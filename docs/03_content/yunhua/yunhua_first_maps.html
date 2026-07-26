@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>雲華第一版地圖規劃</title>
+  <style>
+    :root { --paper:#f5f1e9; --sheet:#fffdf9; --ink:#243442; --muted:#66737d; --line:#d9d0c5; --accent:#93462f; --black:#1d2329; --entry:#367ec9; --exit:#d8574e; --door:#d83d35; --treasure:#e1ac28; --event:#3d8fd0; --large:#35965d; --trap:#df4b42; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.55 "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif; }
+    main { width:min(100%, 1320px); margin:0 auto; padding:44px 28px 80px; }
+    h1 { margin:0 0 8px; color:#562d22; font-size:2rem; }
+    h2 { margin:48px 0 12px; padding-bottom:8px; border-bottom:3px solid var(--accent); color:#6b3326; font-size:1.35rem; }
+    h3 { margin:0 0 4px; color:#803e2d; font-size:1.05rem; }
+    p { margin:0; }
+    .lead, .note, .floor-note { color:var(--muted); }
+    .legend { display:flex; flex-wrap:wrap; gap:8px 16px; margin:18px 0 36px; }
+    .legend-item { display:flex; align-items:center; gap:6px; white-space:nowrap; }
+    .legend-box { width:18px; height:18px; border:1px solid var(--black); background:var(--sheet); }
+    .legend-box.black { background:var(--black); } .legend-box.entry { background:var(--entry); } .legend-box.exit { background:var(--exit); }
+    .legend-dot { width:14px; height:14px; border-radius:50%; border:2px solid var(--ink); }
+    .legend-dot.treasure { background:var(--treasure); } .legend-dot.event { background:var(--event); } .legend-dot.large { background:var(--large); } .legend-dot.trap { background:var(--trap); }
+    .line-sample { width:24px; height:0; border-top:6px solid var(--door); }
+    .map-header { display:flex; justify-content:space-between; gap:16px; align-items:baseline; margin:0 0 16px; }
+    .map-header .note { text-align:right; }
+    .floors { display:flex; flex-wrap:wrap; gap:24px; align-items:flex-start; }
+    .floor { display:grid; flex:0 1 340px; gap:6px; min-width:0; }
+    .floor.eight { flex-basis:500px; }
+    .floor-label { color:#744433; font-weight:700; }
+    .floor svg { display:block; width:100%; max-width:480px; height:auto; }
+    .floor.eight svg { max-width:520px; }
+    .tile { shape-rendering:crispEdges; }
+    .svg-label { font-family:"Microsoft JhengHei", "Noto Sans TC", sans-serif; font-weight:700; fill:#fff; text-anchor:middle; dominant-baseline:middle; }
+    .stair { font-family:"Microsoft JhengHei", "Noto Sans TC", sans-serif; font-weight:800; fill:#344550; text-anchor:middle; dominant-baseline:middle; }
+    @media (max-width:720px) { main { padding:28px 14px 56px; } .map-header { display:block; } .map-header .note { text-align:left; margin-top:4px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>雲華第一版地圖規劃</h1>
+    <p class="lead">粗小格只表現房間面積與疲勞成本；每個不含內牆線的連通房間才是一個可選擇移動的邏輯格。入口、出口、樓梯、固定陷阱皆為獨立單格功能房間，普通怪物不設偏好房間。</p>
+    <div class="legend" aria-label="地圖圖例">
+      <span class="legend-item"><span class="legend-box black"></span>不存在地塊</span>
+      <span class="legend-item"><span class="legend-box entry"></span>入口房間</span>
+      <span class="legend-item"><span class="legend-box exit"></span>出口房間</span>
+      <span class="legend-item"><span class="legend-box"></span>一般房間</span>
+      <span class="legend-item">無內牆線＝同一邏輯格</span>
+      <span class="legend-item"><span class="line-sample"></span>門</span>
+      <span class="legend-item">↑／↓ 樓梯</span>
+      <span class="legend-item"><span class="legend-dot treasure"></span>寶箱偏好房間</span>
+      <span class="legend-item"><span class="legend-dot event"></span>事件偏好房間</span>
+      <span class="legend-item"><span class="legend-dot large"></span>大型體型敵人偏好房間</span>
+      <span class="legend-item"><span class="legend-dot trap"></span>固定陷阱房間</span>
+    </div>
+    <div id="map-root"></div>
+  </main>
+  <script>
+    const k = (r, c) => `${r},${c}`;
+    const rect = (top, left, bottom, right) => { const cells = []; for (let r = top; r <= bottom; r += 1) for (let c = left; c <= right; c += 1) cells.push(k(r,c)); return cells; };
+    const join = (...parts) => [...new Set(parts.flat())];
+    const room = (id, cells, options = {}) => ({ id, cells, marks: [], ...options });
+    const connection = (from, to, a, b, type = 'open') => ({ from, to, a, b, type });
+    const mapFloor = (label, rows, cols, rooms, connections, options = {}) => ({ label, rows, cols, rooms, connections, ...options });
+
+    const herbValley = mapFloor('單層｜野外 8×8', 8, 8, [
+      room('入口竹徑', [k(8,1)], { entry:true, anchor:k(8,1) }),
+      room('南側山徑', [k(8,2),k(8,3),k(7,2),k(7,3)], {}),
+      room('瘴氣裂縫', [k(7,4)], { marks:['trap'] }),
+      room('西側竹叢', [k(6,2),k(6,3),k(5,2),k(5,3),k(5,4)], { marks:['treasure'], anchor:k(5,3) }),
+      room('採藥台地', [k(4,3),k(4,4),k(3,3),k(3,4)], { marks:['event'], anchor:k(4,3) }),
+      room('中央空地', rect(4,5,5,6), { marks:['large'], anchor:k(4,5) }),
+      room('東側棧道', [k(5,7),k(4,7),k(3,7),k(3,8),k(2,8)], {}),
+      room('崩裂棧板', [k(2,7)], { marks:['trap'] }),
+      room('北側藥棚', [k(3,5),k(2,4),k(2,5),k(2,6),k(1,5),k(1,6)], { marks:['treasure','event'], anchor:k(2,5) }),
+      room('北口', [k(1,7)], { exit:true }),
+    ], [
+      connection('入口竹徑','南側山徑',k(8,1),k(8,2)),
+      connection('南側山徑','西側竹叢',k(7,3),k(6,3)),
+      connection('南側山徑','瘴氣裂縫',k(7,3),k(7,4)),
+      connection('西側竹叢','採藥台地',k(5,4),k(4,4)),
+      connection('採藥台地','中央空地',k(4,4),k(4,5)),
+      connection('中央空地','東側棧道',k(4,6),k(4,7),'door'),
+      connection('東側棧道','崩裂棧板',k(2,8),k(2,7)),
+      connection('崩裂棧板','北側藥棚',k(2,7),k(2,6)),
+      connection('北側藥棚','北口',k(1,6),k(1,7)),
+    ], { note:'無樓梯。入口、出口與兩處固定陷阱皆為單格功能房間；中央空地是 2×2 的大型體型敵人偏好房間。' });
+
+    const canalSurface = mapFloor('地上 1F｜沉倉入口', 5, 5, [
+      room('水道入口', [k(1,1)], { entry:true }),
+      room('西側倉房', [k(1,2),k(1,3),k(2,2),k(2,3),k(2,4),k(3,2),k(3,3)], { marks:['treasure'], anchor:k(2,3) }),
+      room('引水走廊', [k(3,4),k(4,2),k(4,3),k(4,4),k(5,3)], {}),
+      room('西側下行梯', [k(4,5)], { stair:'↓' }),
+      room('東側沉倉', [k(1,4),k(1,5)], { marks:['event'], anchor:k(1,5) }),
+      room('東側下行梯', [k(2,5)], { stair:'↓' }),
+    ], [
+      connection('水道入口','西側倉房',k(1,1),k(1,2),'door'),
+      connection('西側倉房','引水走廊',k(3,3),k(3,4)),
+      connection('引水走廊','西側下行梯',k(4,4),k(4,5)),
+      connection('東側沉倉','東側下行梯',k(1,5),k(2,5)),
+    ], { note:'東側沉倉與入口區沒有同層連線；它是事件房間，必須下到地下蓄水池繞行後，再由單格東側下行梯抵達。' });
+
+    const canalBasement = mapFloor('地下 1F｜蓄水池', 5, 5, [
+      room('東側上行梯', [k(2,5)], { stair:'↑' }),
+      room('東側導渠', [k(3,5)], {}),
+      room('蓄水池', rect(3,3,4,4), { marks:['large'], anchor:k(4,4) }),
+      room('西側上行梯', [k(4,5)], { stair:'↑' }),
+      room('中段水閘', [k(1,2),k(1,3),k(2,2),k(2,3),k(2,4)], { marks:['event'], anchor:k(2,3) }),
+      room('西側沉貨區', [k(3,2),k(4,2),k(5,2)], { marks:['treasure'], anchor:k(4,2) }),
+      room('水門出口', [k(5,3)], { exit:true }),
+      room('沉木陷阱', [k(5,4)], { marks:['trap'] }),
+    ], [
+      connection('東側上行梯','東側導渠',k(2,5),k(3,5)),
+      connection('東側導渠','蓄水池',k(3,5),k(3,4)),
+      connection('蓄水池','西側上行梯',k(4,4),k(4,5)),
+      connection('蓄水池','沉木陷阱',k(4,4),k(5,4)),
+      connection('水門出口','西側沉貨區',k(5,3),k(5,2)),
+      connection('西側沉貨區','中段水閘',k(3,2),k(2,2)),
+      connection('中段水閘','蓄水池',k(2,4),k(3,4),'door'),
+    ], { note:'兩座單格上行梯分別在（2,5）與（4,5），並與地上層的兩座下行梯完全對齊。蓄水池是 2×2 的大型體型敵人偏好房間。' });
+
+    const towerOne = mapFloor('塔 1F｜入塔廳', 6, 6, [
+      room('入塔入口', [k(6,1)], { entry:true }),
+      room('入塔前室', [k(5,1),k(5,2),k(6,2)], {}),
+      room('下行封門梯', [k(4,2)], { stair:'↓' }),
+      room('正印前庭', rect(4,3,5,4), { marks:['event'], anchor:k(4,3) }),
+      room('上行校印廳', [k(2,3),k(3,3),k(3,4)], {}),
+      room('上行校印梯', [k(2,4)], { stair:'↑' }),
+      room('側庫', [k(2,5),k(3,5)], { marks:['treasure'], anchor:k(2,5) }),
+      room('符紙火陷', [k(1,4)], { marks:['trap'] }),
+      room('北側環廊', [k(1,5)], {}),
+    ], [
+      connection('入塔入口','入塔前室',k(6,1),k(6,2)),
+      connection('入塔前室','下行封門梯',k(5,2),k(4,2),'door'),
+      connection('入塔前室','正印前庭',k(5,2),k(5,3)),
+      connection('正印前庭','上行校印廳',k(4,3),k(3,3)),
+      connection('上行校印廳','上行校印梯',k(2,3),k(2,4)),
+      connection('上行校印廳','側庫',k(3,4),k(3,5),'door'),
+      connection('上行校印梯','符紙火陷',k(2,4),k(1,4)),
+      connection('符紙火陷','北側環廊',k(1,4),k(1,5)),
+    ], { note:'↑（2,4）接塔 2F 同座標房間；↓（4,2）接地下 1F 同座標房間。' });
+
+    const towerTwo = mapFloor('塔 2F｜校印廊', 6, 6, [
+      room('下行校印廳', [k(1,3),k(1,4),k(2,3)], {}),
+      room('下行校印梯', [k(2,4)], { stair:'↓' }),
+      room('中段校印室', [k(3,2),k(4,2),k(4,3)], { marks:['event'], anchor:k(4,2) }),
+      room('上行校印梯', [k(3,3)], { stair:'↑' }),
+      room('東側書庫', rect(3,5,4,6), { marks:['treasure'], anchor:k(3,6) }),
+      room('下層迴廊', rect(5,3,6,4), {}),
+      room('碎印陷阱', [k(6,5)], { marks:['trap'] }),
+      room('東向短廊', [k(3,4)], {}),
+    ], [
+      connection('下行校印廳','下行校印梯',k(2,3),k(2,4)),
+      connection('下行校印廳','上行校印梯',k(2,3),k(3,3)),
+      connection('上行校印梯','中段校印室',k(3,3),k(4,3)),
+      connection('上行校印梯','東向短廊',k(3,3),k(3,4)),
+      connection('東向短廊','東側書庫',k(3,4),k(3,5),'door'),
+      connection('中段校印室','下層迴廊',k(4,3),k(5,3)),
+      connection('下層迴廊','碎印陷阱',k(6,4),k(6,5)),
+    ], { note:'↑（3,3）接塔 3F 同座標房間；↓（2,4）接塔 1F 同座標房間。' });
+
+    const towerThree = mapFloor('塔 3F｜藏卷層', 6, 6, [
+      room('下行藏卷室', [k(3,2),k(4,2),k(4,3)], {}),
+      room('下行藏卷梯', [k(3,3)], { stair:'↓' }),
+      room('上行藏卷室', [k(1,3),k(1,4),k(2,3)], {}),
+      room('上行藏卷梯', [k(2,4)], { stair:'↑' }),
+      room('東側典藏庫', rect(3,5,4,6), { marks:['event'], anchor:k(3,5) }),
+      room('南側卷軸庫', [k(5,4),k(6,4)], { marks:['treasure'], anchor:k(6,4) }),
+      room('折角短廊', [k(3,4),k(4,4)], {}),
+      room('落卷陷阱', [k(5,5)], { marks:['trap'] }),
+    ], [
+      connection('下行藏卷室','下行藏卷梯',k(4,3),k(3,3)),
+      connection('下行藏卷梯','折角短廊',k(3,3),k(3,4)),
+      connection('折角短廊','東側典藏庫',k(3,4),k(3,5),'door'),
+      connection('折角短廊','上行藏卷梯',k(3,4),k(2,4)),
+      connection('上行藏卷梯','上行藏卷室',k(2,4),k(2,3)),
+      connection('折角短廊','南側卷軸庫',k(4,4),k(5,4)),
+      connection('南側卷軸庫','落卷陷阱',k(5,4),k(5,5)),
+    ], { note:'↑（2,4）接塔 4F 同座標房間；↓（3,3）接塔 2F 同座標房間。' });
+
+    const towerFour = mapFloor('塔 4F｜觀印台', 6, 6, [
+      room('塔外出口', [k(1,3)], { exit:true }),
+      room('觀印前室', [k(1,4),k(2,3)], {}),
+      room('下行觀印梯', [k(2,4)], { stair:'↓' }),
+      room('北側符銘室', [k(1,5),k(1,6),k(2,5)], { marks:['event'], anchor:k(1,5) }),
+      room('觀印台', rect(3,2,4,5), { marks:['large'], anchor:k(3,4) }),
+      room('東側儀器庫', [k(3,6),k(4,6)], { marks:['treasure'], anchor:k(3,6) }),
+    ], [
+      connection('塔外出口','觀印前室',k(1,3),k(1,4)),
+      connection('觀印前室','下行觀印梯',k(1,4),k(2,4)),
+      connection('觀印前室','北側符銘室',k(1,4),k(1,5)),
+      connection('觀印前室','觀印台',k(2,3),k(3,3),'door'),
+      connection('觀印台','東側儀器庫',k(3,5),k(3,6)),
+    ], { note:'↓（2,4）接塔 3F 同座標房間。觀印台是 2×4 的大型體型敵人偏好房間。' });
+
+    const towerBasementOne = mapFloor('塔 地下 1F｜封印庫', 6, 6, [
+      room('上行封門梯', [k(4,2)], { stair:'↑' }),
+      room('封門前廳', [k(4,1),k(5,1),k(5,2),k(5,3)], {}),
+      room('中段封印室', rect(3,3,4,4), { marks:['event'], anchor:k(3,3) }),
+      room('下行地脈梯', [k(2,5)], { stair:'↓' }),
+      room('地脈前廳', [k(1,5),k(1,6),k(2,6)], {}),
+      room('封存架', rect(5,4,6,5), { marks:['treasure'], anchor:k(6,4) }),
+      room('地脈短廊', [k(3,5)], { marks:['trap'] }),
+    ], [
+      connection('上行封門梯','封門前廳',k(4,2),k(4,1)),
+      connection('封門前廳','中段封印室',k(5,3),k(4,3),'door'),
+      connection('中段封印室','地脈短廊',k(3,4),k(3,5)),
+      connection('地脈短廊','下行地脈梯',k(3,5),k(2,5)),
+      connection('下行地脈梯','地脈前廳',k(2,5),k(2,6)),
+      connection('中段封印室','封存架',k(4,4),k(5,4)),
+    ], { note:'↑（4,2）接塔 1F 同座標房間；↓（2,5）接地下 2F 同座標房間。' });
+
+    const towerBasementTwo = mapFloor('塔 地下 2F｜地脈室', 6, 6, [
+      room('上行地脈梯', [k(2,5)], { stair:'↑' }),
+      room('地脈前廳', [k(1,5),k(1,6),k(2,6)], {}),
+      room('地脈主室', rect(3,2,5,5), { marks:['event'], anchor:k(3,4) }),
+      room('地脈側庫', [k(6,2),k(6,3)], { marks:['treasure'], anchor:k(6,2) }),
+    ], [
+      connection('上行地脈梯','地脈前廳',k(2,5),k(2,6)),
+      connection('上行地脈梯','地脈主室',k(2,5),k(3,5),'door'),
+      connection('地脈主室','地脈側庫',k(5,2),k(6,2)),
+    ], { note:'↑（2,5）接地下 1F 同座標房間。' });
+
+    const maps = [
+      { city:'青岑城', title:'霧篁藥谷', type:'野外｜單層 8×8', note:'房間形狀不規則，但每個無內牆線的房間只是一個移動節點；疲勞才依房間覆蓋的小格面積計算。', floors:[herbValley] },
+      { city:'雲京', title:'舊漕渠與沉倉', type:'內部｜5×5、地上 1 層＋地下 1 層', note:'地上東側沉倉是事件房間，與入口區沒有同層連線；必須經地下蓄水池繞行。', floors:[canalSurface, canalBasement] },
+      { city:'雲京', title:'天衡印塔', type:'建築型國家迷宮｜6×6、塔 1–4F＋地下 1–2F', note:'六層皆由任意形狀房間構成。地下兩層是可選封印支線；主路徑向上至四層觀印台出口。', floors:[towerOne, towerTwo, towerThree, towerFour, towerBasementOne, towerBasementTwo] },
+    ];
+
+    function validateMaps() {
+      for (const exploreMap of maps) {
+        const exits = exploreMap.floors.flatMap(floor => floor.rooms).filter(node => node.exit);
+        if (exits.length < 1 || exits.length > 3) throw new Error(`${exploreMap.title} 的出口總數必須為 1～3 個`);
+        for (const floor of exploreMap.floors) {
+          const roomsById = new Map(floor.rooms.map(node => [node.id, node]));
+          for (const node of floor.rooms) {
+            const functions = [node.entry && '入口', node.exit && '出口', node.stair && '樓梯', node.marks.includes('trap') && '陷阱'].filter(Boolean);
+            if (!functions.length) continue;
+            const expectedMarks = functions[0] === '陷阱' ? 1 : 0;
+            if (functions.length !== 1 || node.cells.length !== 1 || node.marks.length !== expectedMarks) {
+              throw new Error(`${floor.label} 的「${node.id}」必須是無其他內容的單格功能房間`);
+            }
+          }
+          for (const edge of floor.connections) {
+            const from = roomsById.get(edge.from), to = roomsById.get(edge.to);
+            const [ar,ac] = edge.a.split(',').map(Number), [br,bc] = edge.b.split(',').map(Number);
+            if (!from?.cells.includes(edge.a) || !to?.cells.includes(edge.b) || Math.abs(ar - br) + Math.abs(ac - bc) !== 1) {
+              throw new Error(`${floor.label} 存在無效的房間連線`);
+            }
+          }
+        }
+      }
+    }
+    validateMaps();
+
+    const root = document.getElementById('map-root');
+    const color = { treasure:'var(--treasure)', event:'var(--event)', large:'var(--large)', trap:'var(--trap)' };
+    function position(key, size) { const [r,c] = key.split(',').map(Number); return { x:(c - 1) * size, y:(r - 1) * size }; }
+    const edgeKey = (a, b) => [a, b].sort().join('|');
+    function roomWalls(data, roomsByCell, size) {
+      const connections = new Map(data.connections.map(edge => [edgeKey(edge.a, edge.b), edge.type || 'open']));
+      const drawn = new Set(), walls = [];
+      const sides = [
+        { dr:-1, dc:0, line:(x,y) => [x,y,x + size,y] },
+        { dr:0, dc:1, line:(x,y) => [x + size,y,x + size,y + size] },
+        { dr:1, dc:0, line:(x,y) => [x,y + size,x + size,y + size] },
+        { dr:0, dc:-1, line:(x,y) => [x,y,x,y + size] },
+      ];
+      for (const [cell, node] of roomsByCell) {
+        const [r,c] = cell.split(',').map(Number), { x, y } = position(cell, size);
+        for (const side of sides) {
+          const adjacent = k(r + side.dr, c + side.dc);
+          if (roomsByCell.get(adjacent) === node) continue;
+          const key = edgeKey(cell, adjacent);
+          if (drawn.has(key)) continue;
+          drawn.add(key);
+          const type = connections.get(key);
+          const [x1,y1,x2,y2] = side.line(x,y);
+          if (!type) {
+            walls.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--black)" stroke-width="2"/>`);
+            continue;
+          }
+          const horizontal = y1 === y2, halfGap = size * .18;
+          const middle = horizontal ? (x1 + x2) / 2 : (y1 + y2) / 2;
+          const first = horizontal ? [x1,y1,middle - halfGap,y1] : [x1,y1,x1,middle - halfGap];
+          const second = horizontal ? [middle + halfGap,y1,x2,y2] : [x1,middle + halfGap,x2,y2];
+          walls.push(`<line x1="${first[0]}" y1="${first[1]}" x2="${first[2]}" y2="${first[3]}" stroke="var(--black)" stroke-width="2"/>`);
+          walls.push(`<line x1="${second[0]}" y1="${second[1]}" x2="${second[2]}" y2="${second[3]}" stroke="var(--black)" stroke-width="2"/>`);
+          if (type === 'door') {
+            const door = horizontal ? [middle - halfGap,y1,middle + halfGap,y1] : [x1,middle - halfGap,x2,middle + halfGap];
+            walls.push(`<line x1="${door[0]}" y1="${door[1]}" x2="${door[2]}" y2="${door[3]}" stroke="var(--door)" stroke-width="5" stroke-linecap="round"/>`);
+          }
+        }
+      }
+      return walls.join('');
+    }
+    function mapSvg(data) {
+      const size = data.cols === 8 ? 54 : 68;
+      const width = data.cols * size, height = data.rows * size;
+      const roomsByCell = new Map();
+      for (const node of data.rooms) for (const cell of node.cells) {
+        if (roomsByCell.has(cell)) throw new Error(`${data.label}：房間重疊於 ${cell}`);
+        roomsByCell.set(cell, node);
+      }
+      let cells = `<rect class="tile" x="0" y="0" width="${width}" height="${height}" fill="var(--black)"/>`;
+      for (const node of data.rooms) {
+        const fill = node.entry ? 'var(--entry)' : node.exit ? 'var(--exit)' : 'var(--sheet)';
+        const path = node.cells.map(cell => {
+          const { x, y } = position(cell, size);
+          return `M${x},${y}h${size}v${size}H${x}Z`;
+        }).join('');
+        cells += `<path class="tile" d="${path}" fill="${fill}"><title>${node.id}｜面積 ${node.cells.length} 格</title></path>`;
+      }
+      const walls = roomWalls(data, roomsByCell, size);
+      const symbols = data.rooms.map(node => {
+        const anchor = position(node.anchor || node.cells[0], size);
+        const label = node.entry ? '入' : node.exit ? '出' : '';
+        const labelSvg = label ? `<text class="svg-label" x="${anchor.x + size/2}" y="${anchor.y + size/2}" font-size="${size * .30}">${label}</text>` : '';
+        const stairAnchor = position(node.stairAnchor || node.anchor || node.cells[0], size);
+        const stairSvg = node.stair ? `<text class="stair" x="${stairAnchor.x + size/2}" y="${stairAnchor.y + size/2}" font-size="${size * .44}">${node.stair}</text>` : '';
+        const marks = node.marks.map((mark, index) => `<circle cx="${anchor.x + size - 12 - index * 17}" cy="${anchor.y + 12}" r="8" fill="${color[mark]}" stroke="var(--ink)" stroke-width="2"><title>${mark}｜${node.id}</title></circle>`).join('');
+        return `${labelSvg}${marks}${stairSvg}`;
+      }).join('');
+      return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${data.label} 地圖">${cells}${walls}${symbols}</svg>`;
+    }
+    root.innerHTML = maps.map(map => `<section><h2>${map.city}｜${map.title}</h2><div class="map-header"><h3>${map.type}</h3><p class="note">${map.note}</p></div><div class="floors">${map.floors.map(data => `<div class="floor ${data.cols === 8 ? 'eight' : ''}"><div class="floor-label">${data.label}</div><div class="floor-note">${data.note}</div>${mapSvg(data)}</div>`).join('')}</div></section>`).join('');
+  </script>
+</body>
+</html>

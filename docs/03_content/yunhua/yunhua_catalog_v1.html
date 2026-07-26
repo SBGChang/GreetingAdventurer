@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>雲華內容目錄｜重整版</title>
+  <style>
+    :root { --paper:#f5f1e9; --sheet:#fffdf9; --line:#e3dacf; --head:#f9eee5; --ink:#203246; --accent:#93462f; --muted:#7c8995; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.55 "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif; }
+    main { width:min(100%, 1360px); margin:0 auto; padding:44px 28px 80px; }
+    h1 { margin:0 0 26px; font-size:2.25rem; letter-spacing:.04em; color:#51291f; }
+    h2 { margin:54px 0 16px; padding:0 0 9px; border-bottom:3px solid var(--accent); font-size:1.55rem; color:#642f23; }
+    h3 { margin:32px 0 10px; color:#823e2b; font-size:1.12rem; }
+    h4 { margin:24px 0 8px; color:#74513a; font-size:1rem; }
+    .note { margin:0 0 13px; padding:10px 14px; border-left:4px solid #bb7650; background:#fff8ef; color:#63564d; }
+    .table-wrap { width:100%; margin:0 0 24px; overflow:hidden; border:1px solid var(--line); border-radius:10px; background:var(--sheet); }
+    table { width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed; }
+    th, td { padding:10px 12px; vertical-align:top; text-align:left; overflow-wrap:anywhere; border-right:1px solid var(--line); border-bottom:1px solid var(--line); }
+    th:last-child, td:last-child { border-right:0; }
+    tbody tr:last-child td { border-bottom:0; }
+    th { background:var(--head); color:#713321; font-weight:800; white-space:normal; }
+    td { background:var(--sheet); }
+    .numeric { text-align:right; white-space:nowrap; overflow-wrap:normal; font-variant-numeric:tabular-nums; }
+    .grade, .item-kind { color:#a04831; font-weight:800; }
+    .name { color:#263f57; }
+    .stat { color:#94503e; font-weight:700; }
+    .total { color:#172e45; font-weight:800; }
+    .zero { color:#aab2b8; }
+    .str { color:#c23b40; } .int { color:#6554bc; } .ref { color:#18875f; } .coord { color:#b87413; } .cha { color:#b64589; }
+    .mult.low { color:#8e9aa5; } .mult.mid { color:#286da3; } .mult.high { color:#bf551e; }
+    .delay-value { color:#2e719a; }
+    .time { color:#2e719a; }
+    .ability { padding:0; text-align:left; border-left:1px solid var(--line); }
+    .ability-row { display:grid; grid-template-columns:44px minmax(0,1fr); gap:8px; padding:9px 11px; text-align:left; }
+    .ability-row + .ability-row { border-top:1px solid var(--line); }
+    .ability-row b { color:#963d2a; font-weight:800; }
+    .equipment .c-grade { width:5%; } .equipment .c-name { width:8%; } .equipment .c-stat { width:8%; }
+    .equipment .c-number { width:5.2%; } .equipment .c-total { width:5.6%; } .equipment .c-ability { width:47.4%; }
+    .equipment td { padding:9px 10px; }
+    .equipment .numeric { padding-right:12px; }
+    .equipment .total, .equipment th:nth-child(9) { border-right:0; }
+    .action .a-stage { width:7%; } .action .a-name { width:9%; } .action .a-base { width:5.5%; }
+    .action .a-attribute { width:4.7%; } .action .a-min { width:5.5%; } .action .a-ability { width:49.5%; }
+    .action td:nth-child(9), .action th:nth-child(9) { border-right:0; }
+    .timed-item .t-stage { width:9%; } .timed-item .t-name { width:13%; } .timed-item .t-time { width:12%; } .timed-item .t-ability { width:66%; }
+    .timed-item td:nth-child(3), .timed-item th:nth-child(3) { border-right:0; }
+    .ordinary-4 .n-0 { width:14%; } .ordinary-4 .n-1 { width:21%; } .ordinary-4 .n-2 { width:30%; } .ordinary-4 .n-3 { width:35%; }
+    .ordinary-5 .n-0 { width:10%; } .ordinary-5 .n-1 { width:15%; } .ordinary-5 .n-2 { width:20%; } .ordinary-5 .n-3 { width:20%; } .ordinary-5 .n-4 { width:35%; }
+    @media (max-width:800px) {
+      main { padding:28px 12px 56px; }
+      body { font-size:14px; }
+      th, td { padding:8px 6px; }
+      .ability-row { grid-template-columns:38px minmax(0,1fr); gap:5px; padding:8px 6px; }
+      .equipment .c-grade { width:7%; } .equipment .c-name { width:10%; } .equipment .c-stat { width:9%; }
+      .equipment .c-number { width:5%; } .equipment .c-total { width:6%; } .equipment .c-ability { width:43%; }
+      .action .a-stage { width:8%; } .action .a-name { width:10%; } .action .a-base { width:6%; }
+      .action .a-attribute { width:4.8%; } .action .a-min { width:6%; } .action .a-ability { width:46%; }
+    }
+  </style>
+</head>
+<body><main><h1>雲華內容目錄｜重整版</h1><p class="note">版型驗證用。所有表格依品級由低到高排序：一般 → 精品 → 史詩 → 傳說 → 神話。</p><p class="note">係數格式為「副屬性：主屬性係數」。所有效果均以技能觸發；沒有普通攻擊。</p><h2>武器</h2><h3>單手物理</h3>
+  <div class="table-wrap">
+    <table class="data equipment">
+      <colgroup><col class="c-grade"><col class="c-name"><col class="c-stat"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-total"><col class="c-ability"></colgroup>
+      <thead><tr><th>品級</th><th>名稱</th><th>副屬性</th><th class="numeric str">肌</th><th class="numeric int">智</th><th class="numeric ref">反</th><th class="numeric coord">協</th><th class="numeric cha">魅</th><th class="numeric">Total</th><th>能力</th></tr></thead>
+      <tbody><tr><td rowspan="2" class="grade">一般</td><td rowspan="2" class="name">環首短刀</td><td class="stat">物傷</td><td class="numeric value"><span class="mult mid">1.55</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult low">0.95</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">2.50</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用主手・單手刀劍・位移技能後</span></div>
+    <div class="ability-row"><b>效果</b><span>下一次被近戰技能命中時，行動延遲 -6</span></div>
+    <div class="ability-row"><b>限制</b><span>每次進入架勢僅 1 次</span></div>
+  </td></tr><tr><td class="stat">命中</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.26</span></td><td class="numeric value"><span class="mult low">0.18</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.44</td></tr><tr><td rowspan="2" class="grade">精品</td><td rowspan="2" class="name">雲紋單刀</td><td class="stat">物傷</td><td class="numeric value"><span class="mult mid">2.20</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">1.35</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">3.55</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用主手・單手刀劍・反擊技能，且成功格擋</span></div>
+    <div class="ability-row"><b>效果</b><span>該反擊技能格擋壓力 +12</span></div>
+    <div class="ability-row"><b>限制</b><span>不適用遠程／施法技能</span></div>
+  </td></tr><tr><td class="stat">命中</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.38</span></td><td class="numeric value"><span class="mult mid">0.27</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.65</td></tr><tr><td rowspan="2" class="grade">史詩</td><td rowspan="2" class="name">銀環柳葉刀</td><td class="stat">物傷</td><td class="numeric value"><span class="mult mid">2.65</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">2.05</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">4.70</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用主手・單手刀劍・斬擊技能命中硬直目標</span></div>
+    <div class="ability-row"><b>效果</b><span>目標行動延遲 +8</span></div>
+    <div class="ability-row"><b>限制</b><span>每回合 1 次</span></div>
+  </td></tr><tr><td class="stat">預判</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult low">0.12</span></td><td class="numeric value"><span class="mult mid">0.24</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.36</td></tr><tr><td rowspan="2" class="grade">傳說</td><td rowspan="2" class="name">斷潮佩刀</td><td class="stat">物傷</td><td class="numeric value"><span class="mult mid">3.15</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">2.55</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">5.70</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用主手・單手刀劍・格擋技能成功後</span></div>
+    <div class="ability-row"><b>效果</b><span>下一個斬擊技能命中 +10</span></div>
+    <div class="ability-row"><b>限制</b><span>效果在切換武器組後失效</span></div>
+  </td></tr><tr><td class="stat">命中</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.48</span></td><td class="numeric value"><span class="mult mid">0.34</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.82</td></tr><tr><td rowspan="3" class="grade">神話</td><td rowspan="3" class="name">青紋長刀</td><td class="stat">物傷</td><td class="numeric value"><span class="mult mid">2.65</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult high">3.30</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">5.95</td>
+  <td rowspan="3" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用主手・單手刀劍・反擊技能，且成功格擋</span></div>
+    <div class="ability-row"><b>效果</b><span>追加「裂勢」：目標格擋減傷 -15，持續 1 次行動</span></div>
+    <div class="ability-row"><b>限制</b><span>不適用副手與雙手同時技能</span></div>
+  </td></tr><tr><td class="stat">命中</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.55</span></td><td class="numeric value"><span class="mult mid">0.42</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.97</td></tr><tr><td class="stat">預判</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.22</span></td><td class="numeric value"><span class="mult mid">0.36</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.58</td></tr></tbody>
+    </table>
+  </div><h3>雙手物理</h3>
+  <div class="table-wrap">
+    <table class="data equipment">
+      <colgroup><col class="c-grade"><col class="c-name"><col class="c-stat"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-total"><col class="c-ability"></colgroup>
+      <thead><tr><th>品級</th><th>名稱</th><th>副屬性</th><th class="numeric str">肌</th><th class="numeric int">智</th><th class="numeric ref">反</th><th class="numeric coord">協</th><th class="numeric cha">魅</th><th class="numeric">Total</th><th>能力</th></tr></thead>
+      <tbody><tr><td rowspan="2" class="grade">一般</td><td rowspan="2" class="name">棗木長槍</td><td class="stat">物傷</td><td class="numeric value"><span class="mult mid">1.65</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult low">0.75</span></td><td class="numeric value"><span class="mult low">0.60</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">3.00</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用雙手・長柄・迎擊技能命中</span></div>
+    <div class="ability-row"><b>效果</b><span>目標行動延遲 +7</span></div>
+    <div class="ability-row"><b>限制</b><span>僅對主動靠近者</span></div>
+  </td></tr><tr><td class="stat">命中</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.30</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.30</td></tr><tr><td rowspan="2" class="grade">精品</td><td rowspan="2" class="name">月牙偃刀</td><td class="stat">物傷</td><td class="numeric value"><span class="mult mid">2.95</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">1.30</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">4.25</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用雙手・長柄・橫掃技能命中 2 名以上目標</span></div>
+    <div class="ability-row"><b>效果</b><span>自身下一個技能行動延遲 -5</span></div>
+    <div class="ability-row"><b>限制</b><span>技能未命中則不發動</span></div>
+  </td></tr><tr><td class="stat">命中</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.20</span></td><td class="numeric value"><span class="mult low">0.18</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.38</td></tr><tr><td rowspan="2" class="grade">史詩</td><td rowspan="2" class="name">破甲長槍</td><td class="stat">物傷</td><td class="numeric value"><span class="mult mid">2.60</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">1.20</span></td><td class="numeric value"><span class="mult low">1.00</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">4.80</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用雙手・長柄・突刺技能命中格擋中目標</span></div>
+    <div class="ability-row"><b>效果</b><span>目標格擋減傷 -12</span></div>
+    <div class="ability-row"><b>限制</b><span>不與同類破甲效果疊加</span></div>
+  </td></tr><tr><td class="stat">預判</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.30</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.30</td></tr><tr><td rowspan="2" class="grade">傳說</td><td rowspan="2" class="name">鐵脊偃刀</td><td class="stat">物傷</td><td class="numeric value"><span class="mult high">4.35</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">2.05</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">6.40</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用雙手・長柄・蓄力技能命中</span></div>
+    <div class="ability-row"><b>效果</b><span>對小型目標追加紅色硬直</span></div>
+    <div class="ability-row"><b>限制</b><span>自身下一個技能行動延遲 +10</span></div>
+  </td></tr><tr><td class="stat">一般減傷</td><td class="numeric value"><span class="mult mid">0.14</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.14</td></tr><tr><td rowspan="2" class="grade">神話</td><td rowspan="2" class="name">盤龍長槍</td><td class="stat">物傷</td><td class="numeric value"><span class="mult high">3.20</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">1.75</span></td><td class="numeric value"><span class="mult mid">2.55</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">7.50</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用雙手・長柄・迎擊或突刺技能命中</span></div>
+    <div class="ability-row"><b>效果</b><span>目標不可使用位移技能，直到下次行動後</span></div>
+    <div class="ability-row"><b>限制</b><span>首領僅改為行動延遲 +12</span></div>
+  </td></tr><tr><td class="stat">命中</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult high">0.62</span></td><td class="numeric value"><span class="mult mid">0.33</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.95</td></tr></tbody>
+    </table>
+  </div><h3>投擲武器</h3>
+  <div class="table-wrap">
+    <table class="data equipment">
+      <colgroup><col class="c-grade"><col class="c-name"><col class="c-stat"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-total"><col class="c-ability"></colgroup>
+      <thead><tr><th>品級</th><th>名稱</th><th>副屬性</th><th class="numeric str">肌</th><th class="numeric int">智</th><th class="numeric ref">反</th><th class="numeric coord">協</th><th class="numeric cha">魅</th><th class="numeric">Total</th><th>能力</th></tr></thead>
+      <tbody><tr><td rowspan="2" class="grade">一般</td><td rowspan="2" class="name">飛針囊</td><td class="stat">物傷</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult low">1.05</span></td><td class="numeric value"><span class="mult low">0.75</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">1.80</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用投擲・飛針技能命中</span></div>
+    <div class="ability-row"><b>效果</b><span>附加追跡 1 回合</span></div>
+    <div class="ability-row"><b>限制</b><span>對無感知敵人無效</span></div>
+  </td></tr><tr><td class="stat">命中</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.42</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.42</td></tr><tr><td rowspan="1" class="grade">史詩</td><td rowspan="1" class="name">流星錘</td><td class="stat">物傷</td><td class="numeric value"><span class="mult mid">2.10</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult low">1.15</span></td><td class="numeric value"><span class="mult low">0.95</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">4.20</td>
+  <td rowspan="1" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用投擲・牽制技能命中讀條中目標</span></div>
+    <div class="ability-row"><b>效果</b><span>黃色讀條中斷</span></div>
+    <div class="ability-row"><b>限制</b><span>對大型目標改為行動延遲 +8</span></div>
+  </td></tr><tr><td rowspan="2" class="grade">神話</td><td rowspan="2" class="name">鎖鏈鏢</td><td class="stat">物傷</td><td class="numeric value"><span class="mult mid">1.85</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">2.40</span></td><td class="numeric value"><span class="mult mid">2.35</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">6.60</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用投擲・牽制技能命中</span></div>
+    <div class="ability-row"><b>效果</b><span>將小型目標拉近 1 格</span></div>
+    <div class="ability-row"><b>限制</b><span>每場戰鬥 2 次</span></div>
+  </td></tr><tr><td class="stat">命中</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.58</span></td><td class="numeric value"><span class="mult mid">0.30</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.88</td></tr></tbody>
+    </table>
+  </div><h3>射擊武器</h3>
+  <div class="table-wrap">
+    <table class="data equipment">
+      <colgroup><col class="c-grade"><col class="c-name"><col class="c-stat"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-total"><col class="c-ability"></colgroup>
+      <thead><tr><th>品級</th><th>名稱</th><th>副屬性</th><th class="numeric str">肌</th><th class="numeric int">智</th><th class="numeric ref">反</th><th class="numeric coord">協</th><th class="numeric cha">魅</th><th class="numeric">Total</th><th>能力</th></tr></thead>
+      <tbody><tr><td rowspan="2" class="grade">一般</td><td rowspan="2" class="name">竹弓</td><td class="stat">物傷</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">1.30</span></td><td class="numeric value"><span class="mult low">1.05</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">2.35</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用射擊・瞄準技能</span></div>
+    <div class="ability-row"><b>效果</b><span>距離衰減 -10</span></div>
+    <div class="ability-row"><b>限制</b><span>不可穿透目標</span></div>
+  </td></tr><tr><td class="stat">命中</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.45</span></td><td class="numeric value"><span class="mult mid">0.25</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.70</td></tr><tr><td rowspan="2" class="grade">史詩</td><td rowspan="2" class="name">連珠弩</td><td class="stat">物傷</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">2.25</span></td><td class="numeric value"><span class="mult mid">1.75</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">4.00</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用射擊・連射技能，連續命中同目標 2 次</span></div>
+    <div class="ability-row"><b>效果</b><span>追加遲緩，目標行動延遲 +6</span></div>
+    <div class="ability-row"><b>限制</b><span>需裝填後才能再用</span></div>
+  </td></tr><tr><td class="stat">命中</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult high">0.65</span></td><td class="numeric value"><span class="mult mid">0.42</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">1.07</td></tr><tr><td rowspan="2" class="grade">神話</td><td rowspan="2" class="name">玄機重弩</td><td class="stat">物傷</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult high">3.35</span></td><td class="numeric value"><span class="mult mid">2.95</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">6.30</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用射擊・貫穿技能</span></div>
+    <div class="ability-row"><b>效果</b><span>貫穿第一名目標</span></div>
+    <div class="ability-row"><b>限制</b><span>行動延遲 +14</span></div>
+  </td></tr><tr><td class="stat">命中</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult high">0.90</span></td><td class="numeric value"><span class="mult mid">0.58</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">1.48</td></tr></tbody>
+    </table>
+  </div><h3>單手法杖</h3>
+  <div class="table-wrap">
+    <table class="data equipment">
+      <colgroup><col class="c-grade"><col class="c-name"><col class="c-stat"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-total"><col class="c-ability"></colgroup>
+      <thead><tr><th>品級</th><th>名稱</th><th>副屬性</th><th class="numeric str">肌</th><th class="numeric int">智</th><th class="numeric ref">反</th><th class="numeric coord">協</th><th class="numeric cha">魅</th><th class="numeric">Total</th><th>能力</th></tr></thead>
+      <tbody><tr><td rowspan="2" class="grade">一般</td><td rowspan="2" class="name">桃木短杖</td><td class="stat">魔傷</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">1.60</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult low">0.70</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">2.30</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用主手・符印・單體法術</span></div>
+    <div class="ability-row"><b>效果</b><span>法術疲勞 -4</span></div>
+    <div class="ability-row"><b>限制</b><span>不適用範圍法術</span></div>
+  </td></tr><tr><td class="stat">魔命</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.24</span></td><td class="numeric value"><span class="mult low">0.16</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.40</td></tr><tr><td rowspan="2" class="grade">史詩</td><td rowspan="2" class="name">墨玉短杖</td><td class="stat">魔傷</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">3.10</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult low">1.15</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">4.25</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用主手・符印・防禦法術</span></div>
+    <div class="ability-row"><b>效果</b><span>護盾值 +10</span></div>
+    <div class="ability-row"><b>限制</b><span>不可持雙手盾</span></div>
+  </td></tr><tr><td class="stat">魔減</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.12</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.12</td></tr><tr><td rowspan="2" class="grade">神話</td><td rowspan="2" class="name">朱砂令杖</td><td class="stat">魔傷</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult high">4.35</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">1.40</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">5.75</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用主手・符印・詛咒法術命中</span></div>
+    <div class="ability-row"><b>效果</b><span>目標下一次施法行動延遲 +12</span></div>
+    <div class="ability-row"><b>限制</b><span>對無施法能力者無效</span></div>
+  </td></tr><tr><td class="stat">魔命</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.55</span></td><td class="numeric value"><span class="mult mid">0.30</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.85</td></tr></tbody>
+    </table>
+  </div><h3>雙手法杖</h3>
+  <div class="table-wrap">
+    <table class="data equipment">
+      <colgroup><col class="c-grade"><col class="c-name"><col class="c-stat"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-total"><col class="c-ability"></colgroup>
+      <thead><tr><th>品級</th><th>名稱</th><th>副屬性</th><th class="numeric str">肌</th><th class="numeric int">智</th><th class="numeric ref">反</th><th class="numeric coord">協</th><th class="numeric cha">魅</th><th class="numeric">Total</th><th>能力</th></tr></thead>
+      <tbody><tr><td rowspan="1" class="grade">一般</td><td rowspan="1" class="name">桑木法杖</td><td class="stat">魔傷</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">2.25</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult low">0.95</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">3.20</td>
+  <td rowspan="1" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用雙手・符印・範圍法術</span></div>
+    <div class="ability-row"><b>效果</b><span>範圍半徑 +1</span></div>
+    <div class="ability-row"><b>限制</b><span>黃色讀條 +5</span></div>
+  </td></tr><tr><td rowspan="2" class="grade">史詩</td><td rowspan="2" class="name">銅鈴長杖</td><td class="stat">魔傷</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult high">4.10</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">1.35</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">5.45</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用雙手・符印・控制法術命中</span></div>
+    <div class="ability-row"><b>效果</b><span>目標行動延遲 +8</span></div>
+    <div class="ability-row"><b>限制</b><span>不與同類控場疊加</span></div>
+  </td></tr><tr><td class="stat">魔命</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.40</span></td><td class="numeric value"><span class="mult mid">0.26</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.66</td></tr><tr><td rowspan="2" class="grade">神話</td><td rowspan="2" class="name">四象陣杖</td><td class="stat">魔傷</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult high">6.15</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">1.80</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">7.95</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用雙手・符印・結界法術</span></div>
+    <div class="ability-row"><b>效果</b><span>結界內隊友受投射傷害 -15</span></div>
+    <div class="ability-row"><b>限制</b><span>施術者硬直時結界消失</span></div>
+  </td></tr><tr><td class="stat">魔減</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.22</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.22</td></tr></tbody>
+    </table>
+  </div><h2>防具與盾牌</h2><h3>輕甲</h3>
+  <div class="table-wrap">
+    <table class="data equipment">
+      <colgroup><col class="c-grade"><col class="c-name"><col class="c-stat"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-total"><col class="c-ability"></colgroup>
+      <thead><tr><th>品級</th><th>名稱</th><th>副屬性</th><th class="numeric str">肌</th><th class="numeric int">智</th><th class="numeric ref">反</th><th class="numeric coord">協</th><th class="numeric cha">魅</th><th class="numeric">Total</th><th>能力</th></tr></thead>
+      <tbody><tr><td rowspan="2" class="grade">一般</td><td rowspan="2" class="name">布面皮甲</td><td class="stat">迴避</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.28</span></td><td class="numeric value"><span class="mult mid">0.25</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.53</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>持有目前武器組</span></div>
+    <div class="ability-row"><b>效果</b><span>地城移動疲勞 -3</span></div>
+    <div class="ability-row"><b>限制</b><span>無格擋加成</span></div>
+  </td></tr><tr><td class="stat">一般減傷</td><td class="numeric value"><span class="mult low">0.06</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.06</td></tr><tr><td rowspan="2" class="grade">史詩</td><td rowspan="2" class="name">鱗片胸甲</td><td class="stat">迴避</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.46</span></td><td class="numeric value"><span class="mult mid">0.40</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.86</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用位移技能後</span></div>
+    <div class="ability-row"><b>效果</b><span>下一次被近戰技能命中時傷害 -8</span></div>
+    <div class="ability-row"><b>限制</b><span>每次行動 1 次</span></div>
+  </td></tr><tr><td class="stat">一般減傷</td><td class="numeric value"><span class="mult mid">0.12</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.12</td></tr><tr><td rowspan="2" class="grade">神話</td><td rowspan="2" class="name">雲紋輕甲</td><td class="stat">迴避</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult high">0.72</span></td><td class="numeric value"><span class="mult high">0.68</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">1.40</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>成功閃避</span></div>
+    <div class="ability-row"><b>效果</b><span>下一次位移技能行動延遲 -10</span></div>
+    <div class="ability-row"><b>限制</b><span>一般減傷低於中甲</span></div>
+  </td></tr><tr><td class="stat">魔減</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.18</span></td><td class="numeric value"><span class="mult mid">0.12</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.30</td></tr></tbody>
+    </table>
+  </div><h3>中甲／重甲</h3>
+  <div class="table-wrap">
+    <table class="data equipment">
+      <colgroup><col class="c-grade"><col class="c-name"><col class="c-stat"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-total"><col class="c-ability"></colgroup>
+      <thead><tr><th>品級</th><th>名稱</th><th>副屬性</th><th class="numeric str">肌</th><th class="numeric int">智</th><th class="numeric ref">反</th><th class="numeric coord">協</th><th class="numeric cha">魅</th><th class="numeric">Total</th><th>能力</th></tr></thead>
+      <tbody><tr><td rowspan="2" class="grade">一般</td><td rowspan="2" class="name">札甲</td><td class="stat">一般減傷</td><td class="numeric value"><span class="mult mid">0.14</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.14</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>成功格擋</span></div>
+    <div class="ability-row"><b>效果</b><span>受擊行動延遲 -5</span></div>
+    <div class="ability-row"><b>限制</b><span>行動效率 -2</span></div>
+  </td></tr><tr><td class="stat">格擋減傷</td><td class="numeric value"><span class="mult mid">0.18</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.08</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.26</td></tr><tr><td rowspan="2" class="grade">史詩</td><td rowspan="2" class="name">鐵脊札甲</td><td class="stat">一般減傷</td><td class="numeric value"><span class="mult high">0.26</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.26</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用格擋技能</span></div>
+    <div class="ability-row"><b>效果</b><span>格擋狀態持續到下一次敵方行動</span></div>
+    <div class="ability-row"><b>限制</b><span>行動效率 -6</span></div>
+  </td></tr><tr><td class="stat">格擋減傷</td><td class="numeric value"><span class="mult high">0.35</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.15</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.50</td></tr><tr><td rowspan="3" class="grade">神話</td><td rowspan="3" class="name">玄鱗重甲</td><td class="stat">一般減傷</td><td class="numeric value"><span class="mult high">0.38</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.38</td>
+  <td rowspan="3" class="ability">
+    <div class="ability-row"><b>條件</b><span>格擋成功且承受近戰技能</span></div>
+    <div class="ability-row"><b>效果</b><span>目標下一個近戰技能傷害 -10</span></div>
+    <div class="ability-row"><b>限制</b><span>行動效率 -12；旅行疲勞 +8</span></div>
+  </td></tr><tr><td class="stat">魔減</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.14</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.14</td></tr><tr><td class="stat">格擋減傷</td><td class="numeric value"><span class="mult high">0.48</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.16</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.64</td></tr></tbody>
+    </table>
+  </div><h3>盾牌</h3>
+  <div class="table-wrap">
+    <table class="data equipment">
+      <colgroup><col class="c-grade"><col class="c-name"><col class="c-stat"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-number"><col class="c-total"><col class="c-ability"></colgroup>
+      <thead><tr><th>品級</th><th>名稱</th><th>副屬性</th><th class="numeric str">肌</th><th class="numeric int">智</th><th class="numeric ref">反</th><th class="numeric coord">協</th><th class="numeric cha">魅</th><th class="numeric">Total</th><th>能力</th></tr></thead>
+      <tbody><tr><td rowspan="2" class="grade">一般</td><td rowspan="2" class="name">藤編小盾</td><td class="stat">格擋</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.28</span></td><td class="numeric value"><span class="mult mid">0.22</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.50</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用副手・盾牌・格擋技能</span></div>
+    <div class="ability-row"><b>效果</b><span>投射傷害 -8</span></div>
+    <div class="ability-row"><b>限制</b><span>無法掩護隊友</span></div>
+  </td></tr><tr><td class="stat">格擋減傷</td><td class="numeric value"><span class="mult mid">0.16</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.16</td></tr><tr><td rowspan="2" class="grade">史詩</td><td rowspan="2" class="name">圓木盾</td><td class="stat">格擋</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.46</span></td><td class="numeric value"><span class="mult mid">0.40</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.86</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用副手・盾牌・盾擊技能命中</span></div>
+    <div class="ability-row"><b>效果</b><span>目標紅色硬直</span></div>
+    <div class="ability-row"><b>限制</b><span>每次架勢 1 次</span></div>
+  </td></tr><tr><td class="stat">格擋減傷</td><td class="numeric value"><span class="mult high">0.32</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.16</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.48</td></tr><tr><td rowspan="2" class="grade">神話</td><td rowspan="2" class="name">鎮岳大盾</td><td class="stat">格擋</td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.55</span></td><td class="numeric value"><span class="mult mid">0.48</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">1.03</td>
+  <td rowspan="2" class="ability">
+    <div class="ability-row"><b>條件</b><span>使用雙手・盾牌・掩護技能</span></div>
+    <div class="ability-row"><b>效果</b><span>相鄰隊友受正面傷害 -20</span></div>
+    <div class="ability-row"><b>限制</b><span>主手武器技能不可用；行動效率 -15</span></div>
+  </td></tr><tr><td class="stat">格擋減傷</td><td class="numeric value"><span class="mult high">0.62</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric value"><span class="mult mid">0.24</span></td><td class="numeric value"><span class="zero">0</span></td><td class="numeric total">0.86</td></tr></tbody>
+    </table>
+  </div><h2>道具</h2><h3>戰鬥消耗道具</h3><p class="note">實際使用延遲＝max（最低，基礎＋肌×肌係數＋智×智係數＋反×反係數＋協×協係數＋魅×魅係數）。負值代表該主屬性降低延遲。</p>
+  <div class="table-wrap">
+    <table class="data action">
+      <colgroup><col class="a-stage"><col class="a-name"><col class="a-base"><col class="a-attribute"><col class="a-attribute"><col class="a-attribute"><col class="a-attribute"><col class="a-attribute"><col class="a-min"><col class="a-ability"></colgroup>
+      <thead><tr><th>品級</th><th>名稱</th><th class="numeric">基礎</th><th class="numeric str">肌</th><th class="numeric int">智</th><th class="numeric ref">反</th><th class="numeric coord">協</th><th class="numeric cha">魅</th><th class="numeric">最低</th><th>能力</th></tr></thead>
+      <tbody><tr><td class="grade">一般</td><td class="name">金瘡散</td><td class="numeric">24</td><td class="numeric delay-value">0</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">-0.04</td><td class="numeric delay-value">0</td><td class="numeric">12</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>自身受傷</span></div>
+    <div class="ability-row"><b>效果</b><span>回復少量生命</span></div>
+    <div class="ability-row"><b>限制</b><span>每次行動僅能使用 1 次</span></div>
+  </td></tr><tr><td class="grade">精品</td><td class="name">清瘴丸</td><td class="numeric">28</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.03</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">-0.04</td><td class="numeric delay-value">0</td><td class="numeric">14</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>中毒／瘴氣狀態</span></div>
+    <div class="ability-row"><b>效果</b><span>解除低階中毒或瘴氣</span></div>
+    <div class="ability-row"><b>限制</b><span>不解除流血</span></div>
+  </td></tr><tr><td class="grade">史詩</td><td class="name">止血膏</td><td class="numeric">34</td><td class="numeric delay-value">0</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">-0.07</td><td class="numeric delay-value">0</td><td class="numeric">16</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>流血狀態</span></div>
+    <div class="ability-row"><b>效果</b><span>解除流血；戰鬥疲勞 -5</span></div>
+    <div class="ability-row"><b>限制</b><span>使用後至下次行動前不可格擋</span></div>
+  </td></tr><tr><td class="grade">傳說</td><td class="name">醒神香</td><td class="numeric">42</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">-0.04</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">0</td><td class="numeric">20</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>昏沉／恐懼／幻覺狀態</span></div>
+    <div class="ability-row"><b>效果</b><span>解除其中 1 種狀態</span></div>
+    <div class="ability-row"><b>限制</b><span>使用期間可被打斷</span></div>
+  </td></tr><tr><td class="grade">神話</td><td class="name">回春靈膏</td><td class="numeric">52</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.08</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">0</td><td class="numeric">24</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>生命低於一半</span></div>
+    <div class="ability-row"><b>效果</b><span>回復生命；解除 1 種低階負面狀態</span></div>
+    <div class="ability-row"><b>限制</b><span>每場戰鬥 1 次</span></div>
+  </td></tr></tbody>
+    </table>
+  </div><h3>非戰鬥消耗道具</h3><p class="note">此類不進入戰鬥行動序列；「使用時間」為探索或世界層面實際消耗的時間。</p>
+  <div class="table-wrap">
+    <table class="data timed-item">
+      <colgroup><col class="t-stage"><col class="t-name"><col class="t-time"><col class="t-ability"></colgroup>
+      <thead><tr><th>品級</th><th>名稱</th><th class="numeric">使用時間</th><th>能力</th></tr></thead>
+      <tbody><tr>
+    <td class="grade">一般</td>
+    <td class="name">驅蟲香</td>
+    <td class="numeric time">地城時間 10</td>
+
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>休息點或營地</span></div>
+    <div class="ability-row"><b>效果</b><span>下一次休息不受蟲害事件干擾</span></div>
+    <div class="ability-row"><b>限制</b><span>只能覆蓋小型休息區</span></div>
+  </td>
+  </tr><tr>
+    <td class="grade">精品</td>
+    <td class="name">攀牆爪</td>
+    <td class="numeric time">地城時間 20</td>
+
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>特定牆面／高低差</span></div>
+    <div class="ability-row"><b>效果</b><span>開啟一條攀登捷徑</span></div>
+    <div class="ability-row"><b>限制</b><span>不可攜帶大型運送物攀登</span></div>
+  </td>
+  </tr><tr>
+    <td class="grade">史詩</td>
+    <td class="name">百草匣</td>
+    <td class="numeric time">世界時間 30</td>
+
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>安全房、城鎮或營地</span></div>
+    <div class="ability-row"><b>效果</b><span>處理多種傷病；疲勞基礎值 -15</span></div>
+    <div class="ability-row"><b>限制</b><span>戰鬥中不可用</span></div>
+  </td>
+  </tr><tr>
+    <td class="grade">傳說</td>
+    <td class="name">千里紙鶴</td>
+    <td class="numeric time">世界時間 15</td>
+
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>已知地點或已見過的對象</span></div>
+    <div class="ability-row"><b>效果</b><span>傳送一則消息</span></div>
+    <div class="ability-row"><b>限制</b><span>不能傳遞物品；對方未必立刻回應</span></div>
+  </td>
+  </tr><tr>
+    <td class="grade">神話</td>
+    <td class="name">封門鎖符</td>
+    <td class="numeric time">地城時間 25</td>
+
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>門、裂縫或狹道</span></div>
+    <div class="ability-row"><b>效果</b><span>低階怪物不可通過 1 次世界結算</span></div>
+    <div class="ability-row"><b>限制</b><span>不消滅事件源頭</span></div>
+  </td>
+  </tr></tbody>
+    </table>
+  </div><h3>非使用道具</h3><p class="note">非使用道具沒有使用延遲。它們是交易、運送、購買、委託交付、探索尋找、鑑定與事件判定的目標；同一物件可因真偽、破損、所有權與產地改變結果。</p><h4>商品與材料</h4>
+  <div class="table-wrap">
+    <table class="data ordinary ordinary-5">
+      <colgroup><col class="n-0"><col class="n-1"><col class="n-2"><col class="n-3"><col class="n-4"></colgroup>
+      <thead><tr><th>類別</th><th>名稱</th><th>狀態／規格</th><th>常見取得</th><th>委託／事件用途</th></tr></thead>
+      <tbody><tr><td class="item-kind">香料</td><td class="">雲華茶磚</td><td class="">完整、受潮、摻雜</td><td class="">茶山商隊、山道盜匪營</td><td class="">茶館補貨、護送商隊、辨別摻雜來源</td></tr><tr><td class="item-kind">藥材</td><td class="">赤參根</td><td class="">新鮮、乾燥、腐敗</td><td class="">山林採集、藥圃、地牢藥室</td><td class="">醫館採購、救治傷者、尋找失竊藥材</td></tr><tr><td class="item-kind">建材</td><td class="">漆木板材</td><td class="">平整、蟲蛀、裂損</td><td class="">木場、河運碼頭、廢宅</td><td class="">修繕屋舍、運送建材、追查偷工減料</td></tr><tr><td class="item-kind">礦材</td><td class="">青鐵錠</td><td class="">標準、摻渣、官鑄標記</td><td class="">礦坑、鐵匠鋪、盜採洞穴</td><td class="">鐵匠訂單、官物失竊、礦坑探索</td></tr></tbody>
+    </table>
+  </div><h4>珍品與收藏品</h4>
+  <div class="table-wrap">
+    <table class="data ordinary ordinary-5">
+      <colgroup><col class="n-0"><col class="n-1"><col class="n-2"><col class="n-3"><col class="n-4"></colgroup>
+      <thead><tr><th>類別</th><th>名稱</th><th>狀態／規格</th><th>常見取得</th><th>委託／事件用途</th></tr></thead>
+      <tbody><tr><td class="item-kind">玉器</td><td class="">青玉酒壺</td><td class="">真品、仿品、缺口</td><td class="">古宅、典當行、墓室</td><td class="">替家族尋回遺物、鑑定真偽、護送拍賣品</td></tr><tr><td class="item-kind">陶器</td><td class="">侍從陶俑</td><td class="">成套、殘件、修補品</td><td class="">地下墓室、古董商、地牢密室</td><td class="">尋找失散部件、博物收藏、墓主相關事件</td></tr><tr><td class="item-kind">書畫</td><td class="">雲水行旅圖</td><td class="">原卷、臨摹、燒損</td><td class="">書院、廢寺、文人收藏</td><td class="">購回失物、找出圖上地點、偽作爭議</td></tr></tbody>
+    </table>
+  </div><h4>家具與居住物件</h4>
+  <div class="table-wrap">
+    <table class="data ordinary ordinary-5">
+      <colgroup><col class="n-0"><col class="n-1"><col class="n-2"><col class="n-3"><col class="n-4"></colgroup>
+      <thead><tr><th>類別</th><th>名稱</th><th>狀態／規格</th><th>常見取得</th><th>委託／事件用途</th></tr></thead>
+      <tbody><tr><td class="item-kind">家具</td><td class="">漆木書架</td><td class="">完整、缺層、蟲蛀</td><td class="">木作坊、舊宅、河運</td><td class="">書院添置、搬遷委託、失竊家具追查</td></tr><tr><td class="item-kind">家具</td><td class="">藥材櫃</td><td class="">空櫃、附藥冊、暗格損壞</td><td class="">醫館、藥鋪、廢棄診所</td><td class="">醫館開業、尋找暗格密件、運送易碎櫃體</td></tr><tr><td class="item-kind">生活器具</td><td class="">銅燈架</td><td class="">完整、缺油盞、刻字</td><td class="">寺廟庫房、舊宅、黑市</td><td class="">修復寺院、鑑別家徽、地牢照明線索</td></tr></tbody>
+    </table>
+  </div><h4>文書、紙本與媒介</h4>
+  <div class="table-wrap">
+    <table class="data ordinary ordinary-5">
+      <colgroup><col class="n-0"><col class="n-1"><col class="n-2"><col class="n-3"><col class="n-4"></colgroup>
+      <thead><tr><th>類別</th><th>名稱</th><th>狀態／規格</th><th>常見取得</th><th>委託／事件用途</th></tr></thead>
+      <tbody><tr><td class="item-kind">紙本</td><td class="">雲紋宣紙</td><td class="">空白、染墨、受潮</td><td class="">紙坊、書院、商隊</td><td class="">交付書院訂貨、偽造事件的材料、書信委託</td></tr><tr><td class="item-kind">文書</td><td class="">地方戶籍冊</td><td class="">正本、抄本、缺頁</td><td class="">衙門、檔案室、地牢藏室</td><td class="">尋找失蹤者、核對身分、追查竄改戶籍</td></tr><tr><td class="item-kind">憑證</td><td class="">漕運貨單</td><td class="">有效、作廢、塗改</td><td class="">碼頭、商隊、盜匪營</td><td class="">接管貨物、查明走私、證明運送完成</td></tr></tbody>
+    </table>
+  </div><h4>事件物件</h4>
+  <div class="table-wrap">
+    <table class="data ordinary ordinary-5">
+      <colgroup><col class="n-0"><col class="n-1"><col class="n-2"><col class="n-3"><col class="n-4"></colgroup>
+      <thead><tr><th>類別</th><th>名稱</th><th>狀態／規格</th><th>常見取得</th><th>委託／事件用途</th></tr></thead>
+      <tbody><tr><td class="item-kind">遺失物</td><td class="">破損家印</td><td class="">缺角、可對合、偽刻</td><td class="">地牢、當鋪、嫌疑人身上</td><td class="">找回家族信物、辨認偽造命令、決定繼承權</td></tr><tr><td class="item-kind">證物</td><td class="">染血披風</td><td class="">新鮮血跡、洗淨痕跡、撕裂</td><td class="">現場調查、廢屋、屍體旁</td><td class="">追查行兇者、辨識隊伍、改變案件走向</td></tr><tr><td class="item-kind">封存物</td><td class="">鉛封木匣</td><td class="">完整封條、破封、假封</td><td class="">庫房、密室、護送車隊</td><td class="">護送密件、判斷是否私拆、引出持有人</td></tr></tbody>
+    </table>
+  </div><h2>技能</h2><h3>主手單手刀劍</h3>
+  <div class="table-wrap">
+    <table class="data action">
+      <colgroup><col class="a-stage"><col class="a-name"><col class="a-base"><col class="a-attribute"><col class="a-attribute"><col class="a-attribute"><col class="a-attribute"><col class="a-attribute"><col class="a-min"><col class="a-ability"></colgroup>
+      <thead><tr><th>解鎖階段</th><th>名稱</th><th class="numeric">基礎</th><th class="numeric str">肌</th><th class="numeric int">智</th><th class="numeric ref">反</th><th class="numeric coord">協</th><th class="numeric cha">魅</th><th class="numeric">最低</th><th>能力</th></tr></thead>
+      <tbody><tr><td class="grade">初階</td><td class="name">游龍步</td><td class="numeric">26</td><td class="numeric delay-value">0</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.08</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">0</td><td class="numeric">12</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>主手單手刀劍</span></div>
+    <div class="ability-row"><b>效果</b><span>移動 1 格；下一個移動技能行動延遲 -12</span></div>
+    <div class="ability-row"><b>限制</b><span>不造成傷害</span></div>
+  </td></tr><tr><td class="grade">初階</td><td class="name">挑腕</td><td class="numeric">30</td><td class="numeric delay-value">-0.03</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">0</td><td class="numeric">14</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>主手單手刀劍；近距離</span></div>
+    <div class="ability-row"><b>效果</b><span>低傷害；目標格擋 -10</span></div>
+    <div class="ability-row"><b>限制</b><span>對無武器目標無效</span></div>
+  </td></tr><tr><td class="grade">中階</td><td class="name">迎風架勢</td><td class="numeric">36</td><td class="numeric delay-value">0</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.08</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">0</td><td class="numeric">16</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>主手單手刀劍</span></div>
+    <div class="ability-row"><b>效果</b><span>進入藍色架勢；成功格擋時可結算反擊</span></div>
+    <div class="ability-row"><b>限制</b><span>若未受近戰技能攻擊則落空</span></div>
+  </td></tr><tr><td class="grade">高階</td><td class="name">破綻追擊</td><td class="numeric">46</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.07</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">0</td><td class="numeric">20</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>主手單手刀劍；目標剛行動完</span></div>
+    <div class="ability-row"><b>效果</b><span>高傷害；目標行動延遲 +8</span></div>
+    <div class="ability-row"><b>限制</b><span>對格擋目標傷害 -30</span></div>
+  </td></tr><tr><td class="grade">大師</td><td class="name">斷流反擊</td><td class="numeric">58</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.08</td><td class="numeric delay-value">-0.07</td><td class="numeric delay-value">0</td><td class="numeric">24</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>主手單手刀劍；迎風架勢成功格擋</span></div>
+    <div class="ability-row"><b>效果</b><span>立即反擊；中斷低階黃色讀條</span></div>
+    <div class="ability-row"><b>限制</b><span>架勢結束；疲勞 +10</span></div>
+  </td></tr></tbody>
+    </table>
+  </div><h3>雙手長柄</h3>
+  <div class="table-wrap">
+    <table class="data action">
+      <colgroup><col class="a-stage"><col class="a-name"><col class="a-base"><col class="a-attribute"><col class="a-attribute"><col class="a-attribute"><col class="a-attribute"><col class="a-attribute"><col class="a-min"><col class="a-ability"></colgroup>
+      <thead><tr><th>解鎖階段</th><th>名稱</th><th class="numeric">基礎</th><th class="numeric str">肌</th><th class="numeric int">智</th><th class="numeric ref">反</th><th class="numeric coord">協</th><th class="numeric cha">魅</th><th class="numeric">最低</th><th>能力</th></tr></thead>
+      <tbody><tr><td class="grade">初階</td><td class="name">守距突刺</td><td class="numeric">32</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">-0.03</td><td class="numeric delay-value">0</td><td class="numeric">18</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>雙手長柄；中距離</span></div>
+    <div class="ability-row"><b>效果</b><span>中傷害；目標不可接近 1 格</span></div>
+    <div class="ability-row"><b>限制</b><span>對相鄰目標傷害 -25</span></div>
+  </td></tr><tr><td class="grade">中階</td><td class="name">架槍迎擊</td><td class="numeric">38</td><td class="numeric delay-value">-0.04</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">-0.04</td><td class="numeric delay-value">0</td><td class="numeric">20</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>雙手長柄</span></div>
+    <div class="ability-row"><b>效果</b><span>進入藍色架勢；敵人接近時攻擊</span></div>
+    <div class="ability-row"><b>限制</b><span>只觸發第一名敵人</span></div>
+  </td></tr><tr><td class="grade">中階</td><td class="name">橫月掃</td><td class="numeric">44</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.04</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">0</td><td class="numeric">22</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>雙手長柄；相鄰 2 名以上敵人</span></div>
+    <div class="ability-row"><b>效果</b><span>對扇形目標造成傷害</span></div>
+    <div class="ability-row"><b>限制</b><span>行動延遲 +12</span></div>
+  </td></tr><tr><td class="grade">高階</td><td class="name">穿陣突刺</td><td class="numeric">52</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">0</td><td class="numeric">24</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>雙手長柄；直線可通行</span></div>
+    <div class="ability-row"><b>效果</b><span>位移後突刺；推動目標 1 格</span></div>
+    <div class="ability-row"><b>限制</b><span>不可穿越敵人</span></div>
+  </td></tr><tr><td class="grade">大師</td><td class="name">封路</td><td class="numeric">64</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">0</td><td class="numeric">28</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>雙手長柄；狹道</span></div>
+    <div class="ability-row"><b>效果</b><span>指定 1 格；敵人進入時行動延遲 +15</span></div>
+    <div class="ability-row"><b>限制</b><span>持續期間不可移動</span></div>
+  </td></tr></tbody>
+    </table>
+  </div><h3>副手盾牌</h3>
+  <div class="table-wrap">
+    <table class="data action">
+      <colgroup><col class="a-stage"><col class="a-name"><col class="a-base"><col class="a-attribute"><col class="a-attribute"><col class="a-attribute"><col class="a-attribute"><col class="a-attribute"><col class="a-min"><col class="a-ability"></colgroup>
+      <thead><tr><th>解鎖階段</th><th>名稱</th><th class="numeric">基礎</th><th class="numeric str">肌</th><th class="numeric int">智</th><th class="numeric ref">反</th><th class="numeric coord">協</th><th class="numeric cha">魅</th><th class="numeric">最低</th><th>能力</th></tr></thead>
+      <tbody><tr><td class="grade">初階</td><td class="name">舉盾</td><td class="numeric">28</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">0</td><td class="numeric">16</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>副手盾牌</span></div>
+    <div class="ability-row"><b>效果</b><span>進入藍色格擋架勢</span></div>
+    <div class="ability-row"><b>限制</b><span>自身行動延遲 +6</span></div>
+  </td></tr><tr><td class="grade">中階</td><td class="name">盾擊</td><td class="numeric">36</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">-0.04</td><td class="numeric delay-value">0</td><td class="numeric">18</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>副手盾牌；成功格擋</span></div>
+    <div class="ability-row"><b>效果</b><span>低傷害；目標紅色硬直</span></div>
+    <div class="ability-row"><b>限制</b><span>每次架勢 1 次</span></div>
+  </td></tr><tr><td class="grade">高階</td><td class="name">掩護</td><td class="numeric">46</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">0</td><td class="numeric">22</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>副手或雙手盾牌；相鄰隊友</span></div>
+    <div class="ability-row"><b>效果</b><span>替隊友承受正面傷害</span></div>
+    <div class="ability-row"><b>限制</b><span>自身迴避 -20</span></div>
+  </td></tr><tr><td class="grade">大師</td><td class="name">守線</td><td class="numeric">58</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.04</td><td class="numeric delay-value">-0.07</td><td class="numeric delay-value">0</td><td class="numeric">26</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>雙手盾牌；狹道</span></div>
+    <div class="ability-row"><b>效果</b><span>封住 1 格；隊友投射傷害 -15</span></div>
+    <div class="ability-row"><b>限制</b><span>主手技能不可用</span></div>
+  </td></tr></tbody>
+    </table>
+  </div><h3>符印法術</h3>
+  <div class="table-wrap">
+    <table class="data action">
+      <colgroup><col class="a-stage"><col class="a-name"><col class="a-base"><col class="a-attribute"><col class="a-attribute"><col class="a-attribute"><col class="a-attribute"><col class="a-attribute"><col class="a-min"><col class="a-ability"></colgroup>
+      <thead><tr><th>解鎖階段</th><th>名稱</th><th class="numeric">基礎</th><th class="numeric str">肌</th><th class="numeric int">智</th><th class="numeric ref">反</th><th class="numeric coord">協</th><th class="numeric cha">魅</th><th class="numeric">最低</th><th>能力</th></tr></thead>
+      <tbody><tr><td class="grade">初階</td><td class="name">火符</td><td class="numeric">34</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.08</td><td class="numeric delay-value">-0.03</td><td class="numeric delay-value">-0.04</td><td class="numeric delay-value">0</td><td class="numeric">20</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>單手或雙手法杖；黃色讀條</span></div>
+    <div class="ability-row"><b>效果</b><span>單體火焰傷害</span></div>
+    <div class="ability-row"><b>限制</b><span>可被打斷</span></div>
+  </td></tr><tr><td class="grade">中階</td><td class="name">鎮足符</td><td class="numeric">42</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.07</td><td class="numeric delay-value">-0.04</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">0</td><td class="numeric">22</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>單手或雙手法杖；黃色讀條</span></div>
+    <div class="ability-row"><b>效果</b><span>目標移動技能行動延遲 +15</span></div>
+    <div class="ability-row"><b>限制</b><span>大型敵人效果減半</span></div>
+  </td></tr><tr><td class="grade">高階</td><td class="name">短時結界</td><td class="numeric">54</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.09</td><td class="numeric delay-value">-0.03</td><td class="numeric delay-value">-0.05</td><td class="numeric delay-value">0</td><td class="numeric">26</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>雙手法杖；黃色讀條</span></div>
+    <div class="ability-row"><b>效果</b><span>區域投射傷害 -15</span></div>
+    <div class="ability-row"><b>限制</b><span>施術者硬直即消失</span></div>
+  </td></tr><tr><td class="grade">大師</td><td class="name">四方鎮界</td><td class="numeric">68</td><td class="numeric delay-value">0</td><td class="numeric delay-value">-0.10</td><td class="numeric delay-value">-0.04</td><td class="numeric delay-value">-0.06</td><td class="numeric delay-value">0</td><td class="numeric">30</td>
+  <td class="ability">
+    <div class="ability-row"><b>條件</b><span>雙手法杖；黃色讀條</span></div>
+    <div class="ability-row"><b>效果</b><span>區域內小型敵人不可穿越</span></div>
+    <div class="ability-row"><b>限制</b><span>每場戰鬥 1 次</span></div>
+  </td></tr></tbody>
+    </table>
+  </div><h2>地區內容</h2><p class="note">城市、可探險地與事件不互相綁定。城市只定義雲華的生活與貨物流通；可探險地只定義地圖模板與雲華產物。非人類怪物只讀取「雲華文化池」，不按城市或個別可探險地分池；人類敵人則讀取目前佔領國的文化池。怪物、物品與事件在日後動態填入各自允許的位置。</p><h3>城市</h3>
+  <div class="table-wrap">
+    <table class="data ordinary ordinary-4">
+      <colgroup><col class="n-0"><col class="n-1"><col class="n-2"><col class="n-3"></colgroup>
+      <thead><tr><th>城市</th><th>定位／氛圍</th><th>核心設施</th><th>雲華常見貨物</th></tr></thead>
+      <tbody><tr><td class="item-kind">雲京</td><td class="">雲華首府；官署、書院與舊街密集</td><td class="">官署、書院、符印鋪、古物市</td><td class="">戶籍檔案、雲紋宣紙、符印材料、古物</td></tr><tr><td class="item-kind">青岑城</td><td class="">山腳藥城；雨霧、紙坊與採藥行並存</td><td class="">醫館、藥行、紙坊、木作坊</td><td class="">赤參根、藥材櫃、竹紙、漆木板材</td></tr><tr><td class="item-kind">茶陵埠</td><td class="">河港商城；茶倉、窯場與船戶聚集</td><td class="">茶倉、河港、窯場、典當行</td><td class="">雲華茶磚、青玉酒壺、侍從陶俑、漕運貨單</td></tr><tr><td class="item-kind">斷雲關</td><td class="">山道關城；鏢局、軍需與旅店集中</td><td class="">鏢局、軍需庫、鐵匠鋪、旅店</td><td class="">青鐵錠、札甲零件、行商補給、舊軍文書</td></tr></tbody>
+    </table>
+  </div><h3>可探險地圖模板</h3><p class="note">**野外**一律為單層 8×8。**內部地圖**的每層為 4×4 或 5×5，樓層數可自由決定：洞穴通常由地上一層延至地下最多三層；塔可由地上最多三層與地下最多三層組合。門、通道、牆壁與陷阱位置固定；沒有門或通道連接的格子不可通過。每張模板另可標記寶箱、物品、大型**體型**敵人、人類敵人與綁架／囚禁偏好位置；一般敵人不使用偏好格，可出現在任一可通行的普通格。</p>
+  <div class="table-wrap">
+    <table class="data ordinary ordinary-5">
+      <colgroup><col class="n-0"><col class="n-1"><col class="n-2"><col class="n-3"><col class="n-4"></colgroup>
+      <thead><tr><th>地點</th><th>環境／地圖規格</th><th>固定空間與陷阱</th><th>雲華物品偏好格</th><th>大型體型敵人偏好房間</th></tr></thead>
+      <tbody><tr><td class="item-kind">霧篁藥谷</td><td class="">野外；單層 8×8</td><td class="">竹林岔路、架高棧道、藥泉；落穴與瘴氣格固定</td><td class="">藥泉旁、竹棚、棧道盡頭；偏好藥材、藥簍與竹紙原料</td><td class="">密竹空地與棧道交會處；供大型異獸事件使用</td></tr><tr><td class="item-kind">舊漕渠與沉倉</td><td class="">內部；5×5，地上 1 層＋地下 1–3 層</td><td class="">水閘、拖運軌、倉門；淹水格與暗門固定</td><td class="">倉架、沉貨格、閘門旁；偏好茶磚、貨單與船貨</td><td class="">閘室與蓄水池；供大型水棲敵人事件使用</td></tr><tr><td class="item-kind">白陶窯群</td><td class="">內部；4×4 或 5×5，窯室可連地下 1–3 層</td><td class="">多層窯室、通風煙道、封存側室；火坑與落灰格固定</td><td class="">側室、陶片堆、窯架；偏好陶俑、酒壺與窯印</td><td class="">主窯室；供大型構裝體事件使用</td></tr><tr><td class="item-kind">鐵鎖礦坑</td><td class="">內部；5×5，地上 1 層＋地下 1–3 層</td><td class="">垂直井道、升降籠、支柱區；坍方格與落石格固定</td><td class="">礦脈、廢棄工具箱、深層支線；偏好青鐵錠與礦工物件</td><td class="">深層採掘面與寬廣支柱區；供大型掘地獸事件使用</td></tr><tr><td class="item-kind">殘雲古關</td><td class="">野外；單層 8×8</td><td class="">城牆缺口、烽火台、吊橋與軍械庫；箭孔與落石格固定</td><td class="">軍械庫、烽火台、關門旁；偏好甲片、軍文書與鎖符材料</td><td class="">關門廣場、吊橋前、城牆缺口；供崩岩山魈使用</td></tr><tr><td class="item-kind">落星觀</td><td class="">塔式內部；4×4 或 5×5，地上最多 3 層＋地下最多 3 層</td><td class="">石階、觀星台、殘殿與封印地窖；符印陷阱固定</td><td class="">書架、地窖、祭台；偏好古符殘紙、木匣與地圖</td><td class="">祭台與封印室；供大型污穢事件使用</td></tr></tbody>
+    </table>
+  </div><h3>雲華怪物</h3><p class="note">這一表是雲華文化固定的非人類怪物池。任何雲華文化城市與探索地共用，不受佔領國變化影響；戰鬥皆以擊殺結束。</p><p class="note">第一版三張可玩地圖的六屬性、技能係數與使用延遲，見 `yunhua_monsters_v1.md`／`yunhua_monsters_v1.html`。</p>
+  <div class="table-wrap">
+    <table class="data ordinary ordinary-5">
+      <colgroup><col class="n-0"><col class="n-1"><col class="n-2"><col class="n-3"><col class="n-4"></colgroup>
+      <thead><tr><th>活動層級</th><th>類型／名稱</th><th>偏好環境</th><th>戰鬥行為</th><th>雲華相關產物</th></tr></thead>
+      <tbody><tr><td class="item-kind">初階</td><td class="">異蟲・瘴翅蛾群</td><td class="">瘴氣格、密竹格、潮濕洞穴</td><td class="">以瘴粉降低命中；群聚時遮蔽視線</td><td class="">翅粉、未腐敗藥材、竹紙原料</td></tr><tr><td class="item-kind">初階</td><td class="">異獸・竹背獾</td><td class="">竹林岔路、山道、棧道轉角</td><td class="">短距離衝撞；近身後連續抓擊</td><td class="">獸皮、腺囊、採藥區材料</td></tr><tr><td class="item-kind">初階／中階</td><td class="">異獸・伏水螈</td><td class="">淹水格、暗渠、地下水窟</td><td class="">由水格突進；命中後施加濕冷</td><td class="">船貨殘件、水棲藥材、漕渠材料</td></tr><tr><td class="item-kind">中階</td><td class="">機關・牽線陶俑</td><td class="">窄道、窯門前、封存側室</td><td class="">緩慢封路；以推擠與盾擊破壞隊形</td><td class="">陶俑殘件、窯印、陶片</td></tr><tr><td class="item-kind">中階</td><td class="">異獸・鐵甲岩蟲</td><td class="">支柱區、深層支線、狹窄礦脈</td><td class="">外殼承受正面傷害較高；鑽地後從相鄰格突襲</td><td class="">甲殼、青鐵礦渣、礦坑材料</td></tr><tr><td class="item-kind">高階</td><td class="">污穢・斷符遊屍</td><td class="">祭台、地窖、封印室</td><td class="">黃色讀條施放鎮足與幻覺；符印術可被打斷</td><td class="">古符殘紙、封印材料、觀星台文物</td></tr><tr><td class="item-kind">高階</td><td class="">大型異獸・崩岩山魈</td><td class="">關門廣場、吊橋前、城牆缺口</td><td class="">擲石封路、擊退前排、破壞相鄰障礙</td><td class="">青鐵甲片、舊軍物件、山道資源</td></tr></tbody>
+    </table>
+  </div><h3>人類怪物（依佔領國變化）</h3><p class="note">人類怪物的出現格由各地點的「人類敵人格」決定。雲華產物與雲華怪物池維持不變；只有人類敵人的文化、裝備、技能與可取得物改為目前佔領國版本。戰鬥同樣以擊殺結束。</p>
+  <div class="table-wrap">
+    <table class="data ordinary ordinary-5">
+      <colgroup><col class="n-0"><col class="n-1"><col class="n-2"><col class="n-3"><col class="n-4"></colgroup>
+      <thead><tr><th>佔領國</th><th>人類怪物</th><th>武器、裝備與技能風格</th><th>出現位置</th><th>可取得的國別物品</th></tr></thead>
+      <tbody><tr><td class="item-kind">雲華</td><td class="">雲華盜匪、鏢局叛徒、私兵</td><td class="">單刀、長槍、連珠弩、札甲、符印與煙幕</td><td class="">人類敵人格、倉房、軍械庫、關門附近</td><td class="">雲華刀槍、符紙、藥材、茶磚與軍需</td></tr><tr><td class="item-kind">奧瑞恩</td><td class="">奧瑞恩傭兵、教團衛兵</td><td class="">長劍、盾牌、十字弩、鎖甲、守護與隊形技能</td><td class="">人類敵人格、寬廣房間、關門與防禦據點</td><td class="">奧瑞恩甲具、藥劑、捲軸與工坊品</td></tr><tr><td class="item-kind">薩菲爾</td><td class="">薩菲爾掠手、商旅護衛</td><td class="">彎刃刀、短弓、投石索、布甲、機動與干擾技能</td><td class="">人類敵人格、河岸、倉房、開闊野外</td><td class="">薩菲爾香料、旅用品、沙幕瓶與星砂</td></tr><tr><td class="item-kind">維爾冬</td><td class="">維爾冬戰團、氏族獵人</td><td class="">戰斧、獵矛、短弓、硬革與毛皮、追擊與戰吼</td><td class="">人類敵人格、山道、礦坑、大型房間</td><td class="">維爾冬獵具、毛皮、止凍酒與符石碎片</td></tr></tbody>
+    </table>
+  </div></main></body>
+</html>
