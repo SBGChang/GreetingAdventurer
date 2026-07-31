@@ -38,7 +38,7 @@
 <body>
   <main>
     <h1>雲華第一版地圖規劃</h1>
-    <p class="lead">粗小格只表現房間面積與疲勞成本；每個不含內牆線的連通房間才是一個可選擇移動的邏輯格。入口、出口、樓梯、固定陷阱皆為獨立單格功能房間，普通怪物不設偏好房間。</p>
+    <p class="lead">粗小格只表現房間面積與迷宮時間；每個不含內牆線的連通房間才是一個可選擇移動的邏輯格。入口、出口、樓梯、固定陷阱皆為獨立單格功能房間，普通怪物不設偏好房間。</p>
     <div class="legend" aria-label="地圖圖例">
       <span class="legend-item"><span class="legend-box black"></span>不存在地塊</span>
       <span class="legend-item"><span class="legend-box entry"></span>入口房間</span>
@@ -179,7 +179,7 @@
 
     const towerFour = mapFloor('塔 4F｜觀印台', 6, 6, [
       room('塔外出口', [k(1,3)], { exit:true }),
-      room('觀印前室', [k(1,4),k(2,3)], {}),
+      room('觀印前室', [k(1,4)], {}),
       room('下行觀印梯', [k(2,4)], { stair:'↓' }),
       room('北側符銘室', [k(1,5),k(1,6),k(2,5)], { marks:['event'], anchor:k(1,5) }),
       room('觀印台', rect(3,2,4,5), { marks:['large'], anchor:k(3,4) }),
@@ -188,7 +188,7 @@
       connection('塔外出口','觀印前室',k(1,3),k(1,4)),
       connection('觀印前室','下行觀印梯',k(1,4),k(2,4)),
       connection('觀印前室','北側符銘室',k(1,4),k(1,5)),
-      connection('觀印前室','觀印台',k(2,3),k(3,3),'door'),
+      connection('下行觀印梯','觀印台',k(2,4),k(3,4),'door'),
       connection('觀印台','東側儀器庫',k(3,5),k(3,6)),
     ], { note:'↓（2,4）接塔 3F 同座標房間。觀印台是 2×4 的大型體型敵人偏好房間。' });
 
@@ -221,7 +221,7 @@
     ], { note:'↑（2,5）接地下 1F 同座標房間。' });
 
     const maps = [
-      { city:'青岑城', title:'霧篁藥谷', type:'野外｜單層 8×8', note:'房間形狀不規則，但每個無內牆線的房間只是一個移動節點；疲勞才依房間覆蓋的小格面積計算。', floors:[herbValley] },
+      { city:'青岑城', title:'霧篁藥谷', type:'野外｜單層 8×8', note:'房間形狀不規則，但每個無內牆線的房間只是一個移動節點；迷宮時間才依房間覆蓋的小格面積計算。', floors:[herbValley] },
       { city:'雲京', title:'舊漕渠與沉倉', type:'內部｜5×5、地上 1 層＋地下 1 層', note:'地上東側沉倉是事件房間，與入口區沒有同層連線；必須經地下蓄水池繞行。', floors:[canalSurface, canalBasement] },
       { city:'雲京', title:'天衡印塔', type:'建築型國家迷宮｜6×6、塔 1–4F＋地下 1–2F', note:'六層皆由任意形狀房間構成。地下兩層是可選封印支線；主路徑向上至四層觀印台出口。', floors:[towerOne, towerTwo, towerThree, towerFour, towerBasementOne, towerBasementTwo] },
     ];
@@ -233,6 +233,22 @@
         for (const floor of exploreMap.floors) {
           const roomsById = new Map(floor.rooms.map(node => [node.id, node]));
           for (const node of floor.rooms) {
+            const connectedCells = new Set([node.cells[0]]);
+            const pendingCells = [node.cells[0]];
+            while (pendingCells.length) {
+              const current = pendingCells.pop();
+              const [currentRow, currentCol] = current.split(',').map(Number);
+              for (const candidate of node.cells) {
+                const [candidateRow, candidateCol] = candidate.split(',').map(Number);
+                if (!connectedCells.has(candidate) && Math.abs(currentRow - candidateRow) + Math.abs(currentCol - candidateCol) === 1) {
+                  connectedCells.add(candidate);
+                  pendingCells.push(candidate);
+                }
+              }
+            }
+            if (connectedCells.size !== node.cells.length) {
+              throw new Error(`${floor.label} 的「${node.id}」不是連通的房間。`);
+            }
             const functions = [node.entry && '入口', node.exit && '出口', node.stair && '樓梯', node.marks.includes('trap') && '陷阱'].filter(Boolean);
             if (!functions.length) continue;
             const expectedMarks = functions[0] === '陷阱' ? 1 : 0;

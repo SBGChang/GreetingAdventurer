@@ -68,7 +68,7 @@
     <p class="lead">第一版雲華文化怪物池。任何雲華文化的城市與可探險地共用此池；地圖不另擁有專屬怪物名單。</p>
     <div class="overview">
       <section class="panel"><h2>六屬性</h2><dl class="attribute-list"><div><dt>生命</dt><dd>怪物直接持有的戰鬥生命值。</dd></div><div><dt>肌</dt><dd>物理傷害、承受衝擊、一般減傷。</dd></div><div><dt>智</dt><dd>異能／符印傷害、預判與施術。</dd></div><div><dt>反</dt><dd>命中、迴避與技能使用延遲減免。</dd></div><div><dt>協</dt><dd>物理傷害、命中與動作效率。</dd></div><div><dt>魅</dt><dd>威嚇、號令、群體感應；無相關能力可為 0。</dd></div></dl></section>
-      <section class="panel"><h2>編寫規則</h2><ul class="rule-list"><li>怪物沒有普通攻擊；每一次傷害、架勢或干擾都必須使用下列技能。</li><li>一般敵人固定 1 招；菁英與 BOSS 可有 2～4 招，第一版所有敵人均不超過 4 招。</li><li>技能延遲為實際行動延遲：基礎值扣除對應主屬性減免後，不得低於最低值。</li><li>非人類怪物只讀取所在地文化池；人類敵人只讀取目前佔領國的文化池。兩者皆不按城市或探索地細分。</li><li>戰鬥雙方各有 3×3 九宮格。小型佔 1×1、中型佔 2×2、大型佔 3×3；體型與威脅等級獨立，唯 BOSS 必為大型。</li></ul></section>
+      <section class="panel"><h2>編寫規則</h2><ul class="rule-list"><li>怪物沒有普通攻擊；每一次傷害、架勢或干擾都必須使用下列技能。</li><li>一般敵人固定 1 招；菁英與 BOSS 可有 2～4 招，第一版所有敵人均不超過 4 招。</li><li>技能延遲為動作完成後實際增加的 CTB：基礎值扣除對應主屬性減免後，不得低於最低值。</li><li>戰鬥沒有自主移動、推拉或擊退；格位只會依前排全空規則由系統整側補位。</li><li>非人類怪物只讀取所在地文化池；人類敵人只讀取目前佔領國的文化池。兩者皆不按城市或探索地細分。</li><li>戰鬥雙方各有 3×3 九宮格。小型佔 1×1、中型佔 2×2、大型佔 3×3；體型與威脅等級獨立，唯 BOSS 必為大型。</li></ul></section>
     </div>
     <section class="balance"><div><b>一般</b><span>固定小型 1×1；生命 160～300；固定 1 招。</span></div><div><b>菁英</b><span>可為小型／中型／大型；生命 420～980；2～4 招。</span></div><div><b>BOSS</b><span>必為大型 3×3；生命 820～1,200；3～4 招。</span></div></section>
     <section class="roster ">
@@ -100,7 +100,7 @@
 </article><article class="monster-card normal">
   <header>
     <span class="rank normal">一般</span>
-    <div><h3>竹背獾</h3><p>異獸｜小型・1×1｜近戰突進；懲罰剛移動的目標。</p></div>
+    <div><h3>竹背獾</h3><p>異獸｜小型・1×1｜近戰追擊；懲罰目前 CTB 偏高的目標。</p></div>
     <span class="skill-count">1 招</span>
   </header>
 
@@ -116,7 +116,7 @@
       <td><strong>掠地撲咬</strong><span>獸技・近戰</span></td>
       <td>物傷：肌0.90＋協0.50；命中：反0.28＋協0.18</td>
       <td>基礎 26｜反 -0.08／點、協 -0.05／點｜最低 14</td>
-      <td>造成物理傷害；目標本次行動若為位移技能，額外行動延遲 +8。</td>
+      <td>造成物理傷害；目標目前 CTB 已達 30 時，額外 CTB +8。</td>
       <td>必須近身；不附帶普通攻擊。</td>
     </tr></tbody>
   </table>
@@ -250,7 +250,7 @@
 </article><article class="monster-card elite">
   <header>
     <span class="rank elite">菁英</span>
-    <div><h3>伏水母螈</h3><p>異獸｜中型・2×2｜高機動、讀條干擾與節奏竊取。</p></div>
+    <div><h3>伏水母螈</h3><p>異獸｜中型・2×2｜高閃避、讀條干擾與節奏竊取。</p></div>
     <span class="skill-count">3 招</span>
   </header>
 
@@ -275,10 +275,10 @@
       <td>造成魔法傷害；目標反應 -8，持續 1 次行動。</td>
       <td>讀條被硬直即中斷。</td>
     </tr><tr>
-      <td><strong>伏水遁</strong><span>移動・異能</span></td>
-      <td>無傷害</td>
+      <td><strong>伏水遁</strong><span>架勢・異能</span></td>
+      <td>迴避：反0.20</td>
       <td>基礎 20｜反 -0.08／點｜最低 10</td>
-      <td>自身行動延遲 -10，並解除本次被標記狀態。</td>
+      <td>提高迴避；下一個技能增加的 CTB -10，並解除本次被標記狀態。</td>
       <td>僅在潮濕房間；不可連續使用。</td>
     </tr></tbody>
   </table>
@@ -286,7 +286,7 @@
 </article><article class="monster-card elite">
   <header>
     <span class="rank elite">菁英</span>
-    <div><h3>覆鱗巨螈</h3><p>大型異獸｜大型・3×3｜大型菁英；拖曳、範圍壓力與潛伏切換。</p></div>
+    <div><h3>覆鱗巨螈</h3><p>大型異獸｜大型・3×3｜大型菁英；咬住壓制、範圍壓力與潛伏切換。</p></div>
     <span class="skill-count">4 招</span>
   </header>
 
@@ -305,10 +305,10 @@
       <td>所有近身目標受到物理傷害，行動延遲 +10。</td>
       <td>每 2 次自身行動最多 1 次。</td>
     </tr><tr>
-      <td><strong>咬住拖曳</strong><span>獸技・近戰</span></td>
+      <td><strong>咬住壓制</strong><span>獸技・近戰</span></td>
       <td>物傷：肌1.20＋協0.70；命中：反0.34＋協0.20</td>
       <td>基礎 32｜反 -0.06／點、協 -0.04／點｜最低 18</td>
-      <td>造成物理傷害；目標下一個位移技能行動延遲 +15。</td>
+      <td>造成物理傷害；目標目前 CTB +15。</td>
       <td>必須近身。</td>
     </tr><tr>
       <td><strong>濁水噴壓</strong><span>異能・黃色讀條</span></td>
@@ -328,7 +328,7 @@
 </article><article class="monster-card normal">
   <header>
     <span class="rank normal">一般</span>
-    <div><h3>牽線陶俑</h3><p>機關｜小型・1×1｜低速近戰推擠，適合窄道。</p></div>
+    <div><h3>牽線陶俑</h3><p>機關｜小型・1×1｜低速近戰壓制，以重擊延後目標 CTB。</p></div>
     <span class="skill-count">1 招</span>
   </header>
 
@@ -341,10 +341,10 @@
     <colgroup><col class="skill-name"><col class="coeff"><col class="delay"><col class="effect"><col class="limit"></colgroup>
     <thead><tr><th>技能</th><th>係數</th><th>使用延遲</th><th>效果</th><th>限制</th></tr></thead>
     <tbody><tr>
-      <td><strong>陶臂推擊</strong><span>機關・近戰</span></td>
+      <td><strong>陶臂重擊</strong><span>機關・近戰</span></td>
       <td>物傷：肌1.00＋協0.40；命中：反0.16＋協0.18</td>
       <td>基礎 32｜反 -0.05／點、協 -0.03／點｜最低 20</td>
-      <td>造成物理傷害；目標行動延遲 +10。</td>
+      <td>造成物理傷害；目標 CTB +10。</td>
       <td>必須近身。</td>
     </tr></tbody>
   </table>
@@ -389,16 +389,16 @@
     <colgroup><col class="skill-name"><col class="coeff"><col class="delay"><col class="effect"><col class="limit"></colgroup>
     <thead><tr><th>技能</th><th>係數</th><th>使用延遲</th><th>效果</th><th>限制</th></tr></thead>
     <tbody><tr>
-      <td><strong>立盾推擠</strong><span>機關・近戰</span></td>
+      <td><strong>立盾重擊</strong><span>機關・近戰</span></td>
       <td>物傷：肌1.12＋協0.46；命中：反0.22＋協0.20</td>
       <td>基礎 30｜反 -0.06／點、協 -0.04／點｜最低 18</td>
-      <td>造成物理傷害；目標行動延遲 +12。</td>
+      <td>造成物理傷害；目標 CTB +12。</td>
       <td>必須近身。</td>
     </tr><tr>
       <td><strong>封步鎖印</strong><span>符印・黃色讀條</span></td>
       <td>魔傷：智0.70；命中：智0.30＋反0.16</td>
       <td>基礎 40｜反 -0.05／點、智 -0.04／點｜最低 24</td>
-      <td>造成魔法傷害；目標下一個位移技能行動延遲 +15。</td>
+      <td>造成魔法傷害；目標 CTB +15。</td>
       <td>讀條被硬直即中斷。</td>
     </tr><tr>
       <td><strong>沉肩守勢</strong><span>架勢・藍色</span></td>
@@ -434,8 +434,8 @@
       <td><strong>四方鎖符</strong><span>符印・黃色讀條</span></td>
       <td>魔傷：智1.00；命中：智0.35＋反0.14</td>
       <td>基礎 48｜反 -0.04／點、智 -0.04／點｜最低 28</td>
-      <td>造成魔法傷害；目標下一個位移技能不可使用，改為行動延遲 +15。</td>
-      <td>讀條被硬直即中斷；對大型目標僅行動延遲 +15。</td>
+      <td>造成魔法傷害；目標 CTB +15。</td>
+      <td>讀條被硬直即中斷；同一目標不疊加。</td>
     </tr><tr>
       <td><strong>石甲回收</strong><span>防禦・藍色</span></td>
       <td>一般減傷：肌0.22；魔法減傷：智0.10</td>
