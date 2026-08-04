@@ -72,6 +72,7 @@ flowchart BT
   WORLD["modules/world"] --> CONTRACTS
   ECONOMY["modules/economy"] --> CONTRACTS
   DISTRIBUTION["modules/distribution"] --> CONTRACTS
+  CRAFTING["modules/crafting"] --> CONTRACTS
   STATS["domain-services/statistics\n無 State 純計算"] --> CONTRACTS
   GATHERING["domain-services/gathering\n無 State 純計算"] --> CONTRACTS
   MAP --> KERNEL
@@ -87,6 +88,7 @@ flowchart BT
   WORLD --> KERNEL
   ECONOMY --> KERNEL
   DISTRIBUTION --> KERNEL
+  CRAFTING --> KERNEL
   COMPOSE["app/composition\n組合型別與模組註冊"] --> DATA
   WORKFLOW["app/workflows\n跨模組交易編排"] --> CONTRACTS
   READMODEL["app/read-models\n跨模組唯讀 Projection"] --> CONTRACTS
@@ -103,6 +105,7 @@ flowchart BT
   COMPOSE --> WORLD
   COMPOSE --> ECONOMY
   COMPOSE --> DISTRIBUTION
+  COMPOSE --> CRAFTING
   COMPOSE --> STATS
   COMPOSE --> GATHERING
   COMPOSE --> WORKFLOW
@@ -250,6 +253,7 @@ type GameState = {
   world: WorldState;
   economy: EconomyState;
   distribution: AssetDistributionState;
+  crafting: CraftingState;
 };
 ```
 
@@ -297,6 +301,8 @@ React、Electron、測試與未來 Web Worker 都只能經由這兩類入口驅�
 | `worldConflictCheck`／`worldConflictResolve` | world | 只在對應世界規則啟用時檢查與完成衝突。 |
 | `marketPressureExpire`／`eventWeightModifierExpire` | world | 結束有期限的世界市場或事件權重修正。 |
 | `characterLifecycleDue` | character | 成年、退休或自然死亡的明確日期檢查；不每日掃描角色。 |
+| `foodStatusExpiry` | crafting | 移除到期 FoodStatus 與其暫時效果。 |
+| `npcCuisineDecisionDue` | crafting | 無 FoodStatus 的非玩家角色獨立骰自製料理或餐館；不進 FreeAction。 |
 
 ### 5.5 內部命令與領域事件
 
@@ -731,25 +737,56 @@ React Features、存檔、Electron／Steam 介接
 18. [Asset Distribution 模組契約](architecture/17_asset_distribution.md)
 19. [Adventurer Lifecycle 模組契約](architecture/18_adventurer_lifecycle_module.md)
 20. [Gathering Resolver 與採集 Workflow 契約](architecture/19_gathering_service.md)
+21. [Crafting & Cuisine 模組契約](architecture/20_crafting_and_cuisine_module.md)
 
 上述文件共同構成第一版完整架構。尚未定案的玩法公式可以留在資料規格中，但模組所有權、公開介面與跨模組流程不得由實作者臨場另造。
 
 ---
 
-## 15. 已知未定玩法參數
+## 15. 未完成設計清單
 
-以下不是架構缺口，而是仍需由設計文件／內容資料定案的玩法值。對應內容在定案前必須保持 `enabled: false` 或缺少必要 Resolver，實作者不得自行猜值：
+本節只記錄**玩法設計尚未完成**的項目，不把「尚未開始寫程式」混進來。分類原則如下：
 
-| 未定內容 | 已固定的架構位置 | 未定案前行為 |
-|---|---|---|
-| 護衛任務的目的地與兩期限公式 | City Escort Rule + Quest Deadline Rule | 不生成護衛候選／委託。 |
-| 商店價格、稅率、戰爭與關係修正 | Economy Price／Modifier Rule | 沒有完整 Price Rule 的 Offer 不可上架。 |
-| 國家力量、開戰與占領公式 | World Conflict Rule | 不排 Conflict Job。 |
-| 精確年齡增減值、退休與自然死亡曲線 | Character Lifecycle + Statistics Age Rule | 只能載入已有完整 Resolver 的角色原型。 |
-| 房屋自動幼兒教育、教師薪資與離隊留守規則 | City Home + Team Free Action + Progression Teaching | 先提供手動 28 日傳授；不啟用自動常駐教育 Assignment。 |
-| 同城房屋繼承衝突與特殊遺產分配 | Inheritance Workflow | 候選預驗證失敗時保持 Succession Interaction，不部分移轉。 |
-| 通緝／懸賞與惡意殺人懲罰 | Character Reputation／Relationship + Quest Reaction | 第一版內容未啟用時不生成懸賞。 |
-| 各採集點互動分鐘、產物 Pool／數量曲線與 NPC 是否可採 | Gathering Rule + Map Node + Gathering Workflow | Rule 不完整的採集點資料無法載入；NPC Policy 未啟用時不進 NPC 序列。 |
+- **數值／內容設計：** 系統行為與資料入口已存在，只差填入公式、曲線、權重、Pool 或第一版內容。
+- **系統／規則設計：** 尚未決定玩家或世界究竟依何種規則運作；實作者不可自行補規則。
+
+### 15.1 數值／內容設計尚未完成
+
+| 項目 | 已固定的架構位置 | 尚缺內容 | 定案前行為 |
+|---|---|---|---|
+| 護衛任務參數 | City Escort Rule + Quest Deadline Rule | 目的城市抽法、接受期限、實際結束期限與報酬數值。 | 不生成護衛候選／委託。 |
+| 商店與任務經濟 | Economy Price／Modifier Rule | 各類商品價格、稅率、城市／戰爭／交流修正、各階任務金錢報酬。 | 沒有完整 Price Rule 的 Offer 不可上架。 |
+| 國家衝突數值 | World Conflict Rule | 國家力量、開戰權重、占領門檻、控制與市場修正量。 | 不排 Conflict Job。 |
+| 年齡生命週期曲線 | Character Lifecycle + Statistics Age Rule | 年齡主屬／副屬修正、退休與自然死亡機率曲線。 | 只能載入已有完整 Resolver 的角色原型。 |
+| 採集內容 | Gathering Rule + Map Node + Gathering Workflow | 各採集點分鐘、資源 Pool、數量與品質曲線；雲華三圖的正式節點位置與圖示。 | Rule 或地圖內容不完整即不可啟用。 |
+| 第一版戰鬥內容預算 | Combat／Map／Progression Definition | 雲華各圖遭遇編組、怪物屬性／技能、掉落、寶箱與事件 Pool，以及每項的最終階級與經驗來源。 | 可保留灰盒資料，但不可假定為正式平衡。 |
+| 支援技能固定 Mastery MXP | Support Mastery Award Rule | 每次支援技能使用的固定 Mastery 值與受益 Mastery 分割；每場最多 3 次的規則已固定。 | Rule 未填時該技能不可發放額外 Mastery MXP。 |
+| 子女教育數值 | Child Education Rule | 自習取父母 Mastery 的低比例、教師／子女教學的實際經驗曲線與教師薪資。 | 可完成教師 Post 與 Cycle 流程，但不啟用未填數值的教育收益。 |
+| 玩家委託犯罪期限 | Quest Failure Crime Rule | 每類任務失敗後的犯罪期限天數。 | 未附 Crime Rule 的任務只到期、不建立紀錄。 |
+
+### 15.2 系統／規則設計尚未完成
+
+目前第一版已討論範圍內，沒有尚未決定的系統規則；以下列出的家庭自習比例、犯罪期限與支援技能固定 Mastery MXP 屬**數值設計**，不是規則缺口。
+
+### 15.3 本輪已定案的規則
+
+| 項目 | 定案規則 |
+|---|---|
+| 防禦 MXP | 依開戰時初始站位分配；由前至後略過空排，第一／二／三個有人排中每人權重為 3／2／1，再按權重和分配 Encounter 防禦預算。 |
+| 紅門 | 開門花 30 分鐘、當前地圖版本內可通行、刷新後重關；只揭露相鄰房間可見怪物／物品／事件，不揭露陷阱。紅門後方優先配置寶箱／事件／大型敵人偏好房。 |
+| 地圖怪物 | 第一版固定留在生成房間，不做依分鐘移動、警戒或追擊。 |
+| 旅行採集 | 取隊內最高採集等級作 RNG 基準，所有正式參與者各自獨立抽一份並進個人背包；最高採集者取得採集 MXP。 |
+| NPC 採集 | 第一版可啟用；以地圖 NPC 有序序列與採集點 Point Cost 處理。 |
+| 玩家繼承 | 玩家指定唯一繼承人；候選限成年正式隊友、成年子嗣與成年伴侶。所有可繼承資產與房屋只移轉給該一人。 |
+| 支援魔法／樂器 | 支援技能每次成功使用給固定 Mastery MXP；同角色同技能每場最多 3 次，不計有效量。抽象戰鬥中，符合武器／技能條件者每場視為各使用一次，於 Settlement 彙總。攻擊型樂器技能仍依傷害。 |
+| 子女教育／房屋 | 玩家家系子女各自為單人 Child Team；教師 Post 至少 28 日，子女每 14 日結算並重抽。沒有教師時自習，按父母各 Mastery 的低比例加總；非玩家冒險者子女不模擬，成年時每項 Mastery 直接取父母各 1/5 相加。 |
+| 犯罪 | 第一版只有玩家隊伍已接委託到期失敗會犯罪；在當前玩家主角建立以 Quest ID 區分的獨立紀錄與期限，彼此不累加／覆蓋。NPC 任務失敗不記犯罪；暫不啟用通緝／懸賞、追捕或其他犯罪來源。 |
+| 製作 | 裝備品級決定白板係數；素材一份最多一條候選詞條，品質前綴決定成功繼承數。一般至神話裝備分別消耗 1～5 素材，詞條上限相同。消耗品以同批產量表達成本優勢；工藝品品質只影響出售倍率。 |
+| 料理 | 不是可囤積 Item，而是角色 FoodStatus。無狀態時玩家可零日自製或用餐；NPC 於日結算骰自製／餐館。有狀態時兩者皆不可再料理或用餐。食材決定所有詞條方向，廚藝決定詞條階級；餐館固定最低階、MXP 為自製同級 1/3。 |
+
+### 15.4 實作狀態的界線
+
+上述兩表不是實作待辦。現有架構文件已定義模組所有權、資料入口與跨模組流程；各模組交接清單中的 Schema、Handler、Workflow、測試則是**未來工程實作工作**。規則尚未定案時，應先完成本節對應的設計項，而非由工程端臨時寫死預設值。
 
 任何一項定案時，只新增對應 Definition、Resolver、Workflow 分支與契約測試；除非所有權真的改變，不需要另開一套架構版本。
 
@@ -760,6 +797,7 @@ React Features、存檔、Electron／Steam 介接
 | 機制 | 唯一真相／主要契約 |
 |---|---|
 | 四國文化、原生內容、占領後人類敵人、路線與戰爭 | World；Map／Combat 只查詢文化結果。 |
+| 武器、防具、道具、料理、工藝品與材料的文化來源 | 各 Item／Recipe Definition 的不可變 `originCultureId`；製作成品跟配方文化，異文化素材不改成品國籍。 |
 | 3／6／9 日旅行、三段事件、1 日進出冒險地、年度休息 | Team + Engine Scheduler。 |
 | 迷宮房間、30 分鐘小格距離、永久小地圖記憶、每版門／陷阱／固定採集點狀態、跨日、Pending 刷新 | Map + Dungeon + Engine。 |
 | NPC 單人／隊伍自主生活、附近任務／冒險地抽選、動作串、任務標記、固定自由－非自由循環與資料化買賣 | Adventurer Lifecycle + Team + Quest + City + Dungeon。 |
@@ -771,8 +809,9 @@ React Features、存檔、Electron／Steam 介接
 | 鎮壓／討伐 41 日鎖、救援／探索內容保留、Purchase 特殊回收 | Quest + Map + Inventory + City Workflow。 |
 | Lv.0～10 熟練度、主屬上限 100、經驗來源、28 日傳授與書籍 | Progression。 |
 | 每怪／配方／旅行／地圖／任務的經驗基礎 | 各來源 Definition + Progression Experience Rule。 |
+| 裝備詞條製作、消耗品產量、工藝品品質與料理 FoodStatus | Crafting & Cuisine；City 只提供設施／餐館入口，Inventory 只持有素材與成品。 |
 | 地圖／旅行／敵人採集來源、最高採集者、產物 RNG、每版一次與共同戰利品分配 | Gathering Resolver／Workflow + Map + Inventory + Distribution + Progression。 |
-| 副屬、裝備係數、持握倍率、年齡、聲望與招式練習 | Derived Statistics 無 State Domain Service。 |
+| 副屬、裝備係數、持握倍率、年齡與聲望 | Derived Statistics 無 State Domain Service。 |
 | 隊伍持久戰鬥配置、雙方九宮格、體型、無自主位移、前排全空補位、技能行動、反擊、三武器組與倒扣式 CTB | Team Formation + Combat + Inventory Loadout。 |
 | 角色出生、家族、未了結關係、成年、死亡、繼承與房屋 | Character + Team Succession + City／Inventory／Economy Workflow。 |
 | 城市十設施、護衛候選、人口補充、房屋功能間 | City。 |

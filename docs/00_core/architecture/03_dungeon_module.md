@@ -91,8 +91,8 @@ Map 公開的每筆 NPC 探索目標都帶有 `pointCost` 與 `resolverId`；目
 ### 2.3 Combat Estimator Port
 
 ```ts
-interface NpcCombatEstimator {
-  resolveContentAttempt(input: NpcContentAttemptInput): NpcContentAttemptOutcome;
+interface AbstractCombatEstimator {
+  resolveContentAttempt(input: AbstractContentAttemptInput): AbstractContentAttemptOutcome;
 }
 ```
 
@@ -152,7 +152,7 @@ type PlayerMapKnowledge = {
 1. 未包含在 `revealedRoomIds` 的房間，其所有實際小格在小地圖一律顯示為黑格。
 2. 一個多格、L、T 或凹形房間仍是一個移動節點；房間被揭露時，其組成的全部小格一起在小地圖打開。
 3. 進入探索地時立即揭露入口房間；成功移入新房間時揭露該房間。
-4. 紅門的定位是「支付一次成本查看門後房間」。成功開門後立即揭露相鄰房間、該連線與當前版本可見內容，不必先移入；同一 Map Version 再經過該門不收開門成本。
+4. 紅門的定位是「支付一次成本查看並通過門後房間」。成功開門後立即揭露相鄰房間、該連線與當前版本的可見怪物、物品與事件，不必先移入；固定陷阱與其他隱藏內容不因開門揭露。同一 Map Version 再經過該門不收開門成本，地圖刷新後則重新關閉。
 5. 玩家實際走入固定陷阱房間、觸發或解除陷阱後，將 `trapId` 寫入 `knownTrapIds`。
 6. `PlayerMapKnowledge` 不因 Map 刷新、離開地圖、角色死亡或玩家世代交替而清除；只可因存檔 migration 或明確的新遊戲重置而改建。
 7. Map 刷新後，已揭露的格子與已知陷阱位置仍可顯示；UI 另外組合 Map Query 的新版本門／陷阱狀態，顯示門已重新關閉、陷阱已重新啟用。

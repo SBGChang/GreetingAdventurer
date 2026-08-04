@@ -59,6 +59,21 @@ type EconomyTransferId = string;
 type ShopOfferId = string;
 type PlayerSocialUsageId = string;
 type EncounterId = string;
+type CraftingAttemptId = string;
+type CraftingRecipeId = DefinitionId;
+type CuisineRecipeId = DefinitionId;
+type MaterialAffixId = DefinitionId;
+type MaterialTagId = DefinitionId;
+type FoodAffixId = DefinitionId;
+type CraftQualityRuleId = DefinitionId;
+type RestaurantMenuId = DefinitionId;
+type RestaurantMealVariantId = DefinitionId;
+type NpcCuisineDecisionRuleId = DefinitionId;
+type CraftQuality = 'plain' | 'fine' | 'excellent' | 'perfect' | 'peerless' | 'demonGod';
+type SupportMasteryAwardRuleId = DefinitionId;
+type ChildEducationRuleId = DefinitionId;
+type ChildStudySessionId = string;
+type HomeTeachingPostId = string;
 type DefinitionId = string;
 type JobId = string;
 type EventId = string;
@@ -353,6 +368,20 @@ type NpcDungeonDayJob = ScheduledJobBase<
   NpcDungeonRunId,
   {}
 >;
+
+type FoodStatusExpiryJob = ScheduledJobBase<
+  'foodStatusExpiry',
+  'crafting',
+  CharacterId,
+  { foodStatusRevision: Revision }
+>;
+
+type NpcCuisineDecisionDueJob = ScheduledJobBase<
+  'npcCuisineDecisionDue',
+  'crafting',
+  CharacterId,
+  {}
+>;
 ```
 
 每種 Job 的玩法欄位只放入 payload；擁有模組與目標 ID 型別由 Base 泛型固定。完整 payload 由擁有模組定義，再於組裝層形成 `GameScheduledJob`。
@@ -425,7 +454,7 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `MoveItemToTeamQuestCargo` | quest、city、map workflow | inventory | 將購買／送貨／探索指定品鎖進該 Quest 的任務物資空間。 |
 | `ReleaseExpiredQuestCargo` | quest workflow | inventory | 將 expired Quest 仍鎖定的物品移入指定 Asset Distribution Escrow。 |
 | `ConsumeBookForLearning` | progression | inventory | 驗證並依書籍政策消耗／保留書籍。 |
-| `TransformCraftingItems` | city | inventory | 驗證材料、消耗輸入並建立成品。 |
+| `TransformCraftingItems` | crafting | inventory | 驗證已預留材料、消耗輸入並建立成品。 |
 | `CommitCombatItemUse` | combat | inventory | 驗證並在同一交易提交戰鬥道具消耗與使用資料。 |
 | `CreateQuestTemporaryCharacter` | quest | character | 接取護衛或救出人物時建立任務暫時角色。 |
 | `CreateWorldAdventurerBatch` | population workflow | character | 依城市文化與數量建立真實冒險者。 |
@@ -433,6 +462,7 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `OpenCharacterRelationshipFact` | quest、content-event workflow | character | 建立角色與人物／組織間的未了結事項。 |
 | `ResolveCharacterRelationshipFact` | quest、content-event workflow | character | 解決一筆既有的關係事項。 |
 | `ApplyCombatCondition` | combat | character | 套用戰鬥後生命、魔力與狀態。 |
+| `ApplyFoodStatusEffects` | crafting workflow | character | 依 FoodStatus 原子套用或移除其來源明確的暫時效果。 |
 | `ReserveShopOfferForQuest` | quest | city | 將指定貨架商品綁定任務。 |
 | `ReleaseQuestShopOffer` | quest | city | 依任務結果釋放或清理貨架商品。 |
 | `TransferCurrency` | city、distribution、workflow | economy | 在兩個帳戶間原子移轉貨幣。 |
@@ -482,7 +512,7 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `WeaponSetConfigured` | inventory | combat、ui/app | 三組武器之一的裝備與技能引用已更新。 |
 | `CombatItemUseCommitted` | inventory | combat | 戰鬥道具已在本交易消耗，並提供延遲／效果資料。 |
 | `BookUseCommittedForLearning` | inventory | progression | 指定書籍已依政策消耗或確認保留。 |
-| `CraftingItemsTransformed` | inventory | city、crafting workflow | 製作材料與成品實體已完成轉換。 |
+| `CraftingItemsTransformed` | inventory | crafting workflow、ui/app | 製作材料與成品實體已完成轉換。 |
 | `QuestStateChanged` | quest | team、ui/app | 更新護衛對象、通知與可交付狀態。 |
 | `QuestCreated` | quest | map、city、ui/app | 世界內容已轉成一筆具絕對期限的委託。 |
 | `QuestAccepted` | quest | city、character、ui/app | 隊伍已在期限前接取委託。 |
@@ -515,6 +545,9 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `CityStockItemAvailable` | city | quest、ui/app | 一件永久庫存物品已可成為需求來源。 |
 | `EscortCandidatesGenerated` | city | quest | 本期匿名護衛候選已生成。 |
 | `CityTrainingCompleted` | city | progression | 城鎮教師訓練已完成。 |
+| `CraftingCompleted` | crafting | progression、ui/app | 耗時製作已完成，成品實體與品質結果已原子提交。 |
+| `CuisineConsumed` | crafting | progression、ui/app | 自製或餐館料理已立即套用 FoodStatus，可發放料理 MXP。 |
+| `FoodStatusChanged` | crafting | character、ui/app | 角色料理狀態已套用或到期。 |
 | `CityMetricsChanged` | city | population／content-event workflow、ui/app | 城市繁榮或安全已改變。 |
 | `CombatEncounterResolved` | combat | dungeon、team、map | 玩家戰鬥遭遇已完成，可恢復探索或處理內容。 |
 | `CombatEncounterStarted` | combat | dungeon、ui/app | 玩家戰鬥遭遇快照已建立。 |
@@ -522,8 +555,7 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `CombatTeamOutcome` | combat | team | 隊伍行動能力因戰鬥結果改變。 |
 | `CombatAttackMasteryEarned` | combat | progression | 已按傷害與武器／魔法分配攻擊成長來源。 |
 | `CombatDefenseMasteryEarned` | combat | progression | 已按參戰與防具規則分配防禦成長來源。 |
-| `CombatSkillPracticeEarned` | combat | progression | 已確認的技能使用產生招式練習來源。 |
-| `CraftingCompleted` | city | progression、ui/app | 製作嘗試已結束；成功與失敗皆可發放製造成長。實體材料／成品已先由 Internal Command 提交。 |
+| `CombatSupportMasteryEarned` | combat | progression | 已確認的無傷害支援技能使用，產生固定 Mastery MXP 來源。 |
 | `GatheringResolved` | gathering workflow | progression、ui/app | 來源消耗與產物 Item 已原子提交；採集者依隊內最高採集等級決定，可正式發放採集 MXP。 |
 | `CommerceInteractionCompleted` | city | progression、ui/app | 一筆買入或賣出已原子完成，可發放交流成長。 |
 | `ConversationCompleted` | city | progression、ui/app | 一次聊天互動已完成，可發放交流成長。 |
@@ -537,7 +569,6 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `PrimaryAttributesChanged` | progression | combat、ui/app | 五項主屬推導結果已變更。 |
 | `ProgressionCapacityChanged` | progression | character | 主屬推導結果可能使最大生命／魔力改變。 |
 | `KnowledgeLearned` | progression | combat、city、ui/app | 技能、魔法或製作知識已正式學會。 |
-| `SkillPracticeChanged` | progression | combat、app/query-cache、ui/app | 招式練習值與 Derived Statistics 係數已改變。 |
 | `PlayerSuccessorSelected` | team | inheritance workflow、ui/app | 玩家已選定新的隊伍 Leader，可開始資產繼承。 |
 | `PlayerInteractionOpened` | 擁有互動的領域模組 | engine session、ui/app | 可存檔的玩家選擇已建立，世界快轉必須暫停。 |
 

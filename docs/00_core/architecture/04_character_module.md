@@ -133,10 +133,17 @@ type Character = {
   innateTraitIds: CharacterTraitDefinitionId[];
   homeId?: HomeId;
   reputation: number;
+  playerQuestCrimeRecords: Record<QuestId, PlayerQuestCrimeRecord>;
 
   condition: CharacterCondition;
   temporaryOrigin?: TemporaryCharacterOrigin;
   revision: Revision;
+};
+
+type PlayerQuestCrimeRecord = {
+  sourceQuestId: QuestId;
+  recordedOnDay: WorldDay;
+  expiresOnDay: WorldDay;
 };
 
 type CharacterCondition = {
@@ -208,6 +215,7 @@ Relationship Fact 只記「跟誰有一件尚未了結的事」，不建立高�
 8. 未達 `adulthoodAgeDays` 的子女不可加入冒險隊伍；成年事件後才依資格改為 available。
 9. `innateTraitIds` 在出生完成後不可修改；它只影響資料 Resolver，不直接寫主屬。
 10. 同一 `sourceId`、subject、counterpart 與 kind 至多一筆未解決 Relationship Fact。
+11. `playerQuestCrimeRecords` 只可存在於目前玩家主角；Key 必須是唯一 `sourceQuestId`，每筆都持有自己的期限，彼此不累加、不覆蓋。逾期紀錄可保留作歷史，但不再是 active crime。
 
 ---
 
@@ -222,6 +230,7 @@ interface CharacterQuery {
   listChildren(id: CharacterId): CharacterId[];
   getInnateTraits(id: CharacterId): CharacterTraitDefinitionId[];
   listUnresolvedRelationships(id: CharacterId): CharacterRelationshipFactView[];
+  listPlayerQuestCrimeRecords(id: CharacterId): PlayerQuestCrimeRecordView[];
   getTemporaryOrigin(id: CharacterId): TemporaryCharacterOrigin | undefined;
 }
 
@@ -246,9 +255,11 @@ interface CharacterStatsQuery {
 | `CreateQuestTemporaryCharacter` | 驗證任務類型、原型與 Quest ID，建立護衛／救援暫時 Character。 |
 | `CreateWorldAdventurerBatch` | 依城市文化、數量與生成規則建立真實世界冒險者，回傳 Character ID 清單。 |
 | `ApplyCharacterReputationEffect` | 依已驗證 Effect 與來源調整聲望並發出變更事實。 |
+| `RecordQuestFailureCrime` | 只接受玩家隊伍的已確認委託失敗來源；在當前玩家主角下以 Quest ID 建立一筆獨立犯罪紀錄與期限。不得改寫 NPC 或既有其他 Quest 的紀錄。 |
 | `OpenCharacterRelationshipFact` | 建立一筆具來源與對象的未了結關係。 |
 | `ResolveCharacterRelationshipFact` | 將指定關係標為已解決；重複處理必須冪等。 |
 | `ApplyCombatCondition` | 套用生命、魔力與暫時狀態改變；生命歸零時處理死亡／不可行動。 |
+| `ApplyFoodStatusEffects` | 僅接受 Crafting Workflow；以 `characterId`、`foodStatusRevision`、`operation: apply \| remove` 與 FoodStatus 已解析的 Effect ID 原子套用／移除狀態。不得由 UI 或任意一般道具偽造 FoodStatus 效果。 |
 
 ### 5.2 訂閱 DomainEvent
 
@@ -285,6 +296,7 @@ interface CharacterStatsQuery {
 | `CharacterRetired` | `characterId`、`retiredOnDay` | team、succession workflow、ui/app。 |
 | `TemporaryCharacterRecovered` | `characterId`、`sourceQuestId`、`reason` | team、quest。 |
 | `CharacterReputationChanged` | `characterId`、`oldValue`、`newValue` | quest、ui/app。 |
+| `CharacterCrimeChanged` | `characterId`、`sourceQuestId`、`recordedOnDay`、`expiresOnDay` | quest、ui/app。 |
 | `CharacterRelationshipChanged` | `relationshipFactId`、`subjectCharacterId`、`state` | city、quest、content-event workflow、ui/app。 |
 
 ---
@@ -336,7 +348,9 @@ Team 的 homeRest（365 日）完成
   → Character 以 Birth Rule 檢查資格與 RNG
   → 成功：依父母與 Birth Rule 選出 innateTraitIds，建立 CharacterBorn 與親子 FamilyLink
   → progression 將新生兒熟練度初始化為 0
-  → 未成年期間不能加入冒險隊；教育與年齡經驗倍率由既有 Progression／Home Rule 處理
+  → 若屬玩家家系：Team 建立單人 control: child Team，Progression 建立第一個 14 日 Child Study Cycle
+  → 若屬非玩家冒險者家系：不建立 Child Team 或逐日教育，只保留成年到期 Job
+  → 未成年期間不能加入冒險隊；成年時依 Progression 的玩家／非玩家子女規則轉換
 ```
 
 ---

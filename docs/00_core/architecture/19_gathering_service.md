@@ -93,6 +93,10 @@ type GatheringResolution = {
   masteryLevelUsed: MasteryLevel;
   experienceAwardRuleId: ExperienceAwardRuleId;
   yields: GatheringYieldEntry[];
+  individualYields?: Array<{
+    recipientCharacterId: CharacterId;
+    yields: GatheringYieldEntry[];
+  }>;
 };
 ```
 
@@ -149,12 +153,13 @@ type ResolveGatheringSource = {
 
 type GatheringDestinationRef =
   | { kind: 'assetDistribution'; distributionId: AssetDistributionId }
-  | { kind: 'characterBag'; characterId: CharacterId };
+  | { kind: 'characterBag'; characterId: CharacterId }
+  | { kind: 'participantCharacterBags'; characterIds: CharacterId[] };
 ```
 
 `ResolveGatheringSource` 由 Gathering Workflow 唯一處理。來源模組必須先驗證位置、時間與來源資格；Workflow 仍會重新查詢目前 State，不能相信 UI 傳入的等級、產物或採集者。
 
-固定地圖採集點與敵人掉落第一版只能送入既有 `assetDistribution`；旅行資源最終要進共同分配或指定角色背包尚未定案，因此必須由資料引用的 Destination Policy 限制。若未來增加其他 Escrow，必須先擴充 `ItemLocation` 與此 union，不能把任意字串當位置。
+固定地圖採集點與敵人掉落第一版只能送入既有 `assetDistribution`。旅行資源固定使用 `participantCharacterBags`：先取隊內最高採集等級（同級取穩定 CharacterId）作為全隊的 RNG 等級基準，再讓每位本次正式參與者各自以獨立 RNG Stream 抽取一份種類與數量，直接進自己的背包。最高採集者仍是本次 `contributorCharacterId`，只由其取得採集 MXP。若未來增加其他 Escrow，必須先擴充 `ItemLocation` 與此 union，不能把任意字串當位置。
 
 ### 4.2 完成事件
 
@@ -204,7 +209,7 @@ NPC 的候選人必須使用 Run 開始時的正式參與者快照，不能在�
 
 - 旅行 Content Event 決定來源是否成立與採集是否耗用事件選項。
 - Combat／Reward Workflow 決定敵人掉落來源是否已正式達成。
-- 產物最後放入個人背包、短期 Distribution 或其他 Escrow，必須由 `GatheringDestinationPolicyId` 明確指定；未定義目的政策的資料不得啟用。
+- 敵人採集型掉落仍進本次短期 Distribution；旅行資源則固定讓每位正式參與者依全隊最高採集等級各自獨立抽取並進個人背包。地圖固定採集點仍進共同 Distribution。其他目的地必須由 `GatheringDestinationPolicyId` 明確指定；未定義目的政策的資料不得啟用。
 
 ---
 
@@ -215,7 +220,7 @@ NPC 的候選人必須使用 Run 開始時的正式參與者快照，不能在�
 3. 地圖節點 `available → harvested` 與 Item Instance 建立必須在同一 Engine Transaction。
 4. 採集者必須屬於來源提供的正式參與者快照。
 5. 最高等級同分時穩定選出相同 Character，不消耗 RNG。
-6. 只有 `GatheringResolved` 的 `contributorCharacterId` 取得一次採集 MXP。
+6. 只有 `GatheringResolved` 的 `contributorCharacterId` 取得一次採集 MXP；旅行資源的其他獨立抽取者不重複取得 MXP。
 7. 地牢採集產物在離場分配前沒有個人 Owner。
 8. 玩家與 NPC 競爭同一節點時至多一方成功；失敗方不扣時間、點數或取得 MXP。
 9. Map 刷新只重設節點，不刪除已採得物品，也不清除玩家已揭露的採集點位置。
@@ -230,4 +235,4 @@ NPC 的候選人必須使用 Run 開始時的正式參與者快照，不能在�
 - [ ] `ResolveGatheringSource` Workflow 與三種 Source Adapter。
 - [ ] Map Node、Inventory、Distribution、Progression 的原子交易測試。
 - [ ] 玩家／NPC 競爭、存讀檔、刷新與 deterministic RNG 測試。
-- [ ] 尚未定案的旅行成果目的政策與第一版 NPC 採集開關資料。
+- [ ] 第一版採集內容資料與 NPC 採集 Point Cost／Sequence 資料。

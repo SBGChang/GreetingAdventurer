@@ -119,7 +119,7 @@ type ActionChainNodeTemplate =
 1. `unaccepted`，且在**預定抵達發佈城市當日**仍早於 `acceptDeadline`。
 2. 尚未被另一支 NPC Team 的任務意向標記；玩家不受此限制。
 3. 路線與該任務所需目的地仍可合法抵達。
-4. `NpcTeamPowerEstimator.assessQuestFeasibility` 回傳可嘗試，並依其成功機率／風險權重排序抽選。
+4. `TeamPowerEstimator.assessQuestFeasibility` 回傳可嘗試，並依其成功機率／風險權重排序抽選。
 
 抽中後，Lifecycle 先要求 Quest 建立 `NpcQuestClaim`，成功才建立「到目標城市 → 嘗試接取」的 ActionChain。這個標記只排除其他 NPC 的抽樣，**不是委託保留**：玩家仍可照常接取；被標記的 NPC 也沒有提前取得任務物、地圖保護或報酬權利。
 
@@ -162,6 +162,8 @@ type NpcSellRule = {
 ```
 
 自由活動可抽取的個人行為僅為**製作、鍛鍊、買賣、休息**。`trade` 的挑選可依個人需求與金錢選擇賣裝備／物品、買裝備／補品，並可在資料規則滿足時購入房屋；不新增疲勞值或隱藏的 NPC 專屬資源。
+
+`craft` 被抽中時不建立市場需求或利潤動機：Lifecycle 只向 Crafting 的公開 Query 取得該角色目前能做的配方池並固定 RNG 抽取。成品裝備的自動換裝只比較最終 Combat Power；未換裝成品留給日後 `trade` 出售。
 
 市場交易是 `cityFree` 中的**零日子步驟**：它遵守城內買賣本來就不花世界時間的規則，但一次自由活動循環至多執行 `maxTransactionsPerFreeCycle` 筆，且完成後下一筆自由行動最早次日才可開始。它不會形成「同一天無限重骰、無限買賣」的迴圈。NPC 與玩家隊友都不使用玩家主角的每日 6 次交易／6 次聊天計數；其交流成長由 Team 在每個完整自由日固定發出的練習事件處理，實際 `NpcMarketIntent` 成功與否不額外給交流 MXP。這只改變交流熟練度來源。
 

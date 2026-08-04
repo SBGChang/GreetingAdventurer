@@ -135,7 +135,7 @@ workNet = 任務獲得 + 地牢獲得 − 旅費 − 已消耗道具價值
 ```ts
 type Team = {
   teamId: TeamId;
-  control: 'player' | 'npc';
+  control: 'player' | 'npc' | 'child';
   memberIds: CharacterId[];             // 正式成員
   temporaryMemberIds: CharacterId[];    // 護衛／救援等任務角色
   leaderId: CharacterId;
@@ -174,6 +174,7 @@ type TeamLocation =
 
 - 一名 `CharacterId` 同時至多屬於一支活動隊伍，且不可同時存在於正式與暫時成員清單。
 - `playerTeamId` 必須指向 `control: player` 的唯一隊伍。
+- `control: child` Team 必須恰有一名未成年正式成員、固定在其家中，不能旅行、進戰鬥、接任務或進入 NPC Lifecycle；它只執行 Child Study Plan。
 - `location.kind: adventureMap` 是 Map 判斷有人在圖內的唯一來源。
 - `leaderId` 必須是正式成員；任務暫時角色不可成為隊長、取得一般任務金錢報酬或參與戰利品分配。
 - `memberJoinedOnDay` 必須對每名正式成員各有一筆；加入當日就是留隊兩個月門檻的起算點。
@@ -195,7 +196,9 @@ type TeamPlan = {
     | 'returnToCity'
     | 'npcDungeonExploration'
     | 'escortTravel'
-    | 'homeRest';
+    | 'homeRest'
+    | 'homeTeachingPost'
+    | 'childStudy';
   startedOnDay: WorldDay;
   dueOnDay?: WorldDay;
   status: 'active' | 'completed' | 'cancelled';
@@ -244,6 +247,8 @@ type PendingSuccession = {
   revision: Revision;
 };
 ```
+
+玩家繼承人由玩家指定，且每次只可選出一人。`eligibleSuccessorIds` 只能包含：仍可用的成年正式隊友、成年子嗣、或成年伴侶；候選者即使目前位於單人 NPC Team，也可在選定時合法轉入玩家隊。未成年者、任務暫時角色、其他 NPC 隊伍成員與非伴侶／非子嗣居民一律不可列入。所有可繼承的個人資產與房屋只移轉給該唯一繼承人，不做多人拆分。
 
 `ContentEventInstance` 是已由資料 Resolver 選定的可序列化快照；不可保存函式或 React callback。
 
@@ -365,6 +370,7 @@ interface TeamQuery {
 |---|---|
 | `StartReturnFromDungeon` | 驗證隊伍、地圖與出口結果，建立 1 日返城 Plan。 |
 | `StartTimedCityAction` | 依 payload 的 `scope` 建立隊伍級 `cityFacilityAction` Plan，或建立／替換成員的自由行動；只保存設施與規則 ID。 |
+| `StartChildStudyPlan` | 僅接受 Progression；驗證 Team 為單人 `control: child` 且位於家中，建立 14 日 `childStudy` Plan。 |
 | `CreateNpcTeam` | 驗證角色皆可用且尚未入隊，在指定城市建立 NPC Team；Adventurer Lifecycle 在角色建立 Workflow 中建立 Controller 並安排首次 `npcDecisionDue`。 |
 | `StartNpcTeamPlan` | 僅接受 Adventurer Lifecycle；驗證 Chain 節點、位置與前置條件後建立 NPC 的 Team Plan。若 `kind=cityFree`，先結算留隊、建立首個 `nonPlayerMemberCityFreeDayTick`，且期限必須為資料化的 2～7 日。 |
 | `AssignNpcMemberFreeAction` | 僅接受 Adventurer Lifecycle；驗證 Team 正在 `cityFree`，為指定正式成員建立 craft／train／trade／rest。 |
@@ -380,7 +386,7 @@ interface TeamQuery {
 | `TeamPlanChanged` | `teamId`、`planId`、`oldKind?`、`newKind` | dungeon、ui/app。 |
 | `TeamPlanCompleted` | `teamId`、`planId`、`kind`、`payload` | city、character、progression、quest、ui/app。 |
 | `TeamLocationChanged` | `teamId`、`from`、`to` | map、dungeon、quest。 |
-| `FreeActionCompleted` | `teamId`、`memberId`、`ruleId`、`payload` | progression、city。 |
+| `FreeActionCompleted` | `teamId`、`memberId`、`ruleId`、`payload` | progression、city、crafting。 |
 | `FreeActionChanged` | `freeActionId`、`status`、`progress` | ui/app。 |
 | `TravelCompleted` | `teamId`、`fromCityId`、`toCityId`、`modeId`、`experienceRuleId`、`experienceMultiplier` | progression、quest。 |
 | `TravelSegmentReached` | `teamId`、`routeId`、`segmentIndex`、`eventProfileId` | travel-event workflow、ui/app。 |
@@ -394,7 +400,7 @@ interface TeamQuery {
 | `AdventurerActivityRecorded` | `characterId`、`kind`、`completedOnDay`、`summaryKey` | city、ui/app。 |
 | `NonPlayerMemberFreeDaySocialPractice` | `teamId`、`characterId`、`worldDay`、`conversationExperienceRuleId`、`commerceExperienceRuleId` | progression、ui/app。 |
 
-`FreeActionCompleted` 只表示時間要求達成；對應 Workflow 再讓 city／progression Resolver 判定成品、MXP、訓練上限與失敗結果。若要建立或消耗實體物品，必須送出 Inventory Internal Command。
+`FreeActionCompleted` 只表示時間要求達成；對應 Workflow 再讓 crafting／city／progression Resolver 判定成品、MXP、訓練上限與失敗結果。若要建立或消耗實體物品，必須送出 Inventory Internal Command。
 
 ### 6.1 開始自由活動前的留隊判定
 
@@ -475,6 +481,7 @@ Map 只根據 `TeamLocationChanged` 與 `TeamQuery` 判斷地圖是否有人；T
 ```text
 玩家 Leader 死亡／退休
   → Team 取消不再合法的 Plan，建立 PendingSuccession
+  → 候選只列出成年正式隊友、成年子嗣與成年伴侶
   → PlayerInteractionOpened，停止長時間快轉
   → 玩家送 selectPlayerSuccessor
   → Team 重新驗證候選並發出 PlayerSuccessorSelected

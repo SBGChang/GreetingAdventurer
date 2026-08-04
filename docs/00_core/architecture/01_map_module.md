@@ -65,6 +65,7 @@ type RoomLinkDefinition = {
   fromCell: GridCell;
   toCell: GridCell;
   kind: 'passage' | 'redDoor';
+  guardedPreferenceKinds?: Array<'chest' | 'event' | 'largeEnemy'>;
 };
 
 type FixedTrapDefinition = {
@@ -91,6 +92,7 @@ Map Schema／Rule Validation 必須驗證：
 - `nationalDungeonForm` 存在時必須與 World 的 Adventure Site 標記相符；`outdoor` form 只能搭配 `kind: outdoor`，其餘兩種只能搭配 `kind: interior`。
 - 房間可為 L、T、凹形等多格形狀；合併房間是一個移動節點。
 - 通道與紅門只可連接合法房間；無連結的房間不可通行。
+- 紅門是固定探索成本；每扇紅門至少一側房間應具有寶箱、事件或大型體型敵人的內容偏好。`guardedPreferenceKinds` 只供 Template／內容驗證與配置檢視使用，不保證本次刷新一定生成該內容。
 - 上下樓梯使用相同的列、行座標。
 - 入口、出口、樓梯與固定陷阱皆是互斥的 1×1 功能房間，且不得成為內容生成位置。
 - 大型敵人偏好房間至少 2×2；事件偏好房間至少由兩格構成。

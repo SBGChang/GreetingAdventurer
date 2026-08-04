@@ -16,6 +16,7 @@
 type ProgressionState = {
   characterProgress: Record<CharacterId, CharacterProgression>;
   teachingSessions: Record<TeachingSessionId, TeachingSession>;
+  childStudySessions: Record<ChildStudySessionId, ChildStudySession>;
 };
 ```
 
@@ -41,11 +42,11 @@ interface ProgressionDefinitionReader {
   getMastery(id: MasteryId): MasteryDefinition;
   getMasteryCurve(id: MasteryCurveId): MasteryCurveDefinition;
   getSkill(id: SkillId): SkillDefinition;
-  getRecipe(id: RecipeId): RecipeDefinition;
   getTeachingRule(id: TeachingRuleId): TeachingRuleDefinition;
   getExperienceAwardRule(id: ExperienceAwardRuleId): ExperienceAwardRuleDefinition;
-  getSkillPracticeRule(id: SkillPracticeRuleId): SkillPracticeRuleDefinition;
+  getSupportMasteryAwardRule(id: SupportMasteryAwardRuleId): SupportMasteryAwardRuleDefinition;
   getAgeExperienceRule(id: AgeExperienceRuleId): AgeExperienceRuleDefinition;
+  getChildEducationRule(id: ChildEducationRuleId): ChildEducationRuleDefinition;
 }
 ```
 
@@ -84,18 +85,12 @@ type SocialMasteryBenefitDefinition = DefinitionHeader & {
 ```ts
 type SkillDefinition = DefinitionHeader & {
   requiredMasteries: MasteryRequirement[];
-  practiceRuleId: SkillPracticeRuleId;
   acquisition:
     | { kind: 'automatic' }
     | { kind: 'book'; acceptedTiers: BookTier[] };
   combatMetadata?: SkillCombatMetadata;
 };
 
-type RecipeDefinition = DefinitionHeader & {
-  requiredMasteries: MasteryRequirement[];
-  acquisition: { kind: 'book'; acceptedTiers: BookTier[] };
-  craftingExperienceRuleId: ExperienceAwardRuleId;
-};
 ```
 
 規則固定：
@@ -116,10 +111,17 @@ type ExperienceAwardRuleDefinition = DefinitionHeader & {
     | 'travel'
     | 'mapExploration'
     | 'questSettlement'
-    | 'skillPractice'
     | 'teaching';
   distributionPolicyId: DistributionPolicyId;
   ageExperienceRuleId?: AgeExperienceRuleId;
+};
+
+type SupportMasteryAwardRuleDefinition = DefinitionHeader & {
+  fixedExperiencePerUse: number;
+  masterySplits: Array<{
+    masteryId: MasteryId;
+    ratio: number;
+  }>;
 };
 
 type AgeExperienceRuleDefinition = DefinitionHeader & {
@@ -134,9 +136,10 @@ type AgeExperienceRuleDefinition = DefinitionHeader & {
 資料規則必須可表達既定設計：
 
 - 武器／攻擊魔法依對怪物造成的傷害比例取得攻擊 MXP；法杖與攻擊魔法可依資料分配 50／50。
-- 防具類依怪物防禦經驗，直接分給所有參戰者；護甲與盾牌的分配細節由資料規則決定。
-- 鍛造／裁縫等製作成功與失敗都取得同一成品的製造 MXP。
+- 防禦熟練度依 Encounter 防禦預算與開戰初始站位分給所有參戰者；由前至後略過空排，第一／二／三個有人排每人權重固定為 3／2／1，與護甲、盾牌穿戴與否無關。
+- 鍛造／裁縫／工藝／製藥／廚藝的成長事件由 Crafting 結算後送入；實際配方、產量、詞條與餐館規則不由 Progression 擁有。
 - 旅行每趟固定經驗，再乘 3／6／9 日模式的倍率，不依天數重複發放。
+- 招式本身沒有熟練度或招式練習值。無傷害的支援魔法／樂器技能使用 `SupportMasteryAwardRule` 給固定 Mastery MXP；同一角色、同一技能在同一 detailed Encounter 最多取得 3 次。第一版法杖魔法可將每次固定值依 50／50 拆給法杖與魔法 Mastery；其他支援技能的受益 Mastery 由資料 `masterySplits` 定義。攻擊型樂器技能仍依有效傷害取得攻擊 MXP。每筆 `masterySplits.ratio` 必須大於 0，且總和必須恰為 1。
 - 每張地圖版本的每個可取得探索單位，只可取得一次探索經驗。
 - 任務熟練度只在回到**原接取公會**結案成功後發放。
 - 子女 15 歲成年前的較快成長由 Age Experience Rule 套用；出生與成年不直接贈送主屬。
@@ -152,7 +155,6 @@ type CharacterProgression = {
   characterId: CharacterId;
   masteries: Record<MasteryId, MasteryProgress>;
   learnedKnowledgeIds: DefinitionId[];
-  skillPractice: Record<SkillDefinitionId, SkillPracticeProgress>;
   claimedExplorationRewards: ExplorationRewardKey[];
   revision: Revision;
 };
@@ -164,15 +166,9 @@ type MasteryProgress = {
   revision: Revision;
 };
 
-type SkillPracticeProgress = {
-  skillId: SkillDefinitionId;
-  experience: number;
-  coefficient: number; // 快取；必須可由 Practice Rule + experience 重建
-  revision: Revision;
-};
 ```
 
-`learnedKnowledgeIds` 可包含 Skill、Magic、Recipe 等 Definition ID；它表示角色已學會，不表示目前可否裝備或施放。`skillPractice` 只存在於已學會且實際使用過的戰鬥技能，供 Derived Statistics 作為招式熟練係數，不取代武器／魔法 Mastery。
+`learnedKnowledgeIds` 可包含 Skill、Magic、Recipe 等 Definition ID；它表示角色已學會，不表示目前可否裝備或施放。角色沒有技能／招式熟練度 State；戰鬥技能造成的所有成長都必須落在既有 Mastery。
 
 ### 3.2 主屬計算
 
@@ -216,7 +212,35 @@ type TeachingSource =
   | { kind: 'cityTeacher'; cityId: CityId; facilityId: FacilityId; teacherMasteryLevel: number };
 ```
 
-### 3.4 Progression 不變量
+### 3.4 ChildStudySession
+
+```ts
+type ChildEducationRuleDefinition = DefinitionHeader & {
+  teacherMinimumPostDays: 28;
+  childStudyCycleDays: 14;
+  selfStudyParentMasteryRate: number; // 數值待試算，必須遠低於 1
+  npcChildParentMasteryShare: 0.2;
+};
+
+type ChildStudySession = {
+  childStudySessionId: ChildStudySessionId;
+  childTeamId: TeamId;
+  learnerId: CharacterId;
+  source:
+    | { kind: 'homeTeacherPost'; postId: HomeTeachingPostId; teacherId: CharacterId; masteryId: MasteryId }
+    | { kind: 'selfStudy' };
+  startedOnDay: WorldDay;
+  scheduledEndOnDay: WorldDay;
+  status: 'active' | 'settled' | 'interrupted';
+  revision: Revision;
+};
+```
+
+玩家家系的未成年子女各自是一支 `control: child`、單人成員的 Child Team。它每次執行 14 日 Child Study Cycle：有可用 Home Teaching Post 時，依資料規則抽取教師與欲學 Mastery；14 日結束後結算並立即重抽下一個對象。教師 Post 至少維持 28 日，玩家主角也是同一規則；教師中途離開崗位時，當前 Cycle 依實際已經過日數比例結算，隨即重抽。沒有教師可用時，Child Team 進入 14 日自習；自習對每一項 Mastery 分別取得「父母同項熟練度加總 × `selfStudyParentMasteryRate`」的經驗。
+
+非玩家冒險者的子女不建立 Child Team 或逐周期模擬；成年當日，對每項 Mastery 直接給予父母各自該項累積 MXP 的 1/5 相加，之後才進入一般角色／隊伍流程。
+
+### 3.5 Progression 不變量
 
 1. 每個 Mastery 的 `level` 必須與其 Curve、Experience 一致，且介於 0～10。
 2. 主屬推導結果必須介於 0～100；不可被其他模組直接覆寫。
@@ -225,6 +249,7 @@ type TeachingSource =
 5. `claimedExplorationRewards` 同一地圖版本／探索單位不可重複。
 6. 學會技能不等於能繞過武器、熟練度、位置或資源需求施放；那些是 Combat／Team 的驗證責任。
 7. 不存在「技能傳授」或「主屬加點」資料路徑。
+8. 一名玩家家系未成年子女同一時點至多有一筆 active ChildStudySession，且周期恆為 14 日；非玩家冒險者子女不得建立 ChildStudySession。
 
 ---
 
@@ -236,12 +261,11 @@ interface ProgressionQuery {
   getPrimaryAttributes(characterId: CharacterId): PrimaryAttributes;
   knows(characterId: CharacterId, knowledgeId: DefinitionId): boolean;
   meetsRequirements(characterId: CharacterId, requirements: MasteryRequirement[]): boolean;
-  getSkillPractice(characterId: CharacterId, skillId: SkillDefinitionId): SkillPracticeView;
   getTeachingSession(characterId: CharacterId): TeachingSessionView | undefined;
 }
 ```
 
-Progression 只公開主屬、熟練度與招式練習真相，不宣稱自己擁有完整角色能力。Composition Adapter 會組合 Progression／Inventory／Character 的 Snapshot DTO，交給 [Derived Statistics](16_derived_statistics.md)，再實作 Character 所需的 `CharacterStatsQuery`。
+Progression 只公開主屬、Mastery 與已學知識真相，不宣稱自己擁有完整角色能力。Composition Adapter 會組合 Progression／Inventory／Character 的 Snapshot DTO，交給 [Derived Statistics](16_derived_statistics.md)，再實作 Character 所需的 `CharacterStatsQuery`。
 
 ---
 
@@ -253,8 +277,8 @@ Progression 只公開主屬、熟練度與招式練習真相，不宣稱自己�
 |---|---|
 | `CombatAttackMasteryEarned` | 依 Combat 已確認的傷害、武器／魔法分配發放攻擊 MXP。 |
 | `CombatDefenseMasteryEarned` | 依 Combat 已確認的參戰者與防具分配發放防禦 MXP。 |
-| `CombatSkillPracticeEarned` | 依技能 Practice Rule 更新該招式的練習值與係數；未學會技能視為不變量錯誤。 |
-| `CraftingCompleted` | 不論成功／失敗，依成品資料給製造 MXP。 |
+| `CombatSupportMasteryEarned` | 依支援技能的 Support Mastery Award Rule，將已結算的 0～3 次固定使用數轉成對應 Mastery MXP；未學會技能視為不變量錯誤。 |
+| `CraftingCompleted` | 依已結算配方的 Crafting Experience Rule 發放對應生活技藝 MXP；若配方定義失敗結果，成功與失敗使用同一規則。 |
 | `GatheringResolved` | 只對 payload 的 `contributorCharacterId`，依已驗證 `masteryId` 與 `experienceAwardRuleId` 發放一次採集 MXP；不平均分給隊伍。 |
 | `CommerceInteractionCompleted` | 僅接受玩家主角成功買入／賣出的事件，依付款或收款角色發交流 MXP。 |
 | `ConversationCompleted` | 僅接受玩家主角成功酒館聊天／情報事件，依發話角色發交流 MXP。 |
@@ -263,11 +287,13 @@ Progression 只公開主屬、熟練度與招式練習真相，不宣稱自己�
 | `MapExplorationCompleted` | 檢查地圖版本／探索單位是否已領取，再發探索 MXP。 |
 | `QuestSettled` | 原接取公會成功結案時發任務 Mastery MXP。 |
 | `FreeActionCompleted` | 只在 payload 指向 Progression 擁有的 TeachingSession 時完成傳授；城市製作／訓練等待 City 的專用完成事件，避免重複發放。 |
+| `TeamPlanCompleted` | 若為 `childStudy`，結算該子女 14 日學習 Cycle，並要求 Team 建立下一個 Cycle。 |
+| `HomeTeachingPostChanged` | Post released 或 interrupted 時，將使用該 Post 的 Child Study Session 按實際經過日數部分結算，並要求重抽下一個 Cycle。 |
 | `CityTrainingCompleted` | 套用固定 Lv.5 城鎮教師的訓練結果；仍使用相同傳授差額與跨級上限。 |
 | `BookUseCommittedForLearning` | 寫入已學習技能／魔法／配方。 |
 | `NpcDungeonSettlementApplied` | 依 NPC 隊伍資料，將正式套用的經驗平均分給成員並分配到其成長配置。 |
 | `CharacterBorn` | 為新生兒建立全部為 0 的 Progression State；不因父母熟練度直接贈送等級。 |
-| `CharacterBecameAdult` | 不直接加經驗；之後的經驗來源自然改用成年 Age Experience Stage。 |
+| `CharacterBecameAdult` | 玩家家系子女停止 Child Study；非玩家冒險者子女對每項 Mastery 取得父母各自累積 MXP 的 1/5 相加，之後的經驗來源自然改用成年 Age Experience Stage。 |
 
 ### 5.2 玩家 Command
 
@@ -325,7 +351,7 @@ combat／city／gathering 已完成事實
   → 發出 MasteryExperienceGranted、MasteryLevelChanged、ProgressionCapacityChanged
 ```
 
-NPC 地牢不逐格戰鬥，但 `NpcDungeonSettlementApplied` 的正式結果仍走同一套 MXP 分配器；隊伍獲得的經驗先平均分配，再依每位 NPC 的資料化成長配置放入對應 Mastery。
+抽象地牢與未來玩家掃蕩不逐格、逐招戰鬥，但正式結果仍走同一套 MXP 分配器；差別只在 Combat 先以 `abstract` 模式計算攻擊技能占比權重與支援技能固定次數。每場抽象戰鬥中，裝備符合且已學會支援樂器／支援魔法技能的角色視為各施放一次；Settlement 依實際戰鬥場次累積固定 Mastery MXP，逐場每技能最多一次。防禦 MXP 則不分模式，一律按開戰初始站位分配。
 
 採集是明確例外：`GatheringResolved` 已依參與者快照選出唯一最高採集等級者，Progression 不重新選人、不平均，也不依產物數量重複發放。一次 Resolution 恰好使用一次 Experience Award Rule。
 
@@ -370,7 +396,6 @@ dungeon 發出 MapExplorationCompleted(mapId, mapVersion, explorationKey, experi
 | `ProgressionCapacityChanged` | `characterId` | character。 |
 | `AutomaticKnowledgeUnlocked` | `characterId`、`knowledgeId` | ui/app。 |
 | `KnowledgeLearned` | `characterId`、`knowledgeId`、`source` | combat、city、ui/app。 |
-| `SkillPracticeChanged` | `characterId`、`skillId`、`experience`、`coefficient` | combat、app/query-cache、ui/app。 |
 | `TeachingSessionChanged` | `sessionId`、`status`、`gainedExperience` | team、ui/app。 |
 
 ### 8.1 輸出 Internal Command
@@ -388,13 +413,13 @@ Progression 模組最低必須提供：
 1. 不同主屬成長曲線、五項屬性各自超過 100 後 clamp 的測試。
 2. Lv.0～Lv.10 門檻與自動技能解鎖的測試。
 3. 武器傷害比例、全員防禦 MXP、法杖／攻擊魔法分配的資料化測試。
-4. 製作成功與失敗取得相同成品 MXP 的測試。
+4. 製作詞條上限、消耗品產量、工藝品售價品質，以及配方失敗時仍取得同一 Crafting MXP 的測試。
 5. 旅行每趟只發一次、3／6／9 模式套用正確倍率的測試。
 6. 地圖同版本探索獎勵只取得一次的測試。
 7. 28 日成人／子女傳授差額公式、城市 Lv.5 教師與最多跨一級 99.99% 的測試。
 8. 書籍來源不影響熟練度門檻、技能不可傳授的測試。
 9. NPC 地牢正式結果平均分配、暫存／跳過內容不發 MXP 的測試。
-10. 招式練習只由已學技能的正式使用結果取得，並能由 Practice Rule 重建係數的測試。
+10. 支援技能固定 Mastery MXP、同技能每場最多 3 次、攻擊型樂器依傷害，以及 abstract 模式每場一次的測試。
 11. 玩家主角交易／聊天事件僅在 City 成功提交後發放；每位非玩家主角的正式隊員在自由日各固定得到一次聊天與一次購物 MXP，且不會隨交易 Intent 次數增加；此例外不得影響其他熟練度來源。
 12. 採集同級以穩定 ID 選出的唯一角色取得一次 MXP；其他隊員、重送 Resolution、NPC skipped 結果皆不取得的測試。
 

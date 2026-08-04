@@ -16,7 +16,7 @@
 
 | 輸入 | 唯一所有者 |
 |---|---|
-| 熟練度等級、五項主屬、已學技能與招式練習值 | progression |
+| 熟練度等級、五項主屬、已學技能 | progression |
 | 年齡、聲望與暫時狀態 | character |
 | 裝備實體、三組武器與裝備係數 | inventory |
 | 係數合成、持握倍率、年齡修正與副屬公式 | statistics definition |
@@ -48,7 +48,6 @@ type SecondaryAttributeRuleDefinition = DefinitionHeader & {
   primaryCoefficients: Partial<Record<PrimaryAttributeId, number>>;
   equipmentCoefficientChannelIds: EquipmentCoefficientChannelId[];
   masteryCoefficientResolverId?: ResolverId;
-  skillPracticeCoefficientResolverId?: ResolverId;
   finalResolverId: ResolverId;
 };
 ```
@@ -73,7 +72,6 @@ type CharacterStatisticsInput = {
   reputation: number;
   primaryAttributesFromMastery: PrimaryAttributes;
   masterySnapshots: MasteryProgressView[];
-  skillPracticeSnapshots: SkillPracticeView[];
   conditionModifierRefs: EffectDefinitionId[];
   equipmentLoadout: CharacterEquipmentLoadoutView;
   equipmentDefinitionViews: EquipmentDefinition[];
@@ -108,7 +106,6 @@ interface CharacterStatisticsCalculator {
 → 裝備五主屬係數矩陣
 → 持握係數
 → 對應熟練度係數
-→ 招式練習係數
 → 副屬專用 Resolver 與最終上下限
 ```
 
@@ -148,7 +145,6 @@ interface CharacterStatisticsCalculator {
 2. 同一套輸入在 Combat、角色面板與裝備預覽得到相同基準副屬。
 3. 雙手、單手與雙持左右手使用正確 Grip Rule。
 4. 不同品級裝備的係數總預算只由資料決定。
-5. 招式未配置時不能憑空取得招式練習倍率。
 6. 聲望對魅力的貢獻只套用一次。
 7. 樂器傷害與減傷走專用 Rule，不被一般物理減傷誤算。
 8. 年齡修正由同一 Age Rule 供角色面板與 Combat 使用。

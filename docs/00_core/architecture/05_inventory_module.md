@@ -55,6 +55,7 @@ interface ItemDefinitionReader {
 
 ```ts
 type ItemDefinition = DefinitionHeader & {
+  originCultureId: CultureId;
   kind:
     | 'equipment'
     | 'combatConsumable'
@@ -74,11 +75,15 @@ type ItemDefinition = DefinitionHeader & {
   combatUseDelayRuleId?: UseDelayRuleId;
   nonCombatUseRuleId?: NonCombatUseRuleId;
   useEffectIds?: EffectDefinitionId[];
+  materialTagIds?: MaterialTagId[];
+  materialAffixId?: MaterialAffixId; // material 時至多一條；由 Crafting 解讀
   unresolvedMapDisposition: 'toCityPermanentStock' | 'removeOnRefresh';
 };
 ```
 
 `generalItem` 是不可直接使用、但可作為委託、運送、購買、探索與交易目標的重要物品。其子分類由資料定義，例如：玉壺、陶俑、家具、宣紙、文書、收藏品、商貨、任務物件。
+
+武器、防具、戰鬥／非戰鬥道具、工藝品與材料都必須有 `originCultureId`。它描述物件的文化來源，不是所在地目前控制國；已建立的 Item Instance 只引用 Definition，因此占領、轉手、運送與販售都不得改寫其文化。
 
 Rule Validation 必須保證：
 
@@ -86,6 +91,7 @@ Rule Validation 必須保證：
 - `nonCombatConsumable` 必須有 `nonCombatUseRuleId` 與效果。
 - `generalItem` 必須有 `generalItemCategoryId`，且不得有任何使用規則。
 - 裝備、書籍與材料依自己的專用流程處理，不能偽裝成一般消耗品。
+- `material` 最多引用一條 `materialAffixId`；該詞條的相容產物類別由 Crafting 資料驗證。
 - 第一版卷軸類書籍必須是 `removeOnRefresh`；其他可入庫物品依內容資料標為 `toCityPermanentStock`。
 - `intrinsicValue.amount` 必須是該貨幣最小單位的非負整數；內部競拍與八折直售只讀此值，不讀商店報價。
 
@@ -170,6 +176,20 @@ type ItemInstance = {
   instanceData?: ItemInstanceData;
   revision: Revision;
 };
+
+type ItemInstanceData =
+  | {
+      kind: 'craftedEquipment';
+      craftingAttemptId: CraftingAttemptId;
+      quality: CraftQuality;
+      inheritedMaterialAffixIds: MaterialAffixId[];
+    }
+  | {
+      kind: 'craftedTradeGood';
+      craftingAttemptId: CraftingAttemptId;
+      quality: CraftQuality;
+      saleMultiplierResolverId: ResolverId;
+    };
 ```
 
 ### 3.2 ItemLocation
@@ -277,7 +297,7 @@ interface InventoryQuery {
 | `useItem` | 持有可於非戰鬥使用的 Item、未被保留。 | 驗證並交給對應 Resolver；依結果消耗或保留。 |
 | `splitStack` | Item 可堆疊且數量足夠。 | 建立新 ItemInstance，保持來源與位置規則。 |
 
-購買、賣出、交付、製造與學習書籍的玩家 Command 由 city、quest、progression 先驗證商業／任務／門檻；Inventory 接收其正式移轉要求。
+購買、賣出、交付、製造與學習書籍的玩家 Command 由 city、quest、crafting、progression 先驗證商業／任務／門檻；Inventory 接收其正式移轉要求。
 
 ### 5.2 Internal Command
 

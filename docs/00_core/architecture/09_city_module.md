@@ -19,6 +19,7 @@ type CityState = {
   intelLeads: Record<IntelLeadId, IntelLead>;
   escortCandidates: Record<EscortCandidateId, EscortCandidate>;
   homes: Record<HomeId, HomeInstance>;
+  homeTeachingPosts: Record<HomeTeachingPostId, HomeTeachingPost>;
   playerSocialUsage: Record<PlayerSocialUsageId, PlayerDailySocialUsage>;
 };
 ```
@@ -148,7 +149,7 @@ type PopulationSupplyRuleDefinition = DefinitionHeader & {
 
 ```ts
 type CityActionRuleDefinition = DefinitionHeader & {
-  kind: 'innRest' | 'craft' | 'masteryTraining' | 'homeRest' | 'homeYearRest';
+  kind: 'innRest' | 'masteryTraining' | 'homeRest' | 'homeYearRest';
   scope: 'member' | 'team';
   durationDays: number;
   requiredFacilityKind: FacilityKind;
@@ -159,7 +160,7 @@ type CityActionRuleDefinition = DefinitionHeader & {
 第一版資料驗證：
 
 - 住宿至少 1 日。
-- 製作一件成品至少 1 日；精確日數由配方／Action Rule 決定。
+- 裝備、消耗品與工藝品製作由 Crafting 模組的配方處理，至少 1 日；City 只提供設施可用性。
 - 城鎮熟練度訓練固定 28 日，教師等級固定 5。
 - 年度休息固定 365 日。
 - 買賣、接／回報委託、聊天與探聽等沒有另行指定耗時的城內互動為 0 日，不建立假 TeamPlan。
@@ -190,7 +191,7 @@ type HomeUpgradeDefinition = DefinitionHeader & {
 };
 ```
 
-買房時先決定 Slot 數量；功能間只占用既有 Slot，不偷偷增加容量。房間與倉庫是初始配置，其他功能由資料決定是否在第一版內容開放。
+買房時先決定 Slot 數量；功能間只占用既有 Slot，不偷偷增加容量。**房屋是第一版必須完成骨架的系統，不延後為純裝飾內容。**第一版至少必須能建立所有權、房間／倉庫 Slot、家中物品儲存、年度休息與生育入口、手動 28 日傳授，以及繼承時的唯一所有權移轉。教育室、工坊、藥房等功能間的自動指派與常駐規則可在後續資料化啟用，但不得推翻上述骨架。
 
 ---
 
@@ -286,6 +287,16 @@ type HomeInstance = {
   state: 'owned' | 'inheritancePending' | 'transferred';
   revision: Revision;
 };
+
+type HomeTeachingPost = {
+  postId: HomeTeachingPostId;
+  homeId: HomeId;
+  teacherCharacterId: CharacterId;
+  startedOnDay: WorldDay;
+  minimumReleaseOnDay: WorldDay; // started + 28
+  state: 'active' | 'released' | 'interrupted';
+  revision: Revision;
+};
 ```
 
 ### 3.6 玩家每日交流用量
@@ -320,6 +331,7 @@ interface CityQuery {
   canUseTavern(cityId: CityId, teamId: TeamId): boolean;
   getPlayerSocialUsage(playerCharacterId: CharacterId, worldDay: WorldDay): PlayerDailySocialUsageView;
   getHome(cityId: CityId, ownerId: CharacterId): HomeView | undefined;
+  canUseRestaurant(cityId: CityId, characterId: CharacterId): boolean; // 第一版由 inn 提供基礎餐點入口
 }
 ```
 
@@ -339,8 +351,10 @@ interface CityQuery {
 | `sellItemToShop` | 隊伍在城市、設施開放、指定 Character 是 Item Owner 且 Item 可交易；若賣方是玩家主角，當日交易未滿 6 次。 | 以賣方個人帳戶收款並解除 Item 的角色 Owner；只有玩家主角的原子交易成功後才將交易計數 +1。 |
 | `askTavernIntel` | 隊伍在城市、酒館開放；玩家主角當日聊天未滿 6 次。 | 依 Intel Rule 揭露一筆可用情報；城內時間為 0；成功揭露後才將聊天計數 +1。 |
 | `talkToTavernAdventurer` | 隊伍在城市、酒館開放，目標為酒館可見的真實冒險者；玩家主角當日聊天未滿 6 次。 | 完成一次零時間聊天，成功後才將聊天計數 +1 並發出 `ConversationCompleted`；招募仍須另送 Team Command。 |
-| `startFacilityAction` | 地點、設施、角色與規則合法。 | 要求 Team 建立住宿、製作、訓練等耗時行動。 |
+| `startFacilityAction` | 地點、設施、角色與規則合法。 | 要求 Team 建立住宿、訓練等 City 耗時行動；製作由 Crafting Command 進入。 |
 | `buyOrUpgradeHome` | 地點、所有權與付款合法。 | 啟動房屋購買／升級 Workflow。 |
+| `assignHomeTeacher` | 玩家角色位於自己的房屋、指定成年人可擔任教師，且沒有衝突 Plan。 | 建立至少 28 日的 `HomeTeachingPost` 與教師 Team Plan；玩家主角也受相同限制。 |
+| `releaseHomeTeacher` | 指定 Post 已達最短 28 日，且教師仍可用。 | 結束 Post；受其教導的 Child Study Session 於當日依已投入時間結算並重抽。 |
 
 公會的接取／結案 Command 由 Quest 擁有；City 只提供 Guild Facility Query。
 
@@ -363,6 +377,7 @@ interface CityQuery {
 | `SetFacilityAvailability` | 依 World／事件的合法來源改變設施開放狀態。 |
 | `ApplyCityMetricEffect` | 依已驗證 Effect 調整繁榮／安全並套用資料上下限。 |
 | `TransferHomeOwnership` | 驗證原所有者、繼承來源與同城唯一性後移轉房屋。 |
+| `InterruptHomeTeachingPost` | 教師死亡、退休、離隊或不再可用時，將 Post 標為 interrupted，通知 Child Study Workflow 立即做部分結算。 |
 | `ExecuteNpcMarketIntent` | 讀取 Adventurer Lifecycle 已選定的單筆交易 Intent，重用既有買 Offer／賣物品／買房 Workflow；驗證失敗只回傳 typed rejection，不重抽目標。它不寫入玩家每日交易計數，也不發出玩家用的 `CommerceInteractionCompleted`。 |
 
 ### 5.4 訂閱 DomainEvent
@@ -372,8 +387,8 @@ interface CityQuery {
 | `MapContentGenerated` | 依 Intel Rule 建立可打聽 Lead；不代表一定形成委託。 |
 | `MapContentResolved`／`MapRefreshed` | 將失效來源情報標為 obsolete。 |
 | `InventoryTransferred` | 若物品進入永久庫存或店面，建立索引反應／Offer 候選。 |
-| `TeamPlanCompleted` | 完成住宿、製作、訓練等 City Action 的設施端結果。 |
-| `FreeActionCompleted` | 對成員級製作／生活訓練驗證設施與 Action Rule，再發出對應的 `CraftingCompleted` 或 `CityTrainingCompleted`。 |
+| `TeamPlanCompleted` | 完成住宿、訓練等 City Action 的設施端結果。 |
+| `FreeActionCompleted` | 對成員級生活訓練驗證設施與 Action Rule，再發出 `CityTrainingCompleted`。製作結算由 Crafting 擁有。 |
 | `MarketPressureChanged`／`RegionControlChanged` | 使受影響報價或設施規則失效並重算。 |
 | `QuestStateChanged` | 更新有 `sourceQuestId` 的 Offer 顯示與刷新保留。 |
 
@@ -386,9 +401,8 @@ interface CityQuery {
 | `CreateItemInstance` | inventory | 為 Base Catalog 建立真實商品實體。 |
 | `TransferItem` | inventory | 永久庫存、貨架、買家與清除位置間移轉。 |
 | `RemoveItemInstance` | inventory | 清除到期的 playerSold 或任務指定實體。 |
-| `TransformCraftingItems` | inventory | 製作完成時轉換材料與成品。 |
 | `TransferCurrency` | economy | 購買、販售、房屋與設施費用。 |
-| `StartTimedCityAction` | team | 建立住宿、製作、訓練或房屋行動。 |
+| `StartTimedCityAction` | team | 建立住宿、訓練或房屋行動。 |
 
 購買與販售由 Workflow 編排，不要求 City Handler 自行依序呼叫所有命令。
 
@@ -407,9 +421,9 @@ interface CityQuery {
 | `IntelRevealed` | `intelId`、`teamId`、`sourceContentId` | ui/app。 |
 | `EscortCandidatesGenerated` | `cityId`、`candidateIds` | quest。 |
 | `FacilityRestCompleted` | `cityId`、`characterIds`、`ruleId` | character。 |
-| `CraftingCompleted` | `characterId`、`recipeId`、`success`、`experienceRuleId` | progression、ui/app。 |
 | `CityTrainingCompleted` | `characterId`、`masteryId`、`teacherLevel: 5` | progression。 |
 | `HomeChanged` | `homeId`、`ownerId`、`change` | character、inventory、ui/app。 |
+| `HomeTeachingPostChanged` | `postId`、`homeId`、`teacherCharacterId`、`state` | team、progression、ui/app。 |
 | `CityMetricsChanged` | `cityId`、`prosperity`、`safety`、`sourceId` | population／content-event workflow、ui/app。 |
 | `AdventurerSupplyDemanded` | `cityId`、`count`、`reason` | character／team population workflow。 |
 
@@ -459,7 +473,7 @@ shopRefresh
 9. 書店一般販售池不得包含高級／極品書。
 10. EscortCandidate 不是 Character；只在 Quest 接取後生成角色。
 11. 城鎮零時間互動不推進世界日。
-12. 住宿、製作、訓練必須透過 Team 耗時行動。
+12. 住宿、訓練必須透過 Team 耗時行動；製作的 FreeAction 由 Crafting 配方建立。
 13. 購買任一步驟失敗，不扣款、不移物、不關閉 Offer。
 14. 房屋功能間的 Slot Cost 總和不可超過 `slotCapacity`，且跨代移轉不改房屋內容。
 15. 買賣只能使用明確角色的個人帳戶與物品 Owner；City 不得要求或建立 Team Account。

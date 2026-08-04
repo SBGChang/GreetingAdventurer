@@ -28,6 +28,8 @@ content/
 │  ├─ equipment/
 │  ├─ skills/
 │  ├─ recipes/
+│  ├─ cuisine/
+│  ├─ material-affixes/
 │  ├─ quests/
 │  ├─ gathering/
 │  └─ mastery/
@@ -125,6 +127,11 @@ flowchart LR
 - Boss 必為大型 3×3。
 - 一般敵人 1 招；菁英／Boss 2～4 招。
 - Combat Skill 的 `actionKind` 不得為移動，Combat Effect Registry 不得註冊換格、推拉或擊退 Effect。
+- Combat Skill 的 `masteryExperienceMode = fixedSupport` 必須引用有效 `SupportMasteryAwardRule`；`damage` 技能不得引用該 Rule。每筆 Support Mastery Rule 的固定值必須非負、分配比率皆為正，且總和恰為 1。
+- Crafting Recipe 的材料總數必須與裝備品級一致：一般／精品／史詩／傳說／神話分別為 1／2／3／4／5；每個 Material Definition 最多一條 Material Affix。裝備成品的繼承詞條數不得超過投入候選素材數。
+- 消耗品 Crafting Recipe 不得產生品質前綴或 Material Affix；其 Quality Resolver 只能解析有限正整數產量。TradeGood 的品質只能引用出售倍率 Resolver，不得加入戰鬥／料理效果。
+- Cuisine Recipe 不得產出 Inventory Item；每個 Food Affix 必須具備 Tier 1～5 的 Effect。Restaurant Menu 只可引用有效 Cuisine Recipe，並永遠使用所有 Food Affix 的 Tier 1 與自製 MXP 的 1/3。
+- 武器、防具、戰鬥／非戰鬥道具、工藝品、材料與料理食譜皆必須有 `originCultureId`。Crafting／Cuisine Recipe 的文化必須與輸出 Item／餐館菜色文化一致；地圖的原生物品、素材與非人類怪物候選池只能引用所在地 `nativeCultureId` 的內容，人類敵人例外，改引用目前控制國文化池。
 - Opening CTB 與 Action Delay 的基礎值、最低值必須非負，且所有減免引用合法主屬性。
 - Gathering Rule 的地牢互動分鐘必須為正整數；Lv.0～10 都必須能解析有限的非負整數產物。
 - NPC 採集啟用時必須有正數 Point Cost 與合法 NPC Dungeon Target Resolver，該 Resolver 必須支援 `gatheringNode` 並引用合法 Outcome Rule；停用時不得編入 NPC Sequence。

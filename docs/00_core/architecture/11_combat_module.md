@@ -120,6 +120,8 @@ type CombatSkillDefinitionView = {
   activationHand: 'mainHand' | 'offHand' | 'bothHands' | 'handless';
   weaponRequirementIds: WeaponRequirementId[];
   actionKind: 'attack' | 'guard' | 'cast' | 'perform' | 'support';
+  masteryExperienceMode: 'damage' | 'fixedSupport';
+  supportMasteryAwardRuleId?: SupportMasteryAwardRuleId;
   techniqueIds: TechniqueId[];
   targeting: TargetingDefinition;
   actionDelayRuleId: ActionDelayRuleId;
@@ -191,8 +193,19 @@ type CombatEncounter = {
   state: 'initializing' | 'active' | 'awaitingPlayerCommand' | 'resolved';
   currentActorId?: CombatantId;
   readyQueue: CombatantId[];
+  supportMasteryUseCounts: Record<CharacterId, Record<SkillDefinitionId, number>>;
   rngStreamId: string;
   revision: Revision;
+};
+
+type CombatResolutionMode = 'detailed' | 'abstract';
+
+type CombatResolutionRequest = {
+  mode: CombatResolutionMode;
+  teamId: TeamId;
+  encounterGroupId: EncounterGroupDefinitionId;
+  participantSnapshotRevision: Revision;
+  rngStreamId: string;
 };
 ```
 
@@ -220,7 +233,9 @@ type CombatantState = {
 };
 ```
 
-角色的遭遇中 HP／MP 是 Combat 快照；Character State 在 Encounter 結束前不逐招改寫。存檔中若有 active Encounter，UI 必須優先顯示 Combat 快照。
+角色的遭遇中 HP／MP 是 Combat 快照；Character State 在 Encounter 結束前不逐招改寫。存檔中若有 active Encounter，UI 必須優先顯示 Combat 快照。解析模式屬於 `CombatResolutionRequest`，不是隊伍身分：`detailed` 建立可逐招操作的 `CombatEncounter`；`abstract` 用於 NPC 地牢、未來玩家掃蕩與任何系統直接結算的戰鬥，直接產生結算結果而不建立 Encounter。
+
+`supportMasteryUseCounts` 只記本場 detailed 參戰者實際成功使用的無傷害支援技能次數；每位角色的同一技能至多累計 3。Encounter 結束時才將此快照轉成固定 Mastery MXP 事件，不能在每次施放時直接修改 Progression。攻擊型樂器與其他攻擊技能不寫入此計數，仍以有效傷害處理。
 
 ### 3.3 九宮格
 
@@ -252,15 +267,15 @@ interface CombatQuery {
   getCombatant(id: CombatantId): CombatantView;
 }
 
-interface NpcCombatEstimator {
-  estimate(
-    teamId: TeamId,
-    encounterGroupId: EncounterGroupDefinitionId,
-    rng: DeterministicRng,
-  ): NpcCombatEstimate;
+interface AbstractCombatEstimator {
+  resolve(input: CombatResolutionRequest): AbstractCombatResolution;
 }
 
-interface NpcTeamPowerEstimator {
+interface DetailedCombatResolver {
+  begin(input: CombatResolutionRequest): EncounterId;
+}
+
+interface TeamPowerEstimator {
   assessQuestFeasibility(input: NpcQuestFeasibilityInput): NpcQuestFeasibility;
 }
 
@@ -280,9 +295,9 @@ type NpcQuestFeasibility = {
 };
 ```
 
-`NpcTeamPowerEstimator` 與 `NpcCombatEstimator` 必須使用同一份角色快照、裝備、技能、主屬與戰鬥公式來源：前者在 NPC 選任務時估計「可否接與權重」，後者在地牢內對每個怪群實際骰定結果。兩者不可各自維護第二份 Team 戰力數值或互相保證結果。
+`TeamPowerEstimator` 與 `AbstractCombatEstimator` 必須使用同一份角色快照、裝備、技能、主屬與戰鬥公式來源：前者在 Team 選任務時估計「可否接與權重」，後者在地牢內對每個怪群實際骰定結果。兩者不可各自維護第二份 Team 戰力數值或互相保證結果。
 
-Dungeon 的 NPC 抽象探索只使用 `NpcCombatEstimator`，不建立 CombatEncounter、不逐隻執行技能。
+任何抽象探索（NPC Team、未來玩家掃蕩）都只使用 `AbstractCombatEstimator`，不建立 `CombatEncounter`、不逐隻執行技能。
 
 ---
 
@@ -335,7 +350,7 @@ Dungeon 的 NPC 抽象探索只使用 `NpcCombatEstimator`，不建立 CombatEnc
 | `CombatTeamOutcome` | `teamId`、`canContinue`、`reason` | team、dungeon。 |
 | `CombatAttackMasteryEarned` | `encounterId`、`characterAwards` | progression。 |
 | `CombatDefenseMasteryEarned` | `encounterId`、`characterAwards` | progression。 |
-| `CombatSkillPracticeEarned` | `encounterId`、`characterId`、`skillId`、`practiceRuleId`、`basis` | progression。 |
+| `CombatSupportMasteryEarned` | `encounterId`、`characterId`、`skillId`、`supportMasteryAwardRuleId`、`useCount` | progression。 |
 
 Combat 不直接發 `MasteryExperienceGranted`、`InventoryTransferred` 或 `QuestStateChanged`。
 
@@ -413,7 +428,22 @@ Combat 不直接發 `MasteryExperienceGranted`、`InventoryTransferred` 或 `Que
 
 - 攻擊 MXP 依角色對各敵人造成的有效傷害比例分配。
 - 法杖與攻擊魔法的 50／50 等分配由資料規則決定。
-- 防禦 MXP 依 Encounter 防禦預算給所有參戰者，再依護甲／盾牌規則分配。
+- 防禦 MXP 依開戰時的初始隊伍站位分給所有參戰者：由前至後略過空排，第一個有人排每人權重 3、第二個有人排每人權重 2、第三個有人排每人權重 1；以所有參戰者權重和為分母分配 Encounter 防禦預算。這是角色的防禦熟練度來源，與防具／盾牌穿戴與否無關，戰中補位也不改變本場快照。
+- 支援魔法／支援樂器的 Mastery MXP 是固定值，不看有效防護、增益、減益或疊加量；同一角色的同一技能在一場 Encounter 最多記 3 次成功使用，於 Encounter resolved 時一次發放。攻擊型樂器技能仍依傷害處理。
+- 抽象地牢戰鬥不逐招模擬：每一場戰鬥都視為每位裝備符合且已學會的支援技能角色使用該技能一次；Settlement 依實際戰鬥場次彙總後發放。此規則同時適用 NPC Team 與未來玩家掃蕩。
+
+### 8.7 Detailed／Abstract 成長解析
+
+兩種模式產生相同類型的成長事件，Progression 不應知道隊伍是玩家或 NPC。
+
+| 成長來源 | `detailed` | `abstract` |
+|---|---|---|
+| 攻擊 MXP | 依實際有效傷害比例。 | 對每名角色計算 `攻擊技能數 / 技能組總數 × 6` 的整數權重；全隊權重和為分母分配 Encounter 攻擊預算。 |
+| 防禦 MXP | 開戰初始站位的 3／2／1 有人排權重。 | 相同；不因模式或隊伍控制權改變。 |
+| 無傷害增益／減益／治療技能 | 每次成功使用給固定 Mastery MXP，同角色同技能每場最多 3 次。 | 每位裝備符合且已學會該技能的角色，視為每場使用一次，各得一份固定 Mastery MXP。 |
+| 攻擊型樂器 | 依有效傷害。 | 列為攻擊技能，納入攻擊技能占比權重。 |
+
+例如 abstract Encounter 中三名角色的攻擊技能占比分別為 1、2/3、0，其權重為 6、4、0；第一、二名分別取得攻擊預算的 6/10 與 4/10，第三名不取得攻擊 MXP。無傷害技能的固定經驗與這個攻擊預算完全分開。
 - 8～9 隻小怪的 Profile 先彙總成單一 Encounter 預算，再按傷害／參戰規則分配一次。
 - 只有正式 resolved Encounter 發出成長事件；無效 Encounter 不得發放。
 

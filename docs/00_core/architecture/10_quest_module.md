@@ -46,6 +46,7 @@ interface QuestDefinitionReader {
   getQuestDeadlineRule(id: QuestDeadlineRuleId): QuestDeadlineRuleDefinition;
   getQuestRewardRule(id: QuestRewardRuleId): QuestRewardRuleDefinition;
   getQuestObjectiveRule(id: QuestObjectiveRuleId): QuestObjectiveRuleDefinition;
+  getQuestFailureCrimeRule(id: QuestFailureCrimeRuleId): QuestFailureCrimeRuleDefinition;
 }
 ```
 
@@ -81,6 +82,7 @@ type QuestReactionRuleDefinition = DefinitionHeader & {
   deadlineRuleId: QuestDeadlineRuleId;
   objectiveRuleId: QuestObjectiveRuleId;
   rewardRuleId: QuestRewardRuleId;
+  failureCrimeRuleId?: QuestFailureCrimeRuleId;
 };
 ```
 
@@ -100,6 +102,12 @@ type QuestDeadlineRuleDefinition = DefinitionHeader & {
   actualEndResolverId: ResolverId;
   maxCityGapCount?: number;
 };
+
+type QuestFailureCrimeRuleDefinition = DefinitionHeader & {
+  expiryDayResolverId: ResolverId;
+};
+
+第一版犯罪來源只有**玩家隊伍已接取委託在實際結束期限到期前未完成並回原公會結案**。未接取委託自然撤下、任務目標在接取前失效、NPC 隊伍任務到期，或任務成功結案，都不形成犯罪紀錄。Quest 到期時以當前玩家主角為唯一紀錄對象；`expiryDayResolverId` 決定該 Quest 自己的期限。每筆 Quest Crime Record 都以 Quest ID 獨立保存，不累加、不覆蓋其他失敗任務。
 ```
 
 第一版已定規則：
@@ -300,6 +308,7 @@ NPC 接取與結案也都是零時間；差別僅在命令由已存檔的 Action
 | `AppendAssetDistributionResult` | distribution | 加入已解析的任務貨幣報酬，或加入移出 Cargo 的 Item ID。 |
 | `FinalizeAssetDistributionCollection` | distribution | 關閉收集；貨幣報酬同步均分，expired 物資依玩家／NPC Policy 處理。 |
 | `ApplyCharacterReputationEffect` | character | 結案時套用報酬組合內已驗證的聲望效果。 |
+| `RecordQuestFailureCrime` | character | 玩家隊伍已接取任務因 actual end deadline 到期而 expired 時，依 Quest Failure Crime Rule 對當前玩家主角寫入該 Quest 的獨立犯罪紀錄與期限。 |
 
 ---
 
@@ -314,7 +323,7 @@ NPC 接取與結案也都是零時間；差別僅在命令由已存檔的 Action
 | `QuestObjectiveCompleted` | `questId`、`completedOnDay` | city、ui/app。 |
 | `QuestSettled` | `questId`、`teamId`、`beneficiaryCharacterIds`、`guildCityId`、`kind`、`masteryExperienceRuleId` | progression、team、city、ui/app。 |
 
-到期只使用 `QuestStateChanged(newStatus=expired)`，不發出 `QuestFailed`。
+到期只使用 `QuestStateChanged(newStatus=expired)`，不發出 `QuestFailed`。若 expired 前 Quest 由玩家隊伍接取且帶有 `failureCrimeRuleId`，Quest Workflow 必須在同一交易 required 呼叫 `RecordQuestFailureCrime`；未接取撤下、接取前目標失效與 NPC 隊伍到期均不呼叫。
 
 任務貨幣分配的參與者很少且沒有物品選擇，`equalCurrencyOnly` 必須在 `settleQuest` 的同一 `EngineTransaction` 內同步完成。若 Distribution、Inventory、Economy、聲望或 Quest 歸檔任一步驟失敗，整筆結案回滾，不會留下已領錢但未結案的狀態。
 
