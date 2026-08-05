@@ -2,7 +2,7 @@
 
 > **模組 ID：** `dungeon`
 >
-> **依賴：** [共用核心契約](00_shared_contracts.md)、Map／Team／Asset Distribution 的公開 Query，以及 Combat 提供的 NPC 戰力估算 Port與 Gathering Workflow 契約。
+> **依賴：** [共用核心契約](00_shared_contracts.md)、Map／Team／Asset Distribution／Combat Sequence 的公開 Query，以及 Gathering Workflow 契約。
 >
 > **責任：** 管理玩家的迷宮分鐘制探索 Session，以及非玩家冒險者的 `NpcDungeonRun`。Dungeon 不擁有地圖內容、不直接發放或分配物品、貨幣與經驗，也不直接更新委託。
 
@@ -26,7 +26,8 @@ type DungeonState = {
 |---|---|---|
 | 地圖模板、內容、內容位置、刷新與 Pending | map | 讀取可用內容序列；送出處理／結算要求。 |
 | 隊伍位置、進出冒險地、旅行時間 | team | 以 Team Plan 與位置事件作為 Session／Run 前置條件。 |
-| 戰鬥九宮格與玩家實際戰鬥結果 | combat | 玩家遭遇交由 combat；NPC 用 Combat Estimator 取得抽象結果。 |
+| 戰鬥九宮格與玩家實際戰鬥結果 | combat | 玩家選擇詳細戰鬥時交由 combat。 |
+| 單場／多場簡易戰鬥、戰力擲骰與整串經驗 | combat-sequence | Dungeon 只在走到怪物內容時要求解析下一個 Challenge，並在 Map 正式套用後提交 accepted Result。 |
 | 戰利品實體與容器轉移 | inventory | 僅在 Map 正式套用內容結果後處理。 |
 | 貨幣帳戶與金錢 | economy | 僅在正式結算後由 Workflow 要求移轉。 |
 | 隊內戰利品競拍、NPC 分配與現金均分 | distribution | Session／Run 只保存 Distribution ID；Dungeon 決定何時開始、追加正式成果與關閉收集。 |
@@ -88,15 +89,20 @@ NPC 的每日點數與小怪／菁英／大怪／寶箱／事件成本由資料�
 
 Map 公開的每筆 NPC 探索目標都帶有 `pointCost` 與 `resolverId`；目標可以是動態 Map Content 或啟用 NPC Policy 的固定採集點。Dungeon 不依怪物個體數、門、陷阱或玩家實際格距重新推算成本。
 
-### 2.3 Combat Estimator Port
+### 2.3 Combat Sequence Port
 
 ```ts
-interface AbstractCombatEstimator {
-  resolveContentAttempt(input: AbstractContentAttemptInput): AbstractContentAttemptOutcome;
+interface CombatSequenceHostPort {
+  start(input: StartCombatSequence): CombatSequenceId;
+  resolveNext(sequenceId: CombatSequenceId, expectedContentId: ContentInstanceId): CombatSequenceChallengeResult;
+  skipNext(sequenceId: CombatSequenceId, expectedContentId: ContentInstanceId): void;
+  stop(sequenceId: CombatSequenceId, reason: CombatSequenceStopReason): void;
+  commitSourceResults(input: CommitCombatSequenceSourceResults): void;
+  invalidate(sequenceId: CombatSequenceId, reason: CombatSequenceInvalidReason): void;
 }
 ```
 
-這是 combat 的唯讀／純計算 Port。它根據隊伍快照、內容資料與 RNG 產生抽象結果，不建立九宮格、不執行 UI 動畫，也不改寫 Combat State。
+這是 [Combat Sequence](21_combat_sequence_module.md) 的命令 Port，不是逐場戰鬥模擬器。Dungeon 擁有內容與點數游標；Combat Sequence 擁有戰力骰、補品重骰、成功戰鬥數與整串經驗累積。兩邊只以 `combatSequenceId`、`contentId` 與 Result ID 關聯。
 
 ---
 
@@ -172,9 +178,15 @@ type NpcDungeonRun = {
   mapVersion: number;
   explorationRuleId: RuleId;
   distributionId: AssetDistributionId;
+  combatSequenceId?: CombatSequenceId;
 
   cursorNpcOrder: number;
   pendingResults: PendingDungeonResult[];
+  settlementProgress: {
+    mapApplied: boolean;
+    combatSequenceSettled: boolean;
+    distributionCompleted: boolean;
+  };
   status: 'exploring' | 'settling' | 'closed' | 'invalid';
   startedOnDay: WorldDay;
   lastProcessedOnDay?: WorldDay;
@@ -195,11 +207,12 @@ type PendingDungeonResult = {
   attemptedOnDay: WorldDay;
   outcome: 'success' | 'failure' | 'skip';
   resolverId: ResolverId;
+  combatSequenceResultId?: CombatSequenceChallengeResultId;
   pendingRewardRefs: PendingRewardRef[];
 };
 ```
 
-`pendingResults` 是 NPC 在多日探索中已骰出的暫存結果；在 Run 進入 `settling` 前，它們不會改變 Map、Inventory、Progression 或 Quest State。採集成功時必須把完整的 deterministic `GatheringResolution` 暫存在結果內，不能只存 Resolution ID 後於結算日重骰；失敗或 skip 時不得帶 Resolution。
+`pendingResults` 是 NPC 在多日探索中已骰出的暫存結果；在 Run 進入 `settling` 前，它們不會改變 Map、Inventory、Progression 或 Quest State。怪物內容必須引用同一 Run 的 Combat Sequence Result；Dungeon 不複製戰力 roll 或經驗資料。採集成功時必須把完整的 deterministic `GatheringResolution` 暫存在結果內，不能只存 Resolution ID 後於結算日重骰；失敗或 skip 時不得帶 Gathering Resolution。
 
 ### 3.4 Run 不變量
 
@@ -209,8 +222,11 @@ type PendingDungeonResult = {
 4. `cursorNpcOrder` 只可向前，不可因次日結算倒退或重骰。
 5. `dailyPointBudget` 每次 `npcDungeonDay` 重新取得，不可跨日累積。
 6. `settling` 或 `closed` Run 不得再建立 `npcDungeonDay` Job。
-7. Session／Run 的 `distributionId` 必須引用同一 Team、同一地圖來源且尚未 invalid 的 Distribution；`participantCharacterIds` 只在開始探索時快照一次，且必須與 Distribution 的參與者一致。
+7. Session／Run 的 `distributionId` 必須引用同一 Team、同一地圖來源且尚未 invalid 的 Distribution；`participantCharacterIds` 只在開始探索時快照一次，必須等於當時全部 1～9 名正式成員，且與 Distribution 的參與者一致。沒有候補或自行留城的正式成員。
 8. 採集成功結果的 `GatheringResolution.participantCharacterIds` 必須等於 Run 快照；貢獻者、等級與產物不得在 Settlement 日重新解析。
+9. 地圖有至少一筆怪物內容時，`combatSequenceId` 必須引用同一 Team、同一 Run 的 `dungeonSweep` Sequence，且兩邊怪物游標必須指向同一個下一個 Content；沒有怪物時不得建立空 Sequence，`settlementProgress.combatSequenceSettled` 從開始即為 true。
+10. 怪物 Pending Result 的 `combatSequenceResultId` 必須存在且來源 Content 相同；寶箱、事件與採集結果不得帶此欄位。
+11. Run 只有在 Map、Combat Sequence 與 Distribution 三項 Settlement 都完成後才能 `closed`。
 
 ---
 
@@ -255,7 +271,7 @@ Dungeon Query 不公開其他隊伍的 RNG seed、未結算獎勵細節或可被
 
 | Internal Command | Dungeon 的反應 |
 |---|---|
-| `StartNpcDungeonRun` | 建立 NPC Run與 collecting 的 NPC 地牢 Distribution，排入下一日 `npcDungeonDay`。 |
+| `StartNpcDungeonRun` | 建立 NPC Run、collecting 的 NPC 地牢 Distribution，以及引用所有怪物內容的 `dungeonSweep` Combat Sequence；排入下一日 `npcDungeonDay`。 |
 
 ### 5.4 訂閱 DomainEvent
 
@@ -263,6 +279,10 @@ Dungeon Query 不公開其他隊伍的 RNG seed、未結算獎勵細節或可被
 |---|---|
 | `NpcDungeonSettlementApplied` | 只將 `appliedResults` 的正式戰利品追加至 Distribution，關閉收集並令 Run 等待自動分配。 |
 | `AssetDistributionCompleted` | 若對應玩家 Session 正在 leaving，關閉 Session並開始返城；若對應 NPC Run 正在 settling，關閉 Run 並通知 Team。 |
+| `CombatSequenceChallengeResolved` | 以 `sourceRef` 建立對應怪物 Pending Result；success 繼續，failure 立即令 Run 進入 settling。 |
+| `CombatSequenceReadyForSourceCommit` | 若 Run 尚未 settling，依 termination reason 進入 settling 並要求 Map 套用暫存結果。 |
+| `CombatSequenceSettled` | 若對應 NPC Run 正在 settling，標記戰鬥串結算完成；其餘兩項 Settlement 也完成時才關閉 Run。 |
+| `CombatSequenceInvalidated` | 將對應 Run 標為 invalid；已實際消耗的重骰補品不回復。 |
 | `TeamLocationChanged` | 若隊伍非預期離開地圖，將相關 Session／Run 標記 invalid 並停止排程。 |
 | `CombatEncounterResolved` | 對玩家內容處理結果發出 Map 請求，或將 Session 從 inCombat 恢復。 |
 | `MapRefreshed` | 若影響進行中 Session／Run 的版本，依規則標記 invalid；正常情況下地圖內有人不應發生。 |
@@ -288,6 +308,13 @@ Dungeon 不會自行 emit `InventoryTransferred`、`MasteryExperienceGranted` �
 |---|---|---|
 | `ResolvePlayerMapContent` | `teamId`、`mapId`、`contentId`、`distributionId`、`resolution` | map。 |
 | `StartCombatEncounter` | `teamId`、`mapId`、`contentId`、`encounterGroupId` | combat。 |
+| `StartCombatSequence` | `source: dungeonSweep`、`teamId`、配置／戰力快照、依 npcOrder 排序的怪物 Challenge | combat-sequence。 |
+| `ResolveNextCombatSequenceChallenge` | `sequenceId`、`expectedContentId`、`attemptedOnDay` | combat-sequence。 |
+| `SkipNextCombatSequenceChallenge` | `sequenceId`、`expectedContentId` | combat-sequence。 |
+| `StopCombatSequence` | `sequenceId`、`reason` | combat-sequence。 |
+| `CommitCombatSequenceSourceResults` | `sequenceId`、由 `appliedResults` 對應出的 accepted successful Result IDs、`sourceCommitId` | combat-sequence。 |
+| `InvalidateCombatSequence` | `sequenceId`、`reason` | combat-sequence。 |
+| `ReleaseCombatSequence` | `sequenceId`、`expectedRevision`；Run 關閉後才送出 | combat-sequence。 |
 | `StartReturnFromDungeon` | `teamId`、`mapId`、`exitId` | team。 |
 | `ApplyNpcDungeonSettlement` | `runId`、`mapId`、`mapVersion`、`distributionId`、`pendingResults` | map。 |
 | `StartAssetDistribution` | `distributionId`、`source: dungeonLoot`、`teamId`、`participantCharacterIds`、`ruleId` | distribution。 |
@@ -312,8 +339,11 @@ flowchart TD
   E -- "無下一筆" --> J["settling"]
   E -- "可處理 Content／Node" --> G{"點數足夠？"}
   G -- "否" --> H["保留 Run；排明日 Job"]
-  G -- "是" --> I["扣點、Resolver 骰定、暫存結果"]
-  I --> K{"失敗／目標完成／要求離場？"}
+  G -- "是" --> I{"怪物內容？"}
+  I -- "是" --> IC["扣點並解析下一個 Combat Sequence Challenge"]
+  I -- "否" --> IN["扣點並執行內容 Resolver"]
+  IC --> K{"失敗／目標完成／要求離場？"}
+  IN --> K
   K -- "否" --> D
   K -- "是" --> J
   J --> L["send ApplyNpcDungeonSettlement"]
@@ -323,13 +353,14 @@ flowchart TD
 
 第一版不做內容預約、NPC 實體遭遇或即時搶奪。
 
-1. NPC 可跨多日累積 `pendingResults`。
-2. Run 進入 `settling` 時才請 Map 一次性驗證並套用結果。
+1. NPC 可跨多日累積 `pendingResults`；怪物內容只保存 Combat Sequence Result ID。
+2. Run 進入 `settling` 時先停止 Combat Sequence，再請 Map 一次性驗證並套用結果。
 3. 若玩家或另一筆已先結算的 Run 已處理某內容，Map 將該筆列入 `skippedResults`。
-4. Inventory、Progression、Quest 只看 `NpcDungeonSettlementApplied.appliedResults`；成果 Workflow 同時把正式 Item／Currency 追加至該 Run 的 Distribution。Gathering Node 只有在 applied 後才建立產物並發出採集 MXP 來源。
-5. NPC Distribution 逐件 RNG 指派物品、把貨幣平均分給開始 Run 時的正式成員；完成後 Dungeon 才關閉 Run。
+4. Dungeon 將 `appliedResults` 中的成功怪物 Result ID 送入 `CommitCombatSequenceSourceResults`；Combat Sequence 只對這個 accepted 子集彙總攻擊／防禦預算與成功場次，並一次發出成長來源。Progression 不再直接平均分配 `NpcDungeonSettlementApplied`。
+5. Inventory、Quest 只看 `NpcDungeonSettlementApplied.appliedResults`；成果 Workflow 同時把正式 Item／Currency 追加至該 Run 的 Distribution。Gathering Node 只有在 applied 後才建立產物並發出採集 MXP 來源。
+6. NPC Distribution 逐件 RNG 指派物品、把貨幣平均分給開始 Run 時的正式成員；Map、Combat Sequence、Distribution 三者都完成後 Dungeon 才關閉 Run。
 
-這讓背景 NPC 保持低成本抽象，同時不會讓同一怪群或寶箱被重複發獎。
+這讓背景 NPC 每個怪群只做一次戰力骰與可能的補品重骰；不模擬 HP、傷勢、招式或逐人輸出，同時不會讓競爭失效的怪群發放經驗。
 
 ### 7.2 離場條件
 
@@ -450,6 +481,10 @@ Dungeon 模組最低必須提供：
 16. 玩家採集依資料增加分鐘、只使用探索參與者快照選最高等級者，產物進 Distribution 而非個人背包的測試。
 17. 同版本重複採集不扣分鐘不發 MXP；刷新後節點恢復且永久小地圖位置不消失的測試。
 18. NPC 採集結果只在 Settlement applied 後建立物品；被玩家搶先採集時安全 skip 的測試。
+19. Dungeon 怪物內容與 Combat Sequence Challenge 游標永遠一致；寶箱／事件／採集不進戰鬥串的測試。
+20. 多日 Run 只在最後對 Map accepted 的成功怪物 Result 一次結算總攻擊、防禦與成功場次的測試。
+21. 怪物戰力擲骰失敗立即停止 Run；在 15% 內補品重骰成功時只記一場正式成功的測試。
+22. Map、Combat Sequence、Distribution 任一尚未完成時 Run 不得關閉的測試。
 
 ---
 
@@ -457,8 +492,8 @@ Dungeon 模組最低必須提供：
 
 - [ ] `PlayerExplorationSession`、`PlayerMapKnowledge`、`NpcDungeonRun`、`PendingDungeonResult` 與 Distribution reference Schema。
 - [ ] NPC 探索／Resolver／迷宮互動 JSON Schema。
-- [ ] Map、Team、Combat 的窄化 Query／Estimator Port。
+- [ ] Map、Team、Combat Sequence 的窄化 Query／Command Port。
 - [ ] 玩家 Session 移動、門、陷阱、採集與離場 Command Handler。
-- [ ] `npcDungeonDay` Job Handler 與 Run 結算流程。
+- [ ] `npcDungeonDay` Job Handler、Combat Sequence 串接與三方 Run 結算流程。
 - [ ] 玩家內容處理、NPC 結算、Distribution 收集、分配完成後返城的 Internal Command 與 Run 事件。
 - [ ] Fixture、跨午夜、快轉與內容競爭測試。

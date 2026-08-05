@@ -44,6 +44,9 @@ interface ProgressionDefinitionReader {
   getSkill(id: SkillId): SkillDefinition;
   getTeachingRule(id: TeachingRuleId): TeachingRuleDefinition;
   getExperienceAwardRule(id: ExperienceAwardRuleId): ExperienceAwardRuleDefinition;
+  listSocialMasteryBenefits(): SocialMasteryBenefitDefinition[];
+  getAttackMasteryAwardRule(id: AttackMasteryAwardRuleId): AttackMasteryAwardRuleDefinition;
+  getDefenseMasteryRoutingRule(id: DefenseMasteryRoutingRuleId): DefenseMasteryRoutingRuleDefinition;
   getSupportMasteryAwardRule(id: SupportMasteryAwardRuleId): SupportMasteryAwardRuleDefinition;
   getAgeExperienceRule(id: AgeExperienceRuleId): AgeExperienceRuleDefinition;
   getChildEducationRule(id: ChildEducationRuleId): ChildEducationRuleDefinition;
@@ -72,6 +75,12 @@ type SocialMasteryBenefitDefinition = DefinitionHeader & {
   inviteSuccessBonusGainsByLevel: [0.5, 0.5, 1, 1, 1.5, 1.5, 2, 2, 3, 3];
   memberDepartureResistanceGainsByLevel: [0.5, 0.5, 1, 1, 1.5, 1.5, 2, 2, 3, 3];
 };
+
+type SocialMasteryBenefitsView = {
+  personalTradeBonus: number;
+  inviteSuccessBonus: number;
+  memberDepartureResistance: number;
+};
 ```
 
 - 熟練度固定 Lv.0～Lv.10。
@@ -91,6 +100,11 @@ type SkillDefinition = DefinitionHeader & {
   combatMetadata?: SkillCombatMetadata;
 };
 
+type SkillCombatMetadata = {
+  masteryExperienceMode: 'damage' | 'fixedSupport';
+  attackMasteryAwardRuleId?: AttackMasteryAwardRuleId;
+  supportMasteryAwardRuleId?: SupportMasteryAwardRuleId;
+};
 ```
 
 規則固定：
@@ -99,25 +113,42 @@ type SkillDefinition = DefinitionHeader & {
 - 其他技能、魔法與製作內容必須閱讀書籍，且仍要符合熟練度門檻。
 - 書籍三級為基礎／高級／極品；來源由 City、Map、Boss 內容資料決定。
 - 技能與魔法不可傳授；傳授只給熟練度 MXP。
+- `damage` 技能必須且只能引用 Attack Mastery Award Rule；`fixedSupport` 技能必須且只能引用 Support Mastery Award Rule。Combat 與 Combat Sequence 的窄化 Skill View 都由這一份 metadata 編譯。
 
 ### 2.4 經驗來源資料
 
 ```ts
 type ExperienceAwardRuleDefinition = DefinitionHeader & {
-  sourceKind:
-    | 'combatAttack'
-    | 'combatDefense'
-    | 'crafting'
-    | 'travel'
-    | 'mapExploration'
-    | 'questSettlement'
-    | 'teaching';
-  distributionPolicyId: DistributionPolicyId;
+  masteryId: MasteryId;
+  baseExperience: number;
   ageExperienceRuleId?: AgeExperienceRuleId;
 };
 
 type SupportMasteryAwardRuleDefinition = DefinitionHeader & {
   fixedExperiencePerUse: number;
+  masterySplits: Array<{
+    masteryId: MasteryId;
+    ratio: number;
+  }>;
+};
+
+type AttackMasteryAwardRuleDefinition = DefinitionHeader & {
+  masterySplits: Array<{
+    masteryId: MasteryId;
+    ratio: number;
+  }>;
+};
+
+type DefenseMasteryRoutingRuleDefinition = DefinitionHeader & {
+  resolverId: ResolverId;
+};
+
+type DefenseMasteryRoutingInput = {
+  characterId: CharacterId;
+  equippedDefenseMasteryIds: MasteryId[];
+};
+
+type DefenseMasteryRoutingResult = {
   masterySplits: Array<{
     masteryId: MasteryId;
     ratio: number;
@@ -133,13 +164,32 @@ type AgeExperienceRuleDefinition = DefinitionHeader & {
 };
 ```
 
+`ExperienceAwardRuleDefinition` 是所有固定熟練度經驗的唯一資料表：規則指定受益 Mastery 與基礎 MXP；Progression 再統一套用年齡倍率與冪等來源檢查。它不負責重算戰鬥傷害、站位權重或支援技能使用次數；那些結果必須先由 Combat／Combat Sequence 結算為專用 Mastery Event。
+
+固定而不隨內容個體變動的行為（玩家聊天、玩家買賣、非玩家主角自由日聊天／買賣）也必須從來源模組的資料規則取得 `experienceAwardRuleId`，並在正式 Event payload 中傳給 Progression；City 與 Team 不得把 MXP 寫死在 Handler。採集點、食譜、旅行模式、探索單位與任務等每筆內容可能不同的來源，同樣在其自身資料或正式 Event 中直接引用 `experienceAwardRuleId`。
+
+### 2.5 熟練度經驗來源矩陣
+
+| 行為事實 | 事實發出者 | Rule 取得方式 | 受益者與限制 |
+|---|---|---|---|
+| 玩家主角成功隊友交流／酒館聊天／打聽情報 | Social `PlayerConversationCompleted` | Social 的 Player Conversation Rule | 玩家主角；三種來源共用每日最多 6 次。 |
+| 玩家主角成功買入／賣出 | City `CommerceInteractionCompleted` | City 的 Player Commerce Practice Rule | 玩家主角；每日最多 6 次。 |
+| 玩家隊友或 NPC 的完整自由日 | Team `NonPlayerMemberFreeDaySocialPractice` | Team 的 Non-player Daily Social Practice Rule | 每名非玩家主角正式成員各一次；不模擬實際交易或聊天。 |
+| 採集點、旅行資源、敵人採集型掉落 | Gathering `GatheringResolved` | payload／採集點資料的 `experienceAwardRuleId` | 唯一最高採集者一次；節點、事件或戰利品來源決定 Rule。 |
+| 自製料理 | Crafting `CuisineConsumed` | 食譜的 `cookingExperienceRuleId` | 製作者；倍率 1。 |
+| 餐館基礎料理 | Crafting `CuisineConsumed` | 同一食譜 Rule | 用餐者；倍率固定 1/3。 |
+| 耗時製作 | Crafting `CraftingCompleted` | 配方的 Experience Rule | 製作者；成功或資料定義的失敗結果都依同一 Rule。 |
+| 旅行、探索、任務與傳授 | 各自正式完成 Event | 對應內容資料或 Event 的 Rule | 依既定的一趟一次、同版一次、原接取公會結案與傳授規則。 |
+
+Social 的 `PlayerConversationDailyUsage` 與 City 的 `PlayerDailyCommerceUsage` 都以 `worldDay` 作為狀態 key。世界日改變即讀取／建立新日的計數，不需要另設「重置次數」Job。
+
 資料規則必須可表達既定設計：
 
-- 武器／攻擊魔法依對怪物造成的傷害比例取得攻擊 MXP；法杖與攻擊魔法可依資料分配 50／50。
-- 防禦熟練度依 Encounter 防禦預算與開戰初始站位分給所有參戰者；由前至後略過空排，第一／二／三個有人排每人權重固定為 3／2／1，與護甲、盾牌穿戴與否無關。
+- 武器／攻擊魔法依對怪物造成的傷害比例取得攻擊 MXP；每個傷害技能引用 `AttackMasteryAwardRule`，因此法杖與攻擊魔法可依資料分配 50／50。簡易戰鬥串若配置多個攻擊技能，先平均分給這些技能，再套用各技能的相同 Rule。
+- 防禦預算是否取得與份額大小只依開戰初始站位：由前至後略過空排，第一／二／三個有人排每人權重固定為 3／2／1，不因是否持盾而失去參與資格。角色份額再由共用 `DefenseMasteryRoutingRule` 對其開始快照中的防禦裝備 Mastery 候選分配；Detailed 與 Combat Sequence 必須使用同一結果。
 - 鍛造／裁縫／工藝／製藥／廚藝的成長事件由 Crafting 結算後送入；實際配方、產量、詞條與餐館規則不由 Progression 擁有。
-- 旅行每趟固定經驗，再乘 3／6／9 日模式的倍率，不依天數重複發放。
-- 招式本身沒有熟練度或招式練習值。無傷害的支援魔法／樂器技能使用 `SupportMasteryAwardRule` 給固定 Mastery MXP；同一角色、同一技能在同一 detailed Encounter 最多取得 3 次。第一版法杖魔法可將每次固定值依 50／50 拆給法杖與魔法 Mastery；其他支援技能的受益 Mastery 由資料 `masterySplits` 定義。攻擊型樂器技能仍依有效傷害取得攻擊 MXP。每筆 `masterySplits.ratio` 必須大於 0，且總和必須恰為 1。
+- 旅行每趟固定經驗，不依天數重複發放。玩家隊伍依 3／6／9 日模式乘 ×0.5／×1／×2；非玩家隊伍固定 6 日與 ×1，且不需要旅行事件結果才能發放。
+- 招式本身沒有熟練度或招式練習值。無傷害的支援魔法／樂器技能使用 `SupportMasteryAwardRule` 給固定 Mastery MXP；同一角色、同一技能在同一 detailed Encounter 最多取得 3 次。Combat Sequence 則是每個正式成功戰鬥節點視為一次，因此整串可超過 3 次。第一版法杖魔法可將每次固定值依 50／50 拆給法杖與魔法 Mastery；其他支援技能的受益 Mastery 由資料 `masterySplits` 定義。攻擊型樂器技能仍屬傷害技能。所有 Attack／Support Rule 的 `masterySplits.ratio` 必須大於 0，且總和必須恰為 1。
 - 每張地圖版本的每個可取得探索單位，只可取得一次探索經驗。
 - 任務熟練度只在回到**原接取公會**結案成功後發放。
 - 子女 15 歲成年前的較快成長由 Age Experience Rule 套用；出生與成年不直接贈送主屬。
@@ -259,6 +309,7 @@ type ChildStudySession = {
 interface ProgressionQuery {
   getMastery(characterId: CharacterId, masteryId: MasteryId): MasteryProgressView;
   getPrimaryAttributes(characterId: CharacterId): PrimaryAttributes;
+  getSocialMasteryBenefits(characterId: CharacterId): SocialMasteryBenefitsView;
   knows(characterId: CharacterId, knowledgeId: DefinitionId): boolean;
   meetsRequirements(characterId: CharacterId, requirements: MasteryRequirement[]): boolean;
   getTeachingSession(characterId: CharacterId): TeachingSessionView | undefined;
@@ -275,15 +326,16 @@ Progression 只公開主屬、Mastery 與已學知識真相，不宣稱自己擁
 
 | Event | Progression 的反應 |
 |---|---|
-| `CombatAttackMasteryEarned` | 依 Combat 已確認的傷害、武器／魔法分配發放攻擊 MXP。 |
-| `CombatDefenseMasteryEarned` | 依 Combat 已確認的參戰者與防具分配發放防禦 MXP。 |
-| `CombatSupportMasteryEarned` | 依支援技能的 Support Mastery Award Rule，將已結算的 0～3 次固定使用數轉成對應 Mastery MXP；未學會技能視為不變量錯誤。 |
+| `CombatAttackMasteryEarned` | 依 Combat／Combat Sequence 已分配的 Character Award 發放攻擊 MXP；使用 `CombatMasterySource` 冪等。 |
+| `CombatDefenseMasteryEarned` | 依 Combat／Combat Sequence 已分配的 Character Award 發放防禦 MXP；使用 `CombatMasterySource` 冪等。 |
+| `CombatSupportMasteryEarned` | 依 Support Mastery Award Rule 將 `creditedUseCount` 轉成對應 Mastery MXP；Encounter 來源必須為 0～3，Combat Sequence 來源可等於正式成功場次。未學會或開始快照不合法視為不變量錯誤。 |
 | `CraftingCompleted` | 依已結算配方的 Crafting Experience Rule 發放對應生活技藝 MXP；若配方定義失敗結果，成功與失敗使用同一規則。 |
+| `CuisineConsumed` | 依 payload 的食譜 Experience Rule 發放廚藝 MXP；餐館僅套用 payload 的固定 `1/3` 倍率。 |
 | `GatheringResolved` | 只對 payload 的 `contributorCharacterId`，依已驗證 `masteryId` 與 `experienceAwardRuleId` 發放一次採集 MXP；不平均分給隊伍。 |
-| `CommerceInteractionCompleted` | 僅接受玩家主角成功買入／賣出的事件，依付款或收款角色發交流 MXP。 |
-| `ConversationCompleted` | 僅接受玩家主角成功酒館聊天／情報事件，依發話角色發交流 MXP。 |
+| `CommerceInteractionCompleted` | 僅接受玩家主角成功買入／賣出的事件，依 payload 的 Commerce Experience Rule 對付款或收款角色發固定交流 MXP。 |
+| `PlayerConversationCompleted` | 僅接受 Social 已提交的玩家隊友交流／酒館聊天／情報事件，依 payload 的 Experience Rule 對玩家主角發固定交流 MXP。 |
 | `NonPlayerMemberFreeDaySocialPractice` | 對 payload 的非玩家主角正式隊員（玩家隊友或 NPC），依兩條 Experience Rule 各發一次聊天與購物交流 MXP；不要求也不模擬實體交易。 |
-| `TravelCompleted` | 每趟只發一次旅行 MXP，使用旅行模式倍率。 |
+| `TravelCompleted` | 每趟只發一次旅行 MXP；`travelKind=player` 使用玩家模式倍率，`travelKind=npc` 只接受固定 ×1。 |
 | `MapExplorationCompleted` | 檢查地圖版本／探索單位是否已領取，再發探索 MXP。 |
 | `QuestSettled` | 原接取公會成功結案時發任務 Mastery MXP。 |
 | `FreeActionCompleted` | 只在 payload 指向 Progression 擁有的 TeachingSession 時完成傳授；城市製作／訓練等待 City 的專用完成事件，避免重複發放。 |
@@ -291,11 +343,16 @@ Progression 只公開主屬、Mastery 與已學知識真相，不宣稱自己擁
 | `HomeTeachingPostChanged` | Post released 或 interrupted 時，將使用該 Post 的 Child Study Session 按實際經過日數部分結算，並要求重抽下一個 Cycle。 |
 | `CityTrainingCompleted` | 套用固定 Lv.5 城鎮教師的訓練結果；仍使用相同傳授差額與跨級上限。 |
 | `BookUseCommittedForLearning` | 寫入已學習技能／魔法／配方。 |
-| `NpcDungeonSettlementApplied` | 依 NPC 隊伍資料，將正式套用的經驗平均分給成員並分配到其成長配置。 |
 | `CharacterBorn` | 為新生兒建立全部為 0 的 Progression State；不因父母熟練度直接贈送等級。 |
 | `CharacterBecameAdult` | 玩家家系子女停止 Child Study；非玩家冒險者子女對每項 Mastery 取得父母各自累積 MXP 的 1/5 相加，之後的經驗來源自然改用成年 Age Experience Stage。 |
 
-### 5.2 玩家 Command
+### 5.2 Internal Command
+
+| Internal Command | Progression 的反應 |
+|---|---|
+| `GrantContentEventMasteryExperience` | 只接受已註冊 Content Event Workflow；依 Event Instance／Effect ID、目標角色與 Experience Award Rule 發放一次，套用既有年齡倍率、上限與冪等來源檢查。 |
+
+### 5.3 玩家 Command
 
 | Command | 前置條件 | Progression 的責任 |
 |---|---|---|
@@ -351,7 +408,7 @@ combat／city／gathering 已完成事實
   → 發出 MasteryExperienceGranted、MasteryLevelChanged、ProgressionCapacityChanged
 ```
 
-抽象地牢與未來玩家掃蕩不逐格、逐招戰鬥，但正式結果仍走同一套 MXP 分配器；差別只在 Combat 先以 `abstract` 模式計算攻擊技能占比權重與支援技能固定次數。每場抽象戰鬥中，裝備符合且已學會支援樂器／支援魔法技能的角色視為各施放一次；Settlement 依實際戰鬥場次累積固定 Mastery MXP，逐場每技能最多一次。防禦 MXP 則不分模式，一律按開戰初始站位分配。
+詳細 Combat 與 [Combat Sequence](21_combat_sequence_module.md) 都先把來源解析成同一組 `Combat*MasteryEarned` 事件，Progression 不重算傷害、戰力骰或隊伍權重。Detailed 使用真實傷害與每技能每場最多 3 次；Combat Sequence 使用整串正式成功的總攻擊／防禦預算及成功場次，並已依開始快照完成六分制攻擊權重、3／2／1 站位權重與每場一次支援技能計算。
 
 採集是明確例外：`GatheringResolved` 已依參與者快照選出唯一最高採集等級者，Progression 不重新選人、不平均，也不依產物數量重複發放。一次 Resolution 恰好使用一次 Experience Award Rule。
 
@@ -414,12 +471,12 @@ Progression 模組最低必須提供：
 2. Lv.0～Lv.10 門檻與自動技能解鎖的測試。
 3. 武器傷害比例、全員防禦 MXP、法杖／攻擊魔法分配的資料化測試。
 4. 製作詞條上限、消耗品產量、工藝品售價品質，以及配方失敗時仍取得同一 Crafting MXP 的測試。
-5. 旅行每趟只發一次、3／6／9 模式套用正確倍率的測試。
+5. 旅行每趟只發一次；玩家 3／6／9 模式套用正確倍率、NPC 固定 6 日與 ×1，且 NPC 不依賴旅行事件的測試。
 6. 地圖同版本探索獎勵只取得一次的測試。
 7. 28 日成人／子女傳授差額公式、城市 Lv.5 教師與最多跨一級 99.99% 的測試。
 8. 書籍來源不影響熟練度門檻、技能不可傳授的測試。
-9. NPC 地牢正式結果平均分配、暫存／跳過內容不發 MXP 的測試。
-10. 支援技能固定 Mastery MXP、同技能每場最多 3 次、攻擊型樂器依傷害，以及 abstract 模式每場一次的測試。
+9. Combat Sequence 只接受來源正式提交的成功 Result；暫存、失敗、skip 與競爭失效內容不發 MXP 的測試。
+10. 支援技能固定 Mastery MXP、detailed 同技能每場最多 3 次、Combat Sequence 每個正式成功節點一次，以及攻擊型樂器走攻擊權重的測試。
 11. 玩家主角交易／聊天事件僅在 City 成功提交後發放；每位非玩家主角的正式隊員在自由日各固定得到一次聊天與一次購物 MXP，且不會隨交易 Intent 次數增加；此例外不得影響其他熟練度來源。
 12. 採集同級以穩定 ID 選出的唯一角色取得一次 MXP；其他隊員、重送 Resolution、NPC skipped 結果皆不取得的測試。
 
@@ -427,7 +484,7 @@ Progression 模組最低必須提供：
 
 ## 10. Progression 模組交接清單
 
-- [ ] Mastery、Curve、Skill、Recipe、Teaching、Experience Award JSON Schema。
+- [ ] Mastery、Curve、Skill、Attack／Support Mastery Award、Defense Mastery Routing、Recipe、Teaching、Experience Award JSON Schema。
 - [ ] `CharacterProgression`、`TeachingSession`、探索獎勵 State Schema。
 - [ ] `ProgressionQuery` 與 Character Stats Projection 所需的公開欄位。
 - [ ] MXP 分配、等級、主屬推導與自動技能 Handler。

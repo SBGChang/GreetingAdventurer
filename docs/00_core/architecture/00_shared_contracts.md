@@ -51,25 +51,50 @@ type TrapDefinitionId = DefinitionId;
 type TeamId = string;
 type CharacterId = string;
 type QuestId = string;
+type ContentEventDefinitionId = DefinitionId;
+type ConditionDefinitionId = DefinitionId;
+type EffectDefinitionId = DefinitionId;
+type PlayerTravelEventPoolId = DefinitionId;
+type PlayerTravelEventDefinitionId = DefinitionId;
+type PlayerTravelEventWeightProfileId = DefinitionId;
+type PlayerTravelEventBindingRuleId = DefinitionId;
+type PlayerTravelEventInstanceId = string;
+type ContentEventInstanceId = string;
 type ItemInstanceId = string;
 type AssetDistributionId = string;
 type ActivityRecordId = string;
 type EconomyAccountId = string;
 type EconomyTransferId = string;
 type ShopOfferId = string;
-type PlayerSocialUsageId = string;
+type PlayerConversationUsageId = string;
+type PlayerCommerceUsageId = string;
 type EncounterId = string;
+type EncounterPoolId = DefinitionId;
 type CraftingAttemptId = string;
+type EncumbranceResolutionId = string;
 type CraftingRecipeId = DefinitionId;
 type CuisineRecipeId = DefinitionId;
 type MaterialAffixId = DefinitionId;
 type MaterialTagId = DefinitionId;
+type ItemTagId = DefinitionId;
+type SkillTagId = DefinitionId;
 type FoodAffixId = DefinitionId;
 type CraftQualityRuleId = DefinitionId;
 type RestaurantMenuId = DefinitionId;
 type RestaurantMealVariantId = DefinitionId;
 type NpcCuisineDecisionRuleId = DefinitionId;
 type CraftQuality = 'plain' | 'fine' | 'excellent' | 'perfect' | 'peerless' | 'demonGod';
+type ExperienceAwardRuleId = DefinitionId;
+type PlayerConversationRuleId = DefinitionId;
+type PlayerAffinityRuleId = DefinitionId;
+type NpcMarriageRuleId = DefinitionId;
+type WorldAdventurerGenerationRuleId = DefinitionId;
+type PlayerCommerceDailyLimitId = DefinitionId;
+type PlayerCommercePracticeRuleId = DefinitionId;
+type NonPlayerMemberDailySocialPracticeRuleId = DefinitionId;
+type RecruitmentRuleId = DefinitionId;
+type TeamFormationRuleId = DefinitionId;
+type NpcTravelRuleId = DefinitionId;
 type SupportMasteryAwardRuleId = DefinitionId;
 type ChildEducationRuleId = DefinitionId;
 type ChildStudySessionId = string;
@@ -81,6 +106,15 @@ type CommandId = string;
 type InteractionId = string;
 type TransactionId = string;
 type CorrelationId = string;
+type RngStreamId = string;
+type ContentEventContext = 'playerTravel' | 'dungeon' | 'city';
+
+type PlayerTravelEscortQuestRef = {
+  questId: QuestId;
+  targetCharacterId: CharacterId;
+  actualEndDeadline: WorldDay;
+  revision: Revision;
+};
 ```
 
 ### 2.1 ID 不變量
@@ -119,9 +153,12 @@ type ModuleStateRegistry = {
   quest: QuestState;
   progression: ProgressionState;
   combat: CombatState;
+  combatSequence: CombatSequenceState;
   world: WorldState;
   economy: EconomyState;
   distribution: AssetDistributionState;
+  crafting: CraftingState;
+  social: SocialState;
 };
 
 type GameState = {
@@ -196,13 +233,12 @@ type DefinitionHeader = {
 資料不可指定：任意程式碼、函式名稱字串後再動態執行、檔案路徑操作、平台 API 呼叫。
 
 ```ts
-type EffectDefinition =
-  | { kind: 'grantItem'; itemDefinitionId: ItemDefinitionId; amount: number }
-  | { kind: 'grantMasteryExperience'; masteryId: MasteryId; amount: number }
-  | { kind: 'applyStatus'; statusId: StatusId; duration: number };
+type EffectTarget =
+  | { kind: 'actor' }
+  | { kind: 'allFormalTeamMembers' };
 ```
 
-新增 `kind` 才需要修改程式與 Schema；新增一筆使用既有 `kind` 的內容只需資料檔。
+完整的 Condition／Effect union 由 Data Runtime 契約唯一維護；共用層只提供跨模組都會使用的目標種類。新增 `kind` 才需要修改程式與 Schema；新增一筆使用既有 `kind` 的內容只需資料檔。
 
 ---
 
@@ -434,11 +470,15 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | Internal Command | 發送者 | 唯一處理者 | 目的 |
 |---|---|---|---|
 | `CreateItemInstance` | map、city、workflow | inventory | 依已驗證的內容結果，在指定初始位置建立物品實體。 |
-| `RemoveItemInstance` | city、quest、distribution | inventory | 依明確原因永久移除指定實體。 |
+| `RemoveItemInstance` | city、quest、distribution、content-event workflow | inventory | 依明確原因永久移除指定實體。 |
 | `TransferItem` | map、city、quest、distribution、workflow | inventory | 將指定實體移往明確位置並指定合法個人 Owner／Escrow。 |
 | `SetMapRefreshLock` | quest | map | 建立或解除鎮壓／討伐刷新鎖。 |
 | `ProtectMapContent` | quest | map | 建立或解除委託內容保護。 |
 | `StartNpcDungeonRun` | team | dungeon | NPC 隊伍抵達冒險地後建立 Run。 |
+| `StartNpcTeamPlan` | adventurer-lifecycle | team | 依已保存的 ActionChain 節點啟動 NPC 旅行、進圖、返城或城市自由活動 Plan。 |
+| `AssignNpcMemberFreeAction` | adventurer-lifecycle | team | 在合法 `cityFree` Plan 中為指定非玩家主角正式成員建立一筆資料化個人自由行動。 |
+| `RecordTeamWorkSettlementValue` | quest／dungeon／travel workflow | team | 以冪等 Entry 記錄留隊結算所需的任務／地牢收入或旅費；不得計入裝備購買支出。 |
+| `StartChildStudyPlan` | progression／child-study workflow | team | 為位於家中的單人 Child Team 建立 14 日學習 Plan。 |
 | `ApplyNpcDungeonSettlement` | dungeon | map | 原子套用 NPC 暫存探索結果；命令必須攜帶對應 Distribution ID。 |
 | `ResolvePlayerMapContent` | dungeon | map | Combat 結果回到 Dungeon 後，正式處理玩家已完成的地圖內容；命令必須攜帶目前 Session 的 Distribution ID。 |
 | `OpenMapDoor` | dungeon | map | 將目前 Map Version 的指定紅門設為已開啟；同版本重複要求必須冪等。 |
@@ -446,40 +486,69 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `HarvestMapGatheringNode` | gathering workflow | map | 將目前 Map Version 的指定固定採集點，以唯一 Resolution 標記為已採集。 |
 | `ResolveGatheringSource` | dungeon、travel／reward workflow | gathering workflow | 選出最高採集等級參與者，解析產物並原子提交來源、物品與成果。 |
 | `StartReturnFromDungeon` | dungeon | team | 玩家使用出口後建立返城大動作。 |
-| `StartTimedCityAction` | city、progression | team | 建立隊伍級城市行動或成員自由行動。 |
+| `StartTimedCityAction` | city、progression、crafting | team | 建立隊伍級城市行動或成員自由行動。 |
 | `CreateNpcTeam` | population workflow | team | 將已建立的世界冒險者組成 NPC 隊伍並排首次決策。 |
-| `AttachQuestTemporaryMember` | quest workflow | team | 將已建立的任務暫時角色加入接取隊伍。 |
+| `AttachQuestTemporaryMember` | quest workflow | team | 將已救出的救援任務暫時角色加入接取隊伍；護衛角色永遠不加入隊伍。 |
 | `ReserveQuestItem` | quest | inventory | 將指定實體保留給委託。 |
+| `ReserveCraftingInputs` | crafting | inventory | 以 Crafting Attempt 原子保留完整輸入素材；任一素材不合法時整批拒絕。 |
 | `ApplyQuestItemLifecycle` | quest | inventory | 回收、釋放或保留指定任務物品。 |
 | `MoveItemToTeamQuestCargo` | quest、city、map workflow | inventory | 將購買／送貨／探索指定品鎖進該 Quest 的任務物資空間。 |
 | `ReleaseExpiredQuestCargo` | quest workflow | inventory | 將 expired Quest 仍鎖定的物品移入指定 Asset Distribution Escrow。 |
 | `ConsumeBookForLearning` | progression | inventory | 驗證並依書籍政策消耗／保留書籍。 |
 | `TransformCraftingItems` | crafting | inventory | 驗證已預留材料、消耗輸入並建立成品。 |
+| `ConsumeCuisineIngredients` | crafting | inventory | 驗證自製料理所需食材的持有、數量與未保留狀態後原子消耗；料理不建立 Inventory 產物。 |
+| `EvaluateTeamEncumbrance` | inventory／statistics workflow | inventory | 以最新 Carry Capacity Snapshot 檢查玩家隊，建立、延後或解除強制超載處理。 |
 | `CommitCombatItemUse` | combat | inventory | 驗證並在同一交易提交戰鬥道具消耗與使用資料。 |
+| `ConsumeCombatSequenceRetrySupply` | combat-sequence | inventory | 依 Retry Supply Policy 從本次參與者的個人背包原子消耗一份合法補品，成功後才允許重骰。 |
+| `OpenPlayerTravelInteraction` | player-travel-event workflow | team | 將已擲定的玩家旅行事件實例寫入玩家隊 Pending；NPC Team 一律拒絕。 |
+| `CompletePlayerTravelSegmentWithoutEvent` | player-travel-event workflow | team | 提交已擲定的 no-event 結果，完成玩家目前段落並安排下一段／抵達；不得建立空白 Pending。 |
+| `MarkPlayerTravelInteractionAwaitingCombat` | player-travel-event workflow | team | 記錄事件已選定戰鬥分支及其 Encounter ID，旅行保持暫停。 |
+| `CompletePlayerTravelInteraction` | player-travel-event workflow | team | 以已提交的選項／戰鬥結果清除 Pending，依隊伍可否繼續安排下一段或結束旅行。 |
 | `CreateQuestTemporaryCharacter` | quest | character | 接取護衛或救出人物時建立任務暫時角色。 |
-| `CreateWorldAdventurerBatch` | population workflow | character | 依城市文化與數量建立真實冒險者。 |
+| `CreateWorldAdventurerBatch` | population workflow | character | 依城市文化、數量、World Adventurer Generation Rule 與 RNG Context 建立真實冒險者。 |
 | `ApplyCharacterReputationEffect` | quest、workflow | character | 套用已驗證的聲望效果。 |
+| `CreatePartnerFamilyLink` | marriage workflow | character | 驗證雙方成年、存活、異性且未婚後，原子建立唯一 active 伴侶關係。 |
+| `ApplyContentEventStatus` | content-event workflow | character | 依已驗證 Event Instance／Effect 對明確角色套用暫時狀態。 |
 | `OpenCharacterRelationshipFact` | quest、content-event workflow | character | 建立角色與人物／組織間的未了結事項。 |
 | `ResolveCharacterRelationshipFact` | quest、content-event workflow | character | 解決一筆既有的關係事項。 |
 | `ApplyCombatCondition` | combat | character | 套用戰鬥後生命、魔力與狀態。 |
 | `ApplyFoodStatusEffects` | crafting workflow | character | 依 FoodStatus 原子套用或移除其來源明確的暫時效果。 |
 | `ReserveShopOfferForQuest` | quest | city | 將指定貨架商品綁定任務。 |
 | `ReleaseQuestShopOffer` | quest | city | 依任務結果釋放或清理貨架商品。 |
+| `RevealTavernIntel` | city-intel workflow | city | 驗證酒館、隊伍與情報後標記揭露；與 Social 對話額度在同一交易提交。 |
+| `SetFacilityAvailability` | world／content-event workflow | city | 依已驗證的世界或內容效果改變城市設施可用狀態。 |
+| `InterruptHomeTeachingPost` | child-study workflow | city | 教師死亡、退休、離隊或不可用時中斷家教 Post，讓既有學習週期先做部分結算再重抽。 |
+| `ExecuteNpcMarketIntent` | adventurer-lifecycle | city workflow | 以已保存的單筆 NPC Intent 重用既有買入、賣出或買房流程；拒絕時不得重抽目標。 |
 | `TransferCurrency` | city、distribution、workflow | economy | 在兩個帳戶間原子移轉貨幣。 |
 | `GrantCurrency` | distribution、workflow | economy | 從 system source 發放已驗證報酬或直售款。 |
 | `RemoveCurrency` | city、distribution、workflow | economy | 將已驗證費用移往 system sink。 |
+| `GrantContentEventMasteryExperience` | content-event workflow | progression | 依 Event Instance、Effect 與 Experience Award Rule 對明確角色發放一次冪等 MXP。 |
 | `CreateEconomyAccount` | character、distribution、workflow | economy | 為新角色、城市或暫時資產分配建立帳戶；Team 不得擁有帳戶。 |
 | `StartAssetDistribution` | quest、dungeon、workflow | distribution | 建立參與者快照、規則與清算帳戶。 |
 | `AppendAssetDistributionResult` | quest、dungeon、map／gathering workflow | distribution | 在 collecting 階段加入已正式取得的物品與貨幣。 |
 | `FinalizeAssetDistributionCollection` | quest、dungeon | distribution | 關閉收集並依玩家競拍、NPC RNG 或純貨幣均分開始結算。 |
+| `ClaimQuestForNpcTeam` | adventurer-lifecycle | quest | 對仍可接取且未被其他 NPC 標記的 Quest 建立不阻擋玩家的 NPC 意向 Claim。 |
+| `ReleaseNpcQuestClaim` | adventurer-lifecycle | quest | ActionChain 結束、目標失效或正式接取後移除 NPC 意向 Claim。 |
+| `AcceptQuestForNpcTeam` | adventurer-lifecycle | quest | 以 active ActionChain 在發佈公會重用正式接取驗證與保護流程。 |
+| `SettleQuestForNpcTeam` | adventurer-lifecycle | quest | 以 active Quest Chain 在原接取公會重用正式結案流程。 |
 | `ChangeRegionControl` | world workflow | world | 改變地區控制國。 |
 | `SetRouteAccess` | world workflow | world | 改變路線開放狀態。 |
 | `ApplyMarketPressure` | world workflow | world | 建立或解除市場壓力。 |
 | `ApplyEventWeightModifier` | world、content-event workflow | world | 建立或解除內容事件權重修正。 |
 | `SetWorldFact` | content-event、quest、world workflow | world | 更新已註冊且型別合法的世界旗標。 |
-| `StartCombatEncounter` | dungeon、map workflow | combat | 依來源內容建立玩家戰鬥遭遇。 |
+| `StartCombatEncounter` | dungeon、map／player-travel-event workflow | combat | 依地圖內容或已擲定的玩家旅行事件建立 detailed 戰鬥遭遇。 |
+| `StartCombatSequence` | dungeon／single-battle-sweep workflow | combat-sequence | 以固定參與者、配置、戰力、Challenge 與 RNG Snapshot 建立可跨日的簡易戰鬥串。 |
+| `ResolveNextCombatSequenceChallenge` | dungeon／single-battle-sweep workflow | combat-sequence | 只解析目前游標指向的下一個 Challenge，並依資料化補品政策處理至多一次重骰。 |
+| `SkipNextCombatSequenceChallenge` | dungeon | combat-sequence | 來源內容在嘗試前已失效時，不耗 RNG、不給經驗並同步推進戰鬥串游標。 |
+| `StopCombatSequence` | host workflow | combat-sequence | 停止解析後續節點並轉入等待來源正式提交的階段。 |
+| `CommitCombatSequenceSourceResults` | dungeon settlement／single-battle source workflow | combat-sequence | 只接受來源正式採納的成功 Result ID，完成唯一一次成長分配與結算。 |
+| `InvalidateCombatSequence` | dungeon、team、save migration | combat-sequence | 來源、隊伍或快照失效時終止戰鬥串，且不得發放成長。 |
+| `ReleaseCombatSequence` | host workflow | combat-sequence | Host 不再引用後，移除已 settled／invalid 的戰鬥串 Runtime Aggregate。 |
 | `TransferHomeOwnership` | inheritance workflow | city | 將房屋移轉給已選定的合法繼承人。 |
 | `ApplyCityMetricEffect` | world、quest、content-event workflow | city | 調整已驗證的繁榮／安全數值。 |
+| `ProvisionPlayerAffinity` | new-game／character-provisioning／adulthood workflow | social | 對新建立或剛取得冒險者身分的非玩家真實冒險者建立唯一一筆對玩家好感初值；重送必須冪等。 |
+| `ConsumePlayerConversationAllowance` | city-intel workflow | social | 在情報揭露的同一交易中消耗玩家當日一次對話額度並建立交流成長事實。 |
+| `ResolveNpcMarriageProposal` | adventurer-lifecycle | marriage workflow | 以已固定的提案者、目標、Team 與規則重驗資格，讀取共隊天數與同一 Combat Power 後執行一次可重播判定；成功時要求 Character 建立伴侶 FamilyLink。 |
 
 ### 7.4 第一版跨模組 Domain Event
 
@@ -488,6 +557,7 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `MapRefreshed` | map | dungeon、quest、city、ui/app | 地圖已建立新版本。 |
 | `MapContentGenerated` | map | quest、city | 依新內容建立委託、情報或庫存反應。 |
 | `MapContentResolved` | map | player-content workflow、quest、progression | 內容正式被處理後建立一般成果、任務指定品與成長後果。 |
+| `MapRefreshPendingRegistered` | map | ui/app、debug | 固定刷新因地圖仍有人而改排下一日檢查；不代表已經刷新。 |
 | `MapRefreshLockChanged` | map | quest、ui/app | 刷新鎖已正式建立或解除。 |
 | `MapDoorOpened` | map | dungeon、ui/app | 紅門已在目前 Map Version 開啟。 |
 | `MapTrapResolved` | map | dungeon、ui/app | 固定陷阱已在目前 Map Version 觸發或解除；角色效果已由同一 Workflow 提交。 |
@@ -500,8 +570,14 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `TeamCombatFormationChanged` | team | combat、ui/app | 下一場 Encounter 使用的持久九宮格配置已被原子替換；不改寫 active Combat。 |
 | `AdventurerActivityRecorded` | team | city、ui/app | 一名真實冒險者的近期行動紀錄已更新。 |
 | `FreeActionCompleted` | team | progression、city | 城鎮自由行動的時間條件已達成；物品操作仍由後續 Internal Command 執行。 |
-| `TravelSegmentReached` | team | travel-event workflow | 旅行前／中／後段已到期，應依資料解析一次內容事件。 |
-| `NpcDungeonSettlementApplied` | map | npc-dungeon-settlement workflow、dungeon、progression、quest | 回傳實際成功套用的內容結果，並只由 applied 部分建立／追加成果。 |
+| `FreeActionChanged` | team | ui/app | 成員自由行動的狀態或累積進度已改變。 |
+| `TeamWorkSettlementChanged` | team | ui/app、debug | 留隊檢定使用的工作收支視窗已新增一筆冪等項目。 |
+| `TravelSegmentReached` | team | player-travel-event workflow | **玩家隊伍**旅行前／中／後段已到期，應依資料解析一次旅行事件；NPC 永不發布。 |
+| `PlayerTravelEventResolved` | team | ui/app、debug | 玩家旅行事件已完成或 no-event 結果已提交；只供紀錄／投影，成長與 Quest 後果已由正式 Effect／Combat／位置事件處理。 |
+| `NpcDungeonSettlementApplied` | map | npc-dungeon-settlement workflow、dungeon、quest | 回傳實際成功套用的內容結果；Dungeon 再把其中 accepted 戰鬥 Result 提交給 Combat Sequence，Progression 不直接平均分配。 |
+| `PlayerDungeonSessionStarted` | dungeon | ui/app | 玩家隊已對特定 Map Version 建立探索 Session。 |
+| `PlayerDungeonTimeAdvanced` | dungeon | kernel、ui/app | 玩家地牢分鐘已增加，必要時要求核心處理跨日。 |
+| `NpcDungeonRunProgressed` | dungeon | ui/app、debug | NPC Run 已消耗本日點數並推進有序內容游標。 |
 | `NpcDungeonRunClosed` | dungeon | team、ui/app | NPC 地牢 Run 已完成或結束。 |
 | `InventoryTransferred` | inventory | quest | 檢查購買／探索等持有條件。 |
 | `ItemInstanceCreated` | inventory | map、city、quest | 新實體物品已建立。 |
@@ -511,29 +587,37 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `EquipmentChanged` | inventory | character、combat、ui/app | 角色裝備位置已改變。 |
 | `WeaponSetConfigured` | inventory | combat、ui/app | 三組武器之一的裝備與技能引用已更新。 |
 | `CombatItemUseCommitted` | inventory | combat | 戰鬥道具已在本交易消耗，並提供延遲／效果資料。 |
+| `CombatSequenceRetrySupplyConsumed` | inventory | combat-sequence | 一份合法補品已由明確參與者背包原子消耗，戰鬥串才可進行該次重骰。 |
 | `BookUseCommittedForLearning` | inventory | progression | 指定書籍已依政策消耗或確認保留。 |
 | `CraftingItemsTransformed` | inventory | crafting workflow、ui/app | 製作材料與成品實體已完成轉換。 |
 | `QuestStateChanged` | quest | team、ui/app | 更新護衛對象、通知與可交付狀態。 |
 | `QuestCreated` | quest | map、city、ui/app | 世界內容已轉成一筆具絕對期限的委託。 |
 | `QuestAccepted` | quest | city、character、ui/app | 隊伍已在期限前接取委託。 |
+| `NpcQuestClaimChanged` | quest | adventurer-lifecycle、ui/app | NPC ActionChain 的非排他意向 Claim 已建立或釋放；玩家仍可接取。 |
 | `QuestObjectiveCompleted` | quest | city、ui/app | 目標已達成但仍須回原公會結案。 |
 | `QuestSettled` | quest | progression、team、city、ui/app | 已在原接取公會正式結案並可發放成長、記錄冒險者近期行動。 |
 | `CharacterAvailabilityChanged` | character | team | 角色死亡、離隊或恢復可用時更新隊伍。 |
 | `CharacterCreated` | character | character-provisioning workflow、team、ui/app | 世界、子女或暫時角色已建立；真實冒險者由 Workflow 建立個人帳戶與初始 Inventory 容器。 |
 | `CharacterConditionChanged` | character | combat、ui/app | 角色生命、魔力或暫時狀態已變更。 |
+| `CharacterReputationChanged` | character | economy、quest、ui/app | 角色聲望已改變，依賴聲望的報價需要失效。 |
 | `CharacterDied` | character | team、quest、progression | 角色死亡後的清理與繼承處理入口。 |
 | `CharacterBorn` | character | progression、ui/app | 年度休息成功產生子女。 |
 | `CharacterBecameAdult` | character | team、progression、population workflow、ui/app | 子女已到成年門檻，可依規則成為冒險者。 |
 | `CharacterRetired` | character | team、inheritance workflow、ui/app | 角色已退休並退出活動身份。 |
 | `CharacterRelationshipChanged` | character | city、quest、content-event workflow、ui/app | 一筆角色關係事項已建立或解決。 |
-| `TemporaryCharacterRecovered` | character | team、quest | 任務暫時角色已回收，解除隊伍與委託關係。 |
+| `FamilyLinkChanged` | character | social、team、progression、ui/app | 伴侶、監護或收養關係已建立或終止；婚姻成功以 `kind=partner` 表示。 |
+| `TemporaryCharacterRecovered` | character | team、quest | 任務暫時角色已回收；Quest 解除關聯，Team 僅在救援角色確實曾加入 `temporaryMemberIds` 時移除成員。 |
 | `RegionControlChanged` | world | map、city、combat、ui/app | 地區控制國已改變。 |
+| `HumanEnemyCultureChanged` | world | map、combat | 占領改變後，新生成的人類敵人改讀目前控制文化。 |
 | `RouteAccessChanged` | world | team、quest、ui/app | 城市路線通行狀態已改變。 |
+| `ConflictStarted` | world | city、quest、ui/app | 國家衝突已正式開始。 |
+| `ConflictResolved` | world | city、quest、ui/app | 國家衝突已正式結束並帶有結果。 |
 | `MarketPressureChanged` | world | economy、city、ui/app | 世界市場修正已改變。 |
 | `EventWeightModifierChanged` | world | team、map、city、content-event workflow | 旅行／地圖／城市事件權重修正已改變。 |
 | `WorldFactChanged` | world | content-event workflow、quest、city、ui/app | 已註冊的世界旗標值已改變。 |
 | `CurrencyTransferred` | economy | city、quest、ui/app | 帳戶餘額已原子移轉。 |
 | `EconomyAccountCreated` | economy | character-provisioning workflow、distribution、ui/app | 角色或暫時清算帳戶已建立。 |
+| `PriceQuoteInvalidated` | economy | city、ui/app | 報價依賴的市場、聲望、好感或內容 revision 已改變，舊 Quote 不可提交。 |
 | `AssetDistributionStarted` | distribution | dungeon、quest、ui/app | 已建立固定參與者的共同成果分配。 |
 | `LootAuctionRoundOpened` | distribution | ui/app | 玩家隊有一件物品進入內部出價回合；阻塞語意另由標準 `PlayerInteractionOpened` 表示。 |
 | `LootItemAwarded` | distribution | dungeon、quest、ui/app | 指定物品已成為一名正式參與角色的個人財產。 |
@@ -544,23 +628,38 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `ShopOfferSold` | city | quest、ui/app | 指定 Offer 的 Item 已售出。 |
 | `CityStockItemAvailable` | city | quest、ui/app | 一件永久庫存物品已可成為需求來源。 |
 | `EscortCandidatesGenerated` | city | quest | 本期匿名護衛候選已生成。 |
+| `IntelRevealed` | city | ui/app | 一筆城市情報已在合法酒館互動中揭露。 |
+| `HomeChanged` | city | character、inventory、ui/app | 房屋所有權或基礎狀態已改變。 |
+| `HomeTeachingPostChanged` | city | team、progression、ui/app | 家教 Post 已建立、釋放或中斷。 |
+| `AdventurerSupplyDemanded` | city | character／team population workflow | 城市人口批次要求建立指定數量的真實冒險者。 |
 | `CityTrainingCompleted` | city | progression | 城鎮教師訓練已完成。 |
-| `CraftingCompleted` | crafting | progression、ui/app | 耗時製作已完成，成品實體與品質結果已原子提交。 |
+| `CraftingCompleted` | crafting | progression、ui/app | 耗時製作已完成；成功時成品與品質、失敗時素材去向都已原子提交，兩者使用同一食譜 MXP Rule。 |
 | `CuisineConsumed` | crafting | progression、ui/app | 自製或餐館料理已立即套用 FoodStatus，可發放料理 MXP。 |
 | `FoodStatusChanged` | crafting | character、ui/app | 角色料理狀態已套用或到期。 |
 | `CityMetricsChanged` | city | population／content-event workflow、ui/app | 城市繁榮或安全已改變。 |
-| `CombatEncounterResolved` | combat | dungeon、team、map | 玩家戰鬥遭遇已完成，可恢復探索或處理內容。 |
-| `CombatEncounterStarted` | combat | dungeon、ui/app | 玩家戰鬥遭遇快照已建立。 |
+| `CombatEncounterResolved` | combat | dungeon、team、map、quest、player-travel-event workflow | 玩家戰鬥遭遇已完成；具型別 Source 決定由地圖或同源旅行事件續接，Quest 以明確 `outcome` 處理護衛戰敗。 |
+| `CombatEncounterStarted` | combat | dungeon、player-travel-event workflow、ui/app | 玩家戰鬥遭遇快照已建立並帶有具型別 Source。 |
 | `CombatActionResolved` | combat | ui/app | 一次技能、道具或其他合法戰鬥動作已解析。 |
 | `CombatTeamOutcome` | combat | team | 隊伍行動能力因戰鬥結果改變。 |
-| `CombatAttackMasteryEarned` | combat | progression | 已按傷害與武器／魔法分配攻擊成長來源。 |
-| `CombatDefenseMasteryEarned` | combat | progression | 已按參戰與防具規則分配防禦成長來源。 |
-| `CombatSupportMasteryEarned` | combat | progression | 已確認的無傷害支援技能使用，產生固定 Mastery MXP 來源。 |
+| `CombatSequenceSettled` | combat-sequence | dungeon、team、ui/app | 一條單場／多場簡易戰鬥串已依來源 accepted Result 完成一次結算。 |
+| `CombatSequenceInvalidated` | combat-sequence | dungeon、team、ui/app | 戰鬥串來源或隊伍快照失效，且不得發放成長。 |
+| `CombatSequenceChallengeResolved` | combat-sequence | dungeon、single-battle-sweep workflow、quest | 一個簡易戰鬥節點已完成唯一一次最終成功／失敗判定；Quest 對失敗隊伍套用相同護衛終止規則。 |
+| `EncumbranceResolutionOpened` | inventory | ui/app | 玩家隊至少一名角色超載，或旅行中的延後檢查已於抵達後轉為強制處理。 |
+| `EncumbranceResolutionClosed` | inventory | ui/app | 玩家隊全部角色均已回到重量上限內，可解除阻塞畫面。 |
+| `CombatSequenceReadyForSourceCommit` | combat-sequence | dungeon、single-battle-sweep workflow | 戰鬥串已無後續節點可解析，等待來源正式接受成功結果。 |
+| `CombatAttackMasteryEarned` | combat／combat-sequence | progression | Detailed 已按實際傷害、Sequence 已按整串六分制權重分配攻擊成長來源。 |
+| `CombatDefenseMasteryEarned` | combat／combat-sequence | progression | 已按來源開始時的 3／2／1 有人排規則分配防禦成長來源。 |
+| `CombatSupportMasteryEarned` | combat／combat-sequence | progression | Detailed 的真實使用或 Sequence 的正式成功場次已轉成固定 Mastery MXP 來源。 |
 | `GatheringResolved` | gathering workflow | progression、ui/app | 來源消耗與產物 Item 已原子提交；採集者依隊內最高採集等級決定，可正式發放採集 MXP。 |
 | `CommerceInteractionCompleted` | city | progression、ui/app | 一筆買入或賣出已原子完成，可發放交流成長。 |
-| `ConversationCompleted` | city | progression、ui/app | 一次聊天互動已完成，可發放交流成長。 |
+| `PlayerConversationCompleted` | social | progression、ui/app | 玩家完成一次隊友交流、酒館聊天或情報互動；三者共用每日六次。 |
+| `PlayerAffinityChanged` | social | economy、ui/app | 一名真實冒險者對玩家的唯一好感值已改變。 |
+| `NpcIntentSelected` | adventurer-lifecycle | ui/app、debug | NPC Team 已選定下一個非自由意圖與 ActionChain。 |
+| `NpcActionChainChanged` | adventurer-lifecycle | ui/app、debug | NPC ActionChain 的節點或狀態已改變。 |
+| `NpcMarketIntentCreated` | adventurer-lifecycle | city workflow、ui/app、debug | 非玩家主角角色已固定一筆待執行的買入、賣出或買房意圖。 |
+| `NpcMarketIntentResolved` | adventurer-lifecycle | ui/app、debug | 已保存的 NPC 市場意圖已成功、拒絕或失效。 |
 | `NonPlayerMemberFreeDaySocialPractice` | team | progression、ui/app | 非玩家主角的正式隊員在城市自由日得到的固定一次聊天與一次購物交流來源；包含玩家隊友與 NPC，不是實際交易或聊天。 |
-| `TravelCompleted` | team | progression、quest | 一趟旅行已結束並帶有基礎 Experience Rule 與模式倍率。 |
+| `TravelCompleted` | team | progression、quest | 一趟旅行已結束；玩家帶 3／6／9 日模式倍率，NPC 固定 6 日與 ×1。 |
 | `MapExplorationCompleted` | dungeon | progression、quest | 玩家對某地圖版本的探索單位已完成，並附資料化 Experience Rule。 |
 | `FacilityRestCompleted` | city | character | 住宿或家中一般休息已完成。 |
 | `HomeYearRestCompleted` | team | character | 365 日年度休息已完成，Character 可執行生育判定。 |
@@ -569,6 +668,8 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `PrimaryAttributesChanged` | progression | combat、ui/app | 五項主屬推導結果已變更。 |
 | `ProgressionCapacityChanged` | progression | character | 主屬推導結果可能使最大生命／魔力改變。 |
 | `KnowledgeLearned` | progression | combat、city、ui/app | 技能、魔法或製作知識已正式學會。 |
+| `AutomaticKnowledgeUnlocked` | progression | ui/app | 熟練度到達門檻後已自動取得基礎知識。 |
+| `TeachingSessionChanged` | progression | team、ui/app | 成人傳授或子女學習 Session 的狀態與本次收益已改變。 |
 | `PlayerSuccessorSelected` | team | inheritance workflow、ui/app | 玩家已選定新的隊伍 Leader，可開始資產繼承。 |
 | `PlayerInteractionOpened` | 擁有互動的領域模組 | engine session、ui/app | 可存檔的玩家選擇已建立，世界快轉必須暫停。 |
 

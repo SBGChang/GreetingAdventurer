@@ -28,7 +28,7 @@ type GameState = {
 | 採集熟練度與 MXP | progression | 唯讀比較等級；完成後發出 `GatheringResolved`。 |
 | 物品實體與位置 | inventory | 以 Required Internal Command 建立正式 Item Instance。 |
 | 玩家競拍／NPC RNG 分配 | distribution | 採集產物只追加到既有成果收集，不自行指定個人 Owner。 |
-| 旅行資源事件與敵人採集型掉落 | 來源 Workflow | 提供合法 Source Ref 與成果目的政策。 |
+| 玩家旅行資源事件與敵人採集型掉落 | 來源 Workflow | 提供合法 Source Ref 與成果目的政策；NPC 旅行沒有事件來源。 |
 
 精確產物在採集成功時才解析並建立 Item Instance。未採集的地圖節點只有「可採集來源」而沒有預先存在的隱藏 Item Instance，因此地圖刷新時不會把未採集資源移入城市永久庫存。
 
@@ -207,7 +207,7 @@ NPC 的候選人必須使用 Run 開始時的正式參與者快照，不能在�
 
 兩者共用同一 Resolver、最高等級採集者規則與完成事件，但來源擁有者仍不同：
 
-- 旅行 Content Event 決定來源是否成立與採集是否耗用事件選項。
+- 玩家旅行 Content Event 決定來源是否成立與採集是否耗用事件選項；非玩家隊伍固定 6 日直達，永遠不建立 `travelResource` Source。
 - Combat／Reward Workflow 決定敵人掉落來源是否已正式達成。
 - 敵人採集型掉落仍進本次短期 Distribution；旅行資源則固定讓每位正式參與者依全隊最高採集等級各自獨立抽取並進個人背包。地圖固定採集點仍進共同 Distribution。其他目的地必須由 `GatheringDestinationPolicyId` 明確指定；未定義目的政策的資料不得啟用。
 

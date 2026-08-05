@@ -44,6 +44,46 @@ flowchart LR
 | `Workflow` | 編排跨模組 Internal Command 與必要／可選步驟。 | 不擁有 State 或玩法公式。 |
 | `Outbox` | 暫存已提交事件與平台效果候選。 | 不接收未提交事件。 |
 
+### 1.1 新遊戲初始化門（Bootstrap Gate）
+
+新遊戲初始化是進入第一個正式遊戲頁面前的一次性原子流程，不是每日 Job、玩家自由行動或可在遊戲內重跑的 Command。
+
+```ts
+type GameSessionPhase = 'bootstrapping' | 'ready' | 'failed';
+type FeatureRouteId = string;
+
+type NewGameRequest = {
+  worldSeed: Seed;
+  initialScenarioId: DefinitionId;
+  playerCharacter: CharacterCreationDraft; // 由 Character 公開契約驗證，不由 Kernel 解讀欄位
+};
+
+type BootstrapDiagnostic = {
+  code: string;
+  source: 'data' | ModuleId | 'scheduler' | 'invariant';
+  details?: Record<string, JsonScalar>;
+};
+
+interface NewGameBootstrapper {
+  createNewGame(request: NewGameRequest, context: EngineContext): NewGameBootstrapResult;
+}
+
+type NewGameBootstrapResult =
+  | { success: true; state: GameState; initialRoute: FeatureRouteId }
+  | { success: false; diagnostics: BootstrapDiagnostic[] };
+```
+
+固定流程為：
+
+1. Data Runtime 完成內容編譯、Schema／引用／規則驗證，並固定 Content Manifest identity。
+2. Module Registry 依**明確 bootstrap dependency order** 建立所有 Slice；不得依 import 順序。
+3. 建立世界、國家、城市、路線、地圖版本、商店／庫存、玩家角色與個人資產、玩家 Team、初始真實冒險者／NPC Team，以及每名非玩家真實冒險者唯一的 Social Affinity 初值。
+4. 建立所有第一個到期 Job、固定刷新 offset、NPC 決策與角色生命週期排程。
+5. 驗證跨模組不變量、Definition Manifest、Runtime ID 唯一性與 Scheduler reference。
+6. 只在全部成功後一次提交初始 `GameState`，將 `GameSessionPhase` 切為 `ready`，再導航至 `initialRoute` 所指第一個正式頁面。
+
+任何一步失敗都回傳 diagnostics，不得保留部分 GameState、發送 committed Domain Event、寫入正式存檔或進入第一個遊戲頁面。Bootstrap UI 只能顯示建立中／錯誤結果，不可讀取尚未 committed 的模組 Projection。載入既有存檔走 Save Migration + Validation 流程，不重跑新遊戲初始化。
+
 ---
 
 ## 2. 公開 Engine 入口
@@ -187,10 +227,10 @@ Workflow 不可決定：
 5. 玩家內容處理與戰利品。
 6. NPC 地牢結算。
 7. 戰鬥消耗品使用。
-8. 護衛／救援任務與暫時角色建立／回收。
+8. 護衛／救援任務與暫時角色建立／回收；護衛只建立 Quest 關聯且不加入 Team，救援角色才可暫時入隊。
 9. 任務結案、報酬金錢與熟練度來源。
 10. 城市耗時行動與完成結果。
-11. 旅行三段 ContentEvent 與玩家 Pending Interaction。
+11. 玩家三段旅行的 ContentEvent、選項效果、戰鬥續接與 Pending Interaction；NPC 固定 6 日旅行不進此 Workflow。
 12. 城市人口需求、世界冒險者建立與 NPC 組隊。
 13. 玩家繼承人選擇，以及金錢、物品與房屋的原子移轉。
 14. 任務報酬均分、expired Quest Cargo 釋放與個人化分配。
@@ -198,6 +238,22 @@ Workflow 不可決定：
 16. 真實冒險者建立後的個人 Economy Account 與初始 Inventory 容器配置。
 17. NPC 自主生活循環：意圖抽選、動作串、任務鎖定與資料化市場交易。
 18. 料理：自製／餐館用餐、FoodStatus 效果套用與到期、NPC 獨立料理決策。
+19. 玩家隊超載：任一重量／容量變動後評估、旅行中延後、抵達後開啟強制 Pending，逐次贈與／入庫／改派任務貨物／遺棄並在全隊合法後關閉。
+
+### 4.1 Player Travel Event Workflow
+
+`app/workflows/player-travel-event` 是玩家旅行事件的唯一跨模組協調者，自己不擁有 State：
+
+| 輸入 | 行為 |
+|---|---|
+| `TravelSegmentReached` | 重新驗證玩家隊與 Plan revision，讀 Route 的玩家事件池、Travel Mode 權重、World 修正與 Quest 窄化 Query；擲定 no-event 或一筆事件。 |
+| no-event | 送 `CompletePlayerTravelSegmentWithoutEvent` 要求 Team 完成本段，不建立 Pending。 |
+| event | 固定 Actor、合法選項、Resolver Snapshot 與必要護衛 Quest Binding，再要求 Team 建立 `PendingPlayerTravelInteraction`。 |
+| `resolveTravelInteraction` | 驗證 Interaction revision／option，將 EffectPlan 轉為各擁有模組的 Required Internal Command。 |
+| 即時 EffectPlan | 所有效果與 `CompletePlayerTravelInteraction` 在同一交易成功後完成。 |
+| 含 detailed Combat | 建立具 `playerTravelEvent` Source 的 Encounter，將 Pending 轉為 `awaitingCombatResult`；等同源 `CombatEncounterResolved` 後才完成。 |
+
+Workflow 絕不接受 NPC Team，也不提供 NPC 自動選項 Resolver。護衛刺殺只是在靜態池中以 Quest Condition 啟用的 Entry；Quest 不擁有或動態修改事件池。
 
 ---
 
@@ -256,7 +312,7 @@ worldDay = targetDay
 
 ### 6.1 玩家輸入切點
 
-旅行遭遇、事件選項、玩家隊內戰利品競拍或其他必須由玩家決定的內容，必須先由擁有模組把 `PendingInteraction` 寫入自己的 Slice，再發出已完成事實 `PlayerInteractionOpened`。
+玩家旅行遭遇、事件選項、玩家隊內戰利品競拍或其他必須由玩家決定的內容，必須先由擁有模組把 `PendingInteraction` 寫入自己的 Slice，再發出已完成事實 `PlayerInteractionOpened`。NPC 城市旅行沒有事件與 Pending。
 
 Scheduler 看到交易提交後存在 Pending Interaction 時：
 
@@ -269,11 +325,13 @@ Pending Interaction 必須存檔；不能只存在 React Modal 或 Promise。NPC
 
 `app/composition` 註冊各模組的 `PendingInteractionQuery`，形成只讀的 `PendingInteractionRegistry`。全域不變量是同一時點最多一筆阻塞玩家的 Interaction；若一筆交易試圖建立第二筆，視為契約錯誤並回滾。Registry 不保存互動副本，也不替擁有模組解析選項。
 
+若目前 Interaction 為 Inventory 的 `encumbranceResolution`，Command Router 只允許該 Resolution View 明列的贈與、入庫、任務貨物改派與遺棄命令；一般導航、旅行、戰鬥、接任務或其他零時間 Command 都在 Root Guard 以 `encumbranceResolutionRequired` 拒絕。旅行中的 `deferredDuringTravel` 尚不是阻塞 Interaction，必須等抵達後由 `EvaluateTeamEncumbrance` 轉為 `awaitingPlayer`。
+
 ### 6.2 相位規則
 
 | Phase | 可處理內容 |
 |---|---|
-| `completeAction` | 旅行、自由活動、NPC 地牢日、既有行動完成。 |
+| `completeAction` | 玩家旅行段落、NPC 第 6 日抵達、自由活動、NPC 地牢日與其他既有行動完成。 |
 | `closeDeadline` | 接受期限、實際結束期限與鎖定到期。 |
 | `worldCadence` | 地圖、商店、護衛候選等固定日曆批次。 |
 | `worldReaction` | 必須延到當日排程處理、且不是交易內即時因果的反應。 |
@@ -333,6 +391,7 @@ interface TransactionQueryContext {
   character: CharacterQuery;
   map: MapQuery;
   team: TeamQuery;
+  adventurerLifecycle: AdventurerLifecycleQuery;
   dungeon: DungeonQuery;
   world: WorldQuery;
   city: CityQuery;
@@ -341,11 +400,19 @@ interface TransactionQueryContext {
   quest: QuestQuery;
   progression: ProgressionQuery;
   combat: CombatQuery;
+  combatSequence: CombatSequenceQuery;
+  combatPower: CombatPowerQuery;
   distribution: AssetDistributionQuery;
+  crafting: CraftingQuery;
+  social: SocialQuery;
 }
 
 interface TransactionDomainServiceContext {
   statistics: CharacterStatisticsCalculator;
+  combatPowerCalculator: CombatPowerCalculator;
+  combatSequenceChallenge: CombatSequenceChallengeResolver;
+  combatSequenceMastery: CombatSequenceMasteryAllocator;
+  gathering: GatheringResolver;
 }
 ```
 
@@ -412,6 +479,10 @@ Engine Runtime 至少必須通過：
 9. UI、存檔與 Steam Port 只看到 committed Outbox。
 10. Module Registry 對重複 Handler、缺少 Handler、重複 Slice owner 於啟動時失敗。
 11. 模組測試可在沒有 React、Electron、檔案系統與 Steam 的環境執行。
+12. 玩家旅行每段恰解析一次事件／no-event，需選擇或戰鬥時在同日停止；存讀檔後以同一 Event／Encounter ID 恢復。
+13. NPC 旅行只有第 6 日抵達 Job；不建立段落 Job、ContentEvent、事件 RNG、Pending 或刺殺候選。
+14. 新遊戲初始化成功前 `GameSessionPhase !== ready` 且無正式 Feature Projection；任一模組初始化失敗時不留下部分 State、存檔或 Outbox。
+15. 相同 NewGameRequest、Definition Manifest 與 seed 產生相同初始角色、好感值、Scheduler 與 initial route；載入存檔不重跑 Bootstrap。
 
 ---
 
@@ -419,9 +490,11 @@ Engine Runtime 至少必須通過：
 
 - [ ] `contracts/core` 的四類訊息信封與 Transaction ID。
 - [ ] Module Registry 與啟動時唯一性驗證。
+- [ ] NewGameBootstrapper、明確初始化依賴順序、原子初始 State 與 Bootstrap diagnostics。
 - [ ] Transaction Runner、working state、commit／reject。
 - [ ] Game Command／Internal Command／Event／Job Router。
 - [ ] Workflow Registry 與 required／optional step。
+- [ ] Player Travel Event Workflow、事件 EffectPlan、戰鬥續接與 NPC 無事件邊界測試。
 - [ ] Scheduler Phase、快轉與重建。
 - [ ] Deterministic RNG、Runtime ID 與重播 Trace。
 - [ ] Committed Outbox 與 Application／Platform Port。

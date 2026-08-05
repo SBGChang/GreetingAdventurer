@@ -4,7 +4,7 @@
 >
 > **依賴：** [共用核心契約](00_shared_contracts.md)、Character／Team／Inventory／Progression／World 的公開 Query。
 >
-> **責任：** 管理雙方九宮格遭遇、戰鬥暫態、倒扣式 CTB、技能、武器組切換、反擊架勢、敵人 AI、自動前排補位與戰鬥結果。Combat 只在遭遇內擁有戰鬥快照；角色永久狀態、隊伍持久配置、物品與地圖內容由其他模組擁有。
+> **責任：** 管理雙方九宮格的 detailed Encounter、戰鬥暫態、倒扣式 CTB、技能、武器組切換、反擊架勢、敵人 AI、自動前排補位與戰鬥結果。Combat 只在遭遇內擁有戰鬥快照；角色永久狀態、隊伍持久配置、物品與地圖內容由其他模組擁有。不進九宮格的單場／多場掃蕩由 [Combat Sequence](21_combat_sequence_module.md) 負責。
 
 ---
 
@@ -25,10 +25,11 @@ type CombatState = {
 | 角色永久生命、魔力與暫時狀態 | character | 遭遇中使用快照，結束時送出正式結果。 |
 | 熟練度、主屬與已學技能 | progression | 以 Query 驗證與計算；只發出成長來源事實。 |
 | 裝備實體與三組武器配置 | inventory | 以 Loadout Query 取得目前武器／效果。 |
-| 隊伍歸屬、世界位置與持久戰鬥配置 | team | Encounter 開始時讀取一次參戰名單與配置快照，結束後發出隊伍結果。 |
+| 隊伍歸屬、世界位置與持久戰鬥配置 | team | Encounter 開始時讀取一次全體正式成員與配置快照，結束後發出隊伍結果。隊伍沒有候補。 |
 | 地圖怪群是否已清除 | map | 戰鬥勝利後要求 Map 處理來源內容。 |
 | 戰鬥道具實體消耗 | inventory | 以 `CommitCombatItemUse` 原子提交。 |
 | 敵人的文化來源 | world／map | 只接收已解析的 Encounter Definition。 |
+| 簡易戰鬥串、戰力擲骰與掃蕩總經驗 | combat-sequence | Combat 不建立或修改 Combat Sequence；兩者只共用編譯後 Encounter／Skill View 與成長事件契約。 |
 
 戰鬥本身不推進世界日或迷宮分鐘。
 
@@ -121,6 +122,7 @@ type CombatSkillDefinitionView = {
   weaponRequirementIds: WeaponRequirementId[];
   actionKind: 'attack' | 'guard' | 'cast' | 'perform' | 'support';
   masteryExperienceMode: 'damage' | 'fixedSupport';
+  attackMasteryAwardRuleId?: AttackMasteryAwardRuleId;
   supportMasteryAwardRuleId?: SupportMasteryAwardRuleId;
   techniqueIds: TechniqueId[];
   targeting: TargetingDefinition;
@@ -139,6 +141,7 @@ type CombatSkillDefinitionView = {
 type CombatRuleDefinition = DefinitionHeader & {
   openingCtbRuleId: OpeningCtbRuleId;
   combatRestDelayRuleId: ActionDelayRuleId;
+  defenseMasteryRoutingRuleId: DefenseMasteryRoutingRuleId;
 };
 
 type OpeningCtbRuleDefinition = DefinitionHeader & {
@@ -180,11 +183,7 @@ type AttributeReductionRule = {
 ```ts
 type CombatEncounter = {
   encounterId: EncounterId;
-  source: {
-    mapId?: MapInstanceId;
-    contentId?: ContentInstanceId;
-    encounterGroupId: EncounterGroupDefinitionId;
-  };
+  source: CombatEncounterSource;
   playerTeamId: TeamId;
   playerFormationRevision: Revision;
   combatants: Record<CombatantId, CombatantState>;
@@ -198,12 +197,23 @@ type CombatEncounter = {
   revision: Revision;
 };
 
-type CombatResolutionMode = 'detailed' | 'abstract';
+type CombatEncounterSource =
+  | {
+      kind: 'mapContent';
+      mapId: MapInstanceId;
+      contentId: ContentInstanceId;
+      encounterGroupId: EncounterGroupDefinitionId;
+    }
+  | {
+      kind: 'playerTravelEvent';
+      interactionId: InteractionId;
+      eventInstanceId: PlayerTravelEventInstanceId;
+      encounterGroupId: EncounterGroupDefinitionId;
+    };
 
-type CombatResolutionRequest = {
-  mode: CombatResolutionMode;
+type DetailedCombatRequest = {
   teamId: TeamId;
-  encounterGroupId: EncounterGroupDefinitionId;
+  source: CombatEncounterSource;
   participantSnapshotRevision: Revision;
   rngStreamId: string;
 };
@@ -233,7 +243,7 @@ type CombatantState = {
 };
 ```
 
-角色的遭遇中 HP／MP 是 Combat 快照；Character State 在 Encounter 結束前不逐招改寫。存檔中若有 active Encounter，UI 必須優先顯示 Combat 快照。解析模式屬於 `CombatResolutionRequest`，不是隊伍身分：`detailed` 建立可逐招操作的 `CombatEncounter`；`abstract` 用於 NPC 地牢、未來玩家掃蕩與任何系統直接結算的戰鬥，直接產生結算結果而不建立 Encounter。
+角色的遭遇中 HP／MP 是 Combat 快照；Character State 在 Encounter 結束前不逐招改寫。存檔中若有 active Encounter，UI 必須優先顯示 Combat 快照。`DetailedCombatRequest` 永遠建立可逐招操作的 `CombatEncounter`；任何不建立 Encounter 的掃蕩不得經過此入口。
 
 `supportMasteryUseCounts` 只記本場 detailed 參戰者實際成功使用的無傷害支援技能次數；每位角色的同一技能至多累計 3。Encounter 結束時才將此快照轉成固定 Mastery MXP 事件，不能在每次施放時直接修改 Progression。攻擊型樂器與其他攻擊技能不寫入此計數，仍以有效傷害處理。
 
@@ -257,7 +267,7 @@ type CombatGridState = {
 
 ---
 
-## 4. 公開 Query 與 Estimator
+## 4. 公開 Query
 
 ```ts
 interface CombatQuery {
@@ -267,37 +277,12 @@ interface CombatQuery {
   getCombatant(id: CombatantId): CombatantView;
 }
 
-interface AbstractCombatEstimator {
-  resolve(input: CombatResolutionRequest): AbstractCombatResolution;
-}
-
 interface DetailedCombatResolver {
-  begin(input: CombatResolutionRequest): EncounterId;
+  begin(input: DetailedCombatRequest): EncounterId;
 }
-
-interface TeamPowerEstimator {
-  assessQuestFeasibility(input: NpcQuestFeasibilityInput): NpcQuestFeasibility;
-}
-
-type NpcQuestFeasibilityInput = {
-  teamId: TeamId;
-  questId: QuestId;
-  objective: QuestObjectiveView;
-  assessedOnDay: WorldDay;
-};
-
-type NpcQuestFeasibility = {
-  canAttempt: boolean;
-  powerScore: number;
-  expectedSuccess: number; // 0..1；僅供資料權重與 UI／debug，非保證結果
-  riskBand: 'trivial' | 'favorable' | 'even' | 'dangerous' | 'impossible';
-  reason?: 'insufficientPower' | 'noUsableMembers' | 'unsupportedObjective';
-};
 ```
 
-`TeamPowerEstimator` 與 `AbstractCombatEstimator` 必須使用同一份角色快照、裝備、技能、主屬與戰鬥公式來源：前者在 Team 選任務時估計「可否接與權重」，後者在地牢內對每個怪群實際骰定結果。兩者不可各自維護第二份 Team 戰力數值或互相保證結果。
-
-任何抽象探索（NPC Team、未來玩家掃蕩）都只使用 `AbstractCombatEstimator`，不建立 `CombatEncounter`、不逐隻執行技能。
+任務可行性、NPC 換裝與簡易戰鬥都直接使用 [Combat Power 純計算契約](22_combat_power_service.md)；Combat 不維護或轉送第二份 NPC 戰力 Estimator。
 
 ---
 
@@ -307,7 +292,9 @@ type NpcQuestFeasibility = {
 
 | Internal Command | Combat 的反應 |
 |---|---|
-| `StartCombatEncounter` | 依 Team Formation、Map Content、Encounter Definition 建立戰鬥快照，先做開場前排補位，再套用開場 CTB。 |
+| `StartCombatEncounter` | 依 Team Formation、具型別的 Map Content／Player Travel Event Source 與 Encounter Definition 建立戰鬥快照，先做開場前排補位，再套用開場 CTB。 |
+
+`StartCombatEncounter` 必須驗證玩家／NPC 隊伍正式成員數為 1～9，且 `TeamCombatFormation` 恰好配置每一名正式成員一次。漏配任何正式成員、出現第十名成員或額外候補都拒絕建立 Encounter；護衛與救援等任務暫時角色不在正式參戰名單。`source.kind=playerTravelEvent` 時，Interaction 必須仍為同一事件的 `awaitingChoice`，且 Event Instance 屬於玩家隊；NPC Team 一律拒絕這種 Source。
 
 ### 5.2 玩家 Game Command
 
@@ -336,7 +323,7 @@ type NpcQuestFeasibility = {
 |---|---|---|
 | `CommitCombatItemUse` | inventory | 驗證並提交 Item、延遲與效果資料。 |
 | `ApplyCombatCondition` | character | Encounter 結束時寫回角色 HP／MP／狀態。 |
-| `ResolvePlayerMapContent` | map | 勝利後正式處理來源怪群／Boss。 |
+| `ResolvePlayerMapContent` | map | 只有 `source.kind=mapContent` 的勝利才正式處理來源怪群／Boss。 |
 
 ---
 
@@ -344,15 +331,17 @@ type NpcQuestFeasibility = {
 
 | Event | 最少 payload | 訂閱者 |
 |---|---|---|
-| `CombatEncounterStarted` | `encounterId`、`teamId`、`contentId?` | dungeon、ui/app。 |
+| `CombatEncounterStarted` | `encounterId`、`teamId`、`source` | dungeon、player-travel-event workflow、ui/app。 |
 | `CombatActionResolved` | `encounterId`、`actorId`、`skillId?`、`results` | ui/app。 |
-| `CombatEncounterResolved` | `encounterId`、`participantCharacterIds`、`outcome`、`contentResolution?` | dungeon、team、map、ui/app。 |
+| `CombatEncounterResolved` | `encounterId`、`teamId`、`participantCharacterIds`、`source`、`outcome: victory \| defeat`、`contentResolution?` | dungeon、team、map、quest、player-travel-event workflow、ui/app。 |
 | `CombatTeamOutcome` | `teamId`、`canContinue`、`reason` | team、dungeon。 |
-| `CombatAttackMasteryEarned` | `encounterId`、`characterAwards` | progression。 |
-| `CombatDefenseMasteryEarned` | `encounterId`、`characterAwards` | progression。 |
-| `CombatSupportMasteryEarned` | `encounterId`、`characterId`、`skillId`、`supportMasteryAwardRuleId`、`useCount` | progression。 |
+| `CombatAttackMasteryEarned` | `source: { kind: encounter, encounterId }`、`characterAwards` | progression。 |
+| `CombatDefenseMasteryEarned` | `source: { kind: encounter, encounterId }`、`characterAwards` | progression。 |
+| `CombatSupportMasteryEarned` | `source: { kind: encounter, encounterId }`、`characterId`、`skillId`、`supportMasteryAwardRuleId`、`creditedUseCount` | progression。 |
 
 Combat 不直接發 `MasteryExperienceGranted`、`InventoryTransferred` 或 `QuestStateChanged`。
+
+Player Travel Event Workflow 只接受 Interaction 所保存的同一 `encounterId`、`eventInstanceId` 與 `teamId`。勝利或戰敗都會完成該旅行事件；若為戰敗，Quest 同時依既有 `CombatEncounterResolved` 規則使該隊所有 `incomplete` 護衛委託到期。Combat 不直接改 Team Pending 或 Quest State。
 
 ---
 
@@ -428,24 +417,22 @@ Combat 不直接發 `MasteryExperienceGranted`、`InventoryTransferred` 或 `Que
 
 - 攻擊 MXP 依角色對各敵人造成的有效傷害比例分配。
 - 法杖與攻擊魔法的 50／50 等分配由資料規則決定。
-- 防禦 MXP 依開戰時的初始隊伍站位分給所有參戰者：由前至後略過空排，第一個有人排每人權重 3、第二個有人排每人權重 2、第三個有人排每人權重 1；以所有參戰者權重和為分母分配 Encounter 防禦預算。這是角色的防禦熟練度來源，與防具／盾牌穿戴與否無關，戰中補位也不改變本場快照。
+- 防禦 MXP 先依開戰時的初始隊伍站位分給所有參戰者：由前至後略過空排，第一個有人排每人權重 3、第二個有人排每人權重 2、第三個有人排每人權重 1；以所有參戰者權重和為分母分配 Encounter 防禦預算。是否取得份額不以持盾為條件，戰中補位也不改變本場快照；個人份額再依 `defenseMasteryRoutingRuleId` 對開始時防禦裝備的 Mastery 候選分配。
 - 支援魔法／支援樂器的 Mastery MXP 是固定值，不看有效防護、增益、減益或疊加量；同一角色的同一技能在一場 Encounter 最多記 3 次成功使用，於 Encounter resolved 時一次發放。攻擊型樂器技能仍依傷害處理。
-- 抽象地牢戰鬥不逐招模擬：每一場戰鬥都視為每位裝備符合且已學會的支援技能角色使用該技能一次；Settlement 依實際戰鬥場次彙總後發放。此規則同時適用 NPC Team 與未來玩家掃蕩。
 
-### 8.7 Detailed／Abstract 成長解析
+### 8.7 Detailed／Combat Sequence 成長邊界
 
-兩種模式產生相同類型的成長事件，Progression 不應知道隊伍是玩家或 NPC。
+Detailed Encounter 與 [Combat Sequence](21_combat_sequence_module.md) 產生相同類型的成長事件，Progression 不應知道隊伍是玩家或 NPC；它只依 `CombatMasterySource` 的判別欄位驗證冪等與來源規則。
 
-| 成長來源 | `detailed` | `abstract` |
+| 成長來源 | detailed Encounter | Combat Sequence |
 |---|---|---|
-| 攻擊 MXP | 依實際有效傷害比例。 | 對每名角色計算 `攻擊技能數 / 技能組總數 × 6` 的整數權重；全隊權重和為分母分配 Encounter 攻擊預算。 |
-| 防禦 MXP | 開戰初始站位的 3／2／1 有人排權重。 | 相同；不因模式或隊伍控制權改變。 |
-| 無傷害增益／減益／治療技能 | 每次成功使用給固定 Mastery MXP，同角色同技能每場最多 3 次。 | 每位裝備符合且已學會該技能的角色，視為每場使用一次，各得一份固定 Mastery MXP。 |
-| 攻擊型樂器 | 依有效傷害。 | 列為攻擊技能，納入攻擊技能占比權重。 |
+| 攻擊 MXP | 依實際有效傷害與該次技能的 Mastery Split。 | 整串正式成功的攻擊預算加總後，依開始快照的六分制攻擊技能權重一次分配。 |
+| 防禦 MXP | 開戰初始站位的 3／2／1 有人排權重。 | 使用整串開始時的相同有人排權重，對總防禦預算分配一次。 |
+| 無傷害增益／減益／治療技能 | 每次成功使用給固定 Mastery MXP，同角色同技能每場最多 3 次。 | 每個配置且合法的技能，每個正式成功戰鬥節點視為一次；整串場次可超過 3。 |
+| 攻擊型樂器 | 依有效傷害。 | 列為攻擊技能，納入六分制攻擊權重。 |
 
-例如 abstract Encounter 中三名角色的攻擊技能占比分別為 1、2/3、0，其權重為 6、4、0；第一、二名分別取得攻擊預算的 6/10 與 4/10，第三名不取得攻擊 MXP。無傷害技能的固定經驗與這個攻擊預算完全分開。
 - 8～9 隻小怪的 Profile 先彙總成單一 Encounter 預算，再按傷害／參戰規則分配一次。
-- 只有正式 resolved Encounter 發出成長事件；無效 Encounter 不得發放。
+- Detailed 只有正式 resolved Encounter 發出成長事件；Combat Sequence 則只有來源正式接受的成功 Result 才能納入整串結算。
 
 ---
 
@@ -454,9 +441,10 @@ Combat 不直接發 `MasteryExperienceGranted`、`InventoryTransferred` 或 `Que
 ```text
 Combat 判定 victory／defeat
   → 對每名角色送 ApplyCombatCondition
-  → victory 時送 ResolvePlayerMapContent
+  → source=mapContent 且 victory 時送 ResolvePlayerMapContent
   → 發出 Attack／Defense Mastery Earned
   → 發出 CombatEncounterResolved + CombatTeamOutcome
+  → source=playerTravelEvent 時由 Workflow 以同源結果完成旅行互動
   → 全部成功才將 Encounter 標為 resolved 並提交
 ```
 
@@ -474,11 +462,14 @@ Character 寫回、Map 內容處理與 MXP 任一步驟違反不變量時，整�
 6. 反擊只在先建立架勢且條件成功時解析一次。
 7. 同一裝備效果在一次 Action 的合併順序 deterministic。
 8. active Encounter 存讀檔後結果可重播。
-9. NPC Estimator 與玩家完整 Combat 不混用 Runtime State。
+9. Combat Sequence 與玩家 detailed Combat 不混用 Runtime State；Combat 不存在第二種簡化 Encounter。
 10. Encounter 結束的 Character／Map／Progression 結果具原子性。
 11. 戰鬥格位只能在 Encounter 建立時配置，或由前排全空規則整側同步改變；玩家 Command、AI、技能與效果均不可位移。
 12. 同值 CTB 永遠玩家側優先；同側順序只由 Encounter RNG 決定，Query 不得改變結果。
 13. 第 1 排仍有占格單位時不得補位；補位必須保留欄位與各占格單位的相對排距。
+14. Encounter 的玩家側 `participantCharacterIds` 必須與開始快照的全部正式成員完全相同；不得漏配、候補或加入護衛／救援任務角色。
+15. `CombatEncounterResolved(outcome=defeat)` 必須攜帶明確 `teamId`，讓 Quest 能在同一交易終止該隊全部進行中的護衛委託；Combat 不直接修改 Quest State。
+16. Player Travel Event Encounter 必須以 Interaction／Event Instance 雙 ID 關聯，NPC 不可成為其 Team；結果只能恢復同一筆旅行 Pending 一次。
 
 ---
 

@@ -32,6 +32,7 @@ interface StatisticsDefinitionReader {
   getStatisticsRule(id: StatisticsRuleId): StatisticsRuleDefinition;
   getSecondaryAttributeRule(id: SecondaryAttributeId): SecondaryAttributeRuleDefinition;
   getGripRule(id: GripRuleId): GripRuleDefinition;
+  getCarryCapacityRule(id: CarryCapacityRuleId): CarryCapacityRuleDefinition;
   getAgeModifierRule(id: AgeModifierRuleId): AgeModifierRuleDefinition;
 }
 
@@ -39,8 +40,14 @@ type StatisticsRuleDefinition = DefinitionHeader & {
   primaryAttributeCap: 100;
   secondaryRuleIds: SecondaryAttributeId[];
   gripRuleId: GripRuleId;
+  carryCapacityRuleId: CarryCapacityRuleId;
   ageModifierRuleId: AgeModifierRuleId;
   reputationContributionRuleId: ResolverId;
+};
+
+type CarryCapacityRuleDefinition = DefinitionHeader & {
+  baseWeightCapacity: number;
+  strengthCapacityPerPoint: number;
 };
 
 type SecondaryAttributeRuleDefinition = DefinitionHeader & {
@@ -83,6 +90,7 @@ type CharacterStatisticsSnapshot = {
   secondaryAttributes: Record<SecondaryAttributeId, number>;
   maxHealth: number;
   maxMana: number;
+  carryingCapacity: number;
   sourceRevisionKey: string;
 };
 
@@ -124,9 +132,9 @@ interface CharacterStatisticsCalculator {
 
 - Character 透過 `CharacterStatsQuery` Adapter 取得 `maxHealth`／`maxMana`，不自行重算。
 - Combat 建立 Encounter 時取得 `CharacterStatisticsSnapshot`；Encounter 內使用快照，除非合法戰中行為明確要求重算。
-- 裝備畫面使用 `previewEquipment`，但只顯示 Calculator 回傳的差異。
+- 裝備畫面使用 `previewEquipment`，但只顯示 Calculator 回傳的差異；背包與商店畫面同時顯示 `InventoryQuery.getCarriedWeight` 與這裡的 `carryingCapacity`。
 - UI 不可用表格係數自行重算傷害、命中或減傷。
-- NPC Combat Estimator 與玩家 Combat 可共用 Calculator，但不得共用可變 Encounter State。
+- [Combat Power Query](22_combat_power_service.md)、Combat Sequence 與玩家 detailed Combat 可共用 Calculator 的能力輸出，但不得共用可變 Encounter State 或在各自模組重寫能力公式。
 
 ---
 
@@ -149,6 +157,7 @@ interface CharacterStatisticsCalculator {
 7. 樂器傷害與減傷走專用 Rule，不被一般物理減傷誤算。
 8. 年齡修正由同一 Age Rule 供角色面板與 Combat 使用。
 9. Calculator 無 State、無 I/O、無未注入的全域資料。
+10. 攜帶上限只由 Carry Capacity Rule 與有效肌力計算；不以背包格數、物品種類或 UI 特例修改。
 
 ---
 

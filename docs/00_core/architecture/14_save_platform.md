@@ -44,6 +44,7 @@ ISO 時間只供檔案排序與 UI 顯示；遊戲規則永遠使用 `WorldDay`�
 - Scheduler 與 Job revision。
 - Active Combat Encounter。
 - Player Dungeon Session 與 NPC Dungeon Run。
+- Social 的玩家中心好感（一名非玩家真實冒險者至多一筆）與當日對話用量；禁止序列化 NPC×NPC 關係矩陣或對話全文。
 - Pending Interaction。
 - Quest 兩期限與四狀態。
 - RNG stream ID、Runtime ID sequence。

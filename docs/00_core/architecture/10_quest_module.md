@@ -28,8 +28,8 @@ type QuestState = {
 | 地圖怪物、Boss、綁架與物品內容 | map | 以 Content ID 綁定目標並要求保護／鎖定。 |
 | ItemInstance、位置、保留與回收 | inventory | 保存目標 Item ID，生命週期以 Internal Command 處理。 |
 | 商店 Offer | city | 保存 Offer ID，要求保留或解除。 |
-| 隊伍位置與成員 | team | 用事件判定抵達、離圖與可結案地點。 |
-| 護衛／救援的暫時角色 | character | 保存 Character ID；建立與回收由 Character 執行。 |
+| 隊伍位置與成員 | team | 用事件判定抵達、離圖與可結案地點；護衛對象不加入 Team。 |
+| 護衛／救援的暫時角色 | character | 保存 Character ID；建立與回收由 Character 執行。護衛角色只與 Quest、Team ID 關聯，不取得 Team Membership；救援角色救出後才可暫時加入隊伍。 |
 | 報酬金錢 | economy | 保存 Reward Rule；結案 Workflow 才發放。 |
 | 任務報酬均分與逾期任務物資分配 | distribution | Quest 保存參與者快照並決定何時開始分配，不自行移轉資產。 |
 | 任務熟練度 | progression | 只在 `QuestSettled` 後發放。 |
@@ -46,7 +46,6 @@ interface QuestDefinitionReader {
   getQuestDeadlineRule(id: QuestDeadlineRuleId): QuestDeadlineRuleDefinition;
   getQuestRewardRule(id: QuestRewardRuleId): QuestRewardRuleDefinition;
   getQuestObjectiveRule(id: QuestObjectiveRuleId): QuestObjectiveRuleDefinition;
-  getQuestFailureCrimeRule(id: QuestFailureCrimeRuleId): QuestFailureCrimeRuleDefinition;
 }
 ```
 
@@ -82,7 +81,6 @@ type QuestReactionRuleDefinition = DefinitionHeader & {
   deadlineRuleId: QuestDeadlineRuleId;
   objectiveRuleId: QuestObjectiveRuleId;
   rewardRuleId: QuestRewardRuleId;
-  failureCrimeRuleId?: QuestFailureCrimeRuleId;
 };
 ```
 
@@ -102,12 +100,6 @@ type QuestDeadlineRuleDefinition = DefinitionHeader & {
   actualEndResolverId: ResolverId;
   maxCityGapCount?: number;
 };
-
-type QuestFailureCrimeRuleDefinition = DefinitionHeader & {
-  expiryDayResolverId: ResolverId;
-};
-
-第一版犯罪來源只有**玩家隊伍已接取委託在實際結束期限到期前未完成並回原公會結案**。未接取委託自然撤下、任務目標在接取前失效、NPC 隊伍任務到期，或任務成功結案，都不形成犯罪紀錄。Quest 到期時以當前玩家主角為唯一紀錄對象；`expiryDayResolverId` 決定該 Quest 自己的期限。每筆 Quest Crime Record 都以 Quest ID 獨立保存，不累加、不覆蓋其他失敗任務。
 ```
 
 第一版已定規則：
@@ -219,6 +211,8 @@ type QuestObjective =
 
 委託一律綁定 Runtime Instance ID；不可用顯示名稱或任意同 Definition 物品替代。
 
+`escort.characterId` 是 Quest 擁有的護送關聯，不是 Team Member ID。護衛角色的位置由其 Quest 所綁定隊伍的位置推導，不加入 `memberIds`／`temporaryMemberIds`、不占九宮格、不參戰，也不參與報酬與戰利品分配。
+
 ---
 
 ## 4. 公開 Query
@@ -229,6 +223,7 @@ interface QuestQuery {
   listGuildPostings(cityId: CityId): QuestView[];
   listTeamActiveQuests(teamId: TeamId): QuestView[];
   listTeamCompletedUnsettled(teamId: TeamId): QuestView[];
+  listIncompleteEscortQuestsForPlayerTravel(teamId: TeamId, onDay: WorldDay): PlayerTravelEscortQuestRef[];
   listNpcClaimablePostings(cityId: CityId, onDay: WorldDay): QuestView[];
   getNpcClaim(questId: QuestId): NpcQuestClaimView | undefined;
   isMapReservedForAcceptedQuest(mapId: MapInstanceId): boolean;
@@ -239,6 +234,8 @@ interface QuestQuery {
 ```
 
 UI 不自行重算完成、期限或結案資格。
+
+`listIncompleteEscortQuestsForPlayerTravel` 是 Player Travel Event Workflow 的窄化唯讀 Port：只回傳指定玩家隊目前為 `incomplete`、護衛角色仍存在且 `onDay < actualEndDeadline` 的護衛任務。它只用來判定刺殺 Entry 是否合格，以及抽中後固定一筆敘事對象；Quest 不會把事件動態推入池，也不會因查詢改寫 State。任何 NPC 旅行不得呼叫此 Query。
 
 ---
 
@@ -282,6 +279,8 @@ NPC 接取與結案也都是零時間；差別僅在命令由已存檔的 Action
 | `EscortCandidatesGenerated` | 將合法候選轉為護衛委託。 |
 | `InventoryTransferred`／`ItemInstanceCreated` | 判定購買／探索指定物是否已進入正確 `teamQuestCargo`，以及送貨交付條件。 |
 | `TeamLocationChanged` | 判定護衛抵達、救援離圖與公會位置。 |
+| `CombatEncounterResolved` | 若 `outcome=defeat`，將 `acceptedByTeamId` 相同且仍為 `incomplete` 的所有護衛 Quest 立即轉為 `expired(reason=combatDefeat)`。已送達而為 `completed` 的護衛不受影響。 |
+| `CombatSequenceChallengeResolved` | 若 `outcome=failure`，對該 `teamId` 套用與 detailed 戰敗完全相同的所有進行中護衛 Quest 到期規則；同一 Sequence 後續事件不得重複處理。 |
 | `CharacterDied` | 護衛／救援對象死亡時立即轉為 `expired`，原因記為 `targetDied`，並執行與期限到期相同的清理流程。 |
 | `MapContentResolved`／`NpcDungeonSettlementApplied` | 判定鎮壓、討伐、救援與探索目標。 |
 | `ShopOfferSold` | 更新 purchase 目標實體仍位於何處；不憑空替換目標。 |
@@ -303,12 +302,11 @@ NPC 接取與結案也都是零時間；差別僅在命令由已存檔的 Action
 | `ReserveShopOfferForQuest` | city | purchase 目標在期限內保留／標示。 |
 | `ReleaseQuestShopOffer` | city | 到期、完成或解除時清理。 |
 | `CreateQuestTemporaryCharacter` | character | 接取護衛或救出人物時建立暫時角色。 |
-| `AttachQuestTemporaryMember` | team | 將已建立的護衛／救援角色加入接取隊伍。 |
+| `AttachQuestTemporaryMember` | team | 僅將已救出的救援角色加入接取隊伍；護衛角色禁止使用此命令。 |
 | `StartAssetDistribution` | distribution | 原公會結案時建立 `equalCurrencyOnly` 報酬分配；或 expired 時建立玩家競拍／NPC RNG 的任務物資分配。 |
 | `AppendAssetDistributionResult` | distribution | 加入已解析的任務貨幣報酬，或加入移出 Cargo 的 Item ID。 |
 | `FinalizeAssetDistributionCollection` | distribution | 關閉收集；貨幣報酬同步均分，expired 物資依玩家／NPC Policy 處理。 |
 | `ApplyCharacterReputationEffect` | character | 結案時套用報酬組合內已驗證的聲望效果。 |
-| `RecordQuestFailureCrime` | character | 玩家隊伍已接取任務因 actual end deadline 到期而 expired 時，依 Quest Failure Crime Rule 對當前玩家主角寫入該 Quest 的獨立犯罪紀錄與期限。 |
 
 ---
 
@@ -323,7 +321,7 @@ NPC 接取與結案也都是零時間；差別僅在命令由已存檔的 Action
 | `QuestObjectiveCompleted` | `questId`、`completedOnDay` | city、ui/app。 |
 | `QuestSettled` | `questId`、`teamId`、`beneficiaryCharacterIds`、`guildCityId`、`kind`、`masteryExperienceRuleId` | progression、team、city、ui/app。 |
 
-到期只使用 `QuestStateChanged(newStatus=expired)`，不發出 `QuestFailed`。若 expired 前 Quest 由玩家隊伍接取且帶有 `failureCrimeRuleId`，Quest Workflow 必須在同一交易 required 呼叫 `RecordQuestFailureCrime`；未接取撤下、接取前目標失效與 NPC 隊伍到期均不呼叫。
+到期只使用 `QuestStateChanged(newStatus=expired)`，不發出 `QuestFailed`。第一版委託失敗只改變任務狀態、清理或釋放任務內容並顯示結果；不產生犯罪、通緝或其他角色違法紀錄。
 
 任務貨幣分配的參與者很少且沒有物品選擇，`equalCurrencyOnly` 必須在 `settleQuest` 的同一 `EngineTransaction` 內同步完成。若 Distribution、Inventory、Economy、聲望或 Quest 歸檔任一步驟失敗，整筆結案回滾，不會留下已領錢但未結案的狀態。
 
@@ -333,7 +331,7 @@ NPC 接取與結案也都是零時間；差別僅在命令由已存檔的 Action
 
 | 類型 | 轉 completed 的唯一條件 |
 |---|---|
-| 護衛 | 帶著存活目標進入目的城市；同交易發出可投影為感謝對話的完成事件。 |
+| 護衛 | Quest 綁定的護衛角色仍存活，且所屬隊伍進入目的城市；同交易發出可投影為感謝對話的完成事件。護衛對象不需要也不得成為隊員。 |
 | 送貨 | 指定 ItemInstance 從 `teamQuestCargo` 在目的城市指定設施自動交付。 |
 | 購買 | 指定 ItemInstance 已進入該 Quest 的 `teamQuestCargo`。 |
 | 探索 | 指定 ItemInstance 已進入該 Quest 的 `teamQuestCargo`。 |
@@ -406,6 +404,10 @@ Quest 到期不等待玩家競拍完成才成為 `expired`；分配流程是到�
 14. Delivery 在目的設施完成交付後已無 Cargo 物可分；完成但未回公會而 expired 不得重新生成同一物品。
 15. expired Cargo 分配沿用接取時的 `participantCharacterIds`；之後招募、解雇或任務暫時角色都不能改變分配名單。
 16. `equalCurrencyOnly` 完成前不可寫入 `QuestSettlement` 或發出 `QuestSettled`。
+17. 護衛 Character 永遠不出現在任何 Team 的 `memberIds`、`temporaryMemberIds`、戰鬥配置、戰利品或報酬參與者快照。
+18. 同一 Team 的 detailed 戰敗或 Combat Sequence 單節點失敗，會在同一交易把該 Team 全部 `incomplete` 護衛 Quest 轉為 `expired(reason=combatDefeat)`；已 `completed`／`expired` 或其他 Team 的護衛不得受影響。
+19. 玩家旅行護衛 Query 只回傳合法的進行中護衛，並在相同 State／Day 以穩定 QuestId 順序輸出；Query 本身不得建立事件或修改任務。
+20. NPC 護衛任務不產生任何旅行事件要求；NPC 旅行只會在抵達或正式戰敗事件到達時改變護衛 Objective／狀態。
 
 ---
 
@@ -418,3 +420,4 @@ Quest 到期不等待玩家競拍完成才成為 `expired`；分配流程是到�
 - [ ] 原公會結案、報酬與任務 MXP 原子交易。
 - [ ] 任務物資空間、貨幣均分與 expired 後全隊物資分配 Workflow。
 - [ ] 各類期限、未接／已接、完成未回報、NPC 結算測試。
+- [ ] 玩家旅行護衛窄化 Query、刺殺候選條件與 NPC 無旅行事件的契約測試。

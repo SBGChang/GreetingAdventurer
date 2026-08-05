@@ -103,10 +103,13 @@ type AdventureSiteDefinition = DefinitionHeader & {
 type RouteDefinition = DefinitionHeader & {
   fromCityId: CityId;
   toCityId: CityId;
+  playerTravelEventPoolId: PlayerTravelEventPoolId;
   passagePolicyId?: PassagePolicyId;
   enabledByDefault: boolean;
 };
 ```
+
+`playerTravelEventPoolId` 只供 Player Travel Event Workflow 使用，讓不同路線可共用或各自配置事件池。NPC 旅行只讀 Route 的兩端與通行狀態，禁止讀取、複製或解析這個事件池。
 
 城市距離使用城市網路的最短 Route 數量：
 
@@ -215,7 +218,7 @@ type MarketPressureState = {
 type WorldEventWeightModifierState = {
   modifierId: WorldEventWeightModifierId;
   scope: { kind: 'nation' | 'region' | 'route' | 'city'; id: GameId };
-  context: 'travel' | 'dungeon' | 'city';
+  context: ContentEventContext; // 'playerTravel' | 'dungeon' | 'city'
   weightModifierRuleId: WeightModifierRuleId;
   activeFromDay: WorldDay;
   activeToDay?: WorldDay;
@@ -328,7 +331,7 @@ World 不消耗通行證；若資料規則要求消耗，旅行 Workflow 另送 
 1. 每個城市與冒險地恰好屬於一個 Region。
 2. 非首都城市恰好連到一個冒險地；首都恰好連到兩個，其中一個必須是該國國家迷宮。
 3. 每個 Region 永遠保留原生文化，且恰好有一個目前控制國。
-4. Route 的兩端城市必須存在；城市網路最短距離結果必須可重播。
+4. Route 的兩端城市與玩家旅行事件池必須存在；城市網路最短距離結果必須可重播。NPC Route Query 不得因此建立事件流程。
 5. 占領只改人類敵人文化，不改原生物品與非人類怪物文化。
 6. 關閉路線不能被 Team 建立新旅行 Plan；既有旅程的處理政策由 Route Rule 明確定義。
 7. 戰爭未啟用時，不建立空白 Conflict Job。

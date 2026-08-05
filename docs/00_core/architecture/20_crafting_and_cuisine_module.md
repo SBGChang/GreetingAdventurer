@@ -51,6 +51,7 @@ type CraftingRecipeDefinition = DefinitionHeader & {
   durationDays: number; // equipment／consumable／tradeGood 均至少 1 日
   ingredientSlots: CraftingIngredientSlotDefinition[];
   craftingExperienceRuleId: ExperienceAwardRuleId;
+  outcomeResolverId: ResolverId; // 成功／失敗與失敗時素材去向；精確公式待定
   qualityRuleId: CraftQualityRuleId;
 };
 
@@ -80,7 +81,7 @@ type CraftQualityRuleDefinition = DefinitionHeader & {
 - 每個可用素材實體最多提供一條 `MaterialAffixId` 候選詞條。
 - 製作品質的可見前綴與成功繼承詞條數固定如下：無前綴 `plain=0`、精良 `fine=1`、卓越 `excellent=2`、完美 `perfect=3`、無雙 `peerless=4`、鬼神 `demonGod=5`。
 - 一般／精品／史詩／傳說／神話裝備配方分別使用 1／2／3／4／5 份素材，因此可成功帶入的詞條硬上限分別也是 1／2／3／4／5；實際帶入數為 `min(品質詞條數, 候選詞條數)`。
-- 成品戰力、NPC 換裝、任務可行性與抽象戰鬥皆只讀最終 Equipment Statistics／Combat Power；不得以品級、前綴或詞條數建立另一套比較順序。
+- 成品戰力、NPC 換裝、任務可行性與 Combat Sequence 皆只讀最終 Equipment Statistics／Combat Power；不得以品級、前綴或詞條數建立另一套比較順序。
 
 ### 2.2 消耗品與工藝品
 
@@ -143,14 +144,34 @@ type FoodStatus = {
 
 type CraftingAttempt = {
   craftingAttemptId: CraftingAttemptId;
+  freeActionId: FreeActionId;
   characterId: CharacterId;
   recipeId: CraftingRecipeId;
   ingredientItemIds: ItemInstanceId[];
   startedOnDay: WorldDay;
   status: 'scheduled' | 'resolved';
+  result?: CraftingAttemptResult;
   revision: Revision;
 };
+
+type CraftingAttemptResult =
+  | {
+      outcome: 'succeeded';
+      quality: CraftQuality;
+      outputItemIds: ItemInstanceId[];
+      consumedIngredientItemIds: ItemInstanceId[];
+    }
+  | {
+      outcome: 'failed';
+      outputItemIds: [];
+      consumedIngredientItemIds: ItemInstanceId[];
+      returnedIngredientItemIds: ItemInstanceId[];
+    };
 ```
+
+製作存在成功與失敗，但成功率、品質聯動與失敗時消耗／返還哪些素材仍屬待定公式，必須由 `outcomeResolverId` 對開始時已保留的素材快照解析。無論結果為成功或失敗，都以同一食譜 `craftingExperienceRuleId` 發放表定 MXP；Handler 不得因失敗改用零經驗或另一條隱藏曲線。
+
+製作所需時間只由 Team 的 `MemberFreeAction.requiredFreeDays／accumulatedFreeDays` 管理。離開 `cityFree` 時，Crafting Attempt 與素材保留都維持原狀；後續自由期繼續扣同一行動的剩餘日數。只有 Team 正式發出該筆 `FreeActionCompleted` 後才解析成功／失敗，不存在「本次自由期不夠長」或一般行程中斷造成的取消。
 
 FoodStatus 存在時，該角色不可自製料理、不可餐館用餐；新狀態不得覆蓋舊狀態。`expiresOnDay` 當日仍有效；`foodStatusExpiry` 排在 `expiresOnDay + 1`，且必須早於當日 `npcCuisineDecisionDue`。因此 NPC 在效果仍有效的日結算不決定料理，失效後才於下一個可結算日重新骰。
 
@@ -167,8 +188,8 @@ interface CraftingQuery {
 
 | Game Command | 前置條件 | 結果 |
 |---|---|---|
-| `startCrafting` | 已學配方、Mastery／設施／材料合法，且角色位於 City Free。 | 保留素材並要求 Team 建立該角色的耗時 craft FreeAction。 |
-| `cookCuisine` | 無 FoodStatus、已學食譜且持有合法食材。 | 零日原子消耗食材、建立 FoodStatus、發放料理 MXP。 |
+| `startCrafting` | 已學配方、Mastery／設施／材料合法，角色位於 City Free，且沒有未完成的耗時自由行動。 | 同一交易依序送出 required `ReserveCraftingInputs`、建立 Crafting Attempt，並以 required `StartTimedCityAction` 要求 Team 建立以 `freeActionId` 回連該 Attempt 的耗時 craft FreeAction；任一步拒絕則全部回滾。 |
+| `cookCuisine` | 無 FoodStatus、已學食譜且持有合法食材。 | required `ConsumeCuisineIngredients` 成功後，零日建立 FoodStatus、套用效果並發放料理 MXP；任一步拒絕則全部回滾。 |
 | `eatRestaurantMeal` | 無 FoodStatus、位於有開放 Inn 的城市且可付款。 | 零日付款、建立最低階 FoodStatus、發放 1/3 料理 MXP。 |
 
 `npcCuisineDecisionDue` 是 Crafting 的每日 Job：對每名無 FoodStatus 的非玩家主角角色，資料化抽取自製料理或餐館；餐館候選只在角色所在城市的 Inn 開放時可用，有 FoodStatus 的角色不建立決策。此 Job 不依賴、也不改變 NPC 的 FreeAction。
@@ -179,27 +200,28 @@ interface CraftingQuery {
 
 | 事件／輸出 | 最少 payload | 訂閱者 |
 |---|---|---|
-| `CraftingCompleted` | `characterId`、`recipeId`、`outputItemIds`、`quality`、`experienceRuleId` | progression、ui/app。 |
+| `CraftingCompleted` | `characterId`、`recipeId`、`outcome`、`outputItemIds`、`quality?`、`experienceRuleId` | progression、ui/app。 |
 | `FoodStatusChanged` | `characterId`、`state: applied \| expired`、`source`、`expiresOnDay?` | character、ui/app。 |
 | `CuisineConsumed` | `characterId`、`source: selfCooked \| restaurant`、`recipeId`、`experienceRuleId`、`experienceMultiplier` | progression、ui/app。 |
 
 ```text
 FreeActionCompleted(craft)
   → Crafting 驗證預留快照與配方
-  → resolve 品質／候選素材詞條／產量或出售倍率
-  → TransformCraftingItems(inventory)
+  → resolve 成功／失敗與素材去向
+  → 成功時 resolve 品質／候選素材詞條／產量或出售倍率
+  → TransformCraftingItems(inventory；依正式結果消耗／返還素材並建立成功產物)
   → CraftingCompleted
-  → Progression 發放對應生活技藝 MXP
+  → Progression 不分成功／失敗，發放同一食譜的生活技藝 MXP
 
 cookCuisine / eatRestaurantMeal
   → 驗證無 FoodStatus
-  → 自製：Consume inputs；餐館：TransferCurrency
-  → 建立 FoodStatus + ApplyFoodEffects(character workflow)
+  → 自製：ConsumeCuisineIngredients；餐館：TransferCurrency
+  → 建立 FoodStatus + ApplyFoodStatusEffects(character workflow)
   → CuisineConsumed
   → Progression 發放料理 MXP（餐館 x1/3）
 
 foodStatusExpiry
-  → 移除 FoodStatus + RemoveFoodEffects
+  → 移除 FoodStatus + ApplyFoodStatusEffects(remove)
   → FoodStatusChanged(expired)
   → 下個 NPC 日結算才可再次骰料理
 ```
@@ -213,3 +235,5 @@ foodStatusExpiry
 5. 工藝品絕不帶素材詞條；任何品級都可有任一出售品質，且只影響出售倍率。
 6. NPC 料理決策僅在無 FoodStatus 的日結算發生，不進 FreeAction 池。
 7. 餐館 FoodStatus 的每條料理詞條均為 Tier 1，且 MXP 恰為相同食譜自製值的 1/3。
+8. Crafting Attempt 在跨越多段 `cityFree` 時保持同一 ID、素材保留與累積進度；一般旅行／冒險只凍結，不取消或重抽。
+9. 製作成功與失敗都只結算一次，並使用同一 `craftingExperienceRuleId`；失敗不得建立產物，但其素材消耗／返還必須完全符合 Outcome Resolver 結果。

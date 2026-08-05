@@ -2,7 +2,7 @@
 
 > **模組 ID：** `team`
 >
-> **依賴：** [共用核心契約](00_shared_contracts.md)、Map／World／City／Character 的公開 Query。
+> **依賴：** [共用核心契約](00_shared_contracts.md)、Map／World／City／Character／Progression 的公開 Query。
 >
 > **責任：** 管理玩家與非玩家冒險者隊伍的成員歸屬、位置、戰鬥配置、大動作、城鎮自由活動與個人自由行動。所有隊伍使用同一套資料模型；玩家由 UI Command 發起行動，NPC 的意圖與動作串則由 [Adventurer Lifecycle](18_adventurer_lifecycle_module.md) 模組決定，Team 只執行已驗證的節點。
 
@@ -19,7 +19,7 @@ type TeamState = {
   plans: Record<TeamPlanId, TeamPlan>;
   freeActions: Record<FreeActionId, MemberFreeAction>;
   recentActivities: Record<CharacterId, RecentAdventurerActivity[]>;
-  pendingTravelInteractions: Record<InteractionId, PendingTravelInteraction>;
+  pendingTravelInteractions: Record<InteractionId, PendingPlayerTravelInteraction>;
   pendingSuccession?: PendingSuccession;
   memberRetention: Record<TeamId, TeamMemberRetentionState>;
   combatFormations: Record<TeamId, TeamCombatFormation>;
@@ -56,45 +56,56 @@ Team 也擁有所有隊伍共通的「成員留隊週期」：它只保存入隊
 
 ```ts
 interface TeamDefinitionReader {
-  getTravelMode(id: TravelModeId): TravelModeDefinition;
+  getPlayerTravelMode(id: TravelModeId): PlayerTravelModeDefinition;
+  getNpcTravelRule(id: NpcTravelRuleId): NpcTravelRuleDefinition;
   getFreeActionRule(id: FreeActionRuleId): FreeActionRuleDefinition;
   getTeamPlanRule(id: TeamPlanRuleId): TeamPlanRuleDefinition;
   getRecentActivityRule(id: RecentActivityRuleId): RecentActivityRuleDefinition;
   getMemberRetentionRule(id: MemberRetentionRuleId): MemberRetentionRuleDefinition;
+  getRecruitmentRule(id: RecruitmentRuleId): RecruitmentRuleDefinition;
+  getTeamFormationRule(id: TeamFormationRuleId): TeamFormationRuleDefinition;
   getNonPlayerMemberDailySocialPracticeRule(id: NonPlayerMemberDailySocialPracticeRuleId): NonPlayerMemberDailySocialPracticeRuleDefinition;
 }
 ```
 
-### 2.2 TravelModeDefinition
+### 2.2 玩家／NPC 旅行規則
 
 ```ts
-type TravelModeDefinition = DefinitionHeader & {
+type PlayerTravelModeDefinition = DefinitionHeader & {
   durationDays: 3 | 6 | 9;
   segments: [number, number, number];  // 1/1/1、2/2/2、3/3/3
   travelExperienceRuleId: ExperienceAwardRuleId;
   travelExperienceMultiplier: number;  // 0.5、1、2
-  travelEventWeightProfileId: WeightProfileId;
+  travelEventWeightProfileId: PlayerTravelEventWeightProfileId;
+};
+
+type NpcTravelRuleDefinition = DefinitionHeader & {
+  durationDays: 6;
+  travelExperienceRuleId: ExperienceAwardRuleId;
+  travelExperienceMultiplier: 1;
+  eventPolicy: 'none';
 };
 ```
 
-城市間旅行的日數、三段事件與旅行經驗倍率由資料定義；Team 只負責建立旅行 Plan 與在段落 Job 到期時前進。
+只有 `control: player` 的隊伍使用 3／6／9 日模式、三個段落與旅行事件權重。所有 `control: npc` 隊伍固定使用 6 日規則，一趟只有抵達 Job，沒有段落事件、事件池、事件 RNG 或 Pending Interaction。這是兩種資料契約，不得實作成「NPC 也抽事件但自動略過」。兩者旅行 MXP 都只在抵達時發一次；NPC 固定 ×1。
 
 ### 2.3 FreeActionRuleDefinition
 
 ```ts
 type FreeActionRuleDefinition = DefinitionHeader & {
-  kind: 'craft' | 'train' | 'trade' | 'tavernVisit' | 'rest';
+  kind: 'craft' | 'train' | 'teach' | 'trade' | 'tavernVisit' | 'rest';
   requiredFreeDays?: number;
   completionResolverId?: ResolverId;
-  canResumeAfterInterruption: boolean;
   requiresCityFacilityKind?: FacilityKind;
 };
 ```
 
 - `craft`、`train`、`teach` 有明確所需自由日數與完成 Resolver。
+- 所有尚未完成的耗時自由行動都保留累積進度；離開 `cityFree` 只會凍結，不會取消、重抽或歸零。下一段自由時間繼續扣除剩餘日數，直到完成才結算並抽取下一件行動。
 - `tavernVisit` 與 `rest` 是可持續的被動選項；它們不必每天建立完成 Job。選擇 `tavernVisit` 的 NPC 正式成員會出現在同城酒館名單。
 - 28 日傳授／訓練的 MXP 計算屬 progression；Team 只追蹤其時間進度。
 
+```ts
 type RecentActivityRuleDefinition = DefinitionHeader & {
   maxRecordsPerCharacter: number;
 };
@@ -106,6 +117,15 @@ type MemberRetentionRuleDefinition = DefinitionHeader & {
   excludedExpenseKinds: ['equipmentPurchase'];
   countedIncomeKinds: ['questReward', 'dungeonReward'];
   countedExpenseKinds: ['travelExpense', 'consumableUse'];
+};
+
+type RecruitmentRuleDefinition = DefinitionHeader & {
+  successChanceResolverId: ResolverId;
+  retryEligibilityResolverId: ResolverId;
+};
+
+type TeamFormationRuleDefinition = DefinitionHeader & {
+  defaultPlacementResolverId: ResolverId;
 };
 
 type NonPlayerMemberDailySocialPracticeRuleDefinition = DefinitionHeader & {
@@ -122,7 +142,9 @@ NPC 的候選意圖、動作串與任務鎖定由 Adventurer Lifecycle 擁有。
 workNet = 任務獲得 + 地牢獲得 − 旅費 − 已消耗道具價值
 ```
 
-購買或更換裝備的支出明確排除；尚未消耗的補品、背包內物品與帳戶餘額也不直接改寫本次工作淨收益。`expectedNetSettlementResolverId` 依成員／隊伍資料給出預期值；`departureChanceResolverId` 必須隨「低於預期的缺口」單調不減。Team 只提供結算輸入與擲骰，不把金錢公式寫死。
+購買或更換裝備的支出明確排除；尚未消耗的補品、背包內物品與帳戶餘額也不直接改寫本次工作淨收益。`expectedNetSettlementResolverId` 依成員／隊伍資料給出預期值；`departureChanceResolverId` 必須同時接收「低於預期的缺口」與隊長的 `memberDepartureResistance`，並隨缺口單調不減、隨抵抗值單調不增。Team 只提供結算輸入與擲骰，不把最終機率公式寫死。
+
+招募不是符合硬條件後直接成功。`successChanceResolverId` 至少接收招募者、目標、玩家隊目前正式人數，以及招募者的 `inviteSuccessBonus`；只有 Resolver 擲骰成功才轉移成員。多人 NPC Team 成員仍在檢定前直接拒絕。重試間隔由 `retryEligibilityResolverId` 定義，正式公式與間隔尚未定案時不得以 UI 重複送出 Command 取代規則。
 
 任何 Team 處於 `cityFree` 的每一完整自由日，對每名**非玩家主角**的正式成員發出一次 `NonPlayerMemberFreeDaySocialPractice`。因此 NPC Team 的所有正式成員、以及玩家 Team 的所有隊友都適用。該事件用 `NonPlayerMemberDailySocialPracticeRuleDefinition` 的兩條 Experience Rule，分別代表一次聊天與一次購物的交流經驗；它不是實際商店交易或酒館 Command，不轉移物品／金錢，也不受玩家主角的每日 6 次聊天與 6 次交易上限影響。這個例外只適用交流熟練度，不改動其他熟練度的既有取得規則。
 
@@ -137,7 +159,7 @@ type Team = {
   teamId: TeamId;
   control: 'player' | 'npc' | 'child';
   memberIds: CharacterId[];             // 正式成員
-  temporaryMemberIds: CharacterId[];    // 護衛／救援等任務角色
+  temporaryMemberIds: CharacterId[];    // 僅救援後需隨隊離圖的任務角色；護衛角色不加入 Team
   leaderId: CharacterId;
   location: TeamLocation;
   activePlanId?: TeamPlanId;
@@ -168,19 +190,27 @@ type WorkSettlementLedger = {
 type TeamLocation =
   | { kind: 'city'; cityId: CityId }
   | { kind: 'adventureMap'; mapId: MapInstanceId }
-  | { kind: 'travelling'; routeId: RouteId; segmentIndex: 0 | 1 | 2 }
+  | {
+      kind: 'travelling';
+      routeId: RouteId;
+      progress:
+        | { kind: 'playerSegments'; segmentIndex: 0 | 1 | 2 }
+        | { kind: 'npcDirect' };
+    }
   | { kind: 'home'; homeId: HomeId };
 ```
 
 - 一名 `CharacterId` 同時至多屬於一支活動隊伍，且不可同時存在於正式與暫時成員清單。
+- `control: player | npc` 的正式成員數必須介於 1～9；沒有候補、預備隊或第十名成員。
 - `playerTeamId` 必須指向 `control: player` 的唯一隊伍。
 - `control: child` Team 必須恰有一名未成年正式成員、固定在其家中，不能旅行、進戰鬥、接任務或進入 NPC Lifecycle；它只執行 Child Study Plan。
 - `location.kind: adventureMap` 是 Map 判斷有人在圖內的唯一來源。
 - `leaderId` 必須是正式成員；任務暫時角色不可成為隊長、取得一般任務金錢報酬或參與戰利品分配。
 - `memberJoinedOnDay` 必須對每名正式成員各有一筆；加入當日就是留隊兩個月門檻的起算點。
 - `TeamCombatFormation` 是下一場遭遇的持久配置，不是 active Combat 的可移動站位；Combat 建立 Encounter 時只讀取一次快照。
-- 每筆配置只能引用該 Team 當下可配置的正式成員；格位必須落在己方 3×3 且不可重疊。成員離隊或不可用時，Team 同一交易移除其配置。
-- 沒有配置在九宮格內的正式成員不會自動被 Combat 偷塞進空格；其是否可作為候補參戰者由之後的參戰名單規則定案。
+- `control: player | npc` 的每筆配置必須恰好包含當下全部正式成員，每人占一個己方 3×3 合法且不重疊的格位。所有正式成員都是參戰者，不存在未配置候補；成員加入、離隊或不可用時必須在同一交易產生仍涵蓋全隊的合法配置，否則隊伍不能開始戰鬥。
+- 新建隊伍或成功招募成員時，由 `TeamFormationRuleDefinition.defaultPlacementResolverId` 以目前配置與全體正式成員產生合法預設位置；不得在 Handler 寫死格位順序。玩家之後可用 `configureCombatFormation` 調整，但不存在「尚未放入所以先當候補」的中間狀態。
+- `temporaryMemberIds` 不占九宮格、不參戰，也不會因正式隊員上限而成為第十名正式成員。
 
 ### 3.2 TeamPlan
 
@@ -207,7 +237,32 @@ type TeamPlan = {
 };
 ```
 
-`TeamPlanPayload` 只保存此大動作需要的 ID 與資料，例如目的城市、旅行模式、Map ID、護衛任務 ID、NPC 地牢 Run ID。它不嵌入城市、地圖、委託或角色的完整 State。
+`TeamPlanPayload` 只保存此大動作需要的 ID 與資料，例如目的城市、玩家旅行模式或 NPC Travel Rule、Map ID、護衛任務 ID、NPC 地牢 Run ID。它不嵌入城市、地圖、委託或角色的完整 State；NPC 旅行 payload 禁止保存玩家模式與任何事件欄位。
+
+城市旅行 payload 必須使用判別聯集：
+
+```ts
+type CityTravelPlanPayload =
+  | {
+      kind: 'playerTravel';
+      fromCityId: CityId;
+      toCityId: CityId;
+      routeId: RouteId;
+      modeId: TravelModeId;
+      segmentIndex: 0 | 1 | 2;
+      nextSegmentDay: WorldDay;
+    }
+  | {
+      kind: 'npcTravel';
+      fromCityId: CityId;
+      toCityId: CityId;
+      routeId: RouteId;
+      npcTravelRuleId: NpcTravelRuleId;
+      arrivalDay: WorldDay;
+    };
+```
+
+NPC payload 不得出現 `modeId`、`segmentIndex`、事件池或事件權重欄位。
 
 ### 3.3 MemberFreeAction
 
@@ -225,15 +280,29 @@ type MemberFreeAction = {
   payload: FreeActionPayload;
   revision: Revision;
 };
+
+type FreeActionPayload =
+  | { kind: 'craft'; recipeId: CraftingRecipeId }
+  | { kind: 'train'; masteryId: MasteryId }
+  | { kind: 'teach'; postId: HomeTeachingPostId }
+  | { kind: 'trade'; marketIntentId: NpcMarketIntentId }
+  | { kind: 'proposeToTeammate'; targetCharacterId: CharacterId; marriageRuleId: NpcMarriageRuleId }
+  | { kind: 'tavernVisit' }
+  | { kind: 'rest' };
 ```
 
+`proposeToTeammate` 是 NPC／非玩家主角成員的零日自由子步驟。Lifecycle 抽中時必須已固定目標；Team 只保存並完成這筆行動，不判斷婚姻或好感。無論提案接受或拒絕，同一成員下一件自由行動最早次日才可開始。
+
 ```ts
-type PendingTravelInteraction = {
+type PendingPlayerTravelInteraction = {
   interactionId: InteractionId;
   teamId: TeamId;
   planId: TeamPlanId;
   segmentIndex: 0 | 1 | 2;
-  contentEventInstance: ContentEventInstance;
+  eventInstance: PlayerTravelEventInstance;
+  state: 'awaitingChoice' | 'awaitingCombatResult';
+  selectedOptionId?: DefinitionId;
+  encounterId?: EncounterId;
   openedOnDay: WorldDay;
   revision: Revision;
 };
@@ -250,7 +319,19 @@ type PendingSuccession = {
 
 玩家繼承人由玩家指定，且每次只可選出一人。`eligibleSuccessorIds` 只能包含：仍可用的成年正式隊友、成年子嗣、或成年伴侶；候選者即使目前位於單人 NPC Team，也可在選定時合法轉入玩家隊。未成年者、任務暫時角色、其他 NPC 隊伍成員與非伴侶／非子嗣居民一律不可列入。所有可繼承的個人資產與房屋只移轉給該唯一繼承人，不做多人拆分。
 
-`ContentEventInstance` 是已由資料 Resolver 選定的可序列化快照；不可保存函式或 React callback。
+```ts
+type PlayerTravelEventInstance = ContentEventInstance & {
+  instanceId: PlayerTravelEventInstanceId;
+  context: 'playerTravel';
+  actorCharacterId: CharacterId; // 固定為目前玩家主角
+  routeId: RouteId;
+  segmentIndex: 0 | 1 | 2;
+  selectedEscortQuestId?: QuestId;
+  rngStreamId: string;
+};
+```
+
+旅行事件只為 `playerTeamId` 建立。事件實例是已由資料 Resolver 選定的可序列化快照；若事件需要一名護衛對象，抽中時即固定 `selectedEscortQuestId`，存讀檔、重送 Command 或多筆護衛並存時都不得重抽。不得保存函式或 React callback。
 
 ### 3.4 最近行動紀錄
 
@@ -262,6 +343,7 @@ type RecentAdventurerActivity = {
     | 'craft'
     | 'train'
     | 'teach'
+    | 'social'
     | 'tavernVisit'
     | 'rest'
     | 'travel'
@@ -284,8 +366,8 @@ Team 在自己的 Plan／Free Action 完成時直接寫入紀錄；戰鬥、任�
 
 1. 成員只有在所屬 Team 的 active plan 為 `cityFree` 時才累積自由日數。
 2. 一名成員在一個時點最多有一筆 `active` 或 `resting` 的自由行動。
-3. 離開 `cityFree` 時，Team 必須先將 `activeSinceDay` 到當日之間已實際取得的自由日數寫入 `accumulatedFreeDays`，再凍結或取消行動。
-4. 回到 `cityFree` 時可恢復 `canResumeAfterInterruption: true` 的行動；不可恢復者由資料 Resolver 決定取消後果。
+3. 離開 `cityFree` 時，Team 必須先將 `activeSinceDay` 到當日之間已實際取得的自由日數寫入 `accumulatedFreeDays`，再凍結行動；一般行程切換不得取消或歸零。
+4. 回到 `cityFree` 時必須恢復同一筆未完成行動，繼續累積至 `requiredFreeDays`；只有角色死亡、資料失效等明確不可恢復原因才可取消。
 5. `resting` 與持續中的 `tavernVisit` 不產生成長或 `freeActionDue` Job。
 6. 新抽出的自由行動最早從次日開始累積，不得在同一日連續完成多筆行動。
 7. `leaderId` 必須是可用的正式成員；玩家 Leader 死亡／退休時可暫時由 `pendingSuccession` 取代，但不得開始新的長期行動。
@@ -308,10 +390,11 @@ interface TeamQuery {
   getActivePlan(teamId: TeamId): TeamPlanView | undefined;
   listFreeActions(teamId: TeamId): MemberFreeActionView[];
   listFormalMembers(teamId: TeamId): CharacterId[];
+  getFormalMemberJoinedOnDay(teamId: TeamId, characterId: CharacterId): WorldDay | undefined;
   getCombatFormation(teamId: TeamId): TeamCombatFormationView;
   listTavernVisitorIds(cityId: CityId): CharacterId[];
   getRecentAdventurerActivity(characterId: CharacterId): RecentAdventurerActivityView[];
-  getPendingTravelInteraction(teamId: TeamId): PendingTravelInteractionView | undefined;
+  getPendingPlayerTravelInteraction(teamId: TeamId): PendingPlayerTravelInteractionView | undefined;
   getPendingSuccession(): PendingSuccessionView | undefined;
 }
 ```
@@ -326,25 +409,24 @@ interface TeamQuery {
 
 | Command | 前置條件 | Team 的責任 |
 |---|---|---|
-| `startCityTravel` | 玩家隊伍在城市，目的地與旅行模式合法。 | 建立 `cityTravel` Plan 與旅行段落 Job。 |
+| `startCityTravel` | 玩家隊伍在城市，目的地與 3／6／9 日玩家旅行模式合法。 | 建立 `kind: playerTravel` 的 `cityTravel` Plan 與第一個段落 Job。 |
 | `enterAdventureMap` | 玩家隊伍在對應城市。 | 建立 1 日 `enterAdventureMap` Plan。 |
 | `returnToCity` | 玩家隊伍位於冒險地圖。 | 建立 1 日 `returnToCity` Plan。 |
-| `chooseCityFreeAction` | 隊伍在城市且目前為 `cityFree`。 | 建立／替換指定成員的自由行動。 |
+| `chooseCityFreeAction` | 隊伍在城市、目前為 `cityFree`，且指定成員沒有尚未完成的耗時自由行動。 | 建立指定成員的自由行動；不得用新選擇覆蓋仍在累積的製作、鍛鍊或傳授。 |
 | `beginCityFreePeriod` | 玩家隊伍在城市，且沒有進行中的非自由 Team Plan。 | 在開始自由活動前結算上一段工作、對符合資格隊員擲留隊骰，成功後才建立玩家的 `cityFree`，並為玩家隊友安排首個自由日交流 Tick。 |
 | `rest` | 地點與休息方式合法。 | 建立耗時的 Team Plan；不直接恢復數值。 |
-| `resolveTravelInteraction` | 玩家隊伍有匹配的 Pending Interaction，選項仍合法。 | 套用資料化結果、清除互動並安排下一旅行段。 |
 | `selectPlayerSuccessor` | 有匹配的 Succession Interaction，角色仍符合繼承政策。 | 必要時從原 NPC Team 合法轉入玩家隊，設為新 Leader、清除互動並發出繼承事實。 |
-| `recruitTavernAdventurer` | 發令者為玩家隊長、目標是同城酒館可見的真實 NPC 冒險者。 | 所有人都可被嘗試招募；僅當目標所屬 NPC Team 為單人 Team（目標本人即唯一成員與隊長）時接受並轉入。多人 Team 的任何成員一律以 `alreadyInTeam` 拒絕，不支援挖角、拆隊或換隊長。 |
+| `recruitTavernAdventurer` | 發令者為玩家隊長、玩家隊未滿 9 名正式成員、目標是同城酒館可見的真實 NPC 冒險者，且 Recruitment Retry Rule 允許本次嘗試。 | 多人 Team 的任何成員一律以 `alreadyInTeam` 拒絕；單人 Team 仍須以 Recruitment Rule 和招募者的交流加成擲骰。只有成功才關閉來源 Team 並轉入玩家隊；失敗不得改動任何成員或資產。 |
 | `dismissMember` | 發令者為該隊隊長、目標是非隊長正式成員，且沒有進行中的 Combat、玩家 Pending Interaction 或尚未完成的玩家資產分配。 | 立即移出正式成員並建立同位置的 NPC 行動單位；不花世界時間、不做拒絕檢定。 |
 | `configureCombatFormation` | 發令者為隊長、沒有 active Combat；所有配置角色均為可配置的正式成員，格位合法且不重疊。 | 原子替換該隊的持久戰鬥配置並遞增 revision；不消耗世界時間，也不改變任何 active Encounter。 |
 
-道具購買、委託接取、技能學習等 Command 由擁有模組驗證；它們可能要求 Team Query 提供位置與成員資料。
+`resolveTravelInteraction` 由 `app/workflows/player-travel-event` 擁有，因為它可能同時要求 Economy、Inventory、Character、Combat 或 World 執行效果。Team 只透過 Internal Command 保存／轉換 Pending 與旅行進度。道具購買、委託接取、技能學習等 Command 同樣由擁有模組驗證；它們可能要求 Team Query 提供位置與成員資料。
 
 ### 5.2 ScheduledJob
 
 | Job | Team 的反應 |
 |---|---|
-| `teamPlanDue` | 驗證 plan revision，完成旅行段落、進出冒險地、返城、休息或其他大動作。 |
+| `teamPlanDue` | 驗證 plan revision；玩家旅行只完成一個段落並發布 `TravelSegmentReached`，NPC 旅行只有開始後第 6 日的一次抵達，其他大動作照各自規則完成。 |
 | `freeActionDue` | 完成對應個人自由行動，emit 完成結果，依規則安排下一筆行動。 |
 | `nonPlayerMemberCityFreeDayTick` | 僅在 Team 仍處於 `cityFree` 時執行；對每名非玩家主角的正式成員發出一筆聊天與一筆購物交流練習，並安排下一個自由日的 Tick，直到自由期結束。 |
 
@@ -356,10 +438,10 @@ interface TeamQuery {
 | `AssetDistributionCompleted` | 若來源為對應 NPC Dungeon Run，關閉／轉換 Plan 並安排離開冒險地；玩家 Distribution 則只解除隊伍異動限制。 |
 | `QuestSettled` | 對 `beneficiaryCharacterIds` 寫入一筆 quest 近期行動。 |
 | `CombatEncounterResolved` | 對事件列出的正式參戰角色寫入一筆 combat 近期行動。 |
-| `QuestStateChanged` | 護衛任務到期、完成或對象死亡時，調整護衛 Plan／暫時成員。 |
+| `QuestStateChanged` | 護衛任務到期、完成、對象死亡或所屬隊伍戰敗時，調整護衛 Plan；護衛角色本來就不在 `temporaryMemberIds`。救援任務才調整任務暫時成員。 |
 | `CharacterAvailabilityChanged` | 成員死亡、離隊或不可行動時，更新 Team 成員與合法 Plan；玩家 Leader 死亡時依 Succession Policy 建立 Pending Interaction。 |
 | `CharacterRetired` | 玩家 Leader 退休時建立 Succession Interaction；NPC 隊依 Decision Policy 選新 Leader 或解散。 |
-| `TemporaryCharacterRecovered` | 從所屬隊伍移除已回收的任務暫時角色。 |
+| `TemporaryCharacterRecovered` | 若為已救出並加入隊伍的救援角色，從 `temporaryMemberIds` 移除；護衛角色無 Team Membership 可移除。 |
 | `CombatTeamOutcome` | 戰鬥後決定隊伍是否能繼續目前動作。 |
 | `ItemConsumed` | 若 `consumerCharacterId` 是正式成員且 Item 為消耗品，依 `intrinsicValuePerUnit × quantity` 記入該 Team 的 `consumableUse`；裝備取得／購買永不入帳。 |
 | `RouteAccessChanged` | 依 Travel Rule 決定既有旅程繼續、於下一段中止或返還；新旅行一律使用最新通行狀態。 |
@@ -373,9 +455,13 @@ interface TeamQuery {
 | `StartChildStudyPlan` | 僅接受 Progression；驗證 Team 為單人 `control: child` 且位於家中，建立 14 日 `childStudy` Plan。 |
 | `CreateNpcTeam` | 驗證角色皆可用且尚未入隊，在指定城市建立 NPC Team；Adventurer Lifecycle 在角色建立 Workflow 中建立 Controller 並安排首次 `npcDecisionDue`。 |
 | `StartNpcTeamPlan` | 僅接受 Adventurer Lifecycle；驗證 Chain 節點、位置與前置條件後建立 NPC 的 Team Plan。若 `kind=cityFree`，先結算留隊、建立首個 `nonPlayerMemberCityFreeDayTick`，且期限必須為資料化的 2～7 日。 |
-| `AssignNpcMemberFreeAction` | 僅接受 Adventurer Lifecycle；驗證 Team 正在 `cityFree`，為指定正式成員建立 craft／train／trade／rest。 |
+| `OpenPlayerTravelInteraction` | 只接受 Player Travel Event Workflow；驗證 Team 是 `playerTeamId`、段落與 Plan revision 相符後，保存已擲定事件實例並暫停旅行。 |
+| `CompletePlayerTravelSegmentWithoutEvent` | 只接受 Player Travel Event Workflow；驗證同一 Plan／段落的 no-event Resolution，直接安排下一段或第三段後抵達，不建立 Pending。 |
+| `MarkPlayerTravelInteractionAwaitingCombat` | 驗證 Pending 正在等待選項且 Encounter 來源為同一 Event Instance，保存選項與 Encounter ID。 |
+| `CompletePlayerTravelInteraction` | 驗證即時效果或 Encounter 結果已提交，清除 Pending；隊伍仍可旅行才安排下一段，否則依 `CombatTeamOutcome` 結束目前 Plan。 |
+| `AssignNpcMemberFreeAction` | 僅接受 Adventurer Lifecycle；驗證 Team 正在 `cityFree`，為指定正式成員建立 craft／train／trade／proposeToTeammate／rest。提案目標必須是同隊正式成員，但婚姻資格由 Marriage Workflow 重驗。 |
 | `RecordTeamWorkSettlementValue` | 僅接受 Quest／Dungeon／Travel Workflow；以冪等 `entryId` 將任務報酬、地牢所得或旅費寫入當前工作結算。禁止傳入裝備購買支出。 |
-| `AttachQuestTemporaryMember` | 驗證 Character 的 Quest Temporary Origin 與 Quest ID，將其加入指定隊伍的 `temporaryMemberIds`。 |
+| `AttachQuestTemporaryMember` | 僅接受已救出的救援角色；驗證 Character 的 Quest Temporary Origin 與 Quest ID 後加入指定隊伍的 `temporaryMemberIds`。護衛角色一律拒絕。 |
 
 ---
 
@@ -388,8 +474,9 @@ interface TeamQuery {
 | `TeamLocationChanged` | `teamId`、`from`、`to` | map、dungeon、quest。 |
 | `FreeActionCompleted` | `teamId`、`memberId`、`ruleId`、`payload` | progression、city、crafting。 |
 | `FreeActionChanged` | `freeActionId`、`status`、`progress` | ui/app。 |
-| `TravelCompleted` | `teamId`、`fromCityId`、`toCityId`、`modeId`、`experienceRuleId`、`experienceMultiplier` | progression、quest。 |
-| `TravelSegmentReached` | `teamId`、`routeId`、`segmentIndex`、`eventProfileId` | travel-event workflow、ui/app。 |
+| `TravelCompleted` | `teamId`、`fromCityId`、`toCityId`、`travelKind: player | npc`、`modeId?`、`experienceRuleId`、`experienceMultiplier` | progression、quest。NPC 固定 6 日與 ×1。 |
+| `TravelSegmentReached` | `teamId`、`routeId`、`segmentIndex`、`eventProfileId` | player-travel-event workflow、ui/app；只由玩家旅行發布。 |
+| `PlayerTravelEventResolved` | `interactionId?`、`eventInstanceId?`、`optionId?`、`outcome: noEvent | immediate | combatVictory | combatDefeat` | ui/app、debug；不作為 Quest 或 MXP 的替代事實。 |
 | `PlayerInteractionOpened` | `interactionId`、`teamId`、`kind: travelEvent \| succession` | engine session、ui/app。 |
 | `HomeYearRestCompleted` | `teamId`、`memberIds`、`elapsedDays: 365` | character。 |
 | `PlayerSuccessorSelected` | `teamId`、`formerLeaderId`、`successorId`、`reason` | inheritance workflow、ui/app。 |
@@ -411,7 +498,7 @@ net = questRewardValue + dungeonRewardValue
     - travelExpenseValue - consumedItemExpenseValue
 ```
 
-對入隊滿 60 日的每位非隊長正式成員，資料 Resolver 以 `net` 與其預期金額算離隊機率；缺口越大，機率越高。擲中者立即離隊，並在目前城市成為自己為隊長的一人 NPC Team。這同樣適用玩家隊友；不移轉任何個人物品／帳戶。
+對入隊滿 60 日的每位非隊長正式成員，資料 Resolver 以 `net`、其預期金額，以及目前隊長的交流 `memberDepartureResistance` 算離隊機率；缺口越大機率越高，抵抗值越高機率越低。擲中者立即離隊，並在目前城市成為自己為隊長的一人 NPC Team。這同樣適用玩家隊友；不移轉任何個人物品／帳戶。精確公式仍屬待定數值設計。
 
 完成判定後，舊 Ledger 以新的 `cycleStartedOnDay` 歸零。一次開始自由期每名成員最多骰一次；不能藉由零日城內互動重複觸發。旅費只在旅行付款成功後記入；地牢所得只在戰利品分配完成後記入；任務所得只在原公會結案且報酬分配成功後記入；消耗品僅於真正使用時以 `ItemDefinition.intrinsicValue` 記入。
 
@@ -448,7 +535,7 @@ sequenceDiagram
 ### 7.2 NPC 隊伍的城鎮行為
 
 1. Adventurer Lifecycle 在自己的 `npcDecisionDue` 選擇 Intent／ActionChain，再以 Internal Command 要求 Team 開始對應 Plan。
-2. 若 Chain 進入 `cityFree`，Lifecycle 為每名正式成員各自指派製作、鍛鍊、買賣或休息。
+2. 若 Chain 進入 `cityFree`，Lifecycle 為每名正式成員各自指派製作、鍛鍊、買賣、向合法隊友求婚或休息。
 3. 每個人只依自己的 `nextDueDay` 結算，其他成員不被拖慢；交易本身是由 Lifecycle／City Workflow 完成的零日子步驟。
 4. 每個完整自由日另由 `nonPlayerMemberCityFreeDayTick` 對每位非玩家主角的正式成員發出一次聊天與一次購物交流練習；這與其自由行動和實際交易完全分離。玩家隊友與其他 NPC 的處理相同。
 5. Team 完成 Plan 或 Free Action 後只發出事實；Lifecycle 次日才推進 Chain 或重新決策。
@@ -466,15 +553,17 @@ sequenceDiagram
 
 Map 只根據 `TeamLocationChanged` 與 `TeamQuery` 判斷地圖是否有人；Team 不直接修改 Pending 或刷新。
 
-### 7.4 旅行三段事件
+### 7.4 玩家三段旅行與 NPC 固定旅行
 
-每趟旅行固定分前／中／後三段；3／6／9 日只是每段分別經過 1／2／3 日。每段到期先發出 `TravelSegmentReached`，由 travel-event workflow 以 Travel Mode 的基礎權重加上 World Query 當下有效的路線／戰爭權重修正，選出 ContentEvent：
+玩家每趟旅行固定分前／中／後三段；3／6／9 日只是每段分別經過 1／2／3 日。每段到期發布 `TravelSegmentReached`，由 Player Travel Event Workflow 使用 Route 的玩家事件池、Travel Mode 權重、World 當下修正與 Quest 的窄化護衛 Query 解析：
 
-- NPC 隊伍由資料 Resolver 立即結算。
-- 玩家隊伍若需要選擇，Team 建立 Pending Interaction、發出 `PlayerInteractionOpened`，核心停止繼續快轉。
-- Interaction 完成後才安排下一段；第三段完成後才改變城市位置並發出一次 `TravelCompleted`。
+- 「護衛刺殺」不由 Quest 動態修改池；事件 Entry 常駐資料池，以「玩家隊有未完成護衛 Quest」Condition 決定本次是否成為候選。
+- 若同時有多筆護衛，事件抽中時以穩定 RNG 固定一筆 `selectedEscortQuestId` 並寫入 Event Instance。
+- 無事件結果由 Workflow 送 `CompletePlayerTravelSegmentWithoutEvent` 直接安排下一段；需要選擇時要求 Team 建立 Pending，核心停止快轉。
+- 即時效果全部提交後結束 Pending；戰鬥選項則保存 `awaitingCombatResult`，等同源 `CombatEncounterResolved` 後才完成事件。
+- 第三段事件完成後才抵達並發布一次 `TravelCompleted`。
 
-旅行 MXP 不是每日取得；只在整趟抵達時取得固定基礎值，再乘旅行模式倍率。
+所有 NPC 隊伍不分任務或隊伍規模，一律建立固定 6 日的 `npcTravel` Plan。它沒有三段、沒有旅行事件候選池、沒有 `TravelSegmentReached`、沒有 Pending，也不因護衛任務建立刺殺事件；第 6 日直接抵達。玩家與 NPC 的旅行 MXP 都不是每日取得，玩家乘模式倍率，NPC 固定 ×1。
 
 ### 7.5 玩家繼承
 
@@ -502,7 +591,10 @@ NPC 正式成員位於城市
 玩家隊長嘗試招募
   → 驗證同城酒館可見；所有可見冒險者都可成為嘗試對象
   → 若來源 NPC Team 不是「目標為唯一正式成員且唯一隊長」：typed rejection = alreadyInTeam，State 不變
-  → 若為單人 Team：關閉來源 Team，目標加入玩家正式成員
+  → 若玩家隊已有 9 人：typed rejection = teamFull
+  → 若為單人 Team：執行 Recruitment Rule 機率檢定
+  → 檢定成功：關閉來源 Team，目標加入玩家正式成員並建立涵蓋全隊的新合法配置
+  → 檢定失敗：成員、隊伍與個人資產完全不變
   → 個人帳戶、背包、裝備與物品 Owner 全部不變
 
 隊長解雇正式成員
@@ -521,33 +613,37 @@ NPC 正式成員位於城市
 Team 模組最低必須提供：
 
 1. 一支玩家隊伍與一支 NPC 隊伍的最小 Fixture。
-2. 一次 3／6／9 日旅行各自三段 Job 的測試。
+2. 玩家一次 3／6／9 日旅行各自恰有三段 Job；NPC 任意旅行恰有一筆第 6 日抵達 Job，且 State／Job／RNG 都不含事件池的測試。
 3. 城鎮自由活動中，不同成員有不同所需日數且互不等待的測試。
 4. 「一次推進 14 日」與「連續 14 次推進 1 日」的自由行動一致性測試。
 5. 城鎮自由活動被旅行中斷後，累積進度正確凍結與恢復的測試。
 6. 玩家隊伍抵達／離開冒險地正確發出位置事件的測試。
 7. 舊 Plan Job 因 revision 不符而被安全跳過的測試。
-8. 三個旅行段各骰一次、玩家互動會中止快轉、整趟只發一次旅行 MXP 的測試。
+8. 玩家三個旅行段各骰一次、互動會中止快轉、無事件可直接續行、戰鬥事件會等 Encounter 結果、整趟只發一次旅行 MXP 的測試。
 9. 隊伍級住宿期間不累積個人自由日，完成後才發出 `TeamPlanCompleted` 的測試。
 10. 玩家 Leader 死亡／退休建立可存檔的 Succession Interaction，NPC 隊不建立玩家互動的測試。
 11. 繼承候選在選擇前失效時拒絕 Command，且不改 Leader 的測試。
 12. 酒館中每個可見冒險者都能聊天與招募，聊天內容只來自目前／近期真實行動的測試。
-13. 嘗試招募所有酒館可見冒險者皆可送出 Command；單人 Team 成功加入，任何多人 Team 成員均以 `alreadyInTeam` 拒絕且來源隊伍完全不變的測試。
-14. 隊長解雇成員立即建立同位置 NPC 行動單位，角色個人資產完全不變的測試。
-15. 任務暫時角色不可被招募、解雇為獨立 NPC、領取均分或參加戰利品分配的測試。
-16. `StartNpcTeamPlan`／`AssignNpcMemberFreeAction` 只執行合法 Lifecycle 節點、無法越過 Team 位置與成員不變量的測試。
-17. 玩家隊友與 NPC 隊員入隊滿／未滿 60 日、各類工作收支、裝備支出排除、缺口遞增離隊機率，以及離隊後生成單人 Team 的測試。
-18. 戰鬥配置可保留第 1、3 排之間的空排；成員離隊會移除其配置，且 active Combat 不受後續配置修改影響的測試。
-19. 非隊長、戰鬥中修改、重疊格位與非正式成員配置均被拒絕且不留下部分寫入的測試。
+13. 嘗試招募所有酒館可見冒險者皆可送出 Command；單人 Team 仍須通過 Recruitment Rule，多人 Team 成員以 `alreadyInTeam`、玩家隊滿 9 人以 `teamFull` 拒絕，任一失敗都不得改動來源隊伍或個人資產的測試。
+14. 玩家與 NPC 隊伍所有正式成員恰好各占九宮格一格、正式人數不得超過 9，且不存在候補參戰者的測試。
+15. 隊長解雇成員立即建立同位置 NPC 行動單位，角色個人資產完全不變的測試。
+16. 任務暫時角色不可被招募、解雇為獨立 NPC、領取均分或參加戰利品分配的測試。
+17. `StartNpcTeamPlan`／`AssignNpcMemberFreeAction` 只執行合法 Lifecycle 節點、無法越過 Team 位置與成員不變量的測試。
+18. 玩家隊友與 NPC 隊員入隊滿／未滿 60 日、各類工作收支、裝備支出排除、缺口遞增與交流抵抗降低離隊機率，以及離隊後生成單人 Team 的測試。
+19. 戰鬥配置可保留第 1、3 排之間的空排；成員離隊會移除其配置，且 active Combat 不受後續配置修改影響的測試。
+20. 非隊長、戰鬥中修改、重疊格位、漏配正式成員與非正式成員配置均被拒絕且不留下部分寫入的測試。
+21. `getFormalMemberJoinedOnDay` 只回傳目前正式隊員的加入日；NPC 求婚可由雙方加入日推導共隊天數，Team 不建立 pairwise 相處紀錄的測試。
+21. 玩家有／無未完成護衛任務時，刺殺事件候選正確出現／消失；多筆護衛只在抽中時固定一筆 Quest ID，讀檔不重抽的測試。
+22. NPC 接取護衛任務後仍固定 6 日直達且完全不建立旅行事件；抵達、期限與其他 Quest 規則照常生效的測試。
 
 ---
 
 ## 9. Team 模組交接清單
 
 - [ ] `Team`、`TeamCombatFormation`、`TeamPlan`、`MemberFreeAction`、`RecentAdventurerActivity` Schema。
-- [ ] Travel、Free Action、NPC Decision Policy JSON Schema。
-- [ ] `TeamQuery`、Map／World／City／Character 的窄化 Reader。
-- [ ] 玩家旅行、進出冒險地、休息、自由行動、戰鬥配置、招募與解雇 Command Handler。
+- [ ] Player Travel Mode、NPC 固定 Travel Rule、Player Travel Pending、Free Action、Recruitment、Retention 與 Formation Schema。
+- [ ] `TeamQuery`、Map／World／City／Character／Progression Social Benefit 的窄化 Reader。
+- [ ] 玩家三段旅行與 Pending Internal Command、NPC 固定 6 日旅行、進出冒險地、休息、自由行動、戰鬥配置、招募與解雇 Handler。
 - [ ] NPC Team Plan、Free Action Job Handler；NPC Decision 與 ActionChain 由 Adventurer Lifecycle 實作。
 - [ ] 位置、Plan、自由行動事件與 `StartNpcDungeonRun` Internal Command。
 - [ ] Fixture、快轉一致性與中斷恢復測試。

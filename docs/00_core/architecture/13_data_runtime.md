@@ -31,8 +31,12 @@ content/
 │  ├─ cuisine/
 │  ├─ material-affixes/
 │  ├─ quests/
+│  ├─ events/
+│  ├─ travel-event-pools/
 │  ├─ gathering/
-│  └─ mastery/
+│  ├─ social/
+│  ├─ mastery/
+│  └─ experience-awards/
 └─ yunhua/
    ├─ pack.json
    └─ ...
@@ -118,6 +122,7 @@ flowchart LR
 - Skill 的武器需求必須存在。
 - Quest Reaction 的 Objective／Deadline／Reward Rule 必須存在。
 - Shop 的 Book Pool 不得引用錯誤 Item kind。
+- Retry Supply Policy 的 Item Tag 必須存在，且候選 Tag 至少能解析到一個 `combatConsumable`；其他 Item kind 不得被當成補品重骰資源。
 - Map Gathering Node 只能引用合法 Gathering Rule；其產物 Resolver 只能引用可建立的 Item Definition。
 
 ### 3.3 Rule Validation
@@ -127,10 +132,16 @@ flowchart LR
 - Boss 必為大型 3×3。
 - 一般敵人 1 招；菁英／Boss 2～4 招。
 - Combat Skill 的 `actionKind` 不得為移動，Combat Effect Registry 不得註冊換格、推拉或擊退 Effect。
-- Combat Skill 的 `masteryExperienceMode = fixedSupport` 必須引用有效 `SupportMasteryAwardRule`；`damage` 技能不得引用該 Rule。每筆 Support Mastery Rule 的固定值必須非負、分配比率皆為正，且總和恰為 1。
+- Combat Skill 的 `masteryExperienceMode = fixedSupport` 必須引用有效 `SupportMasteryAwardRule` 且不得引用 Attack Rule；`damage` 技能必須引用有效 `AttackMasteryAwardRule` 且不得引用 Support Rule。每筆 Attack／Support Mastery Rule 與 Defense Routing 結果的分配比率皆須為正且總和恰為 1；Support 固定值必須非負。Equipment 的 `relatedMasteryIds` 只能引用有效 Mastery。
+- 每筆 `ExperienceAwardRule` 必須指定有效 `masteryId` 與有限、非負的 `baseExperience`。玩家對話的 Social Conversation Rule、玩家交易的 City Commerce Practice Rule，以及非玩家自由日的 Team Social Practice Rule，所引用的 Experience Rule 必須有效且目標 Mastery 均為交流；不得由 Social、City、Team 或 UI 寫死固定 MXP。
+- Combat Sequence Rule 的成功率 Resolver 必須符合固定 Power Input／Probability Output Schema；重骰相對戰力差門檻必須介於 0～1、重骰次數為非負整數、每次補品數量為 1，第一版攻擊權重刻度必須為 6。
+- Combat Power Rule 的 Statistics、Feature 與 Resolver 引用必須存在；Feature 係數與 Capability Base Value 必須為有限非負數。Unit／Formation Resolver 必須是無 RNG、Clock、I/O 與 State 的純 Resolver；同一 Rule 下 Character 與 Monster 不得套用互不相容的分數公式。
 - Crafting Recipe 的材料總數必須與裝備品級一致：一般／精品／史詩／傳說／神話分別為 1／2／3／4／5；每個 Material Definition 最多一條 Material Affix。裝備成品的繼承詞條數不得超過投入候選素材數。
+- Crafting Outcome Resolver 必須回傳 `succeeded | failed` 判別；成功結果才可建立產物與品質，失敗結果不得建立產物，且輸入素材 ID 必須完整且互斥地落入 consumed／returned。兩種結果都引用同一食譜 MXP Rule。
 - 消耗品 Crafting Recipe 不得產生品質前綴或 Material Affix；其 Quality Resolver 只能解析有限正整數產量。TradeGood 的品質只能引用出售倍率 Resolver，不得加入戰鬥／料理效果。
 - Cuisine Recipe 不得產出 Inventory Item；每個 Food Affix 必須具備 Tier 1～5 的 Effect。Restaurant Menu 只可引用有效 Cuisine Recipe，並永遠使用所有 Food Affix 的 Tier 1 與自製 MXP 的 1/3。
+- 每個 Item Definition 都必須有有限非負整數 `unitWeight`；Carry Capacity Rule 必須具備有限非負的基礎值與每點肌力增量。第一版資料不得出現格數、體積、易碎、損壞、真偽、贓物或合法性欄位。
+- 第一版 Character、Quest、Effect 與 Event Definition 不得宣告犯罪、通緝、違法或委託失敗犯罪紀錄；委託到期只能驅動任務狀態與內容生命週期。
 - 武器、防具、戰鬥／非戰鬥道具、工藝品、材料與料理食譜皆必須有 `originCultureId`。Crafting／Cuisine Recipe 的文化必須與輸出 Item／餐館菜色文化一致；地圖的原生物品、素材與非人類怪物候選池只能引用所在地 `nativeCultureId` 的內容，人類敵人例外，改引用目前控制國文化池。
 - Opening CTB 與 Action Delay 的基礎值、最低值必須非負，且所有減免引用合法主屬性。
 - Gathering Rule 的地牢互動分鐘必須為正整數；Lv.0～10 都必須能解析有限的非負整數產物。
@@ -144,13 +155,23 @@ flowchart LR
 - NPC Decision Policy 的候選意圖只能是 `enterNearbyAdventureMap`、`acceptNearbyQuest`、`travelToCity`，且一定有可用的非自由 fallback Chain。
 - 每個 NPC ActionChain Template 都必須以 `complete` 結束；Quest Template 必須含回原公會結案的節點。
 - NPC 市場交易每個自由活動循環的上限為非負整數，且交易／買房規則均引用既有價格與設施資料。
-- `PlayerSocialDailyLimitDefinition` 的聊天與交易上限皆固定為 6；每個 City 都必須引用一筆有效的限制資料。
+- `PlayerConversationRuleDefinition.maxCompletedPerDay` 與 `PlayerCommerceDailyLimitDefinition.maxCommerceInteractionsPerDay` 皆固定為 6；前者由 Social 全域引用，後者與有效 Player Commerce Practice Rule 由每個 City 引用。City 不得再定義對話上限。
+- Social System Definition 必須各引用一筆有效的 Player Affinity 與 Player Conversation Rule。Player Affinity Rule 的上下限、初始值、交流變化、玩家求婚接受與家教價格修正 Resolver 必須齊全；玩家求婚 Resolver 必須 deterministic。Social Runtime／Definition 不得出現 NPC→NPC 或任意角色 pair affinity 欄位。
+- NPC Marriage Rule 的接受 Resolver 只能以共隊天數、雙方 Combat Power 與戰力接近程度作輸入並消耗 deterministic RNG；`proposeToTeammate` Free Action Rule 必須且只能在該 kind 引用有效 `npcMarriageRuleId`。候選只允許同隊、成年、存活、未婚、異性且非玩家主角的正式成員，Lifecycle 以穩定 RNG 固定其中一人，不另設候選權重公式。
+- Character 建立資料必須能解析不可變 `sex: male | female`；active Partner FamilyLink 必須恰有兩名成年、存活、異性且各自未與他人保持 active partner 關係的角色。
+- 每筆 Population Supply Rule 必須引用有效 World Adventurer Generation Rule；其原型清單不可為空，原型／性別／起始年齡／天賦 Resolver 必須存在，且輸出角色在生成日已達該原型的成年門檻。
 - `NonPlayerMemberDailySocialPracticeRuleDefinition` 的聊天與購物 Experience Rule 必須都存在，且目標 Mastery 均為交流；不得以市場交易規則或玩家每日上限取代。它只適用非玩家主角正式隊員。
+- Recruitment Rule 的成功率與重試資格 Resolver 必須存在；成功率 Resolver 必須接收 Progression 提供的 `inviteSuccessBonus`，Retention 離隊 Resolver 必須接收隊長的 `memberDepartureResistance`。Team Formation 的預設配置 Resolver 必須對 1～9 名正式成員產生每人恰好一格且不重疊的 3×3 配置，禁止產生候補。
 - NPC 生計規則的收入視窗、檢查週期與連續不足日數皆為正整數，且離隊條件不可選中隊長。
 - Mastery Lv.0～10，主屬最終上限 100。
 - 書店基礎池不含高級／極品書。
 - Quest Actual End 不早於 Accept Deadline。
 - Asset Distribution 的來源、Controller、Item Policy 必須匹配；玩家內部競拍固定以原價值為最低出價、流標直售倍率固定為 0.8。
+- 玩家旅行模式必須恰為 3／6／9 日，且三段分別為 1／1／1、2／2／2、3／3／3；NPC Travel Rule 必須恰為 6 日、×1 與 `eventPolicy=none`。
+- 每條 Route 必須引用有效的 Player Travel Event Pool；NPC Decision／ActionChain／Travel Rule 不得引用該 Pool、玩家旅行模式、事件 Definition 或事件權重 Profile。
+- Player Travel Event Pool 的 `noEventWeight` 必須為有限正數，Entry／Profile 權重必須為有限非負數；Entry 只能引用 `context=playerTravel` 的事件，玩家事件不得定義 `autoResolutionRuleId`。
+- Player Travel Event 的條件、Binding 與 Effect target 必須符合 Context。事件 Actor 固定為玩家主角；`allFormalTeamMembers` 只在該 Effect 明確選用時成立。`startDetailedCombat` 每個選項最多一筆且必須是最後一個 Effect。
+- Condition 引用圖必須無循環；每筆 Player Travel Event 的 Option ID 必須唯一，且至少有一個沒有 visibility／eligibility 條件的 fallback Option，避免合法事件產生無法關閉的 Pending。
 
 任一 Error 都不得啟動新遊戲或載入需要該內容的存檔。
 
@@ -201,15 +222,21 @@ DefinitionRegistry
 ├─ WorldDefinitionReader
 ├─ MapDefinitionReader
 ├─ TeamDefinitionReader
+├─ AdventurerLifecycleDefinitionReader
+├─ PlayerTravelEventDefinitionReader
 ├─ DungeonDefinitionReader
 ├─ CharacterDefinitionReader
-├─ InventoryDefinitionReader
+├─ ItemDefinitionReader
 ├─ ProgressionDefinitionReader
 ├─ CityDefinitionReader
+├─ SocialDefinitionReader
 ├─ EconomyDefinitionReader
 ├─ QuestDefinitionReader
 ├─ CombatDefinitionReader
+├─ CombatSequenceDefinitionReader
+├─ CombatPowerDefinitionReader
 ├─ GatheringDefinitionReader
+├─ CraftingDefinitionReader
 ├─ AssetDistributionDefinitionReader
 └─ StatisticsDefinitionReader
 ```
@@ -226,12 +253,51 @@ DefinitionRegistry
 資料只能選擇已註冊的有限種類：
 
 ```ts
-type ContentEventDefinition = DefinitionHeader & {
-  allowedContexts: ('travel' | 'dungeon' | 'city')[];
-  triggerConditionIds: ConditionDefinitionId[];
-  options: ContentEventOptionDefinition[];
-  autoResolutionRuleId?: ResolverId;
+type ContentEventDefinition = DefinitionHeader &
+  (
+    | {
+        context: 'playerTravel';
+        triggerConditionIds: ConditionDefinitionId[];
+        bindingRuleId?: PlayerTravelEventBindingRuleId;
+        options: ContentEventOptionDefinition[];
+      }
+    | {
+        context: 'dungeon' | 'city';
+        triggerConditionIds: ConditionDefinitionId[];
+        options: ContentEventOptionDefinition[];
+        autoResolutionRuleId?: ResolverId;
+      }
+  );
+
+type PlayerTravelEventPoolDefinition = DefinitionHeader & {
+  entries: PlayerTravelEventPoolEntryDefinition[];
+  noEventWeight: number;
 };
+
+type PlayerTravelEventPoolEntryDefinition = {
+  eventDefinitionId: PlayerTravelEventDefinitionId;
+  baseWeight: number;
+  valence: 'positive' | 'neutral' | 'negative';
+  availabilityConditionIds: ConditionDefinitionId[];
+};
+
+type PlayerTravelEventWeightProfileDefinition = DefinitionHeader & {
+  valenceMultipliers: Record<'positive' | 'neutral' | 'negative', number>;
+};
+
+type PlayerTravelEventBindingRuleDefinition = DefinitionHeader & {
+  kind: 'incompleteEscortQuest';
+  selectorResolverId: ResolverId;
+};
+
+interface PlayerTravelEventDefinitionReader {
+  getPool(id: PlayerTravelEventPoolId): Readonly<PlayerTravelEventPoolDefinition>;
+  getWeightProfile(id: PlayerTravelEventWeightProfileId): Readonly<PlayerTravelEventWeightProfileDefinition>;
+  getEvent(id: PlayerTravelEventDefinitionId): Readonly<ContentEventDefinition & { context: 'playerTravel' }>;
+  getBindingRule(id: PlayerTravelEventBindingRuleId): Readonly<PlayerTravelEventBindingRuleDefinition>;
+  getCondition(id: ConditionDefinitionId): Readonly<ConditionDefinition>;
+  getEffect(id: EffectDefinitionId): Readonly<EffectDefinition>;
+}
 
 type ContentEventOptionDefinition = {
   optionId: DefinitionId;
@@ -241,35 +307,104 @@ type ContentEventOptionDefinition = {
 };
 
 type ContentEventInstance = {
+  instanceId: ContentEventInstanceId;
   definitionId: ContentEventDefinitionId;
+  definitionRevision: Revision;
   sourceId: GameId;
-  context: 'travel' | 'dungeon' | 'city';
+  context: ContentEventContext;
+  actorCharacterId?: CharacterId;
   rolledOnDay: WorldDay;
-  allowedChoiceIds: DefinitionId[];
+  visibleOptionIds: DefinitionId[];
+  eligibleOptionIds: DefinitionId[];
   resolverSnapshot: JsonValue;
+  rngStreamId: RngStreamId;
 };
 ```
 
-Instance 是 Resolver 已選定結果的可序列化快照，由 Team／Dungeon／City 等情境擁有者存檔；Data Runtime 不保存全域事件佇列。
+Instance 是 Resolver 已選定結果的可序列化快照，由 Team／Dungeon／City 等情境擁有者存檔；Data Runtime 不保存全域事件佇列。`playerTravel` 的 `actorCharacterId` 固定是目前玩家主角，並由 Team 另存 Route、段落及已綁定的護衛 Quest ID。NPC 旅行既不建立 Instance，也不呼叫事件 Resolver。
 
 ```ts
 type ConditionDefinition =
-  | { kind: 'hasItem'; itemDefinitionId: ItemDefinitionId; amount: number }
-  | { kind: 'masteryAtLeast'; masteryId: MasteryId; level: number }
+  | { kind: 'actorHasItem'; itemDefinitionId: ItemDefinitionId; amount: number }
+  | { kind: 'actorHasCurrency'; amount: number }
+  | { kind: 'actorMasteryAtLeast'; masteryId: MasteryId; level: number }
+  | { kind: 'playerTeamHasIncompleteQuest'; questKind: QuestKind }
   | { kind: 'worldFact'; factId: WorldFactId; expected: JsonScalar }
-  | { kind: 'all'; conditions: ConditionDefinition[] }
-  | { kind: 'any'; conditions: ConditionDefinition[] };
+  | { kind: 'all'; conditionIds: ConditionDefinitionId[] }
+  | { kind: 'any'; conditionIds: ConditionDefinitionId[] }
+  | { kind: 'not'; conditionId: ConditionDefinitionId };
 
 type EffectDefinition =
-  | { kind: 'grantItem'; itemDefinitionId: ItemDefinitionId; amount: number }
-  | { kind: 'applyStatus'; statusId: StatusId; duration: number }
-  | { kind: 'adjustCurrentCtb'; amount: number }
-  | { kind: 'grantMasteryExperience'; masteryId: MasteryId; amount: number }
+  | { kind: 'grantItem'; target: EffectTarget; itemDefinitionId: ItemDefinitionId; amount: number }
+  | { kind: 'consumeActorItem'; itemDefinitionId: ItemDefinitionId; amount: number }
+  | { kind: 'removeActorCurrency'; amount: number }
+  | { kind: 'applyStatus'; target: EffectTarget; statusId: StatusId; duration: number }
+  | { kind: 'grantMasteryExperience'; target: EffectTarget; experienceAwardRuleId: ExperienceAwardRuleId; multiplier?: number }
+  | { kind: 'startDetailedCombat'; encounterPoolId: EncounterPoolId }
   | { kind: 'setWorldFact'; factId: WorldFactId; value: JsonScalar }
   | { kind: 'changeCityMetric'; cityId: CityId; metric: 'prosperity' | 'safety'; amount: number };
+
+type PlayerTravelConditionContext = {
+  actorCharacterId: CharacterId;
+  playerTeamId: TeamId;
+  routeId: RouteId;
+  fromCityId: CityId;
+  toCityId: CityId;
+  segmentIndex: 0 | 1 | 2;
+  worldDay: WorldDay;
+  actorItemCounts: Readonly<Record<ItemDefinitionId, number>>;
+  actorCurrency: number;
+  actorMasteryLevels: Readonly<Record<MasteryId, number>>;
+  playerEscortQuests: readonly PlayerTravelEscortQuestRef[];
+  worldFactValues: Readonly<Record<WorldFactId, JsonScalar>>;
+};
+
+type EffectPlan = {
+  sourceEventInstanceId: ContentEventInstanceId;
+  optionId: DefinitionId;
+  steps: readonly {
+    effectId: EffectDefinitionId;
+    targetCharacterIds: readonly CharacterId[];
+  }[];
+  continuation: 'completeImmediately' | 'awaitDetailedCombat';
+};
 ```
 
-Effect Resolver 只產生 `EffectPlan`，不直接改 State。Application Workflow 依每個 Effect kind 的註冊表轉成目標模組的 Internal Command；必要步驟被拒絕時遵守同一 EngineTransaction 回滾規則。如此資料可以組合內容，但不會成為繞過模組所有權的第二條寫入通道。
+Condition Resolver 只讀 Workflow 由各窄化 Query 組成的 immutable Context Snapshot；它不能取得完整 GameState 或直接呼叫模組。`playerTeamHasIncompleteQuest` 的 Snapshot 來源是 Quest 的窄化 Query，只決定事件 Entry 是否合格，不會修改事件池。若 Entry 另有 `incompleteEscortQuest` Binding，選中事件時才以 deterministic Resolver 固定一筆 Quest，並把 Quest ID 寫入 Instance。
+
+Effect Resolver 只產生 `EffectPlan`，不直接改 State。Application Workflow 依每個 Effect kind 的註冊表轉成目標模組的 Internal Command；必要步驟被拒絕時遵守同一 EngineTransaction 回滾規則。`consumeActorItem` 依穩定 ItemInstanceId 順序選取合法實體，`removeActorCurrency` 只可轉入 system sink。`startDetailedCombat` 會把旅行互動轉為 `awaitingCombatResult`；同源 Encounter 正式結算後，Workflow 才能完成事件與繼續旅行。如此資料可以組合內容，但不會成為繞過模組所有權的第二條寫入通道。
+
+`EffectPlan.steps.targetCharacterIds` 是 Target Resolver 的固定結果；世界、城市與戰鬥類 Effect 使用空陣列。Instance 建立後不得因隊伍改組或重新開啟 UI 而重選目標。
+
+| DSL kind | 唯讀條件來源／唯一寫入者 |
+|---|---|
+| `actorHasItem`／`grantItem`／`consumeActorItem` | Inventory Query／Inventory Internal Command。 |
+| `actorHasCurrency`／`removeActorCurrency` | Economy Query／Economy Internal Command。 |
+| `actorMasteryAtLeast`／`grantMasteryExperience` | Progression Query／`GrantContentEventMasteryExperience`。 |
+| `playerTeamHasIncompleteQuest`／護衛 Binding | Quest 的玩家旅行窄化 Query；沒有寫入效果。 |
+| `applyStatus` | Character `ApplyContentEventStatus`。 |
+| `startDetailedCombat` | Combat `StartCombatEncounter`；結果由同源 Event 續接。 |
+| `worldFact`／`setWorldFact` | World Query／World Internal Command。 |
+| `changeCityMetric` | City Internal Command。 |
+
+Player Travel Event Workflow 只做編排，不持有上述任何資料，也不直接寫入任一模組 Slice。
+
+第一版玩家旅行事件的解析順序固定為：
+
+```text
+TravelSegmentReached
+  → 讀 Route.playerTravelEventPoolId
+  → 以玩家主角、玩家隊伍、Route、World Fact／Modifier 建立唯讀 Condition Context
+  → 排除不合格 Entry，套用旅行模式的 valence multiplier
+  → 在「合法 Entry + noEventWeight」中擲定一次
+  → noEvent：直接完成本段
+  → event：解析 Binding、選項資格並保存 ContentEventInstance
+  → 玩家選項產生 EffectPlan
+  → 即時效果全數提交，或等待同源 detailed Combat 結果
+  → 完成事件後才安排下一段／抵達
+```
+
+護衛刺殺是事件池中的普通靜態 Entry：它使用 `playerTeamHasIncompleteQuest(escort)` 作可用條件，使用 `incompleteEscortQuest` Binding 固定敘事對象，並以 `startDetailedCombat` 開戰。非玩家隊伍沒有事件池，因此不需要 NPC 事件選項、AI 自動選項或背景事件結算規則。
 
 新增一筆既有 `kind` 內容只需 JSON；新增 `kind` 才需要：
 

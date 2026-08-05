@@ -16,6 +16,7 @@
 type InventoryState = {
   items: Record<ItemInstanceId, ItemInstance>;
   equipmentLoadouts: Record<CharacterId, CharacterEquipmentLoadout>;
+  encumbranceResolutions: Record<EncumbranceResolutionId, EncumbranceResolution>;
 };
 ```
 
@@ -56,6 +57,7 @@ interface ItemDefinitionReader {
 ```ts
 type ItemDefinition = DefinitionHeader & {
   originCultureId: CultureId;
+  itemTagIds: ItemTagId[];
   kind:
     | 'equipment'
     | 'combatConsumable'
@@ -65,6 +67,7 @@ type ItemDefinition = DefinitionHeader & {
     | 'material';
   stackPolicy: 'single' | 'stackable';
   maxStack?: number;
+  unitWeight: number; // 最小重量單位的非負整數；堆疊總重 = unitWeight × quantity
   tradePolicy: TradePolicy;
   display: ItemDisplayDefinition;
   intrinsicValue: {
@@ -85,15 +88,19 @@ type ItemDefinition = DefinitionHeader & {
 
 武器、防具、戰鬥／非戰鬥道具、工藝品與材料都必須有 `originCultureId`。它描述物件的文化來源，不是所在地目前控制國；已建立的 Item Instance 只引用 Definition，因此占領、轉手、運送與販售都不得改寫其文化。
 
+所有 Item Definition 都必須有固定 `unitWeight`；第一版不使用背包格數、體積、易碎度、損壞度、真偽、贓物或合法性資料。`quantity × unitWeight` 是唯一的物品攜帶負擔。角色攜帶重量由 Inventory 聚合，最大重量由 Derived Statistics 的肌力規則計算；Inventory 不自行計算肌力公式。
+
 Rule Validation 必須保證：
 
 - `combatConsumable` 必須有 `combatUseDelayRuleId` 與效果。
+- 每個 `itemTagId` 必須存在；供補品重骰等跨系統 Policy 分類，但 Tag 本身不含可執行邏輯。
 - `nonCombatConsumable` 必須有 `nonCombatUseRuleId` 與效果。
 - `generalItem` 必須有 `generalItemCategoryId`，且不得有任何使用規則。
 - 裝備、書籍與材料依自己的專用流程處理，不能偽裝成一般消耗品。
 - `material` 最多引用一條 `materialAffixId`；該詞條的相容產物類別由 Crafting 資料驗證。
 - 第一版卷軸類書籍必須是 `removeOnRefresh`；其他可入庫物品依內容資料標為 `toCityPermanentStock`。
 - `intrinsicValue.amount` 必須是該貨幣最小單位的非負整數；內部競拍與八折直售只讀此值，不讀商店報價。
+- `unitWeight` 必須是有限非負整數。所有入角色攜帶範圍的建立、轉移、任務貨物指派，以及可能降低 Carry Capacity 的狀態變更，都必須在同一交易後評估超載；玩家隊超載不回滾已合法發生的物品／狀態結果，而是建立強制處理。
 
 ### 2.3 EquipmentDefinition
 
@@ -102,6 +109,7 @@ type EquipmentDefinition = ItemDefinition & {
   kind: 'equipment';
   equipmentKind: EquipmentKind;
   rarity: 'common' | 'fine' | 'epic' | 'legendary' | 'mythic';
+  relatedMasteryIds: MasteryId[];
   occupiedSlots: EquipmentSlotId[];
   primaryAttributeCoefficients: PrimaryAttributeCoefficients;
   secondaryAttributeCoefficients: SecondaryAttributeCoefficients[];
@@ -110,6 +118,7 @@ type EquipmentDefinition = ItemDefinition & {
 ```
 
 - 主屬／副屬係數、品級預算、雙手裝備取捨與技能觸發效果都屬 Definition，不寫在實作邏輯內。
+- `relatedMasteryIds` 是武器／防具與熟練度的資料化關聯；武器攻擊仍以技能的 Attack Mastery Rule 為準，防禦經驗則由共用 Defense Routing Rule 對目前防禦裝備候選進行分配。
 - `occupiedSlots` 以資料表達單手、雙手、盾牌、鎧甲等互斥規則；Inventory 只驗證位置是否合法。
 - 裝備效果沒有普通攻擊前提；若需觸發，必須引用技能條件／Tag／行為資料。
 
@@ -203,7 +212,7 @@ type ItemLocation =
   | { kind: 'mapContent'; contentId: ContentInstanceId }
   | { kind: 'equipped'; characterId: CharacterId; slotId: EquipmentSlotId; weaponSetId?: WeaponSetId }
   | { kind: 'questEscrow'; questId: QuestId }
-  | { kind: 'teamQuestCargo'; teamId: TeamId; questId: QuestId }
+  | { kind: 'teamQuestCargo'; teamId: TeamId; questId: QuestId; carrierCharacterId: CharacterId }
   | { kind: 'assetDistributionEscrow'; distributionId: AssetDistributionId }
   | { kind: 'removed'; reason: ItemRemovalReason };
 ```
@@ -213,7 +222,7 @@ Team 永遠不是一般 Item Owner，也不存在可自由使用的共享 `teamC
 - `characterBag`、`equipped`、`homeStorage` 中的物品必須有相同角色的 `ownerCharacterId`。
 - 招募、轉隊與解雇只改 Team Membership，不改角色的物品所有權、背包、裝備或住家存放物。
 - 地圖、商店、任務與地牢結算暫存中的物品可以暫時沒有角色 Owner；正式分配給角色時，`TransferItem` 必須在同一交易設定新 Owner。
-- `teamQuestCargo` 是唯一帶有 TeamId 的特殊任務託管位置，不是隊伍財產。其中物品沒有角色 Owner，只能由綁定 Quest 的生命週期命令交付、回收，或在 Quest expired 後送入全隊分配流程。
+- `teamQuestCargo` 是唯一帶有 TeamId 的特殊任務託管位置，不是隊伍財產。其中物品沒有角色 Owner，只能由綁定 Quest 的生命週期命令交付、回收，或在 Quest expired 後送入全隊分配流程；但必須指定 `carrierCharacterId` 作為實際攜帶者，並計入該角色重量。
 
 ```ts
 type ItemReservation = {
@@ -223,7 +232,28 @@ type ItemReservation = {
 };
 ```
 
-### 3.3 角色裝備與三組武器配置
+### 3.3 超載處理
+
+```ts
+type EncumbranceResolution = {
+  resolutionId: EncumbranceResolutionId;
+  teamId: TeamId;
+  overweightCharacterIds: CharacterId[];
+  state: 'deferredDuringTravel' | 'awaitingPlayer';
+  triggerSourceId: GameId;
+  openedOnDay?: WorldDay;
+  revision: Revision;
+};
+```
+
+- 同一玩家 Team 同時至多有一筆 Encumbrance Resolution；`overweightCharacterIds` 每次移轉後以最新重量與 Capacity Snapshot 重算。
+- 玩家隊正在 `travelling` 時不開啟阻塞畫面，只保存 `deferredDuringTravel`；抵達下一個可控制位置後立即重算，仍超載才轉為 `awaitingPlayer`。
+- `awaitingPlayer` 存在時，GameSession 只接受該超載處理所需的轉移、入庫或遺棄 Command。玩家不能關閉畫面、旅行、進圖、戰鬥、接任務或執行其他一般行動。
+- 可將一般物品贈與同隊正式成員，但接收者在交易後也不得超載；若目前位於城市且該角色擁有房屋，可移入自己的 `homeStorage`；其餘情況可遺棄並永久移除物品。
+- 任務貨物不能移入房屋或變成隊友私產，但可在正式成員間改派 `carrierCharacterId`。若玩家選擇遺棄任務貨物，必須經 Quest-aware Workflow 解除保留並永久移除該實體；Quest 不新增 `failed` 狀態，目標無法再完成時仍在實際結束期限轉為 `expired`。
+- 只有全隊所有正式成員都不超載時才能刪除 Resolution 並恢復一般操作。
+
+### 3.4 角色裝備與三組武器配置
 
 ```ts
 type CharacterEquipmentLoadout = {
@@ -243,7 +273,7 @@ type WeaponSetLoadout = {
 
 Inventory 擁有「哪件裝備與哪三招被配置到哪一組」；Progression 仍擁有角色是否學會技能，Combat 只在 Encounter 開始時取得驗證後的快照。雙手裝備以 Definition 的 `occupiedSlots` 同時占用主／副手，不另外複製第二件 Item。
 
-### 3.4 實體物品不變量
+### 3.5 實體物品不變量
 
 1. 每個 `ItemInstanceId` 永久唯一，且同一時點只有一個 `location`。
 2. `quantity > 0` 的 active Item 才可被持有、販售、裝備、使用或作為任務目標。
@@ -256,7 +286,9 @@ Inventory 擁有「哪件裝備與哪三招被配置到哪一組」；Progressio
 9. 武器手部位置必須有 `weaponSetId`；鎧甲等共用裝備位置不得有 `weaponSetId`。
 10. TeamId 不得成為 Item Owner；ItemLocation 只允許在 `teamQuestCargo` 出現 TeamId，其他隊伍持有查詢只能聚合成員個人物品。
 11. `assetDistributionEscrow` 的物品不得裝備、使用、交易或作為一般任務持有條件，直到分配 Workflow 正式處理。
-12. `teamQuestCargo` 只接受 purchase、delivery、exploration 三類 Quest 綁定的指定 ItemInstance；其中物品不得裝備、使用、販售、丟棄、拆堆、製作或轉給個人。
+12. `teamQuestCargo` 只接受 purchase、delivery、exploration 三類 Quest 綁定的指定 ItemInstance；其中物品不得裝備、使用、販售、拆堆、製作或轉給個人。唯一可遺棄路徑是玩家處於強制超載處理時，經 Quest-aware Workflow 解除保留並永久移除。
+13. 角色攜帶重量只計入其 `characterBag`、`equipped`，以及 `teamQuestCargo.carrierCharacterId` 指向自己的 active Item；不得使用格數、體積或任何隱藏負重欄位替代。
+14. 玩家隊角色可短暫處於超載，但同一玩家 Team 必須存在匹配的 `EncumbranceResolution`；系統不得替玩家自動丟棄、轉移或破壞物品。非旅行中的超載必須是 `awaitingPlayer`，旅行中只能是 `deferredDuringTravel`。
 
 ---
 
@@ -268,6 +300,8 @@ interface InventoryQuery {
   getLocation(itemId: ItemInstanceId): ItemLocation | undefined;
   getOwningCharacter(itemId: ItemInstanceId): CharacterId | undefined;
   getIntrinsicValue(itemId: ItemInstanceId): MoneyValue;
+  getItemWeight(itemId: ItemInstanceId): number;
+  getCarriedWeight(characterId: CharacterId): number;
   listAtLocation(location: ItemLocationSelector): ItemInstanceView[];
   characterOwnsItem(characterId: CharacterId, itemId: ItemInstanceId): boolean;
   characterHasBook(characterId: CharacterId, bookId: ItemInstanceId): boolean;
@@ -278,10 +312,21 @@ interface InventoryQuery {
     weaponSetId?: WeaponSetId,
   ): ItemInstanceView | undefined;
   getEquipmentLoadout(characterId: CharacterId): CharacterEquipmentLoadoutView;
+  getEncumbranceResolution(teamId: TeamId): EncumbranceResolutionView | undefined;
 }
 ```
 
 一般條件若要判定「隊伍有人持有指定實體」，先由 Team Query 取得正式成員，再以 `getOwningCharacter` 驗證 Owner 是否在清單中；任務物則直接驗證精確 `teamQuestCargo(teamId, questId)`。兩者都不得建立隊伍物品所有權，也不得用「任意同類型物品」取代指定 ItemInstance。
+
+```ts
+type CarryCapacitySnapshot = {
+  characterId: CharacterId;
+  maximumWeight: number;
+  sourceRevisionKey: string;
+};
+```
+
+`CarryCapacitySnapshot` 由 Derived Statistics Query 產生。Inventory 對外提供目前重量；所有可能改變攜帶重量或上限的 Workflow 在提交前後使用同一版本來源呼叫 `EvaluateTeamEncumbrance`。UI 只顯示 Query 結果與合法處理選項，不自行判斷是否超載。
 
 ---
 
@@ -296,6 +341,10 @@ interface InventoryQuery {
 | `configureWeaponSet` | 裝備由角色持有、slot 相容，且選擇的技能已由 Workflow 驗證。 | 原子更新指定武器組的雙手配置與三個技能引用。 |
 | `useItem` | 持有可於非戰鬥使用的 Item、未被保留。 | 驗證並交給對應 Resolver；依結果消耗或保留。 |
 | `splitStack` | Item 可堆疊且數量足夠。 | 建立新 ItemInstance，保持來源與位置規則。 |
+| `transferItemForEncumbrance` | 有匹配的 `awaitingPlayer`，來源 Item 由超載角色攜帶，接收者是同隊正式成員且交易後不超載。 | 將 Item 贈與接收者並重算全隊超載；不可用於任務貨物。 |
+| `storeItemForEncumbrance` | 有匹配的 `awaitingPlayer`，隊伍位於城市、來源角色在該城擁有房屋，Item 可入庫。 | 移入該角色房屋倉庫並重算；任務貨物不可入庫。 |
+| `abandonItemForEncumbrance` | 有匹配的 `awaitingPlayer`，Item 由超載角色攜帶；任務貨物另須 Quest-aware Workflow 解鎖。 | 永久移除 Item 並重算，絕不建立金錢或城市庫存。 |
+| `reassignQuestCargoCarrierForEncumbrance` | 有匹配的 `awaitingPlayer`，目標為同一 Team 正式成員且改派後不超載。 | 只改 `carrierCharacterId`，不改 Quest、Item Owner 或位置種類。 |
 
 購買、賣出、交付、製造與學習書籍的玩家 Command 由 city、quest、crafting、progression 先驗證商業／任務／門檻；Inventory 接收其正式移轉要求。
 
@@ -307,12 +356,16 @@ interface InventoryQuery {
 | `RemoveItemInstance` | 依明確原因將實體標為 removed；拒絕仍被非法保留或裝備的 Item。 |
 | `TransferItem` | 驗證來源、目的地、Owner 變更、保留與數量後移轉指定實體。 |
 | `ReserveQuestItem` | 以 Quest ID 保留指定實體。 |
+| `ReserveCraftingInputs` | 驗證完整素材集合的 Owner、位置、數量、Definition 與未保留狀態後，以同一 Crafting Attempt ID 原子保留；任一筆不合法時全部拒絕。 |
 | `ApplyQuestItemLifecycle` | 依未接取、完成、到期等明確指令回收、釋放或保留實體。 |
-| `MoveItemToTeamQuestCargo` | 驗證 Quest、Team、指定 Item 與任務類型後，清除個人 Owner 並移入該 Quest 的任務物資空間。 |
+| `MoveItemToTeamQuestCargo` | 驗證 Quest、Team、指定 Item、任務類型與正式攜帶者後，清除個人 Owner 並移入該 Quest 的任務物資空間；驗證攜帶者重量上限。 |
 | `ReleaseExpiredQuestCargo` | Quest expired 時清除任務保留，將仍存在的任務物資移入指定 Asset Distribution Escrow，並回傳實際移動的 Item ID 清單。 |
 | `ConsumeBookForLearning` | 驗證持有權並依 Book Policy 保留或消耗書籍。 |
 | `TransformCraftingItems` | 驗證／消耗材料並建立產物實體。 |
+| `ConsumeCuisineIngredients` | 驗證自製料理食材的 Owner、位置、數量與未保留狀態後原子消耗；不建立 Inventory 產物。 |
 | `CommitCombatItemUse` | 驗證戰鬥道具、消耗實體並回傳延遲／效果資料。 |
+| `ConsumeCombatSequenceRetrySupply` | 驗證 Item 位於本次參與者個人背包、Tag 符合 Retry Supply Policy、未保留且數量足夠；原子扣除一份並回報明確 Item／Owner。 |
+| `EvaluateTeamEncumbrance` | 使用最新 Team Location、正式成員、Carried Weight 與 Carry Capacity Snapshot：未超載則關閉既有 Resolution；旅行中建立／保留 deferred；其餘玩家可控制位置建立 awaiting。 |
 
 ### 5.3 Item 使用與戰鬥
 
@@ -342,8 +395,11 @@ combat 送出 CommitCombatItemUse(itemId, userId)
 | `EquipmentChanged` | `characterId`、`slotId`、`weaponSetId?`、`itemId?` | character、combat、ui/app。 |
 | `WeaponSetConfigured` | `characterId`、`weaponSetId`、`itemIds`、`skillIds` | combat、ui/app。 |
 | `CombatItemUseCommitted` | `itemId`、`userId`、`useDelayRuleId?`、`effectRefs` | combat。 |
+| `CombatSequenceRetrySupplyConsumed` | `sequenceId`、`challengeId`、`itemId`、`ownerCharacterId`、`quantity: 1` | combat-sequence。 |
 | `BookUseCommittedForLearning` | `itemId`、`characterId`、`knowledgeId`、`policy` | progression。 |
 | `CraftingItemsTransformed` | `inputItemIds`、`outputItemIds`、`recipeId` | city、crafting workflow。 |
+| `EncumbranceResolutionOpened` | `resolutionId`、`teamId`、`overweightCharacterIds`、`state` | ui/app。 |
+| `EncumbranceResolutionClosed` | `resolutionId`、`teamId` | ui/app。 |
 
 `TransferItem` 等 Internal Command 的失敗使用具型別的 Command Rejection 回覆，不發出 `*Rejected` DomainEvent，也不進入 committed Outbox。
 ---
@@ -430,20 +486,21 @@ Inventory 模組最低必須提供：
 9. 舊 Job／重複事件不得讓同一 Item 重複轉移或重複消耗的測試。
 10. 採集節點消耗與全部產物建立具原子性；失敗時不留下 Item，成功後產物只存在指定 Distribution Escrow 的測試。
 11. 採集者不是產物 Owner；完成 Asset Distribution 後才設定合法個人 Owner 的測試。
-10. 三組武器、雙手占位與每組三技能配置的合法／非法測試。
-11. 招募、轉隊與解雇後，角色的背包、裝備、住家物品與 Owner 完全不變的測試。
-12. `assetDistributionEscrow` 物品在正式分配前不能使用，分配後 Owner 與角色位置同時改變的測試。
-13. 全部 Item Definition 都有非負 `intrinsicValue`，且內部競拍不套用商店價格修正的測試。
-14. 三種任務物品進入 `teamQuestCargo` 後無法買賣、使用或轉給個人，合法交付／到期分配是唯二出口的測試。
+12. 三組武器、雙手占位與每組三技能配置的合法／非法測試。
+13. 招募、轉隊與解雇後，角色的背包、裝備、住家物品與 Owner 完全不變的測試。
+14. `assetDistributionEscrow` 物品在正式分配前不能使用，分配後 Owner 與角色位置同時改變的測試。
+15. 全部 Item Definition 都有非負 `intrinsicValue`，且內部競拍不套用商店價格修正的測試。
+16. 三種任務物品進入 `teamQuestCargo` 後無法買賣、使用或轉給個人；合法交付、到期分配，以及強制超載中的 Quest-aware 遺棄是僅有出口的測試。
+17. 物品重量、堆疊總重、肌力 Carry Capacity、裝備重量與任務貨物攜帶者均使用同一資料快照；一般位置建立／購買／拾取／接取任務可提交後建立強制超載處理，旅行中延後、抵達後阻塞，逐次轉移／入庫／遺棄直到全隊不超載才解除的測試。
 
 ---
 
 ## 9. Inventory 模組交接清單
 
-- [ ] `ItemInstance`、`ItemLocation`、`ItemReservation`、`CharacterEquipmentLoadout` Schema。
+- [ ] `ItemInstance`、`ItemLocation`、`ItemReservation`、`CharacterEquipmentLoadout`、`EncumbranceResolution` Schema。
 - [ ] Item、Equipment、Book、Use Delay JSON Schema。
 - [ ] `InventoryQuery` 與 Item 定義 Reader。
-- [ ] 裝備、使用、拆堆 Command Handler。
+- [ ] 裝備、使用、拆堆與超載強制處理 Command Handler。
 - [ ] 地圖、城市、委託、書籍、製造與戰鬥的 Internal Command Handler。
 - [ ] Item 建立、移轉、保留、消耗、裝備事件。
 - [ ] Fixture、唯一性、任務實體與月刷新測試。

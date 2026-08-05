@@ -57,9 +57,17 @@ interface GameSession {
 }
 
 type GameSessionSnapshot = {
+  phase: 'bootstrapping' | 'ready' | 'failed';
   revision: number;
+  bootstrapDiagnostics?: BootstrapDiagnosticView[];
   pendingInteraction?: PendingInteractionView;
   lastCommittedOutbox?: CommittedOutboxView;
+};
+
+type BootstrapDiagnosticView = {
+  code: string;
+  messageKey: LocalizationKey;
+  details?: Record<string, JsonScalar>;
 };
 
 type FeatureProjectionToken<TInput, TView> = {
@@ -78,7 +86,7 @@ GameSession：
 5. 發出一次訂閱通知。
 6. 交付 Notification、Save、Audio、Achievement candidate。
 
-GameSession 不檢查角色能否攻擊、任務是否完成或商品是否買得起。完整 GameState 只存在 GameSession／Engine 邊界，不直接交給 React。
+GameSession 不檢查角色能否攻擊、任務是否完成或商品是否買得起。完整 GameState 只存在 GameSession／Engine 邊界，不直接交給 React。`phase !== ready` 時，App Shell 只能顯示 Bootstrap Loading／Error；不得建立正式 Feature Projection 或先導航到第一個遊戲頁面。
 
 ---
 
@@ -178,6 +186,7 @@ ui/
 │  ├─ dungeon/
 │  ├─ combat/
 │  ├─ character/
+│  ├─ social/
 │  ├─ inventory/
 │  ├─ loot-distribution/
 │  ├─ progression/
@@ -222,12 +231,13 @@ type UiCommandRejection = {
 
 ## 7. Pending Interaction
 
-旅行、地圖事件、隊內戰利品競拍或其他需要玩家選擇的內容必須存在擁有模組 State：
+玩家旅行、地圖事件、隊內戰利品競拍、強制超載處理或其他需要玩家選擇的內容必須存在擁有模組 State。NPC 旅行固定 6 日直達，沒有可投影的旅行事件或 Pending：
 
 ```ts
 type PendingInteractionView = {
   interactionId: InteractionId;
   kind: PendingInteractionKind;
+  state: 'awaitingPlayerChoice' | 'awaitingExternalResolution';
   titleKey: LocalizationKey;
   bodyKey: LocalizationKey;
   optionViews: {
@@ -251,18 +261,30 @@ UI：
 
 `resolutionCommand` 是 Projection 由 committed Pending Interaction 組出的公開 DTO，不含任意 callback。共用 Modal 不需要知道哪個領域擁有互動，也不能自行拼接命令 payload。
 
+玩家旅行事件的標題、敘述、可見／可選選項與效果摘要全部來自 Event Instance + Definition Projection；React 不重新查背包、熟練度或護衛任務來判斷選項。若選項啟動 detailed Combat，Pending 會轉為 `awaitingExternalResolution` 且旅行畫面暫停；Combat 結束後核心完成同一 Interaction，UI 只依新 Snapshot 返回旅行或戰敗結果。NPC 行程只可出現在一般世界／Debug Projection，不得顯示虛構的事件紀錄。
+
 ---
 
 ## 8. 城市、地牢與戰鬥畫面
 
 ### 8.1 城市
 
-City Screen Projection 同時讀 World、City、Team、Inventory、Economy、Quest、Progression。多 Model 只在 Projection 相遇，不讓 City 模組 import Quest／Economy State。
+City Screen Projection 同時讀 World、City、Team、Character、Social、Inventory、Economy、Quest、Progression。多 Model 只在 Projection 相遇，不讓 City 模組 import 其他模組 State。
 
 - 隊伍財務摘要必須逐角色顯示，不得捏造 `partyGold` 或共用背包。
+- 背包、商店、拾取與任務貨物畫面必須顯示每名角色的「目前攜帶重量／肌力計算上限」；不得以格數呈現或在 UI 端自行判斷超載。任務物資另顯示其指定攜帶者。
+- Inventory Query 出現 `awaitingPlayer` Encumbrance Resolution 時，切換為不可關閉的強制畫面；只顯示核心提供的贈與隊友、移入目前城市自宅倉庫、改派任務貨物攜帶者或遺棄選項。每次提交後重新讀取 Resolution，直到核心正式關閉前不得導航至其他功能。旅行中的 `deferredDuringTravel` 不顯示畫面，抵達後仍超載才開啟。
 - Tavern Projection 組合 City 營業狀態、Team 酒館訪客、Character 摘要與近期真實行動。
-- 聊天只是零時間 Read Interaction；招募與解雇則送 Team Game Command。
+- 查看冒險者近期行動只是 Read Interaction；真正聊天送出 Social 的 `interactWithAdventurer` 零時間 Command，成功後才計入與隊友交流／情報共用的每日六次並取得交流 MXP。招募與解雇另送 Team Game Command。
+- 招募按鈕只能顯示 Team Query 已解析的硬條件、重試資格與成功率；UI 不得自行把單人 Team 視為必定加入，也不得為了重骰重複送出同一筆不合法嘗試。
 - Quest Cargo 顯示為獨立的鎖定區，物品卡必須禁用使用、裝備、出售與一般轉移，只提供任務目的與期限資訊。
+
+### 8.1.1 隊員互動、好感與求婚
+
+- 玩家隊正式成員的角色互動畫面在沒有全域輸入鎖時隨時提供「交流」，不要求位於酒館且不消耗世界時間；它與酒館聊天、打聽情報使用同一個 Social 額度。
+- Projection 只顯示目標對玩家的單一好感值，不顯示或推導 NPC 彼此關係網。
+- 只有目標為玩家隊正式成員、成年、存活、未婚且與玩家異性，且玩家自己未婚時，才顯示「求婚」。目前玩家為男性時，這等同所有符合條件的未婚女性隊員都有該選項。
+- UI 只呈現 Social／Team／Character Projection 組成的可用性與拒絕原因；好感門檻、接受結果與 FamilyLink 建立都由核心 Workflow 決定。
 
 ### 8.2 地牢
 
@@ -289,7 +311,9 @@ City Screen Projection 同時讀 World、City、Team、Inventory、Economy、Que
 ### 8.4 戰鬥
 
 - 雙方各顯示 3×3 Grid。
-- 戰鬥外的 Team Formation ViewModel 提供可配置正式成員、3×3 格位與 `configureCombatFormation` Command DTO；View 只編輯下一場 Encounter 的持久配置。
+- 一般戰鬥可掃蕩時，UI 只送出 `startSingleBattleSweep` 與玩家對各參戰者明確選擇的武器組；可否掃蕩、隊伍戰力、成功率、補品重骰與熟練度皆由核心決定。
+- 單場掃蕩進度讀取 `CombatSequenceQuery`；一節點 Sequence 完成後顯示 committed 摘要，不播放假的逐招戰鬥。NPC 地牢 Sequence 的未提交成功數、roll 與機率不向玩家公開。
+- 戰鬥外的 Team Formation ViewModel 必須顯示全部 1～9 名正式成員、3×3 格位與 `configureCombatFormation` Command DTO；每名正式成員都必須恰好配置一次，沒有候補區。View 只編輯下一場 Encounter 的持久配置。
 - Combat ViewModel 提供 footprint、合法目標、可用技能、`currentCtb` 與核心已決定的 CTB 順序。
 - 行動條顯示 `min(currentCtb / 100, 1)`；Tooltip 可顯示實際 CTB。
 - UI 不把超過 100 的 State 截斷。
@@ -365,15 +389,20 @@ type LocalizedTextRef = {
 14. 前排補位只反映 committed Combat Snapshot；關閉動畫或跳過動畫不影響格位，且畫面沒有戰鬥移動控制。
 15. Team Formation 編輯只更新下一場配置；active Encounter 的格位與配置 revision 不被 UI 直接改寫。
 16. 已揭露採集點跨刷新保留位置、狀態恢復 available；重複點擊與競爭失敗不由 UI 假裝扣時或發放產物的測試。
+17. 玩家旅行事件只顯示 Instance 已固定的選項；戰鬥分支可存讀檔恢復，NPC 行程永遠不產生旅行事件 Modal 的測試。
+18. Bootstrap 完成前不建立正式頁面 Projection；失敗只顯示 diagnostics，成功後才一次進入 initial route。
+19. 隊友與酒館交流／情報共用每日六次；求婚按鈕只對合法異性未婚正式隊友出現，UI 不會建立 NPC 關係矩陣。
 
 ---
 
 ## 13. UI／Application 交接清單
 
 - [ ] GameSession、Command Queue 與 committed Snapshot。
+- [ ] Bootstrap Loading／Error／Ready Gate 與第一個正式頁面導航。
 - [ ] React Store Adapter／`useGameSelector`。
 - [ ] Module Query Facade 與 Feature Projection。
-- [ ] City、Tavern、Dungeon、Asset Distribution、Combat、Character 等 ViewModel。
+- [ ] City、Tavern、Social／隊員互動、Dungeon、Asset Distribution、Combat、Character 等 ViewModel。
 - [ ] Pending Interaction 與可中斷快轉。
+- [ ] 玩家旅行事件、Effect 摘要、戰鬥續接與 NPC 無旅行事件的 Projection／UI 測試。
 - [ ] Notification／Audio／Localization Projector。
 - [ ] Feature import boundary 與 UI 契約測試。

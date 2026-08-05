@@ -20,7 +20,7 @@ type CityState = {
   escortCandidates: Record<EscortCandidateId, EscortCandidate>;
   homes: Record<HomeId, HomeInstance>;
   homeTeachingPosts: Record<HomeTeachingPostId, HomeTeachingPost>;
-  playerSocialUsage: Record<PlayerSocialUsageId, PlayerDailySocialUsage>;
+  playerCommerceUsage?: PlayerDailyCommerceUsage;
 };
 ```
 
@@ -35,6 +35,7 @@ type CityState = {
 | 角色狀態與熟練度 | character／progression | 設施提供環境，不直接恢復或加 MXP。 |
 | 地區控制、戰爭與通行 | world | 依公開事件調整設施／Offer 規則。 |
 | 地圖內容 | map | 只保存可被打聽的 IntelLead 引用。 |
+| 玩家每日對話與對冒險者好感 | social | City Intel Workflow 分別命令 City 揭露情報、Social 消耗一次共用對話額度；City 不讀寫 Social State。 |
 
 City 的「永久庫存」是 Inventory 中 `location.kind = cityPermanentStock` 的 Query 結果，不在 CityState 再保存 Item ID 清單。
 
@@ -55,7 +56,8 @@ interface CityDefinitionReader {
   getHomeUpgrade(id: HomeUpgradeDefinitionId): HomeUpgradeDefinition;
   getCityActionRule(id: CityActionRuleId): CityActionRuleDefinition;
   getPopulationSupplyRule(id: PopulationSupplyRuleId): PopulationSupplyRuleDefinition;
-  getPlayerSocialDailyLimit(id: PlayerSocialDailyLimitId): PlayerSocialDailyLimitDefinition;
+  getPlayerCommerceDailyLimit(id: PlayerCommerceDailyLimitId): PlayerCommerceDailyLimitDefinition;
+  getPlayerCommercePracticeRule(id: PlayerCommercePracticeRuleId): PlayerCommercePracticeRuleDefinition;
 }
 ```
 
@@ -70,7 +72,8 @@ type CityDefinition = DefinitionHeader & {
   escortGenerationRuleId: EscortGenerationRuleId;
   homeRuleId: HomeRuleId;
   populationSupplyRuleId: PopulationSupplyRuleId;
-  playerSocialDailyLimitId: PlayerSocialDailyLimitId;
+  playerCommerceDailyLimitId: PlayerCommerceDailyLimitId;
+  playerCommercePracticeRuleId: PlayerCommercePracticeRuleId;
 };
 
 type FacilityKind =
@@ -95,13 +98,16 @@ type FacilityDefinition = DefinitionHeader & {
 所有城市使用相同十種場所種類；城市差異由資料目錄、教師項目、情報、Offer、互動角色與對應冒險地形成，不新增隱藏的城市專屬系統入口。
 
 ```ts
-type PlayerSocialDailyLimitDefinition = DefinitionHeader & {
-  maxConversationsPerDay: 6;
+type PlayerCommerceDailyLimitDefinition = DefinitionHeader & {
   maxCommerceInteractionsPerDay: 6;
+};
+
+type PlayerCommercePracticeRuleDefinition = DefinitionHeader & {
+  commerceExperienceRuleId: ExperienceAwardRuleId;
 };
 ```
 
-這是玩家主角本人專用的每日上限，不是整個玩家隊伍共用，也不是每名隊員各有六次。聊天與交易是兩條獨立計數：買入或賣出各算一筆交易；酒館聊天與打聽情報各算一次聊天。資料驗證必須固定兩個上限皆為 6，避免各城市以資料意外放大可刷交流熟練度的次數。
+這是玩家主角本人專用的交易上限，不是整個玩家隊伍共用，也不是每名隊員各有六次；買入或賣出各算一筆。資料驗證必須固定上限為 6，避免各城市以資料意外放大可刷交流熟練度的次數。玩家每日對話與其交流 Experience Rule 由 Social 統一擁有；City 不得為酒館或情報建立第二份計數。
 
 ### 2.3 商店刷新
 
@@ -140,6 +146,7 @@ type PopulationSupplyRuleDefinition = DefinitionHeader & {
   cityOffsetDays: number;
   targetCountResolverId: ResolverId;
   batchLimit: number;
+  adventurerGenerationRuleId: WorldAdventurerGenerationRuleId;
 };
 ```
 
@@ -191,7 +198,9 @@ type HomeUpgradeDefinition = DefinitionHeader & {
 };
 ```
 
-買房時先決定 Slot 數量；功能間只占用既有 Slot，不偷偷增加容量。**房屋是第一版必須完成骨架的系統，不延後為純裝飾內容。**第一版至少必須能建立所有權、房間／倉庫 Slot、家中物品儲存、年度休息與生育入口、手動 28 日傳授，以及繼承時的唯一所有權移轉。教育室、工坊、藥房等功能間的自動指派與常駐規則可在後續資料化啟用，但不得推翻上述骨架。
+**房屋是第一版必須完成骨架的系統，不延後為純裝飾內容。**第一版已定範圍只有：房屋所有權、可供超載處理使用的家中倉庫、年度休息與生育入口、手動 28 日傳授，以及繼承時的唯一所有權移轉。
+
+`purchasableSlotCounts`、`HomeUpgradeDefinition` 與功能間種類目前只是隔離未來擴充的 provisional 資料邊界，不代表房間玩法已定案。房間形狀、家具安放、Slot 意義、功能間容量、升級與常駐規則必須另案討論；正式定案前不得由目前欄位反推玩法、建立預設房間或寫死 UI。
 
 ---
 
@@ -299,20 +308,19 @@ type HomeTeachingPost = {
 };
 ```
 
-### 3.6 玩家每日交流用量
+### 3.6 玩家每日交易用量
 
 ```ts
-type PlayerDailySocialUsage = {
-  usageId: PlayerSocialUsageId;
+type PlayerDailyCommerceUsage = {
+  usageId: PlayerCommerceUsageId;
   playerCharacterId: CharacterId;
   worldDay: WorldDay;
-  conversationCount: number;
   commerceInteractionCount: number;
   revision: Revision;
 };
 ```
 
-`playerSocialUsage` 只為玩家目前控制的主角建立資料；第一版此人就是 `TeamState.playerTeamId` 所指 Team 的 `leaderId`。以 `(playerCharacterId, worldDay)` 作為唯一鍵，因而跨日自然歸零，不需要日結算器額外重設計數；可在存檔維護時清除過期紀錄。玩家隊友、NPC 市場 Intent 及其聊天行為不得建立或寫入此 State。
+`playerCommerceUsage` 只保留玩家目前控制主角在目前世界日的一筆資料；第一版此人就是 `TeamState.playerTeamId` 所指 Team 的 `leaderId`。玩家主角或世界日改變時直接替換，因而跨日自然歸零，不需要日結算器額外重設或累積歷史。玩家隊友與 NPC 市場 Intent 不得建立或寫入此 State。
 
 同一角色可在多座城市各有一間房；同一城市對同一所有者最多一間。房屋內的實體物品仍由 Inventory 的 `homeStorage` Location 管理。
 
@@ -329,10 +337,17 @@ interface CityQuery {
   getOffer(offerId: ShopOfferId): ShopOfferView;
   listAvailableIntel(cityId: CityId, teamId: TeamId): IntelLeadView[];
   canUseTavern(cityId: CityId, teamId: TeamId): boolean;
-  getPlayerSocialUsage(playerCharacterId: CharacterId, worldDay: WorldDay): PlayerDailySocialUsageView;
+  getPlayerCommerceUsage(playerCharacterId: CharacterId, worldDay: WorldDay): PlayerDailyCommerceUsageView;
   getHome(cityId: CityId, ownerId: CharacterId): HomeView | undefined;
   canUseRestaurant(cityId: CityId, characterId: CharacterId): boolean; // 第一版由 inn 提供基礎餐點入口
 }
+
+type PlayerDailyCommerceUsageView = {
+  playerCharacterId: CharacterId;
+  worldDay: WorldDay;
+  commerceInteractionCount: number;
+  remainingCount: number;
+};
 ```
 
 公會的任務清單由 City Screen Projection 組合 `QuestQuery` 提供；`CityState` 與 `CityQuery` 都不保存或轉送 Quest 清單。
@@ -349,16 +364,15 @@ interface CityQuery {
 |---|---|---|
 | `buyShopOffer` | 隊伍在城市、設施開放、Offer 可用，指定付款 Character 為正式成員；若付款者是玩家主角，當日交易未滿 6 次。 | 以付款者個人帳戶購買；一般商品 Owner 轉給該角色，Quest 指定品則直接進 `teamQuestCargo`；只有玩家主角的原子交易成功後才將交易計數 +1。 |
 | `sellItemToShop` | 隊伍在城市、設施開放、指定 Character 是 Item Owner 且 Item 可交易；若賣方是玩家主角，當日交易未滿 6 次。 | 以賣方個人帳戶收款並解除 Item 的角色 Owner；只有玩家主角的原子交易成功後才將交易計數 +1。 |
-| `askTavernIntel` | 隊伍在城市、酒館開放；玩家主角當日聊天未滿 6 次。 | 依 Intel Rule 揭露一筆可用情報；城內時間為 0；成功揭露後才將聊天計數 +1。 |
-| `talkToTavernAdventurer` | 隊伍在城市、酒館開放，目標為酒館可見的真實冒險者；玩家主角當日聊天未滿 6 次。 | 完成一次零時間聊天，成功後才將聊天計數 +1 並發出 `ConversationCompleted`；招募仍須另送 Team Command。 |
+| `askTavernIntel`（Application Workflow） | 隊伍在城市、酒館開放，且玩家當日仍有 Social 對話額度。 | Workflow 分別送出 required `RevealTavernIntel` 與 `ConsumePlayerConversationAllowance`；兩者在同一交易一起提交。城內時間為 0。 |
 | `startFacilityAction` | 地點、設施、角色與規則合法。 | 要求 Team 建立住宿、訓練等 City 耗時行動；製作由 Crafting Command 進入。 |
 | `buyOrUpgradeHome` | 地點、所有權與付款合法。 | 啟動房屋購買／升級 Workflow。 |
-| `assignHomeTeacher` | 玩家角色位於自己的房屋、指定成年人可擔任教師，且沒有衝突 Plan。 | 建立至少 28 日的 `HomeTeachingPost` 與教師 Team Plan；玩家主角也受相同限制。 |
+| `assignHomeTeacher` | 玩家角色位於自己的房屋、指定成年人可擔任教師，且沒有衝突 Plan；若向非玩家冒險者提出家教服務，Economy 的含 Social 好感修正 Quote 與付款必須合法。 | 付款與 Post 建立同成同敗；建立至少 28 日的 `HomeTeachingPost` 與教師 Team Plan，玩家主角自己擔任教師時也受相同時間限制。 |
 | `releaseHomeTeacher` | 指定 Post 已達最短 28 日，且教師仍可用。 | 結束 Post；受其教導的 Child Study Session 於當日依已投入時間結算並重抽。 |
 
 公會的接取／結案 Command 由 Quest 擁有；City 只提供 Guild Facility Query。
 
-玩家主角的買入、賣出、打聽情報與酒館聊天皆為零時間 Command，但同一世界日最多只能完成 6 筆交易與 6 次聊天。超額時回傳 `dailyCommerceInteractionLimitReached` 或 `dailyConversationLimitReached`，不得先扣錢、轉移物品、揭露情報或發放 MXP。玩家隊友的買賣不使用額度，也不從這些互動取得交流 MXP；他們和一般 NPC 一樣只從完整自由日取得固定交流經驗。招募由 Team 的 `recruitTavernAdventurer` Command 另行執行；City 只提供酒館是否開放與玩家是否位於同城的 Query。
+玩家主角的買入、賣出與打聽情報皆為零時間 Command；同一世界日最多完成 6 筆交易，而情報與 Social 的隊友／酒館聊天共用每日 6 次對話。超額時回傳對應 typed rejection，不得先扣錢、轉移物品、揭露情報或發放 MXP。玩家隊友的買賣不使用額度，也不從這些互動取得交流 MXP；他們和一般 NPC 一樣只從完整自由日取得固定交流經驗。酒館聊天由 Social 的 `interactWithAdventurer` 擁有，招募則由 Team 擁有；City 只提供酒館是否開放與玩家是否位於同城的 Query。
 
 ### 5.2 ScheduledJob
 
@@ -379,6 +393,7 @@ interface CityQuery {
 | `TransferHomeOwnership` | 驗證原所有者、繼承來源與同城唯一性後移轉房屋。 |
 | `InterruptHomeTeachingPost` | 教師死亡、退休、離隊或不再可用時，將 Post 標為 interrupted，通知 Child Study Workflow 立即做部分結算。 |
 | `ExecuteNpcMarketIntent` | 讀取 Adventurer Lifecycle 已選定的單筆交易 Intent，重用既有買 Offer／賣物品／買房 Workflow；驗證失敗只回傳 typed rejection，不重抽目標。它不寫入玩家每日交易計數，也不發出玩家用的 `CommerceInteractionCompleted`。 |
+| `RevealTavernIntel` | 只接受 City Intel Workflow；驗證酒館、隊伍與 Intel Lead 後標記揭露。若 Social 額度步驟拒絕，整筆交易回滾。 |
 
 ### 5.4 訂閱 DomainEvent
 
@@ -415,8 +430,7 @@ interface CityQuery {
 | `ShopRefreshed` | `cityId`、`shopId`、`offerIds` | quest、ui/app。 |
 | `ShopOfferCreated` | `offerId`、`itemId`、`source` | quest、ui/app。 |
 | `ShopOfferSold` | `offerId`、`itemId`、`buyerCharacterId`、`buyerTeamId` | quest、ui/app。 |
-| `CommerceInteractionCompleted` | `actorKind: playerCharacter`、`teamId`、`characterId`、`kind: buy \| sell`、`cityId`、`sourceId` | progression、ui/app。 |
-| `ConversationCompleted` | `actorKind: playerCharacter`、`teamId`、`speakerCharacterId`、`targetCharacterId`、`cityId`、`kind: tavernChat \| intel` | progression、ui/app。 |
+| `CommerceInteractionCompleted` | `actorKind: playerCharacter`、`teamId`、`characterId`、`kind: buy \| sell`、`cityId`、`sourceId`、`experienceAwardRuleId` | progression、ui/app。 |
 | `CityStockItemAvailable` | `cityId`、`itemId` | quest、ui/app。 |
 | `IntelRevealed` | `intelId`、`teamId`、`sourceContentId` | ui/app。 |
 | `EscortCandidatesGenerated` | `cityId`、`candidateIds` | quest。 |
@@ -425,7 +439,7 @@ interface CityQuery {
 | `HomeChanged` | `homeId`、`ownerId`、`change` | character、inventory、ui/app。 |
 | `HomeTeachingPostChanged` | `postId`、`homeId`、`teacherCharacterId`、`state` | team、progression、ui/app。 |
 | `CityMetricsChanged` | `cityId`、`prosperity`、`safety`、`sourceId` | population／content-event workflow、ui/app。 |
-| `AdventurerSupplyDemanded` | `cityId`、`count`、`reason` | character／team population workflow。 |
+| `AdventurerSupplyDemanded` | `cityId`、`cultureId`、`count`、`adventurerGenerationRuleId`、`reason` | character／team population workflow。 |
 
 ---
 
@@ -467,15 +481,15 @@ shopRefresh
 3. 同一 ItemInstance 同時最多對應一個 available Offer。
 4. playerSold Item 在下一次刷新清除；Quest 保留中的 Item 除外。
 5. 未售出的 permanentStock Offer 刷新後回到永久庫存，不得消失。
-6. 玩家主角每一世界日的 `conversationCount <= 6` 且 `commerceInteractionCount <= 6`；買入／賣出與聊天／情報的兩組計數互不共用。
-7. 交易或聊天被拒絕、回滾或未成功完成時，計數與交流 MXP 都不得變動。
-8. 玩家隊友與 NPC 的市場交易及酒館出席不得寫入 `playerSocialUsage`，也不得發出玩家交流完成事件。
+6. 玩家主角每一世界日的 `commerceInteractionCount <= 6`；City State 不得保存任何對話計數或好感值。
+7. 交易被拒絕、回滾或未成功完成時，交易計數與交流 MXP 都不得變動；情報揭露與 Social 額度消耗必須同成同敗。
+8. 玩家隊友與 NPC 的市場交易及酒館出席不得寫入 `playerCommerceUsage`，也不得發出玩家交流完成事件。
 9. 書店一般販售池不得包含高級／極品書。
 10. EscortCandidate 不是 Character；只在 Quest 接取後生成角色。
 11. 城鎮零時間互動不推進世界日。
 12. 住宿、訓練必須透過 Team 耗時行動；製作的 FreeAction 由 Crafting 配方建立。
 13. 購買任一步驟失敗，不扣款、不移物、不關閉 Offer。
-14. 房屋功能間的 Slot Cost 總和不可超過 `slotCapacity`，且跨代移轉不改房屋內容。
+14. 已定案的房屋所有權、倉庫內容、休息／傳授入口與跨代移轉必須保持一致；功能間 Slot 規則只有在房間系統另案定義並啟用後才驗證，不得把 provisional 欄位當成第一版完成規則。
 15. 買賣只能使用明確角色的個人帳戶與物品 Owner；City 不得要求或建立 Team Account。
 16. 酒館清單內的冒險者都可打開近期行動對話與發起招募；City 不自行保存第二份 NPC 名單。
 17. NPC 市場交易只能使用其指定角色的個人帳戶與個人物品，且完全重用一般商店／房屋的庫存、報價與同城房屋唯一性規則。
@@ -485,8 +499,8 @@ shopRefresh
 ## 10. City 模組交接清單
 
 - [ ] City、Facility、Shop、Intel、Escort、Home JSON Schema。
-- [ ] CityState、ShopOffer、IntelLead、EscortCandidate、HomeInstance、PlayerDailySocialUsage。
+- [ ] CityState、ShopOffer、IntelLead、EscortCandidate、HomeInstance、PlayerDailyCommerceUsage。
 - [ ] `CityQuery` 與設施／Offer／情報 Query。
 - [ ] 商店刷新、護衛生成與人口批次 Job。
 - [ ] 購買、販售、設施行動、房屋 Workflow。
-- [ ] 永久庫存、書籍層級、護衛非實體、玩家每日交流上限與零時間測試。
+- [ ] 永久庫存、書籍層級、護衛非實體、玩家每日交易上限，以及情報與 Social 對話額度原子提交測試。

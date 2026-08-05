@@ -100,7 +100,7 @@ type PendingAssetDistributionInteraction = {
 };
 ```
 
-`participantCharacterIds` 在分配建立時固定且不可為空，只能包含來源 Team 的正式成員；護衛、救援等 `temporaryMemberIds` 永遠排除。分配途中招募、解雇與開始新隊伍大動作都必須等待玩家分配互動結束。參與者之後離隊不喪失本次分配權；若角色已死亡，所得先進入其個人遺產，再由既有繼承 Workflow 處理。
+`participantCharacterIds` 在分配建立時固定且不可為空，必須等於來源行動開始時 Team 的全部正式成員；隊伍沒有候補或未參與的正式成員。護衛角色本來就不在 Team，救援等 `temporaryMemberIds` 也永遠排除。分配途中招募、解雇與開始新隊伍大動作都必須等待玩家分配互動結束。參與者之後離隊不喪失本次分配權；若角色已死亡，所得先進入其個人遺產，再由既有繼承 Workflow 處理。
 
 ---
 

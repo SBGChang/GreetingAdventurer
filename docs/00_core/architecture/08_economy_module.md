@@ -2,11 +2,11 @@
 
 > **模組 ID：** `economy`
 >
-> **依賴：** [共用核心契約](00_shared_contracts.md)、World／Character／Progression 的公開 Query。
+> **依賴：** [共用核心契約](00_shared_contracts.md)、World／Character／Progression／Social 的公開 Query。
 >
 > **責任：** 管理貨幣帳戶、餘額、原子轉帳、任務報酬付款、商店報價與可重播帳本。Economy 是所有金錢數值的唯一真相來源。
 >
-> **非責任：** 不擁有商品實體、商店貨架、委託狀態、角色聲望、世界戰爭或物品價格 Definition。
+> **非責任：** 不擁有商品實體、商店貨架、委託狀態、角色聲望、玩家好感、世界戰爭或物品價格 Definition。
 
 ---
 
@@ -29,7 +29,8 @@ type EconomyState = {
 | 角色擁有哪些物品 | inventory | 只處理購買所需的金錢步驟。 |
 | 貨架 Offer 是否存在、是否保留 | city | 依 Offer、買家與市場狀態產生 Quote。 |
 | 委託是否完成、獎勵規則 | quest | 接收已驗證的付款命令。 |
-| 聲望與角色關係 | character | 只讀取報價所需的公開數值。 |
+| 角色聲望 | character | 只讀取報價所需的公開數值。 |
+| 冒險者對玩家好感 | social | 家教服務 Quote 只讀好感修正，不保存副本或建立關係網。 |
 | 戰爭、市場壓力與地區控制 | world | 讀取目前有效的 Price Modifier。 |
 | 資產繼承對象 | character／app workflow | 只執行已驗證的帳戶移轉。 |
 
@@ -64,7 +65,7 @@ type MoneyValue = {
 };
 
 type PriceRuleDefinition = DefinitionHeader & {
-  baseValueSource: 'itemDefinition' | 'offerFixedValue' | 'rewardDefinition';
+  baseValueSource: 'itemDefinition' | 'offerFixedValue' | 'rewardDefinition' | 'serviceDefinition';
   buyModifierIds: PriceModifierRuleId[];
   sellModifierIds: PriceModifierRuleId[];
   roundingPolicy: 'floor' | 'ceil' | 'nearest';
@@ -147,7 +148,16 @@ interface EconomyQuery {
   canAfford(accountId: EconomyAccountId, amount: number): boolean;
   getPurchaseQuote(input: PurchaseQuoteInput): PriceQuote;
   getSellQuote(input: SellQuoteInput): PriceQuote;
+  getServiceQuote(input: ServiceQuoteInput): PriceQuote;
 }
+
+type ServiceQuoteInput = {
+  serviceKind: 'homeTutor';
+  serviceDefinitionId: DefinitionId;
+  providerCharacterId: CharacterId;
+  buyerCharacterId: CharacterId;
+  sourceRevision: Revision;
+};
 
 type PriceQuote = {
   quoteId: PriceQuoteId;
@@ -156,13 +166,15 @@ type PriceQuote = {
   priceRuleId: PriceRuleId;
   modifierBreakdown: PriceModifierBreakdown[];
   validFor: {
-    offerRevision: Revision;
+    sourceRevision: Revision;
     pricingEpochs: Record<PriceScopeKey, Revision>;
   };
 };
 ```
 
-Quote 是可重建、不可存檔的 DTO。它必須綁定 Offer／Item 與相關 State Revision；任一來源在購買前改變時，舊 Quote 失效並重新計算。
+Quote 是可重建、不可存檔的 DTO。它必須綁定 Offer／Item／Service 等價格來源與相關 State Revision；任一來源在提交前改變時，舊 Quote 失效並重新計算。
+
+`serviceKind: homeTutor` 必須由資料指定基礎價格，再把 `SocialQuery.getHomeTutorPriceModifier(providerCharacterId)` 作為一筆可解釋的 Modifier 納入 Quote。這只影響玩家向該冒險者請求擔任家教的價格；NPC 彼此沒有好感，因此不得套用這條修正。
 
 
 ---
@@ -186,6 +198,7 @@ Quote 是可重建、不可存檔的 DTO。它必須綁定 Offer／Item 與相�
 |---|---|
 | `MarketPressureChanged` | 不複製 World State；使受影響 Quote revision 失效。 |
 | `CharacterReputationChanged` | 使使用該角色聲望的 Quote 失效。 |
+| `PlayerAffinityChanged` | 只使該冒險者作為家教提供者的 Service Quote 失效；不複製好感值。 |
 
 ---
 
@@ -273,6 +286,7 @@ SellItem GameCommand
 10. 玩家地牢結算完成時，清算帳戶必須為 0，競拍款、八折直售款與地牢金幣的流入總額必須等於成員所得總額。
 11. 內部競拍只能使用 `intrinsicValue`，不得取得或套用一般 Shop Quote。
 12. 均分餘數的分配順序必須 deterministic，快轉、存讀檔與重播結果一致。
+13. 家教 Quote 的好感修正只能來自 Social Query；Economy State、City State 與 Quote Cache 都不得保存第二份好感值。
 
 ---
 
@@ -282,4 +296,4 @@ SellItem GameCommand
 - [ ] Account、Transfer Record、Quote DTO。
 - [ ] `EconomyQuery` 與報價 Resolver。
 - [ ] Currency Internal Command Handler 與冪等。
-- [ ] 購買、販售、委託均分、地牢競拍／均分、繼承 Workflow 契約測試。
+- [ ] 購買、販售、好感修正家教 Quote、委託均分、地牢競拍／均分、繼承 Workflow 契約測試。
