@@ -131,7 +131,8 @@ flowchart LR
 
 - Boss 必為大型 3×3。
 - 一般敵人 1 招；菁英／Boss 2～4 招。
-- Combat Skill 的 `actionKind` 不得為移動，Combat Effect Registry 不得註冊換格、推拉或擊退 Effect。
+- 每個 Monster 必須引用合法的 Natural Attack Profile 與 Control Resistance Profile；所有傷害技能必須解析到具數值倍率的 Damage Rule，顯示文字不得作為運算輸入。
+- Combat Skill 的 `actionKind` 不得為移動；Combat Effect 只能是 `dealDamage`、`heal`、`adjustCtb`、`interruptCasting`、`applyStatus` 或 `removeStatus`，不得註冊換格、推拉、擊退、全局時間或任意腳本 Effect。`interruptCasting` 只可引用 `cast`／`perform` 與合法的中斷延遲 Rule；Status 持續時間必須為正整數的目標行動次數。
 - Combat Skill 的 `masteryExperienceMode = fixedSupport` 必須引用有效 `SupportMasteryAwardRule` 且不得引用 Attack Rule；`damage` 技能必須引用有效 `AttackMasteryAwardRule` 且不得引用 Support Rule。每筆 Attack／Support Mastery Rule 與 Defense Routing 結果的分配比率皆須為正且總和恰為 1；Support 固定值必須非負。Equipment 的 `relatedMasteryIds` 只能引用有效 Mastery。
 - 每筆 `ExperienceAwardRule` 必須指定有效 `masteryId` 與有限、非負的 `baseExperience`。玩家對話的 Social Conversation Rule、玩家交易的 City Commerce Practice Rule，以及非玩家自由日的 Team Social Practice Rule，所引用的 Experience Rule 必須有效且目標 Mastery 均為交流；不得由 Social、City、Team 或 UI 寫死固定 MXP。
 - Combat Sequence Rule 的成功率 Resolver 必須符合固定 Power Input／Probability Output Schema；重骰相對戰力差門檻必須介於 0～1、重骰次數為非負整數、每次補品數量為 1，第一版攻擊權重刻度必須為 6。
@@ -144,6 +145,7 @@ flowchart LR
 - 第一版 Character、Quest、Effect 與 Event Definition 不得宣告犯罪、通緝、違法或委託失敗犯罪紀錄；委託到期只能驅動任務狀態與內容生命週期。
 - 武器、防具、戰鬥／非戰鬥道具、工藝品、材料與料理食譜皆必須有 `originCultureId`。Crafting／Cuisine Recipe 的文化必須與輸出 Item／餐館菜色文化一致；地圖的原生物品、素材與非人類怪物候選池只能引用所在地 `nativeCultureId` 的內容，人類敵人例外，改引用目前控制國文化池。
 - Opening CTB 與 Action Delay 的基礎值、最低值必須非負，且所有減免引用合法主屬性。
+- Control Resistance 的 CTB 倍率必須介於 0～1，累積上限若存在必須為非負；一般／魔法減傷與格擋吸收 Resolver 必須先將 raw 夾在不低於 0，再套遞減公式。
 - Gathering Rule 的地牢互動分鐘必須為正整數；Lv.0～10 都必須能解析有限的非負整數產物。
 - NPC 採集啟用時必須有正數 Point Cost 與合法 NPC Dungeon Target Resolver，該 Resolver 必須支援 `gatheringNode` 並引用合法 Outcome Rule；停用時不得編入 NPC Sequence。
 - 地圖樓梯上下座標一致。

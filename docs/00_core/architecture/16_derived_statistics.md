@@ -64,7 +64,7 @@ type SecondaryAttributeRuleDefinition = DefinitionHeader & {
 - 物理傷害、魔法傷害、樂器傷害。
 - 命中、魔法命中、迴避、預判、格擋。
 - 一般減傷、格擋減傷、魔法減傷、樂器減傷。
-- 移動相關數值、最大生命與最大魔力。
+- 最大生命、最大魔力與攜帶重量上限。
 
 數值名稱與公式來自 Definition；TypeScript 不為某把武器或某個文化寫特例。
 
@@ -124,6 +124,8 @@ interface CharacterStatisticsCalculator {
 - 雙持右手：0.35。
 - 雙持總輸出為兩手結果相加。
 
+一般減傷、魔法減傷與格擋吸收在進入遞減公式前一律使用 `safeRaw = max(0, raw)`。負面狀態可以降低 raw，但第一版不能藉由負 raw 隱式產生易傷，也不能讓分母進入 0 或負值；未來若需要易傷，必須新增獨立且有上下限的 Modifier Rule。
+
 這些值仍放在 `GripRuleDefinition`，測試 Fixture 固定第一版基準。樂器絕對命中、不吃一般減傷，以及樂器減傷讀取頭盔重量與年齡，也由專用 Secondary Rule 表達。
 
 ---
@@ -158,6 +160,7 @@ interface CharacterStatisticsCalculator {
 8. 年齡修正由同一 Age Rule 供角色面板與 Combat 使用。
 9. Calculator 無 State、無 I/O、無未注入的全域資料。
 10. 攜帶上限只由 Carry Capacity Rule 與有效肌力計算；不以背包格數、物品種類或 UI 特例修改。
+11. 第一版不輸出可縮短地城移動的移動速度；地城分鐘只由空間 Template 與互動 Rule 計算。
 
 ---
 

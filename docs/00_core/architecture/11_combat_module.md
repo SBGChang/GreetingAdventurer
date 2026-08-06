@@ -48,6 +48,11 @@ interface CombatDefinitionReader {
   getOpeningCtbRule(id: OpeningCtbRuleId): OpeningCtbRuleDefinition;
   getActionDelayRule(id: ActionDelayRuleId): ActionDelayRuleDefinition;
   getCombatStatus(id: CombatStatusDefinitionId): CombatStatusDefinition;
+  getCombatEffect(id: CombatEffectDefinitionId): CombatEffectDefinition;
+  getDamageRule(id: CombatDamageRuleId): CombatDamageRuleDefinition;
+  getHealRule(id: CombatHealRuleId): CombatHealRuleDefinition;
+  getCtbAdjustmentRule(id: CombatCtbAdjustmentRuleId): CombatCtbAdjustmentRuleDefinition;
+  getCombatInterruptionRule(id: CombatInterruptionRuleId): CombatInterruptionRuleDefinition;
   getEquipmentEffect(id: EquipmentEffectDefinitionId): EquipmentEffectDefinition;
   getAiPolicy(id: CombatAiPolicyId): CombatAiPolicyDefinition;
   getExperienceBudget(id: EncounterExperienceBudgetId): EncounterExperienceBudgetDefinition;
@@ -74,8 +79,22 @@ type MonsterDefinition = DefinitionHeader & {
     charisma: number;
   };
   skillIds: SkillDefinitionId[];
+  naturalAttackProfileId: MonsterNaturalAttackProfileId;
+  controlResistanceProfileId: CombatControlResistanceProfileId;
   aiPolicyId: CombatAiPolicyId;
   experienceProfileId: MonsterExperienceProfileId;
+};
+
+type MonsterNaturalAttackProfileDefinition = DefinitionHeader & {
+  physicalPowerResolverId: ResolverId;
+  magicPowerResolverId: ResolverId;
+  hitScoreResolverId: ResolverId;
+};
+
+type CombatControlResistanceProfileDefinition = DefinitionHeader & {
+  ctbIncreaseMultiplier: number;                // 0..1；只作用於外來正值 adjustCtb
+  maxExternalCtbIncreaseBeforeOwnAction?: number;
+  interruptionImmunityUntilOwnActionAfterSuccess: boolean;
 };
 ```
 
@@ -86,6 +105,8 @@ Rule Validation：
 - 任何敵人不得超過 4 招。
 - Boss 必為大型 3×3。
 - 一般／菁英的威脅等級與體型沒有其他硬性綁定。
+- 每個 Monster 都必須引用可計算的自然攻擊 Profile；不得假定非人類持有隱形武器，也不得只以顯示文字保存技能倍率。
+- 控制抗性只改寫外來正值 CTB 增加與成功中斷頻率；自身 CTB 扣減、技能原始延遲與狀態持續不受影響。
 
 ### 2.3 遭遇編組
 
@@ -135,7 +156,90 @@ type CombatSkillDefinitionView = {
 
 技能分類是內部資料，不要求 UI 顯示所有 Tag。架構中不存在 Basic Attack Definition；攻擊、格擋、施法、演奏與支援全部由技能驅動。戰鬥也不存在主動移動、移動技能、推拉或擊退效果；`anchorCell` 只能由「前排全空」的系統補位規則改變。
 
-### 2.5 開場 CTB 與行動延遲
+### 2.5 戰鬥效果與狀態語彙
+
+`CombatSkillDefinitionView.effectIds` 與裝備的技能效果都必須引用下列受限的資料語彙；不能以效果資料夾帶函式本文或自訂腳本。
+
+```ts
+type CombatEffectDefinition = DefinitionHeader & {
+  operation:
+    | {
+        kind: 'dealDamage';
+        damageRuleId: CombatDamageRuleId;
+      }
+    | {
+        kind: 'heal';
+        healRuleId: CombatHealRuleId;
+      }
+    | {
+        kind: 'adjustCtb';
+        adjustmentRuleId: CombatCtbAdjustmentRuleId;
+      }
+    | {
+        kind: 'interruptCasting';
+        interruptionRuleId: CombatInterruptionRuleId;
+      }
+    | {
+        kind: 'applyStatus';
+        statusId: CombatStatusDefinitionId;
+        durationTargetActions: number;
+        stackPolicy: 'replace' | 'refresh' | 'strongest';
+      }
+    | {
+        kind: 'removeStatus';
+        statusId: CombatStatusDefinitionId;
+      };
+};
+
+type CombatDamageRuleDefinition = DefinitionHeader & {
+  damageChannel: 'physical' | 'magic' | 'instrument';
+  powerResolverId: ResolverId;
+  canBeBlocked: boolean;
+};
+
+type CombatHealRuleDefinition = DefinitionHeader & {
+  powerResolverId: ResolverId;
+};
+
+type CombatCtbAdjustmentRuleDefinition = DefinitionHeader & {
+  amountResolverId: ResolverId; // 正數增加目標 currentCtb，負數扣減；結果最低夾在 0
+};
+
+type CombatInterruptionRuleDefinition = DefinitionHeader & {
+  appliesToActionKinds: Array<'cast' | 'perform'>;
+  interruptionDelayRuleId: ActionDelayRuleId;
+};
+
+type CombatStatusDefinition = DefinitionHeader & {
+  polarity: 'positive' | 'negative';
+  modifierResolverId: ResolverId;
+  displayPriority: number;
+};
+
+type CombatStatusInstance = {
+  statusInstanceId: string;
+  statusId: CombatStatusDefinitionId;
+  remainingTargetActions: number;
+  appliedByCombatantId: CombatantId;
+  revision: Revision;
+};
+```
+
+- `dealDamage`、`heal`、`adjustCtb`、`interruptCasting`、`applyStatus`、`removeStatus` 是第一版戰鬥內容可使用的完整效果集合。若未來確實需要新 kind，必須先增補公開型別、Schema、Handler、Validator、Fixture 與存檔影響說明。
+- Status 的持續時間只以**目標後續完成的行動次數**倒扣；不以世界日、地城分鐘或 UI 回合計數。`remainingTargetActions` 到 0 時由 Combat 移除狀態。
+- `modifierResolverId` 只接收角色／敵人的 Encounter 能力快照與 Status 強度快照，回傳已註冊的副屬修正；它不得改格、建立新遭遇、寫入角色永久狀態或讀取完整世界。
+- 守勢與反擊不是另一套隱藏普通攻擊：守勢以資料定義的正面 Status／格擋條件處理，反擊仍必須由 Skill 的 `counterStance` 主動建立並在符合條件時解析。
+
+### 2.6 效果資料的硬限制
+
+- `CombatDamageRuleDefinition.damageChannel` 只能走既有物理／魔法／樂器傷害與減傷規則；不能藉名稱繞過格擋或減傷。
+- `adjustCtb` 的輸出是實際數值，結果只可使 `currentCtb` 最低為 0，沒有百分比 Bar、速度值或全局時間效果。
+- 對 Monster 的外來正值 `adjustCtb` 必須先套用其 Control Resistance Profile，再套兩次自身行動間的累積上限；負值調整不吃此抗性。Boss 若已在本次自身行動前成功被中斷，後續 `interruptCasting` 只保留技能的其他合法效果，不再次中斷。
+- `interruptCasting` 只可中斷正在進行的 `cast`／`perform` 讀條，並以資料指定的實際 CTB 延遲結束該次讀條；它不能取消守勢、改變格位或奪取下一次行動。
+- `applyStatus` 的 target 必須落在 Skill 已驗證的合法目標內；Status 不能用來修改格位、隊伍成員、地圖內容、物品或熟練度。
+- 相同 Status 的疊加完全依該 Effect 的 `stackPolicy` 決定；內容作者不可假定「同名狀態自然疊層」。
+
+### 2.7 開場 CTB 與行動延遲
 
 ```ts
 type CombatRuleDefinition = DefinitionHeader & {
@@ -234,6 +338,8 @@ type CombatantState = {
   health: number;
   mana: number;
   currentCtb: number;
+  externalCtbIncreaseSinceOwnAction: number;
+  interruptionImmuneUntilOwnAction: boolean;
   activeWeaponSetId?: WeaponSetId;
   activeStatuses: CombatStatusInstance[];
   counterStance?: CounterStanceInstance;
@@ -469,6 +575,8 @@ Character 寫回、Map 內容處理與 MXP 任一步驟違反不變量時，整�
 13. 第 1 排仍有占格單位時不得補位；補位必須保留欄位與各占格單位的相對排距。
 14. Encounter 的玩家側 `participantCharacterIds` 必須與開始快照的全部正式成員完全相同；不得漏配、候補或加入護衛／救援任務角色。
 15. `CombatEncounterResolved(outcome=defeat)` 必須攜帶明確 `teamId`，讓 Quest 能在同一交易終止該隊全部進行中的護衛委託；Combat 不直接修改 Quest State。
+16. Monster 的傷害與命中必須由 `naturalAttackProfileId` 和 Skill 的數值 Damage Rule 完整解析；顯示文字不參與運算。
+17. Boss 的外來 CTB 增加與重複中斷必須受 `controlResistanceProfileId` 限制，讀檔後累積控制量與免疫狀態可重播。
 16. Player Travel Event Encounter 必須以 Interaction／Event Instance 雙 ID 關聯，NPC 不可成為其 Team；結果只能恢復同一筆旅行 Pending 一次。
 
 ---
