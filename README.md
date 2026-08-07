@@ -57,6 +57,8 @@ docs/
       └─ yunhua_monsters_v1.*          雲華文化怪物池與閱讀版
 ```
 
+> `docs/review/` 為架構複審的決策紀錄（見該資料夾 README）；文件內 file:line 為複審當時位置，僅供 provenance，不作定位依據。
+
 ## HTML 閱讀版
 
 - [四國內容目錄（舊版內容草稿）](docs/01_world/national_content_catalog.html)

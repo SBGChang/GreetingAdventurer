@@ -299,7 +299,7 @@ type FreeActionPayload =
   | { kind: 'rest' };
 ```
 
-`proposeToTeammate` 是 NPC／非玩家主角成員的零日自由子步驟。Lifecycle 抽中時必須已固定目標；Team 只保存並完成這筆行動，不判斷婚姻或好感。無論提案接受或拒絕，同一成員下一件自由行動最早次日才可開始。
+`proposeToTeammate` 是 NPC／非玩家主角成員的零日自由子步驟。NPC Behavior 抽中時必須已固定目標；Team 只保存並完成這筆行動，不判斷婚姻或好感。無論提案接受或拒絕，同一成員下一件自由行動最早次日才可開始。
 
 ```ts
 type PendingPlayerTravelInteraction = {
@@ -542,10 +542,10 @@ sequenceDiagram
 ### 7.2 NPC 隊伍的城鎮行為
 
 1. NPC Behavior 在自己的 `npcDecisionDue` 選擇 Intent／ActionChain，再以 Internal Command 要求 Team 開始對應 Plan。
-2. 若 Chain 進入 `cityFree`，Lifecycle 為每名正式成員各自指派製作、鍛鍊、買賣、向合法隊友求婚或休息。
+2. 若 Chain 進入 `cityFree`，NPC Behavior 為每名正式成員各自指派製作、鍛鍊、買賣、向合法隊友求婚或休息。
 3. 每個人只依自己的 `nextDueDay` 結算，其他成員不被拖慢；交易本身是由 NPC Behavior／City Workflow 完成的零日子步驟。
 4. 每個完整自由日另由 `nonPlayerMemberCityFreeDayTick` 對每位非玩家主角的正式成員發出一次聊天與一次購物交流練習；這與其自由行動和實際交易完全分離。玩家隊友與其他 NPC 的處理相同。
-5. Team 完成 Plan 或 Free Action 後只發出事實；Lifecycle 次日才推進 Chain 或重新決策。
+5. Team 完成 Plan 或 Free Action 後只發出事實；NPC Behavior 次日才推進 Chain 或重新決策。
 6. 若離開 `cityFree`，所有可恢復的個人進度凍結，直到下一次取得自由時間。
 
 ### 7.3 進出冒險地
@@ -641,13 +641,13 @@ Team 模組最低必須提供：
 14. 玩家與 NPC 隊伍所有正式成員恰好各占九宮格一格、正式人數不得超過 9，且不存在候補參戰者的測試。
 15. 隊長解雇成員立即建立同位置 NPC 行動單位，角色個人資產完全不變的測試。
 16. 任務暫時角色不可被招募、解雇為獨立 NPC、領取均分或參加戰利品分配的測試。
-17. `StartNpcTeamPlan`／`AssignNpcMemberFreeAction` 只執行合法 Lifecycle 節點、無法越過 Team 位置與成員不變量的測試。
+17. `StartNpcTeamPlan`／`AssignNpcMemberFreeAction` 只執行合法 NPC Behavior 節點、無法越過 Team 位置與成員不變量的測試。
 18. 玩家隊友與 NPC 隊員入隊滿／未滿 60 日、各類工作收支、裝備支出排除、缺口遞增與交流抵抗降低離隊機率，以及離隊後生成單人 Team 的測試。
 19. 戰鬥配置可保留第 1、3 排之間的空排；成員離隊會移除其配置，且 active Combat 不受後續配置修改影響的測試。
 20. 非隊長、戰鬥中修改、重疊格位、漏配正式成員與非正式成員配置均被拒絕且不留下部分寫入的測試。
 21. `getFormalMemberJoinedOnDay` 只回傳目前正式隊員的加入日；NPC 求婚可由雙方加入日推導共隊天數，Team 不建立 pairwise 相處紀錄的測試。
-21. 玩家有／無未完成護衛任務時，刺殺事件候選正確出現／消失；多筆護衛只在抽中時固定一筆 Quest ID，讀檔不重抽的測試。
-22. NPC 接取護衛任務後仍固定 6 日直達且完全不建立旅行事件；抵達、期限與其他 Quest 規則照常生效的測試。
+22. 玩家有／無未完成護衛任務時，刺殺事件候選正確出現／消失；多筆護衛只在抽中時固定一筆 Quest ID，讀檔不重抽的測試。
+23. NPC 接取護衛任務後仍固定 6 日直達且完全不建立旅行事件；抵達、期限與其他 Quest 規則照常生效的測試。
 
 ---
 
