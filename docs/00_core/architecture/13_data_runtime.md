@@ -159,7 +159,7 @@ flowchart LR
 - NPC 市場交易每個自由活動循環的上限為非負整數，且交易／買房規則均引用既有價格與設施資料。
 - `PlayerConversationRuleDefinition.maxCompletedPerDay` 與 `PlayerCommerceDailyLimitDefinition.maxCommerceInteractionsPerDay` 皆固定為 6；前者由 Social 全域引用，後者與有效 Player Commerce Practice Rule 由每個 City 引用。City 不得再定義對話上限。
 - Social System Definition 必須各引用一筆有效的 Player Affinity 與 Player Conversation Rule。Player Affinity Rule 的上下限、初始值、交流變化、玩家求婚接受與家教價格修正 Resolver 必須齊全；玩家求婚 Resolver 必須 deterministic。Social Runtime／Definition 不得出現 NPC→NPC 或任意角色 pair affinity 欄位。
-- NPC Marriage Rule 的接受 Resolver 只能以共隊天數、雙方 Combat Power 與戰力接近程度作輸入並消耗 deterministic RNG；`proposeToTeammate` Free Action Rule 必須且只能在該 kind 引用有效 `npcMarriageRuleId`。候選只允許同隊、成年、存活、未婚、異性且非玩家主角的正式成員，Lifecycle 以穩定 RNG 固定其中一人，不另設候選權重公式。
+- NPC Marriage Rule 的接受 Resolver 只能以共隊天數、雙方 Combat Power 與戰力接近程度作輸入並消耗 deterministic RNG；`proposeToTeammate` Free Action Rule 必須且只能在該 kind 引用有效 `npcMarriageRuleId`。候選只允許同隊、成年、存活、未婚、異性且非玩家主角的正式成員，NPC Behavior 以穩定 RNG 固定其中一人，不另設候選權重公式。
 - Character 建立資料必須能解析不可變 `sex: male | female`；active Partner FamilyLink 必須恰有兩名成年、存活、異性且各自未與他人保持 active partner 關係的角色。
 - 每筆 Population Supply Rule 必須引用有效 World Adventurer Generation Rule；其原型清單不可為空，原型／性別／起始年齡／天賦 Resolver 必須存在，且輸出角色在生成日已達該原型的成年門檻。
 - `NonPlayerMemberDailySocialPracticeRuleDefinition` 的聊天與購物 Experience Rule 必須都存在，且目標 Mastery 均為交流；不得以市場交易規則或玩家每日上限取代。它只適用非玩家主角正式隊員。
@@ -302,11 +302,13 @@ interface PlayerTravelEventDefinitionReader {
 }
 
 type ContentEventOptionDefinition = {
-  optionId: DefinitionId;
+  optionId: ContentEventOptionId;
   visibilityConditionIds: ConditionDefinitionId[];
   eligibilityConditionIds: ConditionDefinitionId[];
   effectIds: EffectDefinitionId[];
 };
+
+// ContentEventOptionId 只需在所屬 ContentEventDefinition 內唯一；Resolver／UI 必須連同 definitionId 或 event instanceId 定位，不能把 optionId 當全域 Definition ID。
 
 type ContentEventInstance = {
   instanceId: ContentEventInstanceId;
@@ -316,10 +318,10 @@ type ContentEventInstance = {
   context: ContentEventContext;
   actorCharacterId?: CharacterId;
   rolledOnDay: WorldDay;
-  visibleOptionIds: DefinitionId[];
-  eligibleOptionIds: DefinitionId[];
+  visibleOptionIds: ContentEventOptionId[];
+  eligibleOptionIds: ContentEventOptionId[];
   resolverSnapshot: JsonValue;
-  rngStreamId: RngStreamId;
+  rngStreamId: RngStreamId; // 已骰定快照的追蹤資訊；後續不再從此 Instance 抽 RNG，故不保存 cursor
 };
 ```
 
@@ -340,7 +342,7 @@ type EffectDefinition =
   | { kind: 'grantItem'; target: EffectTarget; itemDefinitionId: ItemDefinitionId; amount: number }
   | { kind: 'consumeActorItem'; itemDefinitionId: ItemDefinitionId; amount: number }
   | { kind: 'removeActorCurrency'; amount: number }
-  | { kind: 'applyStatus'; target: EffectTarget; statusId: StatusId; duration: number }
+  | { kind: 'applyStatus'; target: EffectTarget; statusId: CharacterStatusDefinitionId; duration: number }
   | { kind: 'grantMasteryExperience'; target: EffectTarget; experienceAwardRuleId: ExperienceAwardRuleId; multiplier?: number }
   | { kind: 'startDetailedCombat'; encounterPoolId: EncounterPoolId }
   | { kind: 'setWorldFact'; factId: WorldFactId; value: JsonScalar }
@@ -363,7 +365,7 @@ type PlayerTravelConditionContext = {
 
 type EffectPlan = {
   sourceEventInstanceId: ContentEventInstanceId;
-  optionId: DefinitionId;
+  optionId: ContentEventOptionId;
   steps: readonly {
     effectId: EffectDefinitionId;
     targetCharacterIds: readonly CharacterId[];
@@ -435,26 +437,37 @@ type ResolverRegistration<TInput, TResult> = {
   ownerModule: ModuleId;
   inputSchemaId: SchemaId;
   resultSchemaId: SchemaId;
-  resolve(input: Readonly<TInput>, context: ResolverContext): TResult;
+  resolve(input: Readonly<TInput>, context: ResolverContext): ResolverExecutionResult<TResult>;
 };
+
+type ResolverExecutionResult<TResult> = Readonly<{
+  value: TResult;
+  nextRngCursor?: RngCursor; // 只有使用 RNG 的 Resolver 才回傳；必須是 context.rngContext 對應的最終 cursor
+}>;
 
 type ResolverContext<
   TDefinitions extends object = object,
   TQueries extends object = object,
-> = {
+> = Readonly<{
   readonly definitions: TDefinitions;   // 只注入該 Resolver 宣告需要的窄化 Definition View
   readonly queries: TQueries;           // 只注入宣告需要的 Query Port
-  readonly rng?: DeterministicRng;       // 未宣告需要 RNG 就不提供；DeterministicRng 見 00_shared_contracts §2.2
-};
+}> & ResolverRngCapability;
+
+type ResolverRngCapability =
+  | Readonly<{ rng?: never; rngContext?: never }>
+  | Readonly<{
+      rng: DeterministicRng;             // 無狀態取值基元
+      rngContext: RngContext;            // cursor 由呼叫者擁有並在成功提交後寫回
+    }>;
 ```
 
-`ResolverContext` 是**能力受限的唯讀 Context**：不得暴露完整 `EngineContext` 或 `GameState`，只給宣告過的 Definition View、Query Port，以及（選用的）scoped RNG。
+`ResolverContext` 是**能力受限的唯讀 Context**：不得暴露完整 `EngineContext` 或 `GameState`，只給宣告過的 Definition View、Query Port，以及成對出現的無狀態 RNG／`RngContext`。Resolver 不得把 cursor 藏在 closure 或 RNG 物件內。
 
 Resolver 必須：
 
 - deterministic、同步、無平台 I/O。
 - 只讀取注入的 Definition View 與 Query Port。
-- RNG 只能使用注入的 scoped stream。
+- RNG 只能使用注入的 `rngContext`，每次抽取顯式串接前一次 `nextCursor`，並在結果中回傳最終 `nextRngCursor`。
 - 回傳 JSON 可表示結果。
 - 不直接修改 GameState。
 

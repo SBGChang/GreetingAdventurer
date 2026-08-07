@@ -24,7 +24,7 @@ Unidirectional Data Flow
 
 ```mermaid
 flowchart LR
-  VIEW["React View"] -->|GameCommand| SESSION["GameSession"]
+  VIEW["React View"] -->|GameCommandRequest| SESSION["GameSession"]
   SESSION --> ENGINE["Pure GameEngine"]
   ENGINE -->|Committed Snapshot + Outbox| SESSION
   SESSION --> QUERY["Module Queries"]
@@ -33,7 +33,7 @@ flowchart LR
   VM --> VIEW
 ```
 
-- View 只顯示 ViewModel 與送出 Command。
+- View 只顯示 ViewModel 與送出不含核心 ID 的 `GameCommandRequest`。
 - ViewModel 只含畫面需要的資料與 UI 狀態。
 - Domain State 不包含 React 狀態。
 - 不使用雙向 Model binding。
@@ -327,12 +327,8 @@ City Screen Projection 同時讀 World、City、Team、Character、Social、Inve
 ## 9. Notification 與效果
 
 ```ts
-interface EventNotificationProjector {
-  project(event: GameDomainEvent): readonly Notification[];   // Domain Event → 語意 Notification（core 型別）
-}
-
 interface NotificationProjector {
-  project(notification: Notification): UiNotice;              // Notification → UI 顯示模型
+  project(notification: Notification): UiNotice;              // committed Outbox Notification → UI 顯示模型
 }
 
 interface AudioCandidateProjector {
@@ -340,7 +336,7 @@ interface AudioCandidateProjector {
 }
 
 type UiNotice = {
-  id: string;
+  id: NotificationId;
   message: LocalizedTextRef;
   tone: 'info' | 'success' | 'warning' | 'error';
   presentation: 'toast' | 'modal';
@@ -348,7 +344,7 @@ type UiNotice = {
 };
 ```
 
-投影流程：`Domain Event → Notification（core）→ UiNotice → React View`。只處理 committed Event。Notification／Audio：
+投影流程：`ModuleResult Notification → committed Outbox → UiNotice → React View`。Application 不得從 Event 再產生第二份 Notification；音效／成就／自動存檔候選才由 committed Event 投影。Notification／Audio：
 
 - 不修改 State。
 - 不觸發新的玩法 Command。

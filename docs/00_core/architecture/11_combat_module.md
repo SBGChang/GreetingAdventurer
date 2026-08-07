@@ -217,7 +217,7 @@ type CombatStatusDefinition = DefinitionHeader & {
 };
 
 type CombatStatusInstance = {
-  statusInstanceId: string;
+  statusInstanceId: CombatStatusInstanceId;
   statusId: CombatStatusDefinitionId;
   remainingTargetActions: number;
   appliedByCombatantId: CombatantId;
@@ -256,11 +256,11 @@ type OpeningCtbRuleDefinition = DefinitionHeader & {
 
 type ActionDelayRuleDefinition = DefinitionHeader & {
   baseDelay: number;
-  reductions: AttributeReductionRule[];
+  reductions: ActionDelayAttributeReductionRule[];
   minimumDelay: number;
 };
 
-type AttributeReductionRule = {
+type ActionDelayAttributeReductionRule = {
   primaryAttribute: PrimaryAttributeId;
   reductionPerPoint: number;
 };
@@ -297,7 +297,7 @@ type CombatEncounter = {
   currentActorId?: CombatantId;
   readyQueue: CombatantId[];
   supportMasteryUseCounts: Record<CharacterId, Record<SkillDefinitionId, number>>;
-  rngStreamId: string;
+  rngContext: RngContext; // 每次 Action 成功提交後保存 nextCursor；拒絕或回滾時不前進
   revision: Revision;
 };
 
@@ -319,7 +319,7 @@ type DetailedCombatRequest = {
   teamId: TeamId;
   source: CombatEncounterSource;
   participantSnapshotRevision: Revision;
-  rngStreamId: string;
+  rngContext: RngContext;
 };
 ```
 

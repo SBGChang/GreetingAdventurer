@@ -2,7 +2,7 @@
 
 > **模組 ID：** `dungeon`
 >
-> **依賴：** [共用核心契約](00_shared_contracts.md)、Map／Team／Asset Distribution／Combat Sequence 的公開 Query，以及 Gathering Workflow 契約。
+> **依賴：** [共用核心契約](00_shared_contracts.md)、Map／Team／Asset Distribution／Combat Sequence 的公開 Query，以及 Gathering Resolver／Host Workflow 契約。
 >
 > **責任：** 管理玩家的迷宮分鐘制探索 Session，以及非玩家冒險者的 `NpcDungeonRun`。Dungeon 不擁有地圖內容、不直接發放或分配物品、貨幣與經驗，也不直接更新委託。
 
@@ -33,7 +33,7 @@ type DungeonState = {
 | 隊內戰利品競拍、NPC 分配與現金均分 | distribution | Session／Run 只保存 Distribution ID；Dungeon 決定何時開始、追加正式成果與關閉收集。 |
 | 熟練度與 MXP | progression | 僅在正式結算後依結果發放。 |
 | 任務完成與公會結案 | quest | 接收已正式處理的目標結果。 |
-| 採集者、採集產物與採集 MXP | gathering workflow／inventory／progression | 驗證探索位置與互動分鐘後，要求原子解析採集來源。 |
+| 採集者、採集產物與採集 MXP | dungeon-gathering workflow／inventory／progression | Dungeon 只透過 `ConsumeDungeonGatheringAction` 驗證探索位置並扣除互動分鐘；Host Workflow 原子解析與提交其餘結果。 |
 
 ---
 
@@ -43,7 +43,7 @@ type DungeonState = {
 
 ```ts
 interface DungeonDefinitionReader {
-  getNpcExplorationRule(id: RuleId): NpcExplorationRuleDefinition;
+  getNpcExplorationRule(id: NpcExplorationRuleId): NpcExplorationRuleDefinition;
   getNpcResolver(id: ResolverId): NpcDungeonTargetResolverDefinition;
   getDungeonInteractionRule(id: InteractionRuleId): DungeonInteractionRuleDefinition;
   getGatheringInteractionView(id: GatheringRuleId): {
@@ -176,7 +176,7 @@ type NpcDungeonRun = {
   participantCharacterIds: CharacterId[];
   mapId: MapInstanceId;
   mapVersion: number;
-  explorationRuleId: RuleId;
+  explorationRuleId: NpcExplorationRuleId;
   distributionId: AssetDistributionId;
   combatSequenceId?: CombatSequenceId;
 
@@ -256,7 +256,7 @@ Dungeon Query 不公開其他隊伍的 RNG seed、未結算獎勵細節或可被
 | `startPlayerExploration` | 玩家 Team 位於冒險地，沒有既有 Session。 | 建立 Player Session，並以當下正式成員快照建立 collecting 的玩家地牢 Distribution。 |
 | `moveDungeonRoom` | Session 為 exploring、目標房間可通行。 | 計算分鐘、更新房間與入口小格、必要時推進世界日。 |
 | `openDungeonDoor` | Session 為 exploring、門連接目前房間、Map Version 相符。 | 若門仍關閉，支付一次開門分鐘、要求 Map 開門並揭露門後房間；已開門時不再收費。 |
-| `gatherDungeonNode` | Session 為 exploring、玩家位於節點所屬房間、Map Version 相符、節點 available，且無戰鬥／Pending Interaction。 | 依 Gathering Rule 增加迷宮分鐘，使用探索開始時的正式參與者快照**啟動 Gathering Workflow**（`ResolveGatheringSource` 入口）；任何必要步驟失敗時整筆回滾。 |
+| `gatherDungeonNode` | 由 `dungeon-gathering-workflow` 接收；不得直接路由到 Dungeon Handler。 | Workflow 先送 required `ConsumeDungeonGatheringAction` 讓 Dungeon 重新驗證 Session／房間／Map Version／阻塞狀態並增加迷宮分鐘，再共用 Gathering Resolver 與其他模組命令；任何必要步驟失敗時整筆回滾。 |
 | `useDungeonExit` | Session 位於合法出口房間，且沒有戰鬥或內容互動。 | 將 Session 改為 leaving，關閉 Distribution 收集；無待分配成果時可立即完成，有玩家競拍時等 `AssetDistributionCompleted` 後才關閉 Session 並返城。 |
 | `interactDungeonContent` | 玩家位於合法位置且內容可用。 | 依互動類型建立 combat／內容處理 Internal Command。 |
 | `resolveDungeonInteraction` | Session 有匹配的 Pending Interaction，選項仍合法。 | 套用資料化結果、清除互動並恢復探索。 |
@@ -272,6 +272,7 @@ Dungeon Query 不公開其他隊伍的 RNG seed、未結算獎勵細節或可被
 | Internal Command | Dungeon 的反應 |
 |---|---|
 | `StartNpcDungeonRun` | 建立 NPC Run、collecting 的 NPC 地牢 Distribution，以及引用所有怪物內容的 `dungeonSweep` Combat Sequence；排入下一日 `npcDungeonDay`。 |
+| `ConsumeDungeonGatheringAction` | 重新驗證 Session、目前房間、Map Version、探索參與者快照與阻塞狀態；成功時增加 Gathering Rule 指定分鐘，失敗時不改 State。 |
 
 ### 5.4 訂閱 DomainEvent
 
@@ -298,7 +299,7 @@ Dungeon Query 不公開其他隊伍的 RNG seed、未結算獎勵細節或可被
 | `PlayerInteractionOpened` | `interactionId`、`teamId`、`kind: dungeonEvent` | engine session、ui/app。 |
 | `MapExplorationCompleted` | `teamId`、`mapId`、`mapVersion`、`explorationKey`、`experienceRuleId` | progression、quest。 |
 | `NpcDungeonRunProgressed` | `runId`、`processedTargetRefs`、`nextCursor`、`remainingPoints` | ui/app、debug。 |
-| `NpcDungeonRunClosed` | `runId`、`teamId`、`reason` | team、ui/app。 |
+| `NpcDungeonRunClosed` | `runId`、`teamId`、`reason` | team、npc-behavior、ui/app。 |
 
 Dungeon 不會自行 emit `InventoryTransferred`、`MasteryExperienceGranted` 或 `QuestStateChanged`。
 
@@ -322,7 +323,6 @@ Dungeon 不會自行 emit `InventoryTransferred`、`MasteryExperienceGranted` �
 | `FinalizeAssetDistributionCollection` | `distributionId` | distribution。 |
 | `OpenMapDoor` | `teamId`、`mapId`、`mapVersion`、`linkId`、`openedOnDungeonMinute` | map。 |
 | `ResolveMapTrap` | `teamId`、`mapId`、`mapVersion`、`trapId`、`resolution`、`resolvedOnDungeonMinute` | map。 |
-| `ResolveGatheringSource`（啟動 Gathering Workflow，非 Internal Command） | `source: mapNode`、`teamId`、探索參與者快照、`distributionId`、`rngContext` | Gathering Workflow 入口。 |
 
 ---
 
@@ -393,8 +393,9 @@ Run 在下列任一狀況進入 `settling`：
 ```text
 已揭露房間中的 available 採集點
   → gatherDungeonNode
-  → 增加 Gathering Rule 指定分鐘；跨午夜時照常推進世界日
-  → ResolveGatheringSource
+  → dungeon-gathering-workflow
+  → required ConsumeDungeonGatheringAction；成功時增加指定分鐘，跨午夜照常推進世界日
+  → GatheringResolver 解析產物並回傳 nextCursor
   → Map Node 標記 harvested
   → 產物 Item 進入本次 Distribution Escrow
   → GrantGatheringMasteryExperience 只給最高採集等級成員 MXP

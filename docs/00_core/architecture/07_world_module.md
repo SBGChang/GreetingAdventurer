@@ -202,7 +202,7 @@ type ConflictState = {
   state: 'active' | 'resolved';
   startedOnDay: WorldDay;
   resolvedOnDay?: WorldDay;
-  rngStreamId: string;
+  rngContext: RngContext; // 衝突跨日解析使用；每次成功解析後保存 nextCursor
   revision: Revision;
 };
 

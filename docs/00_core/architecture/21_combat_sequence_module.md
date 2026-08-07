@@ -13,13 +13,13 @@
 ## 1. 邊界與所有權
 
 ```ts
-type CombatSequenceId = Brand<string, 'CombatSequenceId'>;
-type CombatSequenceChallengeId = Brand<string, 'CombatSequenceChallengeId'>;
-type CombatSequenceChallengeResultId = Brand<string, 'CombatSequenceChallengeResultId'>;
-type CombatSequenceSourceId = Brand<string, 'CombatSequenceSourceId'>;
-type CombatSequenceSourceCommitId = Brand<string, 'CombatSequenceSourceCommitId'>;
-type CombatSequenceRuleId = Brand<DefinitionId, 'CombatSequenceRuleId'>;
-type RetrySupplyPolicyId = Brand<DefinitionId, 'RetrySupplyPolicyId'>;
+type CombatSequenceId = RuntimeId<'combat-sequence'>;
+type CombatSequenceChallengeId = RuntimeId<'combat-sequence-challenge'>;
+type CombatSequenceChallengeResultId = RuntimeId<'combat-sequence-challenge-result'>;
+type CombatSequenceSourceId = RuntimeId<'combat-sequence-source'>;
+type CombatSequenceSourceCommitId = RuntimeId<'combat-sequence-source-commit'>;
+type CombatSequenceRuleId = DefinitionId<'combat-sequence-rule'>;
+type RetrySupplyPolicyId = DefinitionId<'retry-supply-policy'>;
 ```
 
 ### 1.1 唯一可寫 State
@@ -684,7 +684,7 @@ Run 關閉並不再需要查詢戰鬥進度後，Dungeon Workflow 送出 `Releas
 ## 9. 單場掃蕩整合
 
 ```ts
-type StartSingleBattleSweep = GameCommandEnvelope & {
+type StartSingleBattleSweep = {
   type: 'startSingleBattleSweep';
   teamId: TeamId;
   sourceId: CombatSequenceSourceId;

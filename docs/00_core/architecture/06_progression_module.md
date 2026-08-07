@@ -41,7 +41,7 @@ type ProgressionState = {
 interface ProgressionDefinitionReader {
   getMastery(id: MasteryId): MasteryDefinition;
   getMasteryCurve(id: MasteryCurveId): MasteryCurveDefinition;
-  getSkill(id: SkillId): SkillDefinition;
+  getSkill(id: SkillDefinitionId): SkillDefinition;
   getTeachingRule(id: TeachingRuleId): TeachingRuleDefinition;
   getExperienceAwardRule(id: ExperienceAwardRuleId): ExperienceAwardRuleDefinition;
   listSocialMasteryBenefits(): SocialMasteryBenefitDefinition[];

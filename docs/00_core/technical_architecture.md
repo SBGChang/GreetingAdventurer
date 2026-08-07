@@ -131,7 +131,7 @@ flowchart BT
 4. 只有 `app/composition/` 可以同時 import 多個模組並註冊它們。
 5. `app/workflows/` 可以編排多個公開 Internal Command，但不可擁有領域 State、數值公式或把失敗藏成成功。
 6. `app/read-models/` 可以組合多個公開 Query，但不可寫入 State 或執行 Command。
-7. `ui/` 不可直接修改 `GameState`；只能取得 ViewModel、送出 `GameCommand`。
+7. `ui/` 不可直接修改 `GameState`；只能取得 ViewModel、送出不含核心 ID 的 `GameCommandRequest`。
 8. `platform/` 不可實作遊戲規則；它只提供檔案、IPC、Steam、音效等外部能力。
 
 ### 3.2 邊界必須由工具強制
@@ -142,7 +142,7 @@ flowchart BT
 2. 循環依賴檢查：contracts、modules、workflows、read-models 與 UI Feature 的依賴圖不得成環。
 3. 每個模組以自己的 contract、fixture 與記憶體 Reader 單獨 typecheck／test，不要求啟動完整遊戲。
 4. `public.ts` Export Snapshot 測試：未經契約變更不得意外擴張或刪除公開 API。
-5. UI import 規則：`ui/features/*` 只能引用公開 ViewModel／GameCommand／Design System，不可引用 State、Handler 或 Resolver。
+5. UI import 規則：`ui/features/*` 只能引用公開 ViewModel／`GameCommandRequest` payload／Design System，不可引用核心 Envelope、State、Handler 或 Resolver。
 
 因此多人同時開發時，真正需要共同協調的只剩 `contracts/core`、Composition Registry、跨模組 Workflow／Projection，以及同一張多 Model View；領域內部檔案不應互相造成編譯衝突。
 
@@ -227,19 +227,7 @@ src/
 
 ### 5.1 ID、時間與 RNG
 
-```ts
-type WorldDay = number;        // 整數世界日，不使用 Date
-type DungeonMinute = number;   // 迷宮內時間，可跨午夜
-type Seed = string;
-
-// ID 一律採 branded 家族 DefinitionId<K>／RuntimeId<K> 與 registry brand（見 00_shared_contracts §2）；不再有泛型 GameId。
-
-type RngContext = {
-  worldSeed: Seed;
-  streamId: RngStreamId;
-  cursor: RngCursor;      // 顯式游標；DeterministicRng 為純函式，見 00_shared_contracts §2.2
-};
-```
+`WorldDay`、`DungeonMinute`、`Seed`、branded ID 家族、`RngContext`、`RngCursor` 與 `DeterministicRng` 都直接使用 [共用核心契約](architecture/00_shared_contracts.md) §2 的正式型別；本總覽不重複宣告第二套形狀。
 
 - 所有世界排程使用 `WorldDay`。
 - 地牢內的玩家移動使用分鐘；跨越午夜時才要求世界核心推進到下一日。
@@ -247,27 +235,7 @@ type RngContext = {
 
 ### 5.2 根狀態與 Slice
 
-```ts
-type GameState = {
-  core: CoreState;
-  character: CharacterState;
-  map: MapState;
-  team: TeamState;
-  npcBehavior: NpcBehaviorState;
-  dungeon: DungeonState;
-  city: CityState;
-  inventory: InventoryState;
-  quest: QuestState;
-  progression: ProgressionState;
-  combat: CombatState;
-  combatSequence: CombatSequenceState;
-  world: WorldState;
-  economy: EconomyState;
-  distribution: AssetDistributionState;
-  crafting: CraftingState;
-  social: SocialState;
-};
-```
+`CoreState<TScheduledJob>`、`ModuleStateRegistry` 與組合後 `GameState` 的正式形狀只定義於 [共用核心契約](architecture/00_shared_contracts.md) §3；本總覽不複製 Slice 清單。
 
 - 此完整 `GameState` 定義屬 `app/composition`；`contracts/core` 不 import 任一領域 Slice。
 - 每個領域模組只公開自己的 State contribution，並且不接收完整 `GameState`。
@@ -367,19 +335,7 @@ MasteryExperienceGranted
 
 ### 6.2 內容載入介面
 
-```ts
-interface ContentRepository {
-  loadManifest(): RawContentManifest;
-  loadPack(packId: ContentPackId): RawContentPack;
-}
-
-interface DefinitionCompiler {
-  compile(
-    manifest: RawContentManifest,
-    packs: RawContentPack[],
-  ): DefinitionRegistry | DataDiagnostics;
-}
-```
+`ContentRepository`、`DefinitionCompiler`、Raw DTO、驗證結果與唯讀 Registry 的正式型別只定義於 [Data Runtime](architecture/13_data_runtime.md)；本總覽不複製第二套介面。
 
 - `ContentRepository` 由 Vite／Electron／Steam DLC 的平台層實作。
 - `DefinitionCompiler` 在 `data-runtime/`；它只做解析、驗證、索引與只讀 Registry 建立。
@@ -397,21 +353,7 @@ interface DefinitionCompiler {
 
 模組不可拿到無限制的全域資料庫。組裝層提供窄化 Reader：
 
-```ts
-interface MapDefinitionReader {
-  getMapTemplate(id: MapTemplateId): MapTemplateDefinition;
-  getMapSpawnRule(id: MapSpawnRuleId): MapSpawnRuleDefinition;
-}
-
-interface NpcDungeonDefinitionReader {
-  getNpcExplorationRule(id: RuleId): NpcExplorationRuleDefinition;
-  getNpcResolver(id: ResolverId): NpcResolverDefinition;
-}
-
-interface QuestDefinitionReader {
-  getQuestRule(id: QuestRuleId): QuestRuleDefinition;
-}
-```
+正式介面分別由 [Map](architecture/01_map_module.md)、[Dungeon](architecture/03_dungeon_module.md) 與 [Quest](architecture/10_quest_module.md) 契約擁有；本總覽只要求 Composition 注入對應窄化 Reader，不重複欄位與方法簽名。
 
 這讓 `map`、`dungeon`、`quest` 在型別層面也看不到不屬於它們的內容。
 
@@ -510,10 +452,12 @@ interface QuestDefinitionReader {
 ```text
 owns:         哪一個 State Slice 可由自己寫入
 reads:        所需的窄化 Definition Reader 與公開 Query
-handles:      哪些 GameCommand、InternalCommand、ScheduledJob、DomainEvent
+handles:      哪些 GameCommand、InternalCommand、ScheduledJob，以及可提供哪些 Event Subscription Handler
 emits:        哪些 DomainEvent
 invariants:   永遠不得被破壞的資料條件
 ```
+
+Domain Event Type → Subscription Handler 的實際綁定與執行順序只存在 `app/composition` 的 `ExecutionOrderManifest`；模組不能自行增加跨模組訂閱。
 
 ### 8.2 禁止的跨模組寫法
 
@@ -534,48 +478,7 @@ invariants:   永遠不得被破壞的資料條件
 
 NPC 地牢探險採簡易日結算，不走玩家的格子、紅門與陷阱邏輯。地圖生成時，`map` 模組對動態內容建立有序序列；玩家讀取 `position` 探索，NPC 讀取 `npcOrder`。其中怪物內容構成一條 [Combat Sequence](architecture/21_combat_sequence_module.md)；它只做隊伍戰力對敵方戰力的骰定，不建立抽象 Encounter 或模擬 HP／招式。
 
-```ts
-type NpcDungeonSequenceEntry =
-  | {
-      kind: 'mapContent';
-      contentId: ContentInstanceId;
-      definitionId: MonsterGroupId | ChestId | MapEventId;
-      position: MapPosition;       // 玩家用
-      npcOrder: number;            // NPC 用
-      pointCost: number;           // 小怪／寶箱 1、菁英 2、大怪 4；事件由資料指定
-      resolverId: ResolverId;
-      state: 'available' | 'resolved';
-    }
-  | {
-      kind: 'gatheringNode';
-      nodeId: GatheringNodeId;
-      gatheringRuleId: GatheringRuleId;
-      position: MapPosition;       // 玩家用
-      npcOrder: number;            // NPC Policy 啟用時才存在
-      pointCost: number;
-      resolverId: ResolverId;
-      state: 'available' | 'harvested';
-    };
-
-type NpcDungeonRun = {
-  runId: NpcDungeonRunId;
-  teamId: TeamId;
-  participantCharacterIds: CharacterId[];
-  mapId: MapInstanceId;
-  mapVersion: number;
-  distributionId: AssetDistributionId;
-  combatSequenceId?: CombatSequenceId;
-  cursorNpcOrder: number;
-  pendingResults: PendingDungeonResult[];
-  settlementProgress: {
-    mapApplied: boolean;
-    combatSequenceSettled: boolean;
-    distributionCompleted: boolean;
-  };
-  status: 'exploring' | 'settling' | 'closed' | 'invalid';
-  rngContext: RngContext;
-};
-```
+序列投影與 Map Runtime 的正式形狀由 [Map 模組](architecture/01_map_module.md) 擁有；`NpcDungeonRun`、Pending Result 與結算進度的正式形狀由 [Dungeon 模組](architecture/03_dungeon_module.md) 擁有。本總覽不複製會隨領域契約演進的 DTO。
 
 `npcDungeonDay` 的語意固定如下：
 
@@ -602,23 +505,14 @@ city + team + inventory + quest + progression
   → React CityScreen
 ```
 
-```ts
-type CityScreenViewModel = {
-  cityName: string;
-  memberFunds: CharacterMoneyView[];
-  facilities: FacilityView[];
-  shopItems: ShopItemView[];
-  availableQuests: QuestCardView[];
-  activeQuests: QuestCardView[];
-};
-```
+`CityScreenViewModel` 與 `selectCityScreenModel` 的正式形狀只由 [React UI 與 Application](architecture/15_ui_application.md) 的 City Feature Projection 擁有；本總覽不複製欄位。
 
 ### 10.1 UI 禁則
 
 - View 不可自行算委託是否完成、商店能否購買、熟練度是否升級。
 - View 不可直接寫入任一 State Slice。
 - Selector 可以讀取多個公開 Query，但不可修改 State。
-- View 只送出 `GameCommand`；核心交易提交後回傳新 State、committed DomainEvent 與通知，再由 UI 重繪。
+- View 只送出 `GameCommandRequest`；GameSession 在交易內補齊核心信封 ID，提交後回傳新 State、committed DomainEvent 與通知，再由 UI 重繪。
 
 UI 以 Feature 切分：`ui/features/city/`、`ui/features/dungeon/`、`ui/features/quest/` 等。只有同一張畫面、共用 Design System 與 Selector 組裝層需要協調，不應讓 View 成為領域規則的第二份實作。
 
@@ -634,34 +528,25 @@ UI 以 Feature 切分：`ui/features/city/`、`ui/features/dungeon/`、`ui/featu
 2. 呼叫 `executePlayerCommand` 或 `advanceWorldToDay`。
 3. 等待 Engine Transaction 完成並取得 committed result。
 4. 私有替換 committed GameState，更新 React 可見的 Revision Snapshot 與 Projection。
-5. 依核心回傳的 committed outbox（已提交事件；見 [Engine Runtime 與交易契約](architecture/12_engine_runtime.md) 的 `CommittedOutbox`）轉成通知、音效候選、成就候選與存檔請求。
+5. 依核心回傳的 committed outbox（見 [Engine Runtime 與交易契約](architecture/12_engine_runtime.md) 的 `CommittedOutbox`）：把既有 `Notification` 投影成 UI Notice，並由已提交 Event 產生音效、成就與存檔候選；不得從 Event 再製造第二份 Notification。
 
 它不得自行改寫遊戲規則。
 
 ### 11.2 平台介面
 
-```ts
-interface SaveRepository {
-  save(slotId: SaveSlotId, data: SaveFile): Promise<void>;
-  load(slotId: SaveSlotId): Promise<SaveFile>;
-}
-
-interface AchievementGateway {
-  unlock(candidate: AchievementCandidate): Promise<void>;
-}
-```
+`SaveRepository`、`AchievementGateway`、`CloudSaveGateway` 與其回傳結果只以 [存檔與平台邊界](architecture/14_save_platform.md) 的正式 Port 為準。本總覽不重複宣告介面，以免 bytes／原子寫入、備份或平台送達結果產生第二套契約。
 
 - Electron main process 處理檔案系統、視窗與原生 Steam SDK。
 - preload 只暴露經型別包裝的 IPC。
 - renderer／React 不直接存取 Node API。
-- 核心只產生 `AchievementCandidate`，不認識 Steam Achievement ID 或 API。
+- 核心只產生 committed Domain Event／Notification；Application 再把 committed Outbox 投影為 `AchievementCandidate`。核心與 Application 都不認識 Steam Achievement ID 或 API，對照只存在 Platform Adapter。
 
 ### 11.3 存檔相容性
 
 存檔中繼資料型別為 `SaveFileMetadata`（以 [存檔與平台邊界](architecture/14_save_platform.md) 為唯一真相），只存在 `SaveFile` 外層、**不進 `GameState`**；含 Schema／各模組版本／內容 Manifest 版本與 Hash／Content Pack 指紋／App Build。
 
 - 各模組對自己的 Slice 提供 migration。
-- 載入存檔時，先驗證內容包與版本，再依序升版 Slice。
+- 載入存檔時先完成 checksum／JSON 驗證、Save Schema Migration 與各 Module Slice Migration；其後才載入目前 Content Manifest，進行 Definition ID／Pack 相容驗證。完整順序以模組 14 §4 為唯一真相。
 - 若缺少必要內容包／DLC，必須回報可理解的錯誤，不能靜默產生壞資料。
 
 ---

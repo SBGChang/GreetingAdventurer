@@ -133,7 +133,7 @@ interface AssetDistributionQuery {
 | Internal Command | 發送者 | Distribution 的反應 |
 |---|---|---|
 | `StartAssetDistribution` | quest、dungeon、workflow | 建立參與者快照與清算帳戶；依 Policy 立即分配或打開玩家競拍。 |
-| `AppendAssetDistributionResult` | quest、dungeon、map／gathering workflow | 在 collecting 階段加入正式取得的 Item／Currency；地圖採集產物沿用目前 `dungeonLoot` Distribution。 |
+| `AppendAssetDistributionResult` | quest、dungeon、map／gathering host workflow | 在 collecting 階段加入正式取得的 Item／Currency；地圖採集產物沿用目前 `dungeonLoot` Distribution。payload 可帶 `sourceGatheringResolutionId`，供採集整筆結果冪等與追蹤。 |
 | `FinalizeAssetDistributionCollection` | dungeon、quest | 關閉收集階段並開始分配。 |
 
 ### 5.3 輸出 Internal Command
@@ -153,6 +153,7 @@ interface AssetDistributionQuery {
 | Event | 最少 payload | 訂閱者 |
 |---|---|---|
 | `AssetDistributionStarted` | `distributionId`、`source`、`participantCharacterIds` | dungeon、quest、ui/app。 |
+| `AssetDistributionResultAppended` | `distributionId`、`itemIds`、`currencyInputs`、`sourceGatheringResolutionId?` | dungeon、quest、ui/app。Gathering Host Workflow 直接依 Command Result 推進，不訂閱此事件。 |
 | `LootAuctionRoundOpened` | `distributionId`、`itemId`、`intrinsicValue` | ui/app。 |
 | `PlayerInteractionOpened` | `interactionId`、`teamId`、`kind: lootAuction` | engine session、ui/app。 |
 | `LootItemAwarded` | `distributionId`、`itemId`、`winnerCharacterId`、`winningBid?` | inventory、ui/app。 |

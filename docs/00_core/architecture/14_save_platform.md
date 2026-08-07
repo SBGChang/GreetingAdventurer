@@ -13,6 +13,12 @@
 ## 1. SaveFile
 
 ```ts
+type SaveSlotId = Brand<string, 'platform:save-slot'>;
+type BackupId = Brand<string, 'platform:backup'>;
+type RemoteSaveId = Brand<string, 'platform:remote-save'>;
+type PlatformAchievementId = Brand<string, 'platform:achievement'>;
+type PlaySessionId = Brand<string, 'platform:play-session'>;
+
 type ContentPackFingerprint = Readonly<{
   packId: ContentPackId;
   version: string;
@@ -33,7 +39,7 @@ type SaveFile = Readonly<{
   state: GameState;
   createdAtIso: string;
   savedAtIso: string;
-  playSessionId: string;
+  playSessionId: PlaySessionId;
   checksum: string;
 }>;
 ```
@@ -223,14 +229,14 @@ interface CloudSaveGateway {
 ```ts
 type AudioCandidate = {
   sourceEventId: EventId;
-  cueId: string;
+  cueId: AudioCueId;
   dedupeKey?: string;
   priority?: number;
 };
 
 type AchievementCandidate = {
   sourceEventId: EventId;
-  achievementId: string;   // 遊戲內 ID，非 Steam ID；對照表只存在 Platform Adapter
+  achievementId: AchievementDefinitionId;   // 遊戲內 Definition ID，非 Steam ID；對照表只存在 Platform Adapter
 };
 
 type AchievementDeliveryResult =

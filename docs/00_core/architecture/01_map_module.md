@@ -85,6 +85,7 @@ type GatheringNodeDefinition = {
 
 Map Schema／Rule Validation 必須驗證：
 
+- `RoomId`、`RoomLinkId`、`FixedTrapId`、`GatheringNodeId` 都是 `TemplateLocalId`：只需在同一 `MapTemplateDefinition` 內唯一，必須由資料作者指定，禁止交給 Runtime ID Generator；Runtime Map State 以 `mapId + localId` 定位。
 - 一般野外固定單層 8×8；一般內部圖每層為 4×4 或 5×5，上下層數由模板決定。
 - 國家迷宮野外型固定單層 10×10。
 - 國家迷宮地牢型每層固定 6×6，最多地上 1 層、地下 5 層。
@@ -162,7 +163,7 @@ type MapInstance = {
 };
 
 type RefreshLock = {
-  lockId: string;
+  lockId: MapRefreshLockId;
   reason: 'suppression' | 'hunt';
   releaseOnDay: WorldDay;
   sourceQuestId: QuestId;

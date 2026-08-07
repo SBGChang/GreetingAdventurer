@@ -46,7 +46,7 @@ Team 永遠只是行動共同體：一般金錢、背包、裝備與住家物品
 
 Team 只引用 Character 的公開 ID 與 Query，不能把角色身分或生命週期資料偷塞進 Team State。
 
-Team 也擁有所有隊伍共通的「成員留隊週期」：它只保存入隊日與依指定來源事件累計的工作淨收益，不擁有角色帳戶、物品實體或價格。這套機制同時適用玩家隊伍與 NPC 隊伍；NPC Lifecycle 只決定何時要開始下一段自由活動。
+Team 也擁有所有隊伍共通的「成員留隊週期」：它只保存入隊日與依指定來源事件累計的工作淨收益，不擁有角色帳戶、物品實體或價格。這套機制同時適用玩家隊伍與 NPC 隊伍；NPC Behavior 只決定何時要開始下一段自由活動。
 
 ---
 
@@ -93,16 +93,18 @@ type NpcTravelRuleDefinition = DefinitionHeader & {
 
 ```ts
 type FreeActionRuleDefinition = DefinitionHeader & {
-  kind: 'craft' | 'train' | 'teach' | 'trade' | 'tavernVisit' | 'rest';
+  kind: 'craft' | 'train' | 'teach' | 'trade' | 'tavernVisit' | 'proposeToTeammate' | 'rest';
   requiredFreeDays?: number;
   completionResolverId?: ResolverId;
   requiresCityFacilityKind?: FacilityKind;
+  npcMarriageRuleId?: NpcMarriageRuleId;
 };
 ```
 
 - `craft`、`train`、`teach` 有明確所需自由日數與完成 Resolver。
 - 所有尚未完成的耗時自由行動都保留累積進度；離開 `cityFree` 只會凍結，不會取消、重抽或歸零。下一段自由時間繼續扣除剩餘日數，直到完成才結算並抽取下一件行動。
 - `tavernVisit` 與 `rest` 是可持續的被動選項；它們不必每天建立完成 Job。選擇 `tavernVisit` 的 NPC 正式成員會出現在同城酒館名單。
+- `npcMarriageRuleId` 只允許出現在 `kind: proposeToTeammate`；其他種類帶入即為資料驗證錯誤。玩家主角不從 NPC 自由行動池抽取此種類。
 - 28 日傳授／訓練的 MXP 計算屬 progression；Team 只追蹤其時間進度。
 
 ```ts
@@ -209,7 +211,7 @@ type ControllableTeamLocation =
 - 一名 `CharacterId` 同時至多屬於一支活動隊伍，且不可同時存在於正式與暫時成員清單。
 - `control: player | npc` 的正式成員數必須介於 1～9；沒有候補、預備隊或第十名成員。
 - `playerTeamId` 必須指向 `control: player` 的唯一隊伍。
-- `control: child` Team 必須恰有一名未成年正式成員、固定在其家中，不能旅行、進戰鬥、接任務或進入 NPC Lifecycle；它只執行 Child Study Plan。
+- `control: child` Team 必須恰有一名未成年正式成員、固定在其家中，不能旅行、進戰鬥、接任務或進入 NPC Behavior；它只執行 Child Study Plan。
 - `location.kind: adventureMap` 是 Map 判斷有人在圖內的唯一來源。
 - `leaderId` 必須是正式成員；任務暫時角色不可成為隊長、取得一般任務金錢報酬或參與戰利品分配。
 - `memberJoinedOnDay` 必須對每名正式成員各有一筆；加入當日就是留隊兩個月門檻的起算點。
@@ -307,7 +309,7 @@ type PendingPlayerTravelInteraction = {
   segmentIndex: 0 | 1 | 2;
   eventInstance: PlayerTravelEventInstance;
   state: 'awaitingChoice' | 'awaitingCombatResult';
-  selectedOptionId?: DefinitionId;
+  selectedOptionId?: ContentEventOptionId;
   encounterId?: EncounterId;
   openedOnDay: WorldDay;
   revision: Revision;
@@ -333,11 +335,10 @@ type PlayerTravelEventInstance = ContentEventInstance & {
   routeId: RouteId;
   segmentIndex: 0 | 1 | 2;
   selectedEscortQuestId?: QuestId;
-  rngStreamId: string;
 };
 ```
 
-旅行事件只為 `playerTeamId` 建立。事件實例是已由資料 Resolver 選定的可序列化快照；若事件需要一名護衛對象，抽中時即固定 `selectedEscortQuestId`，存讀檔、重送 Command 或多筆護衛並存時都不得重抽。不得保存函式或 React callback。
+旅行事件只為 `playerTeamId` 建立。事件實例是已由資料 Resolver 選定的可序列化快照，並沿用 `ContentEventInstance.rngStreamId` 作追蹤資訊；後續不再從此 Instance 抽 RNG，因此不保存 cursor。若事件需要一名護衛對象，抽中時即固定 `selectedEscortQuestId`，存讀檔、重送 Command 或多筆護衛並存時都不得重抽。不得保存函式或 React callback。
 
 ### 3.4 最近行動紀錄
 
@@ -388,7 +389,6 @@ Team 在自己的 Plan／Free Action 完成時直接寫入紀錄；戰鬥、任�
 interface TeamQuery {
   getTeam(teamId: TeamId): TeamView;
   getPlayerTeamId(): TeamId;
-  getPlayerCharacterId(): CharacterId;
   getPlayerControlledCharacterId(): CharacterId;   // 玩家控制角色的唯一真相 = 玩家隊 leaderId；不另存 Avatar State
   getLocation(teamId: TeamId): TeamLocation;
   listTeamsAtCity(cityId: CityId): TeamId[];
@@ -477,9 +477,9 @@ interface TeamQuery {
 | Event | 最少 payload | 訂閱者 |
 |---|---|---|
 | `TeamPlanChanged` | `teamId`、`planId`、`oldKind?`、`newKind` | dungeon、ui/app。 |
-| `TeamPlanCompleted` | `teamId`、`planId`、`kind`、`payload` | city、character、progression、quest、ui/app。 |
-| `TeamLocationChanged` | `teamId`、`from`、`to` | map、dungeon、quest。 |
-| `FreeActionCompleted` | `teamId`、`memberId`、`ruleId`、`payload` | progression、city、crafting。 |
+| `TeamPlanCompleted` | `teamId`、`planId`、`kind`、`payload` | city、character、progression、quest、npc-behavior、ui/app。 |
+| `TeamLocationChanged` | `teamId`、`from`、`to` | map、dungeon、quest、npc-behavior、encumbrance-transition workflow。 |
+| `FreeActionCompleted` | `teamId`、`memberId`、`ruleId`、`payload` | progression、city、crafting、npc-behavior、npc-marriage workflow。 |
 | `FreeActionChanged` | `freeActionId`、`status`、`progress` | ui/app。 |
 | `TravelCompleted` | `teamId`、`fromCityId`、`toCityId`、`travelKind: player | npc`、`modeId?`、`experienceRuleId`、`experienceMultiplier` | progression、quest。NPC 固定 6 日與 ×1。 |
 | `TravelSegmentReached` | `teamId`、`routeId`、`segmentIndex`、`eventProfileId` | player-travel-event workflow、ui/app；只由玩家旅行發布。 |
@@ -543,7 +543,7 @@ sequenceDiagram
 
 1. NPC Behavior 在自己的 `npcDecisionDue` 選擇 Intent／ActionChain，再以 Internal Command 要求 Team 開始對應 Plan。
 2. 若 Chain 進入 `cityFree`，Lifecycle 為每名正式成員各自指派製作、鍛鍊、買賣、向合法隊友求婚或休息。
-3. 每個人只依自己的 `nextDueDay` 結算，其他成員不被拖慢；交易本身是由 Lifecycle／City Workflow 完成的零日子步驟。
+3. 每個人只依自己的 `nextDueDay` 結算，其他成員不被拖慢；交易本身是由 NPC Behavior／City Workflow 完成的零日子步驟。
 4. 每個完整自由日另由 `nonPlayerMemberCityFreeDayTick` 對每位非玩家主角的正式成員發出一次聊天與一次購物交流練習；這與其自由行動和實際交易完全分離。玩家隊友與其他 NPC 的處理相同。
 5. Team 完成 Plan 或 Free Action 後只發出事實；Lifecycle 次日才推進 Chain 或重新決策。
 6. 若離開 `cityFree`，所有可恢復的個人進度凍結，直到下一次取得自由時間。

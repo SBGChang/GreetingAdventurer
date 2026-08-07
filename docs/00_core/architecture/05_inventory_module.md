@@ -127,11 +127,11 @@ type EquipmentDefinition = ItemDefinition & {
 ```ts
 type UseDelayRuleDefinition = DefinitionHeader & {
   baseDelay: number;
-  reductions: AttributeReductionRule[];
+  reductions: UseDelayAttributeReductionRule[];
   minimumDelay: number;
 };
 
-type AttributeReductionRule = {
+type UseDelayAttributeReductionRule = {
   primaryAttribute: PrimaryAttributeId;
   reductionPerPoint: number;
 };
@@ -248,6 +248,14 @@ type EncumbranceResolution = {
 
 - 同一玩家 Team 同時至多有一筆 Encumbrance Resolution；`overweightCharacterIds` 每次移轉後以最新重量與 Capacity Snapshot 重算。
 - 玩家隊正在 `travelling` 時不開啟阻塞畫面，只保存 `deferredDuringTravel`；抵達下一個可控制位置後立即重算，仍超載才轉為 `awaitingPlayer`。此「抵達後重算」由 `encumbrance-transition-workflow`（訂閱 `TeamLocationChanged`、`to.kind !== 'travelling'`）送出 `EvaluateTeamEncumbrance` 觸發；Inventory **不自建第二套事件重算邏輯**，且 `EvaluateTeamEncumbrance` Handler 必須**冪等**（可被無條件重複要求）。
+
+Composition 必須註冊以下唯一 Workflow Binding：
+
+| Workflow | `startsFrom` | Filter | Required Step |
+|---|---|---|---|
+| `encumbrance-transition-workflow` | `TeamLocationChanged` | `teamId === TeamQuery.getPlayerTeamId()` 且 `to.kind !== 'travelling'` | `EvaluateTeamEncumbrance(teamId)` → inventory |
+
+Filter 不成立時 Workflow 正常結束且不送命令；Filter 與綁定本身列入 `ExecutionOrderManifest.eventSubscriptionsByType`，不得再由 Inventory 或 Team 額外訂閱同事件重算一次。
 - `awaitingPlayer` 存在時，GameSession 只接受該超載處理所需的轉移、入庫或遺棄 Command。玩家不能關閉畫面、旅行、進圖、戰鬥、接任務或執行其他一般行動。
 - 可將一般物品贈與同隊正式成員，但接收者在交易後也不得超載；若目前位於城市且該角色擁有房屋，可移入自己的 `homeStorage`；其餘情況可遺棄並永久移除物品。
 - 任務貨物不能移入房屋或變成隊友私產，但可在正式成員間改派 `carrierCharacterId`。若玩家選擇遺棄任務貨物，必須經 Quest-aware Workflow 解除保留並永久移除該實體；Quest 不新增 `failed` 狀態，目標無法再完成時仍在實際結束期限轉為 `expired`。

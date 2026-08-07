@@ -47,7 +47,7 @@ type PlayerConversationDailyUsage = {
 
 ```ts
 interface SocialDefinitionReader {
-  getSocialSystem(id: DefinitionId): SocialSystemDefinition;
+  getSocialSystem(id: SocialSystemDefinitionId): SocialSystemDefinition;
   getPlayerAffinityRule(id: PlayerAffinityRuleId): PlayerAffinityRuleDefinition;
   getPlayerConversationRule(id: PlayerConversationRuleId): PlayerConversationRuleDefinition;
   getNpcMarriageRule(id: NpcMarriageRuleId): NpcMarriageRuleDefinition;

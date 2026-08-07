@@ -15,11 +15,11 @@
 Combat Power 是可丟棄的衍生值，不是 Team、Character 或 Inventory 的權威欄位。所有呼叫者必須使用本服務；禁止另寫「任務戰力」、「NPC 換裝分數」或「掃蕩戰力」公式。
 
 ```ts
-type CombatPowerRuleId = Brand<DefinitionId, 'CombatPowerRuleId'>;
-type CombatPowerFeatureRuleId = Brand<DefinitionId, 'CombatPowerFeatureRuleId'>;
-type CombatPowerFeatureId = Brand<DefinitionId, 'CombatPowerFeatureId'>;
-type CombatCapabilityId = Brand<DefinitionId, 'CombatCapabilityId'>;
-type EquipmentLoadoutCandidateId = Brand<string, 'EquipmentLoadoutCandidateId'>;
+type CombatPowerRuleId = DefinitionId<'combat-power-rule'>;
+type CombatPowerFeatureRuleId = DefinitionId<'combat-power-feature-rule'>;
+type CombatPowerFeatureId = DefinitionId<'combat-power-feature'>;
+type CombatCapabilityId = DefinitionId<'combat-capability'>;
+type EquipmentLoadoutCandidateId = EphemeralId<'equipment-loadout-candidate'>;
 ```
 
 ```text

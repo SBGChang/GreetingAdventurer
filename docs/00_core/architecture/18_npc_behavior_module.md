@@ -19,14 +19,14 @@
 ### 1.2 意圖、動作串與執行 Plan 的分界
 
 ```text
-Lifecycle Intent / ActionChain  ──決定與鎖定──>  TeamPlan / MemberFreeAction
+NPC Behavior Intent / ActionChain  ──決定與鎖定──>  TeamPlan / MemberFreeAction
      「為何、下一步是什麼」                        「正在花時間做什麼」
 ```
 
 - **Intent：** 一次抽選的高階意圖，例如「自由活動」、「前往別城」、「接當地任務」、「下當地冒險地」。
 - **ActionChain：** 為完成 Intent 所建立的有序**邏輯節點**。自由活動、下當地冒險地、接當地任務與移動至別城在抽取時都先是單節點 Chain；目前只有「任務已接取後」materialize 的任務 Chain 會有多個邏輯節點。
-- **Team Plan／Free Action：** 由 Team 模組執行的一段實際行程或個人生活行為。Lifecycle 不直接改 Team State。
-- **鎖定：** 接取與地牢有關的任務後，Lifecycle 停止抽取新的 Intent；只推進該任務 Chain，直到任務結案、到期、已無法完成或資料化退出規則成立。
+- **Team Plan／Free Action：** 由 Team 模組執行的一段實際行程或個人生活行為。NPC Behavior 不直接改 Team State。
+- **鎖定：** 接取與地牢有關的任務後，NPC Behavior 停止抽取新的 Intent；只推進該任務 Chain，直到任務結案、到期、已無法完成或資料化退出規則成立。
 
 ActionChain 不是把完整地圖路徑、完整商店資料或實體物品複製進 State；只保存 Runtime ID、節點狀態及重播所需 RNG stream。每一節執行前都重新用公開 Query 驗證世界現在仍合法。
 
@@ -60,14 +60,14 @@ type NpcIntentKind =
 type NpcIntentCandidateRule = {
   intentKind: NpcIntentKind;
   chainTemplateId: ActionChainTemplateId;
-  conditionId: ConditionId;
+  conditionId: ConditionDefinitionId;
   weightResolverId: ResolverId;
 };
 
 type NpcMemberFreeActionCandidateRule = {
   actionKind: 'craft' | 'train' | 'trade' | 'proposeToTeammate' | 'rest';
   freeActionRuleId: FreeActionRuleId;
-  conditionId: ConditionId;
+  conditionId: ConditionDefinitionId;
   weightResolverId: ResolverId;
 };
 ```
@@ -97,9 +97,9 @@ type ActionChainNodeTemplate =
   | { kind: 'complete' };
 ```
 
-`cityFree` 是非自由工作結束後由系統建立的強制休整期，不是抽選候選；它的 TeamPlan 固定有資料化的 2～7 日期限。`travelToCity`、`executeNearbyAdventure` 與尚未接取成功的 `acceptNearbyQuest` 都各自是一節完成的 Chain。`executeNearbyAdventure` 的執行過程可依時間規則啟動「進圖 1 日 → NPC Dungeon Run → 回城 1 日」等 Team Plan，但那是**同一節點的執行階段**，不是 Lifecycle 的多節點 ActionChain。這樣既不犧牲既有時間規則，也維持「現在只有任務會有多節點動作串」的設計。
+`cityFree` 是非自由工作結束後由系統建立的強制休整期，不是抽選候選；它的 TeamPlan 固定有資料化的 2～7 日期限。`travelToCity`、`executeNearbyAdventure` 與尚未接取成功的 `acceptNearbyQuest` 都各自是一節完成的 Chain。`executeNearbyAdventure` 的執行過程可依時間規則啟動「進圖 1 日 → NPC Dungeon Run → 回城 1 日」等 Team Plan，但那是**同一節點的執行階段**，不是 NPC Behavior 的多節點 ActionChain。這樣既不犧牲既有時間規則，也維持「現在只有任務會有多節點動作串」的設計。
 
-NPC 節點只解析目的地與路線，不解析玩家的 3／6／9 日旅行模式。Lifecycle 以 Decision Policy 的 `npcTravelRuleId` 要求 Team 建立固定 6 日直達 Plan；這個 Plan 不含前／中／後段落、事件池、事件 RNG、護衛刺殺候選或 Pending Interaction。
+NPC 節點只解析目的地與路線，不解析玩家的 3／6／9 日旅行模式。NPC Behavior 以 Decision Policy 的 `npcTravelRuleId` 要求 Team 建立固定 6 日直達 Plan；這個 Plan 不含前／中／後段落、事件池、事件 RNG、護衛刺殺候選或 Pending Interaction。
 
 任務模板可在接取後依 `QuestKind` materialize 成實際節點：
 
@@ -115,7 +115,7 @@ NPC 節點只解析目的地與路線，不解析玩家的 3／6／9 日旅行�
 
 ### 2.2 NPC 任務抽取：鄰城範圍、可行性與意向標記
 
-抽到 `acceptNearbyQuest` 時，Lifecycle 只從「目前所在城市 + 城市圖上直接相鄰的一格城市」的公會 Posting 池抽取。它不是任意距離搜尋，也不以直線座標猜測相鄰關係；必須使用 `WorldQuery.listCitiesWithinHops(originCityId, 1)`。
+抽到 `acceptNearbyQuest` 時，NPC Behavior 只從「目前所在城市 + 城市圖上直接相鄰的一格城市」的公會 Posting 池抽取。它不是任意距離搜尋，也不以直線座標猜測相鄰關係；必須使用 `WorldQuery.listCitiesWithinHops(originCityId, 1)`。
 
 候選任務必須同時符合：
 
@@ -124,25 +124,17 @@ NPC 節點只解析目的地與路線，不解析玩家的 3／6／9 日旅行�
 3. 路線與該任務所需目的地仍可合法抵達。
 4. `CombatPowerQuery.assessQuestFeasibility` 回傳可嘗試，並依其成功機率／風險權重排序抽選。
 
-抽中後，Lifecycle 先要求 Quest 建立 `NpcQuestClaim`，成功才建立「到目標城市 → 嘗試接取」的 ActionChain。這個標記只排除其他 NPC 的抽樣，**不是委託保留**：玩家仍可照常接取；被標記的 NPC 也沒有提前取得任務物、地圖保護或報酬權利。
+抽中後，NPC Behavior 先要求 Quest 建立 `NpcQuestClaim`，成功才建立「到目標城市 → 嘗試接取」的 ActionChain。這個標記只排除其他 NPC 的抽樣，**不是委託保留**：玩家仍可照常接取；被標記的 NPC 也沒有提前取得任務物、地圖保護或報酬權利。
 
-若玩家或另一個已合法接取者在 NPC 抵達前接走任務，Quest 發出 `QuestAccepted` 並清除 Claim。Lifecycle 將原 Chain 設為 `targetUnavailable`，但絕不取消已開始的旅行或讓隊伍掉頭；隊伍照常抵達目標城市後，此 Chain 直接結束，隔日重新抽選。若尚未開始旅行，則在下一個 Chain Advance 直接結束並重抽。
+若玩家或另一個已合法接取者在 NPC 抵達前接走任務，Quest 發出 `QuestAccepted` 並清除 Claim。NPC Behavior 將原 Chain 設為 `targetUnavailable`，但絕不取消已開始的旅行或讓隊伍掉頭；隊伍照常抵達目標城市後，此 Chain 直接結束，隔日重新抽選。若尚未開始旅行，則在下一個 Chain Advance 直接結束並重抽。
 
 抽到 `enterNearbyAdventureMap` 時也使用同樣的本城＋相鄰一格城市範圍，從其對應冒險地中依戰力可行性與資料權重選取一張圖；必要時先旅行至對應城市。只要任一已接取的救援／探索／鎮壓／討伐 Quest 指向該冒險地，`QuestQuery.isMapReservedForAcceptedQuest(mapId)` 即令它排除在其他 NPC Team 的**自主下地牢抽樣**之外。這不是玩家進圖禁令，也不影響已接取該任務的隊伍。
 
-自主冒險地 Run 一旦首次骰定失敗，或依有序內容序列骰完所有可處理內容，即視為該非自由工作完成；不另選第二張圖。Lifecycle 接著登記強制自由活動期，而非立刻再抽下一個工作。
+自主冒險地 Run 一旦首次骰定失敗，或依有序內容序列骰完所有可處理內容，即視為該非自由工作完成；不另選第二張圖。NPC Behavior 接著登記強制自由活動期，而非立刻再抽下一個工作。
 
 ### 2.3 NPC 城市生活與市場偏好
 
 ```ts
-type FreeActionRuleDefinition = DefinitionHeader & {
-  kind: 'craft' | 'train' | 'trade' | 'proposeToTeammate' | 'rest';
-  requiredFreeDays?: number;
-  completionResolverId?: ResolverId;
-  requiresCityFacilityKind?: FacilityKind;
-  npcMarriageRuleId?: NpcMarriageRuleId;
-};
-
 type NpcMarketPolicyDefinition = DefinitionHeader & {
   budgetReserveRuleId: ResolverId;
   purchaseNeedRules: NpcPurchaseNeedRule[];
@@ -166,13 +158,13 @@ type NpcSellRule = {
 
 自由活動可抽取的個人行為為**製作、鍛鍊、買賣、向同隊成員求婚、休息**。`trade` 的挑選可依個人需求與金錢選擇賣裝備／物品、買裝備／補品，並可在資料規則滿足時購入房屋；不新增疲勞值或隱藏的 NPC 專屬資源。
 
-`kind: proposeToTeammate` 的 Free Action Rule 必須提供 `npcMarriageRuleId`，其他 kind 不得提供。Lifecycle 只以穩定 RNG 從通過硬條件的候選中固定一人，不另做第二套候選偏好公式；Marriage Workflow 才使用該 Rule 進行接受判定。
+`kind: proposeToTeammate` 的 Free Action Rule 必須提供 `npcMarriageRuleId`，其他 kind 不得提供。NPC Behavior 只以穩定 RNG 從通過硬條件的候選中固定一人，不另做第二套候選偏好公式；Marriage Workflow 才使用該 Rule 進行接受判定。
 
-`proposeToTeammate` 只為非玩家主角角色建立候選。目標池限同隊正式成員、成年、存活、未婚、異性且不是玩家主角；Lifecycle 以穩定 RNG 固定一名目標後交給 Marriage Workflow。判定只讀 `currentDay - max(雙方 memberJoinedOnDay)` 與同一 Combat Power Service 的雙方戰力接近程度，不建立 NPC 彼此好感或 pairwise 共隊天數 State。抽中只是進行一次判定，不保證結婚；成功與拒絕都算本次零日自由子步驟已完成，下一筆最早次日再抽。
+`proposeToTeammate` 只為非玩家主角角色建立候選。目標池限同隊正式成員、成年、存活、未婚、異性且不是玩家主角；NPC Behavior 以穩定 RNG 固定一名目標後交給 Marriage Workflow。判定只讀 `currentDay - max(雙方 memberJoinedOnDay)` 與同一 Combat Power Service 的雙方戰力接近程度，不建立 NPC 彼此好感或 pairwise 共隊天數 State。抽中只是進行一次判定，不保證結婚；成功與拒絕都算本次零日自由子步驟已完成，下一筆最早次日再抽。
 
-`craft` 被抽中時不建立市場需求或利潤動機：Lifecycle 只向 Crafting 的公開 Query 取得該角色目前能做的配方池並固定 RNG 抽取。成品裝備的自動換裝只比較最終 Combat Power；未換裝成品留給日後 `trade` 出售。
+`craft` 被抽中時不建立市場需求或利潤動機：NPC Behavior 只向 Crafting 的公開 Query 取得該角色目前能做的配方池並固定 RNG 抽取。成品裝備的自動換裝只比較最終 Combat Power；未換裝成品留給日後 `trade` 出售。
 
-一旦角色抽到有 `requiredFreeDays` 的自由行動，該行動就會跨越後續多段 `cityFree` 持續存在。每一個完整自由日只扣除一天剩餘需求；非自由工作只凍結進度，不取消、不重抽也不歸零。只有累積日數達標並收到 `FreeActionCompleted` 後，Lifecycle 才為該角色抽下一件自由行動。
+一旦角色抽到有 `requiredFreeDays` 的自由行動，該行動就會跨越後續多段 `cityFree` 持續存在。每一個完整自由日只扣除一天剩餘需求；非自由工作只凍結進度，不取消、不重抽也不歸零。只有累積日數達標並收到 `FreeActionCompleted` 後，NPC Behavior 才為該角色抽下一件自由行動。
 
 市場交易是 `cityFree` 中的**零日子步驟**：它遵守城內買賣本來就不花世界時間的規則，但一次自由活動循環至多執行 `maxTransactionsPerFreeCycle` 筆，且完成後下一筆自由行動最早次日才可開始。它不會形成「同一天無限重骰、無限買賣」的迴圈。NPC 與玩家隊友都不使用玩家主角的每日 6 次交易／6 次聊天計數；其交流成長由 Team 在每個完整自由日固定發出的練習事件處理，實際 `NpcMarketIntent` 成功與否不額外給交流 MXP。這只改變交流熟練度來源。
 
@@ -207,7 +199,7 @@ type NpcActionChain = {
   currentNodeIndex: number;
   nodes: NpcActionChainNode[];
   targetUnavailableOnDay?: WorldDay;
-  rngStreamId: RngStreamId;
+  rngContext: RngContext; // Chain 跨日推進時保存下一次抽取位置
   revision: Revision;
 };
 
@@ -274,11 +266,11 @@ interface NpcBehaviorQuery {
 
 ### 4.2 訂閱 Domain Event
 
-| Event | Lifecycle 的反應 |
+| Event | NPC Behavior 的反應 |
 |---|---|
 | `TeamPlanCompleted`／`TeamLocationChanged` | 找到 linked node，標為完成，登記次日 `npcChainAdvance`。 |
-| `FreeActionCompleted` | 對 craft／train 走既有完成流程；對 `trade` 建立一筆資料化 `NpcMarketIntent`（發 `NpcMarketIntentCreated`，由 NPC Market Workflow 承接，流程結束以 `FinalizeNpcMarketIntent` 回寫）。`proposeToTeammate` **不再由 Lifecycle 送命令**：改由 NPC Marriage Workflow 直接訂閱 `FreeActionCompleted(kind=proposeToTeammate)` 承接。結果都不在 Lifecycle 直接寫入。 |
-| `QuestAccepted` | 若為 Lifecycle 正在執行的 `acceptNearbyQuest` 節點，materialize 對應 Quest Chain 並鎖定。 |
+| `FreeActionCompleted` | 對 craft／train 走既有完成流程；對 `trade` 建立一筆資料化 `NpcMarketIntent`（發 `NpcMarketIntentCreated`，由 NPC Market Workflow 承接，流程結束以 `FinalizeNpcMarketIntent` 回寫）。`proposeToTeammate` **不再由 NPC Behavior 送命令**：改由 NPC Marriage Workflow 直接訂閱 `FreeActionCompleted(kind=proposeToTeammate)` 承接。結果都不在 NPC Behavior 直接寫入。 |
+| `QuestAccepted` | 若為 NPC Behavior 正在執行的 `acceptNearbyQuest` 節點，materialize 對應 Quest Chain 並鎖定。 |
 | `NpcQuestClaimChanged` | 自己建立的 Claim 被釋放或被他人接取時，更新目標節點；已開始旅行只在抵達目標城市後結束，未出發則於下一次 Advance 結束。 |
 | `QuestStateChanged`／`QuestSettled` | 目標完成、逾期或已結案時推進／中止 Quest Chain；已結案才解除鎖定。 |
 | `NpcDungeonRunClosed` | 依成功、失敗或目標未達成更新地牢節點，次日決定返城或繼續任務節點。 |
@@ -297,7 +289,7 @@ interface NpcBehaviorQuery {
 | `StartNpcDungeonRun` | dungeon | 開始目標對應的簡易地牢 Run；Dungeon 同時建立其多節點 Combat Sequence。 |
 | `SettleQuestForNpcTeam` | quest | 在原接取公會對已完成任務結案。 |
 
-NPC 市場交易不是第二套商業規則：`trade` 完成時 Lifecycle 只建立資料化 `NpcMarketIntent` 並發 `NpcMarketIntentCreated`，由 **NPC Market Workflow** 承接、重用玩家的買 Offer／賣物品／買房流程（無 React 輸入）；流程結束以 `FinalizeNpcMarketIntent` 回到 Lifecycle 更新 Intent 並發 `NpcMarketIntentResolved`。Lifecycle 不再送 `ExecuteNpcMarketIntent`。
+NPC 市場交易不是第二套商業規則：`trade` 完成時 NPC Behavior 只建立資料化 `NpcMarketIntent` 並發 `NpcMarketIntentCreated`，由 **NPC Market Workflow** 承接、重用玩家的買 Offer／賣物品／買房流程（無 React 輸入）；流程結束以 `FinalizeNpcMarketIntent` 回到 NPC Behavior 更新 Intent 並發 `NpcMarketIntentResolved`。NPC Behavior 不再送 `ExecuteNpcMarketIntent`。
 
 ### 4.4 輸出事件
 
@@ -361,7 +353,7 @@ NPC 不能把隊友金錢當作共同荷包，也不能出售隊友、任務貨�
 
 1. 每支 `control: 'npc'` Team 至多有一個 active ActionChain；玩家 Team 不可持有 NPC Controller。
 2. 任一 active Quest Chain 必須引用一筆由同 Team 接取、尚未結案的 Quest；任務鎖定期間不可抽一般 Intent。
-3. Lifecycle 不可直接寫 Team、Quest、City、Inventory、Economy 或 Dungeon State。
+3. NPC Behavior 不可直接寫 Team、Quest、City、Inventory、Economy 或 Dungeon State。
 4. 行動 Chain 的每一節都必須有完整的完成／中止路徑；不允許永久 `waiting`。
 5. 獨立冒險者與多人隊伍使用同一份 Decision Policy 與相同的 Chain 驗收測試。
 6. 交易 Intent 每個自由活動循環不超過資料上限；無效交易不可在同日重骰。

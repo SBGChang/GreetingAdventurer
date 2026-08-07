@@ -50,7 +50,7 @@ type CharacterState = {
 interface CharacterDefinitionReader {
   getArchetype(id: CharacterArchetypeId): CharacterArchetypeDefinition;
   getLifecycleRule(id: LifecycleRuleId): LifecycleRuleDefinition;
-  getStatusDefinition(id: StatusId): StatusDefinition;
+  getStatusDefinition(id: CharacterStatusDefinitionId): StatusDefinition;
   getBirthRule(id: BirthRuleId): BirthRuleDefinition;
   getTemporaryCharacterRule(id: TemporaryCharacterRuleId): TemporaryCharacterRuleDefinition;
   getWorldAdventurerGenerationRule(id: WorldAdventurerGenerationRuleId): WorldAdventurerGenerationRuleDefinition;
@@ -164,8 +164,8 @@ type CharacterCondition = {
 };
 
 type CharacterStatusInstance = {
-  statusInstanceId: string;
-  statusId: StatusId;
+  statusInstanceId: CharacterStatusInstanceId;
+  statusId: CharacterStatusDefinitionId;
   sourceId?: EntitySourceRef;
   appliedOnDay: WorldDay;
   expiresOnDay?: WorldDay;

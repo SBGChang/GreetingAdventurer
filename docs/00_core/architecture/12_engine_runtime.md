@@ -50,11 +50,11 @@ flowchart LR
 
 ```ts
 type GameSessionPhase = 'bootstrapping' | 'ready' | 'failed';
-type FeatureRouteId = string;
+type FeatureRouteId = Brand<string, 'feature-route'>;
 
 type NewGameRequest = {
   worldSeed: Seed;
-  initialScenarioId: DefinitionId;
+  initialScenarioId: StartingScenarioId;
   playerCharacter: CharacterCreationDraft; // 由 Character 公開契約驗證，不由 Kernel 解讀欄位
 };
 
@@ -92,7 +92,7 @@ type NewGameBootstrapResult =
 interface GameEngine {
   executePlayerCommand(
     state: GameState,
-    envelope: GameCommandEnvelope<GameCommand>,
+    request: GameCommandRequest<GameCommand>,
   ): CommandExecutionResult;
 
   advanceWorldToDay(
@@ -122,7 +122,7 @@ type CommandExecutionResult<TResult extends JsonValue = JsonValue> =
 type EngineContext = {
   definitions: GameDefinitionReaders;
   moduleRegistry: ModuleRegistry;
-  rngFactory: DeterministicRngFactory;
+  rng: DeterministicRng;
   idGenerator: RuntimeIdGenerator;
   limits: EngineSafetyLimits;
 };
@@ -131,29 +131,23 @@ type EngineContext = {
 `EngineContext` 注入的最小 Port 契約（跨模組共用，不得由各模組自行發明 RNG／ID／Definition 讀法）：
 
 ```ts
-interface DeterministicRngFactory {
-  create(streamId: RngStreamId): DeterministicRng;      // DeterministicRng 定義於 00_shared_contracts §2.2
-}
-
-type RuntimeIdAllocation<TId extends string> = Readonly<{
+type RuntimeIdAllocation<TId extends RuntimeId> = Readonly<{
   id: TId;
   nextCursor: RuntimeIdCursor;
 }>;
 
 interface RuntimeIdGenerator {
   // 純函式：無內部可變狀態、不直接改 CoreState。cursor 傳入、傳回，交易內逐次前進（見 §7.2）。
-  next<TId extends string>(input: Readonly<{
+  next<TId extends RuntimeId>(input: Readonly<{
     worldSeed: Seed;
     entityKind: RuntimeEntityKind;
     cursor: RuntimeIdCursor;
   }>): RuntimeIdAllocation<TId>;
 }
 
-interface GameDefinitionReaders {
-  // 各模組貢獻窄化唯讀 Reader（見 13_data_runtime「Narrowed Definition Readers」）；
-  // 不提供無限制 Registry 存取。
-  readonly [readerId: string]: unknown;
-}
+// 各模組貢獻窄化唯讀 Reader（見 13_data_runtime「Narrowed Definition Readers」）；
+// 不提供無限制 Registry 存取。
+type GameDefinitionReaders = Readonly<Partial<Record<DefinitionReaderId, unknown>>>;
 
 interface ModuleRegistry {
   get(moduleId: ModuleId): ModuleContract<unknown> | undefined;
@@ -247,7 +241,14 @@ type WorkflowStepDefinition = {
   onAccepted: WorkflowTransition;
   onRejected: WorkflowTransition;
 };
+
+type WorkflowTransition =
+  | Readonly<{ kind: 'next'; stepIndex: number }>
+  | Readonly<{ kind: 'complete' }>
+  | Readonly<{ kind: 'reject'; code: string }>;
 ```
+
+`startsFrom` 必須是四種正式訊息模型中已註冊的 Game Command、Scheduled Job 或 Domain Event Type，不能填入任意 DTO 或「Workflow Request」。同一純 Resolver 可被多個 Host Workflow 重用，但不因此產生第五種跨 Router 訊息。
 
 Workflow 可決定：
 
@@ -306,7 +307,7 @@ Workflow 絕不接受 NPC Team，也不提供 NPC 自動選項 Resolver。護衛
 
 ### 5.1 唯一 Handler
 
-每個 Game Command、Internal Command、ScheduledJob 的 `type` 在 Registry 中必須恰好有一個 Handler。重複或缺少 Handler 都是啟動錯誤。
+每個 Game Command `type` 必須恰好有一個入口接收者：領域 Module Handler 或 `WorkflowDefinition.startsFrom`，兩者不可同時註冊。每個 Internal Command 與 ScheduledJob 則必須恰好有一個領域 Module Handler。重複或缺少都是啟動錯誤；Workflow 永遠不能成為 Internal Command 的終端 Handler。
 
 ### 5.2 Event Subscriber
 
@@ -320,24 +321,22 @@ type EventSubscription = {
 };
 ```
 
-固定排序為：
+固定排序完全以 `ExecutionOrderManifest.eventSubscriptionsByType[eventType]` 的陣列位置決定。不得使用 bundler、檔名、import 發生順序、subscriber 名稱或模組自填的數字 priority 決定結果。
 
-```text
-ExecutionOrderManifest 的訂閱順序 → subscriberId → registrationId
-```
-
-不得使用 bundler、檔名、import 發生順序或模組自填的數字 priority 決定結果。
-
-跨模組執行順序由 `app/composition` 擁有的唯一 Manifest 決定；模組只宣告 Job 類型、Phase 與訂閱關係：
+跨模組執行順序由 `app/composition` 擁有的唯一 Manifest 決定；模組只註冊自己可執行的 Job Type／Handler 與事件 Subscription Handler，不能自行指定 Job Phase、事件綁定或跨模組順序：
 
 ```ts
 type ExecutionOrderManifest = Readonly<{
   jobTypeOrderByPhase: Readonly<Record<JobPhase, readonly ScheduledJobType[]>>;
-  eventSubscriberOrder: Readonly<Record<DomainEventType, readonly EventSubscriptionId[]>>;
+  eventSubscriptionsByType: Readonly<Record<DomainEventType, readonly EventSubscription[]>>;
 }>;
 ```
 
-Bootstrap 驗證每個已註冊 Job 類型與訂閱恰好在 Manifest 出現一次（不得缺漏或重複）。Kernel 可將順序編譯為內部索引，但不得由模組填寫，也不進入存檔。
+`eventSubscriptionsByType` 同時是事件 Type → Module／Workflow Handler 綁定與執行順序的**唯一真相**，不另存第二份 ID 排序陣列。模組只註冊自己可提供的 `subscriptionHandlerIds`，不能自行決定訂閱哪個事件或跨模組順序；各模組文件中的「訂閱 Domain Event」章節只描述該 Handler 的領域反應。
+
+`subscriptionId` 是由 Composition 作者指定、跨版本穩定的 Registry ID，建議命名為 `subscription.<eventType>.<subscriber>`；它不是 Runtime ID、不進存檔，也不得依陣列 index 或 import 順序動態生成。
+
+Bootstrap 必須驗證：每個已註冊 Job Type 在 `jobTypeOrderByPhase` 恰好出現一次；每個 Job Type 只屬於一個 Phase；每個 `subscriptionId` 全域唯一；每筆 `EventSubscription.eventType` 等於所在 Record Key；Module subscriber 的 `subscriptionId` 存在於該模組註冊的 `subscriptionHandlerIds`；Workflow subscriber 的 `startsFrom` 等於該 Event Type。任何缺漏、重複或錯誤綁定都不得進入遊戲。Kernel 可將順序編譯為內部索引，但不得由模組填寫，也不進入存檔。
 
 ### 5.3 因果追蹤
 
@@ -358,7 +357,7 @@ Bootstrap 驗證每個已註冊 Job 類型與訂閱恰好在 Manifest 出現一�
 ```text
 while nextDueDay <= targetDay:
   worldDay = nextDueDay
-  依 phase → priority → jobId 取得當日 Job
+  依 Manifest phase → 同 phase 的 Job Type 順序 → ownerModule → targetId → jobId 取得當日 Job
   每筆 Job 各自開啟並完成一筆交易
   交易完成後重新讀取 Scheduler
 worldDay = targetDay
@@ -415,32 +414,53 @@ Scheduler 必須提供 `peekNextDueDay()`。玩家休息多日時可直接跳到
 
 ### 7.1 RNG
 
-每筆會骰定內容的 Entity、Job 或 Run 保存自己的 `rngStreamId` 與 `RngCursor`。`DeterministicRng` 為純函式：`cursor` 顯式傳入、`nextCursor` 顯式傳回；**禁止把具內部可變狀態的 RNG 物件存入 State 或跨 Handler 共用**。
+每筆需要跨交易繼續抽取的 Entity、Run 或多次執行 Job 保存完整 `RngContext`（world seed、stream ID、cursor）。`DeterministicRng` 為無狀態純函式：`RngContext` 顯式傳入、`nextCursor` 顯式傳回；**禁止把具內部可變狀態的 RNG 物件存入 State 或跨 Handler 共用**。
 
 - `RngCursor` 必須是非負安全整數；多次抽取須顯式傳遞前一次 `nextCursor`。
-- 跨日續用同一 Stream 的 Entity／Run／Job，由其擁有模組保存 `cursor`；一次性 Resolver 可只回傳選定結果與最終 `cursor`。
+- 跨日或跨玩家輸入續用同一 Stream 的 Entity／Run／Job，由其擁有模組保存更新後的 `RngContext`；一次性 Job 可由自身 ID 派生 Stream 並從零 cursor 開始。
+- 使用 RNG 的 Resolver 必須接收明確 `RngContext`，並連同結果回傳最終 `nextRngCursor`；呼叫者決定把 cursor 寫回哪個有所有者的 Slice。
 - 交易拒絕時，`cursor` 更新隨 Working State 一起丟棄。
-- Event 有多個 Subscriber 時，每個 Subscriber 使用由 `eventId + subscriberId` 派生的子 Stream，初始 `cursor` 為零；新增一個無關 Subscriber 不得改變其他訂閱者原本會抽到的結果。
+- Event 有多個 Subscriber 時，每筆訂閱使用由 `eventId + subscriptionId` 派生的子 Stream，初始 `cursor` 為零；新增一個無關 Subscriber 不得改變其他訂閱者原本會抽到的結果。
+- Runner 為每次 Handler／Workflow 呼叫建立一次性的 `invocationRngContext`：Root Command、Job、Internal Command 分別由其訊息 ID 與接收者 ID 推導；Event Subscriber 依上一條規則推導。這個 Context 不進存檔；若流程要跨交易繼續抽取，必須把另建的長期 `RngContext` 寫入有所有者的 Aggregate。
 
 ### 7.2 Runtime ID
 
 Runtime ID 由 `worldSeed + entityKind + cursor` 確定性產生；`cursor` 是**交易私有**的序號游標（`RuntimeIdCursor`），不是全域可變狀態。
 
-- **交易開始**：`transaction.runtimeIdCursor = state.core.nextRuntimeSequence`。
+- **交易開始**：先令本地 cursor 等於 `state.core.nextRuntimeSequence`。玩家命令依序配發 `CommandId → TransactionId → CorrelationId` 後建立內部 `GameCommandEnvelope` 與 `EngineTransaction`；到期 Job 已有 `JobId`，只配發 `TransactionId → CorrelationId`。最後把本地 cursor 設為 `transaction.runtimeIdCursor`。UI／React 永遠不能提供這些核心 ID。
 - **配發**：Handler 每建立一個實例就以 `RuntimeIdGenerator.next({ worldSeed, entityKind, cursor })` 取得 `{ id, nextCursor }`，只推進**交易私有** cursor。`next` 為純函式（cursor 傳入、傳回），無內部可變狀態、不直接改 `CoreState`。
+- **信封、排程與通知 ID**：Runner 將 Draft 轉為 Internal Command、Domain Event、Scheduled Job 或 Notification 時，也使用同一交易 cursor 依宣告順序配發 `CommandId`、`EventId`、`JobId`、`NotificationId`；每次配發後立即更新 `transaction.runtimeIdCursor`，模組不得預填這些 ID。
 - **即時最終形式**：產出的 ID 在交易內即為最終形式，可直接寫入 Working State、Internal Command、Domain Event Draft 與 Scheduled Job Draft；不需要 `TemporaryRef | RuntimeId` 之類的聯集，提交時也不必深度掃描改寫各模組 Slice。
 - **提交**：`core.nextRuntimeSequence = transaction.runtimeIdCursor`（由 Kernel 寫入 `core`，見 `00_shared_contracts.md` §3 的 core 所有權）。
 - **拒絕／異常**：丟棄 Working State 與 cursor，原序號完全不變。因此「提交時才消耗序號」成立；失敗交易產生過的暫定 ID 不會離開交易，也可由下次成功交易重新產生，無識別衝突。
 
-Handler 執行結果由 Kernel 包一層（cursor **不**塞進領域 `ModuleResult`）：
+Handler 執行時由 Kernel 傳入唯讀、顯式的 Runtime Context；Handler 不得自行讀取或修改 `CoreState`。執行結果再由 Kernel 包一層（cursor **不**塞進領域 `ModuleResult`）：
 
 ```ts
+type TransactionExecutionContext<TReads extends object = object> = Readonly<{
+  worldSeed: Seed;
+  reads: TReads;                          // 只包含 ModuleContract 宣告的窄化 Query／Definition Reader
+  rng: DeterministicRng;
+  invocationRngContext: RngContext;       // 本次呼叫的一次性 scoped Stream；跨交易 RNG 仍由 Aggregate 自己保存
+  idGenerator: RuntimeIdGenerator;
+  runtimeIdCursor: RuntimeIdCursor;       // 本次 Handler／Workflow Step 的起始交易游標
+}>;
+
 type HandlerExecutionResult<TSlice> =
   | Readonly<{ accepted: true; moduleResult: ModuleResult<TSlice>; nextRuntimeIdCursor: RuntimeIdCursor }>
   | Readonly<{ accepted: false; rejection: CommandRejection }>;   // 拒絕不回傳新 cursor、不消耗序號
+
+type WorkflowExecutionResult = Readonly<{
+  outgoingCommands: readonly InternalCommandDraft<GameInternalCommand>[];
+  nextRuntimeIdCursor: RuntimeIdCursor;
+}>;
 ```
 
-範例（起始 cursor = 42）：Item Handler 以 `next({ seed, 'item', 42 })` 建立 `ItemId`、得 `nextCursor = 43`、發出 `TransferItem(itemId)`；Inventory Handler 直接使用該 `ItemId`，若再建實例則從 cursor 43 起。
+Runner 呼叫每個 Module Handler 或 Workflow Step 時傳入目前的 `transaction.runtimeIdCursor`；接受結果後先以 `nextRuntimeIdCursor` 更新交易游標，再處理 `ModuleResult.outgoingMessages` 或 `WorkflowExecutionResult.outgoingCommands`。未配發 ID 的執行單位必須原樣回傳輸入 cursor。Workflow 只能配發其編排本身需要的跨命令關聯 ID，且只能送出 Internal Command Draft；它不能發 Domain Event，也不能藉此建立無所有者的領域 State。交易提交時才把最終 cursor 寫回 `CoreState.nextRuntimeSequence`。
+
+每次接受一個 Module Handler 結果後，Runner 固定依 `outgoingMessages` 陣列順序 → `scheduledJobs` 陣列順序 → `notifications` 陣列順序實體化 Draft 與配發 ID；Workflow 則只依 `outgoingCommands` 陣列順序。不得依物件 key、類型分組、訂閱者名稱或 import 順序改變配發次序。
+
+範例（起始 cursor = 42）：Item Handler 以 `next({ worldSeed, entityKind: 'item-instance', cursor: 42 })` 建立 `ItemInstanceId`、得 `nextCursor = 43`、發出 `TransferItem(itemInstanceId)`；Inventory Handler 直接使用該 `ItemInstanceId`，若再建實例則從 cursor 43 起。
 
 ### 7.3 冪等
 

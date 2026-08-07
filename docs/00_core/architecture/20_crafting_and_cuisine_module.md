@@ -56,7 +56,7 @@ type CraftingRecipeDefinition = DefinitionHeader & {
 };
 
 type CraftingIngredientSlotDefinition = {
-  slotId: string;
+  slotId: CraftingIngredientSlotId; // 只需在所屬 CraftingRecipeDefinition 內唯一
   acceptedMaterialTagIds: MaterialTagId[];
   quantity: number;
   contributesEquipmentAffix: boolean;

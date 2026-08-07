@@ -1,6 +1,6 @@
 # Gathering Resolver 與採集 Workflow 契約
 
-> **技術元件：** `domain-services/gathering`、`app/workflows/gathering`
+> **技術元件：** `domain-services/gathering`，以及各來源的 Host Workflow（例如 `app/workflows/dungeon-gathering`）
 >
 > **依賴：** 共用核心契約、Team／Progression／Map／Inventory／Asset Distribution 的公開契約，以及 Gathering Definition Reader。
 >
@@ -12,13 +12,7 @@
 
 ## 1. 邊界與所有權
 
-採集沒有自己的持久 State：
-
-```ts
-type GameState = {
-  // 不存在 gathering slice
-};
-```
+採集沒有自己的持久 State，也不向 `ModuleStateRegistry`／`GameState` 貢獻 gathering slice。
 
 | 事實 | 唯一所有者 | Gathering 的角色 |
 |---|---|---|
@@ -113,16 +107,17 @@ type GatheringResolution = {
 
 ```ts
 interface GatheringResolver {
-  resolve(input: GatheringResolverInput): GatheringResolution;
+  resolve(input: GatheringResolverInput, rng: DeterministicRng): RngStep<GatheringResolution>;
 }
 
 type GatheringResolverInput = {
+  resolutionId: GatheringResolutionId; // 由 Host Workflow 在交易內先配發；Resolver 不自行產生 ID
   source: GatheringSourceRef;
   teamId: TeamId;
   participantCharacterIds: CharacterId[];
   rule: GatheringRuleDefinition;
   masteryLevels: Record<CharacterId, MasteryLevel>;
-  rng: DeterministicRng;
+  rngContext: RngContext; // Host 依 worldSeed + `gathering:<resolutionId>` + cursor 0 建立的一次性 Context
 };
 ```
 
@@ -133,22 +128,22 @@ type GatheringResolverInput = {
 3. 同級時以穩定 `CharacterId` 排序選出一人，不消耗 RNG。
 4. 該角色的等級決定 `yieldResolverId` 的種類與數量，且只有該角色取得採集 MXP。
 
-Resolver 是純函式：相同 Rule、參與者等級、Source Ref 與 RNG Context 必須得到完全相同結果。
+Resolver 是純函式：相同 Rule、參與者等級、Source Ref 與 RNG Context 必須得到完全相同結果。所有來源的一次採集都使用由 `gathering:<resolutionId>` 推導的一次性 Stream、cursor 從 `0` 開始；`RngStep.nextCursor` 只供該次解析內串接抽取，不寫回 Map、Encounter、Content Event 或 Dungeon Run。交易回滾時 Resolution ID 與結果都不會外洩；同一成功提交也不得再次解析。
 
 ---
 
 ## 4. 輸入與輸出契約
 
-### 4.1 Internal Command
+### 4.1 Host Workflow 內部正規化資料
 
 ```ts
-type ResolveGatheringSource = {
+type GatheringResolutionRequest = {
+  resolutionId: GatheringResolutionId;
   source: GatheringSourceRef;
   teamId: TeamId;
   participantCharacterIds: CharacterId[];
   destinationPolicyId: GatheringDestinationPolicyId;
   destination: GatheringDestinationRef;
-  rngContext: RngContext;
 };
 
 type GatheringDestinationRef =
@@ -157,19 +152,21 @@ type GatheringDestinationRef =
   | { kind: 'participantCharacterBags'; characterIds: CharacterId[] };
 ```
 
-`ResolveGatheringSource` 是 **Gathering Workflow 的啟動輸入（`WorkflowDefinition.startsFrom`）**，不是被路由到單一模組 handler 的 Internal Command；由來源（採集 Game Command／Job／來源事件）提供此輸入啟動 Workflow。來源模組必須先驗證位置、時間與來源資格；Workflow 仍會重新查詢目前 State，不能相信 UI 傳入的等級、產物或採集者，並以有模組所有者的命令（Map／Inventory／Distribution／Progression）完成各步驟。
+`GatheringResolutionRequest` 只是 Host Workflow 呼叫純 Resolver 時使用的本地 DTO，**不是** Game Command、Internal Command、Scheduled Job、Domain Event，也不進 Router 或 `WorkflowDefinition.startsFrom`。各來源必須以現有正式訊息啟動自己的 Host Workflow：固定地圖採集點使用 `gatherDungeonNode` Game Command；旅行資源使用既有旅行內容事件流程；敵人掉落使用既有戰鬥獎勵流程；NPC 地牢則在 Dungeon Settlement 內解析。來源擁有模組負責自己的位置、時間與資格規則，Host Workflow 重新查詢目前 State，不能相信 UI 傳入的等級、產物或採集者。
 
-固定地圖採集點與敵人掉落第一版只能送入既有 `assetDistribution`。旅行資源固定使用 `participantCharacterBags`：先取隊內最高採集等級（同級取穩定 CharacterId）作為全隊的 RNG 等級基準，再讓每位本次正式參與者各自以獨立 RNG Stream 抽取一份種類與數量，直接進自己的背包。最高採集者仍是本次 `contributorCharacterId`，只由其取得採集 MXP。若未來增加其他 Escrow，必須先擴充 `ItemLocation` 與此 union，不能把任意字串當位置。
+第一版 Composition 必須把 `gatherDungeonNode` 只路由給 `dungeon-gathering-workflow`，不得同時註冊 Dungeon Game Command Handler。該 Workflow 的 required steps 固定為 `ConsumeDungeonGatheringAction → HarvestMapGatheringNode → CreateItemInstance（每筆產物）→ AppendAssetDistributionResult → GrantGatheringMasteryExperience`；純 `GatheringResolver` 在第一與第二個命令之間執行。任一步驟拒絕都回滾時間、cursor 與全部下游結果。
+
+固定地圖採集點與敵人掉落第一版只能送入既有 `assetDistribution`。旅行資源固定使用 `participantCharacterBags`：先取隊內最高採集等級（同級取穩定 CharacterId）作為全隊的 RNG 等級基準，再讓每位本次正式參與者各自抽取一份種類與數量，直接進自己的背包。各角色的一次性子 Stream 固定由 `gathering:<resolutionId>:<characterId>` 推導、cursor 從 `0` 開始；它們不進存檔，也不共享或推進採集的基礎 Stream。最高採集者仍是本次 `contributorCharacterId`，只由其取得採集 MXP。若未來增加其他 Escrow，必須先擴充 `ItemLocation` 與此 union，不能把任意字串當位置。
 
 ### 4.2 完成（無複合事件；改由各擁有模組事件表達）
 
-Gathering 沒有 State、不是模組，**不擁有 Domain Event**，因此不發 `GatheringResolved` 複合事件。Gathering Workflow 在同一交易內以有模組所有者的命令完成各步驟，各步驟由其擁有模組發出真實事件，並以 `transactionId` 與 `GatheringResolutionId` 關聯：
+Gathering 沒有 State、不是模組，**不擁有 Domain Event**，因此不發 `GatheringResolved` 複合事件。來源 Host Workflow 在同一交易內以有模組所有者的命令完成各步驟，各步驟由其擁有模組發出真實事件，並以 `transactionId` 與 `GatheringResolutionId` 關聯：
 
 | 步驟 | 命令（擁有模組） | 該模組事件 |
 |---|---|---|
 | 標記採集點 | `HarvestMapGatheringNode`（map） | `MapGatheringNodeHarvested` |
 | 建立產物 | `CreateItemInstance`（inventory） | `ItemInstanceCreated` |
-| 加入成果 | `AppendAssetDistributionResult`（distribution） | 既有成果事件 |
+| 加入成果 | `AppendAssetDistributionResult`（distribution） | `AssetDistributionResultAppended` |
 | 發放採集 MXP | `GrantGatheringMasteryExperience`（progression） | `MasteryExperienceGranted` |
 
 ```ts
@@ -189,16 +186,18 @@ type GrantGatheringMasteryExperience = Readonly<{
 
 ```text
 玩家在採集點所屬房間送出 gatherDungeonNode
-  → Dungeon 驗證 Session、房間、Map Version、無戰鬥／Pending Interaction
-  → Dungeon 增加 Gathering Rule 指定的迷宮分鐘
-  → required ResolveGatheringSource
+  → dungeon-gathering-workflow（startsFrom = gatherDungeonNode）
+      → 以交易 Runtime ID cursor 配發唯一 GatheringResolutionId
+      → required ConsumeDungeonGatheringAction
+          → Dungeon 重新驗證 Session、房間、Map Version、無戰鬥／Pending Interaction
+          → Dungeon 增加 Gathering Rule 指定的迷宮分鐘
       → 重新驗證節點 available
       → 從探索開始時的正式參與者快照選出最高採集者
-      → GatheringResolver 解析種類與數量
+      → GatheringResolver 解析種類與數量並回傳 nextCursor
       → required HarvestMapGatheringNode(resolutionId)
       → required CreateItemInstance(location = assetDistributionEscrow)
-      → required AppendAssetDistributionResult
-      → progression: GrantGatheringMasteryExperience（各步驟事件由擁有模組發出）
+      → required AppendAssetDistributionResult(sourceGatheringResolutionId)
+      → required GrantGatheringMasteryExperience
   → 任一步驟失敗：分鐘、節點、物品、成果與 MXP 全部回滾
 ```
 
@@ -246,7 +245,7 @@ NPC 的候選人必須使用 Run 開始時的正式參與者快照，不能在�
 
 - [ ] Gathering Rule／Source／Resolution Schema 與 JSON Schema。
 - [ ] GatheringDefinitionReader 與純 GatheringResolver。
-- [ ] `ResolveGatheringSource` Workflow 與三種 Source Adapter。
+- [ ] `dungeon-gathering-workflow` 與旅行／戰鬥獎勵／NPC 地牢三種既有 Host Workflow 的 Gathering Resolver Adapter。
 - [ ] Map Node、Inventory、Distribution、Progression 的原子交易測試。
 - [ ] 玩家／NPC 競爭、存讀檔、刷新與 deterministic RNG 測試。
 - [ ] 第一版採集內容資料與 NPC 採集 Point Cost／Sequence 資料。
