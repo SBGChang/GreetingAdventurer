@@ -224,7 +224,7 @@ DefinitionRegistry
 ├─ WorldDefinitionReader
 ├─ MapDefinitionReader
 ├─ TeamDefinitionReader
-├─ AdventurerLifecycleDefinitionReader
+├─ NpcBehaviorDefinitionReader
 ├─ PlayerTravelEventDefinitionReader
 ├─ DungeonDefinitionReader
 ├─ CharacterDefinitionReader
@@ -312,7 +312,7 @@ type ContentEventInstance = {
   instanceId: ContentEventInstanceId;
   definitionId: ContentEventDefinitionId;
   definitionRevision: Revision;
-  sourceId: GameId;
+  sourceId: EntitySourceRef;
   context: ContentEventContext;
   actorCharacterId?: CharacterId;
   rolledOnDay: WorldDay;
@@ -437,7 +437,18 @@ type ResolverRegistration<TInput, TResult> = {
   resultSchemaId: SchemaId;
   resolve(input: Readonly<TInput>, context: ResolverContext): TResult;
 };
+
+type ResolverContext<
+  TDefinitions extends object = object,
+  TQueries extends object = object,
+> = {
+  readonly definitions: TDefinitions;   // 只注入該 Resolver 宣告需要的窄化 Definition View
+  readonly queries: TQueries;           // 只注入宣告需要的 Query Port
+  readonly rng?: DeterministicRng;       // 未宣告需要 RNG 就不提供；DeterministicRng 見 00_shared_contracts §2.2
+};
 ```
+
+`ResolverContext` 是**能力受限的唯讀 Context**：不得暴露完整 `EngineContext` 或 `GameState`，只給宣告過的 Definition View、Query Port，以及（選用的）scoped RNG。
 
 Resolver 必須：
 
@@ -483,7 +494,7 @@ type ContentManifestIdentity = {
 載入存檔時：
 
 1. 先載入並編譯目前內容。
-2. 比對 SaveMeta 的 Manifest Identity。
+2. 比對 SaveFileMetadata 的 Manifest Identity。
 3. 驗證所有 Runtime Definition ID 仍存在。
 4. 套用明確的 Definition alias／migration。
 5. 缺少必要 Pack 或 Definition 時停止，列出受影響 ID。

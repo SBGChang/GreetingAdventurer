@@ -4,7 +4,7 @@
 >
 > **依賴：** [共用核心契約](00_shared_contracts.md)、Map／World／City／Character／Progression 的公開 Query。
 >
-> **責任：** 管理玩家與非玩家冒險者隊伍的成員歸屬、位置、戰鬥配置、大動作、城鎮自由活動與個人自由行動。所有隊伍使用同一套資料模型；玩家由 UI Command 發起行動，NPC 的意圖與動作串則由 [Adventurer Lifecycle](18_adventurer_lifecycle_module.md) 模組決定，Team 只執行已驗證的節點。
+> **責任：** 管理玩家與非玩家冒險者隊伍的成員歸屬、位置、戰鬥配置、大動作、城鎮自由活動與個人自由行動。所有隊伍使用同一套資料模型；玩家由 UI Command 發起行動，NPC 的意圖與動作串則由 [NPC Behavior](18_npc_behavior_module.md) 模組決定，Team 只執行已驗證的節點。
 
 ---
 
@@ -134,7 +134,7 @@ type NonPlayerMemberDailySocialPracticeRuleDefinition = DefinitionHeader & {
 };
 ```
 
-NPC 的候選意圖、動作串與任務鎖定由 Adventurer Lifecycle 擁有。Team 只驗證要求它開始的 Plan／Free Action 是否仍符合城市、地圖與隊伍的真實 State。
+NPC 的候選意圖、動作串與任務鎖定由 NPC Behavior 擁有。Team 只驗證要求它開始的 Plan／Free Action 是否仍符合城市、地圖與隊伍的真實 State。
 
 `MemberRetentionRuleDefinition` 的結算式固定為：
 
@@ -197,6 +197,12 @@ type TeamLocation =
         | { kind: 'playerSegments'; segmentIndex: 0 | 1 | 2 }
         | { kind: 'npcDirect' };
     }
+  | { kind: 'home'; homeId: HomeId };
+
+// 玩家可控制（非 travelling）位置：抵達這些位置時觸發強制超載重算（見下方 encumbrance-transition-workflow）
+type ControllableTeamLocation =
+  | { kind: 'city'; cityId: CityId }
+  | { kind: 'adventureMap'; mapId: MapInstanceId }
   | { kind: 'home'; homeId: HomeId };
 ```
 
@@ -352,7 +358,7 @@ type RecentAdventurerActivity = {
     | 'combat';
   startedOnDay?: WorldDay;
   completedOnDay: WorldDay;
-  sourceId?: GameId;
+  sourceId?: EntitySourceRef;
   summaryKey: LocalizationKey;
   summaryParams: Record<string, JsonScalar>;
 };
@@ -383,6 +389,7 @@ interface TeamQuery {
   getTeam(teamId: TeamId): TeamView;
   getPlayerTeamId(): TeamId;
   getPlayerCharacterId(): CharacterId;
+  getPlayerControlledCharacterId(): CharacterId;   // 玩家控制角色的唯一真相 = 玩家隊 leaderId；不另存 Avatar State
   getLocation(teamId: TeamId): TeamLocation;
   listTeamsAtCity(cityId: CityId): TeamId[];
   countTeamsInside(mapId: MapInstanceId): number;
@@ -453,13 +460,13 @@ interface TeamQuery {
 | `StartReturnFromDungeon` | 驗證隊伍、地圖與出口結果，建立 1 日返城 Plan。 |
 | `StartTimedCityAction` | 依 payload 的 `scope` 建立隊伍級 `cityFacilityAction` Plan，或建立／替換成員的自由行動；只保存設施與規則 ID。 |
 | `StartChildStudyPlan` | 僅接受 Progression；驗證 Team 為單人 `control: child` 且位於家中，建立 14 日 `childStudy` Plan。 |
-| `CreateNpcTeam` | 驗證角色皆可用且尚未入隊，在指定城市建立 NPC Team；Adventurer Lifecycle 在角色建立 Workflow 中建立 Controller 並安排首次 `npcDecisionDue`。 |
-| `StartNpcTeamPlan` | 僅接受 Adventurer Lifecycle；驗證 Chain 節點、位置與前置條件後建立 NPC 的 Team Plan。若 `kind=cityFree`，先結算留隊、建立首個 `nonPlayerMemberCityFreeDayTick`，且期限必須為資料化的 2～7 日。 |
+| `CreateNpcTeam` | 驗證角色皆可用且尚未入隊，在指定城市建立 NPC Team；NPC Behavior 在角色建立 Workflow 中建立 Controller 並安排首次 `npcDecisionDue`。 |
+| `StartNpcTeamPlan` | 僅接受 NPC Behavior；驗證 Chain 節點、位置與前置條件後建立 NPC 的 Team Plan。若 `kind=cityFree`，先結算留隊、建立首個 `nonPlayerMemberCityFreeDayTick`，且期限必須為資料化的 2～7 日。 |
 | `OpenPlayerTravelInteraction` | 只接受 Player Travel Event Workflow；驗證 Team 是 `playerTeamId`、段落與 Plan revision 相符後，保存已擲定事件實例並暫停旅行。 |
 | `CompletePlayerTravelSegmentWithoutEvent` | 只接受 Player Travel Event Workflow；驗證同一 Plan／段落的 no-event Resolution，直接安排下一段或第三段後抵達，不建立 Pending。 |
 | `MarkPlayerTravelInteractionAwaitingCombat` | 驗證 Pending 正在等待選項且 Encounter 來源為同一 Event Instance，保存選項與 Encounter ID。 |
 | `CompletePlayerTravelInteraction` | 驗證即時效果或 Encounter 結果已提交，清除 Pending；隊伍仍可旅行才安排下一段，否則依 `CombatTeamOutcome` 結束目前 Plan。 |
-| `AssignNpcMemberFreeAction` | 僅接受 Adventurer Lifecycle；驗證 Team 正在 `cityFree`，為指定正式成員建立 craft／train／trade／proposeToTeammate／rest。提案目標必須是同隊正式成員，但婚姻資格由 Marriage Workflow 重驗。 |
+| `AssignNpcMemberFreeAction` | 僅接受 NPC Behavior；驗證 Team 正在 `cityFree`，為指定正式成員建立 craft／train／trade／proposeToTeammate／rest。提案目標必須是同隊正式成員，但婚姻資格由 Marriage Workflow 重驗。 |
 | `RecordTeamWorkSettlementValue` | 僅接受 Quest／Dungeon／Travel Workflow；以冪等 `entryId` 將任務報酬、地牢所得或旅費寫入當前工作結算。禁止傳入裝備購買支出。 |
 | `AttachQuestTemporaryMember` | 僅接受已救出的救援角色；驗證 Character 的 Quest Temporary Origin 與 Quest ID 後加入指定隊伍的 `temporaryMemberIds`。護衛角色一律拒絕。 |
 
@@ -479,9 +486,9 @@ interface TeamQuery {
 | `PlayerTravelEventResolved` | `interactionId?`、`eventInstanceId?`、`optionId?`、`outcome: noEvent | immediate | combatVictory | combatDefeat` | ui/app、debug；不作為 Quest 或 MXP 的替代事實。 |
 | `PlayerInteractionOpened` | `interactionId`、`teamId`、`kind: travelEvent \| succession` | engine session、ui/app。 |
 | `HomeYearRestCompleted` | `teamId`、`memberIds`、`elapsedDays: 365` | character。 |
-| `PlayerSuccessorSelected` | `teamId`、`formerLeaderId`、`successorId`、`reason` | inheritance workflow、ui/app。 |
+| `PlayerSuccessorSelected` | `teamId`、`formerLeaderId`、`successorId`、`reason` | inheritance workflow、ui/app。玩家控制角色 = 玩家隊 leaderId（Team 擁有此真相，不另設 Avatar State 或 Player 模組）；此事件後由 Inheritance Workflow 原子編排資產移轉，任一步驟失敗全部回滾。 |
 | `TeamMemberJoined` | `teamId`、`characterId`、`reason: recruited \| succession` | city、quest、ui/app。 |
-| `TeamMemberDeparted` | `teamId`、`characterId`、`reason: recruitedAway \| dismissed \| unavailable \| economicDeparture`、`spawnedTeamId?` | city、quest、ui/app、adventurer-lifecycle。 |
+| `TeamMemberDeparted` | `teamId`、`characterId`、`reason: recruitedAway \| dismissed \| unavailable \| economicDeparture`、`spawnedTeamId?` | city、quest、ui/app、npc-behavior。 |
 | `TeamWorkSettlementChanged` | `teamId`、`entryId`、`kind`、`amount` | ui/app、debug。 |
 | `TeamCombatFormationChanged` | `teamId`、`placements`、`revision` | combat、ui/app。 |
 | `AdventurerActivityRecorded` | `characterId`、`kind`、`completedOnDay`、`summaryKey` | city、ui/app。 |
@@ -534,7 +541,7 @@ sequenceDiagram
 
 ### 7.2 NPC 隊伍的城鎮行為
 
-1. Adventurer Lifecycle 在自己的 `npcDecisionDue` 選擇 Intent／ActionChain，再以 Internal Command 要求 Team 開始對應 Plan。
+1. NPC Behavior 在自己的 `npcDecisionDue` 選擇 Intent／ActionChain，再以 Internal Command 要求 Team 開始對應 Plan。
 2. 若 Chain 進入 `cityFree`，Lifecycle 為每名正式成員各自指派製作、鍛鍊、買賣、向合法隊友求婚或休息。
 3. 每個人只依自己的 `nextDueDay` 結算，其他成員不被拖慢；交易本身是由 Lifecycle／City Workflow 完成的零日子步驟。
 4. 每個完整自由日另由 `nonPlayerMemberCityFreeDayTick` 對每位非玩家主角的正式成員發出一次聊天與一次購物交流練習；這與其自由行動和實際交易完全分離。玩家隊友與其他 NPC 的處理相同。
@@ -552,6 +559,12 @@ sequenceDiagram
 ```
 
 Map 只根據 `TeamLocationChanged` 與 `TeamQuery` 判斷地圖是否有人；Team 不直接修改 Pending 或刷新。
+
+**位置轉換事件保證（供強制超載重算）：**
+
+- 城際抵達必發布 `TeamLocationChanged(travelling → city)`；同一交易可另發布一次 `TravelCompleted`（後者只供旅行 MXP／任務，不作位置真相）。
+- 城市、房屋與冒險地之間的抵達也發布 `TeamLocationChanged`。
+- `encumbrance-transition-workflow` 訂閱 `TeamLocationChanged`，於 `teamId === playerTeamId && to.kind !== 'travelling'`（即 `ControllableTeamLocation`）時送出 required `EvaluateTeamEncumbrance`；不使用 `TravelCompleted`，因為 `TeamLocationChanged` 才是所有位置轉換的共同真相。
 
 ### 7.4 玩家三段旅行與 NPC 固定旅行
 
@@ -644,6 +657,6 @@ Team 模組最低必須提供：
 - [ ] Player Travel Mode、NPC 固定 Travel Rule、Player Travel Pending、Free Action、Recruitment、Retention 與 Formation Schema。
 - [ ] `TeamQuery`、Map／World／City／Character／Progression Social Benefit 的窄化 Reader。
 - [ ] 玩家三段旅行與 Pending Internal Command、NPC 固定 6 日旅行、進出冒險地、休息、自由行動、戰鬥配置、招募與解雇 Handler。
-- [ ] NPC Team Plan、Free Action Job Handler；NPC Decision 與 ActionChain 由 Adventurer Lifecycle 實作。
+- [ ] NPC Team Plan、Free Action Job Handler；NPC Decision 與 ActionChain 由 NPC Behavior 實作。
 - [ ] 位置、Plan、自由行動事件與 `StartNpcDungeonRun` Internal Command。
 - [ ] Fixture、快轉一致性與中斷恢復測試。

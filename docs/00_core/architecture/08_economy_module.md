@@ -125,7 +125,7 @@ type EconomyTransferRecord = {
   currencyId: CurrencyId;
   amount: number;
   reason: EconomyTransferReason;
-  sourceId: GameId;
+  sourceId: EntitySourceRef;
   appliedOnDay: WorldDay;
 };
 ```

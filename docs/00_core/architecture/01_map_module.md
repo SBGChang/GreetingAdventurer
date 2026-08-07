@@ -422,7 +422,7 @@ sequenceDiagram
 3. 合法結果依 `npcOrder` 順序套用；失效結果寫入 `skippedResults`。
 4. 內容結果改寫 Map Content；採集結果則以其 `GatheringResolutionId` 改寫對應 Node State。
 5. Map 發出 `NpcDungeonSettlementApplied`。
-6. inventory、progression、quest 只根據 `appliedResults` 建立戰利品、發給 MXP 或更新任務；實際建立的 Item ID 與貨幣結果追加到該 Run 的 Distribution。採集只有在 Node Result 確實 applied 後才可發出 `GatheringResolved`。
+6. inventory、progression、quest 只根據 `appliedResults` 建立戰利品、發給 MXP 或更新任務；實際建立的 Item ID 與貨幣結果追加到該 Run 的 Distribution。採集只有在 Node Result 確實 applied 後才可送 `GrantGatheringMasteryExperience`（並由各擁有模組發出其事件）。
 
 ---
 

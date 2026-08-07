@@ -62,7 +62,7 @@ flowchart BT
   MAP["modules/map"] --> CONTRACTS
   CHARACTER["modules/character"] --> CONTRACTS
   TEAM["modules/team"] --> CONTRACTS
-  LIFECYCLE["modules/adventurer-lifecycle"] --> CONTRACTS
+  LIFECYCLE["modules/npc-behavior"] --> CONTRACTS
   DUNGEON["modules/dungeon"] --> CONTRACTS
   CITY["modules/city"] --> CONTRACTS
   QUEST["modules/quest"] --> CONTRACTS
@@ -232,11 +232,12 @@ type WorldDay = number;        // 整數世界日，不使用 Date
 type DungeonMinute = number;   // 迷宮內時間，可跨午夜
 type Seed = string;
 
-type GameId = string;          // 實作時以 branded ID 區分 ItemId、MapId、TeamId…
+// ID 一律採 branded 家族 DefinitionId<K>／RuntimeId<K> 與 registry brand（見 00_shared_contracts §2）；不再有泛型 GameId。
 
 type RngContext = {
   worldSeed: Seed;
-  streamId: string;
+  streamId: RngStreamId;
+  cursor: RngCursor;      // 顯式游標；DeterministicRng 為純函式，見 00_shared_contracts §2.2
 };
 ```
 
@@ -248,12 +249,11 @@ type RngContext = {
 
 ```ts
 type GameState = {
-  meta: SaveMeta;
   core: CoreState;
   character: CharacterState;
   map: MapState;
   team: TeamState;
-  adventurerLifecycle: AdventurerLifecycleState;
+  npcBehavior: NpcBehaviorState;
   dungeon: DungeonState;
   city: CityState;
   inventory: InventoryState;
@@ -278,22 +278,16 @@ type GameState = {
 
 ### 5.3 核心入口
 
-```ts
-executePlayerCommand(state, definitions, command, rng): EngineResult
-advanceWorldToDay(state, definitions, targetDay, rng): EngineResult
-```
+> 入口簽章與回傳型別（`CommandExecutionResult`、`WorldAdvanceResult`、`EngineContext`）以 [Engine Runtime 與交易契約](architecture/12_engine_runtime.md) 為**唯一真相**；本節只描述分層概念，不重複型別定義，以免兩處漂移。
 
-```ts
-type EngineResult = {
-  state: GameState;
-  committedEvents: GameDomainEvent[];
-  notifications: Notification[];
-};
-```
+遊戲核心對外只有兩個入口，並刻意分為兩層：
 
-React、Electron、測試與未來 Web Worker 都只能經由這兩類入口驅動遊戲。
+- **`GameEngine`（純核心）**：`executePlayerCommand` 與 `advanceWorldToDay`。definitions、RNG、ID 產生器與時間一律由建構期的 `EngineContext` 注入，不在呼叫時逐一傳入，也不得直接讀系統時間或 `Math.random()`。
+- **`GameSession`（`app/` 門面）**：序列化 UI 輸入、保存目前 committed snapshot、驅動存檔與通知；不含任何玩法規則，也不修改 `GameState`。
 
-每次入口呼叫都建立一筆 `EngineTransaction`。交易中的 Internal Command、DomainEvent、Job Draft 與 Slice 變更全部成功後才提交；必要步驟拒絕時，State 與外部副作用一律不變。
+React、Electron、測試與未來 Web Worker 都只能經由 `GameSession` 驅動 `GameEngine`，不得直接改寫 `GameState`。
+
+每次入口呼叫都建立一筆 `EngineTransaction`。交易中的 Internal Command、DomainEvent、Job Draft 與 Slice 變更全部成功後才提交；必要步驟拒絕時，State 與外部副作用一律不變。世界快轉遇到需要玩家介入的切點時，回傳結果以 `status`／`pendingInteractionId` 表示暫停（見 12 號契約的 `WorldAdvanceResult`）。
 
 ### 5.4 排程工作
 
@@ -309,7 +303,7 @@ React、Electron、測試與未來 Web Worker 都只能經由這兩類入口驅�
 | `nonPlayerMemberCityFreeDayTick` | team | 任一隊伍處於城市自由期時，每位非玩家主角正式成員固定得到一次聊天與一次購物交流練習。 |
 | `npcDungeonDay` | dungeon | 地牢內 NPC 隊伍取得當日 10 點。 |
 | `freeActionDue` | team | 城鎮自由活動中的個人任務完成；後續成長由事件與 Workflow 處理。 |
-| `npcDecisionDue`／`npcChainAdvance` | adventurer-lifecycle | 非玩家隊伍抽選下一個意圖，或在次日推進既有動作串。 |
+| `npcDecisionDue`／`npcChainAdvance` | npc-behavior | 非玩家隊伍抽選下一個意圖，或在次日推進既有動作串。 |
 | `worldConflictCheck`／`worldConflictResolve` | world | 只在對應世界規則啟用時檢查與完成衝突。 |
 | `marketPressureExpire`／`eventWeightModifierExpire` | world | 結束有期限的世界市場或事件權重修正。 |
 | `characterLifecycleDue` | character | 成年、退休或自然死亡的明確日期檢查；不每日掃描角色。 |
@@ -478,7 +472,7 @@ interface QuestDefinitionReader {
 | `character` | 角色身分、年齡、當前生命／魔力、生命週期、家族與角色可用性。 | 身分原型、生命週期規則。 | `CharacterCreated`、`CharacterAvailabilityChanged`、`CharacterDied`。 |
 | `map` | 地圖版本、Pending、刷新鎖、固定採集點狀態、地圖內容實例與 NPC 序列。 | 地圖模板、生成表、文化池。 | `MapRefreshed`、`MapContentGenerated`、`MapContentResolved`、`MapGatheringNodeHarvested`。 |
 | `team` | 玩家／NPC 隊伍、1～9 名正式成員、全員九宮格配置、位置、大動作、可跨多段自由期累積的成員自由行動與近期行動紀錄；不擁有共用金錢或一般物品。 | 行動、旅行、招募、留隊與近期紀錄規則。 | `TeamPlanChanged`、`TeamLocationChanged`、`TeamMemberJoined`。 |
-| `adventurer-lifecycle` | NPC Team 的 Controller、下一個意圖、動作串與市場交易意圖；另為所有非玩家主角正式成員選擇個人自由行動；不執行或擁有隊伍／任務／婚姻／資產。 | 決策、動作串、個人自由行動、NPC 求婚候選與市場偏好規則。 | `NpcIntentSelected`、`NpcActionChainChanged`、`NpcMarketIntentCreated`。 |
+| `npc-behavior` | NPC Team 的 Controller、下一個意圖、動作串與市場交易意圖；另為所有非玩家主角正式成員選擇個人自由行動；不執行或擁有隊伍／任務／婚姻／資產。 | 決策、動作串、個人自由行動、NPC 求婚候選與市場偏好規則。 | `NpcIntentSelected`、`NpcActionChainChanged`、`NpcMarketIntentCreated`。 |
 | `dungeon` | 玩家探索暫態、`NpcDungeonRun`、非戰鬥內容暫存結果與 Combat Sequence reference。 | NPC 探索點規則、非戰鬥內容 Resolver。 | `NpcDungeonRunProgressed`；要求 Map 與 Combat Sequence 結算。 |
 | `city` | 建築狀態、商店刷新政策、貨架 Offer、護衛候選，以及玩家主角每日交易上限。 | 城市與設施定義、商店規則、玩家主角每日交易限制。 | `ShopRefreshed`、`EscortCandidatesGenerated`、`CommerceInteractionCompleted`。 |
 | `inventory` | 所有 Item Instance 的所有權、唯一位置、保留、移轉紀錄與玩家隊超載 Resolution。 | 道具定義。 | `InventoryTransferred`、`ItemConsumed`、`EncumbranceResolutionOpened／Closed`。 |
@@ -640,7 +634,7 @@ UI 以 Feature 切分：`ui/features/city/`、`ui/features/dungeon/`、`ui/featu
 2. 呼叫 `executePlayerCommand` 或 `advanceWorldToDay`。
 3. 等待 Engine Transaction 完成並取得 committed result。
 4. 私有替換 committed GameState，更新 React 可見的 Revision Snapshot 與 Projection。
-5. 依 `EngineResult.committedEvents` 轉成通知、音效候選、成就候選與存檔請求。
+5. 依核心回傳的 committed outbox（已提交事件；見 [Engine Runtime 與交易契約](architecture/12_engine_runtime.md) 的 `CommittedOutbox`）轉成通知、音效候選、成就候選與存檔請求。
 
 它不得自行改寫遊戲規則。
 
@@ -664,14 +658,7 @@ interface AchievementGateway {
 
 ### 11.3 存檔相容性
 
-```ts
-type SaveMeta = {
-  saveSchemaVersion: number;
-  moduleVersions: Record<ModuleId, number>;
-  contentManifestVersion: string;
-  contentManifestHash: string;
-};
-```
+存檔中繼資料型別為 `SaveFileMetadata`（以 [存檔與平台邊界](architecture/14_save_platform.md) 為唯一真相），只存在 `SaveFile` 外層、**不進 `GameState`**；含 Schema／各模組版本／內容 Manifest 版本與 Hash／Content Pack 指紋／App Build。
 
 - 各模組對自己的 Slice 提供 migration。
 - 載入存檔時，先驗證內容包與版本，再依序升版 Slice。
@@ -761,7 +748,7 @@ React Features、存檔、Electron／Steam 介接
 16. [React UI 與應用層契約](architecture/15_ui_application.md)
 17. [Derived Statistics 純計算契約](architecture/16_derived_statistics.md)
 18. [Asset Distribution 模組契約](architecture/17_asset_distribution.md)
-19. [Adventurer Lifecycle 模組契約](architecture/18_adventurer_lifecycle_module.md)
+19. [NPC Behavior 模組契約](architecture/18_npc_behavior_module.md)
 20. [Gathering Resolver 與採集 Workflow 契約](architecture/19_gathering_service.md)
 21. [Crafting & Cuisine 模組契約](architecture/20_crafting_and_cuisine_module.md)
 22. [Combat Sequence 模組契約](architecture/21_combat_sequence_module.md)
@@ -842,7 +829,7 @@ React Features、存檔、Electron／Steam 介接
 | 武器、防具、道具、料理、工藝品與材料的文化來源 | 各 Item／Recipe Definition 的不可變 `originCultureId`；製作成品跟配方文化，異文化素材不改成品國籍。 |
 | 玩家 3／6／9 日三段旅行事件、NPC 固定 6 日無事件、1 日進出冒險地、年度休息 | Team + Player Travel Event Workflow + Engine Scheduler；Route／Mode／Event Pool 由資料契約提供。 |
 | 迷宮房間、30 分鐘小格距離、永久小地圖記憶、每版門／陷阱／固定採集點狀態、跨日、Pending 刷新 | Map + Dungeon + Engine。 |
-| NPC 單人／隊伍自主生活、附近任務／冒險地抽選、動作串、任務標記、固定自由－非自由循環與資料化買賣 | Adventurer Lifecycle + Team + Quest + City + Dungeon。 |
+| NPC 單人／隊伍自主生活、附近任務／冒險地抽選、動作串、任務標記、固定自由－非自由循環與資料化買賣 | NPC Behavior + Team + Quest + City + Dungeon。 |
 | 入隊滿 60 日後、依任務／地牢所得扣旅費與消耗品的留隊判定；玩家隊友與 NPC 隊員皆適用 | Team + Quest + Dungeon + Inventory。 |
 | 隊員／酒館聊天、情報、玩家中心好感、求婚、近期行動、機率招募、解雇與隊伍異動 | Social + Marriage Workflow + Character FamilyLink + Team + Progression Social Benefit + City Read Model。 |
 | 個人帳戶、個人物品、永久庫存、商店貨架、戰鬥／非戰鬥道具、書籍 | Economy + Inventory + City；Team 不擁有一般資產。 |

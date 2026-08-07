@@ -392,7 +392,6 @@ type PlayerDailyCommerceUsageView = {
 | `ApplyCityMetricEffect` | 依已驗證 Effect 調整繁榮／安全並套用資料上下限。 |
 | `TransferHomeOwnership` | 驗證原所有者、繼承來源與同城唯一性後移轉房屋。 |
 | `InterruptHomeTeachingPost` | 教師死亡、退休、離隊或不再可用時，將 Post 標為 interrupted，通知 Child Study Workflow 立即做部分結算。 |
-| `ExecuteNpcMarketIntent` | 讀取 Adventurer Lifecycle 已選定的單筆交易 Intent，重用既有買 Offer／賣物品／買房 Workflow；驗證失敗只回傳 typed rejection，不重抽目標。它不寫入玩家每日交易計數，也不發出玩家用的 `CommerceInteractionCompleted`。 |
 | `RevealTavernIntel` | 只接受 City Intel Workflow；驗證酒館、隊伍與 Intel Lead 後標記揭露。若 Social 額度步驟拒絕，整筆交易回滾。 |
 
 ### 5.4 訂閱 DomainEvent

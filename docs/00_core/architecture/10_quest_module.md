@@ -16,7 +16,7 @@
 type QuestState = {
   quests: Record<QuestId, QuestInstance>;
   guildPostingIndex: Record<CityId, QuestId[]>;
-  sourceContentIndex: Record<GameId, QuestId[]>;
+  sourceContentIndex: Record<string, QuestId[]>;   // key 為 EntitySourceRef 序列化字串
   npcClaims: Record<QuestId, NpcQuestClaim>;
 };
 ```
@@ -140,7 +140,7 @@ type QuestInstance = {
   questId: QuestId;
   kind: QuestKind;
   sourceRuleId: QuestReactionRuleId;
-  sourceId: GameId;
+  sourceId: EntitySourceRef;
   postingGuildCityId: CityId;
 
   createdOnDay: WorldDay;
@@ -228,7 +228,7 @@ interface QuestQuery {
   getNpcClaim(questId: QuestId): NpcQuestClaimView | undefined;
   isMapReservedForAcceptedQuest(mapId: MapInstanceId): boolean;
   isContentProtected(contentId: ContentInstanceId): boolean;
-  getQuestIdsForSource(sourceId: GameId): QuestId[];
+  getQuestIdsForSource(sourceId: EntitySourceRef): QuestId[];
   canSettle(questId: QuestId, teamId: TeamId, cityId: CityId, onDay: WorldDay): boolean;
 }
 ```
@@ -254,7 +254,7 @@ UI 不自行重算完成、期限或結案資格。
 
 | Command | 前置條件 | Quest 的責任 |
 |---|---|---|
-| `AcceptQuestForNpcTeam` | 與 `acceptQuest` 完全相同，且來源必須是 Adventurer Lifecycle 的 active ActionChain。 | 重用接取驗證與保護 Workflow，發出同一種 `QuestAccepted`；不可建立第二套 NPC 任務狀態。 |
+| `AcceptQuestForNpcTeam` | 與 `acceptQuest` 完全相同，且來源必須是 NPC Behavior 的 active ActionChain。 | 重用接取驗證與保護 Workflow，發出同一種 `QuestAccepted`；不可建立第二套 NPC 任務狀態。 |
 | `SettleQuestForNpcTeam` | 與 `settleQuest` 完全相同，且來源必須是該 NPC Team 的 active Quest Chain。 | 重用原公會結案 Workflow，發出同一種 `QuestSettled`。 |
 | `ClaimQuestForNpcTeam` | Quest 未接取、尚未到接受期限，且不存在其他 NPC Team 的 Claim。 | 建立只供 NPC 抽樣排他的 `NpcQuestClaim`；不得阻止玩家 `acceptQuest`。 |
 | `ReleaseNpcQuestClaim` | Claim 的 team／chain 與來源相符，或 Quest 已不再 unaccepted。 | 清除意向標記；不得改寫 Quest 期限、目標或狀態。 |
@@ -316,7 +316,7 @@ NPC 接取與結案也都是零時間；差別僅在命令由已存檔的 Action
 |---|---|---|
 | `QuestCreated` | `questId`、`kind`、`sourceId`、`deadlines` | map、city、ui/app。 |
 | `QuestAccepted` | `questId`、`teamId`、`acceptedOnDay` | city、character、ui/app。 |
-| `NpcQuestClaimChanged` | `questId`、`teamId?`、`chainId?`、`state: claimed \| released` | adventurer-lifecycle、ui/app。 |
+| `NpcQuestClaimChanged` | `questId`、`teamId?`、`chainId?`、`state: claimed \| released` | npc-behavior、ui/app。 |
 | `QuestStateChanged` | `questId`、`oldStatus`、`newStatus`、`reason` | map、city、team、character、ui/app。 |
 | `QuestObjectiveCompleted` | `questId`、`completedOnDay` | city、ui/app。 |
 | `QuestSettled` | `questId`、`teamId`、`beneficiaryCharacterIds`、`guildCityId`、`kind`、`masteryExperienceRuleId` | progression、team、city、ui/app。 |

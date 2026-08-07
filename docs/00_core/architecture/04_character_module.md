@@ -166,7 +166,7 @@ type CharacterCondition = {
 type CharacterStatusInstance = {
   statusInstanceId: string;
   statusId: StatusId;
-  sourceId?: GameId;
+  sourceId?: EntitySourceRef;
   appliedOnDay: WorldDay;
   expiresOnDay?: WorldDay;
   stacks: number;
@@ -210,7 +210,7 @@ type CharacterRelationshipFact = {
     | { kind: 'character'; characterId: CharacterId }
     | { kind: 'organization'; organizationId: OrganizationId };
   kind: RelationshipFactKind;
-  sourceId: GameId;
+  sourceId: EntitySourceRef;
   state: 'unresolved' | 'resolved';
   openedOnDay: WorldDay;
   resolvedOnDay?: WorldDay;

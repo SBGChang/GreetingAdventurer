@@ -13,30 +13,34 @@
 ## 1. SaveFile
 
 ```ts
-type SaveFile = {
-  meta: SaveMeta;
+type ContentPackFingerprint = Readonly<{
+  packId: ContentPackId;
+  version: string;
+  hash: string;
+}>;
+
+type SaveFileMetadata = Readonly<{
+  saveSchemaVersion: number;
+  moduleVersions: Readonly<Record<ModuleId, number>>;
+  contentManifestVersion: string;
+  contentManifestHash: string;
+  contentPacks: readonly ContentPackFingerprint[];
+  appBuildVersion: string;
+}>;
+
+type SaveFile = Readonly<{
+  meta: SaveFileMetadata;   // 存檔中繼資料只存在此外層；GameState 不再保存 meta
   state: GameState;
   createdAtIso: string;
   savedAtIso: string;
   playSessionId: string;
   checksum: string;
-};
-
-type SaveMeta = {
-  saveSchemaVersion: number;
-  moduleVersions: Record<ModuleId, number>;
-  contentManifestVersion: string;
-  contentManifestHash: string;
-  contentPacks: {
-    packId: ContentPackId;
-    version: string;
-    hash: string;
-  }[];
-  appBuildVersion: string;
-};
+}>;
 ```
 
 ISO 時間只供檔案排序與 UI 顯示；遊戲規則永遠使用 `WorldDay`。
+
+存檔時由 Save Service 依 Module Registry、當前 Content Manifest 與 App Build 建立唯一 `SaveFileMetadata`，**不從 `GameState` 複製**；讀檔時先解析 `SaveFile.meta` 供 Schema／Module Migration 與內容相容驗證，再解析 `GameState`。Schema、Content Pack 與 App Build 屬存檔解析／遷移／相容性資訊，不是遊戲世界狀態。
 
 ### 1.1 必須存檔的 Runtime
 
@@ -125,12 +129,13 @@ type ModuleMigration = {
   moduleId: ModuleId;
   fromVersion: number;
   toVersion: number;
-  migrate(rawSlice: JsonValue, context: MigrationContext): JsonValue;
+  migrate(rawSlice: JsonValue): JsonValue;
 };
 ```
 
 - 每次只升一個版本，依序套用。
 - Migration 必須 deterministic，不能使用 RNG、系統時間或平台網路。
+- Migration **不接收 Definition**：它只轉換舊存檔 JSON 結構，不依當前內容資料重算結果；內容 ID alias／相容性修正屬 Manifest 載入後的獨立階段（見 §4.2）。因此不保留 `MigrationContext`。
 - 模組只 Migration 自己的 Slice。
 - 跨 Slice Migration 由架構管理的 Save Migration 明確編排，不能由某領域偷偷改另一 Slice。
 - 每個 Migration 必須有舊版 Fixture。
@@ -212,6 +217,38 @@ interface CloudSaveGateway {
   download(remoteId: RemoteSaveId): Promise<Uint8Array>;
 }
 ```
+
+平台效果候選型別（由 Application 依 committed Outbox 的 events／notifications 投影產生；純引擎不持有這些型別）：
+
+```ts
+type AudioCandidate = {
+  sourceEventId: EventId;
+  cueId: string;
+  dedupeKey?: string;
+  priority?: number;
+};
+
+type AchievementCandidate = {
+  sourceEventId: EventId;
+  achievementId: string;   // 遊戲內 ID，非 Steam ID；對照表只存在 Platform Adapter
+};
+
+type AchievementDeliveryResult =
+  | { status: 'delivered' | 'already-delivered' }
+  | { status: 'retryable-failure' | 'permanent-failure'; errorCode?: string };
+
+type AutoSaveRequest = {
+  sourceEventId: EventId;
+  reason: string;
+};
+
+type PlatformEffectCandidate =
+  | AudioCandidate
+  | AchievementCandidate
+  | AutoSaveRequest;
+```
+
+平台送達失敗（含 `AchievementDeliveryResult` 的 failure）不得回頭改變 `GameState`；以 `sourceEventId` 冪等重試。
 
 ### 7.1 Achievement
 

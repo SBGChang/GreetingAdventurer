@@ -42,7 +42,7 @@ flowchart LR
 | `ModuleRegistry` | 註冊 State contribution、Handler、Subscriber、Query 與 migration。 | 不以 import 順序決定行為。 |
 | `DomainServiceRegistry` | 註冊無 State 的純計算能力與其 Definition Reader。 | 不讓 Service 取得完整 GameState 或平台 I/O。 |
 | `Workflow` | 編排跨模組 Internal Command 與必要／可選步驟。 | 不擁有 State 或玩法公式。 |
-| `Outbox` | 暫存已提交事件與平台效果候選。 | 不接收未提交事件。 |
+| `Outbox` | 暫存已提交事件與通知（`events`／`notifications`）。 | 不接收未提交事件；不持有平台效果候選。 |
 
 ### 1.1 新遊戲初始化門（Bootstrap Gate）
 
@@ -109,6 +109,11 @@ type WorldAdvanceResult = {
   pendingInteractionId?: InteractionId;
   committedOutbox: CommittedOutbox;
 };
+
+// 整筆引擎交易是否完成（不同於 Command Handler 的 GameCommandResult）：
+type CommandExecutionResult<TResult extends JsonValue = JsonValue> =
+  | { accepted: true; state: GameState; result: TResult; committedOutbox: CommittedOutbox }
+  | { accepted: false; state: GameState; rejection: CommandRejection };   // state 為傳入的原始狀態；拒絕不產生 outbox
 ```
 
 兩個入口皆為同步、可重播的純核心操作。資料讀取、RNG、ID 產生器與時間都由 `EngineContext` 明確注入，不得直接呼叫系統時間、`Math.random()`、檔案系統或平台 API。
@@ -121,6 +126,46 @@ type EngineContext = {
   idGenerator: RuntimeIdGenerator;
   limits: EngineSafetyLimits;
 };
+```
+
+`EngineContext` 注入的最小 Port 契約（跨模組共用，不得由各模組自行發明 RNG／ID／Definition 讀法）：
+
+```ts
+interface DeterministicRngFactory {
+  create(streamId: RngStreamId): DeterministicRng;      // DeterministicRng 定義於 00_shared_contracts §2.2
+}
+
+type RuntimeIdAllocation<TId extends string> = Readonly<{
+  id: TId;
+  nextCursor: RuntimeIdCursor;
+}>;
+
+interface RuntimeIdGenerator {
+  // 純函式：無內部可變狀態、不直接改 CoreState。cursor 傳入、傳回，交易內逐次前進（見 §7.2）。
+  next<TId extends string>(input: Readonly<{
+    worldSeed: Seed;
+    entityKind: RuntimeEntityKind;
+    cursor: RuntimeIdCursor;
+  }>): RuntimeIdAllocation<TId>;
+}
+
+interface GameDefinitionReaders {
+  // 各模組貢獻窄化唯讀 Reader（見 13_data_runtime「Narrowed Definition Readers」）；
+  // 不提供無限制 Registry 存取。
+  readonly [readerId: string]: unknown;
+}
+
+interface ModuleRegistry {
+  get(moduleId: ModuleId): ModuleContract<unknown> | undefined;
+  orderedModules(): readonly ModuleContract<unknown>[];  // 順序由註冊資料指定，不依 import 順序
+}
+
+interface EngineSafetyLimits {
+  readonly maxMessagesPerTransaction: number;
+  readonly maxJobsPerDay: number;
+  readonly maxCatchUpDays: number;
+  readonly maxTransactionsPerAdvance: number;
+}
 ```
 
 ---
@@ -271,17 +316,28 @@ Event 可有零到多個 Subscriber。順序由 manifest 明確宣告：
 type EventSubscription = {
   eventType: DomainEventType;
   subscriber: MessageSourceId; // ModuleId 或 WorkflowId
-  priority: number;
+  subscriptionId: EventSubscriptionId;
 };
 ```
 
 固定排序為：
 
 ```text
-priority → subscriber → registrationId
+ExecutionOrderManifest 的訂閱順序 → subscriberId → registrationId
 ```
 
-不得使用 bundler、檔名或 import 發生順序決定結果。
+不得使用 bundler、檔名、import 發生順序或模組自填的數字 priority 決定結果。
+
+跨模組執行順序由 `app/composition` 擁有的唯一 Manifest 決定；模組只宣告 Job 類型、Phase 與訂閱關係：
+
+```ts
+type ExecutionOrderManifest = Readonly<{
+  jobTypeOrderByPhase: Readonly<Record<JobPhase, readonly ScheduledJobType[]>>;
+  eventSubscriberOrder: Readonly<Record<DomainEventType, readonly EventSubscriptionId[]>>;
+}>;
+```
+
+Bootstrap 驗證每個已註冊 Job 類型與訂閱恰好在 Manifest 出現一次（不得缺漏或重複）。Kernel 可將順序編譯為內部索引，但不得由模組填寫，也不進入存檔。
 
 ### 5.3 因果追蹤
 
@@ -359,19 +415,32 @@ Scheduler 必須提供 `peekNextDueDay()`。玩家休息多日時可直接跳到
 
 ### 7.1 RNG
 
-每筆會骰定內容的 Entity、Job 或 Run 保存自己的 `rngStreamId`。Handler 只能透過交易提供的 RNG Context 取值；不同模組不能共用一條隱含全域亂數序列。
+每筆會骰定內容的 Entity、Job 或 Run 保存自己的 `rngStreamId` 與 `RngCursor`。`DeterministicRng` 為純函式：`cursor` 顯式傳入、`nextCursor` 顯式傳回；**禁止把具內部可變狀態的 RNG 物件存入 State 或跨 Handler 共用**。
 
-Event 有多個 Subscriber 時，每個 Subscriber 使用由 `eventId + subscriber` 派生的子 Stream。新增一個無關 Subscriber 不得改變其他訂閱者原本會抽到的結果。
+- `RngCursor` 必須是非負安全整數；多次抽取須顯式傳遞前一次 `nextCursor`。
+- 跨日續用同一 Stream 的 Entity／Run／Job，由其擁有模組保存 `cursor`；一次性 Resolver 可只回傳選定結果與最終 `cursor`。
+- 交易拒絕時，`cursor` 更新隨 Working State 一起丟棄。
+- Event 有多個 Subscriber 時，每個 Subscriber 使用由 `eventId + subscriberId` 派生的子 Stream，初始 `cursor` 為零；新增一個無關 Subscriber 不得改變其他訂閱者原本會抽到的結果。
 
 ### 7.2 Runtime ID
 
-Runtime ID 由：
+Runtime ID 由 `worldSeed + entityKind + cursor` 確定性產生；`cursor` 是**交易私有**的序號游標（`RuntimeIdCursor`），不是全域可變狀態。
 
-```text
-worldSeed + entityKind + nextRuntimeSequence
+- **交易開始**：`transaction.runtimeIdCursor = state.core.nextRuntimeSequence`。
+- **配發**：Handler 每建立一個實例就以 `RuntimeIdGenerator.next({ worldSeed, entityKind, cursor })` 取得 `{ id, nextCursor }`，只推進**交易私有** cursor。`next` 為純函式（cursor 傳入、傳回），無內部可變狀態、不直接改 `CoreState`。
+- **即時最終形式**：產出的 ID 在交易內即為最終形式，可直接寫入 Working State、Internal Command、Domain Event Draft 與 Scheduled Job Draft；不需要 `TemporaryRef | RuntimeId` 之類的聯集，提交時也不必深度掃描改寫各模組 Slice。
+- **提交**：`core.nextRuntimeSequence = transaction.runtimeIdCursor`（由 Kernel 寫入 `core`，見 `00_shared_contracts.md` §3 的 core 所有權）。
+- **拒絕／異常**：丟棄 Working State 與 cursor，原序號完全不變。因此「提交時才消耗序號」成立；失敗交易產生過的暫定 ID 不會離開交易，也可由下次成功交易重新產生，無識別衝突。
+
+Handler 執行結果由 Kernel 包一層（cursor **不**塞進領域 `ModuleResult`）：
+
+```ts
+type HandlerExecutionResult<TSlice> =
+  | Readonly<{ accepted: true; moduleResult: ModuleResult<TSlice>; nextRuntimeIdCursor: RuntimeIdCursor }>
+  | Readonly<{ accepted: false; rejection: CommandRejection }>;   // 拒絕不回傳新 cursor、不消耗序號
 ```
 
-產生。序號只在交易提交時消耗；拒絕交易不得永久吃掉 ID。
+範例（起始 cursor = 42）：Item Handler 以 `next({ seed, 'item', 42 })` 建立 `ItemId`、得 `nextCursor = 43`、發出 `TransferItem(itemId)`；Inventory Handler 直接使用該 `ItemId`，若再建實例則從 cursor 43 起。
 
 ### 7.3 冪等
 
@@ -391,7 +460,7 @@ interface TransactionQueryContext {
   character: CharacterQuery;
   map: MapQuery;
   team: TeamQuery;
-  adventurerLifecycle: AdventurerLifecycleQuery;
+  npcBehavior: NpcBehaviorQuery;
   dungeon: DungeonQuery;
   world: WorldQuery;
   city: CityQuery;
@@ -438,17 +507,16 @@ type CommittedOutbox = {
   transactionId: TransactionId;
   events: GameDomainEvent[];
   notifications: Notification[];
-  platformCandidates: PlatformEffectCandidate[];
 };
 ```
 
-Application 層可以把它轉成：
+純引擎 Outbox 只提交 `events` 與 `notifications`，**不含平台效果候選**。平台候選一律由 Application 依已提交內容投影產生（型別見 14_save_platform 的 `PlatformEffectCandidate` 家族）：
 
-- React UI 通知。
-- 自動存檔要求。
-- 音效／動畫提示。
-- Steam 成就候選。
-- Debug／重播紀錄。
+- `Notification` → `UiNotice`（React UI 通知）。
+- committed Event → `AutoSaveRequest`（自動存檔要求）。
+- committed Event → `AudioCandidate`（音效／動畫提示）。
+- committed Event → `AchievementCandidate`（Steam 成就候選）。
+- committed Event → Debug／重播紀錄。
 
 平台操作失敗不回滾已提交的遊戲世界；由平台層依 `eventId` 重試。遊戲規則不可依 Steam 或音效是否成功決定結果。
 
@@ -458,7 +526,7 @@ Application 層可以把它轉成：
 
 - 只保存 committed `GameState`；不保存進行中的 EngineTransaction。
 - Scheduler 可存檔，但必須能由各 Slice 重建並驗證。
-- SaveMeta 保存 Schema、各模組版本、內容 Manifest 版本與 Hash。
+- SaveFileMetadata（存 SaveFile 外層，非 GameState）保存 Schema、各模組版本、內容 Manifest 版本與 Hash、Content Pack 指紋與 App Build。
 - 載入後先完成 migration、Definition 引用驗證、Job 重建與全域不變量檢查，才交給 UI。
 - 若程式在交易途中關閉，重新啟動時回到上一份 committed save，不會載入半套交易。
 

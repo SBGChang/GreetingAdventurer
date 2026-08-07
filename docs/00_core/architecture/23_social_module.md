@@ -129,7 +129,7 @@ type PlayerConversationUsageView = {
 | `ProvisionPlayerAffinity` | new-game／character-provisioning／adulthood workflow | 對新建立或剛取得冒險者身分的非玩家真實冒險者依 Rule 建立唯一初始值；重送必須冪等。 |
 | `ConsumePlayerConversationAllowance` | City Intel Workflow | 驗證玩家主角與當日上限，計數 +1 並發出 `PlayerConversationCompleted(kind=intel)`；City 的情報揭露失敗時整筆交易回滾。 |
 
-`ResolveNpcMarriageProposal` 是 Adventurer Lifecycle 送往 Marriage Workflow 的跨模組 Internal Command，不由 Social Handler 處理。它和玩家 Game Command `proposeMarriageToTeamMember` 都由 Marriage Workflow 擁有，因為兩者需要同時讀 Social／Team／Character／Combat Power，最後要求 Character 建立 FamilyLink；Social 不直接寫婚姻。
+NPC 婚姻不由 Social Handler 處理，也**不使用 Internal Command**：**NPC Marriage Workflow** 直接訂閱 `FreeActionCompleted(kind=proposeToTeammate)` 啟動（`WorkflowDefinition.startsFrom`）。它和玩家 Game Command `proposeMarriageToTeamMember` 都由 Marriage Workflow 擁有，因為兩者需要同時讀 Social／Team／Character／Combat Power，最後要求 Character 建立 FamilyLink；Social 不直接寫婚姻。
 
 ---
 

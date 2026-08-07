@@ -22,7 +22,7 @@
 16. [React UI 與應用層契約](docs/00_core/architecture/15_ui_application.md)
 17. [Derived Statistics 純計算契約](docs/00_core/architecture/16_derived_statistics.md)
 18. [Asset Distribution 模組契約](docs/00_core/architecture/17_asset_distribution.md)
-19. [Adventurer Lifecycle 模組契約](docs/00_core/architecture/18_adventurer_lifecycle_module.md)
+19. [NPC Behavior 模組契約](docs/00_core/architecture/18_npc_behavior_module.md)
 20. [Gathering Resolver 與採集 Workflow 契約](docs/00_core/architecture/19_gathering_service.md)
 21. [Crafting & Cuisine 模組契約](docs/00_core/architecture/20_crafting_and_cuisine_module.md)
 22. [Combat Sequence 模組契約](docs/00_core/architecture/21_combat_sequence_module.md)

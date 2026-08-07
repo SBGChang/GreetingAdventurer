@@ -48,7 +48,7 @@ type CraftingRecipeDefinition = DefinitionHeader & {
   outputRarity?: EquipmentRarity; // 僅 equipment，基礎係數預算的唯一來源
   requiredMasteries: MasteryRequirement[];
   requiredFacilityKind: FacilityKind;
-  durationDays: number; // equipment／consumable／tradeGood 均至少 1 日
+  craftingDurationDays: number; // 製作占用的自由活動日數；equipment／consumable／tradeGood 均至少 1 日
   ingredientSlots: CraftingIngredientSlotDefinition[];
   craftingExperienceRuleId: ExperienceAwardRuleId;
   outcomeResolverId: ResolverId; // 成功／失敗與失敗時素材去向；精確公式待定
@@ -97,7 +97,7 @@ type CuisineRecipeDefinition = DefinitionHeader & {
   requiredMasteries: MasteryRequirement[];
   ingredientSlots: CuisineIngredientSlotDefinition[];
   baseFoodEffectIds: EffectDefinitionId[];
-  durationDays: number;
+  foodStatusDurationDays: number;   // 料理效果維持天數；料理本身仍為零日行為
   cookingExperienceRuleId: ExperienceAwardRuleId;
   foodAffixTierResolverId: ResolverId; // 食材方向固定；廚藝決定各詞條階級
   restaurantBaseVariantId?: RestaurantMealVariantId;
@@ -194,7 +194,7 @@ interface CraftingQuery {
 
 `npcCuisineDecisionDue` 是 Crafting 的每日 Job：對每名無 FoodStatus 的非玩家主角角色，資料化抽取自製料理或餐館；餐館候選只在角色所在城市的 Inn 開放時可用，有 FoodStatus 的角色不建立決策。此 Job 不依賴、也不改變 NPC 的 FreeAction。
 
-非玩家角色在 `cityFree` 已抽到 `craft` 時，Adventurer Lifecycle 只向 `CraftingQuery.listCraftableRecipes` 取得目前合法的配方池，以固定 RNG 直接抽一筆；不評估市場需求、預期利潤或材料最佳化。完成後若成品是裝備，Workflow 僅以最終 Combat Power 與同裝備位置的目前物品比較：較高則自動換裝，否則保留在個人背包，等後續 `trade` 自由行動出售。這不是另一套品級或詞條比較器。
+非玩家角色在 `cityFree` 已抽到 `craft` 時，NPC Behavior 只向 `CraftingQuery.listCraftableRecipes` 取得目前合法的配方池，以固定 RNG 直接抽一筆；不評估市場需求、預期利潤或材料最佳化。完成後若成品是裝備，Workflow 僅以最終 Combat Power 與同裝備位置的目前物品比較：較高則自動換裝，否則保留在個人背包，等後續 `trade` 自由行動出售。這不是另一套品級或詞條比較器。
 
 ## 5. 事件與跨模組流程
 

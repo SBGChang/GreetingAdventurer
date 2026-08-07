@@ -155,12 +155,12 @@ interface CharacterStatisticsCalculator {
 2. 同一套輸入在 Combat、角色面板與裝備預覽得到相同基準副屬。
 3. 雙手、單手與雙持左右手使用正確 Grip Rule。
 4. 不同品級裝備的係數總預算只由資料決定。
-6. 聲望對魅力的貢獻只套用一次。
-7. 樂器傷害與減傷走專用 Rule，不被一般物理減傷誤算。
-8. 年齡修正由同一 Age Rule 供角色面板與 Combat 使用。
-9. Calculator 無 State、無 I/O、無未注入的全域資料。
-10. 攜帶上限只由 Carry Capacity Rule 與有效肌力計算；不以背包格數、物品種類或 UI 特例修改。
-11. 第一版不輸出可縮短地城移動的移動速度；地城分鐘只由空間 Template 與互動 Rule 計算。
+5. 魅力純由社交相關熟練度帶動；**聲望不併入魅力**（聲望改作獨立 RNG／條件因子）。
+6. 樂器傷害與減傷走專用 Rule，不被一般物理減傷誤算。
+7. 年齡修正由同一 Age Rule 供角色面板與 Combat 使用。
+8. Calculator 無 State、無 I/O、無未注入的全域資料。
+9. 攜帶上限只由 Carry Capacity Rule 與有效肌力計算；不以背包格數、物品種類或 UI 特例修改。
+10. 第一版不輸出可縮短地城移動的移動速度；地城分鐘只由空間 Template 與互動 Rule 計算。
 
 ---
 

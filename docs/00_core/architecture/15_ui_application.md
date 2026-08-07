@@ -245,7 +245,7 @@ type PendingInteractionView = {
     labelKey: LocalizationKey;
     resolutionCommand: GameCommand;
   }[];
-  sourceId: GameId;
+  sourceId: EntitySourceRef;
 };
 ```
 
@@ -327,16 +327,28 @@ City Screen Projection 同時讀 World、City、Team、Character、Social、Inve
 ## 9. Notification 與效果
 
 ```ts
+interface EventNotificationProjector {
+  project(event: GameDomainEvent): readonly Notification[];   // Domain Event → 語意 Notification（core 型別）
+}
+
 interface NotificationProjector {
-  project(event: GameDomainEvent): UiNotice[];
+  project(notification: Notification): UiNotice;              // Notification → UI 顯示模型
 }
 
 interface AudioCandidateProjector {
   project(event: GameDomainEvent): AudioCandidate[];
 }
+
+type UiNotice = {
+  id: string;
+  message: LocalizedTextRef;
+  tone: 'info' | 'success' | 'warning' | 'error';
+  presentation: 'toast' | 'modal';
+  dismissible: boolean;
+};
 ```
 
-只處理 committed Event。Notification／Audio：
+投影流程：`Domain Event → Notification（core）→ UiNotice → React View`。只處理 committed Event。Notification／Audio：
 
 - 不修改 State。
 - 不觸發新的玩法 Command。
@@ -347,13 +359,11 @@ interface AudioCandidateProjector {
 
 ## 10. Localization
 
-Definition、Event、Rejection 與 ViewModel 使用：
+`LocalizedTextRef`（定義於 [共用核心契約](00_shared_contracts.md) §2.2）為文字引用的唯一型別；Definition、Event、Rejection、`Notification` 與 ViewModel 皆使用它，UI 契約不再重複定義（單一真相）：
 
 ```ts
-type LocalizedTextRef = {
-  key: LocalizationKey;
-  params?: Record<string, JsonScalar>;
-};
+// type LocalizedTextRef = { key: LocalizationKey; params?: Record<string, JsonScalar> };
+// ↑ 定義見 00_shared_contracts.md §2.2（core）
 ```
 
 核心 State 不保存已翻譯文字。名稱、描述、錯誤與通知在 UI 邊界依目前語系解析。

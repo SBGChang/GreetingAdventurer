@@ -256,7 +256,7 @@ Dungeon Query 不公開其他隊伍的 RNG seed、未結算獎勵細節或可被
 | `startPlayerExploration` | 玩家 Team 位於冒險地，沒有既有 Session。 | 建立 Player Session，並以當下正式成員快照建立 collecting 的玩家地牢 Distribution。 |
 | `moveDungeonRoom` | Session 為 exploring、目標房間可通行。 | 計算分鐘、更新房間與入口小格、必要時推進世界日。 |
 | `openDungeonDoor` | Session 為 exploring、門連接目前房間、Map Version 相符。 | 若門仍關閉，支付一次開門分鐘、要求 Map 開門並揭露門後房間；已開門時不再收費。 |
-| `gatherDungeonNode` | Session 為 exploring、玩家位於節點所屬房間、Map Version 相符、節點 available，且無戰鬥／Pending Interaction。 | 依 Gathering Rule 增加迷宮分鐘，使用探索開始時的正式參與者快照要求 `ResolveGatheringSource`；任何必要步驟失敗時整筆回滾。 |
+| `gatherDungeonNode` | Session 為 exploring、玩家位於節點所屬房間、Map Version 相符、節點 available，且無戰鬥／Pending Interaction。 | 依 Gathering Rule 增加迷宮分鐘，使用探索開始時的正式參與者快照**啟動 Gathering Workflow**（`ResolveGatheringSource` 入口）；任何必要步驟失敗時整筆回滾。 |
 | `useDungeonExit` | Session 位於合法出口房間，且沒有戰鬥或內容互動。 | 將 Session 改為 leaving，關閉 Distribution 收集；無待分配成果時可立即完成，有玩家競拍時等 `AssetDistributionCompleted` 後才關閉 Session 並返城。 |
 | `interactDungeonContent` | 玩家位於合法位置且內容可用。 | 依互動類型建立 combat／內容處理 Internal Command。 |
 | `resolveDungeonInteraction` | Session 有匹配的 Pending Interaction，選項仍合法。 | 套用資料化結果、清除互動並恢復探索。 |
@@ -322,7 +322,7 @@ Dungeon 不會自行 emit `InventoryTransferred`、`MasteryExperienceGranted` �
 | `FinalizeAssetDistributionCollection` | `distributionId` | distribution。 |
 | `OpenMapDoor` | `teamId`、`mapId`、`mapVersion`、`linkId`、`openedOnDungeonMinute` | map。 |
 | `ResolveMapTrap` | `teamId`、`mapId`、`mapVersion`、`trapId`、`resolution`、`resolvedOnDungeonMinute` | map。 |
-| `ResolveGatheringSource` | `source: mapNode`、`teamId`、探索參與者快照、`distributionId`、`rngContext` | gathering workflow。 |
+| `ResolveGatheringSource`（啟動 Gathering Workflow，非 Internal Command） | `source: mapNode`、`teamId`、探索參與者快照、`distributionId`、`rngContext` | Gathering Workflow 入口。 |
 
 ---
 
@@ -397,7 +397,7 @@ Run 在下列任一狀況進入 `settling`：
   → ResolveGatheringSource
   → Map Node 標記 harvested
   → 產物 Item 進入本次 Distribution Escrow
-  → GatheringResolved 只給最高採集等級成員 MXP
+  → GrantGatheringMasteryExperience 只給最高採集等級成員 MXP
 
 同版本再次互動
   → Node 已 harvested，拒絕且不扣分鐘

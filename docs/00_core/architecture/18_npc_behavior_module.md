@@ -1,6 +1,6 @@
-# Adventurer Lifecycle 模組契約
+# NPC Behavior 模組契約
 
-> **模組 ID：** `adventurer-lifecycle`
+> **模組 ID：** `npc-behavior`
 >
 > **依賴：** [共用核心契約](00_shared_contracts.md)、Team／Quest／City／World／Map／Dungeon／Inventory／Economy／Character／Crafting 的公開 Query，以及 Combat Power 純計算服務。
 >
@@ -35,7 +35,7 @@ ActionChain 不是把完整地圖路徑、完整商店資料或實體物品複�
 ## 2. 靜態資料契約
 
 ```ts
-interface AdventurerLifecycleDefinitionReader {
+interface NpcBehaviorDefinitionReader {
   getDecisionPolicy(id: AdventurerDecisionPolicyId): AdventurerDecisionPolicyDefinition;
   getActionChainTemplate(id: ActionChainTemplateId): ActionChainTemplateDefinition;
   getMarketPolicy(id: NpcMarketPolicyId): NpcMarketPolicyDefinition;
@@ -183,7 +183,7 @@ type NpcSellRule = {
 ## 3. Runtime State 與公開 Query
 
 ```ts
-type AdventurerLifecycleState = {
+type NpcBehaviorState = {
   controllers: Record<TeamId, NpcAdventurerController>;
   chains: Record<ActionChainId, NpcActionChain>;
   marketIntents: Record<NpcMarketIntentId, NpcMarketIntent>;
@@ -250,7 +250,7 @@ type NpcMarketIntent = {
 旅行節點的 `payload` 只能保存目的城市、已選 Route、`npcTravelRuleId` 與必要 revision；Schema 明確禁止 `modeId`、`segmentIndex`、事件池、事件實例及任何事件隨機結果。NPC 接了護衛任務也只會走相同契約。
 
 ```ts
-interface AdventurerLifecycleQuery {
+interface NpcBehaviorQuery {
   getActiveChain(teamId: TeamId): NpcActionChainView | undefined;
   getNextDecisionOnDay(teamId: TeamId): WorldDay | undefined;
   listMarketIntents(teamId: TeamId): NpcMarketIntentView[];
@@ -277,7 +277,7 @@ interface AdventurerLifecycleQuery {
 | Event | Lifecycle 的反應 |
 |---|---|
 | `TeamPlanCompleted`／`TeamLocationChanged` | 找到 linked node，標為完成，登記次日 `npcChainAdvance`。 |
-| `FreeActionCompleted` | 對 craft／train 走既有完成流程；對 `trade` 建立一筆資料化 `NpcMarketIntent`；對 `proposeToTeammate` 以已固定目標送出 `ResolveNpcMarriageProposal`。三者結果都不在 Lifecycle 直接寫入。 |
+| `FreeActionCompleted` | 對 craft／train 走既有完成流程；對 `trade` 建立一筆資料化 `NpcMarketIntent`（發 `NpcMarketIntentCreated`，由 NPC Market Workflow 承接，流程結束以 `FinalizeNpcMarketIntent` 回寫）。`proposeToTeammate` **不再由 Lifecycle 送命令**：改由 NPC Marriage Workflow 直接訂閱 `FreeActionCompleted(kind=proposeToTeammate)` 承接。結果都不在 Lifecycle 直接寫入。 |
 | `QuestAccepted` | 若為 Lifecycle 正在執行的 `acceptNearbyQuest` 節點，materialize 對應 Quest Chain 並鎖定。 |
 | `NpcQuestClaimChanged` | 自己建立的 Claim 被釋放或被他人接取時，更新目標節點；已開始旅行只在抵達目標城市後結束，未出發則於下一次 Advance 結束。 |
 | `QuestStateChanged`／`QuestSettled` | 目標完成、逾期或已結案時推進／中止 Quest Chain；已結案才解除鎖定。 |
@@ -294,11 +294,10 @@ interface AdventurerLifecycleQuery {
 | `AcceptQuestForNpcTeam` | quest | 驗證 NPC 位於發佈公會城市且 Quest 仍可接取。 |
 | `ClaimQuestForNpcTeam` | quest | 將經過可行性篩選的未接任務標記給目前 Chain，排除其他 NPC 的任務抽樣。 |
 | `ReleaseNpcQuestClaim` | quest | Chain 結束、目標失效或接取成功後移除 NPC 意向標記。 |
-| `ExecuteNpcMarketIntent` | city workflow | 以既有商店／房屋流程執行已選定的一次交易。 |
 | `StartNpcDungeonRun` | dungeon | 開始目標對應的簡易地牢 Run；Dungeon 同時建立其多節點 Combat Sequence。 |
 | `SettleQuestForNpcTeam` | quest | 在原接取公會對已完成任務結案。 |
 
-`ExecuteNpcMarketIntent` 不是第二套商業規則：它重用玩家的買 Offer／賣物品／買房 Workflow，只是命令來源是 Lifecycle，且沒有 React 輸入。
+NPC 市場交易不是第二套商業規則：`trade` 完成時 Lifecycle 只建立資料化 `NpcMarketIntent` 並發 `NpcMarketIntentCreated`，由 **NPC Market Workflow** 承接、重用玩家的買 Offer／賣物品／買房流程（無 React 輸入）；流程結束以 `FinalizeNpcMarketIntent` 回到 Lifecycle 更新 Intent 並發 `NpcMarketIntentResolved`。Lifecycle 不再送 `ExecuteNpcMarketIntent`。
 
 ### 4.4 輸出事件
 
@@ -379,7 +378,7 @@ NPC 不能把隊友金錢當作共同荷包，也不能出售隊友、任務貨�
 
 ## 7. 交接清單
 
-- [ ] `AdventurerLifecycleState`、ActionChain、MarketIntent schema。
+- [ ] `NpcBehaviorState`、ActionChain、MarketIntent schema。
 - [ ] Decision Policy、Chain Template、Market Policy JSON Schema 與 Rule Validation。
 - [ ] `npcDecisionDue`／`npcChainAdvance` Job Handler，以及 deterministic RNG fixture。
 - [ ] Team／Quest／Dungeon 完成事件到 Chain 節點的契約測試。

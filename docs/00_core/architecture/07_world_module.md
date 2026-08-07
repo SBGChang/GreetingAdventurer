@@ -153,7 +153,7 @@ type WorldFactDefinition = DefinitionHeader & {
 type WorldFactState = {
   factId: WorldFactId;
   value: JsonScalar;
-  sourceId: GameId;
+  sourceId: EntitySourceRef;
   changedOnDay: WorldDay;
   revision: Revision;
 };
@@ -208,7 +208,7 @@ type ConflictState = {
 
 type MarketPressureState = {
   pressureId: MarketPressureId;
-  scope: { kind: 'nation' | 'region' | 'city'; id: GameId };
+  scope: { kind: 'nation' | 'region' | 'city'; id: NationId | RegionId | CityId };
   modifierRuleId: PriceModifierRuleId;
   activeFromDay: WorldDay;
   activeToDay?: WorldDay;
@@ -217,7 +217,7 @@ type MarketPressureState = {
 
 type WorldEventWeightModifierState = {
   modifierId: WorldEventWeightModifierId;
-  scope: { kind: 'nation' | 'region' | 'route' | 'city'; id: GameId };
+  scope: { kind: 'nation' | 'region' | 'route' | 'city'; id: NationId | RegionId | RouteId | CityId };
   context: ContentEventContext; // 'playerTravel' | 'dungeon' | 'city'
   weightModifierRuleId: WeightModifierRuleId;
   activeFromDay: WorldDay;

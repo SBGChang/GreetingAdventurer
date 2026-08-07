@@ -577,7 +577,7 @@ Character 寫回、Map 內容處理與 MXP 任一步驟違反不變量時，整�
 15. `CombatEncounterResolved(outcome=defeat)` 必須攜帶明確 `teamId`，讓 Quest 能在同一交易終止該隊全部進行中的護衛委託；Combat 不直接修改 Quest State。
 16. Monster 的傷害與命中必須由 `naturalAttackProfileId` 和 Skill 的數值 Damage Rule 完整解析；顯示文字不參與運算。
 17. Boss 的外來 CTB 增加與重複中斷必須受 `controlResistanceProfileId` 限制，讀檔後累積控制量與免疫狀態可重播。
-16. Player Travel Event Encounter 必須以 Interaction／Event Instance 雙 ID 關聯，NPC 不可成為其 Team；結果只能恢復同一筆旅行 Pending 一次。
+18. Player Travel Event Encounter 必須以 Interaction／Event Instance 雙 ID 關聯，NPC 不可成為其 Team；結果只能恢復同一筆旅行 Pending 一次。
 
 ---
 

@@ -175,7 +175,7 @@ type AgeExperienceRuleDefinition = DefinitionHeader & {
 | 玩家主角成功隊友交流／酒館聊天／打聽情報 | Social `PlayerConversationCompleted` | Social 的 Player Conversation Rule | 玩家主角；三種來源共用每日最多 6 次。 |
 | 玩家主角成功買入／賣出 | City `CommerceInteractionCompleted` | City 的 Player Commerce Practice Rule | 玩家主角；每日最多 6 次。 |
 | 玩家隊友或 NPC 的完整自由日 | Team `NonPlayerMemberFreeDaySocialPractice` | Team 的 Non-player Daily Social Practice Rule | 每名非玩家主角正式成員各一次；不模擬實際交易或聊天。 |
-| 採集點、旅行資源、敵人採集型掉落 | Gathering `GatheringResolved` | payload／採集點資料的 `experienceAwardRuleId` | 唯一最高採集者一次；節點、事件或戰利品來源決定 Rule。 |
+| 採集點、旅行資源、敵人採集型掉落 | `GrantGatheringMasteryExperience`（gathering workflow 命令） | 命令 payload 的 `experienceAwardRuleId` | 唯一最高採集者一次；節點、事件或戰利品來源決定 Rule。 |
 | 自製料理 | Crafting `CuisineConsumed` | 食譜的 `cookingExperienceRuleId` | 製作者；倍率 1。 |
 | 餐館基礎料理 | Crafting `CuisineConsumed` | 同一食譜 Rule | 用餐者；倍率固定 1/3。 |
 | 耗時製作 | Crafting `CraftingCompleted` | 配方的 Experience Rule | 製作者；成功或資料定義的失敗結果都依同一 Rule。 |
@@ -331,7 +331,6 @@ Progression 只公開主屬、Mastery 與已學知識真相，不宣稱自己擁
 | `CombatSupportMasteryEarned` | 依 Support Mastery Award Rule 將 `creditedUseCount` 轉成對應 Mastery MXP；Encounter 來源必須為 0～3，Combat Sequence 來源可等於正式成功場次。未學會或開始快照不合法視為不變量錯誤。 |
 | `CraftingCompleted` | 依已結算配方的 Crafting Experience Rule 發放對應生活技藝 MXP；若配方定義失敗結果，成功與失敗使用同一規則。 |
 | `CuisineConsumed` | 依 payload 的食譜 Experience Rule 發放廚藝 MXP；餐館僅套用 payload 的固定 `1/3` 倍率。 |
-| `GatheringResolved` | 只對 payload 的 `contributorCharacterId`，依已驗證 `masteryId` 與 `experienceAwardRuleId` 發放一次採集 MXP；不平均分給隊伍。 |
 | `CommerceInteractionCompleted` | 僅接受玩家主角成功買入／賣出的事件，依 payload 的 Commerce Experience Rule 對付款或收款角色發固定交流 MXP。 |
 | `PlayerConversationCompleted` | 僅接受 Social 已提交的玩家隊友交流／酒館聊天／情報事件，依 payload 的 Experience Rule 對玩家主角發固定交流 MXP。 |
 | `NonPlayerMemberFreeDaySocialPractice` | 對 payload 的非玩家主角正式隊員（玩家隊友或 NPC），依兩條 Experience Rule 各發一次聊天與購物交流 MXP；不要求也不模擬實體交易。 |
@@ -401,7 +400,7 @@ UI 可將「剛好距離下一級只差 1」顯示為 `N+1 Lv. 99.99%`；內部�
 
 ```text
 combat／city／gathering 已完成事實
-  → *MasteryEarned、CraftingCompleted 或 GatheringResolved
+  → *MasteryEarned、CraftingCompleted 事件，或 GrantGatheringMasteryExperience 命令
   → Progression 依 Definition 分配 MXP
   → 更新 Mastery Experience／Level
   → 重新推導五主屬（各自最多 100）
@@ -410,7 +409,7 @@ combat／city／gathering 已完成事實
 
 詳細 Combat 與 [Combat Sequence](21_combat_sequence_module.md) 都先把來源解析成同一組 `Combat*MasteryEarned` 事件，Progression 不重算傷害、戰力骰或隊伍權重。Detailed 使用真實傷害與每技能每場最多 3 次；Combat Sequence 使用整串正式成功的總攻擊／防禦預算及成功場次，並已依開始快照完成六分制攻擊權重、3／2／1 站位權重與每場一次支援技能計算。
 
-採集是明確例外：`GatheringResolved` 已依參與者快照選出唯一最高採集等級者，Progression 不重新選人、不平均，也不依產物數量重複發放。一次 Resolution 恰好使用一次 Experience Award Rule。
+採集是明確例外：Progression 以 InternalCommand `GrantGatheringMasteryExperience`（gathering workflow 送出，冪等來源 `resolutionId + contributorCharacterId + masteryId`）發放採集 MXP——該命令已依參與者快照選出唯一最高採集等級者，Progression 不重新選人、不平均，也不依產物數量重複發放。一次 Resolution 恰好使用一次 Experience Award Rule。
 
 ### 7.2 技能與書籍
 

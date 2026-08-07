@@ -332,7 +332,7 @@ Combat Sequence 開始時保存 `TeamCombatPowerSnapshot.totalPower`、`sourceRe
 |---|---|---|
 | combat-sequence | 開始時取得一次 Team 與每個 Challenge 戰力快照。 | 串中重算、直接讀 Team／Inventory State。 |
 | combat | Detailed Encounter 只讀同源能力與 Definition，不擁有任務可行性 Port。 | 建立第二套 NPC 戰力公式。 |
-| adventurer-lifecycle | 直接呼叫 `assessQuestFeasibility`，並只讀候選 Loadout 比較結果。 | 自己加品級、價格或職業偏好分數當戰力。 |
+| npc-behavior | 直接呼叫 `assessQuestFeasibility`，並只讀候選 Loadout 比較結果。 | 自己加品級、價格或職業偏好分數當戰力。 |
 | inventory／crafting | NPC 比較換裝時由 Workflow 呼叫 `compareLoadouts`。 | Inventory 在 Entity 內保存權威戰力。 |
 | ui/app | 顯示總值與 Breakdown，或做裝備預覽。 | 在 View 重算公式。 |
 

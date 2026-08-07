@@ -29,84 +29,114 @@ type Seed = string;
 type JsonScalar = string | number | boolean | null;
 type JsonValue = JsonScalar | JsonValue[] | { [key: string]: JsonValue };
 type LocalizationKey = string;
+type Brand<T, K extends string> = T & { readonly __brand: K };   // branded 別名基底；新型別採用，現有 `= string` 別名列為後續統一遷移
 
-type GameId = string;
-type ModuleId = string;
-type WorkflowId = string;
+// ── ID 家族 ─────────────────────────────────────────────────────────────
+// DefinitionId<K>：靜態內容定義（資料檔作者指定）。RuntimeId<K>：本局執行期產生的實例。
+// Registry 類（module／workflow／resolver／schema）自成 brand。GameId 已移除（不再有可互換所有 ID 的逃生口）。
+// JSON／存檔內仍是普通字串，只在 Data Runtime、Save Loader、Command Decoder 等驗證邊界轉為 branded；
+// 領域邏輯禁止任意 `as XId`。需要多種來源時使用明確 Union，不用泛型 GameId。
+type DefinitionId<K extends string = string> = Brand<string, `definition:${K}`>;
+type RuntimeId<K extends string = string> = Brand<string, `runtime:${K}`>;
+
+// Registry / 基礎 brand
+type ModuleId = Brand<string, 'module'>;
+type WorkflowId = Brand<string, 'workflow'>;
+type ResolverId = Brand<string, 'resolver'>;                 // 指向 Resolver Registry（註冊純函式），非內容 Definition
+type SchemaId = Brand<string, 'schema'>;                     // 指向 Schema Registry，與 Definition Registry 分離
+type ContentPackId = Brand<string, 'content-pack'>;
+type RngStreamId = Brand<string, 'rng-stream'>;
+type EventSubscriptionId = Brand<string, 'event-subscription'>;
 type MessageSourceId = ModuleId | WorkflowId;
-type ContentPackId = string;
-type NationId = string;
-type CultureId = string;
-type RegionId = string;
-type CityId = string;
-type RouteId = string;
-type MapTemplateId = string;
-type MapInstanceId = string;
-type ContentInstanceId = string;
-type RoomId = string;
-type RoomLinkId = string;
-type FixedTrapId = string;
-type PlayerMapKnowledgeId = string;
-type TrapDefinitionId = DefinitionId;
-type TeamId = string;
-type CharacterId = string;
-type QuestId = string;
-type ContentEventDefinitionId = DefinitionId;
-type ConditionDefinitionId = DefinitionId;
-type EffectDefinitionId = DefinitionId;
-type PlayerTravelEventPoolId = DefinitionId;
-type PlayerTravelEventDefinitionId = DefinitionId;
-type PlayerTravelEventWeightProfileId = DefinitionId;
-type PlayerTravelEventBindingRuleId = DefinitionId;
-type PlayerTravelEventInstanceId = string;
-type ContentEventInstanceId = string;
-type ItemInstanceId = string;
-type AssetDistributionId = string;
-type ActivityRecordId = string;
-type EconomyAccountId = string;
-type EconomyTransferId = string;
-type ShopOfferId = string;
-type PlayerConversationUsageId = string;
-type PlayerCommerceUsageId = string;
-type EncounterId = string;
-type EncounterPoolId = DefinitionId;
-type CraftingAttemptId = string;
-type EncumbranceResolutionId = string;
-type CraftingRecipeId = DefinitionId;
-type CuisineRecipeId = DefinitionId;
-type MaterialAffixId = DefinitionId;
-type MaterialTagId = DefinitionId;
-type ItemTagId = DefinitionId;
-type SkillTagId = DefinitionId;
-type FoodAffixId = DefinitionId;
-type CraftQualityRuleId = DefinitionId;
-type RestaurantMenuId = DefinitionId;
-type RestaurantMealVariantId = DefinitionId;
-type NpcCuisineDecisionRuleId = DefinitionId;
+type RuntimeEntityKind = string;                             // Runtime ID 產生器的種類鍵（不是 ID 本身）
+
+// 世界結構（第一版視為固定內容定義；若日後改為執行期生成，改標 RuntimeId 並通知 composition）── 待原作者確認歸類
+type NationId = DefinitionId<'nation'>;
+type CultureId = DefinitionId<'culture'>;
+type RegionId = DefinitionId<'region'>;
+type CityId = DefinitionId<'city'>;
+type RouteId = DefinitionId<'route'>;
+
+// 內容定義（DefinitionId<K>）
+type MapTemplateId = DefinitionId<'map-template'>;
+type TrapDefinitionId = DefinitionId<'trap'>;
+type ItemDefinitionId = DefinitionId<'item'>;
+type SkillDefinitionId = DefinitionId<'skill'>;
+type MasteryId = DefinitionId<'mastery'>;
+type ContentEventDefinitionId = DefinitionId<'content-event'>;
+type ConditionDefinitionId = DefinitionId<'condition'>;
+type EffectDefinitionId = DefinitionId<'effect'>;
+type PlayerTravelEventPoolId = DefinitionId<'travel-event-pool'>;
+type PlayerTravelEventDefinitionId = DefinitionId<'travel-event'>;
+type PlayerTravelEventWeightProfileId = DefinitionId<'travel-event-weight'>;
+type PlayerTravelEventBindingRuleId = DefinitionId<'travel-event-binding'>;
+type EncounterPoolId = DefinitionId<'encounter-pool'>;
+type CraftingRecipeId = DefinitionId<'crafting-recipe'>;
+type CuisineRecipeId = DefinitionId<'cuisine-recipe'>;
+type MaterialAffixId = DefinitionId<'material-affix'>;
+type MaterialTagId = DefinitionId<'material-tag'>;
+type ItemTagId = DefinitionId<'item-tag'>;
+type SkillTagId = DefinitionId<'skill-tag'>;
+type FoodAffixId = DefinitionId<'food-affix'>;
+type CraftQualityRuleId = DefinitionId<'craft-quality-rule'>;
+type RestaurantMenuId = DefinitionId<'restaurant-menu'>;
+type RestaurantMealVariantId = DefinitionId<'restaurant-meal-variant'>;
+type NpcCuisineDecisionRuleId = DefinitionId<'npc-cuisine-decision-rule'>;
+type ExperienceAwardRuleId = DefinitionId<'experience-award-rule'>;
+type PlayerConversationRuleId = DefinitionId<'player-conversation-rule'>;
+type PlayerAffinityRuleId = DefinitionId<'player-affinity-rule'>;
+type NpcMarriageRuleId = DefinitionId<'npc-marriage-rule'>;
+type WorldAdventurerGenerationRuleId = DefinitionId<'world-adventurer-generation-rule'>;
+type PlayerCommerceDailyLimitId = DefinitionId<'player-commerce-daily-limit'>;
+type PlayerCommercePracticeRuleId = DefinitionId<'player-commerce-practice-rule'>;
+type NonPlayerMemberDailySocialPracticeRuleId = DefinitionId<'nonplayer-social-practice-rule'>;
+type RecruitmentRuleId = DefinitionId<'recruitment-rule'>;
+type TeamFormationRuleId = DefinitionId<'team-formation-rule'>;
+type NpcTravelRuleId = DefinitionId<'npc-travel-rule'>;
+type SupportMasteryAwardRuleId = DefinitionId<'support-mastery-award-rule'>;
+type ChildEducationRuleId = DefinitionId<'child-education-rule'>;
+
+// 執行期實例（RuntimeId<K>）
+type MapInstanceId = RuntimeId<'map-instance'>;
+type ContentInstanceId = RuntimeId<'content-instance'>;
+type RoomId = RuntimeId<'room'>;
+type RoomLinkId = RuntimeId<'room-link'>;
+type FixedTrapId = RuntimeId<'fixed-trap'>;
+type PlayerMapKnowledgeId = RuntimeId<'player-map-knowledge'>;
+type TeamId = RuntimeId<'team'>;
+type CharacterId = RuntimeId<'character'>;
+type QuestId = RuntimeId<'quest'>;
+type PlayerTravelEventInstanceId = RuntimeId<'travel-event-instance'>;
+type ContentEventInstanceId = RuntimeId<'content-event-instance'>;
+type ItemInstanceId = RuntimeId<'item-instance'>;
+type AssetDistributionId = RuntimeId<'asset-distribution'>;
+type ActivityRecordId = RuntimeId<'activity-record'>;
+type EconomyAccountId = RuntimeId<'economy-account'>;
+type EconomyTransferId = RuntimeId<'economy-transfer'>;
+type ShopOfferId = RuntimeId<'shop-offer'>;
+type PlayerConversationUsageId = RuntimeId<'player-conversation-usage'>;
+type PlayerCommerceUsageId = RuntimeId<'player-commerce-usage'>;
+type EncounterId = RuntimeId<'encounter'>;
+type CraftingAttemptId = RuntimeId<'crafting-attempt'>;
+type EncumbranceResolutionId = RuntimeId<'encumbrance-resolution'>;
+type ChildStudySessionId = RuntimeId<'child-study-session'>;
+type HomeTeachingPostId = RuntimeId<'home-teaching-post'>;
+type JobId = RuntimeId<'job'>;
+type EventId = RuntimeId<'event'>;
+type CommandId = RuntimeId<'command'>;
+type InteractionId = RuntimeId<'interaction'>;
+type TransactionId = RuntimeId<'transaction'>;
+type CorrelationId = RuntimeId<'correlation'>;
+
+// 「某筆記錄／效果的來源實體」的明確 Union（取代已移除的 GameId）；各模組如需更窄可在自身契約再收斂。
+type EntitySourceRef =
+  | CharacterId | TeamId | QuestId | CityId
+  | MapInstanceId | ContentEventInstanceId | ItemInstanceId | EncounterId;
+
+// Cursor（number brand）與列舉
+type RuntimeIdCursor = Brand<number, 'RuntimeIdCursor'>;   // 交易私有序號游標；提交時寫回 core.nextRuntimeSequence
+type RngCursor = Brand<number, 'RngCursor'>;               // RNG 抽取游標；顯式傳入／傳回，不存內部可變狀態
 type CraftQuality = 'plain' | 'fine' | 'excellent' | 'perfect' | 'peerless' | 'demonGod';
-type ExperienceAwardRuleId = DefinitionId;
-type PlayerConversationRuleId = DefinitionId;
-type PlayerAffinityRuleId = DefinitionId;
-type NpcMarriageRuleId = DefinitionId;
-type WorldAdventurerGenerationRuleId = DefinitionId;
-type PlayerCommerceDailyLimitId = DefinitionId;
-type PlayerCommercePracticeRuleId = DefinitionId;
-type NonPlayerMemberDailySocialPracticeRuleId = DefinitionId;
-type RecruitmentRuleId = DefinitionId;
-type TeamFormationRuleId = DefinitionId;
-type NpcTravelRuleId = DefinitionId;
-type SupportMasteryAwardRuleId = DefinitionId;
-type ChildEducationRuleId = DefinitionId;
-type ChildStudySessionId = string;
-type HomeTeachingPostId = string;
-type DefinitionId = string;
-type JobId = string;
-type EventId = string;
-type CommandId = string;
-type InteractionId = string;
-type TransactionId = string;
-type CorrelationId = string;
-type RngStreamId = string;
 type ContentEventContext = 'playerTravel' | 'dungeon' | 'city';
 
 type PlayerTravelEscortQuestRef = {
@@ -123,17 +153,41 @@ type PlayerTravelEscortQuestRef = {
 - 靜態 Definition ID 由資料檔作者指定；Runtime Instance ID 由核心 ID 產生器依世界 seed 與序號建立。
 - 任何跨模組關係只儲存 ID；不可將另一模組的完整 Runtime Entity 嵌入本模組 State。
 
+### 2.2 共用值型別（在地化、通知、RNG 基元）
+
+```ts
+type LocalizedTextRef = {
+  key: LocalizationKey;
+  params?: Record<string, JsonScalar>;
+};
+
+type RngStep<T> = Readonly<{ value: T; nextCursor: RngCursor }>;
+
+interface DeterministicRng {
+  // 純函式：cursor 顯式傳入／傳回，無內部可變狀態；不得將 RNG 物件存入 State 或跨 Handler 共用。
+  nextFloat(input: Readonly<{ worldSeed: Seed; streamId: RngStreamId; cursor: RngCursor }>): RngStep<number>;   // value ∈ [0,1)
+  nextInt(input: Readonly<{ worldSeed: Seed; streamId: RngStreamId; cursor: RngCursor; minInclusive: number; maxInclusive: number }>): RngStep<number>;
+}
+
+type Notification = {
+  id: string;
+  sourceEventId?: EventId;
+  message: LocalizedTextRef;
+  tone: 'info' | 'success' | 'warning' | 'error';
+  dedupeKey?: string;
+};
+```
+
+- `LocalizedTextRef` 為 core 型別；Definition、Event、Rejection、`Notification` 與 ViewModel 皆引用它，UI 邊界才依語系解析文字（單一真相，不在 UI 契約重複定義）。
+- `Notification` 是 Core／Engine 產出的語意通知（見 `ModuleResult.notifications`、`CommittedOutbox.notifications`）；供 React 顯示的 `UiNotice` 由 Application 投影，定義於 UI 契約。
+- `DeterministicRng` 為 RNG 取值基元；其工廠 `DeterministicRngFactory` 由 Engine 於 `EngineContext` 注入。
+
 ---
 
 ## 3. 根狀態與時間
 
 ```ts
-type SaveMeta = {
-  saveSchemaVersion: number;
-  moduleVersions: Record<ModuleId, number>;
-  contentManifestVersion: string;
-  contentManifestHash: string;
-};
+// 存檔中繼資料不是遊戲世界狀態，已移至 SaveFile 外層（型別 `SaveFileMetadata` 見 14_save_platform.md）；GameState 不再保存 meta。
 
 type CoreState = {
   worldDay: WorldDay;
@@ -146,7 +200,7 @@ type ModuleStateRegistry = {
   character: CharacterState;
   map: MapState;
   team: TeamState;
-  adventurerLifecycle: AdventurerLifecycleState;
+  npcBehavior: NpcBehaviorState;
   dungeon: DungeonState;
   city: CityState;
   inventory: InventoryState;
@@ -162,12 +216,18 @@ type ModuleStateRegistry = {
 };
 
 type GameState = {
-  meta: SaveMeta;
   core: CoreState;
 } & ModuleStateRegistry;
 ```
 
 `ModuleStateRegistry` 與 `GameState` 屬於 `app/composition`，不是 `contracts/core`。新增模組時只新增該模組自己的 State contribution，再由組裝層納入 Registry；領域模組不得 import 完整 `GameState`。
+
+**Slice 所有權分兩種，不是「模組破例改他 slice」：**
+
+- `GameState.core`（`worldDay`／`nextRuntimeSequence`／`scheduler`）由 **Kernel 獨占寫入**；它不屬任何領域模組，故不列入 `ModuleStateRegistry`。
+- `ModuleStateRegistry` 各 slice 由對應領域模組獨占寫入。
+
+模組只回傳 `nextSlice`、`scheduledJobs`／`cancelledJobIds` 與 Runtime ID cursor 結果，由 Transaction Runner 套用至 `core`；因此 `ModuleResult 不得改他模組 slice` 的規則**無需破例**。
 
 ### 3.1 時間規則
 
@@ -211,8 +271,8 @@ interface DefinitionRegistry {
 ### 4.2 Definition 共通欄位
 
 ```ts
-type DefinitionHeader = {
-  id: DefinitionId;
+type DefinitionHeader<TId extends DefinitionId = DefinitionId> = {
+  id: TId;
   schemaVersion: number;
   packId: ContentPackId;
   enabled: boolean;
@@ -350,14 +410,13 @@ type JobPhase =
 type ScheduledJobBase<
   TType extends string,
   TOwner extends ModuleId,
-  TTarget extends GameId,
+  TTarget extends string,   // 任一 branded 實例 ID（job 目標種類不限於 EntitySourceRef）
   TPayload
 > = {
   jobId: JobId;
   type: TType;
   dueDay: WorldDay;
   phase: JobPhase;
-  priority: number;
   ownerModule: TOwner;
   targetId: TTarget;
   expectedRevision?: Revision;
@@ -424,7 +483,7 @@ type NpcCuisineDecisionDueJob = ScheduledJobBase<
 
 ### 6.2 Scheduler 規則
 
-1. Scheduler 以 `dueDay → phase → priority → jobId` 排序。
+1. Scheduler 以 `dueDay → phase（固定順序）→ ExecutionOrderManifest 的 job type 順序 → ownerModule → targetId → jobId` 排序；不使用模組自填的數字 priority。
 2. 同一天新建立的 Job，若屬於新的角色行動，最早 `dueDay = currentDay + 1`。
 3. 處理器發現 target 不存在、已到期或 revision 不符時，記錄可選 debug event 後跳過，不得拋出未處理例外。
 4. Pending 地圖離開時只建立次日的 `mapRefreshCheck(reason: pending)`，不得立即刷新。
@@ -467,6 +526,12 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 
 以下是跨模組「要求做事」的基準名稱；詳細 payload 由目標模組契約擁有。
 
+> **Workflow 入口（非 Internal Command）**：以下三者不是被路由到單一模組 handler 的 Internal Command，而是 Workflow 的啟動入口（`WorkflowDefinition.startsFrom`，見 [12_engine_runtime.md](12_engine_runtime.md)），已從本表移除。Workflow 本身不能是 Internal Command 的 `targetModule`；Workflow 內每個真正的 Step 才是有明確模組 handler 的 Internal Command。
+>
+> - **Gathering Workflow** ← 原始採集 Game Command／Job／來源事件。呼叫無 State 的 `GatheringResolver`（DomainServiceRegistry）決定採集者、種類與數量，再送 Map（消耗採集點）／Inventory（建立物品）／Distribution（加入成果）／Progression（發放採集 MXP）等有模組所有者的命令；任一 required 步驟失敗則整筆交易回滾。不新增 Gathering Slice 或假模組 handler。
+> - **NPC Market Workflow** ← `NpcMarketIntentCreated`。重用既有買入／賣出／買房流程，結束時送 `FinalizeNpcMarketIntent`（→ npc-behavior，發布 `NpcMarketIntentResolved`）。
+> - **NPC Marriage Workflow** ← `FreeActionCompleted(kind=proposeToTeammate)`。呼叫純 Marriage Proposal Resolver（讀共隊天數與同一 Combat Power）；成功送 `CreatePartnerFamilyLink`（→ character），不成功則正常結束該次零日行動。
+
 | Internal Command | 發送者 | 唯一處理者 | 目的 |
 |---|---|---|---|
 | `CreateItemInstance` | map、city、workflow | inventory | 依已驗證的內容結果，在指定初始位置建立物品實體。 |
@@ -475,8 +540,8 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `SetMapRefreshLock` | quest | map | 建立或解除鎮壓／討伐刷新鎖。 |
 | `ProtectMapContent` | quest | map | 建立或解除委託內容保護。 |
 | `StartNpcDungeonRun` | team | dungeon | NPC 隊伍抵達冒險地後建立 Run。 |
-| `StartNpcTeamPlan` | adventurer-lifecycle | team | 依已保存的 ActionChain 節點啟動 NPC 旅行、進圖、返城或城市自由活動 Plan。 |
-| `AssignNpcMemberFreeAction` | adventurer-lifecycle | team | 在合法 `cityFree` Plan 中為指定非玩家主角正式成員建立一筆資料化個人自由行動。 |
+| `StartNpcTeamPlan` | npc-behavior | team | 依已保存的 ActionChain 節點啟動 NPC 旅行、進圖、返城或城市自由活動 Plan。 |
+| `AssignNpcMemberFreeAction` | npc-behavior | team | 在合法 `cityFree` Plan 中為指定非玩家主角正式成員建立一筆資料化個人自由行動。 |
 | `RecordTeamWorkSettlementValue` | quest／dungeon／travel workflow | team | 以冪等 Entry 記錄留隊結算所需的任務／地牢收入或旅費；不得計入裝備購買支出。 |
 | `StartChildStudyPlan` | progression／child-study workflow | team | 為位於家中的單人 Child Team 建立 14 日學習 Plan。 |
 | `ApplyNpcDungeonSettlement` | dungeon | map | 原子套用 NPC 暫存探索結果；命令必須攜帶對應 Distribution ID。 |
@@ -484,7 +549,6 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `OpenMapDoor` | dungeon | map | 將目前 Map Version 的指定紅門設為已開啟；同版本重複要求必須冪等。 |
 | `ResolveMapTrap` | dungeon | map | 將目前 Map Version 的固定陷阱設為已觸發或已解除。 |
 | `HarvestMapGatheringNode` | gathering workflow | map | 將目前 Map Version 的指定固定採集點，以唯一 Resolution 標記為已採集。 |
-| `ResolveGatheringSource` | dungeon、travel／reward workflow | gathering workflow | 選出最高採集等級參與者，解析產物並原子提交來源、物品與成果。 |
 | `StartReturnFromDungeon` | dungeon | team | 玩家使用出口後建立返城大動作。 |
 | `StartTimedCityAction` | city、progression、crafting | team | 建立隊伍級城市行動或成員自由行動。 |
 | `CreateNpcTeam` | population workflow | team | 將已建立的世界冒險者組成 NPC 隊伍並排首次決策。 |
@@ -497,7 +561,7 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `ConsumeBookForLearning` | progression | inventory | 驗證並依書籍政策消耗／保留書籍。 |
 | `TransformCraftingItems` | crafting | inventory | 驗證已預留材料、消耗輸入並建立成品。 |
 | `ConsumeCuisineIngredients` | crafting | inventory | 驗證自製料理所需食材的持有、數量與未保留狀態後原子消耗；料理不建立 Inventory 產物。 |
-| `EvaluateTeamEncumbrance` | inventory／statistics workflow | inventory | 以最新 Carry Capacity Snapshot 檢查玩家隊，建立、延後或解除強制超載處理。 |
+| `EvaluateTeamEncumbrance` | inventory／statistics／encumbrance-transition workflow | inventory | 以最新 Carry Capacity Snapshot 檢查玩家隊，建立、延後或解除強制超載處理；Handler 必須冪等，可被無條件重複要求（抵達位置轉換時由 encumbrance-transition-workflow 觸發）。 |
 | `CommitCombatItemUse` | combat | inventory | 驗證並在同一交易提交戰鬥道具消耗與使用資料。 |
 | `ConsumeCombatSequenceRetrySupply` | combat-sequence | inventory | 依 Retry Supply Policy 從本次參與者的個人背包原子消耗一份合法補品，成功後才允許重骰。 |
 | `OpenPlayerTravelInteraction` | player-travel-event workflow | team | 將已擲定的玩家旅行事件實例寫入玩家隊 Pending；NPC Team 一律拒絕。 |
@@ -518,19 +582,20 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `RevealTavernIntel` | city-intel workflow | city | 驗證酒館、隊伍與情報後標記揭露；與 Social 對話額度在同一交易提交。 |
 | `SetFacilityAvailability` | world／content-event workflow | city | 依已驗證的世界或內容效果改變城市設施可用狀態。 |
 | `InterruptHomeTeachingPost` | child-study workflow | city | 教師死亡、退休、離隊或不可用時中斷家教 Post，讓既有學習週期先做部分結算再重抽。 |
-| `ExecuteNpcMarketIntent` | adventurer-lifecycle | city workflow | 以已保存的單筆 NPC Intent 重用既有買入、賣出或買房流程；拒絕時不得重抽目標。 |
+| `FinalizeNpcMarketIntent` | npc-market workflow | npc-behavior | 市場流程結束時更新 Intent 為 `completed`／`invalid` 並發布 `NpcMarketIntentResolved`；不重抽目標。 |
 | `TransferCurrency` | city、distribution、workflow | economy | 在兩個帳戶間原子移轉貨幣。 |
 | `GrantCurrency` | distribution、workflow | economy | 從 system source 發放已驗證報酬或直售款。 |
 | `RemoveCurrency` | city、distribution、workflow | economy | 將已驗證費用移往 system sink。 |
 | `GrantContentEventMasteryExperience` | content-event workflow | progression | 依 Event Instance、Effect 與 Experience Award Rule 對明確角色發放一次冪等 MXP。 |
+| `GrantGatheringMasteryExperience` | gathering workflow | progression | 依 `resolutionId + contributorCharacterId + masteryId` 冪等，對唯一最高採集者發放一次採集 MXP；取代已移除的 `GatheringResolved` 事件。 |
 | `CreateEconomyAccount` | character、distribution、workflow | economy | 為新角色、城市或暫時資產分配建立帳戶；Team 不得擁有帳戶。 |
 | `StartAssetDistribution` | quest、dungeon、workflow | distribution | 建立參與者快照、規則與清算帳戶。 |
 | `AppendAssetDistributionResult` | quest、dungeon、map／gathering workflow | distribution | 在 collecting 階段加入已正式取得的物品與貨幣。 |
 | `FinalizeAssetDistributionCollection` | quest、dungeon | distribution | 關閉收集並依玩家競拍、NPC RNG 或純貨幣均分開始結算。 |
-| `ClaimQuestForNpcTeam` | adventurer-lifecycle | quest | 對仍可接取且未被其他 NPC 標記的 Quest 建立不阻擋玩家的 NPC 意向 Claim。 |
-| `ReleaseNpcQuestClaim` | adventurer-lifecycle | quest | ActionChain 結束、目標失效或正式接取後移除 NPC 意向 Claim。 |
-| `AcceptQuestForNpcTeam` | adventurer-lifecycle | quest | 以 active ActionChain 在發佈公會重用正式接取驗證與保護流程。 |
-| `SettleQuestForNpcTeam` | adventurer-lifecycle | quest | 以 active Quest Chain 在原接取公會重用正式結案流程。 |
+| `ClaimQuestForNpcTeam` | npc-behavior | quest | 對仍可接取且未被其他 NPC 標記的 Quest 建立不阻擋玩家的 NPC 意向 Claim。 |
+| `ReleaseNpcQuestClaim` | npc-behavior | quest | ActionChain 結束、目標失效或正式接取後移除 NPC 意向 Claim。 |
+| `AcceptQuestForNpcTeam` | npc-behavior | quest | 以 active ActionChain 在發佈公會重用正式接取驗證與保護流程。 |
+| `SettleQuestForNpcTeam` | npc-behavior | quest | 以 active Quest Chain 在原接取公會重用正式結案流程。 |
 | `ChangeRegionControl` | world workflow | world | 改變地區控制國。 |
 | `SetRouteAccess` | world workflow | world | 改變路線開放狀態。 |
 | `ApplyMarketPressure` | world workflow | world | 建立或解除市場壓力。 |
@@ -548,7 +613,6 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `ApplyCityMetricEffect` | world、quest、content-event workflow | city | 調整已驗證的繁榮／安全數值。 |
 | `ProvisionPlayerAffinity` | new-game／character-provisioning／adulthood workflow | social | 對新建立或剛取得冒險者身分的非玩家真實冒險者建立唯一一筆對玩家好感初值；重送必須冪等。 |
 | `ConsumePlayerConversationAllowance` | city-intel workflow | social | 在情報揭露的同一交易中消耗玩家當日一次對話額度並建立交流成長事實。 |
-| `ResolveNpcMarriageProposal` | adventurer-lifecycle | marriage workflow | 以已固定的提案者、目標、Team 與規則重驗資格，讀取共隊天數與同一 Combat Power 後執行一次可重播判定；成功時要求 Character 建立伴侶 FamilyLink。 |
 
 ### 7.4 第一版跨模組 Domain Event
 
@@ -593,7 +657,7 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `QuestStateChanged` | quest | team、ui/app | 更新護衛對象、通知與可交付狀態。 |
 | `QuestCreated` | quest | map、city、ui/app | 世界內容已轉成一筆具絕對期限的委託。 |
 | `QuestAccepted` | quest | city、character、ui/app | 隊伍已在期限前接取委託。 |
-| `NpcQuestClaimChanged` | quest | adventurer-lifecycle、ui/app | NPC ActionChain 的非排他意向 Claim 已建立或釋放；玩家仍可接取。 |
+| `NpcQuestClaimChanged` | quest | npc-behavior、ui/app | NPC ActionChain 的非排他意向 Claim 已建立或釋放；玩家仍可接取。 |
 | `QuestObjectiveCompleted` | quest | city、ui/app | 目標已達成但仍須回原公會結案。 |
 | `QuestSettled` | quest | progression、team、city、ui/app | 已在原接取公會正式結案並可發放成長、記錄冒險者近期行動。 |
 | `CharacterAvailabilityChanged` | character | team | 角色死亡、離隊或恢復可用時更新隊伍。 |
@@ -650,14 +714,13 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `CombatAttackMasteryEarned` | combat／combat-sequence | progression | Detailed 已按實際傷害、Sequence 已按整串六分制權重分配攻擊成長來源。 |
 | `CombatDefenseMasteryEarned` | combat／combat-sequence | progression | 已按來源開始時的 3／2／1 有人排規則分配防禦成長來源。 |
 | `CombatSupportMasteryEarned` | combat／combat-sequence | progression | Detailed 的真實使用或 Sequence 的正式成功場次已轉成固定 Mastery MXP 來源。 |
-| `GatheringResolved` | gathering workflow | progression、ui/app | 來源消耗與產物 Item 已原子提交；採集者依隊內最高採集等級決定，可正式發放採集 MXP。 |
 | `CommerceInteractionCompleted` | city | progression、ui/app | 一筆買入或賣出已原子完成，可發放交流成長。 |
 | `PlayerConversationCompleted` | social | progression、ui/app | 玩家完成一次隊友交流、酒館聊天或情報互動；三者共用每日六次。 |
 | `PlayerAffinityChanged` | social | economy、ui/app | 一名真實冒險者對玩家的唯一好感值已改變。 |
-| `NpcIntentSelected` | adventurer-lifecycle | ui/app、debug | NPC Team 已選定下一個非自由意圖與 ActionChain。 |
-| `NpcActionChainChanged` | adventurer-lifecycle | ui/app、debug | NPC ActionChain 的節點或狀態已改變。 |
-| `NpcMarketIntentCreated` | adventurer-lifecycle | city workflow、ui/app、debug | 非玩家主角角色已固定一筆待執行的買入、賣出或買房意圖。 |
-| `NpcMarketIntentResolved` | adventurer-lifecycle | ui/app、debug | 已保存的 NPC 市場意圖已成功、拒絕或失效。 |
+| `NpcIntentSelected` | npc-behavior | ui/app、debug | NPC Team 已選定下一個非自由意圖與 ActionChain。 |
+| `NpcActionChainChanged` | npc-behavior | ui/app、debug | NPC ActionChain 的節點或狀態已改變。 |
+| `NpcMarketIntentCreated` | npc-behavior | city workflow、ui/app、debug | 非玩家主角角色已固定一筆待執行的買入、賣出或買房意圖。 |
+| `NpcMarketIntentResolved` | npc-behavior | ui/app、debug | 已保存的 NPC 市場意圖已成功、拒絕或失效。 |
 | `NonPlayerMemberFreeDaySocialPractice` | team | progression、ui/app | 非玩家主角的正式隊員在城市自由日得到的固定一次聊天與一次購物交流來源；包含玩家隊友與 NPC，不是實際交易或聊天。 |
 | `TravelCompleted` | team | progression、quest | 一趟旅行已結束；玩家帶 3／6／9 日模式倍率，NPC 固定 6 日與 ×1。 |
 | `MapExplorationCompleted` | dungeon | progression、quest | 玩家對某地圖版本的探索單位已完成，並附資料化 Experience Rule。 |
@@ -749,6 +812,7 @@ interface TeamQuery {
   getTeam(teamId: TeamId): TeamView;
   getPlayerTeamId(): TeamId;
   getPlayerCharacterId(): CharacterId;
+  getPlayerControlledCharacterId(): CharacterId;   // 玩家控制角色的唯一真相 = 玩家隊 leaderId；不另存 Avatar State
 }
 
 interface MapQuery {

@@ -25,7 +25,7 @@ type GameState = {
 | 固定採集點位置、目前版本是否可採 | map | 讀取並要求 Map 原子標記已採集。 |
 | 玩家所在房間、採集互動分鐘 | dungeon | Dungeon 驗證位置並先計入資料指定分鐘。 |
 | 正式成員與探索參與者快照 | team／distribution | 只從公開 Query 取得候選名單。 |
-| 採集熟練度與 MXP | progression | 唯讀比較等級；完成後發出 `GatheringResolved`。 |
+| 採集熟練度與 MXP | progression | 唯讀比較等級；完成後由 Workflow 送 `GrantGatheringMasteryExperience` 給 progression。 |
 | 物品實體與位置 | inventory | 以 Required Internal Command 建立正式 Item Instance。 |
 | 玩家競拍／NPC RNG 分配 | distribution | 採集產物只追加到既有成果收集，不自行指定個人 Owner。 |
 | 玩家旅行資源事件與敵人採集型掉落 | 來源 Workflow | 提供合法 Source Ref 與成果目的政策；NPC 旅行沒有事件來源。 |
@@ -157,17 +157,31 @@ type GatheringDestinationRef =
   | { kind: 'participantCharacterBags'; characterIds: CharacterId[] };
 ```
 
-`ResolveGatheringSource` 由 Gathering Workflow 唯一處理。來源模組必須先驗證位置、時間與來源資格；Workflow 仍會重新查詢目前 State，不能相信 UI 傳入的等級、產物或採集者。
+`ResolveGatheringSource` 是 **Gathering Workflow 的啟動輸入（`WorkflowDefinition.startsFrom`）**，不是被路由到單一模組 handler 的 Internal Command；由來源（採集 Game Command／Job／來源事件）提供此輸入啟動 Workflow。來源模組必須先驗證位置、時間與來源資格；Workflow 仍會重新查詢目前 State，不能相信 UI 傳入的等級、產物或採集者，並以有模組所有者的命令（Map／Inventory／Distribution／Progression）完成各步驟。
 
 固定地圖採集點與敵人掉落第一版只能送入既有 `assetDistribution`。旅行資源固定使用 `participantCharacterBags`：先取隊內最高採集等級（同級取穩定 CharacterId）作為全隊的 RNG 等級基準，再讓每位本次正式參與者各自以獨立 RNG Stream 抽取一份種類與數量，直接進自己的背包。最高採集者仍是本次 `contributorCharacterId`，只由其取得採集 MXP。若未來增加其他 Escrow，必須先擴充 `ItemLocation` 與此 union，不能把任意字串當位置。
 
-### 4.2 完成事件
+### 4.2 完成（無複合事件；改由各擁有模組事件表達）
 
-| Event | 最少 payload | 訂閱者 |
+Gathering 沒有 State、不是模組，**不擁有 Domain Event**，因此不發 `GatheringResolved` 複合事件。Gathering Workflow 在同一交易內以有模組所有者的命令完成各步驟，各步驟由其擁有模組發出真實事件，並以 `transactionId` 與 `GatheringResolutionId` 關聯：
+
+| 步驟 | 命令（擁有模組） | 該模組事件 |
 |---|---|---|
-| `GatheringResolved` | `resolutionId`、`source`、`teamId`、`participantCharacterIds`、`contributorCharacterId`、`masteryId`、`masteryLevelUsed`、`experienceAwardRuleId`、`itemInstanceIds` | progression、ui/app、debug。 |
+| 標記採集點 | `HarvestMapGatheringNode`（map） | `MapGatheringNodeHarvested` |
+| 建立產物 | `CreateItemInstance`（inventory） | `ItemInstanceCreated` |
+| 加入成果 | `AppendAssetDistributionResult`（distribution） | 既有成果事件 |
+| 發放採集 MXP | `GrantGatheringMasteryExperience`（progression） | `MasteryExperienceGranted` |
 
-`GatheringResolved` 只能在來源狀態、全部 Item Instance 與成果目的地都已成功提交後發出。Inventory 不訂閱這個事件來補建物品；否則建立失敗時會留下「節點已採、物品不存在」的半成品。
+```ts
+type GrantGatheringMasteryExperience = Readonly<{
+  resolutionId: GatheringResolutionId;
+  contributorCharacterId: CharacterId;
+  masteryId: MasteryId;
+  experienceAwardRuleId: ExperienceAwardRuleId;
+}>;
+```
+
+唯一處理者為 progression，冪等來源為 `resolutionId + contributorCharacterId + masteryId`。各步驟皆為 required：任一失敗則整筆交易回滾（不會留下「節點已採、物品不存在」的半成品）。NPC Settlement 另以 `NpcDungeonSettlementApplied` 表達。
 
 ---
 
@@ -184,7 +198,7 @@ type GatheringDestinationRef =
       → required HarvestMapGatheringNode(resolutionId)
       → required CreateItemInstance(location = assetDistributionEscrow)
       → required AppendAssetDistributionResult
-      → emit GatheringResolved
+      → progression: GrantGatheringMasteryExperience（各步驟事件由擁有模組發出）
   → 任一步驟失敗：分鐘、節點、物品、成果與 MXP 全部回滾
 ```
 
@@ -199,7 +213,7 @@ type GatheringDestinationRef =
 
 ### 6.1 NPC 地牢
 
-`npcPolicy.eligible=true` 的採集點會以 `gatheringNode` Entry 進入 Map 的有序 NPC 序列。Dungeon 依 `pointCost` 扣除當日 10 點，並把完整 deterministic `GatheringResolution` 暫存在 Run；只有 `ApplyNpcDungeonSettlement` 實際套用成功後，才標記節點、建立物品並發出 `GatheringResolved`。被玩家搶先採集時列入 `skippedResults`，不發物品或 MXP；Settlement 日也不得重骰採集者或產物。
+`npcPolicy.eligible=true` 的採集點會以 `gatheringNode` Entry 進入 Map 的有序 NPC 序列。Dungeon 依 `pointCost` 扣除當日 10 點，並把完整 deterministic `GatheringResolution` 暫存在 Run；只有 `ApplyNpcDungeonSettlement` 實際套用成功後，才標記節點、建立物品並送 `GrantGatheringMasteryExperience`。被玩家搶先採集時列入 `skippedResults`，不發物品或 MXP；Settlement 日也不得重骰採集者或產物。
 
 NPC 的候選人必須使用 Run 開始時的正式參與者快照，不能在結算日改用已變動的隊伍名單。
 
@@ -220,7 +234,7 @@ NPC 的候選人必須使用 Run 開始時的正式參與者快照，不能在�
 3. 地圖節點 `available → harvested` 與 Item Instance 建立必須在同一 Engine Transaction。
 4. 採集者必須屬於來源提供的正式參與者快照。
 5. 最高等級同分時穩定選出相同 Character，不消耗 RNG。
-6. 只有 `GatheringResolved` 的 `contributorCharacterId` 取得一次採集 MXP；旅行資源的其他獨立抽取者不重複取得 MXP。
+6. 只有 `GrantGatheringMasteryExperience` 的 `contributorCharacterId` 取得一次採集 MXP；旅行資源的其他獨立抽取者不重複取得 MXP。
 7. 地牢採集產物在離場分配前沒有個人 Owner。
 8. 玩家與 NPC 競爭同一節點時至多一方成功；失敗方不扣時間、點數或取得 MXP。
 9. Map 刷新只重設節點，不刪除已採得物品，也不清除玩家已揭露的採集點位置。
