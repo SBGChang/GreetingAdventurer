@@ -1,4 +1,4 @@
-// 雲華 V2 的「閱讀版與平衡審閱」資料來源。
+// 雲華正式內容的「閱讀版與平衡審閱」資料來源。
 // 這不是遊戲 Runtime JSON；正式實作時應依 docs/00_core/architecture/13_data_runtime.md
 // 將每筆資料拆成對應的 Definition JSON。本檔只保證閱讀版與平衡數字有唯一來源。
 
@@ -9,7 +9,7 @@ const scaleVector = (value, scale) => Object.fromEntries(Object.entries(value).m
 const row = (secondary, values) => ({ secondary, values });
 
 export const balanceModel = {
-  title: '雲華 V2｜數值平衡基準',
+  title: '雲華｜數值平衡基準',
   version: '2026-08-06 / first playable balance pass',
   scope: '這份數值以雲華第一版兩城三圖為可玩基準，並以 Tier III～V 的成長比例延伸。它取代舊版 Bar、疲勞、位移與行動效率假設。',
   formulas: [

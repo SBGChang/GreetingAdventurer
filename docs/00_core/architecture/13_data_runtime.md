@@ -473,6 +473,52 @@ Resolver 必須：
 
 資料編譯時必須驗證所有 Resolver ID 已註冊，且 owner／input schema 相符。
 
+### 7.1 Resolver 設計約定（可調公式一律「形狀＝程式、調校＝資料」）
+
+留白或日後需要調整的玩法公式（招募成功率、脫隊機率、物價、委託期限、婚姻接受等）一律遵守同一約定：**把「公式形狀」與「數值調校」分層**，讓未來 90% 的改動只碰資料、不重編、不破存檔。
+
+| 層 | 載體 | 改動頻率 |
+|---|---|---|
+| 公式形狀（logistic、加權乘積、單調調整、查表…） | 登記在 Resolver Registry 的**通用 kernel（程式）** | 極少；只有需要全新數學形狀才加 |
+| 選用哪個形狀 | 規則 Definition 的 `resolverKindId`（**資料**） | 偶爾；改一行 JSON |
+| 形狀的係數／曲線／門檻 | 規則 Definition 的 `params`（**資料**） | 最常；純 JSON，可熱換 |
+
+需要可調公式的規則**不得在程式內寫死係數**，一律以資料選 kernel 並提供參數：
+
+```ts
+type TunableRuleDefinition<TParams extends JsonValue = JsonValue> = DefinitionHeader & {
+  resolverKindId: ResolverId;   // 指向一個已登記的通用 kernel
+  params: TParams;              // 該 kernel 的係數／曲線點／門檻；必須 JSON 可表示並過 Schema
+};
+```
+
+kernel 讀 `params` 計算並回傳 `ResolverExecutionResult`；需要機率判定的 kernel 以注入的 `rngContext` 擲骰並回傳 `nextRngCursor`（見 §7）。
+
+**第一版通用 kernel（少而夠用；多數公式塌縮成這幾種）：**
+
+- `weightedLinearProduct` — 加權線性或乘積（物價、傷害微調）。
+- `logisticCurve` — S 形機率曲線（各種成功率／接受率）。
+- `monotonicAdjust` — 對某輸入單調遞增、對另一輸入單調遞減且有夾限（脫隊機率、好感變化）。
+- `thresholdTable` ／ `piecewiseLookup` — 分段查表（依城市距離定期限、依等級定品級／產量）。
+
+**三條紀律（Rule Validation 必須強制）：**
+
+1. **零魔數**：resolver 程式碼不得出現可調數值；所有係數、門檻、曲線點只能來自 `params`。
+2. **新形狀才動程式，且刻意設門檻**：新增 kernel kind 必須先增補公開型別、Schema、Validator 與 Fixture（比照 §6 Effect kind 的規則），提案前須先證明現有 kernel 無法用 `params` 表達。
+3. **kernel 保持純白名單**：deterministic、同步、無 I/O、`params` 只吃 JSON、隨 content pack 版本走、可重播；**禁止以資料描述整條運算式（expression DSL）**——那違反 §6「資料不得夾帶可執行腳本」，且破壞重播與可測性。宣告式效果走 §6 封閉 Effect 集合，數值運算走本節參數化 kernel，兩者都不是自由運算式。
+
+**第一版留白公式的 kernel 對應（啟用時只需補一筆 `params`，不動程式）：**
+
+| 公式 | kernel | 主要輸入（由 context 注入，資料不重述） |
+|---|---|---|
+| 招募成功率 | `logisticCurve` | 招募者 `inviteSuccessBonus`、雙方戰力差、玩家隊目前人數 |
+| 脫隊機率 | `monotonicAdjust` | 工作淨收益缺口↑、隊長 `memberDepartureResistance`↓ |
+| 物價 | `weightedLinearProduct` | 物品 base value × 市場壓力 × 聲望 × 戰爭倍率 |
+| 委託／護衛期限 | `thresholdTable` | 城市網路最短相隔城市數 → 天數 |
+| NPC 婚姻接受 | `logisticCurve` | 共隊天數、雙方 Combat Power 接近程度 |
+
+上表五條第一版**都不需要新 kernel**；啟用某條 ＝ 在對應 Rule Definition 填 `resolverKindId` 與 `params`。內容編譯必須驗證 `params` 通過該 kernel 的 `inputSchemaId`；缺 `params` 或形狀不符即拒絕，不得由實作端補預設值。
+
 ---
 
 ## 8. Schema Contribution
