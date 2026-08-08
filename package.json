@@ -1,0 +1,13 @@
+{
+  "name": "greeting-adventurer",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Greeting Adventurer — React/TypeScript/Electron implementation of the archived design blueprint.",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}
