@@ -7,6 +7,10 @@
 //         呼叫者注入（route*／applyMutation），kernel 只負責路由順序、因果收斂與原子性。
 
 import type {
+  AnyScheduledJob,
+  JobId,
+  KernelRequest,
+  ScheduledJobDraft,
   TransactionId,
   CommandRejection,
   CommittedOutbox,
@@ -26,29 +30,42 @@ export type HandlerContext<TState> = Readonly<{ workingState: TState }>;
 
 // Handler 只回傳「自己這一片 slice 的下一版」與可選通知；由 applyMutation 併回 workingState。
 // slice 名稱僅為結構鍵，kernel 不解讀；跨 slice 寫入由 applyMutation 的實作阻擋。
+//
+// scheduledJobs / cancelledJobIds / kernelRequests 是 ModuleResult 的其餘三個輸出通道。
+// 它們**不是** slice 寫入：Scheduler 與 worldDay 都屬 core，由 Kernel 獨占
+// （00_shared_contracts.md §6.2），故 Runner 於此集中收集，不讓模組直接碰 core。
 export type SliceMutation = Readonly<{
   sliceName: string;
   nextSlice: unknown;
   notifications?: readonly NotificationDraft[];
+  scheduledJobs?: readonly ScheduledJobDraft<AnyScheduledJob>[];
+  cancelledJobIds?: readonly JobId[];
+  kernelRequests?: readonly KernelRequest[];
 }>;
 
-type Accepted = Readonly<{
+// 交易期間累積、提交時才落地的排程異動。
+export type SchedulingEffects = Readonly<{
+  scheduledJobs: readonly ScheduledJobDraft<AnyScheduledJob>[];
+  cancelledJobIds: readonly JobId[];
+}>;
+
+export type HandlerAccepted = Readonly<{
   accepted: true;
   mutation: SliceMutation;
   // 產生的後續訊息；保留相對順序並優先於呼叫者尚未處理的訊息（§3.1 rule 8）。
   outgoing?: readonly TransactionMessageDraft[];
 }>;
 
-type Rejected = Readonly<{ accepted: false; rejection: CommandRejection }>;
+export type HandlerRejected = Readonly<{ accepted: false; rejection: CommandRejection }>;
 
 // Root（Game Command 或到期 Job）入口 Handler：可接受或拒絕整筆交易。
-export type RootHandler<TState> = (ctx: HandlerContext<TState>) => Accepted | Rejected;
+export type RootHandler<TState> = (ctx: HandlerContext<TState>) => HandlerAccepted | HandlerRejected;
 
 // Internal Command：唯一目標 Handler，可拒絕（Required 被拒 → 整筆交易回滾，見 §3.2）。
 export type InternalCommandHandler<TState> = (
   command: unknown,
   ctx: HandlerContext<TState>,
-) => Accepted | Rejected;
+) => HandlerAccepted | HandlerRejected;
 
 // Domain Event Subscriber：不可拒絕已發生事實（§7.2 rule 6），只回傳自己 slice 的變更與後續訊息。
 export type EventSubscriber<TState> = (
@@ -66,6 +83,9 @@ export type TransactionRunnerConfig<TState> = Readonly<{
   ) => InternalCommandHandler<TState> | undefined;
   // Domain Event → 依 Manifest 固定順序的零到多個 Subscriber。
   routeEventSubscribers: (draft: DomainEventDraft<unknown>) => readonly EventSubscriber<TState>[];
+  // 交易接受時，把整筆累積的排程異動一次寫入 core.scheduler（配發 JobId 亦在此）。
+  // 拒絕時完全不呼叫——排程與 slice 一樣是全有全無。
+  applyScheduling: (state: TState, effects: SchedulingEffects) => TState;
   maxMessagesPerTransaction?: number;
 }>;
 
@@ -99,6 +119,17 @@ export function runTransaction<TState, TResult extends JsonValue = JsonValue>(
   let eventCount = 0;
   let notificationTally = notificationCount(root.mutation);
 
+  // 排程異動與 Kernel 請求跨整筆交易累積；提交時才落地／回傳。
+  const scheduledJobs: ScheduledJobDraft<AnyScheduledJob>[] = [];
+  const cancelledJobIds: JobId[] = [];
+  const kernelRequests: KernelRequest[] = [];
+  const collect = (mutation: SliceMutation): void => {
+    if (mutation.scheduledJobs) scheduledJobs.push(...mutation.scheduledJobs);
+    if (mutation.cancelledJobIds) cancelledJobIds.push(...mutation.cancelledJobIds);
+    if (mutation.kernelRequests) kernelRequests.push(...mutation.kernelRequests);
+  };
+  collect(root.mutation);
+
   // 佇列以「front = 下一個要處理」運作；新產生的訊息 unshift 到最前，達成直接因果先收斂。
   const queue: TransactionMessageDraft[] = root.outgoing ? [...root.outgoing] : [];
   let steps = 0;
@@ -123,6 +154,7 @@ export function runTransaction<TState, TResult extends JsonValue = JsonValue>(
       }
       workingState = config.applyMutation(workingState, outcome.mutation);
       notificationTally += notificationCount(outcome.mutation);
+      collect(outcome.mutation);
       if (outcome.outgoing && outcome.outgoing.length > 0) {
         queue.unshift(...outcome.outgoing);
       }
@@ -134,6 +166,7 @@ export function runTransaction<TState, TResult extends JsonValue = JsonValue>(
         const reaction = subscriber(draft.event, { workingState });
         workingState = config.applyMutation(workingState, reaction.mutation);
         notificationTally += notificationCount(reaction.mutation);
+        collect(reaction.mutation);
         if (reaction.outgoing && reaction.outgoing.length > 0) {
           collected.push(...reaction.outgoing);
         }
@@ -145,10 +178,21 @@ export function runTransaction<TState, TResult extends JsonValue = JsonValue>(
     }
   }
 
+  // 排程於提交時一次落地（core 由 Kernel 獨占寫入）。
+  const committedState = config.applyScheduling(workingState, { scheduledJobs, cancelledJobIds });
+
   const committedOutbox: CommittedOutbox = {
     transactionId,
     eventCount,
     notificationCount: notificationTally,
   };
-  return { accepted: true, state: workingState, result: rootResult, committedOutbox };
+  return {
+    accepted: true,
+    state: committedState,
+    result: rootResult,
+    committedOutbox,
+    // KernelRequest 刻意不在交易內執行：advanceWorldToDay 會再開新交易，
+    // 於交易內遞迴會破壞原子性。由呼叫者（GameSession）於提交後執行。
+    ...(kernelRequests.length > 0 ? { kernelRequests } : {}),
+  };
 }

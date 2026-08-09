@@ -2,7 +2,7 @@
 
 > 給下一位接手者(人或 AI)。設計已定稿、地基與核心模組已實作且驗證通過;剩下的是**整合(串接)+ 補齊模組 + UI**。
 
-## 現況(截至 B.5 接線硬化;地基 + 核心 7 模組 tsc 乾淨、7/7 測試通過)
+## 現況(B.5 接線硬化 + Wave C 第一段 composition 骨架;tsc 乾淨、全部測試通過)
 
 **已完成、且 `tsc` 乾淨 + 單元測試實跑通過:**
 
@@ -13,28 +13,43 @@
 | kernel | `src/kernel/`(DeterministicRng、RuntimeIdGenerator、Scheduler、TransactionRunner) | ✅ + 測試 |
 | data-runtime | `src/data-runtime/`(content 載入、Registry、窄化 Reader、驗證、ResolverRegistry、§7.1 kernels) | ✅ + 測試 |
 | 核心 7 模組 | `src/modules/{character,inventory,progression,map,dungeon,combat,team}/` | ✅ 各含 state/system/queries/fixtures/*.test/public;7/7 測試通過 |
+| composition 骨架 | `src/app/composition/`(GameState、訊息聯集、ExecutionOrderManifest、ModuleRegistry 啟動驗證、kernel↔模組 router) | ✅ + 測試 |
 
 **驗證指令:**
 ```bash
 npm install
 npm run typecheck              # tsc --noEmit,目前 0 錯誤
-npx tsx scripts/verify-modules.ts   # 跑 7 個模組單元測試,目前全過
+npx tsx scripts/verify-modules.ts   # kernel + data-runtime + 7 模組 + composition + 交易接線,目前全過
 ```
 
 ## 待辦(依建議順序)
 
-### 1. 整合 / 串接(最優先,讓它整條跑起來)—— 建 `src/app/composition/` + runner
-- **`GameState`** = `{ core: CoreState<GameScheduledJob> } & { character: CharacterState; inventory: …; …7 slices }`(未實作模組先放最小 stub slice)。
-- **ModuleRegistry**:註冊各模組 contract、handler、query、slice owner、migration。
-- **ExecutionOrderManifest**:`jobTypeOrderByPhase` + `eventSubscriptionsByType`(見 `12_engine_runtime.md` §5.2)。
-- **注入各模組需要的 ports**(它們都吃一個 context bag):
-  - id allocator ← kernel `RuntimeIdGenerator`
-  - RNG ← kernel `DeterministicRng` + 每次呼叫的 `rngContext`
-  - 跨模組 Query ports ← 各模組 `createXxxQuery`
-  - resolvers ← data-runtime `ResolverRegistry`(公式用 §7.1 kernels + `params`)
-- **Handler 結果接線**:B.5 後可拒絕的 Handler 一律回 `ModuleOutcome<TSlice>`(inventory/map/team/dungeon 已就位),Subscriber 回 `ModuleResult<TSlice>`。composition 把前者轉成 kernel `TransactionRunner` 的 `Accepted`/`Rejected`,後者轉成 `EventSubscriber` 的 mutation。**另需處理 `ModuleResult.kernelRequests`**(目前只有 `AdvanceWorldToDay`):交易提交後才執行。character/combat 尚未轉換(見下節),暫時一律視為 accepted。
+### 1. 整合 / 串接 —— `src/app/composition/`
+
+**已完成:**
+- `state.ts`:`GameState`(core + 7 slices)、`GameScheduledJob`、`SLICE_OWNER`、`applyMutation`(拒絕寫 `core` 與未註冊 Slice)。
+- `messages.ts`:`GameCommand` / `GameInternalCommand` / `GameDomainEvent` 聯集 + 路由表。`GAME_COMMAND_ENTRY` 是**完整** `Record<GameCommandType, …>`,新增指令卻沒指定入口會被 tsc 擋下;入口是模組或 Workflow,不可兼有(§5.1)。
+- `manifest.ts`:`ExecutionOrderManifest`(§6.2 相位 + 事件訂閱綁定)+ §5.2 啟動驗證。
+- `registry.ts` + `composition.test.ts`:啟動驗證(重複/缺少 Handler、Slice owner、Manifest 綁定)。
+- `router.ts` + `transaction.test.ts`:kernel `TransactionRunner` ↔ 真實模組 Handler 的接線,含參數順序/回傳形狀/Slice 歸屬三種差異的收斂。
+- **kernel 補洞**:`TransactionRunner` 原本把模組回傳的 `scheduledJobs` 直接丟掉(沒有模組排得了 Job)。現在 `SliceMutation` 帶 `scheduledJobs`/`cancelledJobIds`/`kernelRequests`,Runner 累積後於提交時經注入的 `applyScheduling` 落地,`kernelRequests` 則回傳給呼叫者於提交後執行。
+
+**仍待做:**
+- **注入真實 ports**(目前只有各模組 fixture stub):id allocator ← kernel `RuntimeIdGenerator` + `core.nextRuntimeSequence`;RNG ← kernel `DeterministicRng` + `rngContext`;跨模組 Query ← 各模組 `createXxxQuery`;resolvers ← data-runtime `ResolverRegistry`(§7.1 kernels + `params`);definition readers ← data-runtime 窄化 Reader。
+- **Game Command / Job 的 root 路由**:`router.ts` 目前只做 Internal Command 與 Event;Game Command 與 Job 的 root handler 分派待補。
 - **雲華 `content/*.json`**:把 `docs/03_content/yunhua/yunhua_content.data.mjs`(含 `firstMapLayouts`/`firstMapConfigs`)轉成引擎 content pack JSON,對齊各 Definition Schema。
-- **無頭 runner**:bootstrap 新遊戲 → 腳本化跑「進城→下地城→一場戰鬥→結算→成長」→ 斷言跑完 + golden 重播測試(同 seed+指令→同結果)。
+- **NewGameBootstrapper**(§1.1)與**無頭 runner**:bootstrap 新遊戲 → 腳本化跑「進城→下地城→一場戰鬥→結算→成長」→ golden 重播測試(同 seed+指令→同結果)。
+
+### 1b. Wave B 宣告但未實作的 Handler(整合時浮現的真實缺口)
+
+`ModuleContract` 宣告 ≠ 有實作。路由到這些型別會**明確報錯**(不是靜默成功),清單見 `router.ts` 的 `PENDING_INTERNAL_COMMANDS`:
+
+| 模組 | 未實作的 Internal Command |
+|---|---|
+| inventory | `ApplyQuestItemLifecycle`、`ReleaseExpiredQuestCargo`、`ConsumeBookForLearning`、`TransformCraftingItems`、`ConsumeCuisineIngredients`、`ConsumeCombatSequenceRetrySupply` |
+| team | `StartTimedCityAction`、`StartChildStudyPlan`、`CreateNpcTeam`、`OpenPlayerTravelInteraction`、`CompletePlayerTravelSegmentWithoutEvent`、`MarkPlayerTravelInteractionAwaitingCombat`、`CompletePlayerTravelInteraction`、`AssignNpcMemberFreeAction`、`RecordTeamWorkSettlementValue`、`AttachQuestTemporaryMember` |
+
+另有 Game Command 未實作:inventory 的 `unequipItem`/`useItem`/`splitStack` 與四筆 encumbrance 指令、progression 的 `learnFromBook`/`startTeaching`、team 的 `chooseCityFreeAction`/`dismissMember`;Job 未實作:team 的 `freeActionDue`/`nonPlayerMemberCityFreeDayTick`。Subscriber 未實作:combat 全部 5 筆、team 全部 6 筆、dungeon 的 combat-sequence 相關 4 筆(這三組的 `subscriptionHandlerIds` 已清空以符合事實)。
 
 ### 2. 補齊其餘模組(可平行發包,一模組一 worker,寫自己 `src/modules/<name>/`,禁止再分包)
 economy、city、quest、social、crafting、distribution、world、npc-behavior,以及純服務 statistics / combat-power / gathering(後三者可能是無 State 純函式,放 `src/domain-services/`)。

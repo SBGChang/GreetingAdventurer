@@ -168,7 +168,6 @@ const cases: readonly Case[] = [
           createInitialDungeonState(),
           { type: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
           ctx,
-          FIXTURE.npcExplorationRuleId,
         ),
       );
       // Start 應排一個 npcDungeonDay Job 並開一個 collecting Distribution。
@@ -200,7 +199,6 @@ const cases: readonly Case[] = [
           createInitialDungeonState(),
           { type: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
           ctx,
-          FIXTURE.npcExplorationRuleId,
         ),
       );
       const runId = Object.keys(start.nextSlice.npcRuns)[0] as NpcDungeonRunId;
@@ -233,7 +231,6 @@ const cases: readonly Case[] = [
           createInitialDungeonState(),
           { type: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
           ctx,
-          FIXTURE.npcExplorationRuleId,
         ),
       );
       const runId = Object.keys(start.nextSlice.npcRuns)[0] as NpcDungeonRunId;

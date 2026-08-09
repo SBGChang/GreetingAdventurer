@@ -157,6 +157,9 @@ export type DungeonContext = Readonly<{
   // 迷宮戰利品分配規則（distribution 契約的 StartAssetDistribution 必填 ruleId；
   // controllerPolicy/itemPolicy 由該 rule 定義，dungeon 只負責帶入綁定值）。
   lootDistributionRuleId: AssetDistributionRuleId;
+  // NPC 探索規則（原本由 startNpcDungeonRun 的第四個參數傳入，與其他兩筆同類的資料綁定，
+  // 移入 Context 讓所有 handler 簽章一致：(state, cmd, ctx)）。
+  npcExplorationRuleId: NpcDungeonRun['explorationRuleId'];
   // RNG context（NPC Run 快照用）。
   rng: RngContext;
   // ID 產生器。
@@ -657,8 +660,8 @@ export function startNpcDungeonRun(
   state: DungeonModuleState,
   cmd: StartNpcDungeonRun,
   ctx: DungeonContext,
-  explorationRuleId: NpcDungeonRun['explorationRuleId'],
 ): DungeonHandlerResult {
+  const explorationRuleId = ctx.npcExplorationRuleId;
   const mapVersion = ctx.map.getMapVersion(cmd.mapId);
   const sequence = ctx.map.listNpcSequence(cmd.mapId);
   const hasMonster = sequence.some((e) => e.kind === 'mapContent');

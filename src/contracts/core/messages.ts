@@ -3,6 +3,7 @@
 // 具體的 GameCommand／GameInternalCommand／GameDomainEvent 聯集屬 app/composition，不在 core 定義。
 
 import type { JsonValue } from './primitives';
+import type { KernelRequest } from './module';
 import type { WorldDay } from './primitives';
 import type {
   ClientRequestId,
@@ -93,7 +94,15 @@ export type TransactionMessageDraft =
 // 整筆引擎交易是否完成（不同於 Command Handler 的 GameCommandResult）。
 // state 型別交由 app/composition 具體化（GameState）；core 以泛型 TState 表示。
 export type CommandExecutionResult<TState, TResult extends JsonValue = JsonValue> =
-  | Readonly<{ accepted: true; state: TState; result: TResult; committedOutbox: CommittedOutbox }>
+  | Readonly<{
+      accepted: true;
+      state: TState;
+      result: TResult;
+      committedOutbox: CommittedOutbox;
+      // 交易內累積的 Kernel 請求（目前僅 AdvanceWorldToDay）。刻意**不**在交易內執行：
+      // advanceWorldToDay 會再開新交易，於交易內遞迴會破壞原子性。由 GameSession 於提交後執行。
+      kernelRequests?: readonly KernelRequest[];
+    }>
   | Readonly<{ accepted: false; state: TState; rejection: CommandRejection }>;
 
 export type CommittedOutbox = Readonly<{

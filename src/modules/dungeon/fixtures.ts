@@ -237,6 +237,7 @@ export function createFixtureContext(overrides?: Partial<DungeonContext>): Dunge
     minutesPerDungeonDay: 100, // 小刻度，便於測試跨午夜。
     interactionRuleId: FIXTURE.interactionRuleId,
     lootDistributionRuleId: FIXTURE.lootDistributionRuleId,
+    npcExplorationRuleId: FIXTURE.npcExplorationRuleId,
     rng,
     nextInteractionId: () =>
       `runtime:interaction:gen-${(interactionCounter += 1)}` as InteractionId,
