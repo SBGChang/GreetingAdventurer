@@ -148,14 +148,9 @@ export const teamModuleContract: ModuleContract = {
     'AttachQuestTemporaryMember',
   ],
   handlesJobs: ['teamPlanDue', 'freeActionDue', 'nonPlayerMemberCityFreeDayTick'],
-  subscriptionHandlerIds: [
-    'sub:team/CharacterAvailabilityChanged' as EventSubscriptionId,
-    'sub:team/CharacterRetired' as EventSubscriptionId,
-    'sub:team/QuestSettled' as EventSubscriptionId,
-    'sub:team/CombatEncounterResolved' as EventSubscriptionId,
-    'sub:team/ItemConsumed' as EventSubscriptionId,
-    'sub:team/RouteAccessChanged' as EventSubscriptionId,
-  ],
+  // Wave B 未實作任何 subscriber 函式（CharacterAvailabilityChanged / CharacterRetired /
+  // QuestSettled / CombatEncounterResolved / ItemConsumed / RouteAccessChanged 皆待補）。
+  subscriptionHandlerIds: [] as readonly EventSubscriptionId[],
   emits: [
     'TeamPlanChanged',
     'TeamPlanCompleted',

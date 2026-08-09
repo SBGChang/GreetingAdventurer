@@ -1,4 +1,5 @@
-// Runs every implemented module's pure unit tests. `npx tsx scripts/verify-modules.ts`
+// Runs every implemented module's pure unit tests + the composition startup validation.
+// `npx tsx scripts/verify-modules.ts`
 import { runTests as character } from '../src/modules/character/character.test';
 import { runTests as inventory } from '../src/modules/inventory/inventory.test';
 import { runTests as progression, allTestsPass as progressionPass } from '../src/modules/progression/system.test';
@@ -6,6 +7,7 @@ import { runTests as map } from '../src/modules/map/map.test';
 import { runTests as dungeon } from '../src/modules/dungeon/dungeon.test';
 import { runTests as combat } from '../src/modules/combat/combat.test';
 import { runTests as team } from '../src/modules/team/team.test';
+import { runTests as composition } from '../src/app/composition/composition.test';
 
 // These throw on any failing case.
 const throwing: ReadonlyArray<readonly [string, () => void]> = [
@@ -15,6 +17,8 @@ const throwing: ReadonlyArray<readonly [string, () => void]> = [
   ['dungeon', dungeon],
   ['combat', combat],
   ['team', team],
+  // composition：跨模組註冊面驗證（重複/缺少 Handler、Slice owner、Manifest 綁定）。
+  ['composition', composition],
 ];
 
 for (const [name, run] of throwing) {
@@ -27,4 +31,4 @@ progression();
 if (!progressionPass()) throw new Error('progression tests failed');
 console.log('progression: pass');
 
-console.log('ALL MODULE TESTS PASS (7 modules)');
+console.log('ALL TESTS PASS (7 modules + composition)');

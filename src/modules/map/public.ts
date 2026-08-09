@@ -105,7 +105,7 @@ export const mapModuleContract: ModuleContract = {
     'HarvestMapGatheringNode',
   ],
   handlesJobs: ['mapRefreshCheck'],
-  subscriptionHandlerIds: ['sub:map/TeamLocationChanged' as EventSubscriptionId],
+  subscriptionHandlerIds: ['subscription.TeamLocationChanged.map' as EventSubscriptionId],
   emits: [
     'MapRefreshed',
     'MapContentGenerated',

@@ -372,7 +372,7 @@ export type ChooseCityFreeActionCommand = Readonly<{
   payload: FreeActionPayload;
 }>;
 
-export type BeginCityFreePeriodCommand = Readonly<Record<string, never>>;
+export type BeginCityFreePeriodCommand = Readonly<{ type: 'beginCityFreePeriod' }>;
 
 export type RestCommand = Readonly<{
   type: 'rest';
@@ -492,7 +492,7 @@ export type OpenPlayerTravelInteractionPayload = Readonly<{
 }>;
 
 export type CompletePlayerTravelSegmentWithoutEventPayload = Readonly<{
-  type: 'CompletePlayerTravelSegmentWithout';
+  type: 'CompletePlayerTravelSegmentWithoutEvent';
   teamId: TeamId;
   planId: TeamPlanId;
   segmentIndex: 0 | 1 | 2;

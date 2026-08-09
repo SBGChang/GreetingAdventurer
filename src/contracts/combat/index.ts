@@ -408,6 +408,9 @@ export type CombatGameCommand =
   | CommandAllyCommand
   | CombatRestCommand;
 
+// combat 作為唯一 Handler 接收的 Internal Command（目前僅一筆）。
+export type CombatInternalCommand = StartCombatEncounterCommand;
+
 // ── 輸出 Internal Command（接收者：character / map / inventory）────────
 export type CombatOutboundInternalCommand =
   | ApplyCombatCondition

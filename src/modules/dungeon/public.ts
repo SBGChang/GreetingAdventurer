@@ -82,16 +82,14 @@ export const dungeonModuleContract: ModuleContract = {
   ],
   handlesInternalCommands: ['StartNpcDungeonRun', 'ConsumeDungeonGatheringAction'],
   handlesJobs: ['npcDungeonDay'],
+  // 只登記**已實作**的 subscriber（原本宣告 9 筆但只寫了 4 個函式；宣告卻沒有實作會讓啟動
+  // 驗證誤放行、路由時才炸）。其餘待 combat-sequence / map 刷新反應實作後再加回。
+  // 命名依 12_engine_runtime.md §5.2 的 `subscription.<eventType>.<subscriber>`。
   subscriptionHandlerIds: [
-    'dungeon/on-npc-settlement-applied',
-    'dungeon/on-combat-sequence-settled',
-    'dungeon/on-asset-distribution-completed',
-    'dungeon/on-combat-sequence-challenge-resolved',
-    'dungeon/on-combat-sequence-ready-for-source-commit',
-    'dungeon/on-combat-sequence-invalidated',
-    'dungeon/on-team-location-changed',
-    'dungeon/on-combat-encounter-resolved',
-    'dungeon/on-map-refreshed',
+    'subscription.NpcDungeonSettlementApplied.dungeon',
+    'subscription.CombatSequenceSettled.dungeon',
+    'subscription.AssetDistributionCompleted.dungeon',
+    'subscription.CombatEncounterResolved.dungeon',
   ] as readonly string[] as readonly EventSubscriptionId[],
   emits: [
     'PlayerDungeonSessionStarted',

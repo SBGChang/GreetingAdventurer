@@ -75,13 +75,10 @@ export const combatModuleContract: ModuleContract = {
   handlesGameCommands: ['useCombatSkill', 'useCombatItem', 'commandAlly', 'combatRest'],
   handlesInternalCommands: ['StartCombatEncounter'],
   handlesJobs: [],
-  subscriptionHandlerIds: [
-    'sub:combat/CombatItemUseCommitted' as EventSubscriptionId,
-    'sub:combat/EquipmentChanged' as EventSubscriptionId,
-    'sub:combat/KnowledgeLearned' as EventSubscriptionId,
-    'sub:combat/CharacterDied' as EventSubscriptionId,
-    'sub:combat/CharacterAvailabilityChanged' as EventSubscriptionId,
-  ],
+  // Wave B 未實作任何 subscriber 函式（CombatItemUseCommitted / EquipmentChanged /
+  // KnowledgeLearned / CharacterDied / CharacterAvailabilityChanged 皆待補）。
+  // 只在實作後才登記，否則啟動驗證會放行一個不存在的 Handler。
+  subscriptionHandlerIds: [] as readonly EventSubscriptionId[],
   emits: [
     'CombatEncounterStarted',
     'CombatActionResolved',
