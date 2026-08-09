@@ -52,7 +52,7 @@ const cases: readonly Case[] = [
     name: 'createItemInstance: creates active item + emits ItemInstanceCreated',
     run: () => {
       const deps = createFixtureDeps();
-      const cmd: CreateItemInstance = {
+      const cmd: CreateItemInstance = { type: 'CreateItemInstance',
         definitionId: FIXTURE.paperDefId,
         quantity: 1,
         location: { kind: 'characterBag', characterId: FIXTURE.characterId },
@@ -75,7 +75,7 @@ const cases: readonly Case[] = [
     name: 'createItemInstance: single-stack quantity>1 rejected',
     run: () => {
       const deps = createFixtureDeps();
-      const cmd: CreateItemInstance = {
+      const cmd: CreateItemInstance = { type: 'CreateItemInstance',
         definitionId: FIXTURE.swordDefId, // single
         quantity: 2,
         location: { kind: 'mapContent', contentId: 'runtime:content-instance:x' as never },
@@ -88,7 +88,7 @@ const cases: readonly Case[] = [
     name: 'transferItem: reassigns owner + location, emits InventoryTransferred',
     run: () => {
       const deps = createFixtureDeps();
-      const cmd: TransferItem = {
+      const cmd: TransferItem = { type: 'TransferItem',
         itemId: FIXTURE.swordItemId,
         to: { kind: 'characterBag', characterId: FIXTURE.otherCharacterId },
         newOwnerCharacterId: FIXTURE.otherCharacterId,
@@ -109,7 +109,7 @@ const cases: readonly Case[] = [
     name: 'transferItem: unknown item rejected',
     run: () => {
       const deps = createFixtureDeps();
-      const cmd: TransferItem = {
+      const cmd: TransferItem = { type: 'TransferItem',
         itemId: 'runtime:item-instance:nope' as ItemInstanceId,
         to: { kind: 'cityPermanentStock', cityId: 'definition:city:a' as never },
         reason: 'x',
@@ -122,14 +122,14 @@ const cases: readonly Case[] = [
     run: () => {
       const deps = createFixtureDeps();
       const reserved = expectOk(
-        reserveQuestItem(createFixtureState(), { itemId: FIXTURE.swordItemId, questId: 'runtime:quest:q1' as never }, deps),
+        reserveQuestItem(createFixtureState(), { type: 'ReserveQuestItem', itemId: FIXTURE.swordItemId, questId: 'runtime:quest:q1' as never }, deps),
         'reserve',
       );
       const q = createInventoryQuery(reserved, deps.reader);
       assert(q.isReserved(FIXTURE.swordItemId), 'reserve: isReserved true');
       const tr = transferItem(
         reserved,
-        { itemId: FIXTURE.swordItemId, to: { kind: 'characterBag', characterId: FIXTURE.otherCharacterId }, newOwnerCharacterId: FIXTURE.otherCharacterId, reason: 'x' },
+        { type: 'TransferItem', itemId: FIXTURE.swordItemId, to: { kind: 'characterBag', characterId: FIXTURE.otherCharacterId }, newOwnerCharacterId: FIXTURE.otherCharacterId, reason: 'x' },
         deps,
       );
       expectReject(tr, 'inventory/item-reserved', 'reserve-then-transfer');
@@ -142,7 +142,7 @@ const cases: readonly Case[] = [
       const state = createFixtureState();
       const bad = reserveCraftingInputs(
         state,
-        { craftingAttemptId: 'runtime:crafting-attempt:c1' as never, itemIds: [FIXTURE.swordItemId, 'runtime:item-instance:ghost' as ItemInstanceId] },
+        { type: 'ReserveCraftingInputs', craftingAttemptId: 'runtime:crafting-attempt:c1' as never, itemIds: [FIXTURE.swordItemId, 'runtime:item-instance:ghost' as ItemInstanceId] },
         deps,
       );
       expectReject(bad, 'inventory/unknown-item', 'craft-atomic-reject');
@@ -151,7 +151,7 @@ const cases: readonly Case[] = [
       assert(!q.isReserved(FIXTURE.swordItemId), 'craft-atomic: sword still unreserved');
       // valid set reserves all
       const good = expectOk(
-        reserveCraftingInputs(state, { craftingAttemptId: 'runtime:crafting-attempt:c1' as never, itemIds: [FIXTURE.swordItemId, FIXTURE.potionItemId] }, deps),
+        reserveCraftingInputs(state, { type: 'ReserveCraftingInputs', craftingAttemptId: 'runtime:crafting-attempt:c1' as never, itemIds: [FIXTURE.swordItemId, FIXTURE.potionItemId] }, deps),
         'craft-good',
       );
       const q2 = createInventoryQuery(good, deps.reader);
@@ -162,7 +162,7 @@ const cases: readonly Case[] = [
     name: 'removeItemInstance: marks removed + emits ItemRemoved',
     run: () => {
       const deps = createFixtureDeps();
-      const r = removeItemInstance(createFixtureState(), { itemId: FIXTURE.potionItemId, reason: 'consumed' }, deps);
+      const r = removeItemInstance(createFixtureState(), { type: 'RemoveItemInstance', itemId: FIXTURE.potionItemId, reason: 'consumed' }, deps);
       const next = expectOk(r, 'remove');
       const q = createInventoryQuery(next, deps.reader);
       assert(q.getItem(FIXTURE.potionItemId)?.state === 'removed', 'remove: state removed');
@@ -177,11 +177,11 @@ const cases: readonly Case[] = [
       const deps = createFixtureDeps();
       // equip sword first
       const equipped = expectOk(
-        equipItem(createFixtureState(), { characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot }, deps),
+        equipItem(createFixtureState(), { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot }, deps),
         'equip-for-remove',
       );
       expectReject(
-        removeItemInstance(equipped, { itemId: FIXTURE.swordItemId, reason: 'other' }, deps),
+        removeItemInstance(equipped, { type: 'RemoveItemInstance', itemId: FIXTURE.swordItemId, reason: 'other' }, deps),
         'inventory/item-equipped',
         'remove-equipped',
       );
@@ -191,7 +191,7 @@ const cases: readonly Case[] = [
     name: 'commitCombatItemUse: decrements stack, passes delay rule from definition (no self-calc)',
     run: () => {
       const deps = createFixtureDeps();
-      const r = commitCombatItemUse(createFixtureState(), { itemId: FIXTURE.potionItemId, userId: FIXTURE.characterId }, deps);
+      const r = commitCombatItemUse(createFixtureState(), { type: 'CommitCombatItemUse', itemId: FIXTURE.potionItemId, userId: FIXTURE.characterId }, deps);
       const next = expectOk(r, 'combat-use');
       const q = createInventoryQuery(next, deps.reader);
       assert(q.getItem(FIXTURE.potionItemId)?.quantity === 2, 'combat-use: qty 3→2');
@@ -208,7 +208,7 @@ const cases: readonly Case[] = [
     run: () => {
       const deps = createFixtureDeps();
       expectReject(
-        commitCombatItemUse(createFixtureState(), { itemId: FIXTURE.swordItemId, userId: FIXTURE.characterId }, deps),
+        commitCombatItemUse(createFixtureState(), { type: 'CommitCombatItemUse', itemId: FIXTURE.swordItemId, userId: FIXTURE.characterId }, deps),
         'inventory/not-combat-consumable',
         'combat-use-sword',
       );
@@ -218,7 +218,7 @@ const cases: readonly Case[] = [
     name: 'equipItem: moves item to equipped + getEquippedItem reflects it',
     run: () => {
       const deps = createFixtureDeps();
-      const r = equipItem(createFixtureState(), { characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot }, deps);
+      const r = equipItem(createFixtureState(), { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot }, deps);
       const next = expectOk(r, 'equip');
       const q = createInventoryQuery(next, deps.reader);
       const eq = q.getEquippedItem(FIXTURE.characterId, FIXTURE.mainHandSlot);
@@ -231,7 +231,7 @@ const cases: readonly Case[] = [
     run: () => {
       const deps = createFixtureDeps();
       expectReject(
-        equipItem(createFixtureState(), { characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.bodySlot }, deps),
+        equipItem(createFixtureState(), { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.bodySlot }, deps),
         'inventory/illegal-slot',
         'equip-illegal',
       );
@@ -242,7 +242,7 @@ const cases: readonly Case[] = [
     run: () => {
       // Tight capacity so hero (sword 30 + potion 6 = 36) is overweight.
       const deps = createFixtureDeps({ getCarryCapacity: (characterId) => ({ characterId, maximumWeight: 1, sourceRevisionKey: 'tight' }) });
-      const r = evaluateTeamEncumbrance(createFixtureState(), { teamId: FIXTURE.teamId }, deps);
+      const r = evaluateTeamEncumbrance(createFixtureState(), { type: 'EvaluateTeamEncumbrance', teamId: FIXTURE.teamId }, deps);
       const next = expectOk(r, 'enc-open');
       const q = createInventoryQuery(next, deps.reader);
       const res = q.getEncumbranceResolution(FIXTURE.teamId);
@@ -256,9 +256,9 @@ const cases: readonly Case[] = [
     name: 'evaluateTeamEncumbrance: is idempotent (second eval yields no messages, same resolution)',
     run: () => {
       const deps = createFixtureDeps({ getCarryCapacity: (characterId) => ({ characterId, maximumWeight: 1, sourceRevisionKey: 'tight' }) });
-      const first = expectOk(evaluateTeamEncumbrance(createFixtureState(), { teamId: FIXTURE.teamId }, deps), 'enc-1');
+      const first = expectOk(evaluateTeamEncumbrance(createFixtureState(), { type: 'EvaluateTeamEncumbrance', teamId: FIXTURE.teamId }, deps), 'enc-1');
       const firstId = createInventoryQuery(first, deps.reader).getEncumbranceResolution(FIXTURE.teamId)?.resolutionId;
-      const r2 = evaluateTeamEncumbrance(first, { teamId: FIXTURE.teamId }, deps);
+      const r2 = evaluateTeamEncumbrance(first, { type: 'EvaluateTeamEncumbrance', teamId: FIXTURE.teamId }, deps);
       const second = expectOk(r2, 'enc-2');
       assert(eventsOf(r2).length === 0, 'enc-idempotent: no messages on repeat');
       const secondId = createInventoryQuery(second, deps.reader).getEncumbranceResolution(FIXTURE.teamId)?.resolutionId;
@@ -273,14 +273,14 @@ const cases: readonly Case[] = [
         getCarryCapacity: (characterId) => ({ characterId, maximumWeight: 1, sourceRevisionKey: 'tight' }),
         isTeamTravelling: () => travelling,
       });
-      const deferred = expectOk(evaluateTeamEncumbrance(createFixtureState(), { teamId: FIXTURE.teamId }, deps), 'enc-travel');
+      const deferred = expectOk(evaluateTeamEncumbrance(createFixtureState(), { type: 'EvaluateTeamEncumbrance', teamId: FIXTURE.teamId }, deps), 'enc-travel');
       assert(
         createInventoryQuery(deferred, deps.reader).getEncumbranceResolution(FIXTURE.teamId)?.state === 'deferredDuringTravel',
         'enc-travel: deferred while travelling',
       );
       // Arrive: workflow re-sends EvaluateTeamEncumbrance; still overweight → awaitingPlayer.
       travelling = false;
-      const arrived = expectOk(evaluateTeamEncumbrance(deferred, { teamId: FIXTURE.teamId }, deps), 'enc-arrive');
+      const arrived = expectOk(evaluateTeamEncumbrance(deferred, { type: 'EvaluateTeamEncumbrance', teamId: FIXTURE.teamId }, deps), 'enc-arrive');
       assert(
         createInventoryQuery(arrived, deps.reader).getEncumbranceResolution(FIXTURE.teamId)?.state === 'awaitingPlayer',
         'enc-arrive: awaitingPlayer after arrival',
@@ -291,11 +291,11 @@ const cases: readonly Case[] = [
     name: 'evaluateTeamEncumbrance: not overweight closes existing resolution',
     run: () => {
       const tight = createFixtureDeps({ getCarryCapacity: (characterId) => ({ characterId, maximumWeight: 1, sourceRevisionKey: 'tight' }) });
-      const opened = expectOk(evaluateTeamEncumbrance(createFixtureState(), { teamId: FIXTURE.teamId }, tight), 'enc-open2');
+      const opened = expectOk(evaluateTeamEncumbrance(createFixtureState(), { type: 'EvaluateTeamEncumbrance', teamId: FIXTURE.teamId }, tight), 'enc-open2');
       assert(createInventoryQuery(opened, tight.reader).getEncumbranceResolution(FIXTURE.teamId) !== undefined, 'enc-close: opened first');
       // Now generous capacity → close.
       const roomy = createFixtureDeps();
-      const r = evaluateTeamEncumbrance(opened, { teamId: FIXTURE.teamId }, roomy);
+      const r = evaluateTeamEncumbrance(opened, { type: 'EvaluateTeamEncumbrance', teamId: FIXTURE.teamId }, roomy);
       const closed = expectOk(r, 'enc-close');
       assert(createInventoryQuery(closed, roomy.reader).getEncumbranceResolution(FIXTURE.teamId) === undefined, 'enc-close: resolution removed');
       assert(eventsOf(r).length === 1, 'enc-close: Closed event emitted');

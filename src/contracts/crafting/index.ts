@@ -196,18 +196,21 @@ export interface CraftingQuery {
 // ── §4 玩家 Game Command payload ────────────────────────────────────────
 // doc 以表格描述；欄位依前置條件/結果語意推導（見交接報告）。
 export type StartCraftingCommand = Readonly<{
+  type: 'startCrafting';
   characterId: CharacterId;
   recipeId: CraftingRecipeId;
   ingredientItemIds: ItemInstanceId[];
 }>;
 
 export type CookCuisineCommand = Readonly<{
+  type: 'cookCuisine';
   characterId: CharacterId;
   recipeId: CuisineRecipeId;
   ingredientItemIds: ItemInstanceId[];
 }>;
 
 export type EatRestaurantMealCommand = Readonly<{
+  type: 'eatRestaurantMeal';
   characterId: CharacterId;
   cityId: CityId;
   mealVariantId: RestaurantMealVariantId;
@@ -223,6 +226,7 @@ export type NpcCuisineDecisionDueJobPayload = Readonly<Record<string, never>>;
 
 // ── §5 輸出事件 payload ─────────────────────────────────────────────────
 export type CraftingCompletedEvent = Readonly<{
+  type: 'CraftingCompleted';
   characterId: CharacterId;
   recipeId: CraftingRecipeId;
   outcome: 'succeeded' | 'failed';
@@ -232,6 +236,7 @@ export type CraftingCompletedEvent = Readonly<{
 }>;
 
 export type FoodStatusChangedEvent = Readonly<{
+  type: 'FoodStatusChanged';
   characterId: CharacterId;
   state: 'applied' | 'expired';
   source: FoodStatusSource;
@@ -239,6 +244,7 @@ export type FoodStatusChangedEvent = Readonly<{
 }>;
 
 export type CuisineConsumedEvent = Readonly<{
+  type: 'CuisineConsumed';
   characterId: CharacterId;
   source: 'selfCooked' | 'restaurant';
   recipeId: CuisineRecipeId;

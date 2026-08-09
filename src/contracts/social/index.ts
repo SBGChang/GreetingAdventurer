@@ -101,6 +101,7 @@ export type PlayerConversationKind = 'partyChat' | 'tavernChat' | 'intel';
 export type PlayerAffinityChangeReason = 'provisioned' | 'conversation';
 
 export type PlayerConversationCompletedPayload = Readonly<{
+  type: 'PlayerConversationCompleted';
   interactionId: InteractionId;
   playerCharacterId: CharacterId;
   targetCharacterId?: CharacterId;
@@ -110,6 +111,7 @@ export type PlayerConversationCompletedPayload = Readonly<{
   affinityDelta: number;
 }>;
 export type PlayerAffinityChangedPayload = Readonly<{
+  type: 'PlayerAffinityChanged';
   adventurerId: CharacterId;
   oldValue?: number;
   newValue: number;

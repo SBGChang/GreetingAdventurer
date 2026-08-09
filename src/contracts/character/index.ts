@@ -254,12 +254,14 @@ export interface CharacterStatsQuery {
 // ──────────────────────────────────────────────────────────────────────────
 
 export type CreateQuestTemporaryCharacter = Readonly<{
+  type: 'CreateQuestTemporaryCharacter';
   kind: 'escort' | 'rescue';
   archetypeId: CharacterArchetypeId;
   sourceQuestId: QuestId;
 }>;
 
 export type CreateWorldAdventurerBatch = Readonly<{
+  type: 'CreateWorldAdventurerBatch';
   cityId: CityId;
   cultureId: CultureId;
   count: number;
@@ -268,17 +270,20 @@ export type CreateWorldAdventurerBatch = Readonly<{
 }>;
 
 export type ApplyCharacterReputationEffect = Readonly<{
+  type: 'ApplyCharacterReputationEffect';
   characterId: CharacterId;
   effectId: EffectDefinitionId;
   sourceId: EntitySourceRef;
 }>;
 
 export type CreatePartnerFamilyLink = Readonly<{
+  type: 'CreatePartnerFamilyLink';
   characterIds: readonly [CharacterId, CharacterId];
   sourceId: EntitySourceRef;
 }>;
 
 export type ApplyContentEventStatus = Readonly<{
+  type: 'ApplyContentEventStatus';
   contentEventInstanceId: ContentEventInstanceId;
   effectId: EffectDefinitionId;
   characterId: CharacterId;
@@ -286,6 +291,7 @@ export type ApplyContentEventStatus = Readonly<{
 }>;
 
 export type OpenCharacterRelationshipFact = Readonly<{
+  type: 'OpenCharacterRelationshipFact';
   subjectCharacterId: CharacterId;
   counterpart:
     | Readonly<{ kind: 'character'; characterId: CharacterId }>
@@ -295,11 +301,26 @@ export type OpenCharacterRelationshipFact = Readonly<{
 }>;
 
 export type ResolveCharacterRelationshipFact = Readonly<{
+  type: 'ResolveCharacterRelationshipFact';
   relationshipFactId: RelationshipFactId;
   sourceId: EntitySourceRef;
 }>;
 
+// B.5：本契約原本缺 Internal Command 與 DomainEvent 的聯集宣告，Router 無從得知
+// 「character 這個模組到底收送哪些訊息」。此處補齊；判別欄由各 payload 自帶。
+export type CharacterInternalCommand =
+  | CreateQuestTemporaryCharacter
+  | CreateWorldAdventurerBatch
+  | ApplyCharacterReputationEffect
+  | CreatePartnerFamilyLink
+  | ApplyContentEventStatus
+  | OpenCharacterRelationshipFact
+  | ResolveCharacterRelationshipFact
+  | ApplyCombatCondition
+  | ApplyFoodStatusEffects;
+
 export type ApplyCombatCondition = Readonly<{
+  type: 'ApplyCombatCondition';
   characterId: CharacterId;
   healthDelta?: number;
   manaDelta?: number;
@@ -307,6 +328,7 @@ export type ApplyCombatCondition = Readonly<{
 }>;
 
 export type ApplyFoodStatusEffects = Readonly<{
+  type: 'ApplyFoodStatusEffects';
   characterId: CharacterId;
   foodStatusRevision: Revision;
   operation: 'apply' | 'remove';
@@ -341,12 +363,14 @@ export type CharacterLifecycleJob = ScheduledJobBase<
 // ──────────────────────────────────────────────────────────────────────────
 
 export type CharacterCreatedEvent = Readonly<{
+  type: 'CharacterCreated';
   characterId: CharacterId;
   origin: CharacterOrigin;
   archetypeId: CharacterArchetypeId;
 }>;
 
 export type CharacterAvailabilityChangedEvent = Readonly<{
+  type: 'CharacterAvailabilityChanged';
   characterId: CharacterId;
   oldAvailability: CharacterAvailability;
   newAvailability: CharacterAvailability;
@@ -354,6 +378,7 @@ export type CharacterAvailabilityChangedEvent = Readonly<{
 }>;
 
 export type CharacterConditionChangedEvent = Readonly<{
+  type: 'CharacterConditionChanged';
   characterId: CharacterId;
   health: number;
   mana: number;
@@ -361,49 +386,70 @@ export type CharacterConditionChangedEvent = Readonly<{
 }>;
 
 export type CharacterDiedEvent = Readonly<{
+  type: 'CharacterDied';
   characterId: CharacterId;
   deathDay: WorldDay;
   reason: string;
 }>;
 
 export type CharacterBornEvent = Readonly<{
+  type: 'CharacterBorn';
   characterId: CharacterId;
   parentIds: readonly CharacterId[];
   birthDay: WorldDay;
 }>;
 
 export type CharacterBecameAdultEvent = Readonly<{
+  type: 'CharacterBecameAdult';
   characterId: CharacterId;
   ageDays: number;
 }>;
 
 export type CharacterRetiredEvent = Readonly<{
+  type: 'CharacterRetired';
   characterId: CharacterId;
   retiredOnDay: WorldDay;
 }>;
 
 export type TemporaryCharacterRecoveredEvent = Readonly<{
+  type: 'TemporaryCharacterRecovered';
   characterId: CharacterId;
   sourceQuestId: QuestId;
   reason: string;
 }>;
 
 export type CharacterReputationChangedEvent = Readonly<{
+  type: 'CharacterReputationChanged';
   characterId: CharacterId;
   oldValue: number;
   newValue: number;
 }>;
 
 export type CharacterRelationshipChangedEvent = Readonly<{
+  type: 'CharacterRelationshipChanged';
   relationshipFactId: RelationshipFactId;
   subjectCharacterId: CharacterId;
   state: RelationshipFactState;
 }>;
 
 export type FamilyLinkChangedEvent = Readonly<{
+  type: 'FamilyLinkChanged';
   familyLinkId: FamilyLinkId;
   kind: FamilyLinkKind;
   characterIds: readonly CharacterId[];
   change: 'created' | 'ended';
   worldDay: WorldDay;
 }>;
+
+export type CharacterDomainEvent =
+  | CharacterCreatedEvent
+  | CharacterAvailabilityChangedEvent
+  | CharacterConditionChangedEvent
+  | CharacterDiedEvent
+  | CharacterBornEvent
+  | CharacterBecameAdultEvent
+  | CharacterRetiredEvent
+  | TemporaryCharacterRecoveredEvent
+  | CharacterReputationChangedEvent
+  | CharacterRelationshipChangedEvent
+  | FamilyLinkChangedEvent;

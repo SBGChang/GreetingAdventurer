@@ -14,6 +14,8 @@
 import type {
   ModuleId,
   ModuleResult,
+  ModuleOutcome,
+  KernelRequest,
   TransactionMessageDraft,
   DomainEventDraft,
   InternalCommandDraft,
@@ -57,8 +59,12 @@ import type {
   ResolveDungeonInteraction,
   ConsumeDungeonGatheringAction,
   StartNpcDungeonRun,
+  DungeonOutboundInternalCommand,
 } from '../../contracts/dungeon';
 import type { MapContentKind, GridCell, NpcSequenceEntryView } from '../../contracts/map';
+// AssetDistributionRuleId 由 distribution 契約擁有（非 core）。
+import type { AssetDistributionRuleId } from '../../contracts/distribution';
+import type { CombatEncounterResolvedPayload } from '../../contracts/combat';
 
 import type { DungeonModuleState } from './state';
 import {
@@ -77,7 +83,7 @@ const MAP_MODULE_ID = 'map' as ModuleId;
 const COMBAT_MODULE_ID = 'combat' as ModuleId;
 const DISTRIBUTION_MODULE_ID = 'distribution' as ModuleId;
 const TEAM_MODULE_ID = 'team' as ModuleId;
-const WORLD_MODULE_ID = 'world' as ModuleId;
+// world 模組不再是跨午夜的接收者：世界日推進改走 ModuleResult.kernelRequests（見 advanceSessionTime）。
 
 // ──────────────────────────────────────────────────────────────────────────
 // 注入 Host Port（窄化 Query／Command port）與 Context
@@ -148,6 +154,9 @@ export type DungeonContext = Readonly<{
   minutesPerDungeonDay: number;
   // 目前生效的迷宮互動規則（traversalMinutesPerCell / redDoorOpenMinutes / trapResolverId）。
   interactionRuleId: InteractionRuleId;
+  // 迷宮戰利品分配規則（distribution 契約的 StartAssetDistribution 必填 ruleId；
+  // controllerPolicy/itemPolicy 由該 rule 定義，dungeon 只負責帶入綁定值）。
+  lootDistributionRuleId: AssetDistributionRuleId;
   // RNG context（NPC Run 快照用）。
   rng: RngContext;
   // ID 產生器。
@@ -165,7 +174,11 @@ function event<T>(payload: T): DomainEventDraft<T> {
   return { event: payload };
 }
 
-function internal(targetModule: ModuleId, command: unknown): InternalCommandDraft<unknown> {
+// B.5：外送命令以接收模組契約的真實型別為參數，讓編譯器在發送端就攔下 payload 不匹配。
+function internal(
+  targetModule: ModuleId,
+  command: DungeonOutboundInternalCommand,
+): InternalCommandDraft<unknown> {
   return { targetModule, command };
 }
 
@@ -173,14 +186,40 @@ function result(
   nextSlice: DungeonModuleState,
   outgoingMessages: readonly TransactionMessageDraft[] = [],
   scheduledJobs: ModuleResult<DungeonModuleState>['scheduledJobs'] = [],
+  kernelRequests: readonly KernelRequest[] = [],
 ): ModuleResult<DungeonModuleState> {
-  return { nextSlice, outgoingMessages, scheduledJobs };
+  return { nextSlice, outgoingMessages, scheduledJobs, kernelRequests };
 }
 
-// 前置條件不符：安全 no-op（不改 state、不外送）。真實 Composition 會由 Handler wrapper
-// 依 Command 種類轉為 CommandRejection；Internal Command 失敗整筆回滾（doc §5.3）。
+// Subscriber 專用：已發生事實不可拒絕（12_engine_runtime.md §7.2 rule 6），
+// 條件不符時安全略過並回傳未變 slice。可拒絕的 Handler 請用 reject()。
 function noop(state: DungeonModuleState): ModuleResult<DungeonModuleState> {
   return result(state);
+}
+
+// ── 可拒絕 Handler 的回傳（B.5：全模組統一為 contracts/core 的 ModuleOutcome）──
+//
+// 原本 dungeon 以「回傳未變 slice」表示前置條件不符，Transaction Runner 無法區分
+// 「成功但無變化」與「應拒絕並回滾」，玩家送出非法指令會被當成成功。改為顯式拒絕。
+export type DungeonHandlerResult = ModuleOutcome<DungeonModuleState>;
+
+function accept(
+  nextSlice: DungeonModuleState,
+  outgoingMessages: readonly TransactionMessageDraft[] = [],
+  scheduledJobs: ModuleResult<DungeonModuleState>['scheduledJobs'] = [],
+  kernelRequests: readonly KernelRequest[] = [],
+): DungeonHandlerResult {
+  return { ok: true, result: result(nextSlice, outgoingMessages, scheduledJobs, kernelRequests) };
+}
+
+function reject(
+  code: string,
+  details?: Readonly<Record<string, string | number | boolean>>,
+): DungeonHandlerResult {
+  return {
+    ok: false,
+    rejection: { code, sourceModule: DUNGEON_MODULE_ID, ...(details ? { details } : {}) },
+  };
 }
 
 function bump(revision: Revision): Revision {
@@ -200,6 +239,7 @@ function advanceSessionTime(
 ): Readonly<{
   session: PlayerExplorationSession;
   messages: readonly TransactionMessageDraft[];
+  kernelRequests: readonly KernelRequest[];
 }> {
   const before = session.elapsedDungeonMinutes;
   const after = (before + addMinutes) as DungeonMinute;
@@ -216,23 +256,26 @@ function advanceSessionTime(
 
   const messages: TransactionMessageDraft[] = [
     event({
-      kind: 'PlayerDungeonTimeAdvanced',
+      type: 'PlayerDungeonTimeAdvanced',
       teamId: session.teamId,
       minutes: addMinutes as DungeonMinute,
       worldDayCrossed: crossed ? true : undefined,
     }),
   ];
 
-  if (crossed) {
-    // 跨午夜推進請求。[INVENTED] core/world 尚未提供明確 advance 命令型別；此處以最小 kind
-    // 承載，由 kernel/world 於每日世界結算收斂。跨越多日時逐日推進到目標日。
-    const targetDay = (ctx.worldDay + (dayAfter - dayBefore)) as WorldDay;
-    messages.push(
-      internal(WORLD_MODULE_ID, { kind: 'AdvanceWorldToDay', targetDay }),
-    );
-  }
+  // 跨午夜：doc §3.1/§8「關閉目前分鐘片段並呼叫核心推進下一世界日」。
+  // 世界日由 Kernel 獨占寫入，world 模組不擁有它，故此處走 ModuleResult.kernelRequests，
+  // 不偽造 world 模組的 Internal Command。跨越多日時一次帶出目標日。
+  const kernelRequests: readonly KernelRequest[] = crossed
+    ? [
+        {
+          type: 'AdvanceWorldToDay',
+          targetDay: (ctx.worldDay + (dayAfter - dayBefore)) as WorldDay,
+        },
+      ]
+    : [];
 
-  return { session: nextSession, messages };
+  return { session: nextSession, messages, kernelRequests };
 }
 
 // 揭露一個房間到 Knowledge（若尚未揭露）；回傳新 state（含新建 Knowledge）。
@@ -268,10 +311,10 @@ export function startPlayerExploration(
   state: DungeonModuleState,
   teamId: TeamId,
   ctx: DungeonContext,
-): ModuleResult<DungeonModuleState> {
-  if (getPlayerSession(state, teamId) !== undefined) return noop(state); // 已有 Session。
+): DungeonHandlerResult {
+  if (getPlayerSession(state, teamId) !== undefined) return reject('dungeon.startPlayerExploration.preconditionFailed'); // 已有 Session。
   const mapId = ctx.team.getAdventureMap(teamId);
-  if (mapId === undefined) return noop(state); // 不在冒險地。
+  if (mapId === undefined) return reject('dungeon.startPlayerExploration.preconditionFailed'); // 不在冒險地。
 
   const mapVersion = ctx.map.getMapVersion(mapId);
   const entrance = ctx.map.getEntranceRoom(mapId);
@@ -301,19 +344,19 @@ export function startPlayerExploration(
   );
 
   const messages: TransactionMessageDraft[] = [
-    event({ kind: 'PlayerDungeonSessionStarted', teamId, mapId, mapVersion }),
+    event({ type: 'PlayerDungeonSessionStarted', teamId, mapId, mapVersion }),
     // 以正式成員快照建立 collecting 的玩家地牢 Distribution（doc §5.1、§8.2）。
     internal(DISTRIBUTION_MODULE_ID, {
-      kind: 'StartAssetDistribution',
+      type: 'StartAssetDistribution',
       distributionId,
       source: { kind: 'dungeonLoot', mapId },
       teamId,
       participantCharacterIds: members,
-      // controllerPolicy=playerAuction 由 rule 決定；ruleId 由 Composition 綁定。TODO: 帶入實際 ruleId。
+      ruleId: ctx.lootDistributionRuleId,
     }),
   ];
 
-  return result(revealed, messages);
+  return accept(revealed, messages);
 }
 
 // moveDungeonRoom：Session 為 exploring、目標房間可通行。計算分鐘、更新房間與入口小格、
@@ -323,11 +366,11 @@ export function moveDungeonRoom(
   teamId: TeamId,
   cmd: MoveDungeonRoom,
   ctx: DungeonContext,
-): ModuleResult<DungeonModuleState> {
+): DungeonHandlerResult {
   const session = getPlayerSession(state, teamId);
-  if (session === undefined || session.status !== 'exploring') return noop(state);
-  if (session.pendingInteraction !== undefined) return noop(state); // 內容互動中不可移動。
-  if (ctx.map.getMapVersion(session.mapId) !== session.mapVersion) return noop(state);
+  if (session === undefined || session.status !== 'exploring') return reject('dungeon.moveDungeonRoom.preconditionFailed');
+  if (session.pendingInteraction !== undefined) return reject('dungeon.moveDungeonRoom.preconditionFailed'); // 內容互動中不可移動。
+  if (ctx.map.getMapVersion(session.mapId) !== session.mapVersion) return reject('dungeon.moveDungeonRoom.preconditionFailed');
 
   const traversal = ctx.map.getRoomTraversal(
     session.mapId,
@@ -335,7 +378,7 @@ export function moveDungeonRoom(
     session.entryCell,
     cmd.targetRoomId,
   );
-  if (traversal === undefined) return noop(state); // 不可通行。
+  if (traversal === undefined) return reject('dungeon.moveDungeonRoom.preconditionFailed'); // 不可通行。
 
   const rule = ctx.reader.getDungeonInteractionRule(ctx.interactionRuleId);
   const minutes = traversal.cells * rule.traversalMinutesPerCell;
@@ -360,7 +403,7 @@ export function moveDungeonRoom(
 
   // TODO: 進入 armed 固定陷阱房間時，於同一交易 required ResolveMapTrap + 陷阱效果命令，
   //       並寫入 knownTrapIds（doc §8、§8.3）。第一版主路徑不含陷阱房。
-  return result(revealed, timed.messages);
+  return accept(revealed, timed.messages, [], timed.kernelRequests);
 }
 
 // openDungeonDoor：門連接目前房間、Map Version 相符。門仍關閉時支付一次開門分鐘並 required
@@ -370,17 +413,17 @@ export function openDungeonDoor(
   teamId: TeamId,
   cmd: OpenDungeonDoor,
   ctx: DungeonContext,
-): ModuleResult<DungeonModuleState> {
+): DungeonHandlerResult {
   const session = getPlayerSession(state, teamId);
-  if (session === undefined || session.status !== 'exploring') return noop(state);
-  if (ctx.map.getMapVersion(session.mapId) !== session.mapVersion) return noop(state);
+  if (session === undefined || session.status !== 'exploring') return reject('dungeon.openDungeonDoor.preconditionFailed');
+  if (ctx.map.getMapVersion(session.mapId) !== session.mapVersion) return reject('dungeon.openDungeonDoor.preconditionFailed');
 
   const link = ctx.map.getDoorLink(session.mapId, cmd.linkId);
-  if (link === undefined) return noop(state);
+  if (link === undefined) return reject('dungeon.openDungeonDoor.preconditionFailed');
   // 門必須連接目前房間。
   const connectsCurrent =
     link.fromRoomId === session.currentRoomId || link.toRoomId === session.currentRoomId;
-  if (!connectsCurrent) return noop(state);
+  if (!connectsCurrent) return reject('dungeon.openDungeonDoor.preconditionFailed');
 
   const otherRoomId =
     link.fromRoomId === session.currentRoomId ? link.toRoomId : link.fromRoomId;
@@ -390,7 +433,7 @@ export function openDungeonDoor(
     // 通道或已開紅門：揭露門後房間（若尚未），不扣分鐘。
     const entrance = ctx.map.getEntranceRoom(session.mapId);
     const revealed = revealRoom(state, ctx, teamId, session.mapId, otherRoomId, entrance.roomId);
-    return result(revealed);
+    return accept(revealed);
   }
 
   // 關閉的紅門：支付一次開門分鐘、required OpenMapDoor、永久揭露門後房間與連線（doc §8.3）。
@@ -413,7 +456,7 @@ export function openDungeonDoor(
   const messages: TransactionMessageDraft[] = [
     ...timed.messages,
     internal(MAP_MODULE_ID, {
-      kind: 'OpenMapDoor',
+      type: 'OpenMapDoor',
       teamId,
       mapId: session.mapId,
       mapVersion: session.mapVersion,
@@ -421,7 +464,7 @@ export function openDungeonDoor(
       openedOnDungeonMinute: timed.session.elapsedDungeonMinutes,
     }),
   ];
-  return result(next, messages);
+  return accept(next, messages, [], timed.kernelRequests);
 }
 
 // interactDungeonContent：玩家位於合法位置且內容可用。依互動類型建立 combat／內容處理 Internal
@@ -431,19 +474,19 @@ export function interactDungeonContent(
   teamId: TeamId,
   cmd: InteractDungeonContent,
   ctx: DungeonContext,
-): ModuleResult<DungeonModuleState> {
+): DungeonHandlerResult {
   const session = getPlayerSession(state, teamId);
-  if (session === undefined || session.status !== 'exploring') return noop(state);
-  if (session.pendingInteraction !== undefined) return noop(state);
-  if (!ctx.map.isContentAvailable(session.mapId, cmd.contentId)) return noop(state);
+  if (session === undefined || session.status !== 'exploring') return reject('dungeon.interactDungeonContent.preconditionFailed');
+  if (session.pendingInteraction !== undefined) return reject('dungeon.interactDungeonContent.preconditionFailed');
+  if (!ctx.map.isContentAvailable(session.mapId, cmd.contentId)) return reject('dungeon.interactDungeonContent.preconditionFailed');
 
   const kind = ctx.map.getContentKind(session.mapId, cmd.contentId);
-  if (kind === undefined) return noop(state);
+  if (kind === undefined) return reject('dungeon.interactDungeonContent.preconditionFailed');
 
   if (kind === 'monsterGroup' || kind === 'boss') {
     // 玩家詳細戰鬥交由 combat；Session 轉 inCombat（戰鬥本身不消耗迷宮分鐘，doc §8）。
     const encounterGroupId = ctx.map.getEncounterGroupId(session.mapId, cmd.contentId);
-    if (encounterGroupId === undefined) return noop(state);
+    if (encounterGroupId === undefined) return reject('dungeon.interactDungeonContent.preconditionFailed');
     const inCombat: PlayerExplorationSession = {
       ...session,
       status: 'inCombat',
@@ -451,20 +494,27 @@ export function interactDungeonContent(
     };
     const messages: TransactionMessageDraft[] = [
       internal(COMBAT_MODULE_ID, {
-        kind: 'StartCombatEncounter',
+        type: 'StartCombatEncounter',
         teamId,
-        mapId: session.mapId,
-        contentId: cmd.contentId,
-        encounterGroupId,
+        // combat 以 CombatEncounterSource 承載來源（不是攤平的 mapId/contentId）。
+        source: {
+          kind: 'mapContent',
+          mapId: session.mapId,
+          contentId: cmd.contentId,
+          encounterGroupId,
+        },
+        // 開戰站位快照版本：以 Session revision 作為本次進戰的快照序（combat 只用於冪等比對）。
+        participantSnapshotRevision: session.revision,
+        rngContext: ctx.rng,
       }),
     ];
-    return result(withPlayerSession(state, inCombat), messages);
+    return accept(withPlayerSession(state, inCombat), messages);
   }
 
   if (kind === 'mapEvent') {
     // 事件內容：建立 Pending Interaction，等待玩家選項（doc §5.1、§3.1）。
     const contentEventInstance = ctx.map.getContentEventInstance(session.mapId, cmd.contentId);
-    if (contentEventInstance === undefined) return noop(state);
+    if (contentEventInstance === undefined) return reject('dungeon.interactDungeonContent.preconditionFailed');
     const interactionId = ctx.nextInteractionId();
     const pending: PendingDungeonInteraction = {
       interactionId,
@@ -480,20 +530,20 @@ export function interactDungeonContent(
     };
     const messages: TransactionMessageDraft[] = [
       event({
-        kind: 'PlayerInteractionOpened',
+        type: 'PlayerInteractionOpened',
         interactionId,
         teamId,
         interactionKind: 'dungeonEvent',
       }),
     ];
-    return result(withPlayerSession(state, nextSession), messages);
+    return accept(withPlayerSession(state, nextSession), messages);
   }
 
   // chest / control / kidnap 等：直接要求 Map 處理內容（doc §6.1 ResolvePlayerMapContent）。
   // TODO: control / kidnap 需先解決守衛內容；第一版主路徑只處理直接可取的 chest。
   const messages: TransactionMessageDraft[] = [
     internal(MAP_MODULE_ID, {
-      kind: 'ResolvePlayerMapContent',
+      type: 'ResolvePlayerMapContent',
       teamId,
       mapId: session.mapId,
       contentId: cmd.contentId,
@@ -501,7 +551,7 @@ export function interactDungeonContent(
       resolution: { resolverId: defaultResolverId(), outcome: 'success' },
     }),
   ];
-  return result(state, messages);
+  return accept(state, messages);
 }
 
 // resolveDungeonInteraction：Session 有匹配 Pending Interaction、選項仍合法。套用資料化結果、
@@ -511,11 +561,11 @@ export function resolveDungeonInteraction(
   teamId: TeamId,
   cmd: ResolveDungeonInteraction,
   ctx: DungeonContext,
-): ModuleResult<DungeonModuleState> {
+): DungeonHandlerResult {
   const session = getPlayerSession(state, teamId);
-  if (session === undefined) return noop(state);
+  if (session === undefined) return reject('dungeon.resolveDungeonInteraction.preconditionFailed');
   const pending = session.pendingInteraction;
-  if (pending === undefined || pending.interactionId !== cmd.interactionId) return noop(state);
+  if (pending === undefined || pending.interactionId !== cmd.interactionId) return reject('dungeon.resolveDungeonInteraction.preconditionFailed');
 
   // TODO: 依 contentEventInstance 的選項表驗證 optionId 合法性並解析資料化結果（分支效果／戰鬥／
   //       物品）。第一版主路徑只清除互動並要求 Map 依選項套用內容結果。
@@ -527,7 +577,7 @@ export function resolveDungeonInteraction(
   };
   const messages: TransactionMessageDraft[] = [
     internal(MAP_MODULE_ID, {
-      kind: 'ResolvePlayerMapContent',
+      type: 'ResolvePlayerMapContent',
       teamId,
       mapId: session.mapId,
       contentId: pending.contentId,
@@ -539,7 +589,7 @@ export function resolveDungeonInteraction(
       },
     }),
   ];
-  return result(withPlayerSession(state, restored), messages);
+  return accept(withPlayerSession(state, restored), messages);
 }
 
 // useDungeonExit：Session 位於合法出口房間、無戰鬥或內容互動。轉 leaving 並關閉 Distribution
@@ -549,12 +599,12 @@ export function useDungeonExit(
   teamId: TeamId,
   cmd: UseDungeonExit,
   ctx: DungeonContext,
-): ModuleResult<DungeonModuleState> {
+): DungeonHandlerResult {
   const session = getPlayerSession(state, teamId);
-  if (session === undefined || session.status !== 'exploring') return noop(state);
-  if (session.pendingInteraction !== undefined) return noop(state);
-  if (session.currentRoomId !== cmd.exitRoomId) return noop(state);
-  if (!ctx.map.isExitRoom(session.mapId, cmd.exitRoomId)) return noop(state);
+  if (session === undefined || session.status !== 'exploring') return reject('dungeon.useDungeonExit.preconditionFailed');
+  if (session.pendingInteraction !== undefined) return reject('dungeon.useDungeonExit.preconditionFailed');
+  if (session.currentRoomId !== cmd.exitRoomId) return reject('dungeon.useDungeonExit.preconditionFailed');
+  if (!ctx.map.isExitRoom(session.mapId, cmd.exitRoomId)) return reject('dungeon.useDungeonExit.preconditionFailed');
 
   const leaving: PlayerExplorationSession = {
     ...session,
@@ -563,11 +613,11 @@ export function useDungeonExit(
   };
   const messages: TransactionMessageDraft[] = [
     internal(DISTRIBUTION_MODULE_ID, {
-      kind: 'FinalizeAssetDistributionCollection',
+      type: 'FinalizeAssetDistributionCollection',
       distributionId: session.distributionId,
     }),
   ];
-  return result(withPlayerSession(state, leaving), messages);
+  return accept(withPlayerSession(state, leaving), messages);
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -580,21 +630,21 @@ export function consumeDungeonGatheringAction(
   state: DungeonModuleState,
   cmd: ConsumeDungeonGatheringAction,
   ctx: DungeonContext,
-): ModuleResult<DungeonModuleState> {
+): DungeonHandlerResult {
   const session = getPlayerSession(state, cmd.teamId);
-  if (session === undefined || session.status !== 'exploring') return noop(state);
-  if (session.mapId !== cmd.mapId) return noop(state);
-  if (session.mapVersion !== cmd.mapVersion) return noop(state);
-  if (ctx.map.getMapVersion(cmd.mapId) !== cmd.mapVersion) return noop(state);
-  if (session.pendingInteraction !== undefined) return noop(state); // 阻塞狀態。
-  if (!ctx.map.isGatheringNodeAvailable(cmd.mapId, cmd.nodeId)) return noop(state);
+  if (session === undefined || session.status !== 'exploring') return reject('dungeon.consumeDungeonGatheringAction.preconditionFailed');
+  if (session.mapId !== cmd.mapId) return reject('dungeon.consumeDungeonGatheringAction.preconditionFailed');
+  if (session.mapVersion !== cmd.mapVersion) return reject('dungeon.consumeDungeonGatheringAction.preconditionFailed');
+  if (ctx.map.getMapVersion(cmd.mapId) !== cmd.mapVersion) return reject('dungeon.consumeDungeonGatheringAction.preconditionFailed');
+  if (session.pendingInteraction !== undefined) return reject('dungeon.consumeDungeonGatheringAction.preconditionFailed'); // 阻塞狀態。
+  if (!ctx.map.isGatheringNodeAvailable(cmd.mapId, cmd.nodeId)) return reject('dungeon.consumeDungeonGatheringAction.preconditionFailed');
 
   const ruleId = ctx.map.getGatheringNodeRuleId(cmd.mapId, cmd.nodeId);
-  if (ruleId === undefined) return noop(state);
+  if (ruleId === undefined) return reject('dungeon.consumeDungeonGatheringAction.preconditionFailed');
   const minutes = ctx.reader.getGatheringInteractionView(ruleId).dungeonInteractionMinutes;
 
   const timed = advanceSessionTime(session, minutes, ctx);
-  return result(withPlayerSession(state, timed.session), timed.messages);
+  return accept(withPlayerSession(state, timed.session), timed.messages, [], timed.kernelRequests);
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -608,7 +658,7 @@ export function startNpcDungeonRun(
   cmd: StartNpcDungeonRun,
   ctx: DungeonContext,
   explorationRuleId: NpcDungeonRun['explorationRuleId'],
-): ModuleResult<DungeonModuleState> {
+): DungeonHandlerResult {
   const mapVersion = ctx.map.getMapVersion(cmd.mapId);
   const sequence = ctx.map.listNpcSequence(cmd.mapId);
   const hasMonster = sequence.some((e) => e.kind === 'mapContent');
@@ -643,11 +693,12 @@ export function startNpcDungeonRun(
 
   const messages: TransactionMessageDraft[] = [
     internal(DISTRIBUTION_MODULE_ID, {
-      kind: 'StartAssetDistribution',
+      type: 'StartAssetDistribution',
       distributionId,
       source: { kind: 'dungeonLoot', mapId: cmd.mapId, runId },
       teamId: cmd.teamId,
       participantCharacterIds: members,
+      ruleId: ctx.lootDistributionRuleId,
     }),
   ];
 
@@ -664,7 +715,7 @@ export function startNpcDungeonRun(
     },
   ];
 
-  return result(withNpcRun(state, run), messages, jobs);
+  return accept(withNpcRun(state, run), messages, jobs);
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -683,17 +734,17 @@ export function npcDungeonDay(
   state: DungeonModuleState,
   runId: NpcDungeonRunId,
   ctx: DungeonContext,
-): ModuleResult<DungeonModuleState> {
+): DungeonHandlerResult {
   const run = state.npcRuns[runId];
-  if (run === undefined || run.status !== 'exploring') return noop(state); // settling/closed 不再排（不變量 §3.4.6）。
+  if (run === undefined || run.status !== 'exploring') return reject('dungeon.npcDungeonDay.preconditionFailed'); // settling/closed 不再排（不變量 §3.4.6）。
 
   // 驗證 Team 仍在 Map 且版本相符；否則安全失效（doc §7.2、§5.4 TeamLocationChanged/MapRefreshed）。
   if (!ctx.team.isTeamInMap(run.teamId, run.mapId) || ctx.map.getMapVersion(run.mapId) !== run.mapVersion) {
     const invalid: NpcDungeonRun = { ...run, status: 'invalid', lastProcessedOnDay: ctx.worldDay, revision: bump(run.revision) };
     const messages: TransactionMessageDraft[] = [
-      event({ kind: 'NpcDungeonRunClosed', runId, teamId: run.teamId, reason: 'invalid' }),
+      event({ type: 'NpcDungeonRunClosed', runId, teamId: run.teamId, reason: 'invalid' }),
     ];
-    return result(withNpcRun(state, invalid), messages);
+    return accept(withNpcRun(state, invalid), messages);
   }
 
   const rule = ctx.reader.getNpcExplorationRule(run.explorationRuleId);
@@ -750,7 +801,7 @@ export function npcDungeonDay(
     };
     const messages: TransactionMessageDraft[] = [
       event({
-        kind: 'NpcDungeonRunProgressed',
+        type: 'NpcDungeonRunProgressed',
         runId,
         processedTargetRefs: processedRefs,
         nextCursor: cursor,
@@ -768,7 +819,7 @@ export function npcDungeonDay(
         payload: {},
       },
     ];
-    return result(withNpcRun(state, progressed), messages, jobs);
+    return accept(withNpcRun(state, progressed), messages, jobs);
   }
 
   // 進入 settling：停止（無）Combat Sequence 後 required ApplyNpcDungeonSettlement（doc §7、§7.1）。
@@ -782,14 +833,14 @@ export function npcDungeonDay(
   };
   const messages: TransactionMessageDraft[] = [
     event({
-      kind: 'NpcDungeonRunProgressed',
+      type: 'NpcDungeonRunProgressed',
       runId,
       processedTargetRefs: processedRefs,
       nextCursor: cursor,
       remainingPoints,
     }),
     internal(MAP_MODULE_ID, {
-      kind: 'ApplyNpcDungeonSettlement',
+      type: 'ApplyNpcDungeonSettlement',
       runId,
       mapId: run.mapId,
       mapVersion: run.mapVersion,
@@ -797,7 +848,7 @@ export function npcDungeonDay(
       pendingResults: mergedResults,
     }),
   ];
-  return result(withNpcRun(state, settling), messages);
+  return accept(withNpcRun(state, settling), messages);
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -813,7 +864,7 @@ function tryCloseRun(
   if (p.mapApplied && p.combatSequenceSettled && p.distributionCompleted && run.status !== 'closed') {
     const closed: NpcDungeonRun = { ...run, status: 'closed', revision: bump(run.revision) };
     const messages: TransactionMessageDraft[] = [
-      event({ kind: 'NpcDungeonRunClosed', runId: run.runId, teamId: run.teamId, reason: 'completed' }),
+      event({ type: 'NpcDungeonRunClosed', runId: run.runId, teamId: run.teamId, reason: 'completed' }),
     ];
     // TODO: Run 關閉後才送出 ReleaseCombatSequence（doc §6.1）。
     return result(withNpcRun(state, closed), messages);
@@ -837,7 +888,7 @@ export function handleNpcDungeonSettlementApplied(
   // TODO: 依 appliedResults 逐筆 AppendAssetDistributionResult（正式 Item/Currency）；此處只關閉收集。
   const messages: TransactionMessageDraft[] = [
     internal(DISTRIBUTION_MODULE_ID, {
-      kind: 'FinalizeAssetDistributionCollection',
+      type: 'FinalizeAssetDistributionCollection',
       distributionId: run.distributionId,
     }),
   ];
@@ -891,18 +942,19 @@ export function handleAssetDistributionCompleted(
       const completion = ctx.map.getExplorationCompletion(session.mapId);
       const messages: TransactionMessageDraft[] = [
         event({
-          kind: 'MapExplorationCompleted',
+          type: 'MapExplorationCompleted',
           teamId: session.teamId,
           mapId: session.mapId,
           mapVersion: session.mapVersion,
           explorationKey: completion.explorationKey,
           experienceRuleId: completion.experienceRuleId,
         }),
+        // team 契約的 StartReturnFromDungeon 只吃 teamId + mapId；離場城市由 team 自行
+        // 以 TeamWorldReader.getMapExitCity(mapId) 解析，不由 dungeon 傳出口房間。
         internal(TEAM_MODULE_ID, {
-          kind: 'StartReturnFromDungeon',
+          type: 'StartReturnFromDungeon',
           teamId: session.teamId,
           mapId: session.mapId,
-          exitId: session.currentRoomId,
         }),
       ];
       return result(withPlayerSession(state, closed), messages);
@@ -919,6 +971,49 @@ export function handleAssetDistributionCompleted(
 // 第一版預設 resolver 佔位；真實 resolver 由內容 Definition 指定（doc §2）。
 function defaultResolverId(): ResolverId {
   return 'resolver:dungeon-default' as ResolverId;
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// CombatEncounterResolved 訂閱者（doc §5.4 表：「對玩家內容處理結果發出 Map 請求，
+// 或將 Session 從 inCombat 恢復」）
+//
+// B.5：11_combat_module.md §432 寫「combat 送 ResolvePlayerMapContent」，但該命令必填
+// `distributionId`，而 distributionId 屬於 Dungeon Session（combat 無從取得），
+// 03_dungeon_module.md §310 也把這筆列為 dungeon 的外送命令。兩份文件衝突，取
+// 「擁有資料的一方發送」：combat 只發已發生事實 CombatEncounterResolved，dungeon 在此收斂。
+// 本模組原本宣告了這個訂閱卻沒有實作，玩家戰鬥勝利後地圖內容永遠不會被標記為已處理。
+// ──────────────────────────────────────────────────────────────────────────
+
+export function handleCombatEncounterResolved(
+  state: DungeonModuleState,
+  event: CombatEncounterResolvedPayload,
+): ModuleResult<DungeonModuleState> {
+  const session = getPlayerSession(state, event.teamId);
+  if (session === undefined || session.status !== 'inCombat') return noop(state);
+
+  // 戰鬥結束一律讓 Session 回到探索狀態（勝敗皆然）。
+  const restored: PlayerExplorationSession = {
+    ...session,
+    status: 'exploring',
+    revision: bump(session.revision),
+  };
+  const next = withPlayerSession(state, restored);
+
+  // 只有「來源為本圖內容 + 勝利」才正式處理該內容（doc §5.4 與 11 §432 的同一條件）。
+  const source = event.source;
+  if (event.outcome !== 'victory' || source.kind !== 'mapContent') return result(next);
+  if (source.mapId !== session.mapId) return result(next);
+
+  return result(next, [
+    internal(MAP_MODULE_ID, {
+      type: 'ResolvePlayerMapContent',
+      teamId: event.teamId,
+      mapId: session.mapId,
+      contentId: source.contentId,
+      distributionId: session.distributionId,
+      resolution: { resolverId: defaultResolverId(), outcome: 'success' },
+    }),
+  ]);
 }
 
 // Dungeon 不自訂事件重算以外的 Subscriber；此清單供 Composition 驗證訂閱綁定。

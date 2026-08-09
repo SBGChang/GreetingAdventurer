@@ -267,6 +267,7 @@ export interface InventoryQuery {
 
 // ── Player Game Command payloads ────────────────────────────────────────────
 export type EquipItem = Readonly<{
+  type: 'equipItem';
   characterId: CharacterId;
   itemId: ItemInstanceId;
   slotId: EquipmentSlotId;
@@ -274,12 +275,14 @@ export type EquipItem = Readonly<{
 }>;
 
 export type UnequipItem = Readonly<{
+  type: 'unequipItem';
   characterId: CharacterId;
   slotId: EquipmentSlotId;
   weaponSetId?: WeaponSetId;
 }>;
 
 export type ConfigureWeaponSet = Readonly<{
+  type: 'configureWeaponSet';
   characterId: CharacterId;
   weaponSetId: WeaponSetId;
   mainHandItemId?: ItemInstanceId;
@@ -288,16 +291,19 @@ export type ConfigureWeaponSet = Readonly<{
 }>;
 
 export type UseItem = Readonly<{
+  type: 'useItem';
   characterId: CharacterId;
   itemId: ItemInstanceId;
 }>;
 
 export type SplitStack = Readonly<{
+  type: 'splitStack';
   itemId: ItemInstanceId;
   quantity: number;
 }>;
 
 export type TransferItemForEncumbrance = Readonly<{
+  type: 'transferItemForEncumbrance';
   resolutionId: EncumbranceResolutionId;
   itemId: ItemInstanceId;
   fromCharacterId: CharacterId;
@@ -305,6 +311,7 @@ export type TransferItemForEncumbrance = Readonly<{
 }>;
 
 export type StoreItemForEncumbrance = Readonly<{
+  type: 'storeItemForEncumbrance';
   resolutionId: EncumbranceResolutionId;
   itemId: ItemInstanceId;
   characterId: CharacterId;
@@ -312,11 +319,13 @@ export type StoreItemForEncumbrance = Readonly<{
 }>;
 
 export type AbandonItemForEncumbrance = Readonly<{
+  type: 'abandonItemForEncumbrance';
   resolutionId: EncumbranceResolutionId;
   itemId: ItemInstanceId;
 }>;
 
 export type ReassignQuestCargoCarrierForEncumbrance = Readonly<{
+  type: 'reassignQuestCargoCarrierForEncumbrance';
   resolutionId: EncumbranceResolutionId;
   itemId: ItemInstanceId;
   newCarrierCharacterId: CharacterId;
@@ -335,6 +344,7 @@ export type InventoryGameCommand =
 
 // ── Internal Command payloads (handled by inventory) ────────────────────────
 export type CreateItemInstance = Readonly<{
+  type: 'CreateItemInstance';
   definitionId: ItemDefinitionId;
   quantity: number;
   location: ItemLocation;
@@ -343,11 +353,13 @@ export type CreateItemInstance = Readonly<{
 }>;
 
 export type RemoveItemInstance = Readonly<{
+  type: 'RemoveItemInstance';
   itemId: ItemInstanceId;
   reason: ItemRemovalReason;
 }>;
 
 export type TransferItem = Readonly<{
+  type: 'TransferItem';
   itemId: ItemInstanceId;
   to: ItemLocation;
   newOwnerCharacterId?: CharacterId;
@@ -355,22 +367,26 @@ export type TransferItem = Readonly<{
 }>;
 
 export type ReserveQuestItem = Readonly<{
+  type: 'ReserveQuestItem';
   itemId: ItemInstanceId;
   questId: QuestId;
 }>;
 
 export type ReserveCraftingInputs = Readonly<{
+  type: 'ReserveCraftingInputs';
   craftingAttemptId: CraftingAttemptId;
   itemIds: readonly ItemInstanceId[];
 }>;
 
 export type ApplyQuestItemLifecycle = Readonly<{
+  type: 'ApplyQuestItemLifecycle';
   itemId: ItemInstanceId;
   questId: QuestId;
   action: 'remove' | 'releaseAndKeep' | 'reclaim';
 }>;
 
 export type MoveItemToTeamQuestCargo = Readonly<{
+  type: 'MoveItemToTeamQuestCargo';
   itemId: ItemInstanceId;
   questId: QuestId;
   teamId: TeamId;
@@ -378,16 +394,19 @@ export type MoveItemToTeamQuestCargo = Readonly<{
 }>;
 
 export type ReleaseExpiredQuestCargo = Readonly<{
+  type: 'ReleaseExpiredQuestCargo';
   questId: QuestId;
   distributionId: AssetDistributionId;
 }>;
 
 export type ConsumeBookForLearning = Readonly<{
+  type: 'ConsumeBookForLearning';
   bookItemId: ItemInstanceId;
   characterId: CharacterId;
 }>;
 
 export type TransformCraftingItems = Readonly<{
+  type: 'TransformCraftingItems';
   craftingAttemptId: CraftingAttemptId;
   consumedIngredientItemIds: readonly ItemInstanceId[];
   returnedIngredientItemIds: readonly ItemInstanceId[];
@@ -399,16 +418,19 @@ export type TransformCraftingItems = Readonly<{
 }>;
 
 export type ConsumeCuisineIngredients = Readonly<{
+  type: 'ConsumeCuisineIngredients';
   characterId: CharacterId;
   ingredientItemIds: readonly ItemInstanceId[];
 }>;
 
 export type CommitCombatItemUse = Readonly<{
+  type: 'CommitCombatItemUse';
   itemId: ItemInstanceId;
   userId: CharacterId;
 }>;
 
 export type ConsumeCombatSequenceRetrySupply = Readonly<{
+  type: 'ConsumeCombatSequenceRetrySupply';
   sequenceId: CombatSequenceId;
   challengeId: CombatSequenceChallengeId;
   participantCharacterId: CharacterId;
@@ -416,6 +438,7 @@ export type ConsumeCombatSequenceRetrySupply = Readonly<{
 }>;
 
 export type EvaluateTeamEncumbrance = Readonly<{
+  type: 'EvaluateTeamEncumbrance';
   teamId: TeamId;
 }>;
 
@@ -437,6 +460,7 @@ export type InventoryInternalCommand =
 
 // ── Domain Event payloads (emitted by inventory) ────────────────────────────
 export type ItemInstanceCreated = Readonly<{
+  type: 'ItemInstanceCreated';
   itemId: ItemInstanceId;
   definitionId: ItemDefinitionId;
   ownerCharacterId?: CharacterId;
@@ -444,6 +468,7 @@ export type ItemInstanceCreated = Readonly<{
 }>;
 
 export type InventoryTransferred = Readonly<{
+  type: 'InventoryTransferred';
   itemId: ItemInstanceId;
   from: ItemLocation;
   to: ItemLocation;
@@ -453,23 +478,27 @@ export type InventoryTransferred = Readonly<{
 }>;
 
 export type ItemReservationChanged = Readonly<{
+  type: 'ItemReservationChanged';
   itemId: ItemInstanceId;
   reservation?: ItemReservation;
 }>;
 
 export type ItemConsumed = Readonly<{
+  type: 'ItemConsumed';
   itemId: ItemInstanceId;
   quantity: number;
   reason: string;
 }>;
 
 export type ItemRemoved = Readonly<{
+  type: 'ItemRemoved';
   itemId: ItemInstanceId;
   previousLocation: ItemLocation;
   reason: ItemRemovalReason;
 }>;
 
 export type EquipmentChanged = Readonly<{
+  type: 'EquipmentChanged';
   characterId: CharacterId;
   slotId: EquipmentSlotId;
   weaponSetId?: WeaponSetId;
@@ -477,6 +506,7 @@ export type EquipmentChanged = Readonly<{
 }>;
 
 export type WeaponSetConfigured = Readonly<{
+  type: 'WeaponSetConfigured';
   characterId: CharacterId;
   weaponSetId: WeaponSetId;
   itemIds: readonly ItemInstanceId[];
@@ -484,6 +514,7 @@ export type WeaponSetConfigured = Readonly<{
 }>;
 
 export type CombatItemUseCommitted = Readonly<{
+  type: 'CombatItemUseCommitted';
   itemId: ItemInstanceId;
   userId: CharacterId;
   useDelayRuleId?: UseDelayRuleId;
@@ -491,6 +522,7 @@ export type CombatItemUseCommitted = Readonly<{
 }>;
 
 export type CombatSequenceRetrySupplyConsumed = Readonly<{
+  type: 'CombatSequenceRetrySupplyConsumed';
   sequenceId: CombatSequenceId;
   challengeId: CombatSequenceChallengeId;
   itemId: ItemInstanceId;
@@ -499,6 +531,7 @@ export type CombatSequenceRetrySupplyConsumed = Readonly<{
 }>;
 
 export type BookUseCommittedForLearning = Readonly<{
+  type: 'BookUseCommittedForLearning';
   itemId: ItemInstanceId;
   characterId: CharacterId;
   knowledgeId: CharacterKnowledgeId;
@@ -506,12 +539,14 @@ export type BookUseCommittedForLearning = Readonly<{
 }>;
 
 export type CraftingItemsTransformed = Readonly<{
+  type: 'CraftingItemsTransformed';
   inputItemIds: readonly ItemInstanceId[];
   outputItemIds: readonly ItemInstanceId[];
   recipeId: CraftingRecipeId;
 }>;
 
 export type EncumbranceResolutionOpened = Readonly<{
+  type: 'EncumbranceResolutionOpened';
   resolutionId: EncumbranceResolutionId;
   teamId: TeamId;
   overweightCharacterIds: readonly CharacterId[];
@@ -519,6 +554,7 @@ export type EncumbranceResolutionOpened = Readonly<{
 }>;
 
 export type EncumbranceResolutionClosed = Readonly<{
+  type: 'EncumbranceResolutionClosed';
   resolutionId: EncumbranceResolutionId;
   teamId: TeamId;
 }>;

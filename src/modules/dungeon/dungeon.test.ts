@@ -8,9 +8,10 @@
 //   - 玩家採集：ConsumeDungeonGatheringAction 依資料增加分鐘（§9.16）。
 //   - NPC Run：npcDungeonDay 依序列推進游標並在全清後進入 settling，三方結算後關閉（§9.3、§9.14、§9.22）。
 
-import type { AssetDistributionId, NpcDungeonRunId } from '../../contracts/core';
+import type { AssetDistributionId, ModuleResult, NpcDungeonRunId } from '../../contracts/core';
 import type { MoveDungeonRoom, ConsumeDungeonGatheringAction, StartNpcDungeonRun } from '../../contracts/dungeon';
 
+import type { DungeonModuleState } from './state';
 import { createInitialDungeonState } from './state';
 import {
   moveDungeonRoom,
@@ -20,29 +21,36 @@ import {
   handleNpcDungeonSettlementApplied,
   handleAssetDistributionCompleted,
 } from './system';
+import type { DungeonHandlerResult } from './system';
 import { createFixtureState, createFixtureContext, FIXTURE } from './fixtures';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
 
-// 取出外送訊息中的 event.kind 清單。
+// 可拒絕 Handler 現在回傳 ModuleOutcome；測試主路徑一律預期 accept。
+function ok(r: DungeonHandlerResult): ModuleResult<DungeonModuleState> {
+  if (!r.ok) throw new Error(`expected accept, got rejection: ${r.rejection.code}`);
+  return r.result;
+}
+
+// 取出外送訊息中的 event.type 清單。
 function eventKinds(messages: readonly unknown[]): string[] {
   const out: string[] = [];
   for (const m of messages) {
-    const ev = (m as { event?: { kind?: string } }).event;
-    if (ev && typeof ev.kind === 'string') out.push(ev.kind);
+    const ev = (m as { event?: { type?: string } }).event;
+    if (ev && typeof ev.type === 'string') out.push(ev.type);
   }
   return out;
 }
 
-// 取出外送訊息中的 internal command.kind 清單。
+// 取出外送訊息中的 internal command.type 清單。
 function internalKinds(messages: readonly unknown[]): string[] {
   const out: string[] = [];
   for (const m of messages) {
-    const cmd = (m as { targetModule?: unknown; command?: { kind?: string } });
-    if (cmd.targetModule !== undefined && cmd.command && typeof cmd.command.kind === 'string') {
-      out.push(cmd.command.kind);
+    const cmd = (m as { targetModule?: unknown; command?: { type?: string } });
+    if (cmd.targetModule !== undefined && cmd.command && typeof cmd.command.type === 'string') {
+      out.push(cmd.command.type);
     }
   }
   return out;
@@ -56,8 +64,8 @@ const cases: readonly Case[] = [
     run: () => {
       const ctx = createFixtureContext();
       const s0 = createFixtureState();
-      const cmd: MoveDungeonRoom = { kind: 'moveDungeonRoom', targetRoomId: FIXTURE.roomMiddle };
-      const r = moveDungeonRoom(s0, FIXTURE.teamId, cmd, ctx);
+      const cmd: MoveDungeonRoom = { type: 'moveDungeonRoom', targetRoomId: FIXTURE.roomMiddle };
+      const r = ok(moveDungeonRoom(s0, FIXTURE.teamId, cmd, ctx));
       const session = r.nextSlice.playerSessions[FIXTURE.teamId];
       assert(session !== undefined, 'session exists');
       // R1→R2 = 2 cells × 30 = 60 分鐘。
@@ -66,7 +74,7 @@ const cases: readonly Case[] = [
       const kinds = eventKinds(r.outgoingMessages);
       assert(kinds.includes('PlayerDungeonTimeAdvanced'), 'emits PlayerDungeonTimeAdvanced');
       // 60 < 100（迷宮日長）→ 未跨午夜。
-      assert(!internalKinds(r.outgoingMessages).includes('AdvanceWorldToDay'), 'no world advance yet');
+      assert((r.kernelRequests ?? []).length === 0, 'no world advance yet');
       // R2 揭露。
       const knowledge = Object.values(r.nextSlice.playerMapKnowledge)[0];
       assert(knowledge?.revealedRoomIds.includes(FIXTURE.roomMiddle) === true, 'R2 revealed');
@@ -78,27 +86,33 @@ const cases: readonly Case[] = [
       const ctx = createFixtureContext();
       const s0 = createFixtureState();
       // 第一步 R1→R2（elapsed 60）。
-      const r1 = moveDungeonRoom(
-        s0,
-        FIXTURE.teamId,
-        { kind: 'moveDungeonRoom', targetRoomId: FIXTURE.roomMiddle },
-        ctx,
+      const r1 = ok(
+        moveDungeonRoom(
+          s0,
+          FIXTURE.teamId,
+          { type: 'moveDungeonRoom', targetRoomId: FIXTURE.roomMiddle },
+          ctx,
+        ),
       );
       // 第二步 R2→R3（+60 → 120 跨越 100 邊界）。
-      const r2 = moveDungeonRoom(
-        r1.nextSlice,
-        FIXTURE.teamId,
-        { kind: 'moveDungeonRoom', targetRoomId: FIXTURE.roomExit },
-        ctx,
+      const r2 = ok(
+        moveDungeonRoom(
+          r1.nextSlice,
+          FIXTURE.teamId,
+          { type: 'moveDungeonRoom', targetRoomId: FIXTURE.roomExit },
+          ctx,
+        ),
       );
       const session = r2.nextSlice.playerSessions[FIXTURE.teamId];
       assert(session!.elapsedDungeonMinutes === 120, `elapsed 120 (got ${session!.elapsedDungeonMinutes})`);
-      const advances = internalKinds(r2.outgoingMessages).filter((k) => k === 'AdvanceWorldToDay');
+      // 跨午夜走 ModuleResult.kernelRequests（world 模組不擁有世界日）。
+      const advances = (r2.kernelRequests ?? []).filter((k) => k.type === 'AdvanceWorldToDay');
       assert(advances.length === 1, `exactly one world advance (got ${advances.length})`);
+      assert(advances[0]!.targetDay === ctx.worldDay + 1, 'advances exactly one day');
       // 事件標記跨午夜。
       const timeEvent = r2.outgoingMessages
-        .map((m) => (m as { event?: { kind?: string; worldDayCrossed?: boolean } }).event)
-        .find((e) => e?.kind === 'PlayerDungeonTimeAdvanced');
+        .map((m) => (m as { event?: { type?: string; worldDayCrossed?: boolean } }).event)
+        .find((e) => e?.type === 'PlayerDungeonTimeAdvanced');
       assert(timeEvent?.worldDayCrossed === true, 'worldDayCrossed=true');
     },
   },
@@ -108,13 +122,13 @@ const cases: readonly Case[] = [
       const ctx = createFixtureContext();
       const s0 = createFixtureState();
       const cmd: ConsumeDungeonGatheringAction = {
-        kind: 'ConsumeDungeonGatheringAction',
+        type: 'ConsumeDungeonGatheringAction',
         teamId: FIXTURE.teamId,
         mapId: FIXTURE.mapId,
         mapVersion: FIXTURE.mapVersion,
         nodeId: FIXTURE.gatherNodePlayer,
       };
-      const r = consumeDungeonGatheringAction(s0, cmd, ctx);
+      const r = ok(consumeDungeonGatheringAction(s0, cmd, ctx));
       const session = r.nextSlice.playerSessions[FIXTURE.teamId];
       // 玩家採集規則 = 15 分鐘。
       assert(session!.elapsedDungeonMinutes === 15, `elapsed 15 (got ${session!.elapsedDungeonMinutes})`);
@@ -122,31 +136,40 @@ const cases: readonly Case[] = [
     },
   },
   {
-    name: 'ConsumeDungeonGatheringAction rejects (no-op) on Map Version mismatch',
+    name: 'ConsumeDungeonGatheringAction rejects on Map Version mismatch',
     run: () => {
       const ctx = createFixtureContext();
       const s0 = createFixtureState();
       const cmd: ConsumeDungeonGatheringAction = {
-        kind: 'ConsumeDungeonGatheringAction',
+        type: 'ConsumeDungeonGatheringAction',
         teamId: FIXTURE.teamId,
         mapId: FIXTURE.mapId,
         mapVersion: FIXTURE.mapVersion + 5, // 版本不符。
         nodeId: FIXTURE.gatherNodePlayer,
       };
+      // B.5 起前置條件不符是明確拒絕，不再是「回傳未變 slice」的靜默成功。
       const r = consumeDungeonGatheringAction(s0, cmd, ctx);
-      assert(r.nextSlice === s0, 'state unchanged on mismatch');
-      assert(r.outgoingMessages.length === 0, 'no messages on mismatch');
+      assert(!r.ok, 'mismatch must be rejected, not silently accepted');
+      if (!r.ok) {
+        assert(
+          r.rejection.code === 'dungeon.consumeDungeonGatheringAction.preconditionFailed',
+          `rejection code (got ${r.rejection.code})`,
+        );
+        assert(r.rejection.sourceModule === 'dungeon', 'rejection names the source module');
+      }
     },
   },
   {
     name: 'npcDungeonDay processes full sequence within 10 points and enters settling',
     run: () => {
       const ctx = createFixtureContext();
-      const start = startNpcDungeonRun(
-        createInitialDungeonState(),
-        { kind: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
-        ctx,
-        FIXTURE.npcExplorationRuleId,
+      const start = ok(
+        startNpcDungeonRun(
+          createInitialDungeonState(),
+          { type: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
+          ctx,
+          FIXTURE.npcExplorationRuleId,
+        ),
       );
       // Start 應排一個 npcDungeonDay Job 並開一個 collecting Distribution。
       assert(start.scheduledJobs.length === 1, 'one npcDungeonDay job scheduled');
@@ -157,7 +180,7 @@ const cases: readonly Case[] = [
       // 無怪物序列 → combatSequenceSettled 從開始即 true（不變量 §3.4.9）。
       assert(runBefore.settlementProgress.combatSequenceSettled === true, 'combat settled from start (no monsters)');
 
-      const day = npcDungeonDay(start.nextSlice, runId, ctx);
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
       const run = day.nextSlice.npcRuns[runId]!;
       // 3+3+4 = 10 點，全序列同日處理 → cursor 前進到 3、進入 settling。
       assert(run.cursorNpcOrder === 3, `cursor advanced to 3 (got ${run.cursorNpcOrder})`);
@@ -172,16 +195,18 @@ const cases: readonly Case[] = [
     name: 'npc run closes only after Map + Distribution settlement complete',
     run: () => {
       const ctx = createFixtureContext();
-      const start = startNpcDungeonRun(
-        createInitialDungeonState(),
-        { kind: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
-        ctx,
-        FIXTURE.npcExplorationRuleId,
+      const start = ok(
+        startNpcDungeonRun(
+          createInitialDungeonState(),
+          { type: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
+          ctx,
+          FIXTURE.npcExplorationRuleId,
+        ),
       );
       const runId = Object.keys(start.nextSlice.npcRuns)[0] as NpcDungeonRunId;
       const distributionId = start.nextSlice.npcRuns[runId]!.distributionId as AssetDistributionId;
 
-      const day = npcDungeonDay(start.nextSlice, runId, ctx);
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
       assert(day.nextSlice.npcRuns[runId]!.status === 'settling', 'settling after day');
 
       // Map 套用結算 → mapApplied，但仍未關閉（distribution 未完成）。
@@ -203,19 +228,21 @@ const cases: readonly Case[] = [
       const ctx = createFixtureContext({
         team: { ...createFixtureContext().team, isTeamInMap: () => false },
       });
-      const start = startNpcDungeonRun(
-        createInitialDungeonState(),
-        { kind: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
-        ctx,
-        FIXTURE.npcExplorationRuleId,
+      const start = ok(
+        startNpcDungeonRun(
+          createInitialDungeonState(),
+          { type: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
+          ctx,
+          FIXTURE.npcExplorationRuleId,
+        ),
       );
       const runId = Object.keys(start.nextSlice.npcRuns)[0] as NpcDungeonRunId;
-      const day = npcDungeonDay(start.nextSlice, runId, ctx);
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
       const run = day.nextSlice.npcRuns[runId]!;
       assert(run.status === 'invalid', `status invalid (got ${run.status})`);
       const closed = day.outgoingMessages
-        .map((m) => (m as { event?: { kind?: string; reason?: string } }).event)
-        .find((e) => e?.kind === 'NpcDungeonRunClosed');
+        .map((m) => (m as { event?: { type?: string; reason?: string } }).event)
+        .find((e) => e?.type === 'NpcDungeonRunClosed');
       assert(closed?.reason === 'invalid', 'closed with reason invalid');
     },
   },

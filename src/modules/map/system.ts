@@ -22,6 +22,7 @@ import type {
   ResolverId,
   DefinitionId,
   ModuleResult,
+  ModuleOutcome,
   ScheduledJobDraft,
   AnyScheduledJob,
   DomainEventDraft,
@@ -124,9 +125,8 @@ export type MapHandlerContext = Readonly<{
 // Handler 回傳型別（接受／拒絕）
 // ──────────────────────────────────────────────────────────────────────────
 
-export type MapHandlerResult =
-  | Readonly<{ ok: true; result: ModuleResult<MapState> }>
-  | Readonly<{ ok: false; rejection: CommandRejection }>;
+// B.5：形狀改由 contracts/core 的 ModuleOutcome 單一定義。
+export type MapHandlerResult = ModuleOutcome<MapState>;
 
 // ──────────────────────────────────────────────────────────────────────────
 // 小工具
@@ -337,8 +337,8 @@ function refreshMapInstance(
 
   const contentIds = generated.contents.map((c) => c.contentId);
   return makeResult(nextState, [
-    emit({ kind: 'MapRefreshed', mapId: instance.mapId, oldVersion, newVersion }),
-    emit({ kind: 'MapContentGenerated', mapId: instance.mapId, mapVersion: newVersion, contentIds }),
+    emit({ type: 'MapRefreshed', mapId: instance.mapId, oldVersion, newVersion }),
+    emit({ type: 'MapContentGenerated', mapId: instance.mapId, mapVersion: newVersion, contentIds }),
   ]);
 }
 
@@ -374,7 +374,7 @@ export function handleMapRefreshCheck(
     };
     return makeResult(
       upsertInstance(state, nextInstance),
-      [emit({ kind: 'MapRefreshPendingRegistered', mapId: instance.mapId, checkDay })],
+      [emit({ type: 'MapRefreshPendingRegistered', mapId: instance.mapId, checkDay })],
       [pendingCheckJobDraft(instance.mapId, checkDay, nextInstance.revision)],
     );
   }
@@ -410,7 +410,7 @@ export function onTeamLocationChanged(
   };
   return makeResult(
     upsertInstance(state, nextInstance),
-    [emit({ kind: 'MapRefreshPendingRegistered', mapId, checkDay })],
+    [emit({ type: 'MapRefreshPendingRegistered', mapId, checkDay })],
     [pendingCheckJobDraft(mapId, checkDay, nextInstance.revision)],
   );
 }
@@ -454,7 +454,7 @@ export function handleOpenMapDoor(
   };
   return accept(upsertInstance(state, nextInstance), [
     emit({
-      kind: 'MapDoorOpened',
+      type: 'MapDoorOpened',
       mapId: instance.mapId,
       mapVersion: instance.currentVersion,
       linkId: command.linkId,
@@ -497,7 +497,7 @@ export function handleResolveMapTrap(
   };
   return accept(upsertInstance(state, nextInstance), [
     emit({
-      kind: 'MapTrapResolved',
+      type: 'MapTrapResolved',
       mapId: instance.mapId,
       mapVersion: instance.currentVersion,
       trapId: command.trapId,
@@ -561,7 +561,7 @@ export function handleHarvestMapGatheringNode(
   };
   return accept(upsertInstance(state, nextInstance), [
     emit({
-      kind: 'MapGatheringNodeHarvested',
+      type: 'MapGatheringNodeHarvested',
       mapId: instance.mapId,
       mapVersion: instance.currentVersion,
       nodeId: command.nodeId,
@@ -593,7 +593,7 @@ export function handleResolvePlayerMapContent(
   };
   return accept(upsertContent(state, next), [
     emit({
-      kind: 'MapContentResolved',
+      type: 'MapContentResolved',
       mapId: command.mapId,
       contentId: command.contentId,
       distributionId: command.distributionId,
@@ -648,7 +648,7 @@ export function handleApplyNpcDungeonSettlement(
       applied.push(result);
       messages.push(
         emit({
-          kind: 'MapContentResolved',
+          type: 'MapContentResolved',
           mapId: command.mapId,
           contentId: target.contentId,
           distributionId: command.distributionId,
@@ -665,7 +665,7 @@ export function handleApplyNpcDungeonSettlement(
 
   messages.push(
     emit({
-      kind: 'NpcDungeonSettlementApplied',
+      type: 'NpcDungeonSettlementApplied',
       runId: command.runId,
       distributionId: command.distributionId,
       appliedResults: applied,
@@ -726,7 +726,7 @@ export function handleSetMapRefreshLock(
       revision: bump(instance.revision),
     };
     return accept(upsertInstance(state, nextInstance), [
-      emit({ kind: 'MapRefreshLockChanged', mapId: command.mapId, lock }),
+      emit({ type: 'MapRefreshLockChanged', mapId: command.mapId, lock }),
     ]);
   }
 
@@ -737,6 +737,6 @@ export function handleSetMapRefreshLock(
     revision: bump(instance.revision),
   };
   return accept(upsertInstance(state, nextInstance), [
-    emit({ kind: 'MapRefreshLockChanged', mapId: command.mapId }),
+    emit({ type: 'MapRefreshLockChanged', mapId: command.mapId }),
   ]);
 }

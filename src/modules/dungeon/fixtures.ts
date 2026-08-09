@@ -39,6 +39,7 @@ import type {
   PlayerExplorationSession,
 } from '../../contracts/dungeon';
 import type { GridCell, MapContentKind, NpcSequenceEntryView } from '../../contracts/map';
+import type { AssetDistributionRuleId } from '../../contracts/distribution';
 
 import type { DungeonModuleState } from './state';
 import { createInitialDungeonState, withPlayerSession, createKnowledge, withKnowledge } from './state';
@@ -70,6 +71,8 @@ export const FIXTURE = {
   gatheringRulePlayer: 'definition:gathering-rule:herb' as GatheringRuleId,
   gatheringRuleNpc: 'definition:gathering-rule:npc' as GatheringRuleId,
   interactionRuleId: 'definition:interaction-rule:base' as InteractionRuleId,
+  lootDistributionRuleId:
+    'definition:asset-distribution-rule:dungeon-loot' as AssetDistributionRuleId,
   npcExplorationRuleId: 'definition:npc-exploration-rule:base' as NpcExplorationRuleId,
   resolverId: 'resolver:dungeon-target' as ResolverId,
   trapResolverId: 'resolver:trap' as ResolverId,
@@ -233,6 +236,7 @@ export function createFixtureContext(overrides?: Partial<DungeonContext>): Dunge
     worldDay: 1 as WorldDay,
     minutesPerDungeonDay: 100, // 小刻度，便於測試跨午夜。
     interactionRuleId: FIXTURE.interactionRuleId,
+    lootDistributionRuleId: FIXTURE.lootDistributionRuleId,
     rng,
     nextInteractionId: () =>
       `runtime:interaction:gen-${(interactionCounter += 1)}` as InteractionId,

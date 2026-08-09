@@ -57,15 +57,15 @@ function eventsOf(messages: readonly TransactionMessageDraft[]): MapDomainEvent[
     .map((m) => m.event as MapDomainEvent);
 }
 
-function hasEvent(events: readonly MapDomainEvent[], kind: MapDomainEvent['kind']): boolean {
-  return events.some((e) => e.kind === kind);
+function hasEvent(events: readonly MapDomainEvent[], type: MapDomainEvent['type']): boolean {
+  return events.some((e) => e.type === type);
 }
 
-function findEvent<K extends MapDomainEvent['kind']>(
+function findEvent<K extends MapDomainEvent['type']>(
   events: readonly MapDomainEvent[],
-  kind: K,
-): Extract<MapDomainEvent, { kind: K }> | undefined {
-  return events.find((e) => e.kind === kind) as Extract<MapDomainEvent, { kind: K }> | undefined;
+  type: K,
+): Extract<MapDomainEvent, { type: K }> | undefined {
+  return events.find((e) => e.type === type) as Extract<MapDomainEvent, { type: K }> | undefined;
 }
 
 function expectOk(r: MapHandlerResult, label: string) {
@@ -154,7 +154,7 @@ const cases: readonly Case[] = [
       const state = fixtureMapState(1);
       const ctx = makeContext();
       const cmd: OpenMapDoor = {
-        kind: 'OpenMapDoor',
+        type: 'OpenMapDoor',
         teamId: TEAM_ID,
         mapId: MAP_ID,
         mapVersion: 1,
@@ -190,7 +190,7 @@ const cases: readonly Case[] = [
       const state = fixtureMapState(1);
       const ctx = makeContext();
       const cmd: ResolveMapTrap = {
-        kind: 'ResolveMapTrap',
+        type: 'ResolveMapTrap',
         teamId: TEAM_ID,
         mapId: MAP_ID,
         mapVersion: 1,
@@ -219,7 +219,7 @@ const cases: readonly Case[] = [
       const state = fixtureMapState(1);
       const inside = makeContext({ presence: stubPresence({ teamIsInside: true }) });
       const cmd: HarvestMapGatheringNode = {
-        kind: 'HarvestMapGatheringNode',
+        type: 'HarvestMapGatheringNode',
         teamId: TEAM_ID,
         mapId: MAP_ID,
         mapVersion: 1,
@@ -272,7 +272,7 @@ const cases: readonly Case[] = [
         pendingRewardRefs: [],
       };
       const cmd: ApplyNpcDungeonSettlement = {
-        kind: 'ApplyNpcDungeonSettlement',
+        type: 'ApplyNpcDungeonSettlement',
         runId: 'run-1' as NpcDungeonRunId,
         mapId: MAP_ID,
         mapVersion: 2,
@@ -328,7 +328,7 @@ const cases: readonly Case[] = [
     run: () => {
       const state = fixtureMapState(1);
       const lockCmd: SetMapRefreshLock = {
-        kind: 'SetMapRefreshLock',
+        type: 'SetMapRefreshLock',
         mapId: MAP_ID,
         mode: 'set',
         reason: 'suppression',

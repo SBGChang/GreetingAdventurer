@@ -279,17 +279,22 @@ export type GrantContentEventMasteryExperience = Readonly<{
 // ──────────────────────────────────────────────────────────────────────────
 
 export type LearnFromBookCommand = Readonly<{
+  type: 'learnFromBook';
   characterId: CharacterId;
   bookItemId: ItemInstanceId;
   knowledgeId: DefinitionId;
 }>;
 
 export type StartTeachingCommand = Readonly<{
+  type: 'startTeaching';
   learnerId: CharacterId;
   teacher: TeachingSource;
   masteryId: MasteryId;
   ruleId: TeachingRuleId;
 }>;
+
+// B.5：補齊原本缺席的訊息聯集宣告（判別欄由各 payload 自帶）。
+export type ProgressionGameCommand = LearnFromBookCommand | StartTeachingCommand;
 
 // ──────────────────────────────────────────────────────────────────────────
 // §6 傳授規則
@@ -309,6 +314,7 @@ export type TeachingRuleDefinition = DefinitionHeader<TeachingRuleId> &
 // ──────────────────────────────────────────────────────────────────────────
 
 export type MasteryExperienceGrantedEvent = Readonly<{
+  type: 'MasteryExperienceGranted';
   characterId: CharacterId;
   masteryId: MasteryId;
   amount: number;
@@ -316,6 +322,7 @@ export type MasteryExperienceGrantedEvent = Readonly<{
 }>;
 
 export type MasteryLevelChangedEvent = Readonly<{
+  type: 'MasteryLevelChanged';
   characterId: CharacterId;
   masteryId: MasteryId;
   oldLevel: number;
@@ -323,27 +330,41 @@ export type MasteryLevelChangedEvent = Readonly<{
 }>;
 
 export type PrimaryAttributesChangedEvent = Readonly<{
+  type: 'PrimaryAttributesChanged';
   characterId: CharacterId;
   attributes: PrimaryAttributes;
 }>;
 
 export type ProgressionCapacityChangedEvent = Readonly<{
+  type: 'ProgressionCapacityChanged';
   characterId: CharacterId;
 }>;
 
 export type AutomaticKnowledgeUnlockedEvent = Readonly<{
+  type: 'AutomaticKnowledgeUnlocked';
   characterId: CharacterId;
   knowledgeId: DefinitionId;
 }>;
 
 export type KnowledgeLearnedEvent = Readonly<{
+  type: 'KnowledgeLearned';
   characterId: CharacterId;
   knowledgeId: DefinitionId;
   source: KnowledgeSource;
 }>;
 
 export type TeachingSessionChangedEvent = Readonly<{
+  type: 'TeachingSessionChanged';
   sessionId: TeachingSessionId;
   status: TeachingSessionStatus;
   gainedExperience: number;
 }>;
+
+export type ProgressionDomainEvent =
+  | MasteryExperienceGrantedEvent
+  | MasteryLevelChangedEvent
+  | PrimaryAttributesChangedEvent
+  | ProgressionCapacityChangedEvent
+  | AutomaticKnowledgeUnlockedEvent
+  | KnowledgeLearnedEvent
+  | TeachingSessionChangedEvent;

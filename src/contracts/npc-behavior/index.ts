@@ -203,24 +203,28 @@ export type StartNpcTravelPlanPayload = {
 
 // ── 輸出事件（§4.4）──────────────────────────────────────────────────
 export type NpcIntentSelectedPayload = Readonly<{
+  type: 'NpcIntentSelected';
   teamId: TeamId;
   intentKind: NpcIntentKind;
   chainId: ActionChainId;
   onDay: WorldDay;
 }>;
 export type NpcActionChainChangedPayload = Readonly<{
+  type: 'NpcActionChainChanged';
   teamId: TeamId;
   chainId: ActionChainId;
   currentNodeIndex: number;
   status: NpcChainStatus;
 }>;
 export type NpcMarketIntentCreatedPayload = Readonly<{
+  type: 'NpcMarketIntentCreated';
   intentId: NpcMarketIntentId;
   teamId: TeamId;
   memberId: CharacterId;
   kind: NpcMarketIntentKind;
 }>;
 export type NpcMarketIntentResolvedPayload = Readonly<{
+  type: 'NpcMarketIntentResolved';
   intentId: NpcMarketIntentId;
   state: NpcMarketIntentState;
   reason?: string;

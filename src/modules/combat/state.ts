@@ -79,6 +79,7 @@ export type CombatantState = Readonly<{
   health: number;
   maxHealth: number; // 快照上限（heal 夾住用）；文件 §3.2 未列，但恢復需上限，故隨快照保存。
   mana: number;
+  maxMana: number; // 同上；結算寫回 manaDelta 需要開戰當下的 MP 上限，不可用 maxHealth 代替。
   currentCtb: number; // 可超過 100，不做 UI clamp（不變量 5）
   externalCtbIncreaseSinceOwnAction: number;
   interruptionImmuneUntilOwnAction: boolean;

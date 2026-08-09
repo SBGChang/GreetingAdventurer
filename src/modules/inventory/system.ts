@@ -15,6 +15,7 @@ import type {
   ItemInstanceId,
   ModuleId,
   ModuleResult,
+  ModuleOutcome,
   TeamId,
   WeaponSetId,
   WorldDay,
@@ -48,9 +49,8 @@ import type {
 export const INVENTORY_MODULE_ID = 'inventory' as ModuleId;
 
 // ── Handler 回傳型別 ────────────────────────────────────────────────────────
-export type InventoryHandlerResult =
-  | Readonly<{ ok: true; result: ModuleResult<InventoryState> }>
-  | Readonly<{ ok: false; rejection: CommandRejection }>;
+// B.5：形狀改由 contracts/core 的 ModuleOutcome 單一定義（原本三個模組各自複寫同一形狀）。
+export type InventoryHandlerResult = ModuleOutcome<InventoryState>;
 
 // ── 注入依賴（讀 Port + ID 產生器 + 世界時鐘）───────────────────────────────
 export type InventoryDeps = Readonly<{
@@ -155,7 +155,7 @@ export function createItemInstance(
   // TODO: 進入角色攜帶範圍的建立須在同一交易評估超載（doc §2.2）。此觸發由
   // encumbrance-transition-workflow 及各建立來源 Workflow 負責，Inventory 不自建第二套重算。
   return accept(withItem(state, inst), [
-    emit({ itemId, definitionId: cmd.definitionId, ownerCharacterId: owner, location: cmd.location }),
+    emit({ type: 'ItemInstanceCreated', itemId, definitionId: cmd.definitionId, ownerCharacterId: owner, location: cmd.location }),
   ]);
 }
 
@@ -195,7 +195,7 @@ export function transferItem(
     revision: inst.revision + 1,
   };
   return accept(withItem(state, next), [
-    emit({ itemId: cmd.itemId, from, to: cmd.to, oldOwner, newOwner, reason: cmd.reason }),
+    emit({ type: 'InventoryTransferred', itemId: cmd.itemId, from, to: cmd.to, oldOwner, newOwner, reason: cmd.reason }),
   ]);
 }
 
@@ -220,7 +220,7 @@ export function removeItemInstance(
     revision: inst.revision + 1,
   };
   return accept(withItem(state, next), [
-    emit({ itemId: cmd.itemId, previousLocation, reason: cmd.reason }),
+    emit({ type: 'ItemRemoved', itemId: cmd.itemId, previousLocation, reason: cmd.reason }),
   ]);
 }
 
@@ -247,7 +247,7 @@ export function reserveQuestItem(
     reservedQuantity: inst.quantity,
   };
   const next: ItemInstance = { ...inst, reservation, revision: inst.revision + 1 };
-  return accept(withItem(state, next), [emit({ itemId: cmd.itemId, reservation })]);
+  return accept(withItem(state, next), [emit({ type: 'ItemReservationChanged', itemId: cmd.itemId, reservation })]);
 }
 
 // ── ReserveCraftingInputs（原子；任一不合法全部拒絕，doc §5.2）───────────────
@@ -281,7 +281,7 @@ export function reserveCraftingInputs(
     };
     const next: ItemInstance = { ...inst, reservation, revision: inst.revision + 1 };
     items = { ...items, [id]: next };
-    messages.push(emit({ itemId: id, reservation }));
+    messages.push(emit({ type: 'ItemReservationChanged', itemId: id, reservation }));
   }
   return accept({ ...state, items }, messages);
 }
@@ -314,7 +314,7 @@ export function moveItemToTeamQuestCargo(
     revision: inst.revision + 1,
   };
   return accept(withItem(state, next), [
-    emit({ itemId: cmd.itemId, from, to, oldOwner, newOwner: undefined, reason: 'moveToTeamQuestCargo' }),
+    emit({ type: 'InventoryTransferred', itemId: cmd.itemId, from, to, oldOwner, newOwner: undefined, reason: 'moveToTeamQuestCargo' }),
   ]);
 }
 
@@ -349,13 +349,13 @@ export function commitCombatItemUse(
 
   // Inventory 不自算延遲，只回傳 Definition 的 useDelayRuleId 與效果（doc §2.4、§5.3）。
   const messages: DomainEventDraft<unknown>[] = [
-    emit({
+    emit({ type: 'CombatItemUseCommitted',
       itemId: cmd.itemId,
       userId: cmd.userId,
       useDelayRuleId: def.combatUseDelayRuleId,
       effectRefs: def.useEffectIds ?? [],
     }),
-    emit({ itemId: cmd.itemId, quantity: 1, reason: 'combatUse' }),
+    emit({ type: 'ItemConsumed', itemId: cmd.itemId, quantity: 1, reason: 'combatUse' }),
   ];
   return accept(withItem(state, next), messages);
 }
@@ -418,7 +418,7 @@ export function equipItem(
     equipmentLoadouts: { ...state.equipmentLoadouts, [cmd.characterId]: nextLoadout },
   };
   return accept(nextState, [
-    emit({ characterId: cmd.characterId, slotId: cmd.slotId, weaponSetId: cmd.weaponSetId, itemId: cmd.itemId }),
+    emit({ type: 'EquipmentChanged', characterId: cmd.characterId, slotId: cmd.slotId, weaponSetId: cmd.weaponSetId, itemId: cmd.itemId }),
   ]);
 }
 
@@ -452,7 +452,7 @@ export function configureWeaponSet(
   );
   const skillIds = cmd.selectedSkillIds.filter((x): x is NonNullable<typeof x> => x !== undefined);
   return accept(nextState, [
-    emit({ characterId: cmd.characterId, weaponSetId: cmd.weaponSetId, itemIds, skillIds }),
+    emit({ type: 'WeaponSetConfigured', characterId: cmd.characterId, weaponSetId: cmd.weaponSetId, itemIds, skillIds }),
   ]);
 }
 
@@ -475,7 +475,7 @@ export function evaluateTeamEncumbrance(
     const nextResolutions = { ...state.encumbranceResolutions };
     delete (nextResolutions as Record<string, EncumbranceResolution>)[existing.resolutionId as unknown as string];
     return accept({ ...state, encumbranceResolutions: nextResolutions }, [
-      emit({ resolutionId: existing.resolutionId, teamId: cmd.teamId }),
+      emit({ type: 'EncumbranceResolutionClosed', resolutionId: existing.resolutionId, teamId: cmd.teamId }),
     ]);
   }
 
@@ -494,7 +494,7 @@ export function evaluateTeamEncumbrance(
     };
     return accept(
       { ...state, encumbranceResolutions: { ...state.encumbranceResolutions, [existing.resolutionId]: updated } },
-      [emit({ resolutionId: existing.resolutionId, teamId: cmd.teamId, overweightCharacterIds: overweight, state: targetState })],
+      [emit({ type: 'EncumbranceResolutionOpened', resolutionId: existing.resolutionId, teamId: cmd.teamId, overweightCharacterIds: overweight, state: targetState })],
     );
   }
 
@@ -511,7 +511,7 @@ export function evaluateTeamEncumbrance(
   };
   return accept(
     { ...state, encumbranceResolutions: { ...state.encumbranceResolutions, [resolutionId]: created } },
-    [emit({ resolutionId, teamId: cmd.teamId, overweightCharacterIds: overweight, state: targetState })],
+    [emit({ type: 'EncumbranceResolutionOpened', resolutionId, teamId: cmd.teamId, overweightCharacterIds: overweight, state: targetState })],
   );
 }
 

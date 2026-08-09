@@ -45,6 +45,11 @@ import type {
 } from '../core';
 // Cross-module: map owns GridCell (src/contracts/map).
 import type { GridCell } from '../map';
+// B.5：外送 Internal Command 一律引用接收模組契約的真實型別，讓 tsc 在發送端就攔下不匹配
+// （原本 combat 自行拼了 ResolvePlayerMapContent / CommitCombatItemUse 的欄位，兩邊都對不上）。
+import type { ResolvePlayerMapContent } from '../map';
+import type { ApplyCombatCondition } from '../character';
+import type { CommitCombatItemUse } from '../inventory';
 // Cross-module: progression owns PrimaryAttributeId + DefenseMasteryRoutingRuleId (src/contracts/progression).
 import type { PrimaryAttributeId, DefenseMasteryRoutingRuleId } from '../progression';
 // Shared growth-event contract lives in combat-sequence; detailed combat reuses it (doc §8.7, §7).
@@ -403,6 +408,12 @@ export type CombatGameCommand =
   | CommandAllyCommand
   | CombatRestCommand;
 
+// ── 輸出 Internal Command（接收者：character / map / inventory）────────
+export type CombatOutboundInternalCommand =
+  | ApplyCombatCondition
+  | ResolvePlayerMapContent
+  | CommitCombatItemUse;
+
 // ── 輸出事件（§7）─────────────────────────────────────────────────────
 export type CombatEncounterOutcome = 'victory' | 'defeat';
 // Derived: contentResolution shape is not specified in the doc (see report note).
@@ -411,17 +422,20 @@ export type CombatContentResolution = Readonly<Record<string, JsonValue>>;
 export type CombatActionResult = Readonly<Record<string, JsonValue>>;
 
 export type CombatEncounterStartedPayload = Readonly<{
+  type: 'CombatEncounterStarted';
   encounterId: EncounterId;
   teamId: TeamId;
   source: CombatEncounterSource;
 }>;
 export type CombatActionResolvedPayload = Readonly<{
+  type: 'CombatActionResolved';
   encounterId: EncounterId;
   actorId: CombatantId;
   skillId?: SkillDefinitionId;
   results: readonly CombatActionResult[];
 }>;
 export type CombatEncounterResolvedPayload = Readonly<{
+  type: 'CombatEncounterResolved';
   encounterId: EncounterId;
   teamId: TeamId;
   participantCharacterIds: readonly CharacterId[];
@@ -430,19 +444,23 @@ export type CombatEncounterResolvedPayload = Readonly<{
   contentResolution?: CombatContentResolution;
 }>;
 export type CombatTeamOutcomePayload = Readonly<{
+  type: 'CombatTeamOutcome';
   teamId: TeamId;
   canContinue: boolean;
   reason: string;
 }>;
 export type CombatAttackMasteryEarnedPayload = Readonly<{
+  type: 'CombatAttackMasteryEarned';
   source: CombatMasterySource;
   characterAwards: readonly MasteryExperienceAmount[];
 }>;
 export type CombatDefenseMasteryEarnedPayload = Readonly<{
+  type: 'CombatDefenseMasteryEarned';
   source: CombatMasterySource;
   characterAwards: readonly MasteryExperienceAmount[];
 }>;
 export type CombatSupportMasteryEarnedPayload = Readonly<{
+  type: 'CombatSupportMasteryEarned';
   source: CombatMasterySource;
   characterId: CharacterId;
   skillId: SkillDefinitionId;

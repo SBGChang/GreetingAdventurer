@@ -41,6 +41,18 @@ import type {
 
 // 跨模組引用：Dungeon 的 NPC 目標種類沿用 Map 的內容種類與格座標。
 import type { MapContentKind, GridCell } from '../map';
+// 外送 Internal Command 一律引用接收模組契約的真實型別（見 §6.1）。
+import type {
+  OpenMapDoor,
+  ResolvePlayerMapContent,
+  ApplyNpcDungeonSettlement,
+} from '../map';
+import type { StartCombatEncounterCommand } from '../combat';
+import type {
+  StartAssetDistributionCommand,
+  FinalizeAssetDistributionCollectionCommand,
+} from '../distribution';
+import type { StartReturnFromDungeonPayload } from '../team';
 
 // ──────────────────────────────────────────────────────────────────────────
 // 本地 ID / 外部占位型別
@@ -263,17 +275,17 @@ export interface DungeonQuery {
 // ──────────────────────────────────────────────────────────────────────────
 
 // [INFERRED] 玩家 Command payload 由 §5.1 前置條件與責任描述推導；actorTeamId 由信封提供。
-export type StartPlayerExploration = Readonly<{ kind: 'startPlayerExploration' }>;
-export type MoveDungeonRoom = Readonly<{ kind: 'moveDungeonRoom'; targetRoomId: RoomId }>;
-export type OpenDungeonDoor = Readonly<{ kind: 'openDungeonDoor'; linkId: RoomLinkId }>;
-export type GatherDungeonNode = Readonly<{ kind: 'gatherDungeonNode'; nodeId: GatheringNodeId }>;
-export type UseDungeonExit = Readonly<{ kind: 'useDungeonExit'; exitRoomId: RoomId }>;
+export type StartPlayerExploration = Readonly<{ type: 'startPlayerExploration' }>;
+export type MoveDungeonRoom = Readonly<{ type: 'moveDungeonRoom'; targetRoomId: RoomId }>;
+export type OpenDungeonDoor = Readonly<{ type: 'openDungeonDoor'; linkId: RoomLinkId }>;
+export type GatherDungeonNode = Readonly<{ type: 'gatherDungeonNode'; nodeId: GatheringNodeId }>;
+export type UseDungeonExit = Readonly<{ type: 'useDungeonExit'; exitRoomId: RoomId }>;
 export type InteractDungeonContent = Readonly<{
-  kind: 'interactDungeonContent';
+  type: 'interactDungeonContent';
   contentId: ContentInstanceId;
 }>;
 export type ResolveDungeonInteraction = Readonly<{
-  kind: 'resolveDungeonInteraction';
+  type: 'resolveDungeonInteraction';
   interactionId: InteractionId;
   optionId: ContentEventOptionId;
 }>;
@@ -305,7 +317,7 @@ export type DungeonScheduledJob = NpcDungeonDayJob;
 // ──────────────────────────────────────────────────────────────────────────
 
 export type StartNpcDungeonRun = Readonly<{
-  kind: 'StartNpcDungeonRun';
+  type: 'StartNpcDungeonRun';
   teamId: TeamId;
   mapId: MapInstanceId;
   planId: TeamPlanId;
@@ -313,7 +325,7 @@ export type StartNpcDungeonRun = Readonly<{
 
 // [INFERRED] 欄位由 §5.3 重新驗證描述推導。
 export type ConsumeDungeonGatheringAction = Readonly<{
-  kind: 'ConsumeDungeonGatheringAction';
+  type: 'ConsumeDungeonGatheringAction';
   teamId: TeamId;
   mapId: MapInstanceId;
   mapVersion: number;
@@ -327,28 +339,28 @@ export type DungeonInternalCommand = StartNpcDungeonRun | ConsumeDungeonGatherin
 // ──────────────────────────────────────────────────────────────────────────
 
 export type PlayerDungeonSessionStarted = Readonly<{
-  kind: 'PlayerDungeonSessionStarted';
+  type: 'PlayerDungeonSessionStarted';
   teamId: TeamId;
   mapId: MapInstanceId;
   mapVersion: number;
 }>;
 
 export type PlayerDungeonTimeAdvanced = Readonly<{
-  kind: 'PlayerDungeonTimeAdvanced';
+  type: 'PlayerDungeonTimeAdvanced';
   teamId: TeamId;
   minutes: DungeonMinute;
   worldDayCrossed?: boolean;
 }>;
 
 export type PlayerInteractionOpened = Readonly<{
-  kind: 'PlayerInteractionOpened';
+  type: 'PlayerInteractionOpened';
   interactionId: InteractionId;
   teamId: TeamId;
   interactionKind: 'dungeonEvent';
 }>;
 
 export type MapExplorationCompleted = Readonly<{
-  kind: 'MapExplorationCompleted';
+  type: 'MapExplorationCompleted';
   teamId: TeamId;
   mapId: MapInstanceId;
   mapVersion: number;
@@ -357,7 +369,7 @@ export type MapExplorationCompleted = Readonly<{
 }>;
 
 export type NpcDungeonRunProgressed = Readonly<{
-  kind: 'NpcDungeonRunProgressed';
+  type: 'NpcDungeonRunProgressed';
   runId: NpcDungeonRunId;
   processedTargetRefs: readonly NpcDungeonTargetRef[];
   nextCursor: number;
@@ -365,7 +377,7 @@ export type NpcDungeonRunProgressed = Readonly<{
 }>;
 
 export type NpcDungeonRunClosed = Readonly<{
-  kind: 'NpcDungeonRunClosed';
+  type: 'NpcDungeonRunClosed';
   runId: NpcDungeonRunId;
   teamId: TeamId;
   reason: 'completed' | 'invalid' | 'stopped';
@@ -380,15 +392,19 @@ export type DungeonDomainEvent =
   | NpcDungeonRunClosed;
 
 // ──────────────────────────────────────────────────────────────────────────
-// 6.1 輸出 Internal Command（唯一處理者為 combat / combat-sequence / distribution
-// 等外部模組）。此處僅登記本模組會發出的 combat-encounter 命令型別，其餘由各接收
-// 模組於自身契約定義。
+// 6.1 輸出 Internal Command
+//
+// B.5：這裡原本自行宣告了一個 `StartCombatEncounter`，欄位與 combat 契約真正接收的
+// StartCombatEncounterCommand 完全不同（缺 source/participantSnapshotRevision/rngContext），
+// 而訊息在 TransactionMessageDraft 以 unknown 傳遞，tsc 抓不到。改為直接引用**接收模組的
+// 真實型別**：發送端與接收端從此由編譯器保證一致。
 // ──────────────────────────────────────────────────────────────────────────
 
-export type StartCombatEncounter = Readonly<{
-  kind: 'StartCombatEncounter';
-  teamId: TeamId;
-  mapId: MapInstanceId;
-  contentId: ContentInstanceId;
-  encounterGroupId: EncounterGroupDefinitionId;
-}>;
+export type DungeonOutboundInternalCommand =
+  | OpenMapDoor
+  | ResolvePlayerMapContent
+  | ApplyNpcDungeonSettlement
+  | StartCombatEncounterCommand
+  | StartAssetDistributionCommand
+  | FinalizeAssetDistributionCollectionCommand
+  | StartReturnFromDungeonPayload;

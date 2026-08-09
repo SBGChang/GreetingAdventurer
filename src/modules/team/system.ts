@@ -23,6 +23,7 @@ import type {
   Revision,
   RngContext,
   ModuleResult,
+  ModuleOutcome,
   CommandRejection,
   TransactionMessageDraft,
   DomainEventDraft,
@@ -162,30 +163,31 @@ export type TeamHandlerContext = Readonly<{
 }>;
 
 // ──────────────────────────────────────────────────────────────────────────
-// 輸出 DomainEvent（帶 type 判別；對齊 character 事件封裝慣例）
+// 輸出 DomainEvent
+// B.5 起判別欄由 contracts/team 的 payload 自身攜帶（core messages.ts 的訊息判別欄約定），
+// 本地不再包一層 tagged wrapper。
 // ──────────────────────────────────────────────────────────────────────────
 
-export type TeamDomainEventTagged =
-  | ({ type: 'TeamPlanCompleted' } & TeamPlanCompletedEvent)
-  | ({ type: 'TeamLocationChanged' } & TeamLocationChangedEvent)
-  | ({ type: 'TravelCompleted' } & TravelCompletedEvent)
-  | ({ type: 'TravelSegmentReached' } & TravelSegmentReachedEvent)
-  | ({ type: 'PlayerSuccessorSelected' } & PlayerSuccessorSelectedEvent)
-  | ({ type: 'TeamMemberJoined' } & TeamMemberJoinedEvent)
-  | ({ type: 'TeamMemberDeparted' } & TeamMemberDepartedEvent)
-  | ({ type: 'TeamCombatFormationChanged' } & TeamCombatFormationChangedEvent)
-  | ({ type: 'HomeYearRestCompleted' } & HomeYearRestCompletedEvent);
+export type TeamDomainEvent =
+  | TeamPlanCompletedEvent
+  | TeamLocationChangedEvent
+  | TravelCompletedEvent
+  | TravelSegmentReachedEvent
+  | PlayerSuccessorSelectedEvent
+  | TeamMemberJoinedEvent
+  | TeamMemberDepartedEvent
+  | TeamCombatFormationChangedEvent
+  | HomeYearRestCompletedEvent;
 
 // 輸出 Internal Command（唯一處理者：dungeon）。
-export type StartNpcDungeonRunCommand = { type: 'StartNpcDungeonRun' } & StartNpcDungeonRunPayload;
+export type StartNpcDungeonRunCommand = StartNpcDungeonRunPayload;
 
 // ──────────────────────────────────────────────────────────────────────────
 // Handler 回傳型別（對齊 inventory 慣例）
 // ──────────────────────────────────────────────────────────────────────────
 
-export type TeamHandlerResult =
-  | Readonly<{ ok: true; result: ModuleResult<TeamState> }>
-  | Readonly<{ ok: false; rejection: CommandRejection }>;
+// B.5：形狀改由 contracts/core 的 ModuleOutcome 單一定義。
+export type TeamHandlerResult = ModuleOutcome<TeamState>;
 
 function reject(
   code: string,
@@ -202,13 +204,12 @@ function accept(
   return { ok: true, result: { nextSlice, outgoingMessages, scheduledJobs } };
 }
 
-function emit(event: TeamDomainEventTagged): DomainEventDraft<unknown> {
+function emit(event: TeamDomainEvent): DomainEventDraft<unknown> {
   return { event };
 }
 
 function emitStartNpcDungeonRun(payload: StartNpcDungeonRunPayload): InternalCommandDraft<unknown> {
-  const command: StartNpcDungeonRunCommand = { type: 'StartNpcDungeonRun', ...payload };
-  return { targetModule: DUNGEON_MODULE_ID, command };
+  return { targetModule: DUNGEON_MODULE_ID, command: payload };
 }
 
 function planDueJob(
@@ -301,10 +302,10 @@ export function handleStartCityTravel(
   let next = upsertPlan(state, plan);
   next = upsertTeam(next, nextTeam);
 
-  const locationChanged: TeamLocationChangedEvent = { teamId: team.teamId, from: team.location, to };
+  const locationChanged: TeamLocationChangedEvent = { type: 'TeamLocationChanged', teamId: team.teamId, from: team.location, to };
   return accept(
     next,
-    [emit({ type: 'TeamLocationChanged', ...locationChanged })],
+    [emit(locationChanged)],
     [planDueJob(team.teamId, planId, nextSegmentDay, plan.revision)],
   );
 }
@@ -456,11 +457,12 @@ export function handleConfigureCombatFormation(
   const formation: TeamCombatFormation = { teamId: cmd.teamId, placements: cmd.placements, revision };
   const next = upsertFormation(state, formation);
   const changed: TeamCombatFormationChangedEvent = {
+    type: 'TeamCombatFormationChanged',
     teamId: cmd.teamId,
     placements: cmd.placements,
     revision,
   };
-  return accept(next, [emit({ type: 'TeamCombatFormationChanged', ...changed })]);
+  return accept(next, [emit(changed)]);
 }
 
 type PlacementValidation =
@@ -561,11 +563,11 @@ export function handleRecruitTavernAdventurer(
   const messages = recomputeFormation(next, playerTeam.teamId, nextMembers, ctx);
   next = messages.next;
 
-  const departed: TeamMemberDepartedEvent = { teamId: sourceTeam.teamId, characterId: target, reason: 'recruitedAway' };
-  const joined: TeamMemberJoinedEvent = { teamId: playerTeam.teamId, characterId: target, reason: 'recruited' };
+  const departed: TeamMemberDepartedEvent = { type: 'TeamMemberDeparted', teamId: sourceTeam.teamId, characterId: target, reason: 'recruitedAway' };
+  const joined: TeamMemberJoinedEvent = { type: 'TeamMemberJoined', teamId: playerTeam.teamId, characterId: target, reason: 'recruited' };
   return accept(next, [
-    emit({ type: 'TeamMemberDeparted', ...departed }),
-    emit({ type: 'TeamMemberJoined', ...joined }),
+    emit(departed),
+    emit(joined),
     ...messages.events,
   ]);
 }
@@ -585,8 +587,8 @@ function recomputeFormation(
   });
   const revision = prev !== undefined ? bump(prev.revision) : (0 as Revision);
   const next = upsertFormation(state, { teamId, placements, revision });
-  const changed: TeamCombatFormationChangedEvent = { teamId, placements, revision };
-  return { next, events: [emit({ type: 'TeamCombatFormationChanged', ...changed })] };
+  const changed: TeamCombatFormationChangedEvent = { type: 'TeamCombatFormationChanged', teamId, placements, revision };
+  return { next, events: [emit(changed)] };
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -617,11 +619,12 @@ export function handleSelectPlayerSuccessor(
     next = removeTeam(next, sourceTeam.teamId);
     if (!members.includes(cmd.successorId)) members = [...members, cmd.successorId];
     const joined: TeamMemberJoinedEvent = {
+    type: 'TeamMemberJoined',
       teamId: playerTeam.teamId,
       characterId: cmd.successorId,
       reason: 'succession',
     };
-    events.push(emit({ type: 'TeamMemberJoined', ...joined }));
+    events.push(emit(joined));
   }
 
   next = upsertTeam(next, {
@@ -633,12 +636,13 @@ export function handleSelectPlayerSuccessor(
   next = setPendingSuccession(next, undefined);
 
   const selected: PlayerSuccessorSelectedEvent = {
+    type: 'PlayerSuccessorSelected',
     teamId: playerTeam.teamId,
     formerLeaderId: pending.formerLeaderId,
     successorId: cmd.successorId,
     reason: pending.reason,
   };
-  events.push(emit({ type: 'PlayerSuccessorSelected', ...selected }));
+  events.push(emit(selected));
   return accept(next, events);
 }
 
@@ -726,12 +730,13 @@ function settleRetentionAndDepartures(
       };
       next = upsertTeam(next, npcTeam);
       const ev: TeamMemberDepartedEvent = {
+    type: 'TeamMemberDeparted',
         teamId: team.teamId,
         characterId: memberId,
         reason: 'economicDeparture',
         spawnedTeamId,
       };
-      events.push(emit({ type: 'TeamMemberDeparted', ...ev }));
+      events.push(emit(ev));
     }
 
     // Ledger 以新 cycleStartedOnDay 歸零；留隊成員的 joinedOn 保留。
@@ -791,10 +796,10 @@ export function handleStartNpcTeamPlan(
     };
     let next = upsertPlan(state, plan);
     next = upsertTeam(next, { ...team, location: to, activePlanId: planId, revision: bump(team.revision) });
-    const locationChanged: TeamLocationChangedEvent = { teamId: team.teamId, from: team.location, to };
+    const locationChanged: TeamLocationChangedEvent = { type: 'TeamLocationChanged', teamId: team.teamId, from: team.location, to };
     return accept(
       next,
-      [emit({ type: 'TeamLocationChanged', ...locationChanged })],
+      [emit(locationChanged)],
       [planDueJob(team.teamId, planId, arrivalDay, plan.revision)],
     );
   }
@@ -862,6 +867,7 @@ function duePlanComplete(
   delete (clearedTeam as { activePlanId?: TeamPlanId }).activePlanId;
   next = upsertTeam(next, clearedTeam);
   const completed: TeamPlanCompletedEvent = {
+    type: 'TeamPlanCompleted',
     teamId: plan.teamId,
     planId: plan.planId,
     kind: plan.kind,
@@ -869,7 +875,7 @@ function duePlanComplete(
   };
   return {
     nextSlice: next,
-    outgoingMessages: [emit({ type: 'TeamPlanCompleted', ...completed }), ...extraMessages],
+    outgoingMessages: [emit(completed), ...extraMessages],
     scheduledJobs: [],
   };
 }
@@ -889,12 +895,13 @@ function dueCityTravel(
   if (travel.kind === 'playerTravel') {
     const mode = ctx.definitions.getPlayerTravelMode(travel.modeId);
     const segmentReached: TravelSegmentReachedEvent = {
+    type: 'TravelSegmentReached',
       teamId: plan.teamId,
       routeId: travel.routeId,
       segmentIndex: travel.segmentIndex,
       eventProfileId: mode.travelEventWeightProfileId,
     };
-    const segmentEvent = emit({ type: 'TravelSegmentReached', ...segmentReached });
+    const segmentEvent = emit(segmentReached);
 
     if (travel.segmentIndex < 2) {
       // 前/中段：只完成一個段落，推進到下一段並排下一個 Job。
@@ -927,8 +934,9 @@ function dueCityTravel(
     // 第三段：發布段落事件後抵達（foundation 直接抵達；Pending 互動分支見 TODO）。
     const to: TeamLocation = { kind: 'city', cityId: travel.toCityId };
     const arrivalTeam: Team = { ...team, location: to, revision: bump(team.revision) };
-    const locationChanged: TeamLocationChangedEvent = { teamId: plan.teamId, from: team.location, to };
+    const locationChanged: TeamLocationChangedEvent = { type: 'TeamLocationChanged', teamId: plan.teamId, from: team.location, to };
     const travelCompleted: TravelCompletedEvent = {
+    type: 'TravelCompleted',
       teamId: plan.teamId,
       fromCityId: travel.fromCityId,
       toCityId: travel.toCityId,
@@ -942,8 +950,8 @@ function dueCityTravel(
       plan,
       [
         segmentEvent,
-        emit({ type: 'TeamLocationChanged', ...locationChanged }),
-        emit({ type: 'TravelCompleted', ...travelCompleted }),
+        emit(locationChanged),
+        emit(travelCompleted),
       ],
       arrivalTeam,
     );
@@ -953,8 +961,9 @@ function dueCityTravel(
   const rule = ctx.definitions.getNpcTravelRule(travel.npcTravelRuleId);
   const to: TeamLocation = { kind: 'city', cityId: travel.toCityId };
   const arrivalTeam: Team = { ...team, location: to, revision: bump(team.revision) };
-  const locationChanged: TeamLocationChangedEvent = { teamId: plan.teamId, from: team.location, to };
+  const locationChanged: TeamLocationChangedEvent = { type: 'TeamLocationChanged', teamId: plan.teamId, from: team.location, to };
   const travelCompleted: TravelCompletedEvent = {
+    type: 'TravelCompleted',
     teamId: plan.teamId,
     fromCityId: travel.fromCityId,
     toCityId: travel.toCityId,
@@ -966,8 +975,8 @@ function dueCityTravel(
     state,
     plan,
     [
-      emit({ type: 'TeamLocationChanged', ...locationChanged }),
-      emit({ type: 'TravelCompleted', ...travelCompleted }),
+      emit(locationChanged),
+      emit(travelCompleted),
     ],
     arrivalTeam,
   );
@@ -986,12 +995,19 @@ function dueEnterAdventureMap(
   const mapId = plan.payload.mapId ?? ctx.ids.nextMapInstanceId();
   const to: TeamLocation = { kind: 'adventureMap', mapId };
   const arrivalTeam: Team = { ...team, location: to, revision: bump(team.revision) };
-  const locationChanged: TeamLocationChangedEvent = { teamId: plan.teamId, from: team.location, to };
+  const locationChanged: TeamLocationChangedEvent = { type: 'TeamLocationChanged', teamId: plan.teamId, from: team.location, to };
 
-  const extras: TransactionMessageDraft[] = [emit({ type: 'TeamLocationChanged', ...locationChanged })];
+  const extras: TransactionMessageDraft[] = [emit(locationChanged)];
   // NPC 隊伍進圖後送出 StartNpcDungeonRun（唯一處理者 dungeon）。
   if (team.control === 'npc') {
-    extras.push(emitStartNpcDungeonRun({ teamId: plan.teamId, mapId, planId: plan.planId }));
+    extras.push(
+      emitStartNpcDungeonRun({
+        type: 'StartNpcDungeonRun',
+        teamId: plan.teamId,
+        mapId,
+        planId: plan.planId,
+      }),
+    );
   }
   return duePlanComplete(state, plan, extras, arrivalTeam);
 }
@@ -1003,11 +1019,11 @@ function dueReturnToCity(state: TeamState, plan: TeamPlan): ModuleResult<TeamSta
   const team = requireTeam(state, plan.teamId);
   const to: TeamLocation = { kind: 'city', cityId: plan.payload.toCityId };
   const arrivalTeam: Team = { ...team, location: to, revision: bump(team.revision) };
-  const locationChanged: TeamLocationChangedEvent = { teamId: plan.teamId, from: team.location, to };
+  const locationChanged: TeamLocationChangedEvent = { type: 'TeamLocationChanged', teamId: plan.teamId, from: team.location, to };
   return duePlanComplete(
     state,
     plan,
-    [emit({ type: 'TeamLocationChanged', ...locationChanged })],
+    [emit(locationChanged)],
     arrivalTeam,
   );
 }
@@ -1015,11 +1031,12 @@ function dueReturnToCity(state: TeamState, plan: TeamPlan): ModuleResult<TeamSta
 function dueHomeRest(state: TeamState, plan: TeamPlan): ModuleResult<TeamState> {
   const team = requireTeam(state, plan.teamId);
   const yearRest: HomeYearRestCompletedEvent = {
+    type: 'HomeYearRestCompleted',
     teamId: plan.teamId,
     memberIds: team.memberIds,
     elapsedDays: 365,
   };
-  return duePlanComplete(state, plan, [emit({ type: 'HomeYearRestCompleted', ...yearRest })]);
+  return duePlanComplete(state, plan, [emit(yearRest)]);
 }
 
 // ──────────────────────────────────────────────────────────────────────────

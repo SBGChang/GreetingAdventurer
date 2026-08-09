@@ -90,7 +90,7 @@ const cases: readonly Case[] = [
     run: () => {
       const state = fixtureCharacterState();
       const ctx = makeContext();
-      const cmd: ApplyCombatCondition = { characterId: PLAYER_ID, healthDelta: -9999 };
+      const cmd: ApplyCombatCondition = { type: 'ApplyCombatCondition', characterId: PLAYER_ID, healthDelta: -9999 };
       const res = handleApplyCombatCondition(cmd, state, ctx);
       const next = reqChar(res.nextSlice, PLAYER_ID);
       assert(next.condition.health === 0, 'HP 應被夾到 0');
@@ -109,14 +109,14 @@ const cases: readonly Case[] = [
       const ctx = makeContext({ stats: stubStatsQuery(100, 50) });
       // 先過量治療應被夾到 max=100
       const heal = handleApplyCombatCondition(
-        { characterId: PLAYER_ID, healthDelta: 9999 },
+        { type: 'ApplyCombatCondition', characterId: PLAYER_ID, healthDelta: 9999 },
         state,
         ctx,
       );
       assert(reqChar(heal.nextSlice, PLAYER_ID).condition.health === 100, '治療應夾到 maxHealth');
       // 扣血 30 → 70
       const dmg = handleApplyCombatCondition(
-        { characterId: PLAYER_ID, healthDelta: -30 },
+        { type: 'ApplyCombatCondition', characterId: PLAYER_ID, healthDelta: -30 },
         state,
         ctx,
       );
@@ -170,7 +170,7 @@ const cases: readonly Case[] = [
     run: () => {
       const state = fixtureCharacterState(); // player=female, npc=male, 皆成年存活
       const ctx = makeContext();
-      const cmd: CreatePartnerFamilyLink = {
+      const cmd: CreatePartnerFamilyLink = { type: 'CreatePartnerFamilyLink',
         characterIds: [PLAYER_ID, NPC_ID],
         sourceId: PLAYER_ID,
       };
@@ -192,14 +192,14 @@ const cases: readonly Case[] = [
       const state = createCharacterState({ characters: [a, b] });
       // 同性 → 拒
       const sameSex = handleCreatePartnerFamilyLink(
-        { characterIds: ['a' as CharacterId, 'b' as CharacterId], sourceId: 'a' as CharacterId },
+        { type: 'CreatePartnerFamilyLink', characterIds: ['a' as CharacterId, 'b' as CharacterId], sourceId: 'a' as CharacterId },
         state,
         ctx,
       );
       assert(Object.keys(sameSex.nextSlice.familyLinks).length === 0, '同性應被拒');
       // 自我求婚 → 拒
       const selfM = handleCreatePartnerFamilyLink(
-        { characterIds: ['a' as CharacterId, 'a' as CharacterId], sourceId: 'a' as CharacterId },
+        { type: 'CreatePartnerFamilyLink', characterIds: ['a' as CharacterId, 'a' as CharacterId], sourceId: 'a' as CharacterId },
         state,
         ctx,
       );
@@ -211,7 +211,7 @@ const cases: readonly Case[] = [
     run: () => {
       const ctx = makeContext();
       const state = fixtureCharacterState();
-      const openCmd: OpenCharacterRelationshipFact = {
+      const openCmd: OpenCharacterRelationshipFact = { type: 'OpenCharacterRelationshipFact',
         subjectCharacterId: PLAYER_ID,
         counterpart: { kind: 'character', characterId: NPC_ID },
         kind: 'debt',
@@ -227,7 +227,7 @@ const cases: readonly Case[] = [
       assert(q.listUnresolvedRelationships(PLAYER_ID).length === 1, 'Query 應回一筆未了結');
       // 解決後 Query 回 0，且再次解決冪等
       const factId = Object.keys(again.nextSlice.relationshipFacts)[0]! as never;
-      const resolveCmd: ResolveCharacterRelationshipFact = {
+      const resolveCmd: ResolveCharacterRelationshipFact = { type: 'ResolveCharacterRelationshipFact',
         relationshipFactId: factId,
         sourceId: PLAYER_ID,
       };
@@ -315,7 +315,7 @@ const cases: readonly Case[] = [
         }),
       });
       const res = onHomeYearRestCompleted(
-        { teamId: 'team-1' as never, memberIds: ['pa' as CharacterId, 'ma' as CharacterId], elapsedDays: 365 },
+        { type: 'HomeYearRestCompleted', teamId: 'team-1' as never, memberIds: ['pa' as CharacterId, 'ma' as CharacterId], elapsedDays: 365 },
         state,
         ctx,
       );
@@ -339,7 +339,7 @@ const cases: readonly Case[] = [
       const escort = makeEscort('esc-1' as CharacterId, questId);
       const state = createCharacterState({ characters: [escort] });
       const res = onQuestStateChanged(
-        { questId, oldStatus: 'incomplete', newStatus: 'expired', reason: 'actualEndDeadline' },
+        { type: 'QuestStateChanged', questId, oldStatus: 'incomplete', newStatus: 'expired', reason: 'actualEndDeadline' },
         state,
         makeContext(),
       );
@@ -353,7 +353,7 @@ const cases: readonly Case[] = [
     run: () => {
       const state = fixtureCharacterState();
       const ctx = makeContext({ resolvers: stubResolverPort({ resolveReputationDelta: () => 5 }) });
-      const cmd: ApplyCharacterReputationEffect = {
+      const cmd: ApplyCharacterReputationEffect = { type: 'ApplyCharacterReputationEffect',
         characterId: PLAYER_ID,
         effectId: 'eff-rep' as EffectDefinitionId,
         sourceId: PLAYER_ID,
@@ -374,7 +374,11 @@ const cases: readonly Case[] = [
       const state = createCharacterState({ characters: [hurt] });
       // 新上限 60 → HP 應被夾到 60
       const ctx = makeContext({ stats: stubStatsQuery(60, 30) });
-      const res = onStatsCapacityChanged({ characterId: PLAYER_ID }, state, ctx);
+      const res = onStatsCapacityChanged(
+        { type: 'EquipmentChanged', characterId: PLAYER_ID, slotId: 'mainHand' as never },
+        state,
+        ctx,
+      );
       const next = reqChar(res.nextSlice, PLAYER_ID);
       assert(next.condition.health === 60 && next.condition.mana === 30, '當前資源應被新上限夾住');
       assert(hasEvent(eventsOf(res.outgoingMessages), 'CharacterConditionChanged'), '應 emit CharacterConditionChanged');

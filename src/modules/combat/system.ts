@@ -49,6 +49,7 @@ import type {
   CombatEncounterOutcome,
   CombatDomainEvent,
   CombatActionResult,
+  CombatOutboundInternalCommand,
 } from '../../contracts/combat';
 import type { PrimaryAttributeId } from '../../contracts/progression';
 import type { ProgressionQuery } from '../../contracts/progression';
@@ -170,7 +171,11 @@ export type CombatHandlerContext = Readonly<{
 function emit(event: CombatDomainEvent): TransactionMessageDraft {
   return { event };
 }
-function command(targetModule: ModuleId, cmd: unknown): TransactionMessageDraft {
+// B.5：外送命令以接收模組契約的真實型別為參數（見 contracts/combat CombatOutboundInternalCommand）。
+function command(
+  targetModule: ModuleId,
+  cmd: CombatOutboundInternalCommand,
+): TransactionMessageDraft {
   return { targetModule, command: cmd };
 }
 function result(
@@ -376,6 +381,7 @@ function buildPlayerCombatants(
       health: member.startHealth,
       maxHealth: member.maxHealth,
       mana: member.startMana,
+      maxMana: member.maxMana,
       currentCtb: 0,
       externalCtbIncreaseSinceOwnAction: 0,
       interruptionImmuneUntilOwnAction: false,
@@ -410,6 +416,7 @@ function buildEnemyCombatants(
       health: monster.attributes.health,
       maxHealth: monster.attributes.health,
       mana: 0,
+      maxMana: 0, // 怪物不使用 MP 資源池（結算不對怪物寫回 Character 條件）。
       currentCtb: 0,
       externalCtbIncreaseSinceOwnAction: 0,
       interruptionImmuneUntilOwnAction: false,
@@ -1061,14 +1068,17 @@ export function handleUseCombatItem(
   const encounter = tryGetEncounter(state, cmd.encounterId);
   if (encounter === undefined || encounter.state === 'resolved') return result(state);
   if (encounter.currentActorId !== cmd.actorId) return result(state);
-  // TODO: 完整戰鬥道具 workflow —— 送 CommitCombatItemUse 給 inventory，待 CombatItemUseCommitted
-  //   回來後才套效果 / 延遲。第一版僅發出提交草案，不改 Encounter 快照。
+  // inventory 契約的 CommitCombatItemUse 只吃 { itemId, userId }：userId 是使用者的
+  // CharacterId，不是 CombatantId。怪物沒有背包，非角色行動者直接視為非法。
+  const actor = encounter.combatants[cmd.actorId];
+  if (actor === undefined || actor.source.kind !== 'character') return result(state);
+  // TODO: 完整戰鬥道具 workflow —— 待 CombatItemUseCommitted 回來後才套效果 / 延遲。
+  //   第一版僅發出提交草案，不改 Encounter 快照。
   return result(state, [
     command(INVENTORY_MODULE, {
       type: 'CommitCombatItemUse',
-      encounterId: cmd.encounterId,
-      actorId: cmd.actorId,
-      itemInstanceId: cmd.itemInstanceId,
+      itemId: cmd.itemInstanceId,
+      userId: actor.source.characterId,
     }),
   ]);
 }
@@ -1108,24 +1118,17 @@ function resolveEncounter(
     const c = encounter.combatants[id]!;
     if (c.source.kind !== 'character') continue;
     const applyCmd: ApplyCombatCondition = {
+      type: 'ApplyCombatCondition',
       characterId: c.source.characterId,
       healthDelta: c.health - c.maxHealth,
-      manaDelta: c.mana - c.maxHealth, // maxMana 未快照於 combatant；以 maxHealth 佔位（見報告 mismatch）
-    } as ApplyCombatCondition;
-    messages.push(command(CHARACTER_MODULE, { type: 'ApplyCombatCondition', ...applyCmd }));
+      manaDelta: c.mana - c.maxMana,
+    };
+    messages.push(command(CHARACTER_MODULE, applyCmd));
   }
 
-  // (2) source=mapContent 且 victory → ResolvePlayerMapContent。
-  if (source.kind === 'mapContent' && outcome === 'victory') {
-    messages.push(
-      command(MAP_MODULE, {
-        type: 'ResolvePlayerMapContent',
-        mapId: source.mapId,
-        contentId: source.contentId,
-        encounterGroupId: source.encounterGroupId,
-      }),
-    );
-  }
+  // (2) 地圖內容處理：由 dungeon 訂閱 CombatEncounterResolved 後發出 ResolvePlayerMapContent。
+  // 該命令必填 distributionId，屬於 Dungeon Session，combat 無從取得（見 dungeon
+  // handleCombatEncounterResolved 的說明）。combat 只負責發出已發生事實。
 
   // (3) 成長事件（只在正式 resolved 時發，一次）。
   const budgets = encounterBudgets(encounter, ctx);

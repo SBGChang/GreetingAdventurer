@@ -230,33 +230,39 @@ export type QuestStateChangeReason =
   | 'contentUnavailable';
 
 export type QuestCreatedPayload = Readonly<{
+  type: 'QuestCreated';
   questId: QuestId;
   kind: QuestKind;
   sourceId: EntitySourceRef;
   deadlines: QuestDeadlines;
 }>;
 export type QuestAcceptedPayload = Readonly<{
+  type: 'QuestAccepted';
   questId: QuestId;
   teamId: TeamId;
   acceptedOnDay: WorldDay;
 }>;
 export type NpcQuestClaimChangedPayload = Readonly<{
+  type: 'NpcQuestClaimChanged';
   questId: QuestId;
   teamId?: TeamId;
   chainId?: ActionChainId;
   state: NpcQuestClaimState;
 }>;
 export type QuestStateChangedPayload = Readonly<{
+  type: 'QuestStateChanged';
   questId: QuestId;
   oldStatus: QuestStatus;
   newStatus: QuestStatus;
   reason: QuestStateChangeReason;
 }>;
 export type QuestObjectiveCompletedPayload = Readonly<{
+  type: 'QuestObjectiveCompleted';
   questId: QuestId;
   completedOnDay: WorldDay;
 }>;
 export type QuestSettledPayload = Readonly<{
+  type: 'QuestSettled';
   questId: QuestId;
   teamId: TeamId;
   beneficiaryCharacterIds: readonly CharacterId[];

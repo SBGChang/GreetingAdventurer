@@ -161,6 +161,7 @@ export interface AssetDistributionQuery {
 // ── 5.1 玩家 Command payloads ────────────────────────────────────────────
 
 export type SubmitLootBidCommand = Readonly<{
+  type: 'submitLootBid';
   distributionId: AssetDistributionId;
   bidderCharacterId: CharacterId;
   itemId: ItemInstanceId;
@@ -168,12 +169,14 @@ export type SubmitLootBidCommand = Readonly<{
 }>;
 
 export type PassLootItemCommand = Readonly<{
+  type: 'passLootItem';
   distributionId: AssetDistributionId;
   bidderCharacterId: CharacterId;
   itemId: ItemInstanceId;
 }>;
 
 export type ResolveLootAuctionRoundCommand = Readonly<{
+  type: 'resolveLootAuctionRound';
   distributionId: AssetDistributionId;
   itemId: ItemInstanceId;
 }>;
@@ -186,6 +189,7 @@ export type AssetDistributionGameCommand =
 // ── 5.2 收到的 Internal Command payloads（Distribution 為 Handler） ────────
 
 export type StartAssetDistributionCommand = Readonly<{
+  type: 'StartAssetDistribution';
   distributionId: AssetDistributionId;
   source: AssetDistributionSource;
   teamId: TeamId;
@@ -194,6 +198,7 @@ export type StartAssetDistributionCommand = Readonly<{
 }>;
 
 export type AppendAssetDistributionResultCommand = Readonly<{
+  type: 'AppendAssetDistributionResult';
   distributionId: AssetDistributionId;
   itemIds: readonly ItemInstanceId[];
   currencyInputs: readonly MoneyValue[];
@@ -202,11 +207,13 @@ export type AppendAssetDistributionResultCommand = Readonly<{
 }>;
 
 export type FinalizeAssetDistributionCollectionCommand = Readonly<{
+  type: 'FinalizeAssetDistributionCollection';
   distributionId: AssetDistributionId;
 }>;
 
 // §7.4 Expired Quest Cargo：Quest 送出，將 Item 移入該筆 assetDistributionEscrow
 export type ReleaseExpiredQuestCargoCommand = Readonly<{
+  type: 'ReleaseExpiredQuestCargo';
   distributionId: AssetDistributionId;
 }>;
 
@@ -219,29 +226,34 @@ export type AssetDistributionInboundInternalCommand =
 // ── 5.3 輸出 Internal Command payloads（handler 屬 economy／inventory；placeholder） ──
 
 export type CreateEconomyAccountCommand = Readonly<{
+  type: 'CreateEconomyAccount';
   owner: 'assetDistribution';
   distributionId: AssetDistributionId;
   currencyId: CurrencyId;
 }>;
 
 export type GrantCurrencyCommand = Readonly<{
+  type: 'GrantCurrency';
   accountId: EconomyAccountId;
   amount: MoneyValue;
 }>;
 
 export type TransferCurrencyCommand = Readonly<{
+  type: 'TransferCurrency';
   fromAccountId: EconomyAccountId;
   toAccountId: EconomyAccountId;
   amount: MoneyValue;
 }>;
 
 export type TransferItemCommand = Readonly<{
+  type: 'TransferItem';
   itemId: ItemInstanceId;
   toCharacterId: CharacterId;
   location: 'characterBag';
 }>;
 
 export type RemoveItemInstanceCommand = Readonly<{
+  type: 'RemoveItemInstance';
   itemId: ItemInstanceId;
 }>;
 
@@ -267,12 +279,14 @@ export type CurrencyAward = Readonly<{
 }>;
 
 export type AssetDistributionStartedEvent = Readonly<{
+  type: 'AssetDistributionStarted';
   distributionId: AssetDistributionId;
   source: AssetDistributionSource;
   participantCharacterIds: readonly CharacterId[];
 }>;
 
 export type AssetDistributionResultAppendedEvent = Readonly<{
+  type: 'AssetDistributionResultAppended';
   distributionId: AssetDistributionId;
   itemIds: readonly ItemInstanceId[];
   currencyInputs: readonly MoneyValue[];
@@ -280,18 +294,21 @@ export type AssetDistributionResultAppendedEvent = Readonly<{
 }>;
 
 export type LootAuctionRoundOpenedEvent = Readonly<{
+  type: 'LootAuctionRoundOpened';
   distributionId: AssetDistributionId;
   itemId: ItemInstanceId;
   intrinsicValue: MoneyValue;
 }>;
 
 export type PlayerInteractionOpenedEvent = Readonly<{
+  type: 'PlayerInteractionOpened';
   interactionId: InteractionId;
   teamId: TeamId;
   kind: 'lootAuction';
 }>;
 
 export type LootItemAwardedEvent = Readonly<{
+  type: 'LootItemAwarded';
   distributionId: AssetDistributionId;
   itemId: ItemInstanceId;
   winnerCharacterId: CharacterId;
@@ -299,12 +316,14 @@ export type LootItemAwardedEvent = Readonly<{
 }>;
 
 export type LootItemDirectSoldEvent = Readonly<{
+  type: 'LootItemDirectSold';
   distributionId: AssetDistributionId;
   itemId: ItemInstanceId;
   saleValue: MoneyValue;
 }>;
 
 export type AssetDistributionCompletedEvent = Readonly<{
+  type: 'AssetDistributionCompleted';
   distributionId: AssetDistributionId;
   itemAwards: readonly LootItemAward[];
   currencyAwards: readonly CurrencyAward[];

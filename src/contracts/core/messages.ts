@@ -16,6 +16,25 @@ import type {
   TransactionId,
 } from './ids';
 
+// ──────────────────────────────────────────────────────────────────────────
+// 訊息判別欄約定（B.5 收斂，全專案唯一）
+//
+// 每一個 Game Command／Internal Command／Domain Event payload **必須**帶一個字面值
+// `type` 欄位，值等於該訊息型別名（去掉 `Command`／`Event` 後綴）。理由：
+//   1. TransactionMessageDraft 以 `unknown` 承載 payload（core 不得知道具體聯集），
+//      因此 Router 只能靠 payload 自身的判別欄分派；沒有判別欄的 payload 無法路由。
+//   2. 判別鍵曾出現 `kind:`／`type:`／無 三種寫法，導致收送兩端靜默對不上。
+//      統一為 `type`，並保留 `kind` 給**領域模型**的變體（如 ItemLocation.kind、
+//      CombatEncounterSource.kind）——兩者語意不同，不得混用。
+//
+// 註：`TaggedMessage` 只是宣告意圖用的輔助別名，contracts 內多數型別直接內嵌
+// `type: 'X'` 欄位即可，不強制透過它建構。
+// ──────────────────────────────────────────────────────────────────────────
+export type TaggedMessage<TType extends string, TPayload> = Readonly<{ type: TType }> & TPayload;
+
+// 任何可被 Router 分派的訊息的結構性下界。
+export type AnyTaggedMessage = Readonly<{ type: string }>;
+
 export type CommandRejection = Readonly<{
   code: string;
   sourceModule: ModuleId;

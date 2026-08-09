@@ -350,7 +350,7 @@ export type MapScheduledJob = MapRefreshCheckJob;
 
 // [INFERRED] 欄位由 §5.2 與 §3.1 RefreshLock 推導。
 export type SetMapRefreshLock = Readonly<{
-  kind: 'SetMapRefreshLock';
+  type: 'SetMapRefreshLock';
   mapId: MapInstanceId;
   mode: 'set' | 'release';
   reason?: RefreshLock['reason'];
@@ -359,14 +359,14 @@ export type SetMapRefreshLock = Readonly<{
 }>;
 
 export type ProtectMapContent = Readonly<{
-  kind: 'ProtectMapContent';
+  type: 'ProtectMapContent';
   contentId: ContentInstanceId;
   mode: 'protect' | 'release';
   questId: QuestId;
 }>;
 
 export type ResolvePlayerMapContent = Readonly<{
-  kind: 'ResolvePlayerMapContent';
+  type: 'ResolvePlayerMapContent';
   teamId: TeamId;
   mapId: MapInstanceId;
   contentId: ContentInstanceId;
@@ -375,7 +375,7 @@ export type ResolvePlayerMapContent = Readonly<{
 }>;
 
 export type ApplyNpcDungeonSettlement = Readonly<{
-  kind: 'ApplyNpcDungeonSettlement';
+  type: 'ApplyNpcDungeonSettlement';
   runId: NpcDungeonRunId;
   mapId: MapInstanceId;
   mapVersion: number;
@@ -384,7 +384,7 @@ export type ApplyNpcDungeonSettlement = Readonly<{
 }>;
 
 export type OpenMapDoor = Readonly<{
-  kind: 'OpenMapDoor';
+  type: 'OpenMapDoor';
   teamId: TeamId;
   mapId: MapInstanceId;
   mapVersion: number;
@@ -393,7 +393,7 @@ export type OpenMapDoor = Readonly<{
 }>;
 
 export type ResolveMapTrap = Readonly<{
-  kind: 'ResolveMapTrap';
+  type: 'ResolveMapTrap';
   teamId: TeamId;
   mapId: MapInstanceId;
   mapVersion: number;
@@ -403,7 +403,7 @@ export type ResolveMapTrap = Readonly<{
 }>;
 
 export type HarvestMapGatheringNode = Readonly<{
-  kind: 'HarvestMapGatheringNode';
+  type: 'HarvestMapGatheringNode';
   teamId: TeamId;
   mapId: MapInstanceId;
   mapVersion: number;
@@ -426,21 +426,21 @@ export type MapInternalCommand =
 // ──────────────────────────────────────────────────────────────────────────
 
 export type MapRefreshed = Readonly<{
-  kind: 'MapRefreshed';
+  type: 'MapRefreshed';
   mapId: MapInstanceId;
   oldVersion: number;
   newVersion: number;
 }>;
 
 export type MapContentGenerated = Readonly<{
-  kind: 'MapContentGenerated';
+  type: 'MapContentGenerated';
   mapId: MapInstanceId;
   mapVersion: number;
   contentIds: readonly ContentInstanceId[];
 }>;
 
 export type MapContentResolved = Readonly<{
-  kind: 'MapContentResolved';
+  type: 'MapContentResolved';
   mapId: MapInstanceId;
   contentId: ContentInstanceId;
   distributionId?: AssetDistributionId;
@@ -449,13 +449,13 @@ export type MapContentResolved = Readonly<{
 }>;
 
 export type MapRefreshPendingRegistered = Readonly<{
-  kind: 'MapRefreshPendingRegistered';
+  type: 'MapRefreshPendingRegistered';
   mapId: MapInstanceId;
   checkDay: WorldDay;
 }>;
 
 export type NpcDungeonSettlementApplied = Readonly<{
-  kind: 'NpcDungeonSettlementApplied';
+  type: 'NpcDungeonSettlementApplied';
   runId: NpcDungeonRunId;
   distributionId: AssetDistributionId;
   appliedResults: readonly PendingDungeonResult[];
@@ -463,20 +463,20 @@ export type NpcDungeonSettlementApplied = Readonly<{
 }>;
 
 export type MapRefreshLockChanged = Readonly<{
-  kind: 'MapRefreshLockChanged';
+  type: 'MapRefreshLockChanged';
   mapId: MapInstanceId;
   lock?: RefreshLock;
 }>;
 
 export type MapDoorOpened = Readonly<{
-  kind: 'MapDoorOpened';
+  type: 'MapDoorOpened';
   mapId: MapInstanceId;
   mapVersion: number;
   linkId: RoomLinkId;
 }>;
 
 export type MapTrapResolved = Readonly<{
-  kind: 'MapTrapResolved';
+  type: 'MapTrapResolved';
   mapId: MapInstanceId;
   mapVersion: number;
   trapId: FixedTrapId;
@@ -484,7 +484,7 @@ export type MapTrapResolved = Readonly<{
 }>;
 
 export type MapGatheringNodeHarvested = Readonly<{
-  kind: 'MapGatheringNodeHarvested';
+  type: 'MapGatheringNodeHarvested';
   mapId: MapInstanceId;
   mapVersion: number;
   nodeId: GatheringNodeId;

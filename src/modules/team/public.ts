@@ -74,7 +74,7 @@ export type {
   TeamIdAllocator,
   TeamWorldReader,
   TeamResolverPort,
-  TeamDomainEventTagged,
+  TeamDomainEvent,
   StartNpcDungeonRunCommand,
 } from './system';
 

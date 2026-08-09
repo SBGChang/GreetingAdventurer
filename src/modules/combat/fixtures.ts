@@ -492,6 +492,7 @@ export function makeCombatant(spec: CombatantSpec): CombatantState {
     health: spec.health ?? 100,
     maxHealth: 100,
     mana: 30,
+    maxMana: 30,
     currentCtb: spec.currentCtb ?? 0,
     externalCtbIncreaseSinceOwnAction: 0,
     interruptionImmuneUntilOwnAction: false,

@@ -22,7 +22,7 @@ export {
 } from './state';
 
 // ── System：注入 Port/Context + 玩家 handler + NPC job/command + 結算 subscriber ──
-export type { DungeonContext, DungeonMapPort, DungeonTeamPort } from './system';
+export type { DungeonContext, DungeonMapPort, DungeonTeamPort, DungeonHandlerResult } from './system';
 export {
   DUNGEON_MODULE_ID,
   startPlayerExploration,
@@ -37,6 +37,7 @@ export {
   handleNpcDungeonSettlementApplied,
   handleCombatSequenceSettled,
   handleAssetDistributionCompleted,
+  handleCombatEncounterResolved,
   dungeonSubscribers,
 } from './system';
 

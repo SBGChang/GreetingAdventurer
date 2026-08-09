@@ -45,6 +45,8 @@ import type { DefinitionHeader, ScheduledJobBase } from '../core';
 
 // 跨模組：GridCell 由 map 擁有（未實作，屬預期 unresolved import）。
 import type { GridCell } from '../map';
+// 外送 Internal Command 引用接收模組契約的真實型別（見下方 TeamOutboundInternalCommand）。
+import type { StartNpcDungeonRun } from '../dungeon';
 
 // ── 本模組專屬／未定案 Definition ID（core 未列出）──────────────────────
 export type FreeActionRuleId = DefinitionId<'free-action-rule'>;
@@ -347,20 +349,24 @@ export interface TeamQuery {
 
 // ── 玩家 Command payload（doc 只列前置條件；欄位依 prose 推導）──────────
 export type StartCityTravelCommand = Readonly<{
+  type: 'startCityTravel';
   toCityId: CityId;
   routeId: RouteId;
   modeId: TravelModeId;
 }>;
 
 export type EnterAdventureMapCommand = Readonly<{
+  type: 'enterAdventureMap';
   adventureSiteId: AdventureSiteId;
 }>;
 
 export type ReturnToCityCommand = Readonly<{
+  type: 'returnToCity';
   teamId: TeamId;
 }>;
 
 export type ChooseCityFreeActionCommand = Readonly<{
+  type: 'chooseCityFreeAction';
   memberId: CharacterId;
   ruleId: FreeActionRuleId;
   payload: FreeActionPayload;
@@ -369,23 +375,28 @@ export type ChooseCityFreeActionCommand = Readonly<{
 export type BeginCityFreePeriodCommand = Readonly<Record<string, never>>;
 
 export type RestCommand = Readonly<{
+  type: 'rest';
   planKind: Extract<TeamPlanKind, 'homeRest'> | 'cityFacilityAction';
 }>;
 
 export type SelectPlayerSuccessorCommand = Readonly<{
+  type: 'selectPlayerSuccessor';
   interactionId: InteractionId;
   successorId: CharacterId;
 }>;
 
 export type RecruitTavernAdventurerCommand = Readonly<{
+  type: 'recruitTavernAdventurer';
   targetCharacterId: CharacterId;
 }>;
 
 export type DismissMemberCommand = Readonly<{
+  type: 'dismissMember';
   memberId: CharacterId;
 }>;
 
 export type ConfigureCombatFormationCommand = Readonly<{
+  type: 'configureCombatFormation';
   teamId: TeamId;
   placements: Readonly<Record<CharacterId, GridCell>>;
 }>;
@@ -438,11 +449,13 @@ export type TeamScheduledJob =
 
 // ── Internal Command payload（inbound；欄位依 prose 推導）─────────────────
 export type StartReturnFromDungeonPayload = Readonly<{
+  type: 'StartReturnFromDungeon';
   teamId: TeamId;
   mapId: MapInstanceId;
 }>;
 
 export type StartTimedCityActionPayload = Readonly<{
+  type: 'StartTimedCityAction';
   teamId: TeamId;
   scope: 'team' | 'member';
   facilityId?: DefinitionId;
@@ -452,22 +465,26 @@ export type StartTimedCityActionPayload = Readonly<{
 }>;
 
 export type StartChildStudyPlanPayload = Readonly<{
+  type: 'StartChildStudyPlan';
   teamId: TeamId;
 }>;
 
 export type CreateNpcTeamPayload = Readonly<{
+  type: 'CreateNpcTeam';
   memberIds: readonly CharacterId[];
   leaderId: CharacterId;
   cityId: CityId;
 }>;
 
 export type StartNpcTeamPlanPayload = Readonly<{
+  type: 'StartNpcTeamPlan';
   teamId: TeamId;
   kind: TeamPlanKind;
   payload: TeamPlanPayload;
 }>;
 
 export type OpenPlayerTravelInteractionPayload = Readonly<{
+  type: 'OpenPlayerTravelInteraction';
   teamId: TeamId;
   planId: TeamPlanId;
   segmentIndex: 0 | 1 | 2;
@@ -475,22 +492,26 @@ export type OpenPlayerTravelInteractionPayload = Readonly<{
 }>;
 
 export type CompletePlayerTravelSegmentWithoutEventPayload = Readonly<{
+  type: 'CompletePlayerTravelSegmentWithout';
   teamId: TeamId;
   planId: TeamPlanId;
   segmentIndex: 0 | 1 | 2;
 }>;
 
 export type MarkPlayerTravelInteractionAwaitingCombatPayload = Readonly<{
+  type: 'MarkPlayerTravelInteractionAwaitingCombat';
   interactionId: InteractionId;
   selectedOptionId: ContentEventOptionId;
   encounterId: EncounterId;
 }>;
 
 export type CompletePlayerTravelInteractionPayload = Readonly<{
+  type: 'CompletePlayerTravelInteraction';
   interactionId: InteractionId;
 }>;
 
 export type AssignNpcMemberFreeActionPayload = Readonly<{
+  type: 'AssignNpcMemberFreeAction';
   teamId: TeamId;
   memberId: CharacterId;
   ruleId: FreeActionRuleId;
@@ -504,6 +525,7 @@ export type TeamWorkSettlementEntryKind =
   | 'consumableUse';
 
 export type RecordTeamWorkSettlementValuePayload = Readonly<{
+  type: 'RecordTeamWorkSettlementValue';
   teamId: TeamId;
   entryId: string; // 冪等鍵
   kind: TeamWorkSettlementEntryKind;
@@ -511,6 +533,7 @@ export type RecordTeamWorkSettlementValuePayload = Readonly<{
 }>;
 
 export type AttachQuestTemporaryMemberPayload = Readonly<{
+  type: 'AttachQuestTemporaryMember';
   teamId: TeamId;
   characterId: CharacterId;
   questId: QuestId;
@@ -531,16 +554,15 @@ export type TeamInboundInternalCommand =
   | AttachQuestTemporaryMemberPayload;
 
 // 輸出 Internal Command（唯一處理者：dungeon）。
-export type StartNpcDungeonRunPayload = Readonly<{
-  teamId: TeamId;
-  mapId: MapInstanceId;
-  planId: TeamPlanId;
-}>;
+// B.5：不再自行複寫欄位，直接引用 dungeon 契約的真實型別——兩份宣告一旦漂移，
+// 送出的命令就會被接收端拒絕，而訊息以 unknown 傳遞時編譯器看不到。
+export type StartNpcDungeonRunPayload = StartNpcDungeonRun;
 
 export type TeamOutboundInternalCommand = StartNpcDungeonRunPayload;
 
 // ── 輸出 DomainEvent payload ────────────────────────────────────────────
 export type TeamPlanChangedEvent = Readonly<{
+  type: 'TeamPlanChanged';
   teamId: TeamId;
   planId: TeamPlanId;
   oldKind?: TeamPlanKind;
@@ -548,6 +570,7 @@ export type TeamPlanChangedEvent = Readonly<{
 }>;
 
 export type TeamPlanCompletedEvent = Readonly<{
+  type: 'TeamPlanCompleted';
   teamId: TeamId;
   planId: TeamPlanId;
   kind: TeamPlanKind;
@@ -555,12 +578,14 @@ export type TeamPlanCompletedEvent = Readonly<{
 }>;
 
 export type TeamLocationChangedEvent = Readonly<{
+  type: 'TeamLocationChanged';
   teamId: TeamId;
   from: TeamLocation;
   to: TeamLocation;
 }>;
 
 export type FreeActionCompletedEvent = Readonly<{
+  type: 'FreeActionCompleted';
   teamId: TeamId;
   memberId: CharacterId;
   ruleId: FreeActionRuleId;
@@ -568,12 +593,14 @@ export type FreeActionCompletedEvent = Readonly<{
 }>;
 
 export type FreeActionChangedEvent = Readonly<{
+  type: 'FreeActionChanged';
   freeActionId: FreeActionId;
   status: MemberFreeActionStatus;
   progress: number;
 }>;
 
 export type TravelCompletedEvent = Readonly<{
+  type: 'TravelCompleted';
   teamId: TeamId;
   fromCityId: CityId;
   toCityId: CityId;
@@ -584,6 +611,7 @@ export type TravelCompletedEvent = Readonly<{
 }>;
 
 export type TravelSegmentReachedEvent = Readonly<{
+  type: 'TravelSegmentReached';
   teamId: TeamId;
   routeId: RouteId;
   segmentIndex: 0 | 1 | 2;
@@ -591,6 +619,7 @@ export type TravelSegmentReachedEvent = Readonly<{
 }>;
 
 export type PlayerTravelEventResolvedEvent = Readonly<{
+  type: 'PlayerTravelEventResolved';
   interactionId?: InteractionId;
   eventInstanceId?: PlayerTravelEventInstanceId;
   optionId?: ContentEventOptionId;
@@ -598,18 +627,21 @@ export type PlayerTravelEventResolvedEvent = Readonly<{
 }>;
 
 export type PlayerInteractionOpenedEvent = Readonly<{
+  type: 'PlayerInteractionOpened';
   interactionId: InteractionId;
   teamId: TeamId;
   kind: 'travelEvent' | 'succession';
 }>;
 
 export type HomeYearRestCompletedEvent = Readonly<{
+  type: 'HomeYearRestCompleted';
   teamId: TeamId;
   memberIds: readonly CharacterId[];
   elapsedDays: 365;
 }>;
 
 export type PlayerSuccessorSelectedEvent = Readonly<{
+  type: 'PlayerSuccessorSelected';
   teamId: TeamId;
   formerLeaderId: CharacterId;
   successorId: CharacterId;
@@ -617,12 +649,14 @@ export type PlayerSuccessorSelectedEvent = Readonly<{
 }>;
 
 export type TeamMemberJoinedEvent = Readonly<{
+  type: 'TeamMemberJoined';
   teamId: TeamId;
   characterId: CharacterId;
   reason: 'recruited' | 'succession';
 }>;
 
 export type TeamMemberDepartedEvent = Readonly<{
+  type: 'TeamMemberDeparted';
   teamId: TeamId;
   characterId: CharacterId;
   reason: 'recruitedAway' | 'dismissed' | 'unavailable' | 'economicDeparture';
@@ -630,6 +664,7 @@ export type TeamMemberDepartedEvent = Readonly<{
 }>;
 
 export type TeamWorkSettlementChangedEvent = Readonly<{
+  type: 'TeamWorkSettlementChanged';
   teamId: TeamId;
   entryId: string;
   kind: TeamWorkSettlementEntryKind;
@@ -637,12 +672,14 @@ export type TeamWorkSettlementChangedEvent = Readonly<{
 }>;
 
 export type TeamCombatFormationChangedEvent = Readonly<{
+  type: 'TeamCombatFormationChanged';
   teamId: TeamId;
   placements: Readonly<Record<CharacterId, GridCell>>;
   revision: Revision;
 }>;
 
 export type AdventurerActivityRecordedEvent = Readonly<{
+  type: 'AdventurerActivityRecorded';
   characterId: CharacterId;
   kind: RecentAdventurerActivityKind;
   completedOnDay: WorldDay;
@@ -650,6 +687,7 @@ export type AdventurerActivityRecordedEvent = Readonly<{
 }>;
 
 export type NonPlayerMemberFreeDaySocialPracticeEvent = Readonly<{
+  type: 'NonPlayerMemberFreeDaySocialPractice';
   teamId: TeamId;
   characterId: CharacterId;
   worldDay: WorldDay;

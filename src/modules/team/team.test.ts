@@ -124,7 +124,7 @@ function playerTravel(modeId: TravelModeId): TravelTally {
   const worldDay = 20000;
   const s0 = fixtureTeamState(worldDay as WorldDay);
   const ctx = makeContext({ worldDay: worldDay as WorldDay });
-  const r = ok(handleStartCityTravel(s0, { toCityId: CITY_B, routeId: ROUTE_AB, modeId }, ctx));
+  const r = ok(handleStartCityTravel(s0, { type: 'startCityTravel', toCityId: CITY_B, routeId: ROUTE_AB, modeId }, ctx));
   return runTravel(r.result.nextSlice, r.result.scheduledJobs, worldDay);
 }
 
@@ -162,7 +162,7 @@ const cases: readonly Case[] = [
       const s0 = fixtureTeamState(worldDay as WorldDay);
       const ctx = makeContext({ worldDay: worldDay as WorldDay });
       const arrivalDay = (worldDay + 6) as WorldDay;
-      const payload: StartNpcTeamPlanPayload = {
+      const payload: StartNpcTeamPlanPayload = { type: 'StartNpcTeamPlan',
         teamId: NPC_TEAM_ID,
         kind: 'cityTravel',
         payload: {
@@ -196,7 +196,7 @@ const cases: readonly Case[] = [
         [PLAYER_LEADER_ID]: same,
         [PLAYER_MEMBER_ID]: same,
       };
-      const r = handleConfigureCombatFormation(s0, { teamId: PLAYER_TEAM_ID, placements }, ctx);
+      const r = handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, placements }, ctx);
       assert(!r.ok && r.rejection.code === 'team/formation-cell-overlap', `overlap rejected (got ${r.ok ? 'ok' : r.rejection.code})`);
     },
   },
@@ -206,7 +206,7 @@ const cases: readonly Case[] = [
       const s0 = fixtureTeamState();
       const ctx = makeContext();
       const placements: Record<string, GridCell> = { [PLAYER_LEADER_ID]: { floor: 0, row: 0, col: 0 } };
-      const r = handleConfigureCombatFormation(s0, { teamId: PLAYER_TEAM_ID, placements }, ctx);
+      const r = handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, placements }, ctx);
       assert(!r.ok && r.rejection.code === 'team/formation-benched-member', `bench rejected (got ${r.ok ? 'ok' : r.rejection.code})`);
     },
   },
@@ -220,7 +220,7 @@ const cases: readonly Case[] = [
         [PLAYER_MEMBER_ID]: { floor: 0, row: 0, col: 1 },
         ['char-stranger']: { floor: 0, row: 1, col: 0 },
       };
-      const r = handleConfigureCombatFormation(s0, { teamId: PLAYER_TEAM_ID, placements }, ctx);
+      const r = handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, placements }, ctx);
       assert(!r.ok && r.rejection.code === 'team/formation-non-member', `non-member rejected (got ${r.ok ? 'ok' : r.rejection.code})`);
     },
   },
@@ -233,7 +233,7 @@ const cases: readonly Case[] = [
         [PLAYER_LEADER_ID]: { floor: 0, row: 2, col: 2 },
         [PLAYER_MEMBER_ID]: { floor: 0, row: 0, col: 0 },
       };
-      const r = ok(handleConfigureCombatFormation(s0, { teamId: PLAYER_TEAM_ID, placements }, ctx));
+      const r = ok(handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, placements }, ctx));
       const f = r.result.nextSlice.combatFormations[PLAYER_TEAM_ID]!;
       assert(f.revision === 1, `revision bumped to 1 (got ${f.revision})`);
       assert(eventTypes(r.result.outgoingMessages).includes('TeamCombatFormationChanged'), 'emits formation changed');
@@ -244,7 +244,7 @@ const cases: readonly Case[] = [
     run: () => {
       const s0 = fixtureTeamState();
       const ctx = makeContext();
-      const r = ok(handleRecruitTavernAdventurer(s0, { targetCharacterId: NPC_LEADER_ID }, ctx));
+      const r = ok(handleRecruitTavernAdventurer(s0, { type: 'recruitTavernAdventurer', targetCharacterId: NPC_LEADER_ID }, ctx));
       const player = r.result.nextSlice.teams[PLAYER_TEAM_ID]!;
       assert(player.memberIds.includes(NPC_LEADER_ID), 'target joined player team');
       assert(player.memberIds.length === 3, `player now 3 members (got ${player.memberIds.length})`);
@@ -260,7 +260,7 @@ const cases: readonly Case[] = [
     run: () => {
       const s0 = fixtureTeamState();
       const ctx = makeContext({ resolvers: stubResolverPort({ resolveRecruitmentSuccess: () => false }) });
-      const r = handleRecruitTavernAdventurer(s0, { targetCharacterId: NPC_LEADER_ID }, ctx);
+      const r = handleRecruitTavernAdventurer(s0, { type: 'recruitTavernAdventurer', targetCharacterId: NPC_LEADER_ID }, ctx);
       assert(!r.ok && r.rejection.code === 'team/recruitment-failed', `recruitment-failed (got ${r.ok ? 'ok' : r.rejection.code})`);
     },
   },
@@ -280,7 +280,7 @@ const cases: readonly Case[] = [
         },
       } as TeamState;
       const ctx = makeContext();
-      const r = handleRecruitTavernAdventurer(multi, { targetCharacterId: NPC_LEADER_ID }, ctx);
+      const r = handleRecruitTavernAdventurer(multi, { type: 'recruitTavernAdventurer', targetCharacterId: NPC_LEADER_ID }, ctx);
       assert(!r.ok && r.rejection.code === 'team/already-in-team', `already-in-team (got ${r.ok ? 'ok' : r.rejection.code})`);
     },
   },
@@ -333,7 +333,7 @@ const cases: readonly Case[] = [
         },
       } as TeamState;
       const ctx = makeContext();
-      const r = ok(handleSelectPlayerSuccessor(state, { interactionId: 'int-1' as never, successorId: PLAYER_MEMBER_ID }, ctx));
+      const r = ok(handleSelectPlayerSuccessor(state, { type: 'selectPlayerSuccessor', interactionId: 'int-1' as never, successorId: PLAYER_MEMBER_ID }, ctx));
       const player = r.result.nextSlice.teams[PLAYER_TEAM_ID]!;
       assert(player.leaderId === PLAYER_MEMBER_ID, 'leader replaced');
       assert(r.result.nextSlice.pendingSuccession === undefined, 'pending cleared');
@@ -356,7 +356,7 @@ const cases: readonly Case[] = [
         },
       } as TeamState;
       const ctx = makeContext();
-      const r = handleSelectPlayerSuccessor(state, { interactionId: 'int-1' as never, successorId: NPC_LEADER_ID }, ctx);
+      const r = handleSelectPlayerSuccessor(state, { type: 'selectPlayerSuccessor', interactionId: 'int-1' as never, successorId: NPC_LEADER_ID }, ctx);
       assert(!r.ok && r.rejection.code === 'team/ineligible-successor', `ineligible rejected (got ${r.ok ? 'ok' : r.rejection.code})`);
     },
   },
@@ -366,7 +366,7 @@ const cases: readonly Case[] = [
       const worldDay = 20000 as WorldDay;
       const s0 = fixtureTeamState(worldDay);
       const ctx = makeContext({ worldDay });
-      const r = ok(handleStartCityTravel(s0, { toCityId: CITY_B, routeId: ROUTE_AB, modeId: TRAVEL_MODE_3 }, ctx));
+      const r = ok(handleStartCityTravel(s0, { type: 'startCityTravel', toCityId: CITY_B, routeId: ROUTE_AB, modeId: TRAVEL_MODE_3 }, ctx));
       const job = materializeJob(r.result.scheduledJobs[0], 1); // expectedRevision 0
       // 人為推進 plan.revision，使排定 Job 失配。
       const planId = job.payload.planId;
@@ -388,7 +388,7 @@ const cases: readonly Case[] = [
       const worldDay = 20000 as WorldDay;
       const s0 = fixtureTeamState(worldDay);
       const ctx = makeContext({ worldDay });
-      const enter = ok(handleEnterAdventureMap(s0, { adventureSiteId: 'site-1' as never }, ctx));
+      const enter = ok(handleEnterAdventureMap(s0, { type: 'enterAdventureMap', adventureSiteId: 'site-1' as never }, ctx));
       const job = materializeJob(enter.result.scheduledJobs[0], 1);
       const ctx2 = makeContext({ worldDay: job.dueDay });
       const arrived = handleTeamPlanDueJob(enter.result.nextSlice, job, ctx2);
@@ -398,7 +398,7 @@ const cases: readonly Case[] = [
       assert(team.location.kind === 'adventureMap', 'team now on adventure map');
 
       // return to city.
-      const ret = ok(handleReturnToCity(arrived.nextSlice, { teamId: PLAYER_TEAM_ID }, ctx2));
+      const ret = ok(handleReturnToCity(arrived.nextSlice, { type: 'returnToCity', teamId: PLAYER_TEAM_ID }, ctx2));
       const rjob = materializeJob(ret.result.scheduledJobs[0], 2);
       const back = handleTeamPlanDueJob(ret.result.nextSlice, rjob, makeContext({ worldDay: rjob.dueDay }));
       const backTeam = back.nextSlice.teams[PLAYER_TEAM_ID]!;
