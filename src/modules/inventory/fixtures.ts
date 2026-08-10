@@ -46,6 +46,7 @@ export const FIXTURE = {
   paperDefId: 'definition:item:paper' as ItemDefinitionId,
   // Item instance IDs
   swordItemId: 'runtime:item-instance:sword-1' as ItemInstanceId,
+  greatswordItemId: 'runtime:item-instance:greatsword-1' as ItemInstanceId,
   potionItemId: 'runtime:item-instance:potion-1' as ItemInstanceId,
   // Equipment slots
   mainHandSlot: 'definition:equipment-slot:mainHand' as EquipmentSlotId,
@@ -184,8 +185,22 @@ export function createFixtureState(): InventoryState {
     state: 'active',
     revision: 0,
   };
+  // 雙手武器實例：供「雙手佔位／頂替卸下」測試使用。
+  const greatsword: ItemInstance = {
+    itemId: FIXTURE.greatswordItemId,
+    definitionId: FIXTURE.greatswordDefId,
+    quantity: 1,
+    ownerCharacterId: FIXTURE.characterId,
+    location: { kind: 'characterBag', characterId: FIXTURE.characterId },
+    state: 'active',
+    revision: 0,
+  };
   return {
-    items: { [FIXTURE.swordItemId]: sword, [FIXTURE.potionItemId]: potion },
+    items: {
+      [FIXTURE.swordItemId]: sword,
+      [FIXTURE.potionItemId]: potion,
+      [FIXTURE.greatswordItemId]: greatsword,
+    },
     equipmentLoadouts: {},
     encumbranceResolutions: {},
   };

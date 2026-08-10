@@ -21,10 +21,14 @@ import {
   reserveCraftingInputs,
   reserveQuestItem,
   transferItem,
+  configureWeaponSet,
   type InventoryHandlerResult,
 } from './system';
 import { createFixtureDeps, createFixtureReader, createFixtureState, FIXTURE } from './fixtures';
 import type { InventoryState } from './state';
+
+// 預設武器組 0（getOrCreateLoadout 以 `${characterId}:ws{i}` 命名）。
+const WS0 = `${FIXTURE.characterId}:ws0` as WeaponSetId;
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -63,7 +67,8 @@ const cases: readonly Case[] = [
       const next = expectOk(r, 'create');
       const query = createInventoryQuery(next, deps.reader);
       // exactly one new item added
-      assert(Object.keys(next.items).length === 3, 'create: item count 3');
+      // fixture 種了 3 件（劍／藥水／雙手劍），新增 1 件 → 4。
+      assert(Object.keys(next.items).length === 4, 'create: item count 4');
       const evts = eventsOf(r);
       assert(evts.length === 1, 'create: one event');
       const created = evts[0] as { location: { kind: string } };
@@ -177,7 +182,7 @@ const cases: readonly Case[] = [
       const deps = createFixtureDeps();
       // equip sword first
       const equipped = expectOk(
-        equipItem(createFixtureState(), { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot }, deps),
+        equipItem(createFixtureState(), { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: WS0 }, deps),
         'equip-for-remove',
       );
       expectReject(
@@ -218,10 +223,11 @@ const cases: readonly Case[] = [
     name: 'equipItem: moves item to equipped + getEquippedItem reflects it',
     run: () => {
       const deps = createFixtureDeps();
-      const r = equipItem(createFixtureState(), { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot }, deps);
+      const r = equipItem(createFixtureState(), { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: WS0 }, deps);
       const next = expectOk(r, 'equip');
       const q = createInventoryQuery(next, deps.reader);
-      const eq = q.getEquippedItem(FIXTURE.characterId, FIXTURE.mainHandSlot);
+      // 手部裝備屬於武器組，查詢必須帶 weaponSetId（location 也記著它）。
+      const eq = q.getEquippedItem(FIXTURE.characterId, FIXTURE.mainHandSlot, WS0);
       assert(eq?.itemId === FIXTURE.swordItemId, 'equip: equipped item present');
       assert(q.getLocation(FIXTURE.swordItemId)?.kind === 'equipped', 'equip: location equipped');
     },
@@ -299,6 +305,108 @@ const cases: readonly Case[] = [
       const closed = expectOk(r, 'enc-close');
       assert(createInventoryQuery(closed, roomy.reader).getEncumbranceResolution(FIXTURE.teamId) === undefined, 'enc-close: resolution removed');
       assert(eventsOf(r).length === 1, 'enc-close: Closed event emitted');
+    },
+  },
+  {
+    // 迴歸：已裝備的物品不得被 TransferItem 直接搬走——裝備欄會留著舊 itemId，
+    // 造成「物品在別處、裝備欄仍指著它」的永久不一致。
+    name: 'transferItem: 已裝備物品被拒絕（不得繞過卸下）',
+    run: () => {
+      const deps = createFixtureDeps();
+      const equipped = expectOk(
+        equipItem(
+          createFixtureState(),
+          { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: WS0 },
+          deps,
+        ),
+        'equip',
+      );
+      expectReject(
+        transferItem(
+          equipped,
+          { type: 'TransferItem', itemId: FIXTURE.swordItemId, to: { kind: 'characterBag', characterId: FIXTURE.characterId }, reason: 'test' },
+          deps,
+        ),
+        'inventory/item-equipped',
+        'transfer equipped',
+      );
+    },
+  },
+  {
+    // 迴歸：裝上新物品必須把原槽位物品卸回背包。
+    name: 'equipItem: 頂替時把原槽位物品卸回背包',
+    run: () => {
+      const deps = createFixtureDeps();
+      const s1 = expectOk(
+        equipItem(
+          createFixtureState(),
+          { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: WS0 },
+          deps,
+        ),
+        'equip sword',
+      );
+      assert(s1.items[FIXTURE.swordItemId]!.location.kind === 'equipped', '劍應為 equipped');
+
+      const s2 = expectOk(
+        equipItem(
+          s1,
+          { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.greatswordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: WS0 },
+          deps,
+        ),
+        'equip greatsword',
+      );
+      const sword = s2.items[FIXTURE.swordItemId]!;
+      assert(
+        sword.location.kind === 'characterBag',
+        `舊主手物品應被卸回背包，實得 ${sword.location.kind}`,
+      );
+      assert(s2.items[FIXTURE.greatswordItemId]!.location.kind === 'equipped', '雙手劍應為 equipped');
+      // 雙手武器同時占用主／副手（doc §282）。
+      const set = s2.equipmentLoadouts[FIXTURE.characterId]!.weaponSets[0]!;
+      assert(set.mainHandItemId === FIXTURE.greatswordItemId, '主手應為雙手劍');
+      assert(set.offHandItemId === FIXTURE.greatswordItemId, '雙手武器應同時占用副手');
+    },
+  },
+  {
+    name: 'configureWeaponSet: 拒絕不存在／非本人持有的物品',
+    run: () => {
+      const deps = createFixtureDeps();
+      const state = createFixtureState();
+      const weaponSetId = WS0;
+      expectReject(
+        configureWeaponSet(
+          state,
+          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId, mainHandItemId: 'runtime:item-instance:ghost' as ItemInstanceId, selectedSkillIds: [undefined, undefined, undefined] },
+          deps,
+        ),
+        'inventory/unknown-item',
+        'ghost item',
+      );
+      expectReject(
+        configureWeaponSet(
+          state,
+          { type: 'configureWeaponSet', characterId: 'runtime:character:other' as CharacterId, weaponSetId, mainHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] },
+          deps,
+        ),
+        'inventory/unknown-weapon-set',
+        'other character weapon set',
+      );
+    },
+  },
+  {
+    name: 'configureWeaponSet: 雙手武器不得只占一手',
+    run: () => {
+      const deps = createFixtureDeps();
+      const weaponSetId = WS0;
+      expectReject(
+        configureWeaponSet(
+          createFixtureState(),
+          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId, mainHandItemId: FIXTURE.greatswordItemId, offHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] },
+          deps,
+        ),
+        'inventory/two-handed-must-occupy-both-hands',
+        'two-handed with different off-hand',
+      );
     },
   },
 ];

@@ -172,6 +172,12 @@ export function transferItem(
   if (isReservedActive(inst) && inst.reservation?.kind !== 'pendingTransfer') {
     return reject('inventory/item-reserved');
   }
+  // 已裝備的物品不可直接被搬走：裝備欄（armorSlots / weaponSets）仍會保留該 itemId，
+  // 造成「物品在背包、裝備欄卻還指著它」的不一致，違反不變量 inventory/single-location。
+  // 必須先卸下（UnequipItem）再移動。
+  if (inst.location.kind === 'equipped') {
+    return reject('inventory/item-equipped', { itemId: String(cmd.itemId) });
+  }
 
   const bound = ownerBoundCharacter(cmd.to);
   let newOwner: CharacterId | undefined;
@@ -379,14 +385,56 @@ export function equipItem(
     return reject('inventory/illegal-slot', { slotId: String(cmd.slotId) });
   }
 
+  // 手部裝備屬於武器組（doc §282：三組武器各自持有主／副手），必須指名 weaponSetId；
+  // 否則會被寫進共用的 armorSlots，武器組永遠看不到它。反之鎧甲不得帶 weaponSetId（不變量 9）。
+  const isHandHeld = equip.equipmentKind === 'weapon' || equip.equipmentKind === 'shield';
+  if (isHandHeld && cmd.weaponSetId === undefined) {
+    return reject('inventory/weapon-requires-weapon-set');
+  }
+  if (!isHandHeld && cmd.weaponSetId !== undefined) {
+    return reject('inventory/non-weapon-must-not-target-weapon-set');
+  }
+
   const loadout = getOrCreateLoadout(state, cmd.characterId);
+  // 雙手裝備以 occupiedSlots 同時占用主／副手（doc §282），不複製第二件 Item。
+  const isTwoHanded = equip.occupiedSlots.length > 1;
+
   let nextLoadout = loadout;
+  let working = state;
+  const events: DomainEventDraft<unknown>[] = [];
+  // 被頂掉的舊裝備：必須真的卸回背包，否則舊物品的 location 仍是 equipped，
+  // 裝備欄與物品位置就此永久不一致（違反 inventory/single-location）。
+  const displaced: ItemInstanceId[] = [];
+
   if (cmd.weaponSetId !== undefined) {
-    // 武器手部位置（doc 不變量 9）：找到對應武器組並設定主手。
     const idx = loadout.weaponSets.findIndex((w) => w.weaponSetId === cmd.weaponSetId);
     if (idx < 0) return reject('inventory/unknown-weapon-set', { weaponSetId: String(cmd.weaponSetId) });
-    // TODO: 依 occupiedSlots 判定主手／副手／雙手占位；此處實作主手主路徑。
-    const updated: WeaponSetLoadout = { ...loadout.weaponSets[idx]!, mainHandItemId: cmd.itemId };
+    const set = loadout.weaponSets[idx]!;
+
+    if (set.mainHandItemId !== undefined && set.mainHandItemId !== cmd.itemId) {
+      displaced.push(set.mainHandItemId);
+    }
+    // 換上雙手武器 → 副手也被占用；換上單手武器時，若原主手是雙手武器，其副手佔位一併解除。
+    const previousMainIsTwoHanded =
+      set.mainHandItemId !== undefined && set.offHandItemId === set.mainHandItemId;
+    if (
+      set.offHandItemId !== undefined &&
+      set.offHandItemId !== cmd.itemId &&
+      (isTwoHanded || previousMainIsTwoHanded)
+    ) {
+      if (!displaced.includes(set.offHandItemId)) displaced.push(set.offHandItemId);
+    }
+
+    const updated: WeaponSetLoadout = {
+      ...set,
+      mainHandItemId: cmd.itemId,
+      // 雙手：主副手指向同一件；單手且原本是雙手佔位：副手清空。
+      offHandItemId: isTwoHanded
+        ? cmd.itemId
+        : previousMainIsTwoHanded
+          ? undefined
+          : set.offHandItemId,
+    };
     nextLoadout = {
       ...loadout,
       weaponSets: replaceWeaponSet(loadout.weaponSets, idx, updated),
@@ -394,11 +442,36 @@ export function equipItem(
     };
   } else {
     // 鎧甲等共用裝備位置（doc 不變量 9：不得有 weaponSetId）。
-    nextLoadout = {
-      ...loadout,
-      armorSlots: { ...loadout.armorSlots, [cmd.slotId]: cmd.itemId },
-      revision: loadout.revision + 1,
-    };
+    // 一件裝備可占用多個 slot；每個被占用的 slot 上的舊物品都要卸下。
+    const nextArmor: Record<EquipmentSlotId, ItemInstanceId | undefined> = { ...loadout.armorSlots };
+    for (const slot of equip.occupiedSlots) {
+      const previous = nextArmor[slot];
+      if (previous !== undefined && previous !== cmd.itemId && !displaced.includes(previous)) {
+        displaced.push(previous);
+      }
+      nextArmor[slot] = cmd.itemId;
+    }
+    nextLoadout = { ...loadout, armorSlots: nextArmor, revision: loadout.revision + 1 };
+  }
+
+  // 卸下被頂掉的物品：回到該角色背包。
+  for (const oldItemId of displaced) {
+    const old = working.items[oldItemId];
+    if (old === undefined) continue;
+    working = withItem(working, {
+      ...old,
+      location: { kind: 'characterBag', characterId: cmd.characterId },
+      revision: old.revision + 1,
+    });
+    events.push(
+      emit({
+        type: 'EquipmentChanged',
+        characterId: cmd.characterId,
+        slotId: cmd.slotId,
+        weaponSetId: cmd.weaponSetId,
+        itemId: undefined, // 該位置已清空
+      }),
+    );
   }
 
   const equippedLocation: ItemLocation = {
@@ -413,24 +486,56 @@ export function equipItem(
     revision: inst.revision + 1,
   };
   const nextState: InventoryState = {
-    ...state,
-    items: { ...state.items, [movedItem.itemId]: movedItem },
-    equipmentLoadouts: { ...state.equipmentLoadouts, [cmd.characterId]: nextLoadout },
+    ...working,
+    items: { ...working.items, [movedItem.itemId]: movedItem },
+    equipmentLoadouts: { ...working.equipmentLoadouts, [cmd.characterId]: nextLoadout },
   };
-  return accept(nextState, [
+  events.push(
     emit({ type: 'EquipmentChanged', characterId: cmd.characterId, slotId: cmd.slotId, weaponSetId: cmd.weaponSetId, itemId: cmd.itemId }),
-  ]);
+  );
+  return accept(nextState, events);
 }
 
 // ── ConfigureWeaponSet（Player Command，doc §5.1、§3.4）──────────────────────
 export function configureWeaponSet(
   state: InventoryState,
   cmd: ConfigureWeaponSet,
-  _deps: InventoryDeps,
+  deps: InventoryDeps,
 ): InventoryHandlerResult {
   const loadout = getOrCreateLoadout(state, cmd.characterId);
   const idx = loadout.weaponSets.findIndex((w) => w.weaponSetId === cmd.weaponSetId);
   if (idx < 0) return reject('inventory/unknown-weapon-set', { weaponSetId: String(cmd.weaponSetId) });
+
+  // doc §349 前置條件：「裝備由角色持有、slot 相容」。原本完全沒驗證，任意 itemId
+  // ——包含不存在的、別人的、非裝備的——都會被寫進武器組。
+  const hands = [
+    ['mainHand', cmd.mainHandItemId] as const,
+    ['offHand', cmd.offHandItemId] as const,
+  ];
+  for (const [hand, itemId] of hands) {
+    if (itemId === undefined) continue;
+    const item = state.items[itemId];
+    if (item === undefined) return reject('inventory/unknown-item', { hand, itemId: String(itemId) });
+    if (item.state !== 'active') return reject('inventory/item-not-active', { hand });
+    if (item.ownerCharacterId !== cmd.characterId) return reject('inventory/not-owner', { hand });
+    if (deps.reader.getItem(item.definitionId).kind !== 'equipment') {
+      return reject('inventory/not-equipment', { hand });
+    }
+  }
+
+  // 雙手裝備同時占用主／副手（doc §282）：兩手必須是同一件；反之單手不得占滿兩手。
+  const twoHandedOf = (itemId: ItemInstanceId | undefined): boolean => {
+    if (itemId === undefined) return false;
+    const item = state.items[itemId];
+    if (item === undefined) return false;
+    return deps.reader.getEquipment(item.definitionId).occupiedSlots.length > 1;
+  };
+  const mainTwoHanded = twoHandedOf(cmd.mainHandItemId);
+  const offTwoHanded = twoHandedOf(cmd.offHandItemId);
+  if ((mainTwoHanded || offTwoHanded) && cmd.mainHandItemId !== cmd.offHandItemId) {
+    return reject('inventory/two-handed-must-occupy-both-hands');
+  }
+
   // 技能合法性（角色是否學會）由組裝 Workflow 透過 Progression Query 驗證，Inventory 只存配置（doc §1.2）。
   const updated: WeaponSetLoadout = {
     weaponSetId: cmd.weaponSetId,
