@@ -49,8 +49,10 @@ export type EquipmentCoefficientChannelId = DefinitionId<'equipment-coefficient-
 // ── Foreign placeholder IDs (owned by other modules, absent from core) ──────
 export type PrimaryAttributeId = DefinitionId<'primary-attribute'>; // PLACEHOLDER (invented): owned by character/progression
 export type CharacterKnowledgeId = DefinitionId<'character-knowledge'>; // PLACEHOLDER (invented): owned by progression
-export type CombatSequenceId = DefinitionId<'combat-sequence'>; // PLACEHOLDER (invented): owned by combat
-export type CombatSequenceChallengeId = DefinitionId<'combat-sequence-challenge'>; // PLACEHOLDER (invented): owned by combat
+// combat-sequence 擁有這兩個 ID，且它們是 RuntimeId（每場戰鬥串是執行期實例），
+// 不是 DefinitionId。原本此處各自宣告成 DefinitionId，跨模組傳遞時型別家族就錯了。
+import type { CombatSequenceId, CombatSequenceChallengeId } from '../combat-sequence';
+export type { CombatSequenceId, CombatSequenceChallengeId };
 
 // ── Invented structural placeholders (shape not specified in doc) ───────────
 export type TradePolicy = Readonly<{ tradable: boolean }>; // PLACEHOLDER (invented)

@@ -78,8 +78,10 @@ export type GatheringResolution = Readonly<{
   participantCharacterIds: readonly CharacterId[];
 }>;
 
-// [EXTERNAL PLACEHOLDER] 由 Combat Sequence（module 21）擁有；此處僅供 Host Port 型別完備。
-export type CombatSequenceId = DefinitionId<'combat-sequence'>;
+// 由 Combat Sequence（module 21）擁有。引用其真實型別（RuntimeId），不自行宣告——
+// 原本此處宣告成 DefinitionId，與擁有者的 RuntimeId 不同家族。
+import type { CombatSequenceId } from '../combat-sequence';
+export type { CombatSequenceId };
 export type CombatSequenceChallengeResultId = DefinitionId<'combat-sequence-challenge-result'>;
 export type CombatSequenceStopReason = string;
 export type CombatSequenceInvalidReason = string;

@@ -23,7 +23,12 @@ import {
   DELAY_STANDARD,
   EFF_COUNTER_DAMAGE,
   HERO_ID,
+  MAGE_ID,
+  WEAPON_SET_A,
 } from './fixtures';
+import { localCell } from './state';
+import type { Revision } from '../../contracts/core';
+import type { ApplyCombatCondition } from '../../contracts/character';
 
 // ── 迷你斷言工具 ─────────────────────────────────────────────────────────
 function assert(cond: boolean, msg: string): void {
@@ -36,6 +41,9 @@ function eventsOf(messages: readonly TransactionMessageDraft[]): CombatDomainEve
 }
 function countEvent(events: readonly CombatDomainEvent[], type: CombatDomainEvent['type']): number {
   return events.filter((e) => e.type === type).length;
+}
+function commandsOf(messages: readonly TransactionMessageDraft[]): unknown[] {
+  return messages.filter((m) => 'command' in m).map((m) => (m as { command: unknown }).command);
 }
 function aliveEnemies(encounter: CombatEncounter): CombatantState[] {
   return (Object.keys(encounter.combatants) as CombatantId[])
@@ -147,6 +155,81 @@ const cases: readonly Case[] = [
       assert(resolved !== undefined && (resolved as { outcome: string }).outcome === 'victory', '結果應為 victory');
       assert(countEvent(allEvents, 'CombatAttackMasteryEarned') === 1, '攻擊 MXP 應恰發一次（結束時一次性）');
       assert(countEvent(allEvents, 'CombatTeamOutcome') === 1, '應恰發一次 CombatTeamOutcome');
+    },
+  },
+  {
+    // 迴歸測試：結算送出的 ApplyCombatCondition 是 delta，接收端做 condition.health + delta。
+    // 基準必須是**開戰快照**而非上限——否則帶傷進場的角色會被再扣一次已受的傷。
+    name: '結算 delta 相對開戰值，不是相對上限（帶傷進場不得被重複扣血）',
+    run: () => {
+      // 法師 40/80 帶傷進場、站後排（AI 只打前排），全場不該掉血 → delta 應為 0。
+      const ctx = makeCombatContext({
+        formation: {
+          getPlayerFormation: () => ({
+            teamId: 'team-player' as never,
+            formationRevision: 0 as Revision,
+            members: [
+              { characterId: HERO_ID, cell: localCell(1, 1), activeWeaponSetId: WEAPON_SET_A, maxHealth: 100, maxMana: 30, startHealth: 100, startMana: 30 },
+              { characterId: MAGE_ID, cell: localCell(2, 2), activeWeaponSetId: WEAPON_SET_A, maxHealth: 80, maxMana: 50, startHealth: 40, startMana: 50 },
+            ],
+          }),
+        },
+      });
+      let state: CombatState = handleStartCombatEncounter(
+        createInitialCombatState(),
+        fixtureStartCommand(),
+        ctx,
+      ).nextSlice;
+      const encounterId = Object.keys(state.encounters)[0]! as EncounterId;
+
+      const allCommands: unknown[] = [];
+      for (let guard = 0; guard < 50; guard += 1) {
+        const encounter = state.encounters[encounterId]!;
+        if (encounter.state === 'resolved') break;
+        const actorId = encounter.currentActorId;
+        if (actorId === undefined) break;
+        const actor = encounter.combatants[actorId]!;
+        let res;
+        if (actor.side === 'player') {
+          const target = aliveEnemies(encounter)[0];
+          if (target === undefined) break;
+          res = handleUseCombatSkill(
+            state,
+            { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_STRIKE, targetCombatantIds: [target.combatantId] },
+            ctx,
+          );
+        } else {
+          res = handleEnemyTurn(state, encounterId, ctx);
+        }
+        allCommands.push(...commandsOf(res.outgoingMessages));
+        state = res.nextSlice;
+      }
+
+      const conditions = allCommands.filter(
+        (c): c is ApplyCombatCondition =>
+          typeof c === 'object' && c !== null && (c as { type?: string }).type === 'ApplyCombatCondition',
+      );
+      assert(conditions.length > 0, '結算應對角色送出 ApplyCombatCondition');
+
+      const mage = conditions.find((c) => c.characterId === MAGE_ID);
+      assert(mage !== undefined, '法師應收到寫回命令');
+      assert(
+        mage!.healthDelta === 0,
+        `未受傷的帶傷進場角色 healthDelta 應為 0（用上限當基準會是 -40），實得 ${mage!.healthDelta}`,
+      );
+
+      // 每名角色的 delta 都不得低於「該場實際承受的傷害」。
+      const encounter = state.encounters[encounterId]!;
+      for (const c of conditions) {
+        const combatant = Object.values(encounter.combatants).find(
+          (b) => b.source.kind === 'character' && b.source.characterId === c.characterId,
+        );
+        assert(combatant !== undefined, '寫回對象應存在於 Encounter');
+        assert(
+          c.healthDelta === combatant!.health - combatant!.startHealth,
+          `${c.characterId} 的 healthDelta 應等於 結束值−開戰值`,
+        );
+      }
     },
   },
   {

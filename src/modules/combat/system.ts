@@ -382,6 +382,8 @@ function buildPlayerCombatants(
       maxHealth: member.maxHealth,
       mana: member.startMana,
       maxMana: member.maxMana,
+      startHealth: member.startHealth,
+      startMana: member.startMana,
       currentCtb: 0,
       externalCtbIncreaseSinceOwnAction: 0,
       interruptionImmuneUntilOwnAction: false,
@@ -417,6 +419,8 @@ function buildEnemyCombatants(
       maxHealth: monster.attributes.health,
       mana: 0,
       maxMana: 0, // 怪物不使用 MP 資源池（結算不對怪物寫回 Character 條件）。
+      startHealth: monster.attributes.health,
+      startMana: 0,
       currentCtb: 0,
       externalCtbIncreaseSinceOwnAction: 0,
       interruptionImmuneUntilOwnAction: false,
@@ -1120,8 +1124,9 @@ function resolveEncounter(
     const applyCmd: ApplyCombatCondition = {
       type: 'ApplyCombatCondition',
       characterId: c.source.characterId,
-      healthDelta: c.health - c.maxHealth,
-      manaDelta: c.mana - c.maxMana,
+      // 相對**開戰快照**的 delta（接收端做 condition.health + delta）。
+      healthDelta: c.health - c.startHealth,
+      manaDelta: c.mana - c.startMana,
     };
     messages.push(command(CHARACTER_MODULE, applyCmd));
   }
