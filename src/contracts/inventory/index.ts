@@ -47,7 +47,10 @@ export type EquipmentSlotId = DefinitionId<'equipment-slot'>; // PLACEHOLDER (in
 export type EquipmentCoefficientChannelId = DefinitionId<'equipment-coefficient-channel'>; // PLACEHOLDER (invented, per brief)
 
 // ── Foreign placeholder IDs (owned by other modules, absent from core) ──────
-export type PrimaryAttributeId = DefinitionId<'primary-attribute'>; // PLACEHOLDER (invented): owned by character/progression
+// PrimaryAttributeId 由 progression 擁有，且是 5 個字面值的聯集（不是 branded ID）。
+// 原本此處宣告成 DefinitionId，會讓 PrimaryAttributeCoefficients 變成任意鍵的 Record。
+import type { PrimaryAttributeId } from '../progression';
+export type { PrimaryAttributeId };
 export type CharacterKnowledgeId = DefinitionId<'character-knowledge'>; // PLACEHOLDER (invented): owned by progression
 // combat-sequence 擁有這兩個 ID，且它們是 RuntimeId（每場戰鬥串是執行期實例），
 // 不是 DefinitionId。原本此處各自宣告成 DefinitionId，跨模組傳遞時型別家族就錯了。

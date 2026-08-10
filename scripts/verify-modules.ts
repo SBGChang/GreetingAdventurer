@@ -12,9 +12,12 @@ import { runTests as transactionWiring } from '../src/app/composition/transactio
 // 地基層測試自 Wave A 起就存在，但從未被這支腳本跑過。
 import { runKernelTests } from '../src/kernel/kernel.test';
 import { runKernelTests as dataKernels, allKernelTestsPass } from '../src/data-runtime/kernels.test';
+// 契約重複宣告的 ratchet：不准再長出新的影子型別。
+import { runTests as contractDuplicates, remainingDuplicateCount } from './check-contract-duplicates';
 
 // These throw on any failing case.
 const throwing: ReadonlyArray<readonly [string, () => void]> = [
+  ['contract-duplicates (ratchet)', contractDuplicates],
   ['kernel', () => void runKernelTests()],
   [
     'data-runtime kernels',
@@ -46,3 +49,4 @@ if (!progressionPass()) throw new Error('progression tests failed');
 console.log('progression: pass');
 
 console.log('ALL TESTS PASS (kernel + data-runtime + 7 modules + composition + transaction wiring)');
+console.log(`NOTE: 契約重複宣告尚餘 ${remainingDuplicateCount()} 筆待收斂（見 scripts/check-contract-duplicates.ts）`);

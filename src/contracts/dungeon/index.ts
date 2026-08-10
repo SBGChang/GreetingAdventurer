@@ -71,35 +71,48 @@ export type ContentEventInstance = Readonly<{
   rngStreamId: RngStreamId;
 }>;
 
-// [EXTERNAL PLACEHOLDER] 由 Gathering Service（module 19）擁有；僅保留文件引用的欄位。
-export type GatheringResolution = Readonly<{
-  resolutionId: GatheringResolutionId;
-  gatheringRuleId: GatheringRuleId;
-  participantCharacterIds: readonly CharacterId[];
-}>;
+// 由 Gathering Service（module 19）擁有。原本此處只保留 3 個欄位的影子版，
+// 與擁有者的完整結構（contributorCharacterId / masteryId / yields …）不同。
+import type { GatheringResolution } from '../gathering';
+export type { GatheringResolution };
 
-// 由 Combat Sequence（module 21）擁有。引用其真實型別（RuntimeId），不自行宣告——
-// 原本此處宣告成 DefinitionId，與擁有者的 RuntimeId 不同家族。
-import type { CombatSequenceId } from '../combat-sequence';
-export type { CombatSequenceId };
-export type CombatSequenceChallengeResultId = DefinitionId<'combat-sequence-challenge-result'>;
-export type CombatSequenceStopReason = string;
-export type CombatSequenceInvalidReason = string;
-export type CombatSequenceChallengeResult = Readonly<{
-  resultId: CombatSequenceChallengeResultId;
-  contentId: ContentInstanceId;
-  outcome: 'success' | 'failure';
-}>;
-export type StartCombatSequence = Readonly<{
-  source: 'dungeonSweep';
-  teamId: TeamId;
-  challenges: readonly ContentInstanceId[];
-}>;
-export type CommitCombatSequenceSourceResults = Readonly<{
-  sequenceId: CombatSequenceId;
-  acceptedResultIds: readonly CombatSequenceChallengeResultId[];
-  sourceCommitId: string;
-}>;
+// ── Combat Sequence（module 21）─────────────────────────────────────────
+//
+// 這一整組型別由 combat-sequence 擁有。此處原本是一份**影子契約**：自行宣告了
+// ChallengeResultId（DefinitionId 而非 RuntimeId）、把 StopReason/InvalidReason 放寬成
+// `string`、sourceCommitId 用普通 `string`，且 StartCombatSequence / ChallengeResult /
+// CommitCombatSequenceSourceResults 的欄位與擁有者完全不同。因為 Host Port 至今沒有實作，
+// 這些差異不會被編譯器發現，等真正接線時才會爆成型別衝突或被迫轉型。
+// 一律改為引用擁有者的真實型別。
+import type {
+  CombatSequenceId,
+  CombatSequenceChallengeId,
+  CombatSequenceChallengeResultId,
+  CombatSequenceChallengeResult,
+  CombatSequenceStopReason,
+  CombatSequenceInvalidReason,
+  StartCombatSequence,
+  ResolveNextCombatSequenceChallenge,
+  SkipNextCombatSequenceChallenge,
+  StopCombatSequence,
+  InvalidateCombatSequence,
+  CommitCombatSequenceSourceResults,
+} from '../combat-sequence';
+
+export type {
+  CombatSequenceId,
+  CombatSequenceChallengeId,
+  CombatSequenceChallengeResultId,
+  CombatSequenceChallengeResult,
+  CombatSequenceStopReason,
+  CombatSequenceInvalidReason,
+  StartCombatSequence,
+  ResolveNextCombatSequenceChallenge,
+  SkipNextCombatSequenceChallenge,
+  StopCombatSequence,
+  InvalidateCombatSequence,
+  CommitCombatSequenceSourceResults,
+};
 
 // ──────────────────────────────────────────────────────────────────────────
 // 2. 靜態資料契約（owned Definition + Reader / Host Port）
@@ -140,16 +153,18 @@ export interface DungeonDefinitionReader {
 }
 
 // Combat Sequence 的命令 Port（非逐場戰鬥模擬器）。
+//
+// 每個方法直接吃 combat-sequence 契約的 Internal Command payload——這些呼叫在真實引擎裡
+// 就是送給該模組的 Internal Command，參數不該在此重新攤平成別的形狀。
+// `start` 不回傳 ID：sequenceId 是 StartCombatSequence 的**輸入**欄位（由呼叫端以自己的
+// 交易 ID 配發器鑄造），呼叫者本來就已經持有它。
 export interface CombatSequenceHostPort {
-  start(input: StartCombatSequence): CombatSequenceId;
-  resolveNext(
-    sequenceId: CombatSequenceId,
-    expectedContentId: ContentInstanceId,
-  ): CombatSequenceChallengeResult;
-  skipNext(sequenceId: CombatSequenceId, expectedContentId: ContentInstanceId): void;
-  stop(sequenceId: CombatSequenceId, reason: CombatSequenceStopReason): void;
+  start(input: StartCombatSequence): void;
+  resolveNext(input: ResolveNextCombatSequenceChallenge): CombatSequenceChallengeResult;
+  skipNext(input: SkipNextCombatSequenceChallenge): void;
+  stop(input: StopCombatSequence): void;
   commitSourceResults(input: CommitCombatSequenceSourceResults): void;
-  invalidate(sequenceId: CombatSequenceId, reason: CombatSequenceInvalidReason): void;
+  invalidate(input: InvalidateCombatSequence): void;
 }
 
 // ──────────────────────────────────────────────────────────────────────────

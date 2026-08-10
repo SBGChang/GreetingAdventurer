@@ -79,7 +79,8 @@ const swordDef: EquipmentDefinition = {
   rarity: 'common',
   relatedMasteryIds: [],
   occupiedSlots: [FIXTURE.mainHandSlot], // 單手
-  primaryAttributeCoefficients: {},
+  // 五個主屬性係數必須齊全（PrimaryAttributeId 是 progression 的 5 字面值聯集，不是任意 ID）。
+  primaryAttributeCoefficients: { muscle: 0, intelligence: 0, reaction: 0, coordination: 0, charisma: 0 },
   secondaryAttributeCoefficients: [],
   skillEffectRefs: [],
 };
@@ -91,7 +92,8 @@ const greatswordDef: EquipmentDefinition = {
   rarity: 'fine',
   relatedMasteryIds: [],
   occupiedSlots: [FIXTURE.mainHandSlot, FIXTURE.offHandSlot], // 雙手占主/副
-  primaryAttributeCoefficients: {},
+  // 五個主屬性係數必須齊全（PrimaryAttributeId 是 progression 的 5 字面值聯集，不是任意 ID）。
+  primaryAttributeCoefficients: { muscle: 0, intelligence: 0, reaction: 0, coordination: 0, charisma: 0 },
   secondaryAttributeCoefficients: [],
   skillEffectRefs: [],
 };
