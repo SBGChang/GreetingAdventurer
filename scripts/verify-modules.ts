@@ -10,6 +10,7 @@ import { runTests as team } from '../src/modules/team/team.test';
 import { runTests as composition } from '../src/app/composition/composition.test';
 import { runTests as transactionWiring } from '../src/app/composition/transaction.test';
 import { runTests as engineSession } from '../src/app/composition/session.test';
+import { runTests as dungeonReader } from '../src/app/content/dungeon-reader.test';
 // 地基層測試自 Wave A 起就存在，但從未被這支腳本跑過。
 import { runKernelTests } from '../src/kernel/kernel.test';
 import { runKernelTests as dataKernels, allKernelTestsPass } from '../src/data-runtime/kernels.test';
@@ -39,6 +40,8 @@ const throwing: ReadonlyArray<readonly [string, () => void]> = [
   ['transaction-wiring', transactionWiring],
   // session：引擎 Session 端到端——玩家命令 → §7.2 runtime-id → 跨模組級聯改真實 Slice。
   ['engine-session', engineSession],
+  // content：data-runtime → 領域 Reader 的 adapter（dungeon 樣板 + 真交易端到端）。
+  ['dungeon-reader', dungeonReader],
 ];
 
 for (const [name, run] of throwing) {
@@ -52,6 +55,6 @@ if (!progressionPass()) throw new Error('progression tests failed');
 console.log('progression: pass');
 
 console.log(
-  'ALL TESTS PASS (kernel + data-runtime + 7 modules + composition + transaction wiring + engine session)',
+  'ALL TESTS PASS (kernel + data-runtime + 7 modules + composition + transaction wiring + engine session + content reader)',
 );
 console.log(`NOTE: 契約重複宣告尚餘 ${remainingDuplicateCount()} 筆待收斂（見 scripts/check-contract-duplicates.ts）`);

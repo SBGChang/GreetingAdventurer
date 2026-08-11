@@ -8,134 +8,20 @@
 //   - map 的 handleOpenMapDoor 只讀 map Slice（`void ctx`），故不依賴任何未實作模組或內容；
 //   - 兩邊只需在 mapId + linkId + version 對齊，就能證明「跨模組級聯真的接上了」。
 // 這是各模組自己的綠燈證明不了的東西（跨模組線）。內容仍用 fixture（內容軌另計），但 id/rng/
-// cursor/路由/跨模組 Slice 變更全部是真的。
+// cursor/路由/跨模組 Slice 變更全部是真的。鋪設共用於 session-fixture.ts。
 
-import type {
-  AdventureSiteId,
-  GameCommandRequest,
-  MapInstanceId,
-  MapTemplateId,
-  Revision,
-  RoomLinkId,
-  TeamId,
-} from '../../contracts/core';
-import type { MapInstance } from '../../contracts/map';
-import type { OpenDungeonDoor } from '../../contracts/dungeon';
+import { requireInstance } from '../../modules/map/public';
+import { FIXTURE, createFixtureState } from '../../modules/dungeon/public';
 
-import {
-  FIXTURE,
-  createFixtureState,
-  createFixtureReader,
-  createFixtureMapPort,
-  createFixtureTeamPort,
-} from '../../modules/dungeon/public';
-import { createMapState, requireInstance, makeContext as mapMakeContext } from '../../modules/map/public';
-import { createTeamState } from '../../modules/team/public';
-
-import { runGameCommand, type ContextAssembler } from './session';
-import type { ModuleContexts } from './router';
-import type { GameCommand } from './messages';
-import { createEmptyGameState, type GameState } from './state';
+import { runGameCommand } from './session';
+import { baseState, makeAssembler, openRedDoor } from './session-fixture';
+import type { GameState } from './state';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
 
-const PLAYER_TEAM = FIXTURE.teamId;
-
-// 未觸及的模組 Context 一律用會拋錯的 proxy：路由送錯模組時立刻爆，而非靜默通過。
-function unusedContext(name: string): never {
-  return new Proxy(
-    {},
-    {
-      get() {
-        throw new Error(`本測試不應觸及 ${name} 的 Context`);
-      },
-    },
-  ) as never;
-}
-
-// 對齊 dungeon FIXTURE 的 map Slice：一個 mapId=cave、v1、含一道「關閉的紅門」在 redDoorLink 的實例。
-// 直接手建 spatialRuntime，避免與 map 自己 fixture 的 template ID 世界打架。
-function alignedMapState(): GameState['map'] {
-  const instance: MapInstance = {
-    mapId: FIXTURE.mapId as MapInstanceId,
-    adventureSiteId: 'runtime:adventure-site:cave' as AdventureSiteId,
-    templateId: 'definition:map-template:cave' as MapTemplateId,
-    currentVersion: FIXTURE.mapVersion,
-    refresh: { offsetDays: 3 },
-    spatialRuntime: {
-      mapVersion: FIXTURE.mapVersion,
-      doorStates: {
-        [FIXTURE.redDoorLink as RoomLinkId]: {
-          linkId: FIXTURE.redDoorLink as RoomLinkId,
-          mapVersion: FIXTURE.mapVersion,
-          state: 'closed',
-          revision: 0 as Revision,
-        },
-      },
-      trapStates: {},
-      gatheringNodeStates: {},
-    },
-    revision: 0 as Revision,
-  };
-  return createMapState({ instances: [instance] });
-}
-
-// dungeon Slice：玩家隊伍在「中間房 R2」探索中（紅門連 R2↔R3，開門前置要求門連接目前房間）。
-function dungeonAtMiddle(): GameState['dungeon'] {
-  const base = createFixtureState();
-  const session = base.playerSessions[FIXTURE.teamId]!;
-  return {
-    ...base,
-    playerSessions: {
-      ...base.playerSessions,
-      [FIXTURE.teamId]: { ...session, currentRoomId: FIXTURE.roomMiddle },
-    },
-  };
-}
-
-function baseState(): GameState {
-  return {
-    ...createEmptyGameState({
-      worldSeed: 'session-smoke-test',
-      team: createTeamState({ playerTeamId: PLAYER_TEAM as TeamId }),
-    }),
-    dungeon: dungeonAtMiddle(),
-    map: alignedMapState(),
-  };
-}
-
-// ContextAssembler：dungeon 用 fixture 內容 + Session 注入的**真實** id/rng；map 只需能路由到即可
-// （handleOpenMapDoor 不讀 ctx）。其餘模組不應被觸及。
-const assembler: ContextAssembler = (runtime, _state): ModuleContexts => ({
-  dungeon: {
-    reader: createFixtureReader(),
-    map: createFixtureMapPort(),
-    team: createFixtureTeamPort(),
-    worldDay: runtime.worldDay,
-    minutesPerDungeonDay: 100,
-    interactionRuleId: FIXTURE.interactionRuleId,
-    lootDistributionRuleId: FIXTURE.lootDistributionRuleId,
-    npcExplorationRuleId: FIXTURE.npcExplorationRuleId,
-    rng: runtime.rngContextFor('dungeon'),
-    nextInteractionId: runtime.ids.dungeon.nextInteractionId,
-    nextKnowledgeId: runtime.ids.dungeon.nextKnowledgeId,
-    nextRunId: runtime.ids.dungeon.nextRunId,
-    nextDistributionId: runtime.ids.dungeon.nextDistributionId,
-  },
-  map: mapMakeContext({ worldDay: runtime.worldDay, ids: runtime.ids.map, rng: runtime.rng }),
-  character: unusedContext('character'),
-  inventory: unusedContext('inventory'),
-  combat: unusedContext('combat'),
-  team: unusedContext('team'),
-  progression: unusedContext('progression'),
-});
-
-const openRedDoor: GameCommandRequest<GameCommand> = {
-  actorTeamId: PLAYER_TEAM as TeamId,
-  command: { type: 'openDungeonDoor', linkId: FIXTURE.redDoorLink } as OpenDungeonDoor,
-};
+const assembler = makeAssembler();
 
 export type SessionTestResult = Readonly<{ name: string; pass: boolean; error?: string }>;
 
@@ -144,7 +30,6 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
     name: '玩家 openDungeonDoor 的 OpenMapDoor 跨模組落到真實 map Slice，門被打開',
     run: () => {
       const s0 = baseState();
-      // 前置：門一開始是關的。
       assert(
         requireInstance(s0.map, FIXTURE.mapId).spatialRuntime.doorStates[FIXTURE.redDoorLink]!.state ===
           'closed',
@@ -160,7 +45,6 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
       ]!;
       assert(door.state === 'open', `紅門應被 map handler 開啟（實得 ${door.state}）`);
 
-      // dungeon 這邊：Session 前進 20 分鐘（redDoorOpenMinutes），且揭露門後 R3。
       const session = result.state.dungeon.playerSessions[FIXTURE.teamId]!;
       assert(session.elapsedDungeonMinutes === 20, `Session 應前進 20 分鐘（實得 ${session.elapsedDungeonMinutes}）`);
     },
@@ -202,7 +86,6 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
       assert(!result.accepted, '門不連接目前房間應被拒絕');
       if (result.accepted) return;
       assert(result.rejection.sourceModule === 'dungeon', '拒絕應來自 dungeon');
-      // 回滾：map 的門仍為關閉、序號不變。
       assert(
         requireInstance(result.state.map, FIXTURE.mapId).spatialRuntime.doorStates[FIXTURE.redDoorLink]!
           .state === 'closed',
