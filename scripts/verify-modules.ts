@@ -11,6 +11,7 @@ import { runTests as composition } from '../src/app/composition/composition.test
 import { runTests as transactionWiring } from '../src/app/composition/transaction.test';
 import { runTests as engineSession } from '../src/app/composition/session.test';
 import { runTests as dungeonReader } from '../src/app/content/dungeon-reader.test';
+import { runTests as moduleReaders } from '../src/app/content/readers.test';
 // 地基層測試自 Wave A 起就存在，但從未被這支腳本跑過。
 import { runKernelTests } from '../src/kernel/kernel.test';
 import { runKernelTests as dataKernels, allKernelTestsPass } from '../src/data-runtime/kernels.test';
@@ -42,6 +43,8 @@ const throwing: ReadonlyArray<readonly [string, () => void]> = [
   ['engine-session', engineSession],
   // content：data-runtime → 領域 Reader 的 adapter（dungeon 樣板 + 真交易端到端）。
   ['dungeon-reader', dungeonReader],
+  // content：其餘 6 個模組 reader adapter（header 投影 + 特殊 getter + 跨 kind 防呆）。
+  ['module-readers', moduleReaders],
 ];
 
 for (const [name, run] of throwing) {
