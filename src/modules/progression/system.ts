@@ -27,11 +27,12 @@ import type {
   MasterySource,
 } from '../../contracts/progression';
 import type { GrantGatheringMasteryExperience } from '../../contracts/gathering';
+// mastery-earned payloads 由 combat-sequence 擁有（combat 與 combat-sequence 都發此事件）；從擁有者引用。
 import type {
   CombatAttackMasteryEarnedPayload,
   CombatDefenseMasteryEarnedPayload,
   CombatSupportMasteryEarnedPayload,
-} from '../../contracts/combat';
+} from '../../contracts/combat-sequence';
 import type { CraftingCompletedEvent } from '../../contracts/crafting';
 
 import type { ProgressionModuleState } from './state';

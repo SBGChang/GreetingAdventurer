@@ -2,7 +2,7 @@
 
 > **模組 ID：** `dungeon`
 >
-> **依賴：** [共用核心契約](00_shared_contracts.md)、Map／Team／Asset Distribution／Combat Sequence 的公開 Query，以及 Gathering Resolver／Host Workflow 契約。
+> **依賴：** [共用核心契約](00_shared_contracts.md)、Map／Team／Asset Distribution 的公開 Query、Combat Sequence 的 Internal Command 與 Domain Event（§2.3，非同步 Port），以及 Gathering Resolver／Host Workflow 契約。
 >
 > **責任：** 管理玩家的迷宮分鐘制探索 Session，以及非玩家冒險者的 `NpcDungeonRun`。Dungeon 不擁有地圖內容、不直接發放或分配物品、貨幣與經驗，也不直接更新委託。
 
@@ -89,20 +89,29 @@ NPC 的每日點數與小怪／菁英／大怪／寶箱／事件成本由資料�
 
 Map 公開的每筆 NPC 探索目標都帶有 `pointCost` 與 `resolverId`；目標可以是動態 Map Content 或啟用 NPC Policy 的固定採集點。Dungeon 不依怪物個體數、門、陷阱或玩家實際格距重新推算成本。
 
-### 2.3 Combat Sequence Port
+### 2.3 Combat Sequence 互動（Internal Command 出、Domain Event 回）
 
-```ts
-interface CombatSequenceHostPort {
-  start(input: StartCombatSequence): CombatSequenceId;
-  resolveNext(sequenceId: CombatSequenceId, expectedContentId: ContentInstanceId): CombatSequenceChallengeResult;
-  skipNext(sequenceId: CombatSequenceId, expectedContentId: ContentInstanceId): void;
-  stop(sequenceId: CombatSequenceId, reason: CombatSequenceStopReason): void;
-  commitSourceResults(input: CommitCombatSequenceSourceResults): void;
-  invalidate(sequenceId: CombatSequenceId, reason: CombatSequenceInvalidReason): void;
-}
-```
+Dungeon 與 [Combat Sequence](21_combat_sequence_module.md) 的互動走**交易模型**，**不是**同步 Host Port。跨模組不能同步呼叫並取回結果（那會繞過 Transaction Runner、Slice 所有權與交易回滾，見 `00_shared_contracts.md` §5）。因此原本回傳 `CombatSequenceChallengeResult` 的 `resolveNext()` 已移除，改為「命令草稿出、事件訂閱回」。
 
-這是 [Combat Sequence](21_combat_sequence_module.md) 的命令 Port，不是逐場戰鬥模擬器。Dungeon 擁有內容與點數游標；Combat Sequence 擁有戰力骰、補品重骰、成功戰鬥數與整串經驗累積。兩邊只以 `combatSequenceId`、`contentId` 與 Result ID 關聯。
+**Dungeon 送出的 Internal Command**（型別皆由 combat-sequence 契約擁有，Dungeon 只引用；見 `DungeonOutboundInternalCommand`）：
+
+| 命令 | 時機 |
+|---|---|
+| `StartCombatSequence` | 進入含怪物內容的房間時開一條 Sequence（`sequenceId` 由 Dungeon 以自己的交易 ID cursor 鑄造，作為輸入欄位帶入，故無需回傳） |
+| `ResolveNextCombatSequenceChallenge` | 逐題推進（取代原 `resolveNext`；結果**改由事件回**） |
+| `SkipNextCombatSequenceChallenge` | 來源在嘗試前已失效 |
+| `StopCombatSequence` | 全部解出／挑戰失敗／宿主中止 |
+| `CommitCombatSequenceSourceResults` | 結算時提交本 Session 接受的成功結果 |
+| `InvalidateCombatSequence` | 來源失效／隊伍不可用／快照版本衝突 |
+
+**Combat Sequence 回發、Dungeon 訂閱的 Domain Event**：
+
+| 事件 | Dungeon 反應 |
+|---|---|
+| `CombatSequenceChallengeResolved` | 取得單題結果（`outcome` / `resultId`）後續行 |
+| `CombatSequenceSettled` | 整串結算完成 → 標記 `combatSequenceSettled`，推進三方結算 |
+
+Dungeon 擁有內容與點數游標；Combat Sequence 擁有戰力骰、補品重骰、成功戰鬥數與整串經驗累積。兩邊只以 `combatSequenceId`、`contentId` 與 Result ID 關聯。
 
 ---
 

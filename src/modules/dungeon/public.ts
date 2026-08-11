@@ -68,7 +68,7 @@ export const dungeonModuleContract: ModuleContract = {
     'map-query' as ReaderPortId,
     'team-query' as ReaderPortId,
     'asset-distribution-query' as ReaderPortId,
-    'combat-sequence-host-port' as ReaderPortId,
+    // combat-sequence 不是「讀」的 Port：改走 Internal Command（out）+ 事件訂閱（in），見 contracts/dungeon。
   ],
   handlesGameCommands: [
     'startPlayerExploration',

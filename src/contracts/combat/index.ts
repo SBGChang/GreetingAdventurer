@@ -53,9 +53,14 @@ import type { CommitCombatItemUse } from '../inventory';
 // Cross-module: progression owns PrimaryAttributeId + DefenseMasteryRoutingRuleId (src/contracts/progression).
 import type { PrimaryAttributeId, DefenseMasteryRoutingRuleId } from '../progression';
 // Shared growth-event contract lives in combat-sequence; detailed combat reuses it (doc §8.7, §7).
+// 三個 mastery-earned payload 由 combat-sequence 擁有（兩個模組都發此事件，收成單一擁有者的型別，
+// 避免同 discriminant 兩套 payload）。此處只引用，不再自行宣告。
 import type {
   CombatMasterySource,
   MasteryExperienceAmount,
+  CombatAttackMasteryEarnedPayload,
+  CombatDefenseMasteryEarnedPayload,
+  CombatSupportMasteryEarnedPayload,
 } from '../combat-sequence';
 
 // ── 敵人定義（§2.2）──────────────────────────────────────────────────
@@ -452,24 +457,7 @@ export type CombatTeamOutcomePayload = Readonly<{
   canContinue: boolean;
   reason: string;
 }>;
-export type CombatAttackMasteryEarnedPayload = Readonly<{
-  type: 'CombatAttackMasteryEarned';
-  source: CombatMasterySource;
-  characterAwards: readonly MasteryExperienceAmount[];
-}>;
-export type CombatDefenseMasteryEarnedPayload = Readonly<{
-  type: 'CombatDefenseMasteryEarned';
-  source: CombatMasterySource;
-  characterAwards: readonly MasteryExperienceAmount[];
-}>;
-export type CombatSupportMasteryEarnedPayload = Readonly<{
-  type: 'CombatSupportMasteryEarned';
-  source: CombatMasterySource;
-  characterId: CharacterId;
-  skillId: SkillDefinitionId;
-  supportMasteryAwardRuleId: SupportMasteryAwardRuleId;
-  creditedUseCount: number;
-}>;
+// mastery-earned payloads 由 combat-sequence 擁有（見檔首 import）；此處不再宣告，直接用於事件 union。
 
 export type CombatDomainEvent =
   | ({ type: 'CombatEncounterStarted' } & CombatEncounterStartedPayload)

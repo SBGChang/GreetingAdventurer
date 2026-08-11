@@ -52,7 +52,8 @@ import type {
   StartAssetDistributionCommand,
   FinalizeAssetDistributionCollectionCommand,
 } from '../distribution';
-import type { StartReturnFromDungeonPayload } from '../team';
+// PlayerInteractionOpened 事件由 team 擁有（單一聯集，三個模組共發）；此處引用擁有者型別。
+import type { StartReturnFromDungeonPayload, PlayerInteractionOpenedEvent } from '../team';
 
 // ──────────────────────────────────────────────────────────────────────────
 // 本地 ID / 外部占位型別
@@ -88,7 +89,6 @@ import type {
   CombatSequenceId,
   CombatSequenceChallengeId,
   CombatSequenceChallengeResultId,
-  CombatSequenceChallengeResult,
   CombatSequenceStopReason,
   CombatSequenceInvalidReason,
   StartCombatSequence,
@@ -103,7 +103,6 @@ export type {
   CombatSequenceId,
   CombatSequenceChallengeId,
   CombatSequenceChallengeResultId,
-  CombatSequenceChallengeResult,
   CombatSequenceStopReason,
   CombatSequenceInvalidReason,
   StartCombatSequence,
@@ -115,7 +114,7 @@ export type {
 };
 
 // ──────────────────────────────────────────────────────────────────────────
-// 2. 靜態資料契約（owned Definition + Reader / Host Port）
+// 2. 靜態資料契約（owned Definition + Reader）
 // ──────────────────────────────────────────────────────────────────────────
 
 export type DungeonInteractionRuleDefinition = DefinitionHeader &
@@ -152,20 +151,17 @@ export interface DungeonDefinitionReader {
   }>;
 }
 
-// Combat Sequence 的命令 Port（非逐場戰鬥模擬器）。
+// Combat Sequence 的互動走**交易模型**，不是同步 Host Port。
 //
-// 每個方法直接吃 combat-sequence 契約的 Internal Command payload——這些呼叫在真實引擎裡
-// 就是送給該模組的 Internal Command，參數不該在此重新攤平成別的形狀。
-// `start` 不回傳 ID：sequenceId 是 StartCombatSequence 的**輸入**欄位（由呼叫端以自己的
-// 交易 ID 配發器鑄造），呼叫者本來就已經持有它。
-export interface CombatSequenceHostPort {
-  start(input: StartCombatSequence): void;
-  resolveNext(input: ResolveNextCombatSequenceChallenge): CombatSequenceChallengeResult;
-  skipNext(input: SkipNextCombatSequenceChallenge): void;
-  stop(input: StopCombatSequence): void;
-  commitSourceResults(input: CommitCombatSequenceSourceResults): void;
-  invalidate(input: InvalidateCombatSequence): void;
-}
+// 原本這裡有一個 `CombatSequenceHostPort`，其 `resolveNext()` **同步回傳** `CombatSequenceChallengeResult`。
+// 那違反核心架構（00_shared_contracts.md §5）：跨模組不能同步呼叫並取回結果，否則繞過 Transaction
+// Runner、Slice 所有權與交易回滾。正確流程是「命令草稿出、事件訂閱回」：
+//   - Dungeon required `StartCombatSequence` / `ResolveNextCombatSequenceChallenge` / `SkipNext…` /
+//     `StopCombatSequence` / `CommitCombatSequenceSourceResults` / `InvalidateCombatSequence`
+//     （皆為 combat-sequence 契約的 Internal Command；見下方 DungeonOutboundInternalCommand）。
+//   - combat-sequence 處理後**發布事件**：`CombatSequenceChallengeResolved`（單題結果）、
+//     `CombatSequenceSettled`（整條結算）。Dungeon **訂閱**這些事件後才續行（見 §10 / handler）。
+// sequenceId 由 Dungeon 以自己的交易 ID cursor 鑄造（StartCombatSequence 的輸入欄位），故無需回傳。
 
 // ──────────────────────────────────────────────────────────────────────────
 // 3. Runtime State（Dungeon 唯一可寫）
@@ -369,12 +365,7 @@ export type PlayerDungeonTimeAdvanced = Readonly<{
   worldDayCrossed?: boolean;
 }>;
 
-export type PlayerInteractionOpened = Readonly<{
-  type: 'PlayerInteractionOpened';
-  interactionId: InteractionId;
-  teamId: TeamId;
-  interactionKind: 'dungeonEvent';
-}>;
+// PlayerInteractionOpened 由 team 擁有（見檔首 import）；dungeon 以 kind: 'dungeonEvent' 發此事件。
 
 export type MapExplorationCompleted = Readonly<{
   type: 'MapExplorationCompleted';
@@ -403,7 +394,7 @@ export type NpcDungeonRunClosed = Readonly<{
 export type DungeonDomainEvent =
   | PlayerDungeonSessionStarted
   | PlayerDungeonTimeAdvanced
-  | PlayerInteractionOpened
+  | PlayerInteractionOpenedEvent
   | MapExplorationCompleted
   | NpcDungeonRunProgressed
   | NpcDungeonRunClosed;
@@ -424,4 +415,12 @@ export type DungeonOutboundInternalCommand =
   | StartCombatEncounterCommand
   | StartAssetDistributionCommand
   | FinalizeAssetDistributionCollectionCommand
-  | StartReturnFromDungeonPayload;
+  | StartReturnFromDungeonPayload
+  // combat-sequence 命令（取代已移除的同步 Host Port）。combat-sequence 的個別命令型別不內嵌
+  // 判別欄（在其自己的 union 才加），故此處比照 combat-sequence 的樣式以 `({ type } & payload)` 帶入。
+  | ({ type: 'StartCombatSequence' } & StartCombatSequence)
+  | ({ type: 'ResolveNextCombatSequenceChallenge' } & ResolveNextCombatSequenceChallenge)
+  | ({ type: 'SkipNextCombatSequenceChallenge' } & SkipNextCombatSequenceChallenge)
+  | ({ type: 'StopCombatSequence' } & StopCombatSequence)
+  | ({ type: 'CommitCombatSequenceSourceResults' } & CommitCombatSequenceSourceResults)
+  | ({ type: 'InvalidateCombatSequence' } & InvalidateCombatSequence);

@@ -626,11 +626,14 @@ export type PlayerTravelEventResolvedEvent = Readonly<{
   outcome: 'noEvent' | 'immediate' | 'combatVictory' | 'combatDefeat';
 }>;
 
+// 玩家互動開啟事件的**單一擁有者**。三個模組都發此事件（team：旅行事件/繼承；distribution：
+// 戰利品競拍；dungeon：地城事件），故收成一個帶 `kind` 判別欄的型別，避免同 discriminant 三套 payload。
+// distribution / dungeon 引用此型別，不得各自宣告。
 export type PlayerInteractionOpenedEvent = Readonly<{
   type: 'PlayerInteractionOpened';
   interactionId: InteractionId;
   teamId: TeamId;
-  kind: 'travelEvent' | 'succession';
+  kind: 'travelEvent' | 'succession' | 'lootAuction' | 'dungeonEvent';
 }>;
 
 export type HomeYearRestCompletedEvent = Readonly<{

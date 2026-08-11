@@ -22,34 +22,43 @@ const CONTRACTS = 'src/contracts';
 //   inventory 擁有：CharacterEquipmentLoadoutView / EquipmentDefinition /
 //                   EquipmentCoefficientChannelId / EquipmentSkillEffectRef /
 //                   ConsumeCombatSequenceRetrySupply（inventory 是 handler）
-//   economy 擁有：  MoneyValue / CreateEconomyAccountCommand / GrantCurrencyCommand /
-//                   TransferCurrencyCommand
+//   economy 擁有：  MoneyValue
 //   city 擁有：     FacilityKind（team 目前放寬成 string，最不相容）
-//   combat-sequence 擁有：CombatAttackMasteryEarnedPayload /
-//                   CombatDefenseMasteryEarnedPayload / CombatSupportMasteryEarnedPayload
 //   npc-behavior 擁有：NpcStopPolicyId
-//   team 擁有：     PlayerInteractionOpenedEvent（但三個模組都發此事件，應收成單一聯集）
 //   ContentEventInstance：內容/事件模組尚不存在；暫由 dungeon 擁有（其形狀較完整）
+//
+// 已收斂（本輪移除）：economy 的 CreateEconomyAccountCommand / GrantCurrencyCommand /
+//   TransferCurrencyCommand、combat-sequence 的三個 *MasteryEarnedPayload、team 的
+//   PlayerInteractionOpenedEvent —— distribution / combat 的重複宣告已改為 import 擁有者型別。
 const KNOWN_DUPLICATES = new Set<string>([
   'CharacterEquipmentLoadoutView',
-  'CombatAttackMasteryEarnedPayload',
-  'CombatDefenseMasteryEarnedPayload',
-  'CombatSupportMasteryEarnedPayload',
   'ConsumeCombatSequenceRetrySupply',
   'ContentEventInstance',
-  'CreateEconomyAccountCommand',
   'EquipmentCoefficientChannelId',
   'EquipmentDefinition',
   'EquipmentSkillEffectRef',
   'FacilityKind',
-  'GrantCurrencyCommand',
   'MoneyValue',
   'NpcStopPolicyId',
-  'PlayerInteractionOpenedEvent',
-  'TransferCurrencyCommand',
 ]);
 
 const DECL = /^export (?:type|interface) ([A-Z]\w*)\s*(?:=|\{|<)/gm;
+
+// ── 訊息判別欄（discriminant）碰撞守門 ──────────────────────────────────────
+//
+// 名稱守門抓不到的另一種影子契約：兩份契約各自**宣告**一個 payload 型別、名稱不同、卻帶**同一個**
+// `type: 'X'` 判別字面值。組進 GameCommand/GameInternalCommand/GameDomainEvent 聯集時，同一
+// discriminant 對到兩套不相容 payload → 判別式縮窄選錯或被迫轉型，且 tsc 在跨模組以 unknown 傳遞時
+// 看不到。（例：distribution 曾以 {toCharacterId,location} 宣告 `type:'TransferItem'`，與 inventory 的
+// {to,reason,newOwnerCharacterId} 撞。）
+//
+// 只算**宣告**位置的 `type: 'X'`（payload 型別本體的判別欄，形如 `type: 'X';`），**不**算聯集裡的
+// 引用 `({ type: 'X' } & Foo)`——後者是「引用擁有者型別」的正確樣式（B.5），同 discriminant 同 payload。
+// 判別方式：union 引用一定以 `({` 起頭夾住 `type`，宣告不會。
+const DISCRIMINANT = /(\(\{\s*)?type: '([A-Za-z]\w*)'/g;
+
+// 目前**無**跨契約的 discriminant 宣告碰撞（10 筆已於本輪全部收斂）。基準線保持空；長出新的即失敗。
+const KNOWN_DISCRIMINANT_DUPLICATES = new Set<string>([]);
 
 export type DuplicateFinding = Readonly<{ name: string; files: readonly string[] }>;
 
@@ -80,21 +89,63 @@ export function findDuplicateContractDeclarations(): readonly DuplicateFinding[]
   return out.sort((a, b) => (a.name < b.name ? -1 : 1));
 }
 
-export function runTests(): void {
-  const findings = findDuplicateContractDeclarations();
-  const added = findings.filter((f) => !KNOWN_DUPLICATES.has(f.name));
-  const converged = [...KNOWN_DUPLICATES].filter((n) => !findings.some((f) => f.name === n));
+// 找出「跨 2 份以上契約、在宣告位置帶同一 `type: 'X'` 判別字面值」的碰撞（見 DISCRIMINANT 註解）。
+export function findDuplicateDiscriminantDeclarations(): readonly DuplicateFinding[] {
+  const byDiscriminant = new Map<string, Set<string>>();
 
+  for (const dir of readdirSync(CONTRACTS)) {
+    const file = join(CONTRACTS, dir, 'index.ts');
+    let src: string;
+    try {
+      src = readFileSync(file, 'utf8');
+    } catch {
+      continue;
+    }
+    for (const m of src.matchAll(DISCRIMINANT)) {
+      if (m[1] !== undefined) continue; // `({ type: 'X' } & Foo)` 聯集引用，非宣告——略過
+      const value = m[2]!;
+      if (!byDiscriminant.has(value)) byDiscriminant.set(value, new Set());
+      byDiscriminant.get(value)!.add(dir);
+    }
+  }
+
+  const out: DuplicateFinding[] = [];
+  for (const [name, files] of byDiscriminant) {
+    if (files.size > 1) out.push({ name, files: [...files].sort() });
+  }
+  return out.sort((a, b) => (a.name < b.name ? -1 : 1));
+}
+
+function checkRatchet(
+  findings: readonly DuplicateFinding[],
+  baseline: ReadonlySet<string>,
+  kind: string,
+  addedHint: string,
+): void {
+  const added = findings.filter((f) => !baseline.has(f.name));
+  const converged = [...baseline].filter((n) => !findings.some((f) => f.name === n));
   if (added.length > 0) {
-    const lines = added.map((f) => `  - ${f.name} 同時宣告於: ${f.files.join(', ')}`).join('\n');
-    throw new Error(
-      `新增了 ${added.length} 筆契約重複宣告（型別應由擁有者宣告，其餘 import + re-export）:\n${lines}`,
-    );
+    const lines = added.map((f) => `  - ${f.name}: ${f.files.join(', ')}`).join('\n');
+    throw new Error(`新增了 ${added.length} 筆${kind}（${addedHint}）:\n${lines}`);
   }
   if (converged.length > 0) {
-    // 收斂完成後必須把名字從基準線移除，否則清單會失去「必須歸零」的意義。
-    throw new Error(`以下重複已收斂，請從 KNOWN_DUPLICATES 移除：${converged.join(', ')}`);
+    throw new Error(`以下${kind}已收斂，請從基準線移除：${converged.join(', ')}`);
   }
+}
+
+export function runTests(): void {
+  checkRatchet(
+    findDuplicateContractDeclarations(),
+    KNOWN_DUPLICATES,
+    '契約重複宣告',
+    '型別應由擁有者宣告，其餘 import + re-export',
+  );
+  checkRatchet(
+    findDuplicateDiscriminantDeclarations(),
+    KNOWN_DISCRIMINANT_DUPLICATES,
+    '訊息判別欄碰撞',
+    '同 discriminant 應對單一 payload；外送/共發改引用擁有者型別',
+  );
 }
 
 // 供報表使用：目前尚未收斂的重複數。

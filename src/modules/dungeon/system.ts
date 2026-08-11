@@ -536,7 +536,7 @@ export function interactDungeonContent(
         type: 'PlayerInteractionOpened',
         interactionId,
         teamId,
-        interactionKind: 'dungeonEvent',
+        kind: 'dungeonEvent',
       }),
     ];
     return accept(withPlayerSession(state, nextSession), messages);

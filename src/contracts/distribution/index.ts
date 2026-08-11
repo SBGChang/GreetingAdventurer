@@ -21,6 +21,13 @@ import type {
   InteractionId,
 } from '../core';
 
+// B.5 慣例：外送 Internal Command 一律引用**接收模組**契約的真實型別，不在此重宣告 placeholder
+// （原本各自宣告的 shape 與擁有者對不上，跨模組接線時會錯誤縮窄或被迫轉型）。
+import type { CreateEconomyAccountCommand, GrantCurrencyCommand, TransferCurrencyCommand } from '../economy';
+import type { TransferItem, RemoveItemInstance } from '../inventory';
+// PlayerInteractionOpened 事件由 team 擁有（單一聯集，三個模組共發）。
+import type { PlayerInteractionOpenedEvent } from '../team';
+
 // ── Invented placeholders：core 未定義的 ID／值型別 ──
 export type AssetDistributionRuleId = DefinitionId<'asset-distribution-rule'>;
 export type AssetDistributionSourceResultId = RuntimeId<'asset-distribution-source-result'>;
@@ -211,58 +218,24 @@ export type FinalizeAssetDistributionCollectionCommand = Readonly<{
   distributionId: AssetDistributionId;
 }>;
 
-// §7.4 Expired Quest Cargo：Quest 送出，將 Item 移入該筆 assetDistributionEscrow
-export type ReleaseExpiredQuestCargoCommand = Readonly<{
-  type: 'ReleaseExpiredQuestCargo';
-  distributionId: AssetDistributionId;
-}>;
-
+// §7.4 Expired Quest Cargo 的 `ReleaseExpiredQuestCargo` 由 **inventory** 處理（quest workflow 送出，
+// 將仍鎖定的任務物移入指定 assetDistributionEscrow；見 00_shared_contracts §5.4 表、10_quest §301、
+// 05_inventory §370）。distribution 不是此命令的 handler，故不在此宣告/接收。
 export type AssetDistributionInboundInternalCommand =
   | StartAssetDistributionCommand
   | AppendAssetDistributionResultCommand
-  | FinalizeAssetDistributionCollectionCommand
-  | ReleaseExpiredQuestCargoCommand;
+  | FinalizeAssetDistributionCollectionCommand;
 
-// ── 5.3 輸出 Internal Command payloads（handler 屬 economy／inventory；placeholder） ──
-
-export type CreateEconomyAccountCommand = Readonly<{
-  type: 'CreateEconomyAccount';
-  owner: 'assetDistribution';
-  distributionId: AssetDistributionId;
-  currencyId: CurrencyId;
-}>;
-
-export type GrantCurrencyCommand = Readonly<{
-  type: 'GrantCurrency';
-  accountId: EconomyAccountId;
-  amount: MoneyValue;
-}>;
-
-export type TransferCurrencyCommand = Readonly<{
-  type: 'TransferCurrency';
-  fromAccountId: EconomyAccountId;
-  toAccountId: EconomyAccountId;
-  amount: MoneyValue;
-}>;
-
-export type TransferItemCommand = Readonly<{
-  type: 'TransferItem';
-  itemId: ItemInstanceId;
-  toCharacterId: CharacterId;
-  location: 'characterBag';
-}>;
-
-export type RemoveItemInstanceCommand = Readonly<{
-  type: 'RemoveItemInstance';
-  itemId: ItemInstanceId;
-}>;
-
+// ── 5.3 輸出 Internal Command（handler 屬 economy／inventory）──
+// 一律引用**接收模組**的真實命令型別（見檔首 import）；不再宣告 placeholder。distribution 的
+// handler（實作時）負責填齊接收端要求的完整欄位（economy 的 transferId/rewardRuleId/sourceId、
+// inventory 的 to: ItemLocation / reason 等）。
 export type AssetDistributionOutboundInternalCommand =
-  | CreateEconomyAccountCommand
-  | GrantCurrencyCommand
-  | TransferCurrencyCommand
-  | TransferItemCommand
-  | RemoveItemInstanceCommand;
+  | CreateEconomyAccountCommand // economy
+  | GrantCurrencyCommand // economy
+  | TransferCurrencyCommand // economy
+  | TransferItem // inventory
+  | RemoveItemInstance; // inventory
 
 // ── 6. 輸出事件 payloads ─────────────────────────────────────────────────
 
@@ -300,12 +273,7 @@ export type LootAuctionRoundOpenedEvent = Readonly<{
   intrinsicValue: MoneyValue;
 }>;
 
-export type PlayerInteractionOpenedEvent = Readonly<{
-  type: 'PlayerInteractionOpened';
-  interactionId: InteractionId;
-  teamId: TeamId;
-  kind: 'lootAuction';
-}>;
+// PlayerInteractionOpened 由 team 擁有（見檔首 import）；distribution 以 kind: 'lootAuction' 發此事件。
 
 export type LootItemAwardedEvent = Readonly<{
   type: 'LootItemAwarded';
