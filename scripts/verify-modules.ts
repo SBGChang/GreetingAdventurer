@@ -14,6 +14,7 @@ import { runTests as dungeonReader } from '../src/app/content/dungeon-reader.tes
 import { runTests as moduleReaders } from '../src/app/content/readers.test';
 import { runTests as resolvers } from '../src/app/content/resolvers.test';
 import { runTests as crossModulePorts } from '../src/app/content/cross-module-ports.test';
+import { runTests as bootstrap } from '../src/app/composition/bootstrap.test';
 // 地基層測試自 Wave A 起就存在，但從未被這支腳本跑過。
 import { runKernelTests } from '../src/kernel/kernel.test';
 import { runKernelTests as dataKernels, allKernelTestsPass } from '../src/data-runtime/kernels.test';
@@ -51,6 +52,8 @@ const throwing: ReadonlyArray<readonly [string, () => void]> = [
   ['resolvers', resolvers],
   // content：真實跨模組 Query Port adapter（讀真實 sibling Slice，取代 fixture stub）。
   ['cross-module-ports', crossModulePorts],
+  // bootstrap：開機骨架端到端——NewGameBootstrapper → 玩家命令 → 提交 → golden 重播。
+  ['bootstrap', bootstrap],
 ];
 
 for (const [name, run] of throwing) {
@@ -64,6 +67,6 @@ if (!progressionPass()) throw new Error('progression tests failed');
 console.log('progression: pass');
 
 console.log(
-  'ALL TESTS PASS (kernel + data-runtime + 7 modules + composition + transaction wiring + engine session + content reader)',
+  'ALL TESTS PASS (kernel + data-runtime + 7 modules + composition + transaction wiring + engine session + content adapters + bootstrap)',
 );
 console.log(`NOTE: 契約重複宣告尚餘 ${remainingDuplicateCount()} 筆待收斂（見 scripts/check-contract-duplicates.ts）`);
