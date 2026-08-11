@@ -131,7 +131,7 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
   {
     name: 'Internal Command 依判別欄路由到 dungeon，並只改到 dungeon slice',
     run: () => {
-      const config = createTransactionConfig({ contexts: contexts(), applyScheduling });
+      const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
       const s0 = baseState();
       const outcome = runTransaction(config, s0, TX, (ctx) => {
         const handler = config.routeInternalCommand({ targetModule: 'dungeon' as never, command: gatherCommand });
@@ -150,7 +150,7 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
   {
     name: '拒絕會回滾整筆交易（slice 與 scheduler 都不留痕跡）',
     run: () => {
-      const config = createTransactionConfig({ contexts: contexts(), applyScheduling });
+      const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
       const s0 = baseState();
       const bad: ConsumeDungeonGatheringAction = { ...gatherCommand, mapVersion: FIXTURE.mapVersion + 5 };
       const outcome = runTransaction(config, s0, TX, (ctx) => {
@@ -171,7 +171,7 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
   {
     name: 'kernelRequests 於提交後回傳，不在交易內執行',
     run: () => {
-      const config = createTransactionConfig({ contexts: contexts(), applyScheduling });
+      const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
       const s0 = baseState();
       // 迷宮日 100 分鐘；採集 15 分鐘 × 7 次會跨午夜。此處直接把 Session 推到邊界前。
       const ctxs = contexts();
@@ -188,7 +188,7 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
           },
         },
       };
-      const cfg = createTransactionConfig({ contexts: ctxs, applyScheduling });
+      const cfg = createTransactionConfig({ contextFactory: () => ctxs, applyScheduling });
       const outcome = runTransaction(cfg, near, TX, (ctx) => {
         const handler = cfg.routeInternalCommand({ targetModule: 'dungeon' as never, command: gatherCommand });
         return handler!(gatherCommand, ctx);
@@ -206,7 +206,7 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
   {
     name: '送錯 targetModule 會明確報錯，不會被靜默改投',
     run: () => {
-      const config = createTransactionConfig({ contexts: contexts(), applyScheduling });
+      const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
       let message = '';
       try {
         config.routeInternalCommand({ targetModule: 'map' as never, command: gatherCommand });
@@ -219,7 +219,7 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
   {
     name: '缺少判別欄的訊息無法路由，且錯誤訊息指向判別欄約定',
     run: () => {
-      const config = createTransactionConfig({ contexts: contexts(), applyScheduling });
+      const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
       let message = '';
       try {
         config.routeInternalCommand({ targetModule: 'dungeon' as never, command: { teamId: 'x' } });
@@ -236,7 +236,7 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
         PENDING_INTERNAL_COMMANDS.length > 0,
         'Wave B 確實有宣告未實作的 Internal Command，此測試才有意義',
       );
-      const config = createTransactionConfig({ contexts: contexts(), applyScheduling });
+      const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
       // StartTimedCityAction 由 team 宣告處理，但 Wave B 沒有寫這個 Handler。
       let message = '';
       try {
@@ -255,11 +255,11 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
   {
     name: 'Game Command 依 actorTeamId 路由到 dungeon Handler，並真的改到 dungeon slice',
     run: () => {
-      const config = createTransactionConfig({ contexts: contexts(), applyScheduling });
+      const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
       const s0 = baseState();
       // 玩家隊在入口房 R1 探索中；moveDungeonRoom → R2 走 2 格 × 30 分/格。
       const command: GameCommand = { type: 'moveDungeonRoom', targetRoomId: FIXTURE.roomMiddle } as MoveDungeonRoom;
-      const root = routeGameCommand(envelope(command, FIXTURE.teamId), contexts());
+      const root = routeGameCommand(envelope(command, FIXTURE.teamId), contexts);
       const outcome = runTransaction(config, s0, TX, root, null);
 
       assert(outcome.accepted, '合法移動應被接受');
@@ -277,7 +277,7 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
       try {
         routeGameCommand(
           envelope({ type: 'gatherDungeonNode', nodeId: FIXTURE.gatherNodePlayer } as GameCommand, FIXTURE.teamId),
-          contexts(),
+          contexts,
         );
       } catch (e) {
         message = e instanceof Error ? e.message : String(e);
@@ -294,7 +294,7 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
         // unequipItem 由 inventory 宣告接收，但 Wave B 沒有寫 Handler。
         routeGameCommand(
           envelope({ type: 'unequipItem' } as unknown as GameCommand, PLAYER_TEAM),
-          contexts(),
+          contexts,
         );
       } catch (e) {
         message = e instanceof Error ? e.message : String(e);
@@ -307,7 +307,7 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
   {
     name: '到期 Job 依 job.type 路由到 dungeon，過期 Run 由 dungeon Handler 拒絕',
     run: () => {
-      const config = createTransactionConfig({ contexts: contexts(), applyScheduling });
+      const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
       const s0 = baseState();
       // fixture 沒有這個 NPC Run → dungeon.npcDungeonDay 回 preconditionFailed，
       // 足以證明「routeJob 真的分派到 dungeon 的 Job Handler」。
@@ -319,7 +319,7 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
         targetId: 'runtime:npc-dungeon-run:absent' as NpcDungeonRunId,
         payload: {},
       } as GameScheduledJob;
-      const outcome = runTransaction(config, s0, TX, routeJob(job, contexts()), null);
+      const outcome = runTransaction(config, s0, TX, routeJob(job, contexts), null);
 
       assert(!outcome.accepted, '過期 Run 的 Job 應被拒絕（回滾）');
       if (outcome.accepted) return;
@@ -335,7 +335,7 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
       assert(PENDING_JOBS.includes('freeActionDue'), 'freeActionDue 應在未實作清單');
       let message = '';
       try {
-        routeJob({ type: 'freeActionDue' } as unknown as GameScheduledJob, contexts());
+        routeJob({ type: 'freeActionDue' } as unknown as GameScheduledJob, contexts);
       } catch (e) {
         message = e instanceof Error ? e.message : String(e);
       }

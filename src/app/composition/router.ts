@@ -72,6 +72,12 @@ export type ModuleContexts = Readonly<{
   progression: ProgressionDefinitionReader;
 }>;
 
+// 跨模組 Query 只吃 State 快照（各 createXxxQuery 都是 (state) => Query），因此 Context 必須用
+// 「當前 workingState」重建，否則後段 Handler 讀到的是交易開始時的過期 slice（違反 §3.1 rule 3：
+// Handler 只看得到最新 workingState）。故 router 不吃固定 contexts，而吃一個「以 state 產生 contexts」
+// 的工廠；ID cursor / RNG 這類需跨呼叫延續的狀態，由工廠自身的閉包（GameSession 提供）保存。
+export type ModuleContextFactory = (state: GameState) => ModuleContexts;
+
 // ──────────────────────────────────────────────────────────────────────────
 // ModuleResult / ModuleOutcome → kernel 的 Accepted | Rejected
 // ──────────────────────────────────────────────────────────────────────────
@@ -290,7 +296,7 @@ export const PENDING_GAME_COMMANDS: readonly GameCommandType[] = (
 // 找不到入口/未實作/落在 Workflow 入口一律明確報錯，讓「送了指令卻沒反應」不會變成隱形 bug。
 export function routeGameCommand(
   envelope: GameCommandEnvelope<GameCommand>,
-  contexts: ModuleContexts,
+  contextFactory: ModuleContextFactory,
 ): RootHandler<GameState> {
   const type = requireMessageType(envelope.command, 'routeGameCommand') as GameCommandType;
   const entry = GAME_COMMAND_ENTRY[type];
@@ -309,7 +315,8 @@ export function routeGameCommand(
         `（見 router.ts 的 PENDING_GAME_COMMANDS）`,
     );
   }
-  return (ctx) => dispatch(envelope.command, envelope.actorTeamId, ctx.workingState, contexts);
+  return (ctx) =>
+    dispatch(envelope.command, envelope.actorTeamId, ctx.workingState, contextFactory(ctx.workingState));
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -344,7 +351,7 @@ export const PENDING_JOBS: readonly GameJobType[] = (
 // 把一筆到期 Job 轉為 runTransaction 的 rootHandler。
 export function routeJob(
   job: GameScheduledJob,
-  contexts: ModuleContexts,
+  contextFactory: ModuleContextFactory,
 ): RootHandler<GameState> {
   const dispatch = JOB_HANDLERS[job.type];
   if (dispatch === undefined) {
@@ -353,7 +360,7 @@ export function routeJob(
         `（見 router.ts 的 PENDING_JOBS）`,
     );
   }
-  return (ctx) => dispatch(job, ctx.workingState, contexts);
+  return (ctx) => dispatch(job, ctx.workingState, contextFactory(ctx.workingState));
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -419,7 +426,8 @@ const EVENT_SUBSCRIBERS: Readonly<Record<string, SubscriberDispatch>> = {
 // ──────────────────────────────────────────────────────────────────────────
 
 export type CreateTransactionConfigInput = Readonly<{
-  contexts: ModuleContexts;
+  // 以「當前 workingState」產生跨模組 Context 的工廠（見 ModuleContextFactory）。
+  contextFactory: ModuleContextFactory;
   manifest?: ExecutionOrderManifest;
   // 提交時把累積的排程異動寫入 core.scheduler（JobId 由呼叫者的 cursor 配發）。
   applyScheduling: TransactionRunnerConfig<GameState>['applyScheduling'];
@@ -429,7 +437,7 @@ export function createTransactionConfig(
   input: CreateTransactionConfigInput,
 ): TransactionRunnerConfig<GameState> {
   const manifest = input.manifest ?? EXECUTION_ORDER_MANIFEST;
-  const { contexts } = input;
+  const { contextFactory } = input;
 
   return {
     applyMutation,
@@ -454,7 +462,7 @@ export function createTransactionConfig(
             `（見 router.ts 的 PENDING_INTERNAL_COMMANDS）`,
         );
       }
-      return (command, ctx) => dispatch(command, ctx.workingState, contexts);
+      return (command, ctx) => dispatch(command, ctx.workingState, contextFactory(ctx.workingState));
     },
 
     routeEventSubscribers: (draft): readonly EventSubscriber<GameState>[] => {
@@ -468,7 +476,7 @@ export function createTransactionConfig(
         if (dispatch === undefined) {
           throw new Error(`routeEventSubscribers: Manifest 綁定 "${key}" 沒有對應的 Subscriber 實作`);
         }
-        return (event, ctx) => dispatch(event, ctx.workingState, contexts);
+        return (event, ctx) => dispatch(event, ctx.workingState, contextFactory(ctx.workingState));
       });
     },
   };
