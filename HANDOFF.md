@@ -17,6 +17,8 @@
 | root 路由 | `router.ts`:`routeGameCommand`(envelope→模組 Handler,teamId 取自 `actorTeamId`)、`routeJob`(job.type→Handler);Workflow 入口/未實作皆明確報錯(`PENDING_GAME_COMMANDS`/`PENDING_JOBS`) | ✅ + 測試 |
 | context 工廠 | `router.ts`:`ModuleContextFactory = (state)=>ModuleContexts`,每次 dispatch 以當前 workingState 重建(query 工廠皆吃快照,§3.1 rule 3) | ✅ |
 | 引擎 Session | `session.ts`:§7.2 交易私有 runtime-id cursor(seed 自 `core.nextRuntimeSequence`、鑄 envelope+entity+job ID、提交寫回)、真實 kernel id/rng ports;內容以注入的 `ContextAssembler` 供給 | ✅ + 測試(跨模組級聯 openDungeonDoor→OpenMapDoor→真 map slice) |
+| 內容 adapter | `src/app/content/`:reader adapter(全 7 模組)+ resolver adapter(核心+§7.1 資料調校樣板)+ 真實跨模組 Query port(DungeonTeamPort/CombatLoadoutQuery;硬的 DungeonMapPort 等待) | ✅ + 測試(data-runtime 首批真實消費者) |
+| NewGameBootstrapper | `bootstrap.ts`:`createNewGame` 組出合法初始 State(玩家隊+隊長+站位),bootstrap cursor 鑄 ID | ✅ + 測試(**開機切片**:bootstrap→`rest`→提交→golden 重播,全走真引擎、只碰已實作模組) |
 
 **驗證指令:**
 ```bash

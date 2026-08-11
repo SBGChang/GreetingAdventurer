@@ -8,6 +8,18 @@
 
 ---
 
+## 2026-08-12 — 開機骨架：NewGameBootstrapper + 第一個可跑切片（golden 重播）
+
+驗收目標「基本可以玩的架構」的**最小端到端證明**。commit `f9c433d`。
+
+`bootstrap.ts` 的 `createNewGame(input)` 組出合法初始 GameState:玩家隊（control=player、在起始城、站位涵蓋隊長）+ 隊長 Character,用**交易外的 bootstrap cursor**（§7.2）鑄隊伍/隊長 ID,終值寫入 `core.nextRuntimeSequence`。內容輕:隊長的內容相依欄位（archetype/sex/birthDay）以 bring-up 參數帶入,不讀 content。起始日給正值（8000）讓隊長（birthDay 0）開局成年、且世界日曆非負。
+
+`bootstrap.test.ts` 把切片整條跑過真引擎 Session:一筆玩家 `rest`（cityFacilityAction）—— **刻意挑它**,因為它只用 `worldDay + team id allocator`、鑄一個 TeamPlanId、排一個 teamPlanDue Job、**零跨模組外送**,故能完整走過 bootstrap→命令→§7.2 ID 配發→排程→提交,又不依賴任何未實作模組或內容。驗:合法 bootstrap（隊在城、隊長就位、序號=2）、bootstrap 決定性、rest 的 plan+job 效果、**golden 重播**（同 seed+命令 → 逐位元相同提交 State）。
+
+**意義**:引擎迴圈第一次「開機就跑」。在此之前所有測試都從 fixture/手建 state 起手;現在有了從**零**組出合法 state、驅動命令、決定性重播的完整鏈。往後換上真內容/真模組時,這條鏈是回歸基準（golden replay 抓非決定性）。
+
+---
+
 ## 2026-08-12 — 契約接線硬化（複審回合）：combat-sequence 交易模型 + 10 個 discriminant 碰撞
 
 一輪複審點出三個「只有在組裝尚未實作的模組時才會爆」的接線缺陷。全部修正,`tsc` 乾淨、verify 全過。commit `7581c11`。
