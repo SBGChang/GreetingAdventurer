@@ -8,12 +8,19 @@
 //   3. Slice 歸屬：kernel 只認 sliceName 字串，由此處補上。
 // 模組本身不需要為了被組裝而改寫；轉接一律在 composition 完成。
 
-import type { CommandRejection, ModuleId, TransactionMessageDraft } from '../../contracts/core';
+import type {
+  CommandRejection,
+  GameCommandEnvelope,
+  ModuleId,
+  TeamId,
+  TransactionMessageDraft,
+} from '../../contracts/core';
 import type {
   EventSubscriber,
   HandlerAccepted,
   HandlerRejected,
   InternalCommandHandler,
+  RootHandler,
   SliceMutation,
   TransactionRunnerConfig,
 } from '../../kernel';
@@ -27,9 +34,28 @@ import * as combat from '../../modules/combat/public';
 import * as team from '../../modules/team/public';
 
 import type { ProgressionDefinitionReader } from '../../contracts/progression';
-import { applyMutation, type GameSliceName, type GameState } from './state';
-import { INTERNAL_COMMAND_OWNER, requireMessageType, type GameInternalCommandType } from './messages';
-import { EXECUTION_ORDER_MANIFEST, type ExecutionOrderManifest } from './manifest';
+import {
+  applyMutation,
+  type GameJobType,
+  type GameScheduledJob,
+  type GameSliceName,
+  type GameState,
+} from './state';
+import {
+  GAME_COMMAND_ENTRY,
+  GAME_COMMAND_OWNER,
+  INTERNAL_COMMAND_OWNER,
+  requireMessageType,
+  WORKFLOW_ENTRY,
+  type GameCommand,
+  type GameCommandType,
+  type GameInternalCommandType,
+} from './messages';
+import {
+  EXECUTION_ORDER_MANIFEST,
+  JOB_TYPE_ORDER_BY_PHASE,
+  type ExecutionOrderManifest,
+} from './manifest';
 
 // ──────────────────────────────────────────────────────────────────────────
 // 注入：各模組的 Context bag
@@ -179,6 +205,156 @@ const INTERNAL_COMMAND_HANDLERS: Readonly<Partial<Record<GameInternalCommandType
 export const PENDING_INTERNAL_COMMANDS: readonly GameInternalCommandType[] = (
   Object.keys(INTERNAL_COMMAND_OWNER) as GameInternalCommandType[]
 ).filter((type) => INTERNAL_COMMAND_HANDLERS[type] === undefined);
+
+// ──────────────────────────────────────────────────────────────────────────
+// Game Command（Root）分派表
+//
+// Game Command 是玩家/UI 的動作，由 runTransaction 的 rootHandler 入口執行（§5.1：每個
+// Game Command 恰好一個入口——模組 Handler 或 Workflow）。與 Internal Command 的兩點差異：
+//   1. 入口可能是 Workflow（gatherDungeonNode）——此時沒有模組 Handler，交由 Workflow Wave。
+//   2. 玩家的「操作對象」是 GameCommandEnvelope.actorTeamId，不在 command payload 內。
+//      dungeon 的玩家 Handler 簽章是 (state, teamId, cmd?, ctx)，teamId 由此處自 envelope 帶入。
+// ──────────────────────────────────────────────────────────────────────────
+
+type RootDispatch = (
+  command: unknown,
+  actorTeamId: TeamId,
+  state: GameState,
+  ctxs: ModuleContexts,
+) => Accepted | Rejected;
+
+const GAME_COMMAND_HANDLERS: Readonly<Partial<Record<GameCommandType, RootDispatch>>> = {
+  // ── dungeon：(state, teamId, cmd?, ctx) → ModuleOutcome。teamId ← envelope.actorTeamId ──
+  startPlayerExploration: (_c, t, s, x) =>
+    fromOutcome('dungeon', dungeon.startPlayerExploration(s.dungeon, t, x.dungeon)),
+  moveDungeonRoom: (c, t, s, x) =>
+    fromOutcome('dungeon', dungeon.moveDungeonRoom(s.dungeon, t, c as never, x.dungeon)),
+  openDungeonDoor: (c, t, s, x) =>
+    fromOutcome('dungeon', dungeon.openDungeonDoor(s.dungeon, t, c as never, x.dungeon)),
+  interactDungeonContent: (c, t, s, x) =>
+    fromOutcome('dungeon', dungeon.interactDungeonContent(s.dungeon, t, c as never, x.dungeon)),
+  resolveDungeonInteraction: (c, t, s, x) =>
+    fromOutcome('dungeon', dungeon.resolveDungeonInteraction(s.dungeon, t, c as never, x.dungeon)),
+  useDungeonExit: (c, t, s, x) =>
+    fromOutcome('dungeon', dungeon.useDungeonExit(s.dungeon, t, c as never, x.dungeon)),
+
+  // ── combat：(state, cmd, ctx) → ModuleResult。combat 尚未轉 ModuleOutcome，非法輸入以
+  //    「回傳未變 slice」表示（HANDOFF 已列為待逐點判讀）；此處一律 acceptResult。 ──
+  useCombatSkill: (c, _t, s, x) =>
+    acceptResult('combat', combat.handleUseCombatSkill(s.combat, c as never, x.combat)),
+  useCombatItem: (c, _t, s, x) =>
+    acceptResult('combat', combat.handleUseCombatItem(s.combat, c as never, x.combat)),
+  commandAlly: (c, _t, s, x) =>
+    acceptResult('combat', combat.handleCommandAlly(s.combat, c as never, x.combat)),
+  combatRest: (c, _t, s, x) =>
+    acceptResult('combat', combat.handleCombatRest(s.combat, c as never, x.combat)),
+
+  // ── inventory：(state, cmd, deps) → ModuleOutcome ──
+  equipItem: (c, _t, s, x) =>
+    fromOutcome('inventory', inventory.equipItem(s.inventory, c as never, x.inventory)),
+  configureWeaponSet: (c, _t, s, x) =>
+    fromOutcome('inventory', inventory.configureWeaponSet(s.inventory, c as never, x.inventory)),
+
+  // ── team：(state, cmd, ctx) → ModuleOutcome（beginCityFreePeriod 無 cmd）──
+  startCityTravel: (c, _t, s, x) =>
+    fromOutcome('team', team.handleStartCityTravel(s.team, c as never, x.team)),
+  enterAdventureMap: (c, _t, s, x) =>
+    fromOutcome('team', team.handleEnterAdventureMap(s.team, c as never, x.team)),
+  returnToCity: (c, _t, s, x) =>
+    fromOutcome('team', team.handleReturnToCity(s.team, c as never, x.team)),
+  rest: (c, _t, s, x) => fromOutcome('team', team.handleRest(s.team, c as never, x.team)),
+  configureCombatFormation: (c, _t, s, x) =>
+    fromOutcome('team', team.handleConfigureCombatFormation(s.team, c as never, x.team)),
+  recruitTavernAdventurer: (c, _t, s, x) =>
+    fromOutcome('team', team.handleRecruitTavernAdventurer(s.team, c as never, x.team)),
+  selectPlayerSuccessor: (c, _t, s, x) =>
+    fromOutcome('team', team.handleSelectPlayerSuccessor(s.team, c as never, x.team)),
+  beginCityFreePeriod: (_c, _t, s, x) =>
+    fromOutcome('team', team.handleBeginCityFreePeriod(s.team, x.team)),
+};
+
+// 入口為 WORKFLOW 的 Game Command（gatherDungeonNode）：不是模組 Handler，交 Workflow Wave。
+const WORKFLOW_ENTRY_SET: ReadonlySet<GameCommandType> = new Set(
+  (Object.keys(GAME_COMMAND_ENTRY) as GameCommandType[]).filter(
+    (type) => GAME_COMMAND_ENTRY[type] === WORKFLOW_ENTRY,
+  ),
+);
+
+// 契約宣告由模組接收、但 Wave B 尚未實作的 Game Command（對照 GAME_COMMAND_OWNER，即扣掉
+// Workflow 入口後仍缺 Handler 者）。與 PENDING_INTERNAL_COMMANDS 同理：明確清單，不靜默成功。
+export const PENDING_GAME_COMMANDS: readonly GameCommandType[] = (
+  Object.keys(GAME_COMMAND_OWNER) as GameCommandType[]
+).filter((type) => GAME_COMMAND_HANDLERS[type] === undefined);
+
+// 把一筆 Game Command Envelope 轉為 runTransaction 的 rootHandler。
+// 找不到入口/未實作/落在 Workflow 入口一律明確報錯，讓「送了指令卻沒反應」不會變成隱形 bug。
+export function routeGameCommand(
+  envelope: GameCommandEnvelope<GameCommand>,
+  contexts: ModuleContexts,
+): RootHandler<GameState> {
+  const type = requireMessageType(envelope.command, 'routeGameCommand') as GameCommandType;
+  const entry = GAME_COMMAND_ENTRY[type];
+  if (entry === undefined) {
+    throw new Error(`routeGameCommand: "${type}" 不在 GAME_COMMAND_ENTRY（未註冊的 Game Command）`);
+  }
+  if (WORKFLOW_ENTRY_SET.has(type)) {
+    throw new Error(
+      `routeGameCommand: "${type}" 的入口是 Workflow，不直接路由到模組 Handler（待 Workflow Wave 實作）`,
+    );
+  }
+  const dispatch = GAME_COMMAND_HANDLERS[type];
+  if (dispatch === undefined) {
+    throw new Error(
+      `routeGameCommand: "${type}" 由 "${entry}" 宣告接收，但 Wave B 未實作該 Handler` +
+        `（見 router.ts 的 PENDING_GAME_COMMANDS）`,
+    );
+  }
+  return (ctx) => dispatch(envelope.command, envelope.actorTeamId, ctx.workingState, contexts);
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// 到期 Job（Root）分派表
+//
+// 到期 Job 也是交易 root（§6.2）。Job 已由 Scheduler 存為具型別的 GameScheduledJob，故依
+// job.type 分派。與 Command 的兩點差異：Job 無 actorTeam（作用對象在 job.targetId/payload）；
+// 過期/失效 Job 由各模組 Handler 自行「安靜跳過」（回傳未變 slice），不是拒絕。
+//   - character/map/team 回 ModuleResult；dungeon 的 npcDungeonDay 回 ModuleOutcome。
+//   - dungeon.npcDungeonDay 簽章是 (state, runId, ctx)，runId ← job.targetId。
+// ──────────────────────────────────────────────────────────────────────────
+
+type JobDispatch = (job: GameScheduledJob, state: GameState, ctxs: ModuleContexts) => Accepted | Rejected;
+
+const JOB_HANDLERS: Readonly<Partial<Record<GameJobType, JobDispatch>>> = {
+  characterLifecycleDue: (j, s, x) =>
+    acceptResult('character', character.handleCharacterLifecycleJob(j as never, s.character, x.character)),
+  mapRefreshCheck: (j, s, x) =>
+    acceptResult('map', map.handleMapRefreshCheck(j as never, s.map, x.map)),
+  npcDungeonDay: (j, s, x) =>
+    fromOutcome('dungeon', dungeon.npcDungeonDay(s.dungeon, (j as GameScheduledJob).targetId as never, x.dungeon)),
+  teamPlanDue: (j, s, x) =>
+    acceptResult('team', team.handleTeamPlanDueJob(s.team, j as never, x.team)),
+};
+
+// Manifest 註冊了 Phase 順序、但 Wave B 未實作 Handler 的 Job（team 的 freeActionDue /
+// nonPlayerMemberCityFreeDayTick）。路由到這些會明確報錯，不靜默丟棄一個到期的 Job。
+export const PENDING_JOBS: readonly GameJobType[] = (
+  Object.values(JOB_TYPE_ORDER_BY_PHASE).flat() as GameJobType[]
+).filter((type) => JOB_HANDLERS[type] === undefined);
+
+// 把一筆到期 Job 轉為 runTransaction 的 rootHandler。
+export function routeJob(
+  job: GameScheduledJob,
+  contexts: ModuleContexts,
+): RootHandler<GameState> {
+  const dispatch = JOB_HANDLERS[job.type];
+  if (dispatch === undefined) {
+    throw new Error(
+      `routeJob: Job type "${job.type}" 已在 Manifest 註冊，但 Wave B 未實作對應 Handler` +
+        `（見 router.ts 的 PENDING_JOBS）`,
+    );
+  }
+  return (ctx) => dispatch(job, ctx.workingState, contexts);
+}
 
 // ──────────────────────────────────────────────────────────────────────────
 // 事件訂閱分派表（key = `${eventType}::${subscriber}`，對齊 Manifest 的綁定）

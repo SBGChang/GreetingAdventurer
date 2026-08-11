@@ -10,7 +10,17 @@
 //   - ModuleResult.kernelRequests 於提交後回傳給呼叫者，不在交易內遞迴執行。
 //   - 契約宣告卻未實作的 Handler 會明確報錯，不是靜默成功。
 
-import type { JobId, TeamId, TransactionId } from '../../contracts/core';
+import type {
+  CommandId,
+  CorrelationId,
+  GameCommandEnvelope,
+  JobId,
+  ModuleId,
+  NpcDungeonRunId,
+  TeamId,
+  TransactionId,
+  WorldDay,
+} from '../../contracts/core';
 import { runTransaction, type SchedulingEffects } from '../../kernel';
 
 import {
@@ -19,10 +29,19 @@ import {
   FIXTURE,
   consumeDungeonGatheringAction,
 } from '../../modules/dungeon/public';
-import type { ConsumeDungeonGatheringAction } from '../../contracts/dungeon';
+import type { ConsumeDungeonGatheringAction, MoveDungeonRoom } from '../../contracts/dungeon';
 
-import { createTransactionConfig, PENDING_INTERNAL_COMMANDS, type ModuleContexts } from './router';
+import {
+  createTransactionConfig,
+  routeGameCommand,
+  routeJob,
+  PENDING_GAME_COMMANDS,
+  PENDING_INTERNAL_COMMANDS,
+  PENDING_JOBS,
+  type ModuleContexts,
+} from './router';
 import { createEmptyGameState, type GameScheduledJob, type GameState } from './state';
+import type { GameCommand } from './messages';
 import { createTeamState } from '../../modules/team/public';
 
 function assert(condition: boolean, message: string): void {
@@ -93,6 +112,18 @@ const gatherCommand: ConsumeDungeonGatheringAction = {
   mapVersion: FIXTURE.mapVersion,
   nodeId: FIXTURE.gatherNodePlayer,
 };
+
+// 建一個最小 GameCommandEnvelope（核心 ID 於真實 Composition 由交易 cursor 配發；測試以固定值代入）。
+function envelope(command: GameCommand, actorTeamId: TeamId): GameCommandEnvelope<GameCommand> {
+  return {
+    commandId: 'runtime:command~test~0' as CommandId,
+    transactionId: TX,
+    correlationId: 'runtime:correlation~test~0' as CorrelationId,
+    issuedAtWorldDay: 0 as WorldDay,
+    actorTeamId,
+    command,
+  };
+}
 
 export type TransactionTestResult = Readonly<{ name: string; pass: boolean; error?: string }>;
 
@@ -217,6 +248,98 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
         message = e instanceof Error ? e.message : String(e);
       }
       assert(message.includes('未實作'), `應指出 Handler 未實作（實得 "${message}"）`);
+    },
+  },
+
+  // ── Game Command（Root）路由 ────────────────────────────────────────────────
+  {
+    name: 'Game Command 依 actorTeamId 路由到 dungeon Handler，並真的改到 dungeon slice',
+    run: () => {
+      const config = createTransactionConfig({ contexts: contexts(), applyScheduling });
+      const s0 = baseState();
+      // 玩家隊在入口房 R1 探索中；moveDungeonRoom → R2 走 2 格 × 30 分/格。
+      const command: GameCommand = { type: 'moveDungeonRoom', targetRoomId: FIXTURE.roomMiddle } as MoveDungeonRoom;
+      const root = routeGameCommand(envelope(command, FIXTURE.teamId), contexts());
+      const outcome = runTransaction(config, s0, TX, root, null);
+
+      assert(outcome.accepted, '合法移動應被接受');
+      if (!outcome.accepted) return;
+      const session = outcome.state.dungeon.playerSessions[FIXTURE.teamId];
+      assert(session?.currentRoomId === FIXTURE.roomMiddle, `應移入 R2（實得 ${String(session?.currentRoomId)}）`);
+      assert(session?.elapsedDungeonMinutes === 60, `應前進 60 分鐘（實得 ${session?.elapsedDungeonMinutes}）`);
+      assert(outcome.state.team === s0.team, 'team slice 不應被動到');
+    },
+  },
+  {
+    name: '入口為 Workflow 的 Game Command（gatherDungeonNode）不直接路由，明確報錯',
+    run: () => {
+      let message = '';
+      try {
+        routeGameCommand(
+          envelope({ type: 'gatherDungeonNode', nodeId: FIXTURE.gatherNodePlayer } as GameCommand, FIXTURE.teamId),
+          contexts(),
+        );
+      } catch (e) {
+        message = e instanceof Error ? e.message : String(e);
+      }
+      assert(message.includes('Workflow'), `應指出入口是 Workflow（實得 "${message}"）`);
+    },
+  },
+  {
+    name: '契約宣告但未實作的 Game Command 會明確報錯',
+    run: () => {
+      assert(PENDING_GAME_COMMANDS.includes('unequipItem'), 'unequipItem 應在未實作清單');
+      let message = '';
+      try {
+        // unequipItem 由 inventory 宣告接收，但 Wave B 沒有寫 Handler。
+        routeGameCommand(
+          envelope({ type: 'unequipItem' } as unknown as GameCommand, PLAYER_TEAM),
+          contexts(),
+        );
+      } catch (e) {
+        message = e instanceof Error ? e.message : String(e);
+      }
+      assert(message.includes('未實作'), `應指出 Handler 未實作（實得 "${message}"）`);
+    },
+  },
+
+  // ── 到期 Job（Root）路由 ────────────────────────────────────────────────────
+  {
+    name: '到期 Job 依 job.type 路由到 dungeon，過期 Run 由 dungeon Handler 拒絕',
+    run: () => {
+      const config = createTransactionConfig({ contexts: contexts(), applyScheduling });
+      const s0 = baseState();
+      // fixture 沒有這個 NPC Run → dungeon.npcDungeonDay 回 preconditionFailed，
+      // 足以證明「routeJob 真的分派到 dungeon 的 Job Handler」。
+      const job = {
+        type: 'npcDungeonDay',
+        jobId: 'runtime:job~npc~0' as JobId,
+        dueDay: 1 as WorldDay,
+        ownerModule: 'dungeon' as ModuleId,
+        targetId: 'runtime:npc-dungeon-run:absent' as NpcDungeonRunId,
+        payload: {},
+      } as GameScheduledJob;
+      const outcome = runTransaction(config, s0, TX, routeJob(job, contexts()), null);
+
+      assert(!outcome.accepted, '過期 Run 的 Job 應被拒絕（回滾）');
+      if (outcome.accepted) return;
+      assert(
+        outcome.rejection.code === 'dungeon.npcDungeonDay.preconditionFailed',
+        `拒絕碼應來自 dungeon（實得 ${outcome.rejection.code}）`,
+      );
+    },
+  },
+  {
+    name: 'Manifest 註冊但未實作的 Job（freeActionDue）會明確報錯',
+    run: () => {
+      assert(PENDING_JOBS.includes('freeActionDue'), 'freeActionDue 應在未實作清單');
+      let message = '';
+      try {
+        routeJob({ type: 'freeActionDue' } as unknown as GameScheduledJob, contexts());
+      } catch (e) {
+        message = e instanceof Error ? e.message : String(e);
+      }
+      assert(message.includes('未實作'), `應指出 Job Handler 未實作（實得 "${message}"）`);
     },
   },
 ];
