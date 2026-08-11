@@ -102,6 +102,11 @@ Vite+React app、GameSession adapter、Projection/ViewModel、核心畫面(城�
 ## 慣例(務必遵守)
 - **訊息判別欄**:每個 Command / Event payload 必帶 `type` 字面值欄位(Game Command camelCase,
   Internal Command 與 Event PascalCase)。跨模組外送命令**引用接收模組契約的型別**,不得自行複寫欄位。
+  `scripts/check-contract-duplicates.ts` 現在**雙重守門**:型別名稱重複(基準線 9,須歸零)+ discriminant
+  宣告碰撞(基準線空——不同名卻同 `type: 'X'` 宣告會失敗;union 引用 `({ type } & Owner)` 不算)。
+- **跨模組互動只走命令+事件,不設同步回傳 Port**:需要另一模組「做事並取結果」時,發 Internal Command →
+  對方發 Domain Event → 訂閱回收。同步回傳會繞過 Transaction Runner／Slice 所有權／回滾(見 dungeon↔
+  combat-sequence 的 §2.3;曾有的 `CombatSequenceHostPort.resolveNext()` 已移除)。
 - **Handler 回傳**:可拒絕的 Handler(Game/Internal Command、Job root)回 `ModuleOutcome<TSlice>`;
   Event Subscriber 回 `ModuleResult<TSlice>`。不得用「回傳未變 slice」表示拒絕。
 - **branded ID 家族**:`DefinitionId<K>` / `RuntimeId<K>` / `EphemeralId<K>` / `TemplateLocalId<K>` + registry brands(`ModuleId`/`WorkflowId`/`ResolverId`/`SchemaId`…),定義在 `contracts/core`。無泛型 `GameId`。
