@@ -13,6 +13,7 @@ import { runTests as engineSession } from '../src/app/composition/session.test';
 import { runTests as dungeonReader } from '../src/app/content/dungeon-reader.test';
 import { runTests as moduleReaders } from '../src/app/content/readers.test';
 import { runTests as resolvers } from '../src/app/content/resolvers.test';
+import { runTests as crossModulePorts } from '../src/app/content/cross-module-ports.test';
 // 地基層測試自 Wave A 起就存在，但從未被這支腳本跑過。
 import { runKernelTests } from '../src/kernel/kernel.test';
 import { runKernelTests as dataKernels, allKernelTestsPass } from '../src/data-runtime/kernels.test';
@@ -48,6 +49,8 @@ const throwing: ReadonlyArray<readonly [string, () => void]> = [
   ['module-readers', moduleReaders],
   // content：資料調校 Resolver adapter（§7.1 kernel + params-from-definition + RNG 紀律）。
   ['resolvers', resolvers],
+  // content：真實跨模組 Query Port adapter（讀真實 sibling Slice，取代 fixture stub）。
+  ['cross-module-ports', crossModulePorts],
 ];
 
 for (const [name, run] of throwing) {
