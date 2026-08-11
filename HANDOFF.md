@@ -2,7 +2,7 @@
 
 > 給下一位接手者(人或 AI)。設計已定稿、地基與核心模組已實作且驗證通過;剩下的是**整合(串接)+ 補齊模組 + UI**。
 
-## 現況(B.5 接線硬化 + Wave C 第一段 composition 骨架;tsc 乾淨、全部測試通過)
+## 現況(Wave C:composition 骨架 + root 路由 + 引擎 Session;tsc 乾淨、全部測試通過)
 
 **已完成、且 `tsc` 乾淨 + 單元測試實跑通過:**
 
@@ -14,6 +14,9 @@
 | data-runtime | `src/data-runtime/`(content 載入、Registry、窄化 Reader、驗證、ResolverRegistry、§7.1 kernels) | ✅ + 測試 |
 | 核心 7 模組 | `src/modules/{character,inventory,progression,map,dungeon,combat,team}/` | ✅ 各含 state/system/queries/fixtures/*.test/public;7/7 測試通過 |
 | composition 骨架 | `src/app/composition/`(GameState、訊息聯集、ExecutionOrderManifest、ModuleRegistry 啟動驗證、kernel↔模組 router) | ✅ + 測試 |
+| root 路由 | `router.ts`:`routeGameCommand`(envelope→模組 Handler,teamId 取自 `actorTeamId`)、`routeJob`(job.type→Handler);Workflow 入口/未實作皆明確報錯(`PENDING_GAME_COMMANDS`/`PENDING_JOBS`) | ✅ + 測試 |
+| context 工廠 | `router.ts`:`ModuleContextFactory = (state)=>ModuleContexts`,每次 dispatch 以當前 workingState 重建(query 工廠皆吃快照,§3.1 rule 3) | ✅ |
+| 引擎 Session | `session.ts`:§7.2 交易私有 runtime-id cursor(seed 自 `core.nextRuntimeSequence`、鑄 envelope+entity+job ID、提交寫回)、真實 kernel id/rng ports;內容以注入的 `ContextAssembler` 供給 | ✅ + 測試(跨模組級聯 openDungeonDoor→OpenMapDoor→真 map slice) |
 
 **驗證指令:**
 ```bash
@@ -34,11 +37,15 @@ npx tsx scripts/verify-modules.ts   # kernel + data-runtime + 7 模組 + composi
 - `router.ts` + `transaction.test.ts`:kernel `TransactionRunner` ↔ 真實模組 Handler 的接線,含參數順序/回傳形狀/Slice 歸屬三種差異的收斂。
 - **kernel 補洞**:`TransactionRunner` 原本把模組回傳的 `scheduledJobs` 直接丟掉(沒有模組排得了 Job)。現在 `SliceMutation` 帶 `scheduledJobs`/`cancelledJobIds`/`kernelRequests`,Runner 累積後於提交時經注入的 `applyScheduling` 落地,`kernelRequests` 則回傳給呼叫者於提交後執行。
 
-**仍待做:**
-- **注入真實 ports**(目前只有各模組 fixture stub):id allocator ← kernel `RuntimeIdGenerator` + `core.nextRuntimeSequence`;RNG ← kernel `DeterministicRng` + `rngContext`;跨模組 Query ← 各模組 `createXxxQuery`;resolvers ← data-runtime `ResolverRegistry`(§7.1 kernels + `params`);definition readers ← data-runtime 窄化 Reader。
-- **Game Command / Job 的 root 路由**:`router.ts` 目前只做 Internal Command 與 Event;Game Command 與 Job 的 root handler 分派待補。
-- **雲華 `content/*.json`**:把 `docs/03_content/yunhua/yunhua_content.data.mjs`(含 `firstMapLayouts`/`firstMapConfigs`)轉成引擎 content pack JSON,對齊各 Definition Schema。
-- **NewGameBootstrapper**(§1.1)與**無頭 runner**:bootstrap 新遊戲 → 腳本化跑「進城→下地城→一場戰鬥→結算→成長」→ golden 重播測試(同 seed+指令→同結果)。
+**已完成(本段新增):**
+- **Game Command / Job 的 root 路由**:見上表 root 路由列。
+- **引擎 Session 的 id/rng 骨幹**:見上表引擎 Session 列。id allocator ← kernel `RuntimeIdGenerator` + 交易私有 cursor(§7.2);RNG 產生器 ← kernel `DeterministicRng`。這半邊(內容無關的組裝)已真接並有跨模組級聯測試佐證。
+
+**仍待做(其中「真實內容 ports」卡在下方內容軌):**
+- **內容 ports(卡在內容)**:definition readers、resolvers(內嵌公式,§7.1 kernels + `params`)、跨模組 Query 的**真實** adapter(如 `DungeonMapPort`、combat formation 快照)、以及 world/derived-statistics 未實作模組供給的 `WorldQuery`/`TeamWorldReader`/carry-capacity。目前 Session 以注入的 `ContextAssembler` 供給,測試用 fixture 內容;換上真內容只換 Assembler,不動 Session。
+- **雲華 content pack(內容軌,見 §2 下的新任務)**:無任何 content-pack JSON;無任何 `ResolverRegistration`;各模組 `XxxDefinitionReader` 是手寫領域介面,要真接需寫 registry→窄化 reader→領域 reader 的 adapter。把 `docs/03_content/yunhua/yunhua_content.data.mjs`(含 `firstMapLayouts`/`firstMapConfigs`)轉成引擎 content pack JSON,對齊各 Definition Schema,並以 data-runtime `createDefinitionReader` / `createResolverRegistry` 建 reader/resolver。**這是全 vertical slice 的關鍵路徑,可平行發包(依 domain 切)。**
+- **NewGameBootstrapper**(§1.1)與**全 vertical slice**:bootstrap 新遊戲 → 腳本化跑「進城→下地城→一場戰鬥→結算→成長」→ golden 重播測試(同 seed+指令→同結果)。骨幹(Session)已就緒,卡在上面的內容 ports。
+- **引擎 Session 尚未涵蓋(刻意,已記於 `session.ts`)**:Internal Command / Event Draft 物化為帶 CommandId/EventId 的完整信封(Outbox/存檔平台需要,與 State 正確性無關);§7.1 `invocationRngContext` 完整推導(現為簡化版)。
 
 ### 1b. Wave B 宣告但未實作的 Handler(整合時浮現的真實缺口)
 
