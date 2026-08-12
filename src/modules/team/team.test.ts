@@ -11,9 +11,15 @@
 //   * 舊 Plan Job 因 revision 不符安全跳過。
 
 import type { JobId, WorldDay, Revision, DomainEventDraft } from '../../contracts/core';
-import type { TeamPlanDueJob, StartNpcTeamPlanPayload, TravelCompletedEvent } from '../../contracts/team';
+import type {
+  TeamPlanDueJob,
+  StartNpcTeamPlanPayload,
+  TravelCompletedEvent,
+  TravelSegmentReachedEvent,
+} from '../../contracts/team';
 import type { GridCell } from '../../contracts/map';
 import type { TeamState } from './state';
+import { requireTeam, tryGetPlan } from './state';
 import type { TeamHandlerResult } from './system';
 import {
   handleStartCityTravel,
@@ -25,6 +31,7 @@ import {
   handleBeginCityFreePeriod,
   handleStartNpcTeamPlan,
   handleTeamPlanDueJob,
+  handleCompletePlayerTravelSegmentWithoutEvent,
 } from './system';
 import { createTeamQuery, createTeamPresenceQuery } from './queries';
 import {
@@ -99,22 +106,50 @@ function runTravel(state0: TeamState, firstJobs: readonly unknown[], worldDay0: 
   let travelKind: string | undefined;
   let seq = 0;
 
-  while (jobs.length > 0) {
-    seq += 1;
-    if (seq > 10) throw new Error('travel did not terminate');
-    const job = materializeJob(jobs[0], seq);
-    const ctx = makeContext({ worldDay: job.dueDay });
-    const result = handleTeamPlanDueJob(state, job, ctx);
-    state = result.nextSlice;
-    for (const t of eventTypes(result.outgoingMessages)) {
+  const tally = (messages: readonly unknown[]): void => {
+    for (const t of eventTypes(messages)) {
       if (t === 'TravelSegmentReached') segmentReached += 1;
       if (t === 'TravelCompleted') travelCompleted += 1;
     }
-    const loc = findEvent<{ to: { kind: string } }>(result.outgoingMessages, 'TeamLocationChanged');
+    const loc = findEvent<{ to: { kind: string } }>(messages, 'TeamLocationChanged');
     if (loc !== undefined && loc.to.kind !== 'travelling') nonTravellingArrival += 1;
-    const tc = findEvent<TravelCompletedEvent>(result.outgoingMessages, 'TravelCompleted');
+    const tc = findEvent<TravelCompletedEvent>(messages, 'TravelCompleted');
     if (tc !== undefined) travelKind = tc.travelKind;
-    jobs = result.scheduledJobs;
+  };
+
+  while (jobs.length > 0) {
+    seq += 1;
+    if (seq > 12) throw new Error('travel did not terminate');
+    const job = materializeJob(jobs[0], seq);
+    const ctx = makeContext({ worldDay: job.dueDay });
+    const due = handleTeamPlanDueJob(state, job, ctx);
+    state = due.nextSlice;
+    tally(due.outgoingMessages);
+    jobs = due.scheduledJobs;
+
+    // 玩家旅行：teamPlanDue 只「抵達本段 + 發 TravelSegmentReached」後停下，推進由旅行事件 Workflow 決定。
+    // 測試扮演「本段無事件」的 Workflow：對每個 TravelSegmentReached 送 CompletePlayerTravelSegmentWithoutEvent。
+    const seg = findEvent<TravelSegmentReachedEvent>(due.outgoingMessages, 'TravelSegmentReached');
+    if (seg !== undefined) {
+      const activePlanId = requireTeam(state, seg.teamId).activePlanId;
+      const plan = activePlanId !== undefined ? tryGetPlan(state, activePlanId) : undefined;
+      if (plan === undefined) throw new Error('travel: no active plan to complete segment');
+      const complete = ok(
+        handleCompletePlayerTravelSegmentWithoutEvent(
+          state,
+          {
+            type: 'CompletePlayerTravelSegmentWithoutEvent',
+            teamId: seg.teamId,
+            planId: plan.planId,
+            segmentIndex: seg.segmentIndex,
+          },
+          ctx,
+        ),
+      );
+      state = complete.result.nextSlice;
+      tally(complete.result.outgoingMessages);
+      jobs = complete.result.scheduledJobs;
+    }
   }
   void worldDay0;
   return { segmentReached, travelCompleted, nonTravellingArrival, finalState: state, travelKind };

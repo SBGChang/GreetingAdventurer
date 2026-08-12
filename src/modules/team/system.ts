@@ -46,6 +46,7 @@ import type {
   TeamModuleId,
   StartReturnFromDungeonPayload,
   StartNpcTeamPlanPayload,
+  CompletePlayerTravelSegmentWithoutEventPayload,
   // Event payloads
   TeamPlanCompletedEvent,
   TeamLocationChangedEvent,
@@ -838,7 +839,7 @@ export function handleTeamPlanDueJob(
 
   switch (plan.kind) {
     case 'cityTravel':
-      return dueCityTravel(state, plan, job, ctx);
+      return dueCityTravel(state, plan, ctx);
     case 'enterAdventureMap':
       return dueEnterAdventureMap(state, plan, ctx);
     case 'returnToCity':
@@ -883,7 +884,6 @@ function duePlanComplete(
 function dueCityTravel(
   state: TeamState,
   plan: TeamPlan,
-  job: TeamPlanDueJob,
   ctx: TeamHandlerContext,
 ): ModuleResult<TeamState> {
   if (plan.payload.kind !== 'cityTravel') {
@@ -893,68 +893,19 @@ function dueCityTravel(
   const team = requireTeam(state, plan.teamId);
 
   if (travel.kind === 'playerTravel') {
+    // 玩家旅行：teamPlanDue 只「抵達本段」並發布 TravelSegmentReached，然後**停下等旅行事件 Workflow
+    // 決定**（doc §2.3）——不在同一交易自行推進，否則旅行事件/護衛刺殺/Pending 選擇都攔不住旅程。
+    //   - 無事件 → CompletePlayerTravelSegmentWithoutEvent → handleCompletePlayerTravelSegmentWithoutEvent 推進
+    //   - 有事件 → OpenPlayerTravelInteraction → 開 Pending 互動、等玩家（待實作）
     const mode = ctx.definitions.getPlayerTravelMode(travel.modeId);
     const segmentReached: TravelSegmentReachedEvent = {
-    type: 'TravelSegmentReached',
+      type: 'TravelSegmentReached',
       teamId: plan.teamId,
       routeId: travel.routeId,
       segmentIndex: travel.segmentIndex,
       eventProfileId: mode.travelEventWeightProfileId,
     };
-    const segmentEvent = emit(segmentReached);
-
-    if (travel.segmentIndex < 2) {
-      // 前/中段：只完成一個段落，推進到下一段並排下一個 Job。
-      const nextIndex = (travel.segmentIndex + 1) as 1 | 2;
-      const leg = mode.segments[nextIndex];
-      const nextSegmentDay = (job.dueDay + leg) as WorldDay;
-      const nextPlan: TeamPlan = {
-        ...plan,
-        dueOnDay: nextSegmentDay,
-        payload: {
-          kind: 'cityTravel',
-          travel: { ...travel, segmentIndex: nextIndex, nextSegmentDay },
-        },
-        revision: bump(plan.revision),
-      };
-      const to: TeamLocation = {
-        kind: 'travelling',
-        routeId: travel.routeId,
-        progress: { kind: 'playerSegments', segmentIndex: nextIndex },
-      };
-      let next = upsertPlan(state, nextPlan);
-      next = upsertTeam(next, { ...team, location: to, revision: bump(team.revision) });
-      return {
-        nextSlice: next,
-        outgoingMessages: [segmentEvent],
-        scheduledJobs: [planDueJob(plan.teamId, plan.planId, nextSegmentDay, nextPlan.revision)],
-      };
-    }
-
-    // 第三段：發布段落事件後抵達（foundation 直接抵達；Pending 互動分支見 TODO）。
-    const to: TeamLocation = { kind: 'city', cityId: travel.toCityId };
-    const arrivalTeam: Team = { ...team, location: to, revision: bump(team.revision) };
-    const locationChanged: TeamLocationChangedEvent = { type: 'TeamLocationChanged', teamId: plan.teamId, from: team.location, to };
-    const travelCompleted: TravelCompletedEvent = {
-    type: 'TravelCompleted',
-      teamId: plan.teamId,
-      fromCityId: travel.fromCityId,
-      toCityId: travel.toCityId,
-      travelKind: 'player',
-      modeId: travel.modeId,
-      experienceRuleId: mode.travelExperienceRuleId,
-      experienceMultiplier: mode.travelExperienceMultiplier,
-    };
-    return duePlanComplete(
-      state,
-      plan,
-      [
-        segmentEvent,
-        emit(locationChanged),
-        emit(travelCompleted),
-      ],
-      arrivalTeam,
-    );
+    return { nextSlice: state, outgoingMessages: [emit(segmentReached)], scheduledJobs: [] };
   }
 
   // NPC 旅行：第 6 日直接抵達，一次旅行 MXP ×1，無段落事件。
@@ -980,6 +931,66 @@ function dueCityTravel(
     ],
     arrivalTeam,
   );
+}
+
+// 旅行事件 Workflow 判定「本段無事件」→ 推進下一段（或第三段後抵達）。與 dueCityTravel 分工：後者只
+// 「抵達本段 + 發 TravelSegmentReached」後停下，推進一律由此 Internal Command 觸發，讓旅行事件、護衛
+// 刺殺與 Pending 選擇能攔在段落之間。日期沿用 plan 儲存的 nextSegmentDay（＝本段到期日）+ 下一段里程，
+// 與舊 dueCityTravel 的 `job.dueDay + leg` 等價。
+export function handleCompletePlayerTravelSegmentWithoutEvent(
+  state: TeamState,
+  cmd: CompletePlayerTravelSegmentWithoutEventPayload,
+  ctx: TeamHandlerContext,
+): TeamHandlerResult {
+  const plan = tryGetPlan(state, cmd.planId);
+  if (plan === undefined || plan.status !== 'active') return reject('team/no-active-travel-plan');
+  if (plan.kind !== 'cityTravel' || plan.payload.kind !== 'cityTravel') return reject('team/not-city-travel');
+  const travel = plan.payload.travel;
+  if (travel.kind !== 'playerTravel') return reject('team/not-player-travel');
+  if (travel.segmentIndex !== cmd.segmentIndex) return reject('team/travel-segment-mismatch');
+  const team = requireTeam(state, plan.teamId);
+  const mode = ctx.definitions.getPlayerTravelMode(travel.modeId);
+
+  if (travel.segmentIndex < 2) {
+    const nextIndex = (travel.segmentIndex + 1) as 1 | 2;
+    const nextSegmentDay = (travel.nextSegmentDay + mode.segments[nextIndex]) as WorldDay;
+    const nextPlan: TeamPlan = {
+      ...plan,
+      dueOnDay: nextSegmentDay,
+      payload: { kind: 'cityTravel', travel: { ...travel, segmentIndex: nextIndex, nextSegmentDay } },
+      revision: bump(plan.revision),
+    };
+    const to: TeamLocation = {
+      kind: 'travelling',
+      routeId: travel.routeId,
+      progress: { kind: 'playerSegments', segmentIndex: nextIndex },
+    };
+    let next = upsertPlan(state, nextPlan);
+    next = upsertTeam(next, { ...team, location: to, revision: bump(team.revision) });
+    return accept(next, [], [planDueJob(plan.teamId, plan.planId, nextSegmentDay, nextPlan.revision)]);
+  }
+
+  // 第三段完成 → 抵達目的城。
+  const to: TeamLocation = { kind: 'city', cityId: travel.toCityId };
+  const arrivalTeam: Team = { ...team, location: to, revision: bump(team.revision) };
+  const locationChanged: TeamLocationChangedEvent = {
+    type: 'TeamLocationChanged',
+    teamId: plan.teamId,
+    from: team.location,
+    to,
+  };
+  const travelCompleted: TravelCompletedEvent = {
+    type: 'TravelCompleted',
+    teamId: plan.teamId,
+    fromCityId: travel.fromCityId,
+    toCityId: travel.toCityId,
+    travelKind: 'player',
+    modeId: travel.modeId,
+    experienceRuleId: mode.travelExperienceRuleId,
+    experienceMultiplier: mode.travelExperienceMultiplier,
+  };
+  const completed = duePlanComplete(state, plan, [emit(locationChanged), emit(travelCompleted)], arrivalTeam);
+  return accept(completed.nextSlice, completed.outgoingMessages, completed.scheduledJobs);
 }
 
 function dueEnterAdventureMap(

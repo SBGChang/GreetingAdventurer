@@ -65,6 +65,7 @@ export {
   // Internal Command
   handleStartReturnFromDungeon,
   handleStartNpcTeamPlan,
+  handleCompletePlayerTravelSegmentWithoutEvent,
   // Job
   handleTeamPlanDueJob,
 } from './system';

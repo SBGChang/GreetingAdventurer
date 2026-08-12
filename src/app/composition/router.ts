@@ -205,6 +205,8 @@ const INTERNAL_COMMAND_HANDLERS: Readonly<Partial<Record<GameInternalCommandType
     fromOutcome('team', team.handleStartReturnFromDungeon(s.team, c as never, x.team)),
   StartNpcTeamPlan: (c, s, x) =>
     fromOutcome('team', team.handleStartNpcTeamPlan(s.team, c as never, x.team)),
+  CompletePlayerTravelSegmentWithoutEvent: (c, s, x) =>
+    fromOutcome('team', team.handleCompletePlayerTravelSegmentWithoutEvent(s.team, c as never, x.team)),
 };
 
 // 契約宣告會處理、但 Wave B 沒有實作的 Internal Command。
