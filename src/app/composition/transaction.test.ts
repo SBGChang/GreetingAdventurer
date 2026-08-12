@@ -98,7 +98,8 @@ function baseState(): GameState {
   return {
     ...createEmptyGameState({
       worldSeed: 'transaction-test',
-      team: createTeamState({ playerTeamId: PLAYER_TEAM }),
+      // 玩家隊 = dungeon 探索 Session 的隊伍：Game Command 授權要求 actorTeamId === playerTeamId。
+      team: createTeamState({ playerTeamId: FIXTURE.teamId }),
     }),
     // 用 dungeon 自己的 fixture slice，讓真實 handler 有可操作的 Session。
     dungeon: createFixtureState(),

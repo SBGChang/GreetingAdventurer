@@ -140,6 +140,26 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
     },
   },
   {
+    name: '授權（#4）：以非玩家隊的 actorTeamId 下命令 → 拒絕，且不動任何 Slice',
+    run: () => {
+      const g = createBringUpFixture(INPUT);
+      const intruder = 'runtime:team:intruder' as TeamId;
+      const result = runGameCommand(g.state, restRequest(intruder), assembler);
+      assert(!result.accepted, '非玩家隊的 actorTeamId 應被拒絕');
+      if (result.accepted) return;
+      assert(
+        result.rejection.code.includes('actorNotPlayerTeam'),
+        `拒絕碼應為授權失敗（實得 ${result.rejection.code}）`,
+      );
+      // 授權在 dispatch 前擋下 → 全回滾：不建立 Plan、序號不變。
+      assert(result.state.team.teams[g.playerTeamId]!.activePlanId === undefined, '拒絕後不應建立 Plan');
+      assert(
+        (result.state.core.nextRuntimeSequence as unknown as number) === 2,
+        '拒絕後序號應維持 bootstrap 值（§7.2）',
+      );
+    },
+  },
+  {
     name: 'Golden 重播：同 seed + 同命令 → 逐位元相同的提交 State',
     run: () => {
       const teamId = createBringUpFixture(INPUT).playerTeamId;

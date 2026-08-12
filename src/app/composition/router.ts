@@ -9,6 +9,7 @@
 // 模組本身不需要為了被組裝而改寫；轉接一律在 composition 完成。
 
 import type {
+  CharacterId,
   CommandRejection,
   GameCommandEnvelope,
   ModuleId,
@@ -292,6 +293,65 @@ export const PENDING_GAME_COMMANDS: readonly GameCommandType[] = (
   Object.keys(GAME_COMMAND_OWNER) as GameCommandType[]
 ).filter((type) => GAME_COMMAND_HANDLERS[type] === undefined);
 
+// ──────────────────────────────────────────────────────────────────────────
+// 授權：玩家命令只能作用在 actorTeamId 擁有的資料
+//
+// Handler 各自驗自己的領域前置，但「這筆命令的目標是否屬於發令的隊伍」是跨切面的：Game Command
+// 的 payload 由玩家/UI 提供，若不檢查 actorTeamId，玩家可在 payload 填入別隊角色或別隊 Encounter
+// 直接操作不屬於自己的資料。此處在 dispatch **之前**擋下：
+//   - 全域：玩家只能以自己控制的（玩家）隊伍行動（actorTeamId === team.playerTeamId）。
+//   - 帶 teamId 的命令：teamId === actorTeamId。
+//   - 帶 characterId 的命令：該角色須為 actorTeamId 的（正式或臨時）成員。
+//   - 帶 encounterId 的戰鬥命令：該 Encounter 的 playerTeamId === actorTeamId。
+// ──────────────────────────────────────────────────────────────────────────
+
+function isMemberOf(state: GameState, teamId: TeamId, characterId: CharacterId): boolean {
+  const t = team.tryGetTeam(state.team, teamId);
+  if (t === undefined) return false;
+  return t.memberIds.includes(characterId) || t.temporaryMemberIds.includes(characterId);
+}
+
+function authorizeGameCommand(
+  command: GameCommand,
+  actorTeamId: TeamId,
+  state: GameState,
+): CommandRejection | undefined {
+  const owner = (GAME_COMMAND_ENTRY[command.type] ?? ('composition' as ModuleId)) as ModuleId;
+  const deny = (reason: string): CommandRejection => ({
+    code: `authorization.${command.type}.${reason}`,
+    sourceModule: owner,
+    details: { actorTeamId: String(actorTeamId) },
+  });
+
+  // 全域：玩家只能以自己控制的隊伍行動。
+  if (actorTeamId !== state.team.playerTeamId) return deny('actorNotPlayerTeam');
+
+  switch (command.type) {
+    case 'returnToCity':
+    case 'configureCombatFormation':
+      return command.teamId === actorTeamId ? undefined : deny('teamNotOwnedByActor');
+    case 'equipItem':
+    case 'unequipItem':
+    case 'configureWeaponSet':
+      return isMemberOf(state, actorTeamId, command.characterId)
+        ? undefined
+        : deny('characterNotInActorTeam');
+    case 'useCombatSkill':
+    case 'useCombatItem':
+    case 'commandAlly':
+    case 'combatRest': {
+      const encounter = combat.tryGetEncounter(state.combat, command.encounterId);
+      return encounter !== undefined && encounter.playerTeamId === actorTeamId
+        ? undefined
+        : deny('encounterNotOwnedByActor');
+    }
+    default:
+      // 其餘玩家隊隱含命令（rest / startCityTravel / beginCityFreePeriod …）本就以 state.playerTeamId
+      // 作用，已由上面全域檢查涵蓋。
+      return undefined;
+  }
+}
+
 // 把一筆 Game Command Envelope 轉為 runTransaction 的 rootHandler。
 // 找不到入口/未實作/落在 Workflow 入口一律明確報錯，讓「送了指令卻沒反應」不會變成隱形 bug。
 export function routeGameCommand(
@@ -315,8 +375,12 @@ export function routeGameCommand(
         `（見 router.ts 的 PENDING_GAME_COMMANDS）`,
     );
   }
-  return (ctx) =>
-    dispatch(envelope.command, envelope.actorTeamId, ctx.workingState, contextFactory(ctx.workingState));
+  return (ctx) => {
+    // 授權在 dispatch 之前；不通過即拒絕整筆交易（不動任何 Slice）。
+    const denied = authorizeGameCommand(envelope.command, envelope.actorTeamId, ctx.workingState);
+    if (denied !== undefined) return { accepted: false, rejection: denied };
+    return dispatch(envelope.command, envelope.actorTeamId, ctx.workingState, contextFactory(ctx.workingState));
+  };
 }
 
 // ──────────────────────────────────────────────────────────────────────────
