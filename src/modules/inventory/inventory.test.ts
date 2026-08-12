@@ -66,9 +66,11 @@ const cases: readonly Case[] = [
       const r = createItemInstance(createFixtureState(), cmd, deps);
       const next = expectOk(r, 'create');
       const query = createInventoryQuery(next, deps.reader);
-      // exactly one new item added
-      // fixture 種了 3 件（劍／藥水／雙手劍），新增 1 件 → 4。
-      assert(Object.keys(next.items).length === 4, 'create: item count 4');
+      // 恰好新增一件（相對 fixture 起始件數，避免硬編數字隨 fixture 增減而脆裂）。
+      assert(
+        Object.keys(next.items).length === Object.keys(createFixtureState().items).length + 1,
+        'create: exactly one item added',
+      );
       const evts = eventsOf(r);
       assert(evts.length === 1, 'create: one event');
       const created = evts[0] as { location: { kind: string } };
@@ -365,6 +367,56 @@ const cases: readonly Case[] = [
       const set = s2.equipmentLoadouts[FIXTURE.characterId]!.weaponSets[0]!;
       assert(set.mainHandItemId === FIXTURE.greatswordItemId, '主手應為雙手劍');
       assert(set.offHandItemId === FIXTURE.greatswordItemId, '雙手武器應同時占用副手');
+    },
+  },
+  {
+    name: 'equipItem: 盾裝副手 → 寫進 offHandItemId（不再誤入 mainHand）',
+    run: () => {
+      const deps = createFixtureDeps();
+      const s = expectOk(
+        equipItem(
+          createFixtureState(),
+          { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.shieldItemId, slotId: FIXTURE.offHandSlot, weaponSetId: WS0 },
+          deps,
+        ),
+        'equip shield',
+      );
+      const set = s.equipmentLoadouts[FIXTURE.characterId]!.weaponSets[0]!;
+      assert(set.offHandItemId === FIXTURE.shieldItemId, '盾應在副手');
+      assert(set.mainHandItemId === undefined, '盾不應寫進主手');
+    },
+  },
+  {
+    name: 'equipItem: 頂替多格甲時清空其全部 slot（不殘留 head）',
+    run: () => {
+      const deps = createFixtureDeps();
+      // 先穿多格袍（body + head）。
+      const s1 = expectOk(
+        equipItem(
+          createFixtureState(),
+          { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.robeItemId, slotId: FIXTURE.bodySlot },
+          deps,
+        ),
+        'equip robe',
+      );
+      const armor1 = s1.equipmentLoadouts[FIXTURE.characterId]!.armorSlots;
+      assert(
+        armor1[FIXTURE.bodySlot] === FIXTURE.robeItemId && armor1[FIXTURE.headSlot] === FIXTURE.robeItemId,
+        '袍應同時占 body + head',
+      );
+      // 再穿單格胸甲（body）→ 頂掉袍；袍的 head slot 也應清空（不殘留）。
+      const s2 = expectOk(
+        equipItem(
+          s1,
+          { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.chestItemId, slotId: FIXTURE.bodySlot },
+          deps,
+        ),
+        'equip chest',
+      );
+      const armor2 = s2.equipmentLoadouts[FIXTURE.characterId]!.armorSlots;
+      assert(armor2[FIXTURE.bodySlot] === FIXTURE.chestItemId, 'body 應為胸甲');
+      assert(armor2[FIXTURE.headSlot] === undefined, '袍被頂掉後 head slot 不應殘留');
+      assert(s2.items[FIXTURE.robeItemId]!.location.kind === 'characterBag', '袍應卸回背包');
     },
   },
   {

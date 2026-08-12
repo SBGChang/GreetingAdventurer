@@ -41,17 +41,24 @@ export const FIXTURE = {
   // Definition IDs
   swordDefId: 'definition:item:sword' as ItemDefinitionId,
   greatswordDefId: 'definition:item:greatsword' as ItemDefinitionId,
+  shieldDefId: 'definition:item:shield' as ItemDefinitionId,
+  robeDefId: 'definition:item:robe' as ItemDefinitionId, // 多格甲：body + head
+  chestDefId: 'definition:item:chest' as ItemDefinitionId, // 單格甲：body
   potionDefId: 'definition:item:potion' as ItemDefinitionId,
   bookDefId: 'definition:item:book-basic' as ItemDefinitionId,
   paperDefId: 'definition:item:paper' as ItemDefinitionId,
   // Item instance IDs
   swordItemId: 'runtime:item-instance:sword-1' as ItemInstanceId,
   greatswordItemId: 'runtime:item-instance:greatsword-1' as ItemInstanceId,
+  shieldItemId: 'runtime:item-instance:shield-1' as ItemInstanceId,
+  robeItemId: 'runtime:item-instance:robe-1' as ItemInstanceId,
+  chestItemId: 'runtime:item-instance:chest-1' as ItemInstanceId,
   potionItemId: 'runtime:item-instance:potion-1' as ItemInstanceId,
   // Equipment slots
   mainHandSlot: 'definition:equipment-slot:mainHand' as EquipmentSlotId,
   offHandSlot: 'definition:equipment-slot:offHand' as EquipmentSlotId,
   bodySlot: 'definition:equipment-slot:body' as EquipmentSlotId,
+  headSlot: 'definition:equipment-slot:head' as EquipmentSlotId,
 } as const;
 
 // ── Definition base helpers ─────────────────────────────────────────────────
@@ -99,6 +106,44 @@ const greatswordDef: EquipmentDefinition = {
   skillEffectRefs: [],
 };
 
+const noCoeff = { muscle: 0, intelligence: 0, reaction: 0, coordination: 0, charisma: 0 } as const;
+
+const shieldDef: EquipmentDefinition = {
+  ...baseItem(FIXTURE.shieldDefId, 'equipment', 20),
+  kind: 'equipment',
+  equipmentKind: 'shield',
+  rarity: 'common',
+  relatedMasteryIds: [],
+  occupiedSlots: [FIXTURE.offHandSlot], // 盾屬副手
+  primaryAttributeCoefficients: noCoeff,
+  secondaryAttributeCoefficients: [],
+  skillEffectRefs: [],
+};
+
+const robeDef: EquipmentDefinition = {
+  ...baseItem(FIXTURE.robeDefId, 'equipment', 25),
+  kind: 'equipment',
+  equipmentKind: 'armor',
+  rarity: 'common',
+  relatedMasteryIds: [],
+  occupiedSlots: [FIXTURE.bodySlot, FIXTURE.headSlot], // 多格甲：body + head
+  primaryAttributeCoefficients: noCoeff,
+  secondaryAttributeCoefficients: [],
+  skillEffectRefs: [],
+};
+
+const chestDef: EquipmentDefinition = {
+  ...baseItem(FIXTURE.chestDefId, 'equipment', 15),
+  kind: 'equipment',
+  equipmentKind: 'armor',
+  rarity: 'common',
+  relatedMasteryIds: [],
+  occupiedSlots: [FIXTURE.bodySlot], // 單格甲：body
+  primaryAttributeCoefficients: noCoeff,
+  secondaryAttributeCoefficients: [],
+  skillEffectRefs: [],
+};
+
 const POTION_DELAY_RULE = 'definition:use-delay-rule:potion' as UseDelayRuleId;
 
 const potionDef: ItemDefinition = {
@@ -135,6 +180,9 @@ export function createFixtureReader(): ItemDefinitionReader {
   const defs: Record<string, ItemDefinition> = {
     [FIXTURE.swordDefId]: swordDef,
     [FIXTURE.greatswordDefId]: greatswordDef,
+    [FIXTURE.shieldDefId]: shieldDef,
+    [FIXTURE.robeDefId]: robeDef,
+    [FIXTURE.chestDefId]: chestDef,
     [FIXTURE.potionDefId]: potionDef,
     [FIXTURE.bookDefId]: bookDef,
     [FIXTURE.paperDefId]: paperDef,
@@ -195,11 +243,23 @@ export function createFixtureState(): InventoryState {
     state: 'active',
     revision: 0,
   };
+  const bagItem = (itemId: ItemInstanceId, definitionId: ItemDefinitionId): ItemInstance => ({
+    itemId,
+    definitionId,
+    quantity: 1,
+    ownerCharacterId: FIXTURE.characterId,
+    location: { kind: 'characterBag', characterId: FIXTURE.characterId },
+    state: 'active',
+    revision: 0,
+  });
   return {
     items: {
       [FIXTURE.swordItemId]: sword,
       [FIXTURE.potionItemId]: potion,
       [FIXTURE.greatswordItemId]: greatsword,
+      [FIXTURE.shieldItemId]: bagItem(FIXTURE.shieldItemId, FIXTURE.shieldDefId),
+      [FIXTURE.robeItemId]: bagItem(FIXTURE.robeItemId, FIXTURE.robeDefId),
+      [FIXTURE.chestItemId]: bagItem(FIXTURE.chestItemId, FIXTURE.chestDefId),
     },
     equipmentLoadouts: {},
     encumbranceResolutions: {},

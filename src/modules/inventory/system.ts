@@ -411,46 +411,63 @@ export function equipItem(
     if (idx < 0) return reject('inventory/unknown-weapon-set', { weaponSetId: String(cmd.weaponSetId) });
     const set = loadout.weaponSets[idx]!;
 
-    if (set.mainHandItemId !== undefined && set.mainHandItemId !== cmd.itemId) {
-      displaced.push(set.mainHandItemId);
-    }
-    // 換上雙手武器 → 副手也被占用；換上單手武器時，若原主手是雙手武器，其副手佔位一併解除。
+    // 目標手:雙手武器占滿主+副;盾牌屬副手;其餘單手武器屬主手。原本一律寫進主手,導致裝副手(盾)
+    // 被錯放到主手(offHand→mainHand bug)。[限制] 單手武器的「雙持副手」需 slot→hand 訊號,資料模型
+    // 目前未提供,故單手武器一律主手。
     const previousMainIsTwoHanded =
       set.mainHandItemId !== undefined && set.offHandItemId === set.mainHandItemId;
-    if (
-      set.offHandItemId !== undefined &&
-      set.offHandItemId !== cmd.itemId &&
-      (isTwoHanded || previousMainIsTwoHanded)
-    ) {
-      if (!displaced.includes(set.offHandItemId)) displaced.push(set.offHandItemId);
+    const goesOffHand = !isTwoHanded && equip.equipmentKind === 'shield';
+
+    let nextMain = set.mainHandItemId;
+    let nextOff = set.offHandItemId;
+
+    if (isTwoHanded) {
+      if (set.mainHandItemId !== undefined && set.mainHandItemId !== cmd.itemId) displaced.push(set.mainHandItemId);
+      if (set.offHandItemId !== undefined && set.offHandItemId !== cmd.itemId && !displaced.includes(set.offHandItemId)) {
+        displaced.push(set.offHandItemId);
+      }
+      nextMain = cmd.itemId;
+      nextOff = cmd.itemId; // 雙手：主副手指向同一件
+    } else if (goesOffHand) {
+      // 頂掉原副手（若非同一件、且不是被雙手武器共用的佔位）。
+      if (set.offHandItemId !== undefined && set.offHandItemId !== cmd.itemId && set.offHandItemId !== set.mainHandItemId) {
+        displaced.push(set.offHandItemId);
+      }
+      // 原主手是雙手武器 → 佔用副手，換上盾牌前必須把它卸下、清主手。
+      if (previousMainIsTwoHanded && set.mainHandItemId !== undefined) {
+        if (!displaced.includes(set.mainHandItemId)) displaced.push(set.mainHandItemId);
+        nextMain = undefined;
+      }
+      nextOff = cmd.itemId;
+    } else {
+      if (set.mainHandItemId !== undefined && set.mainHandItemId !== cmd.itemId) displaced.push(set.mainHandItemId);
+      if (previousMainIsTwoHanded) nextOff = undefined; // 原雙手武器的副手佔位解除
+      nextMain = cmd.itemId;
     }
 
-    const updated: WeaponSetLoadout = {
-      ...set,
-      mainHandItemId: cmd.itemId,
-      // 雙手：主副手指向同一件；單手且原本是雙手佔位：副手清空。
-      offHandItemId: isTwoHanded
-        ? cmd.itemId
-        : previousMainIsTwoHanded
-          ? undefined
-          : set.offHandItemId,
-    };
+    const updated: WeaponSetLoadout = { ...set, mainHandItemId: nextMain, offHandItemId: nextOff };
     nextLoadout = {
       ...loadout,
       weaponSets: replaceWeaponSet(loadout.weaponSets, idx, updated),
       revision: loadout.revision + 1,
     };
   } else {
-    // 鎧甲等共用裝備位置（doc 不變量 9：不得有 weaponSetId）。
-    // 一件裝備可占用多個 slot；每個被占用的 slot 上的舊物品都要卸下。
+    // 鎧甲等共用裝備位置（doc 不變量 9：不得有 weaponSetId）。一件裝備可占用多個 slot。
     const nextArmor: Record<EquipmentSlotId, ItemInstanceId | undefined> = { ...loadout.armorSlots };
+    // 先蒐集所有被本次占用 slot 頂掉的舊物品。
     for (const slot of equip.occupiedSlots) {
       const previous = nextArmor[slot];
       if (previous !== undefined && previous !== cmd.itemId && !displaced.includes(previous)) {
         displaced.push(previous);
       }
-      nextArmor[slot] = cmd.itemId;
     }
+    // 被頂掉的物品可能是**多格**裝備：把它占用的**每一個** slot 都清掉,否則其他格會殘留指向已卸下的
+    // 物品(multi-slot armor 殘留 slot bug)。
+    for (const key of Object.keys(nextArmor) as EquipmentSlotId[]) {
+      const occupant = nextArmor[key];
+      if (occupant !== undefined && displaced.includes(occupant)) nextArmor[key] = undefined;
+    }
+    for (const slot of equip.occupiedSlots) nextArmor[slot] = cmd.itemId;
     nextLoadout = { ...loadout, armorSlots: nextArmor, revision: loadout.revision + 1 };
   }
 
