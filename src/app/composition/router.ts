@@ -10,7 +10,9 @@
 
 import type {
   CharacterId,
+  CombatantId,
   CommandRejection,
+  EncounterId,
   GameCommandEnvelope,
   ModuleId,
   TeamId,
@@ -328,6 +330,16 @@ function authorizeGameCommand(
   // 全域：玩家只能以自己控制的隊伍行動。
   if (actorTeamId !== state.team.playerTeamId) return deny('actorNotPlayerTeam');
 
+  // 戰鬥命令：Encounter 須屬玩家隊，且指定的戰鬥員（actorId/allyId）須為**玩家方**——否則玩家可在
+  // 敵人正要行動時送出敵人的技能/休息命令，操作不屬於自己的戰鬥員。
+  const combatantOwned = (encounterId: EncounterId, combatantId: CombatantId): CommandRejection | undefined => {
+    const encounter = combat.tryGetEncounter(state.combat, encounterId);
+    if (encounter === undefined || encounter.playerTeamId !== actorTeamId) return deny('encounterNotOwnedByActor');
+    const combatant = encounter.combatants[combatantId];
+    if (combatant === undefined || combatant.side !== 'player') return deny('combatantNotPlayerSide');
+    return undefined;
+  };
+
   switch (command.type) {
     case 'returnToCity':
     case 'configureCombatFormation':
@@ -338,15 +350,12 @@ function authorizeGameCommand(
       return isMemberOf(state, actorTeamId, command.characterId)
         ? undefined
         : deny('characterNotInActorTeam');
+    case 'commandAlly':
+      return combatantOwned(command.encounterId, command.allyId);
     case 'useCombatSkill':
     case 'useCombatItem':
-    case 'commandAlly':
-    case 'combatRest': {
-      const encounter = combat.tryGetEncounter(state.combat, command.encounterId);
-      return encounter !== undefined && encounter.playerTeamId === actorTeamId
-        ? undefined
-        : deny('encounterNotOwnedByActor');
-    }
+    case 'combatRest':
+      return combatantOwned(command.encounterId, command.actorId);
     default:
       // 其餘玩家隊隱含命令（rest / startCityTravel / beginCityFreePeriod …）本就以 state.playerTeamId
       // 作用，已由上面全域檢查涵蓋。

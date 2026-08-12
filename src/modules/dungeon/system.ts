@@ -739,7 +739,9 @@ export function npcDungeonDay(
   ctx: DungeonContext,
 ): DungeonHandlerResult {
   const run = state.npcRuns[runId];
-  if (run === undefined || run.status !== 'exploring') return reject('dungeon.npcDungeonDay.preconditionFailed'); // settling/closed 不再排（不變量 §3.4.6）。
+  // 失效/過期 Job（Run 不存在，或已 settling/closed）→ **接受並 no-op**（不是拒絕）：到期 Job 於交易
+  // 提交時被 Scheduler 消耗，若在此拒絕會讓交易回滾、Job 留在佇列而不斷重觸發（見 session.runDueJob）。
+  if (run === undefined || run.status !== 'exploring') return accept(state); // settling/closed 不再排（§3.4.6）。
 
   // 驗證 Team 仍在 Map 且版本相符；否則安全失效（doc §7.2、§5.4 TeamLocationChanged/MapRefreshed）。
   if (!ctx.team.isTeamInMap(run.teamId, run.mapId) || ctx.map.getMapVersion(run.mapId) !== run.mapVersion) {

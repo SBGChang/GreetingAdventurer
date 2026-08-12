@@ -10,7 +10,14 @@
 // teamPlanDue Job、不外送任何 Internal Command；其到期 Job 也自足（duePlanComplete，只發無訂閱者的
 // TeamPlanCompleted）。故整條鏈不依賴任何未實作模組或內容。
 
-import type { CityId, GameCommandRequest, TeamId } from '../../contracts/core';
+import type {
+  CityId,
+  GameCommandRequest,
+  JobId,
+  ModuleId,
+  NpcDungeonRunId,
+  TeamId,
+} from '../../contracts/core';
 import type { RestCommand } from '../../contracts/team';
 
 import { createBringUpFixture, type BringUpFixtureInput } from './bootstrap';
@@ -18,6 +25,7 @@ import { runGameCommand, runDueJob, type ContextAssembler } from './session';
 import { unusedContext } from './session-fixture';
 import type { ModuleContexts } from './router';
 import type { GameCommand } from './messages';
+import type { GameScheduledJob, GameState } from './state';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -137,6 +145,34 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
       assert(team.activePlanId === undefined, 'Plan 完成後 activePlanId 應清空');
       const plans = Object.values(afterJob.state.team.plans);
       assert(plans.length === 1 && plans[0]!.status === 'completed', 'Plan 應標記 completed');
+    },
+  },
+  {
+    name: '#1(R3)：過期 Job 經 runDueJob → 接受並 no-op，且被消耗（不因拒絕而違反回滾）',
+    run: () => {
+      const g = createBringUpFixture(INPUT);
+      const jobId = 'runtime:job~npc~absent' as JobId;
+      // dungeon slice 為空 → 這個 NPC Run 不存在 → npcDungeonDay 應「接受並 no-op」。
+      const job = {
+        type: 'npcDungeonDay',
+        jobId,
+        dueDay: g.state.core.worldDay,
+        ownerModule: 'dungeon' as ModuleId,
+        targetId: 'runtime:npc-dungeon-run:absent' as NpcDungeonRunId,
+        payload: {},
+      } as GameScheduledJob;
+      // 把過期 Job 放進 Scheduler（模擬它是排定的到期工作）。
+      const state: GameState = {
+        ...g.state,
+        core: { ...g.state.core, scheduler: { jobsById: { [jobId]: job }, revision: 1 as never } },
+      };
+      const result = runDueJob(state, job, assembler);
+      assert(result.accepted, '過期 Job 應被接受並 no-op（不是拒絕）');
+      if (!result.accepted) return;
+      assert(
+        Object.keys(result.state.core.scheduler.jobsById).length === 0,
+        '過期 Job 於提交時應被消耗（dequeue）',
+      );
     },
   },
   {

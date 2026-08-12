@@ -306,12 +306,12 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
 
   // ── 到期 Job（Root）路由 ────────────────────────────────────────────────────
   {
-    name: '到期 Job 依 job.type 路由到 dungeon，過期 Run 由 dungeon Handler 拒絕',
+    name: '到期 Job 依 job.type 路由到 dungeon；過期 Run 由 Handler 接受並 no-op（非拒絕）',
     run: () => {
       const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
       const s0 = baseState();
-      // fixture 沒有這個 NPC Run → dungeon.npcDungeonDay 回 preconditionFailed，
-      // 足以證明「routeJob 真的分派到 dungeon 的 Job Handler」。
+      // fixture 沒有這個 NPC Run。失效 Job 應「接受並 no-op」——若拒絕會回滾、Job 留在佇列不斷重觸發
+      // （見 session.runDueJob 的消費規則）。
       const job = {
         type: 'npcDungeonDay',
         jobId: 'runtime:job~npc~0' as JobId,
@@ -322,12 +322,9 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
       } as GameScheduledJob;
       const outcome = runTransaction(config, s0, TX, routeJob(job, contexts), null);
 
-      assert(!outcome.accepted, '過期 Run 的 Job 應被拒絕（回滾）');
-      if (outcome.accepted) return;
-      assert(
-        outcome.rejection.code === 'dungeon.npcDungeonDay.preconditionFailed',
-        `拒絕碼應來自 dungeon（實得 ${outcome.rejection.code}）`,
-      );
+      assert(outcome.accepted, '過期 Run 的 Job 應被接受並 no-op（不是拒絕）');
+      if (!outcome.accepted) return;
+      assert(outcome.state.dungeon === s0.dungeon, 'no-op 不應改動 dungeon slice');
     },
   },
   {

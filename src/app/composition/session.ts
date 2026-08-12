@@ -310,14 +310,12 @@ export function runDueJob(
   assembler: ContextAssembler,
 ): GameStepResult {
   const worldSeed = state.core.worldSeed as Seed;
-  // Scheduler dequeue 已觸發的 Job（在其交易之前）：一次性消耗，避免快轉重複取得同一到期工作。
-  const dequeued = dequeueJob(state, job.jobId);
-  const holder: CursorHolder = { cursor: dequeued.core.nextRuntimeSequence };
+  const holder: CursorHolder = { cursor: state.core.nextRuntimeSequence };
   const transactionId = mintId<TransactionId>(worldSeed, holder, 'transaction');
   mintId<CorrelationId>(worldSeed, holder, 'correlation');
   // invocation 身分＝jobId（§7.1：Job 的 rng 由 jobId + 擁有者派生）。
-  return runRoot(
-    dequeued,
+  const result = runRoot(
+    state,
     worldSeed,
     holder,
     transactionId,
@@ -325,6 +323,11 @@ export function runDueJob(
     (cf) => routeJob(job, cf),
     assembler,
   );
+  // Job 於交易**成功提交**時才消耗（Scheduler dequeue）；拒絕則原始 State 完全不變（Job 留著，
+  // §7.2 回滾）。失效 Job 應由 Handler「接受並 no-op」（見 dungeon npcDungeonDay），故正常也會走
+  // accept 這條被消耗，不會殘留重複觸發。真正的 reject 代表下游必要命令失敗，屬錯誤，Job 不消耗。
+  if (!result.accepted) return result;
+  return { ...result, state: dequeueJob(result.state, job.jobId) };
 }
 
 // 只曝出 id ports（供 Bootstrapper 在交易外預先鑄 ID，例如建立初始玩家隊伍時）。
