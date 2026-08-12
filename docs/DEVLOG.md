@@ -8,6 +8,22 @@
 
 ---
 
+## 2026-08-12 — 複審回合 2：開機切片的 5 個 P1（含「可玩」是過度宣稱的更正）
+
+上一則把 bring-up 切片說成「基本可以玩的架構」是**過度宣稱**——它是引擎迴圈的煙霧測試,不是可玩性。複審點出 6 個問題,前 5 個 P1 全修（commits `4746412`、`50f6668`、`e2617af`）:
+
+1. **到期 Job 沒被消耗**（我引入）——`runDueJob` 執行後 Job 仍留在 `jobsById`（applyScheduling 只刪 cancelled），快轉會不斷取得同一到期工作。修:Scheduler 在 Job 交易**之前** dequeue 它（一次性;接受或拒絕都已消耗）。測試改成**真的執行** Job 並驗證它消失 + Plan 完成。
+2. **bootstrap 過度宣稱**（我命名膨脹）——只建 character/team/formation 卻自稱「合法初始 GameState / NewGameBootstrapper」。改名 `createNewGame` → `createBringUpFixture`,補隊長成長檔 + 輸入驗證,並在檔首誠實列出正式 §1.1 Gate 還缺什麼（多卡在內容）。
+3. **RNG 每交易從 cursor 0**（我引入）——`rngContextFor()` 恆回 cursor 0、stream 不含調用身分,同一判定跨交易恆得相同結果。修:stream 由「訊息 ID（commandId/jobId）+ tag」派生（§7.1）。
+4. **玩家命令沒查 actorTeamId 權限**（一直缺）——router dispatch 忽略 actorTeamId,玩家可在 payload 填別隊角色/Encounter 操作不屬於自己的資料。修:dispatch 前授權(全域 actorTeamId===playerTeamId;teamId/characterId/encounterId 目標須屬 actorTeam)。此檢查還抓出 transaction.test 一個潛在的 session-team 不匹配。
+5. **玩家旅行跳過旅行事件 Workflow**（Wave B team bug）——`dueCityTravel` 在發 TravelSegmentReached 的同交易就推進下一段、第三段直接抵達,旅行事件/護衛刺殺/Pending 選擇全攔不住。修:拆成「dueCityTravel 只抵達本段並停下」+ 新 `handleCompletePlayerTravelSegmentWithoutEvent`（原 PENDING,現接上 router）推進;team.test 的旅行模擬扮演「無事件」Workflow 逐段送命令,仍得 3 段 + 1 完成。
+
+**仍在 backlog（#6，非本輪）**:裝備副手寫進主手/多格防具殘 slot、戰鬥可用未學技能+資源下溢+目標未驗、地牢互動未查內容是否在目前房間、11 Game/16 Internal/2 Job 未實作、契約重複 9 筆。
+
+**教訓**:綠燈 ≠ 正確。golden replay 抓非決定性,但抓不到「授權」「Workflow 攔截」這種**缺席的規則**——那要靠複審逐條讀。命名也要誠實:`createBringUpFixture` 不叫 `createNewGame`。
+
+---
+
 ## 2026-08-12 — 開機骨架：NewGameBootstrapper + 第一個可跑切片（golden 重播）
 
 驗收目標「基本可以玩的架構」的**最小端到端證明**。commit `f9c433d`。

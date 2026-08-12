@@ -18,7 +18,8 @@
 | context 工廠 | `router.ts`:`ModuleContextFactory = (state)=>ModuleContexts`,每次 dispatch 以當前 workingState 重建(query 工廠皆吃快照,§3.1 rule 3) | ✅ |
 | 引擎 Session | `session.ts`:§7.2 交易私有 runtime-id cursor(seed 自 `core.nextRuntimeSequence`、鑄 envelope+entity+job ID、提交寫回)、真實 kernel id/rng ports;內容以注入的 `ContextAssembler` 供給 | ✅ + 測試(跨模組級聯 openDungeonDoor→OpenMapDoor→真 map slice) |
 | 內容 adapter | `src/app/content/`:reader adapter(全 7 模組)+ resolver adapter(核心+§7.1 資料調校樣板)+ 真實跨模組 Query port(DungeonTeamPort/CombatLoadoutQuery;硬的 DungeonMapPort 等待) | ✅ + 測試(data-runtime 首批真實消費者) |
-| NewGameBootstrapper | `bootstrap.ts`:`createNewGame` 組出合法初始 State(玩家隊+隊長+站位),bootstrap cursor 鑄 ID | ✅ + 測試(**開機切片**:bootstrap→`rest`→提交→golden 重播,全走真引擎、只碰已實作模組) |
+| bring-up fixture | `bootstrap.ts`:`createBringUpFixture` 組出**最小可驅動** State(玩家隊+隊長+空成長檔+站位),bootstrap cursor 鑄 ID + 輸入驗證。**非**正式 §1.1 NewGameBootstrapper(缺 archetype 屬性派生、生命週期 Job、內容/城/archetype 驗證、diagnostics/route/phase——多卡在內容) | ✅ + 測試(bring-up 切片:bootstrap→`rest`→提交→**執行到期 Job**→golden 重播,只碰已實作模組) |
+| 授權 | `router.ts`:玩家命令 dispatch 前檢查 actorTeamId 擁有目標(全域 actorTeamId===playerTeamId;teamId/characterId/encounterId 目標須屬 actorTeam) | ✅ + 測試 |
 
 **驗證指令:**
 ```bash
