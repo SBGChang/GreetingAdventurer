@@ -8,6 +8,22 @@
 
 ---
 
+## 2026-08-12 — 複審回合 3 + 旅行「做到底」：Workflow 訂閱機制,旅行端到端接通
+
+複審回合 3 抓到我上一輪引入/未竟的 3 個 P1:①`runDueJob` 在交易**前** dequeue,拒絕的 Job 仍被消耗(破壞回滾)——改成**只在提交時消耗**,失效 Job 由 Handler 接受並 no-op(dungeon `npcDungeonDay` 從拒絕改 no-op);③戰鬥授權只驗 Encounter 屬玩家隊,沒驗 `actorId`/`allyId` 是玩家方——補 `side==='player'`;②旅行改「停下等 Workflow」方向對,但 composition **沒有** Workflow 驅動者,真實 Session 停在段落邊界,而單元測試手動扮演 Workflow **把斷線藏起來**。
+
+②我先誠實攤開(manifest/HANDOFF 註),然後**做到底**:建 composition 的 **Workflow 訂閱機制**——
+- kernel:`EventSubscriber.mutation` 改選填(Workflow 只送命令、不擁有 Slice);
+- manifest:`WORKFLOW_EVENT_SUBSCRIPTIONS_BY_TYPE` + `REGISTERED_WORKFLOW_IDS`,與模組訂閱分開驗;
+- router:`WORKFLOW_SUBSCRIBERS` 分派;
+- 旅行事件 Workflow:`TravelSegmentReached` → 讀隊伍 active plan → 送 `CompletePlayerTravelSegmentWithoutEvent`(第一版恆「無事件」;內容 event weights 後命中事件改送 `OpenPlayerTravelInteraction`)。
+
+`travel-integration.test` **以引擎自驅**證端到端:一支旅行中的隊伍只靠反覆 `runDueJob` —— dueCityTravel 發段落事件 → Workflow 送 CompleteSegment → team 推進 —— 恰 3 個 due-job 交易後抵達 CITY_B,**零手動 CompleteSegment**。這是旅行從「停住」到「真的通」。
+
+**教訓再一次**:綠燈的單元測試可能**在扮演本該由系統做的角色**——把整合斷線藏起來。端到端要讓**引擎自己驅動**,測試只擺輸入、驗輸出,不代跑中間步驟。
+
+---
+
 ## 2026-08-12 — 複審回合 2：開機切片的 5 個 P1（含「可玩」是過度宣稱的更正）
 
 上一則把 bring-up 切片說成「基本可以玩的架構」是**過度宣稱**——它是引擎迴圈的煙霧測試,不是可玩性。複審點出 6 個問題,前 5 個 P1 全修（commits `4746412`、`50f6668`、`e2617af`）:
