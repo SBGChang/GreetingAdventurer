@@ -120,6 +120,8 @@ export interface DungeonMapPort {
   // 動態內容。
   getContentKind(mapId: MapInstanceId, contentId: ContentInstanceId): MapContentKind | undefined;
   isContentAvailable(mapId: MapInstanceId, contentId: ContentInstanceId): boolean;
+  // 內容所在房間（互動前置：玩家必須人在該房；不存在回 undefined）。
+  getContentRoomId(mapId: MapInstanceId, contentId: ContentInstanceId): RoomId | undefined;
   getEncounterGroupId(
     mapId: MapInstanceId,
     contentId: ContentInstanceId,
@@ -482,6 +484,10 @@ export function interactDungeonContent(
   if (session === undefined || session.status !== 'exploring') return reject('dungeon.interactDungeonContent.preconditionFailed');
   if (session.pendingInteraction !== undefined) return reject('dungeon.interactDungeonContent.preconditionFailed');
   if (!ctx.map.isContentAvailable(session.mapId, cmd.contentId)) return reject('dungeon.interactDungeonContent.preconditionFailed');
+  // 內容必須就在玩家目前所在房間——只檢查「內容存在」會讓玩家隔空互動別房的內容（doc §8）。
+  if (ctx.map.getContentRoomId(session.mapId, cmd.contentId) !== session.currentRoomId) {
+    return reject('dungeon.interactDungeonContent.preconditionFailed');
+  }
 
   const kind = ctx.map.getContentKind(session.mapId, cmd.contentId);
   if (kind === undefined) return reject('dungeon.interactDungeonContent.preconditionFailed');

@@ -9,12 +9,18 @@
 //   - NPC Run：npcDungeonDay 依序列推進游標並在全清後進入 settling，三方結算後關閉（§9.3、§9.14、§9.22）。
 
 import type { AssetDistributionId, ModuleResult, NpcDungeonRunId } from '../../contracts/core';
-import type { MoveDungeonRoom, ConsumeDungeonGatheringAction, StartNpcDungeonRun } from '../../contracts/dungeon';
+import type {
+  MoveDungeonRoom,
+  ConsumeDungeonGatheringAction,
+  StartNpcDungeonRun,
+  InteractDungeonContent,
+} from '../../contracts/dungeon';
 
 import type { DungeonModuleState } from './state';
 import { createInitialDungeonState } from './state';
 import {
   moveDungeonRoom,
+  interactDungeonContent,
   consumeDungeonGatheringAction,
   startNpcDungeonRun,
   npcDungeonDay,
@@ -78,6 +84,34 @@ const cases: readonly Case[] = [
       // R2 揭露。
       const knowledge = Object.values(r.nextSlice.playerMapKnowledge)[0];
       assert(knowledge?.revealedRoomIds.includes(FIXTURE.roomMiddle) === true, 'R2 revealed');
+    },
+  },
+  {
+    name: 'interactDungeonContent rejects when the content is not in the player current room',
+    run: () => {
+      const ctx = createFixtureContext();
+      const s0 = createFixtureState(); // session 在入口房 R1；事件內容在 R2。
+      const cmd: InteractDungeonContent = { type: 'interactDungeonContent', contentId: FIXTURE.eventContentId };
+      const r = interactDungeonContent(s0, FIXTURE.teamId, cmd, ctx);
+      assert(!r.ok, 'interact from a different room must reject');
+    },
+  },
+  {
+    name: 'interactDungeonContent proceeds when the player stands in the content room',
+    run: () => {
+      const ctx = createFixtureContext();
+      // 先移到內容所在房 R2。
+      const moved = ok(
+        moveDungeonRoom(
+          createFixtureState(),
+          FIXTURE.teamId,
+          { type: 'moveDungeonRoom', targetRoomId: FIXTURE.roomMiddle },
+          ctx,
+        ),
+      );
+      const cmd: InteractDungeonContent = { type: 'interactDungeonContent', contentId: FIXTURE.eventContentId };
+      const r = interactDungeonContent(moved.nextSlice, FIXTURE.teamId, cmd, ctx);
+      assert(r.ok, 'interact from the content room proceeds');
     },
   },
   {

@@ -191,6 +191,9 @@ export function createFixtureMapPort(overrides?: Partial<DungeonMapPort>): Dunge
     getContentKind: (_mapId, contentId): MapContentKind | undefined =>
       contentId === FIXTURE.eventContentId ? 'mapEvent' : 'chest',
     isContentAvailable: () => true,
+    // fixture 內容都放在中間房 R2（互動前置：玩家須人在該房）。
+    getContentRoomId: (_mapId, contentId) =>
+      contentId === FIXTURE.eventContentId ? FIXTURE.roomMiddle : undefined,
     getEncounterGroupId: () => undefined,
     getContentEventInstance: (_mapId, _contentId) => ({
       instanceId: 'runtime:content-event-instance:evt-1' as never,
