@@ -887,23 +887,43 @@ export function handleUseCombatSkill(
   if (actor0 === undefined || actor0.state === 'dead') return result(state);
 
   const skillView = ctx.definitions.getSkillView(cmd.skillId);
+  const activeWeaponSetId = cmd.weaponSetId ?? actor0.activeWeaponSetId;
+
+  // 技能合法性（玩家角色）：必須**學會**且**配置在目前生效的武器組**——否則玩家可施放未學/未配置的
+  // 技能。敵方（monster）用自身招式，不受武器組配置限制。
+  if (actor0.source.kind === 'character') {
+    const characterId = actor0.source.characterId;
+    if (!ctx.progression.knows(characterId, cmd.skillId)) return result(state); // 未學會
+    const configuredSet = ctx.loadout
+      .getEquipmentLoadout(characterId)
+      .weaponSets.find((w) => w.weaponSetId === activeWeaponSetId);
+    if (configuredSet === undefined || !configuredSet.selectedSkillIds.includes(cmd.skillId)) {
+      return result(state); // 未配置在目前武器組
+    }
+  }
+
+  // 資源足夠才付：原本以 Math.max(0,…) 夾到零，等於資源不足也能全效施放。先算總成本、確認足夠再扣。
+  let healthCost = 0;
+  let manaCost = 0;
+  for (const cost of skillView.resourceCosts) {
+    if (cost.resource === 'health') healthCost += cost.amount;
+    else manaCost += cost.amount;
+  }
+  if (actor0.health < healthCost || actor0.mana < manaCost) return result(state); // 資源不足
 
   // 起始 Working（就地可變 combatants 副本）。
   let combatants: Record<CombatantId, CombatantState> = { ...encounter.combatants };
   let work: Working = { encounter, combatants, results: [] };
 
-  // 付資源成本。
+  // 付資源成本（已確認足夠，直接扣，不再夾零）。切換武器組：第一版只更新 activeWeaponSetId。
+  // TODO: 跨武器組切換延遲需先加 switchDelayRule 再執行技能；目標側別合法性待資料化 targeting resolver。
   const actor = getC(work, cmd.actorId);
-  let health = actor.health;
-  let mana = actor.mana;
-  for (const cost of skillView.resourceCosts) {
-    if (cost.resource === 'health') health = Math.max(0, health - cost.amount);
-    else mana = Math.max(0, mana - cost.amount);
-  }
-  // 切換武器組（同組不切裝；跨組先套切換延遲 — 第一版只更新 activeWeaponSetId）。
-  // TODO: 跨武器組切換延遲需先加 switchDelayRule 再執行技能。
-  const activeWeaponSetId = cmd.weaponSetId ?? actor.activeWeaponSetId;
-  combatants[cmd.actorId] = { ...actor, health, mana, activeWeaponSetId };
+  combatants[cmd.actorId] = {
+    ...actor,
+    health: actor.health - healthCost,
+    mana: actor.mana - manaCost,
+    activeWeaponSetId,
+  };
   work = { ...work, combatants };
 
   // 守勢 / 反擊：建立架勢消耗本次行動，不立即套用效果（§8.4）。

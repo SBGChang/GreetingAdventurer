@@ -20,6 +20,8 @@ import {
   fixtureStartCommand,
   SKILL_STRIKE,
   SKILL_COUNTER,
+  SKILL_HEAL,
+  SKILL_BITE,
   DELAY_STANDARD,
   EFF_COUNTER_DAMAGE,
   HERO_ID,
@@ -111,6 +113,65 @@ const cases: readonly Case[] = [
       assert(enemy.state === 'dead', `敵人應死亡（HP20 受 30 傷），實際 state=${enemy.state}`);
       assert(enemy.health === 0, 'HP 應夾到 0');
       assert(countEvent(eventsOf(res.outgoingMessages), 'CombatActionResolved') === 1, '應 emit 一次 CombatActionResolved');
+    },
+  },
+  {
+    name: '資源不足 → 技能不施放（no-op，不夾零）',
+    run: () => {
+      const ctx = makeCombatContext();
+      const started = handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx);
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const encounter = started.nextSlice.encounters[encounterId]!;
+      const actorId = encounter.currentActorId!;
+      // 把行動者法力壓到 SKILL_HEAL 成本（5）以下。
+      const drained: CombatState = {
+        ...started.nextSlice,
+        encounters: {
+          ...started.nextSlice.encounters,
+          [encounterId]: {
+            ...encounter,
+            combatants: {
+              ...encounter.combatants,
+              [actorId]: { ...encounter.combatants[actorId]!, mana: 3 },
+            },
+          },
+        },
+      };
+      const res = handleUseCombatSkill(
+        drained,
+        { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_HEAL, targetCombatantIds: [actorId] },
+        ctx,
+      );
+      const after = res.nextSlice.encounters[encounterId]!.combatants[actorId]!;
+      assert(after.mana === 3, `法力不足應原樣不動（不扣、不夾零），實際 mana=${after.mana}`);
+      assert(
+        countEvent(eventsOf(res.outgoingMessages), 'CombatActionResolved') === 0,
+        '資源不足不應 emit CombatActionResolved',
+      );
+    },
+  },
+  {
+    name: '技能未配置於目前武器組 → 不施放（no-op）',
+    run: () => {
+      const ctx = makeCombatContext();
+      const started = handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx);
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const encounter = started.nextSlice.encounters[encounterId]!;
+      const actorId = encounter.currentActorId!;
+      const enemyId = aliveEnemies(encounter)[0]!.combatantId;
+      const before = encounter.combatants[enemyId]!.health;
+      // SKILL_BITE 是敵方招式，不在玩家武器組 selectedSkillIds 內。
+      const res = handleUseCombatSkill(
+        started.nextSlice,
+        { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_BITE, targetCombatantIds: [enemyId] },
+        ctx,
+      );
+      const after = res.nextSlice.encounters[encounterId]!.combatants[enemyId]!;
+      assert(after.health === before, `未配置技能不應造成傷害，before=${before} after=${after.health}`);
+      assert(
+        countEvent(eventsOf(res.outgoingMessages), 'CombatActionResolved') === 0,
+        '未配置技能不應 emit CombatActionResolved',
+      );
     },
   },
   {
