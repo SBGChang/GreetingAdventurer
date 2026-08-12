@@ -68,10 +68,11 @@ export type InternalCommandHandler<TState> = (
 ) => HandlerAccepted | HandlerRejected;
 
 // Domain Event Subscriber：不可拒絕已發生事實（§7.2 rule 6），只回傳自己 slice 的變更與後續訊息。
+// mutation 可省略：Workflow 訂閱者只反應事件、送出後續 Internal Command，本身不擁有 Slice，故無 mutation。
 export type EventSubscriber<TState> = (
   event: unknown,
   ctx: HandlerContext<TState>,
-) => Readonly<{ mutation: SliceMutation; outgoing?: readonly TransactionMessageDraft[] }>;
+) => Readonly<{ mutation?: SliceMutation; outgoing?: readonly TransactionMessageDraft[] }>;
 
 // 全部路由與狀態併合皆注入；kernel 不 import 任何具體模組或 GameState。
 export type TransactionRunnerConfig<TState> = Readonly<{
@@ -164,9 +165,12 @@ export function runTransaction<TState, TResult extends JsonValue = JsonValue>(
       const collected: TransactionMessageDraft[] = [];
       for (const subscriber of subscribers) {
         const reaction = subscriber(draft.event, { workingState });
-        workingState = config.applyMutation(workingState, reaction.mutation);
-        notificationTally += notificationCount(reaction.mutation);
-        collect(reaction.mutation);
+        // Workflow 訂閱者可無 mutation（只送後續命令）；有 mutation 才併回 Working State。
+        if (reaction.mutation !== undefined) {
+          workingState = config.applyMutation(workingState, reaction.mutation);
+          notificationTally += notificationCount(reaction.mutation);
+          collect(reaction.mutation);
+        }
         if (reaction.outgoing && reaction.outgoing.length > 0) {
           collected.push(...reaction.outgoing);
         }

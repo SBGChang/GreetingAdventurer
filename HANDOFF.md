@@ -19,7 +19,8 @@
 | 引擎 Session | `session.ts`:§7.2 交易私有 runtime-id cursor(seed 自 `core.nextRuntimeSequence`、鑄 envelope+entity+job ID、提交寫回)、真實 kernel id/rng ports;內容以注入的 `ContextAssembler` 供給 | ✅ + 測試(跨模組級聯 openDungeonDoor→OpenMapDoor→真 map slice) |
 | 內容 adapter | `src/app/content/`:reader adapter(全 7 模組)+ resolver adapter(核心+§7.1 資料調校樣板)+ 真實跨模組 Query port(DungeonTeamPort/CombatLoadoutQuery;硬的 DungeonMapPort 等待) | ✅ + 測試(data-runtime 首批真實消費者) |
 | bring-up fixture | `bootstrap.ts`:`createBringUpFixture` 組出**最小可驅動** State(玩家隊+隊長+空成長檔+站位),bootstrap cursor 鑄 ID + 輸入驗證。**非**正式 §1.1 NewGameBootstrapper(缺 archetype 屬性派生、生命週期 Job、內容/城/archetype 驗證、diagnostics/route/phase——多卡在內容) | ✅ + 測試(bring-up 切片:bootstrap→`rest`→提交→**執行到期 Job**→golden 重播,只碰已實作模組) |
-| 授權 | `router.ts`:玩家命令 dispatch 前檢查 actorTeamId 擁有目標(全域 actorTeamId===playerTeamId;teamId/characterId/encounterId 目標須屬 actorTeam) | ✅ + 測試 |
+| 授權 | `router.ts`:玩家命令 dispatch 前檢查 actorTeamId 擁有目標(全域 actorTeamId===playerTeamId;teamId/characterId/encounterId 目標須屬 actorTeam;戰鬥員須 `side==='player'`) | ✅ + 測試 |
+| Workflow 訂閱 | Workflow 反應事件、送 Internal Command 但不擁有 Slice:kernel EventSubscriber `mutation` 改為選填;manifest `WORKFLOW_EVENT_SUBSCRIPTIONS_BY_TYPE` + router `WORKFLOW_SUBSCRIBERS` + registry 驗證。首個:**旅行事件 Workflow**(TravelSegmentReached→CompleteSegment) | ✅ + 測試(travel 端到端) |
 
 **驗證指令:**
 ```bash
@@ -62,9 +63,11 @@ npx tsx scripts/verify-modules.ts   # kernel + data-runtime + 7 模組 + composi
 | inventory | `ApplyQuestItemLifecycle`、`ReleaseExpiredQuestCargo`、`ConsumeBookForLearning`、`TransformCraftingItems`、`ConsumeCuisineIngredients`、`ConsumeCombatSequenceRetrySupply` |
 | team | `StartTimedCityAction`、`StartChildStudyPlan`、`CreateNpcTeam`、`OpenPlayerTravelInteraction`、`MarkPlayerTravelInteractionAwaitingCombat`、`CompletePlayerTravelInteraction`、`AssignNpcMemberFreeAction`、`RecordTeamWorkSettlementValue`、`AttachQuestTemporaryMember` |
 
-> `CompletePlayerTravelSegmentWithoutEvent` **已實作**(接上 router)——但它的正常送出者是**旅行事件
-> Workflow**,而該 Workflow 未實作、composition 沒有 `TravelSegmentReached` 訂閱者,故玩家旅行目前**停在
-> 段落邊界**(見 `manifest.ts` 的整合缺口註;`OpenPlayerTravelInteraction` 分支同樣待該 Workflow)。
+> `CompletePlayerTravelSegmentWithoutEvent` **已實作並端到端接通**:`dueCityTravel` 發 `TravelSegmentReached`
+> 後停下,composition 的**旅行事件 Workflow 訂閱者**(見 `manifest.ts` 的 `WORKFLOW_EVENT_SUBSCRIPTIONS_BY_TYPE`
+> + `router.ts` 的 `WORKFLOW_SUBSCRIBERS`)送 `CompletePlayerTravelSegmentWithoutEvent` 推進。旅行由引擎自驅
+> 至抵達(`travel-integration.test`)。**待內容**:event weights + resolver 命中事件時改送
+> `OpenPlayerTravelInteraction`(Pending 互動分支,尚未實作)。
 
 目前 PENDING 計數(對照 router 的 `PENDING_*`):**Game Command 11、Internal Command 15、Job 2**。另有 Game
 Command 未實作:inventory 的 `unequipItem`/`useItem`/`splitStack` 與四筆 encumbrance 指令、progression 的

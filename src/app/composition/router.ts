@@ -497,6 +497,39 @@ const EVENT_SUBSCRIBERS: Readonly<Record<string, SubscriberDispatch>> = {
 };
 
 // ──────────────────────────────────────────────────────────────────────────
+// Workflow 事件訂閱分派表（key = `${eventType}::${workflowId}`）
+//
+// Workflow 反應事件、送出後續 Internal Command，但不擁有 Slice（回傳無 mutation，只有 outgoing）。
+// ──────────────────────────────────────────────────────────────────────────
+
+type WorkflowSubscriberDispatch = (
+  event: unknown,
+  state: GameState,
+) => Readonly<{ outgoing: readonly TransactionMessageDraft[] }>;
+
+const WORKFLOW_SUBSCRIBERS: Readonly<Record<string, WorkflowSubscriberDispatch>> = {
+  // 旅行事件 Workflow：玩家抵達一段 → 決定是否觸發旅行事件。第一版（無內容 event weights）一律「無事件」
+  // → 送 CompletePlayerTravelSegmentWithoutEvent 推進下一段/抵達。之後接上 event-weight resolver 後，
+  // 命中事件改送 OpenPlayerTravelInteraction（開 Pending 互動）。這條讓玩家旅行整條端到端接通，而推進
+  // 仍走 Internal Command 的可攔截路徑（不是 dueCityTravel 自行推進）。
+  'TravelSegmentReached::travel-event-workflow': (e, s) => {
+    const event = e as { teamId: TeamId; segmentIndex: 0 | 1 | 2 };
+    const activePlanId = team.tryGetTeam(s.team, event.teamId)?.activePlanId;
+    if (activePlanId === undefined) return { outgoing: [] }; // 無 active plan：無事可推進
+    const draft: TransactionMessageDraft = {
+      targetModule: 'team' as ModuleId,
+      command: {
+        type: 'CompletePlayerTravelSegmentWithoutEvent',
+        teamId: event.teamId,
+        planId: activePlanId,
+        segmentIndex: event.segmentIndex,
+      },
+    };
+    return { outgoing: [draft] };
+  },
+};
+
+// ──────────────────────────────────────────────────────────────────────────
 // TransactionRunnerConfig 組裝
 // ──────────────────────────────────────────────────────────────────────────
 
@@ -542,17 +575,35 @@ export function createTransactionConfig(
 
     routeEventSubscribers: (draft): readonly EventSubscriber<GameState>[] => {
       const type = requireMessageType(draft.event, 'routeEventSubscribers');
-      const bindings =
+      const subscribers: EventSubscriber<GameState>[] = [];
+
+      // 模組訂閱者（固定順序先於 Workflow）。
+      const moduleBindings =
         manifest.eventSubscriptionsByType[type as keyof typeof manifest.eventSubscriptionsByType];
-      if (bindings === undefined || bindings.length === 0) return [];
-      return bindings.map((binding) => {
+      for (const binding of moduleBindings ?? []) {
         const key = `${binding.eventType}::${binding.subscriber}`;
         const dispatch = EVENT_SUBSCRIBERS[key];
         if (dispatch === undefined) {
           throw new Error(`routeEventSubscribers: Manifest 綁定 "${key}" 沒有對應的 Subscriber 實作`);
         }
-        return (event, ctx) => dispatch(event, ctx.workingState, contextFactory(ctx.workingState));
-      });
+        subscribers.push((event, ctx) => dispatch(event, ctx.workingState, contextFactory(ctx.workingState)));
+      }
+
+      // Workflow 訂閱者（反應事件、送出後續 Internal Command，無 mutation）。
+      const workflowBindings =
+        manifest.workflowEventSubscriptionsByType[
+          type as keyof typeof manifest.workflowEventSubscriptionsByType
+        ];
+      for (const binding of workflowBindings ?? []) {
+        const key = `${binding.eventType}::${binding.workflowId}`;
+        const dispatch = WORKFLOW_SUBSCRIBERS[key];
+        if (dispatch === undefined) {
+          throw new Error(`routeEventSubscribers: Workflow 綁定 "${key}" 沒有對應的 Subscriber 實作`);
+        }
+        subscribers.push((event, ctx) => dispatch(event, ctx.workingState));
+      }
+
+      return subscribers;
     },
   };
 }

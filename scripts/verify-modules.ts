@@ -15,6 +15,7 @@ import { runTests as moduleReaders } from '../src/app/content/readers.test';
 import { runTests as resolvers } from '../src/app/content/resolvers.test';
 import { runTests as crossModulePorts } from '../src/app/content/cross-module-ports.test';
 import { runTests as bootstrap } from '../src/app/composition/bootstrap.test';
+import { runTests as travelIntegration } from '../src/app/composition/travel-integration.test';
 // 地基層測試自 Wave A 起就存在，但從未被這支腳本跑過。
 import { runKernelTests } from '../src/kernel/kernel.test';
 import { runKernelTests as dataKernels, allKernelTestsPass } from '../src/data-runtime/kernels.test';
@@ -54,6 +55,8 @@ const throwing: ReadonlyArray<readonly [string, () => void]> = [
   ['cross-module-ports', crossModulePorts],
   // bootstrap：開機骨架端到端——NewGameBootstrapper → 玩家命令 → 提交 → golden 重播。
   ['bootstrap', bootstrap],
+  // travel：玩家旅行端到端——引擎自驅（旅行事件 Workflow 訂閱者送 CompleteSegment），非手動扮演。
+  ['travel-integration', travelIntegration],
 ];
 
 for (const [name, run] of throwing) {
@@ -67,6 +70,6 @@ if (!progressionPass()) throw new Error('progression tests failed');
 console.log('progression: pass');
 
 console.log(
-  'ALL TESTS PASS (kernel + data-runtime + 7 modules + composition + transaction wiring + engine session + content adapters + bootstrap)',
+  'ALL TESTS PASS (kernel + data-runtime + 7 modules + composition + transaction wiring + engine session + content adapters + bootstrap + travel workflow)',
 );
 console.log(`NOTE: 契約重複宣告尚餘 ${remainingDuplicateCount()} 筆待收斂（見 scripts/check-contract-duplicates.ts）`);
