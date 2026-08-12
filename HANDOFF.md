@@ -50,7 +50,8 @@ npx tsx scripts/verify-modules.ts   # kernel + data-runtime + 7 模組 + composi
 - **內容 ports(卡在內容)**:definition readers、resolvers(內嵌公式,§7.1 kernels + `params`)、跨模組 Query 的**真實** adapter(如 `DungeonMapPort`、combat formation 快照)、以及 world/derived-statistics 未實作模組供給的 `WorldQuery`/`TeamWorldReader`/carry-capacity。目前 Session 以注入的 `ContextAssembler` 供給,測試用 fixture 內容;換上真內容只換 Assembler,不動 Session。
 - **雲華 content pack(內容軌,見 §2 下的新任務)**:無任何 content-pack JSON;無任何 `ResolverRegistration`;各模組 `XxxDefinitionReader` 是手寫領域介面,要真接需寫 registry→窄化 reader→領域 reader 的 adapter。把 `docs/03_content/yunhua/yunhua_content.data.mjs`(含 `firstMapLayouts`/`firstMapConfigs`)轉成引擎 content pack JSON,對齊各 Definition Schema,並以 data-runtime `createDefinitionReader` / `createResolverRegistry` 建 reader/resolver。**這是全 vertical slice 的關鍵路徑,可平行發包(依 domain 切)。**
 - **NewGameBootstrapper**(§1.1)與**全 vertical slice**:bootstrap 新遊戲 → 腳本化跑「進城→下地城→一場戰鬥→結算→成長」→ golden 重播測試(同 seed+指令→同結果)。骨幹(Session)已就緒,卡在上面的內容 ports。
-- **引擎 Session 尚未涵蓋(刻意,已記於 `session.ts`)**:Internal Command / Event Draft 物化為帶 CommandId/EventId 的完整信封(Outbox/存檔平台需要,與 State 正確性無關);§7.1 `invocationRngContext` 完整推導(現為簡化版)。
+- **引擎 Session 尚未涵蓋**:Internal Command / Event Draft 物化為帶 CommandId/EventId 的完整信封(Outbox/存檔平台需要,與 State 正確性無關)。
+- **RNG 只完成一半(P2,§7.1)**:Root Command / Job 已由訊息 ID 派生**不同 stream**(跨交易不再恆得相同結果)。**仍待**:同一交易多次 `rngContextFor(tag)` 仍從 cursor 0(需 sub-stream 或串接 cursor);Event Subscriber 的 eventId+subscriptionId 子 stream;`TeamResolverPort` 等只回 boolean、無法回傳並串接 `nextRngCursor`(團隊離隊迴圈對每名成員重用同一 context);以「交易拒絕」表示 RNG 判定失敗會讓 CommandId 回滾、重試取得相同結果(判定失敗應以**接受 + 結果欄位**表示,不用拒絕)。
 
 ### 1b. Wave B 宣告但未實作的 Handler(整合時浮現的真實缺口)
 
@@ -59,9 +60,17 @@ npx tsx scripts/verify-modules.ts   # kernel + data-runtime + 7 模組 + composi
 | 模組 | 未實作的 Internal Command |
 |---|---|
 | inventory | `ApplyQuestItemLifecycle`、`ReleaseExpiredQuestCargo`、`ConsumeBookForLearning`、`TransformCraftingItems`、`ConsumeCuisineIngredients`、`ConsumeCombatSequenceRetrySupply` |
-| team | `StartTimedCityAction`、`StartChildStudyPlan`、`CreateNpcTeam`、`OpenPlayerTravelInteraction`、`CompletePlayerTravelSegmentWithoutEvent`、`MarkPlayerTravelInteractionAwaitingCombat`、`CompletePlayerTravelInteraction`、`AssignNpcMemberFreeAction`、`RecordTeamWorkSettlementValue`、`AttachQuestTemporaryMember` |
+| team | `StartTimedCityAction`、`StartChildStudyPlan`、`CreateNpcTeam`、`OpenPlayerTravelInteraction`、`MarkPlayerTravelInteractionAwaitingCombat`、`CompletePlayerTravelInteraction`、`AssignNpcMemberFreeAction`、`RecordTeamWorkSettlementValue`、`AttachQuestTemporaryMember` |
 
-另有 Game Command 未實作:inventory 的 `unequipItem`/`useItem`/`splitStack` 與四筆 encumbrance 指令、progression 的 `learnFromBook`/`startTeaching`、team 的 `chooseCityFreeAction`/`dismissMember`;Job 未實作:team 的 `freeActionDue`/`nonPlayerMemberCityFreeDayTick`。Subscriber 未實作:combat 全部 5 筆、team 全部 6 筆、dungeon 的 combat-sequence 相關 4 筆(這三組的 `subscriptionHandlerIds` 已清空以符合事實)。
+> `CompletePlayerTravelSegmentWithoutEvent` **已實作**(接上 router)——但它的正常送出者是**旅行事件
+> Workflow**,而該 Workflow 未實作、composition 沒有 `TravelSegmentReached` 訂閱者,故玩家旅行目前**停在
+> 段落邊界**(見 `manifest.ts` 的整合缺口註;`OpenPlayerTravelInteraction` 分支同樣待該 Workflow)。
+
+目前 PENDING 計數(對照 router 的 `PENDING_*`):**Game Command 11、Internal Command 15、Job 2**。另有 Game
+Command 未實作:inventory 的 `unequipItem`/`useItem`/`splitStack` 與四筆 encumbrance 指令、progression 的
+`learnFromBook`/`startTeaching`、team 的 `chooseCityFreeAction`/`dismissMember`;Job 未實作:team 的
+`freeActionDue`/`nonPlayerMemberCityFreeDayTick`。Subscriber 未實作:combat 全部 5 筆、team 6 筆、dungeon 的
+combat-sequence 相關 4 筆(這三組的 `subscriptionHandlerIds` 已清空以符合事實)。
 
 ### 2. 補齊其餘模組(可平行發包,一模組一 worker,寫自己 `src/modules/<name>/`,禁止再分包)
 economy、city、quest、social、crafting、distribution、world、npc-behavior,以及純服務 statistics / combat-power / gathering(後三者可能是無 State 純函式,放 `src/domain-services/`)。

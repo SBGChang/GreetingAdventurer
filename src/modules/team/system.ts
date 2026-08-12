@@ -944,9 +944,11 @@ export function handleCompletePlayerTravelSegmentWithoutEvent(
 ): TeamHandlerResult {
   const plan = tryGetPlan(state, cmd.planId);
   if (plan === undefined || plan.status !== 'active') return reject('team/no-active-travel-plan');
+  if (cmd.teamId !== plan.teamId) return reject('team/travel-team-mismatch');
   if (plan.kind !== 'cityTravel' || plan.payload.kind !== 'cityTravel') return reject('team/not-city-travel');
   const travel = plan.payload.travel;
   if (travel.kind !== 'playerTravel') return reject('team/not-player-travel');
+  // segmentIndex 必須對上目前所在段落——防重放/過期命令重複推進（Plan payload 的段落即狀態游標）。
   if (travel.segmentIndex !== cmd.segmentIndex) return reject('team/travel-segment-mismatch');
   const team = requireTeam(state, plan.teamId);
   const mode = ctx.definitions.getPlayerTravelMode(travel.modeId);

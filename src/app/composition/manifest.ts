@@ -57,6 +57,12 @@ function sub(eventType: GameDomainEventType, subscriber: string): EventSubscript
 //             CharacterDied / CharacterAvailabilityChanged）尚無 subscriber 實作
 //   - dungeon: combat-sequence 相關 4 筆需 combat-sequence 模組
 //   - team: QuestSettled / RouteAccessChanged 需 quest/world 模組
+//
+// ⚠️ 已知整合缺口（player travel）：team 的 `dueCityTravel` 只發 `TravelSegmentReached` 後停下,推進由
+// **旅行事件 Workflow** 決定（無事件→`CompletePlayerTravelSegmentWithoutEvent`;有事件→
+// `OpenPlayerTravelInteraction`）。該 Workflow 屬未實作的 Workflow Wave,composition 目前**沒有**
+// TravelSegmentReached 的驅動者,故真實 Session 的玩家旅行會**停在段落邊界**(active Plan、無下一個
+// Job、無 Pending)。team.test 手動扮演該 Workflow 驗 handler,但整條 end-to-end 旅行尚未接通。
 export const EVENT_SUBSCRIPTIONS_BY_TYPE: Readonly<
   Partial<Record<GameDomainEventType, readonly EventSubscription[]>>
 > = {
