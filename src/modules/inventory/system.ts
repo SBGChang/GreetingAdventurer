@@ -57,6 +57,9 @@ export type InventoryDeps = Readonly<{
   reader: ItemDefinitionReader;
   nextItemInstanceId: () => ItemInstanceId;
   nextEncumbranceResolutionId: () => EncumbranceResolutionId;
+  // 由核心 Runtime ID 產生器配發（每呼叫推進 core.nextRuntimeSequence）。建立 Loadout 時鑄三個武器組 ID，
+  // 不再以 `${characterId}:ws${i}` 偽造（違反「所有 Runtime ID 由核心產生器建立」）。
+  nextWeaponSetId: () => WeaponSetId;
   worldDay: WorldDay;
   // 超載評估輸入（由 team / derived-statistics 擁有，Inventory 只讀）。
   getTeamMembers: (teamId: TeamId) => readonly CharacterId[];
@@ -395,7 +398,7 @@ export function equipItem(
     return reject('inventory/non-weapon-must-not-target-weapon-set');
   }
 
-  const loadout = getOrCreateLoadout(state, cmd.characterId);
+  const loadout = getOrCreateLoadout(state, cmd.characterId, deps);
   // 雙手裝備以 occupiedSlots 同時占用主／副手（doc §282），不複製第二件 Item。
   const isTwoHanded = equip.occupiedSlots.length > 1;
 
@@ -519,7 +522,7 @@ export function configureWeaponSet(
   cmd: ConfigureWeaponSet,
   deps: InventoryDeps,
 ): InventoryHandlerResult {
-  const loadout = getOrCreateLoadout(state, cmd.characterId);
+  const loadout = getOrCreateLoadout(state, cmd.characterId, deps);
   const idx = loadout.weaponSets.findIndex((w) => w.weaponSetId === cmd.weaponSetId);
   if (idx < 0) return reject('inventory/unknown-weapon-set', { weaponSetId: String(cmd.weaponSetId) });
 
@@ -686,17 +689,20 @@ export function evaluateTeamEncumbrance(
 }
 
 // ── Loadout 輔助 ───────────────────────────────────────────────────────────
-function getOrCreateLoadout(state: InventoryState, characterId: CharacterId) {
+// 首次觸及某角色的 Loadout 時建立三個空武器組。武器組 ID 一律由核心產生器（deps.nextWeaponSetId）鑄，
+// 不再以字串偽造。註：這仍是「惰性建立」；正式的角色建立流程應在角色誕生時就鑄好 Loadout（見 HANDOFF），
+// 使 UI/命令能先查得武器組 ID 再引用——此處先把 ID 出處修正為核心產生器。
+function getOrCreateLoadout(state: InventoryState, characterId: CharacterId, deps: InventoryDeps) {
   const existing = state.equipmentLoadouts[characterId];
   if (existing) return existing;
-  const ws = (i: number): WeaponSetLoadout => ({
-    weaponSetId: `${characterId}:ws${i}` as WeaponSetId,
+  const ws = (): WeaponSetLoadout => ({
+    weaponSetId: deps.nextWeaponSetId(),
     selectedSkillIds: [undefined, undefined, undefined],
   });
   return {
     characterId,
     armorSlots: {} as Readonly<Record<EquipmentSlotId, ItemInstanceId | undefined>>,
-    weaponSets: [ws(0), ws(1), ws(2)] as readonly [WeaponSetLoadout, WeaponSetLoadout, WeaponSetLoadout],
+    weaponSets: [ws(), ws(), ws()] as readonly [WeaponSetLoadout, WeaponSetLoadout, WeaponSetLoadout],
     revision: 0,
   };
 }

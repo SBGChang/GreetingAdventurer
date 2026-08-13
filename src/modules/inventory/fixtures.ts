@@ -14,6 +14,7 @@ import type {
   ItemInstanceId,
   TeamId,
   UseDelayRuleId,
+  WeaponSetId,
   WorldDay,
 } from '../../contracts/core';
 import type {
@@ -26,7 +27,7 @@ import type {
   NonCombatUseRuleDefinition,
   UseDelayRuleDefinition,
 } from '../../contracts/inventory';
-import type { InventoryState, ItemInstance } from './state';
+import type { InventoryState, ItemInstance, WeaponSetLoadout } from './state';
 import type { InventoryDeps } from './system';
 
 // ── 固定 ID ────────────────────────────────────────────────────────────────
@@ -261,7 +262,21 @@ export function createFixtureState(): InventoryState {
       [FIXTURE.robeItemId]: bagItem(FIXTURE.robeItemId, FIXTURE.robeDefId),
       [FIXTURE.chestItemId]: bagItem(FIXTURE.chestItemId, FIXTURE.chestDefId),
     },
-    equipmentLoadouts: {},
+    // Loadout 於角色建立時就存在（正式流程；此處以固定 ID 預建，讓測試能以 `${characterId}:ws{i}` 引用）。
+    // 生產路徑的武器組 ID 由核心產生器鑄（getOrCreateLoadout(deps.nextWeaponSetId)），不再字串偽造。
+    equipmentLoadouts: {
+      [FIXTURE.characterId]: {
+        characterId: FIXTURE.characterId,
+        armorSlots: {},
+        weaponSets: [0, 1, 2].map(
+          (i): WeaponSetLoadout => ({
+            weaponSetId: `${FIXTURE.characterId}:ws${i}` as WeaponSetId,
+            selectedSkillIds: [undefined, undefined, undefined],
+          }),
+        ) as unknown as readonly [WeaponSetLoadout, WeaponSetLoadout, WeaponSetLoadout],
+        revision: 0,
+      },
+    },
     encumbranceResolutions: {},
   };
 }
@@ -270,11 +285,13 @@ export function createFixtureState(): InventoryState {
 export function createFixtureDeps(overrides?: Partial<InventoryDeps>): InventoryDeps {
   let itemCounter = 100;
   let resolutionCounter = 0;
+  let weaponSetCounter = 0;
   const base: InventoryDeps = {
     reader: createFixtureReader(),
     nextItemInstanceId: () => `runtime:item-instance:gen-${(itemCounter += 1)}` as ItemInstanceId,
     nextEncumbranceResolutionId: () =>
       `runtime:encumbrance-resolution:gen-${(resolutionCounter += 1)}` as EncumbranceResolutionId,
+    nextWeaponSetId: () => `runtime:weapon-set:gen-${(weaponSetCounter += 1)}` as WeaponSetId,
     worldDay: 1 as WorldDay,
     getTeamMembers: () => [FIXTURE.characterId],
     getCarryCapacity: (characterId): CarryCapacitySnapshot => ({

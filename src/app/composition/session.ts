@@ -49,6 +49,7 @@ import type {
   FreeActionId,
   InteractionId,
   ItemInstanceId,
+  WeaponSetId,
   JobId,
   MapInstanceId,
   MapRefreshLockId,
@@ -101,6 +102,7 @@ function mintId<TId extends RuntimeId>(
 export type InventoryIdAllocator = Readonly<{
   nextItemInstanceId: () => ItemInstanceId;
   nextEncumbranceResolutionId: () => EncumbranceResolutionId;
+  nextWeaponSetId: () => WeaponSetId;
 }>;
 export type DungeonIdAllocator = Readonly<{
   nextInteractionId: () => InteractionId;
@@ -134,6 +136,7 @@ function createIdPorts(worldSeed: Seed, holder: CursorHolder): EngineIdPorts {
     inventory: {
       nextItemInstanceId: next<ItemInstanceId>('item-instance'),
       nextEncumbranceResolutionId: next<EncumbranceResolutionId>('encumbrance-resolution'),
+      nextWeaponSetId: next<WeaponSetId>('weapon-set'),
     },
     map: {
       nextContentInstanceId: next<ContentInstanceId>('content-instance'),

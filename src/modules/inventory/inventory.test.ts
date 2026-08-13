@@ -534,6 +534,26 @@ const cases: readonly Case[] = [
       assert(loc?.kind === 'equipped' && loc.weaponSetId === WS1, '武器 location 應指向 WS1');
     },
   },
+  {
+    name: 'getOrCreateLoadout: 武器組 ID 由核心產生器配發（不再字串偽造 ${char}:ws{i}）',
+    run: () => {
+      const deps = createFixtureDeps();
+      // 清掉預建 Loadout，強制惰性建立走 deps.nextWeaponSetId（裝甲不需武器組 ID，可觸發建立）。
+      const noLoadout: InventoryState = { ...createFixtureState(), equipmentLoadouts: {} };
+      const r = equipItem(
+        noLoadout,
+        { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.robeItemId, slotId: FIXTURE.bodySlot },
+        deps,
+      );
+      const next = expectOk(r, 'equip-armor');
+      const sets = next.equipmentLoadouts[FIXTURE.characterId]!.weaponSets;
+      for (const ws of sets) {
+        const id = String(ws.weaponSetId);
+        assert(id.startsWith('runtime:weapon-set:'), `武器組 ID 應由核心產生器配發，實得 ${id}`);
+        assert(!id.includes(':ws'), `不得再是偽造的 \${char}:ws{i} 格式，實得 ${id}`);
+      }
+    },
+  },
 ];
 
 export type InventoryTestResult = Readonly<{ name: string; passed: boolean; error?: string }>;
