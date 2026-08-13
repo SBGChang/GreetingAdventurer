@@ -89,7 +89,9 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
     run: () => {
       const { state } = travelStartState();
       const job = Object.values(state.core.scheduler.jobsById)[0]!;
-      const result = runDueJob(state, job, assembler);
+      // 世界時鐘推進到該 Job 到期日再執行（真實引擎快轉就是這樣；runDueJob 會擋未到期，見 #2）。
+      const dueState = { ...state, core: { ...state.core, worldDay: job.dueDay } };
+      const result = runDueJob(dueState, job, assembler);
       assert(result.accepted, '段0 Job 交易應被接受');
       if (!result.accepted) return;
 
@@ -114,6 +116,8 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
         guard += 1;
         if (guard > 8) throw new Error('travel did not terminate');
         const job = Object.values(state.core.scheduler.jobsById)[0]!;
+        // 世界時鐘推進到 Job 到期日（引擎快轉語意）再執行。
+        state = { ...state, core: { ...state.core, worldDay: job.dueDay } };
         const result = runDueJob(state, job, assembler);
         assert(result.accepted, '每個旅行 Job 交易都應被接受');
         if (!result.accepted) return;

@@ -217,9 +217,9 @@ function commitCursor(state: GameState, cursor: RuntimeIdCursor): GameState {
   return { ...state, core: { ...state.core, nextRuntimeSequence: cursor } };
 }
 
-// Scheduler 於 Job 觸發時 dequeue 該 Job（一次性）。到期 Job 執行後不會自己留在佇列——否則快轉會不斷
-// 取得同一筆已到期工作。dequeue 在 Job 交易之前發生，故不論交易接受或拒絕，該 Job 都已消耗；交易若
-// 重排新 Job，走 applyScheduling 另配新 JobId。
+// Scheduler 於 Job 交易**成功提交**時才 dequeue（一次性；見 runDueJob）。拒絕則回滾、Job 留在佇列——
+// 失效 Job 由 Handler「接受並 no-op」而被消耗（見 dungeon npcDungeonDay），不會殘留重複觸發。交易若重排
+// 新 Job，走 applyScheduling 另配新 JobId。
 function dequeueJob(state: GameState, jobId: JobId): GameState {
   if (state.core.scheduler.jobsById[jobId] === undefined) return state;
   const jobsById: Record<JobId, GameScheduledJob> = { ...state.core.scheduler.jobsById };
@@ -325,6 +325,19 @@ export function runDueJob(
         code: 'engine/job-not-scheduled',
         sourceModule: 'core' as ModuleId,
         details: { jobId: String(job.jobId) },
+      },
+    };
+  }
+  // 尚未到期的 Job 不得執行：到期日在未來 → 不開交易、不推進 cursor。Scheduler 是「已排定」而非「已到期」，
+  // 呼叫者須自行判斷 dueDay；此處是最後防線，避免提前結算未來工作。
+  if ((authoritative.dueDay as unknown as number) > (state.core.worldDay as unknown as number)) {
+    return {
+      accepted: false,
+      state,
+      rejection: {
+        code: 'engine/job-not-due',
+        sourceModule: 'core' as ModuleId,
+        details: { jobId: String(job.jobId), dueDay: Number(authoritative.dueDay), worldDay: Number(state.core.worldDay) },
       },
     };
   }

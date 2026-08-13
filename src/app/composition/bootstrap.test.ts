@@ -132,7 +132,9 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
       const job = Object.values(afterRest.state.core.scheduler.jobsById)[0];
       assert(job !== undefined && job.type === 'teamPlanDue', '應有一個 teamPlanDue Job 可執行');
 
-      const afterJob = runDueJob(afterRest.state, job!, assembler);
+      // 時間前進到 Job 到期日才可執行（runDueJob 以 job-not-due 擋未到期，見 #2）。
+      const dueState: GameState = { ...afterRest.state, core: { ...afterRest.state.core, worldDay: job!.dueDay } };
+      const afterJob = runDueJob(dueState, job!, assembler);
       assert(afterJob.accepted, 'Job 交易應被接受');
       if (!afterJob.accepted) return;
 
@@ -184,7 +186,9 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
       if (!afterRest.accepted) return;
       const job = Object.values(afterRest.state.core.scheduler.jobsById)[0]!;
 
-      const afterJob = runDueJob(afterRest.state, job, assembler);
+      // 時間前進到到期日再執行（見 #2 job-not-due）。
+      const dueState: GameState = { ...afterRest.state, core: { ...afterRest.state.core, worldDay: job.dueDay } };
+      const afterJob = runDueJob(dueState, job, assembler);
       assert(afterJob.accepted, 'Job 首次執行應被接受並消耗');
       if (!afterJob.accepted) return;
       const seqAfter = afterJob.state.core.nextRuntimeSequence as unknown as number;
@@ -202,6 +206,37 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
         '重放被擋 → 不得推進 runtime 序號（根本未開交易）',
       );
       assert(replay.state === afterJob.state, '被擋時應原封回傳輸入狀態');
+    },
+  },
+  {
+    name: '#2(R5)：尚未到期的 Job 經 runDueJob → 不執行、拒絕 job-not-due、序號不變',
+    run: () => {
+      const g = createBringUpFixture(INPUT);
+      const jobId = 'runtime:job~future' as JobId;
+      const future = {
+        type: 'npcDungeonDay',
+        jobId,
+        dueDay: (g.state.core.worldDay as unknown as number) + 1, // 明日到期
+        ownerModule: 'dungeon' as ModuleId,
+        targetId: 'runtime:npc-dungeon-run:x' as NpcDungeonRunId,
+        payload: {},
+      } as unknown as GameScheduledJob;
+      const state: GameState = {
+        ...g.state,
+        core: { ...g.state.core, scheduler: { jobsById: { [jobId]: future }, revision: 1 as never } },
+      };
+      const seqBefore = state.core.nextRuntimeSequence as unknown as number;
+      const result = runDueJob(state, future, assembler);
+      assert(!result.accepted, '未到期 Job 不得執行');
+      if (result.accepted) return;
+      assert(
+        result.rejection.code === 'engine/job-not-due',
+        `拒絕碼應為 job-not-due（實得 ${result.rejection.code}）`,
+      );
+      assert(
+        (result.state.core.nextRuntimeSequence as unknown as number) === seqBefore,
+        '未到期被擋 → 不得推進 runtime 序號',
+      );
     },
   },
   {
