@@ -477,18 +477,17 @@ const cases: readonly Case[] = [
     },
   },
   {
-    name: 'configureWeaponSet: 單手劍不得放副手（副手只收盾）',
+    name: 'configureWeaponSet: 單手武器可放副手（雙持；GDD 允許同組混搭兩把武器）',
     run: () => {
       const deps = createFixtureDeps();
-      expectReject(
-        configureWeaponSet(
-          createFixtureState(),
-          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, offHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] },
-          deps,
-        ),
-        'inventory/illegal-hand',
-        'sword in off hand',
+      const r = configureWeaponSet(
+        createFixtureState(),
+        { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, offHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] },
+        deps,
       );
+      const next = expectOk(r, 'one-handed weapon in off hand (dual-wield)');
+      const loc = createInventoryQuery(next, deps.reader).getLocation(FIXTURE.swordItemId);
+      assert(loc?.kind === 'equipped' && loc.weaponSetId === WS0, '單手武器放副手應 equipped 於該組');
     },
   },
   {
@@ -529,6 +528,28 @@ const cases: readonly Case[] = [
       const ws0 = loadout.weaponSets.find((w) => w.weaponSetId === WS0)!;
       const ws1 = loadout.weaponSets.find((w) => w.weaponSetId === WS1)!;
       assert(ws0.mainHandItemId === undefined, '原組 WS0 不應再引用該武器（否則一件同時在兩組）');
+      assert(ws1.mainHandItemId === FIXTURE.swordItemId, '新組 WS1 應引用該武器');
+      const loc = createInventoryQuery(s2, deps.reader).getLocation(FIXTURE.swordItemId);
+      assert(loc?.kind === 'equipped' && loc.weaponSetId === WS1, '武器 location 應指向 WS1');
+    },
+  },
+  {
+    name: 'equipItem: 同一武器改裝到另一組 → 從原組移除（single-location；#4 補 equipItem 漏修）',
+    run: () => {
+      const deps = createFixtureDeps();
+      const WS1 = `${FIXTURE.characterId}:ws1` as WeaponSetId;
+      const s1 = expectOk(
+        equipItem(createFixtureState(), { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: WS0 }, deps),
+        'equip ws0',
+      );
+      const s2 = expectOk(
+        equipItem(s1, { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: WS1 }, deps),
+        'equip ws1',
+      );
+      const loadout = s2.equipmentLoadouts[FIXTURE.characterId]!;
+      const ws0 = loadout.weaponSets.find((w) => w.weaponSetId === WS0)!;
+      const ws1 = loadout.weaponSets.find((w) => w.weaponSetId === WS1)!;
+      assert(ws0.mainHandItemId === undefined, '原組 WS0 不應再引用該武器（equipItem 亦須跨組清除）');
       assert(ws1.mainHandItemId === FIXTURE.swordItemId, '新組 WS1 應引用該武器');
       const loc = createInventoryQuery(s2, deps.reader).getLocation(FIXTURE.swordItemId);
       assert(loc?.kind === 'equipped' && loc.weaponSetId === WS1, '武器 location 應指向 WS1');

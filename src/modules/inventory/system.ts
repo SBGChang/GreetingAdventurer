@@ -449,9 +449,21 @@ export function equipItem(
     }
 
     const updated: WeaponSetLoadout = { ...set, mainHandItemId: nextMain, offHandItemId: nextOff };
+    // 跨組唯一（single-location）：本次裝上的武器若被**其他**武器組引用，一併清掉——否則同一把武器會
+    // 同時掛在多組，只有 ItemLocation 指向最後一組（configureWeaponSet 已修，equipItem 先前漏修）。
+    const clearOther = (ws: WeaponSetLoadout): WeaponSetLoadout => {
+      const m = ws.mainHandItemId === cmd.itemId ? undefined : ws.mainHandItemId;
+      const o = ws.offHandItemId === cmd.itemId ? undefined : ws.offHandItemId;
+      return m === ws.mainHandItemId && o === ws.offHandItemId ? ws : { ...ws, mainHandItemId: m, offHandItemId: o };
+    };
+    const ws0 = loadout.weaponSets;
     nextLoadout = {
       ...loadout,
-      weaponSets: replaceWeaponSet(loadout.weaponSets, idx, updated),
+      weaponSets: [
+        idx === 0 ? updated : clearOther(ws0[0]),
+        idx === 1 ? updated : clearOther(ws0[1]),
+        idx === 2 ? updated : clearOther(ws0[2]),
+      ],
       revision: loadout.revision + 1,
     };
   } else {
@@ -554,12 +566,19 @@ export function configureWeaponSet(
   if ((mainTwoHanded || offTwoHanded) && cmd.mainHandItemId !== cmd.offHandItemId) {
     return reject('inventory/two-handed-must-occupy-both-hands');
   }
-  // 手部位置合法性（原本完全沒驗，故盾可放主手、單手劍可放副手）：主手須為武器；副手須為盾，或與主手
-  // 同一件的雙手武器。[限制] 單手武器的「雙持副手」需 slot→hand 訊號，資料模型未提供，故副手只收盾。
+  // 手部位置合法性：主手須為武器（盾/鎧甲/飾品不得放主手）。副手可為**盾**或**單手武器**（雙持——GDD
+  // 允許同組混搭兩把武器），或與主手同一件的雙手武器；不得放單獨的雙手武器（上面已擋）或鎧甲/飾品。
   if (mainEquip !== undefined && mainEquip.equipmentKind !== 'weapon') {
     return reject('inventory/illegal-hand', { hand: 'mainHand', kind: mainEquip.equipmentKind });
   }
-  if (offEquip !== undefined && cmd.offHandItemId !== cmd.mainHandItemId && offEquip.equipmentKind !== 'shield') {
+  const offOneHandedWeapon =
+    offEquip !== undefined && offEquip.equipmentKind === 'weapon' && offEquip.occupiedSlots.length === 1;
+  if (
+    offEquip !== undefined &&
+    cmd.offHandItemId !== cmd.mainHandItemId &&
+    offEquip.equipmentKind !== 'shield' &&
+    !offOneHandedWeapon
+  ) {
     return reject('inventory/illegal-hand', { hand: 'offHand', kind: offEquip.equipmentKind });
   }
 
