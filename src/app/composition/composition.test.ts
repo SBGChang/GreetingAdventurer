@@ -115,6 +115,26 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
     },
   },
   {
+    name: 'manifest 偵測得到 Workflow 的 startsFrom 沒有對應訂閱（#5 startsFrom 驗證）',
+    run: () => {
+      // 抽掉 TravelSegmentReached 訂閱 → 旅行事件 Workflow 的 startsFrom 就沒有對應訂閱了。
+      const withoutTravel = Object.fromEntries(
+        Object.entries(EXECUTION_ORDER_MANIFEST.eventSubscriptionsByType).filter(
+          ([eventType]) => eventType !== 'TravelSegmentReached',
+        ),
+      );
+      const broken = {
+        ...EXECUTION_ORDER_MANIFEST,
+        eventSubscriptionsByType: withoutTravel,
+      } as typeof EXECUTION_ORDER_MANIFEST;
+      const diagnostics = validateManifest(broken, ['teamPlanDue']);
+      assert(
+        diagnostics.some((d) => d.code === 'manifest.workflow.startsFromNotSubscribed'),
+        'startsFrom 無對應訂閱應被偵測',
+      );
+    },
+  },
+  {
     name: 'applyMutation 拒絕寫入 core',
     run: () => {
       let threw = false;

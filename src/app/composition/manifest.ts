@@ -6,7 +6,13 @@
 //
 // 順序完全由陣列位置決定：不得依 bundler、檔名、import 順序、subscriber 名稱或模組自填數字。
 
-import type { EventSubscriptionId, JobPhase, ModuleId } from '../../contracts/core';
+import type {
+  EventSubscriptionId,
+  JobPhase,
+  ModuleId,
+  WorkflowId,
+  MessageSourceId,
+} from '../../contracts/core';
 import type { GameDomainEventType } from './messages';
 import type { GameJobType } from './state';
 
@@ -29,22 +35,54 @@ export const JOB_TYPE_ORDER_BY_PHASE: Readonly<Record<JobPhase, readonly GameJob
 };
 
 // ──────────────────────────────────────────────────────────────────────────
-// 事件訂閱（§5.2）
+// Workflow 定義（§5.1）
+//
+// Workflow 反應事件、送出後續 Internal Command，但**不擁有 Slice**（其 EventSubscriber 無 mutation）。
+// 訂閱與模組**共用**下方唯一的 EVENT_SUBSCRIPTIONS_BY_TYPE（subscriber 為 ModuleId | WorkflowId），故
+// 「模組先或 Workflow 先」由該表陣列位置單一決定，不再拆成第二張真相。此處僅宣告 Workflow 身分與其
+// 起始事件（startsFrom），啟動驗證會確認 startsFrom 真的有對應訂閱。實際反應邏輯住在 app/workflows/。
+// ──────────────────────────────────────────────────────────────────────────
+
+// WorkflowId 用 core 的品牌型別（`workflow:${K}`）——不再本地重宣告一個不相容的型別。
+export const TRAVEL_EVENT_WORKFLOW = 'workflow:travel-event' as WorkflowId;
+
+export type WorkflowDefinition = Readonly<{
+  workflowId: WorkflowId;
+  // 此 Workflow 由哪個事件啟動；必須出現在 EVENT_SUBSCRIPTIONS_BY_TYPE 中該 workflowId 的訂閱裡。
+  startsFrom: GameDomainEventType;
+}>;
+
+export const REGISTERED_WORKFLOWS: readonly WorkflowDefinition[] = [
+  { workflowId: TRAVEL_EVENT_WORKFLOW, startsFrom: 'TravelSegmentReached' },
+];
+
+// ──────────────────────────────────────────────────────────────────────────
+// 事件訂閱（§5.2）——模組與 Workflow 共用的唯一有序表
 // ──────────────────────────────────────────────────────────────────────────
 
 // subscriptionId 由 Composition 作者指定、跨版本穩定，命名 `subscription.<eventType>.<subscriber>`。
 // 它不是 Runtime ID、不進存檔，也不得依陣列 index 或 import 順序動態生成。
 export type EventSubscription = Readonly<{
   eventType: GameDomainEventType;
-  subscriber: ModuleId;
+  // ModuleId 或 WorkflowId：兩者共用同一張有序表（§5.2 唯一真相）。是否為 Workflow 由 registry 成員
+  // 判定（router 以 dispatch 表歸屬區分；validateManifest 以 REGISTERED_WORKFLOWS 判定）。
+  subscriber: MessageSourceId;
   subscriptionId: EventSubscriptionId;
 }>;
 
-function sub(eventType: GameDomainEventType, subscriber: string): EventSubscription {
+function sub(eventType: GameDomainEventType, subscriberModule: string): EventSubscription {
   return {
     eventType,
-    subscriber: subscriber as ModuleId,
-    subscriptionId: `subscription.${eventType}.${subscriber}` as EventSubscriptionId,
+    subscriber: subscriberModule as ModuleId,
+    subscriptionId: `subscription.${eventType}.${subscriberModule}` as EventSubscriptionId,
+  };
+}
+
+function workflowSub(eventType: GameDomainEventType, workflowId: WorkflowId): EventSubscription {
+  return {
+    eventType,
+    subscriber: workflowId,
+    subscriptionId: `subscription.${eventType}.${String(workflowId)}` as EventSubscriptionId,
   };
 }
 
@@ -57,12 +95,6 @@ function sub(eventType: GameDomainEventType, subscriber: string): EventSubscript
 //             CharacterDied / CharacterAvailabilityChanged）尚無 subscriber 實作
 //   - dungeon: combat-sequence 相關 4 筆需 combat-sequence 模組
 //   - team: QuestSettled / RouteAccessChanged 需 quest/world 模組
-//
-// player travel 的推進由**旅行事件 Workflow** 決定,已接上(見下方 WORKFLOW_EVENT_SUBSCRIPTIONS_BY_TYPE
-// 的 `TravelSegmentReached`):team 的 `dueCityTravel` 只發 `TravelSegmentReached` 後停下,Workflow 訂閱者
-// 收到後（第一版無內容 event weights,一律「無事件」）送 `CompletePlayerTravelSegmentWithoutEvent` 推進。
-// 端到端已通(travel-integration.test 以引擎自驅驗至抵達)。**待內容**:event weights + resolver 命中事件時
-// 改送 `OpenPlayerTravelInteraction`(Pending 互動分支)。
 export const EVENT_SUBSCRIPTIONS_BY_TYPE: Readonly<
   Partial<Record<GameDomainEventType, readonly EventSubscription[]>>
 > = {
@@ -87,55 +119,23 @@ export const EVENT_SUBSCRIPTIONS_BY_TYPE: Readonly<
   // 能力上限改變 → character 夾住當前 HP/MP。
   ProgressionCapacityChanged: [sub('ProgressionCapacityChanged', 'character')],
   EquipmentChanged: [sub('EquipmentChanged', 'character')],
-};
 
-// ──────────────────────────────────────────────────────────────────────────
-// Workflow 事件訂閱（§5.2）
-//
-// Workflow 反應事件、送出後續 Internal Command，但**不擁有 Slice**（其 EventSubscriber 無 mutation）。
-// 與模組訂閱分開登記：模組訂閱由 registry 對 ModuleContract.subscriptionHandlerIds 交叉驗證；Workflow
-// 訂閱對 REGISTERED_WORKFLOW_IDS 驗證。subscriptionId 與模組訂閱共用全域唯一命名空間。
-// ──────────────────────────────────────────────────────────────────────────
-
-export type WorkflowId = string & { readonly __workflowBrand: 'workflow' };
-
-export type WorkflowEventSubscription = Readonly<{
-  eventType: GameDomainEventType;
-  workflowId: WorkflowId;
-  subscriptionId: EventSubscriptionId;
-}>;
-
-function workflowSub(eventType: GameDomainEventType, workflowId: WorkflowId): WorkflowEventSubscription {
-  return {
-    eventType,
-    workflowId,
-    subscriptionId: `subscription.${eventType}.${workflowId}` as EventSubscriptionId,
-  };
-}
-
-// 旅行事件 Workflow：玩家每抵達一段旅程 → 決定是否觸發旅行事件。
-export const TRAVEL_EVENT_WORKFLOW = 'travel-event-workflow' as WorkflowId;
-
-export const REGISTERED_WORKFLOW_IDS: ReadonlySet<WorkflowId> = new Set([TRAVEL_EVENT_WORKFLOW]);
-
-export const WORKFLOW_EVENT_SUBSCRIPTIONS_BY_TYPE: Readonly<
-  Partial<Record<GameDomainEventType, readonly WorkflowEventSubscription[]>>
-> = {
-  // TravelSegmentReached → 旅行事件 Workflow：無事件時送 CompletePlayerTravelSegmentWithoutEvent 推進;
-  // 有事件時（待內容 event weights + resolver）改送 OpenPlayerTravelInteraction。
+  // 玩家旅行推進由**旅行事件 Workflow** 決定（不是 dueCityTravel 自行推進）：team 發 TravelSegmentReached
+  // 後停下，此 Workflow 訂閱者收到 → 送 CompletePlayerTravelSegmentWithoutEvent 推進下一段/抵達。與模組
+  // 訂閱共用這張有序表，故若某事件同時有模組與 Workflow 訂閱，其先後由此處陣列位置單一決定（§5.2）。
+  // 端到端已通（travel-integration.test 以引擎自驅驗至抵達）。**待內容**：event weights + resolver 命中
+  // 事件時改送 OpenPlayerTravelInteraction（Pending 互動分支）。反應邏輯：app/workflows/player-travel-event。
   TravelSegmentReached: [workflowSub('TravelSegmentReached', TRAVEL_EVENT_WORKFLOW)],
 };
 
 export type ExecutionOrderManifest = Readonly<{
   jobTypeOrderByPhase: typeof JOB_TYPE_ORDER_BY_PHASE;
   eventSubscriptionsByType: typeof EVENT_SUBSCRIPTIONS_BY_TYPE;
-  workflowEventSubscriptionsByType: typeof WORKFLOW_EVENT_SUBSCRIPTIONS_BY_TYPE;
 }>;
 
 export const EXECUTION_ORDER_MANIFEST: ExecutionOrderManifest = {
   jobTypeOrderByPhase: JOB_TYPE_ORDER_BY_PHASE,
   eventSubscriptionsByType: EVENT_SUBSCRIPTIONS_BY_TYPE,
-  workflowEventSubscriptionsByType: WORKFLOW_EVENT_SUBSCRIPTIONS_BY_TYPE,
 };
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -144,8 +144,9 @@ export const EXECUTION_ORDER_MANIFEST: ExecutionOrderManifest = {
 
 export type ManifestDiagnostic = Readonly<{ code: string; detail: string }>;
 
-// 檢查：每個 Job Type 恰好出現一次且只屬一個 Phase；每個 subscriptionId 全域唯一；
-// 每筆 EventSubscription.eventType 等於所在 Record Key。
+// 檢查：每個 Job Type 恰好出現一次且只屬一個 Phase；每個 subscriptionId 全域唯一；每筆
+// EventSubscription.eventType 等於所在 Record Key；Workflow 訂閱者須已註冊；每個註冊 Workflow 的
+// startsFrom 真的有對應訂閱。
 export function validateManifest(
   manifest: ExecutionOrderManifest,
   registeredJobTypes: readonly GameJobType[],
@@ -183,7 +184,11 @@ export function validateManifest(
     }
   }
 
+  const registeredWorkflowIds = new Set<string>(REGISTERED_WORKFLOWS.map((w) => String(w.workflowId)));
   const seenSubscriptionIds = new Set<string>();
+  // 記錄每個 Workflow 實際訂閱了哪些 eventType（供 startsFrom 檢查）。
+  const workflowSubscribedEvents = new Map<string, Set<string>>();
+
   for (const [eventType, subs] of Object.entries(manifest.eventSubscriptionsByType)) {
     for (const s of subs ?? []) {
       if (s.eventType !== eventType) {
@@ -199,31 +204,31 @@ export function validateManifest(
         });
       }
       seenSubscriptionIds.add(s.subscriptionId);
+
+      const subscriberStr = String(s.subscriber);
+      if (registeredWorkflowIds.has(subscriberStr)) {
+        const events = workflowSubscribedEvents.get(subscriberStr) ?? new Set<string>();
+        events.add(String(s.eventType));
+        workflowSubscribedEvents.set(subscriberStr, events);
+      } else if (subscriberStr.startsWith('workflow:')) {
+        // 品牌前綴看似 Workflow，卻不在 REGISTERED_WORKFLOWS。
+        out.push({
+          code: 'manifest.subscription.unknownWorkflow',
+          detail: `subscription "${s.subscriptionId}" 指向未註冊的 Workflow "${subscriberStr}"`,
+        });
+      }
+      // 其餘視為模組訂閱：其 Handler 存在性由 registry 對 ModuleContract.subscriptionHandlerIds 交叉驗證。
     }
   }
 
-  // Workflow 訂閱：與模組訂閱共用 subscriptionId 全域唯一命名空間；workflowId 須已註冊。
-  for (const [eventType, subs] of Object.entries(manifest.workflowEventSubscriptionsByType)) {
-    for (const s of subs ?? []) {
-      if (s.eventType !== eventType) {
-        out.push({
-          code: 'manifest.workflowSubscription.eventTypeMismatch',
-          detail: `Workflow subscriptionId "${s.subscriptionId}" 的 eventType 是 "${s.eventType}"，但掛在 key "${eventType}" 下`,
-        });
-      }
-      if (!REGISTERED_WORKFLOW_IDS.has(s.workflowId)) {
-        out.push({
-          code: 'manifest.workflowSubscription.unknownWorkflow',
-          detail: `subscription "${s.subscriptionId}" 指向未註冊的 Workflow "${s.workflowId}"`,
-        });
-      }
-      if (seenSubscriptionIds.has(s.subscriptionId)) {
-        out.push({
-          code: 'manifest.subscription.duplicateId',
-          detail: `subscriptionId "${s.subscriptionId}" 重複`,
-        });
-      }
-      seenSubscriptionIds.add(s.subscriptionId);
+  // 每個註冊 Workflow 的 startsFrom 必須真的有對應訂閱（否則永遠不會被啟動）。
+  for (const w of REGISTERED_WORKFLOWS) {
+    const events = workflowSubscribedEvents.get(String(w.workflowId));
+    if (events === undefined || !events.has(String(w.startsFrom))) {
+      out.push({
+        code: 'manifest.workflow.startsFromNotSubscribed',
+        detail: `Workflow "${String(w.workflowId)}" 宣告 startsFrom "${w.startsFrom}"，但未在 eventSubscriptionsByType 找到對應訂閱`,
+      });
     }
   }
 

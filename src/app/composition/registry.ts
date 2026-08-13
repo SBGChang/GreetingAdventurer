@@ -23,6 +23,7 @@ import {
 } from './messages';
 import {
   EXECUTION_ORDER_MANIFEST,
+  REGISTERED_WORKFLOWS,
   validateManifest,
   type ExecutionOrderManifest,
   type ManifestDiagnostic,
@@ -125,13 +126,16 @@ export function validateRegistry(
   }
   out.push(...validateManifest(manifest, [...jobOwners.keys()] as GameJobType[]));
 
-  // 6) Manifest 的每筆 subscription 都必須對應到該模組真的註冊過的 subscriptionHandlerId。
+  // 6) Manifest 的每筆**模組**訂閱都必須對應到該模組真的註冊過的 subscriptionHandlerId。Workflow 訂閱者
+  //    不是模組（其註冊與 startsFrom 由 validateManifest 檢查），故在此模組交叉驗證中跳過。
+  const workflowIds = new Set<string>(REGISTERED_WORKFLOWS.map((w) => String(w.workflowId)));
   const declaredSubscriptionIds = new Map<string, Set<string>>();
   for (const c of contracts) {
     declaredSubscriptionIds.set(c.id, new Set(c.subscriptionHandlerIds as readonly string[]));
   }
   for (const subs of Object.values(manifest.eventSubscriptionsByType)) {
     for (const s of subs ?? []) {
+      if (workflowIds.has(String(s.subscriber))) continue; // Workflow 訂閱者跳過模組交叉驗證
       const declared = declaredSubscriptionIds.get(s.subscriber);
       if (declared === undefined) {
         out.push({
