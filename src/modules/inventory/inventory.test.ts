@@ -461,6 +461,79 @@ const cases: readonly Case[] = [
       );
     },
   },
+  {
+    name: 'configureWeaponSet: 盾牌不得放主手（手部位置合法性）',
+    run: () => {
+      const deps = createFixtureDeps();
+      expectReject(
+        configureWeaponSet(
+          createFixtureState(),
+          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, mainHandItemId: FIXTURE.shieldItemId, selectedSkillIds: [undefined, undefined, undefined] },
+          deps,
+        ),
+        'inventory/illegal-hand',
+        'shield in main hand',
+      );
+    },
+  },
+  {
+    name: 'configureWeaponSet: 單手劍不得放副手（副手只收盾）',
+    run: () => {
+      const deps = createFixtureDeps();
+      expectReject(
+        configureWeaponSet(
+          createFixtureState(),
+          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, offHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] },
+          deps,
+        ),
+        'inventory/illegal-hand',
+        'sword in off hand',
+      );
+    },
+  },
+  {
+    name: 'configureWeaponSet: 合法配置同步 ItemLocation（劍→主手、盾→副手皆 equipped，不留在背包）',
+    run: () => {
+      const deps = createFixtureDeps();
+      const r = configureWeaponSet(
+        createFixtureState(),
+        { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, mainHandItemId: FIXTURE.swordItemId, offHandItemId: FIXTURE.shieldItemId, selectedSkillIds: [undefined, undefined, undefined] },
+        deps,
+      );
+      const next = expectOk(r, 'configure');
+      const q = createInventoryQuery(next, deps.reader);
+      const swordLoc = q.getLocation(FIXTURE.swordItemId);
+      const shieldLoc = q.getLocation(FIXTURE.shieldItemId);
+      assert(swordLoc?.kind === 'equipped', '劍 location 應 equipped');
+      assert(shieldLoc?.kind === 'equipped', '盾 location 應 equipped（不得仍在背包）');
+      assert(
+        swordLoc?.kind === 'equipped' && swordLoc.weaponSetId === WS0,
+        '劍 equipped location 應帶 WS0',
+      );
+    },
+  },
+  {
+    name: 'configureWeaponSet: 同一件武器改配到另一組 → 從原組移除（single-location 不變量）',
+    run: () => {
+      const deps = createFixtureDeps();
+      const WS1 = `${FIXTURE.characterId}:ws1` as WeaponSetId;
+      const s1 = expectOk(
+        configureWeaponSet(createFixtureState(), { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, mainHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] }, deps),
+        'ws0',
+      );
+      const s2 = expectOk(
+        configureWeaponSet(s1, { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS1, mainHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] }, deps),
+        'ws1',
+      );
+      const loadout = s2.equipmentLoadouts[FIXTURE.characterId]!;
+      const ws0 = loadout.weaponSets.find((w) => w.weaponSetId === WS0)!;
+      const ws1 = loadout.weaponSets.find((w) => w.weaponSetId === WS1)!;
+      assert(ws0.mainHandItemId === undefined, '原組 WS0 不應再引用該武器（否則一件同時在兩組）');
+      assert(ws1.mainHandItemId === FIXTURE.swordItemId, '新組 WS1 應引用該武器');
+      const loc = createInventoryQuery(s2, deps.reader).getLocation(FIXTURE.swordItemId);
+      assert(loc?.kind === 'equipped' && loc.weaponSetId === WS1, '武器 location 應指向 WS1');
+    },
+  },
 ];
 
 export type InventoryTestResult = Readonly<{ name: string; passed: boolean; error?: string }>;
