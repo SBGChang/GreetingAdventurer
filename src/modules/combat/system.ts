@@ -870,6 +870,31 @@ function finishTurn(
   return result(upsertEncounter(state, encounter), messages);
 }
 
+// 解析合法目標集合（不信任 UI 傳入的 targetCombatantIds）：去重 → 存在且未死 → 依 actionKind 篩側別。
+// attack 只能作用敵方、support 只能作用己方；cast/guard/perform 的側別由技能語意決定，此處不強制。
+// [限制] 資料化 targeting resolver（targetResolverId：範圍/形狀/距離/人數上限）與 activationHand/
+// weaponRequirementIds 尚未接（見 handleUseCombatSkill 註）；此處先保證**結構不變量**（去重、存活、
+// 側別），杜絕本輪複審實測的「攻擊點到我方隊友受傷」與「同一目標 ID 重複命中」。
+function legalTargetsFor(
+  encounter: CombatEncounter,
+  actorSide: 'player' | 'enemy',
+  actionKind: CombatActionKind,
+  requested: readonly CombatantId[],
+): CombatantId[] {
+  const seen = new Set<string>();
+  const out: CombatantId[] = [];
+  for (const id of requested) {
+    if (seen.has(id as string)) continue; // 去重：同一目標只計一次
+    seen.add(id as string);
+    const c = encounter.combatants[id];
+    if (c === undefined || c.state === 'dead') continue; // 不存在／已死不可為目標
+    if (actionKind === 'attack' && c.side === actorSide) continue; // 攻擊不得作用己方
+    if (actionKind === 'support' && c.side !== actorSide) continue; // 支援不得作用敵方
+    out.push(id);
+  }
+  return out;
+}
+
 // ──────────────────────────────────────────────────────────────────────────
 // §5.2 useCombatSkill（真實主路）
 // ──────────────────────────────────────────────────────────────────────────
@@ -911,12 +936,21 @@ export function handleUseCombatSkill(
   }
   if (actor0.health < healthCost || actor0.mana < manaCost) return result(state); // 資源不足
 
+  // 合法目標集合（去重 + 存活 + 側別）——不信任 UI。attack/support 指定了目標卻**全數不合法**（如以攻擊
+  // 點選我方隊友），整個行動 no-op：不付代價、不空耗回合。guard/cast/perform 不受此空集門檻限制。
+  const legalTargets = legalTargetsFor(encounter, actor0.side, skillView.actionKind, cmd.targetCombatantIds);
+  const consumesTargets = skillView.actionKind === 'attack' || skillView.actionKind === 'support';
+  if (consumesTargets && cmd.targetCombatantIds.length > 0 && legalTargets.length === 0) {
+    return result(state);
+  }
+
   // 起始 Working（就地可變 combatants 副本）。
   let combatants: Record<CombatantId, CombatantState> = { ...encounter.combatants };
   let work: Working = { encounter, combatants, results: [] };
 
   // 付資源成本（已確認足夠，直接扣，不再夾零）。切換武器組：第一版只更新 activeWeaponSetId。
-  // TODO: 跨武器組切換延遲需先加 switchDelayRule 再執行技能；目標側別合法性待資料化 targeting resolver。
+  // TODO: 跨武器組切換延遲需先加 switchDelayRule；activationHand／weaponRequirementIds 尚未驗證
+  // （需 fixture 於武器組實裝武器 + 武器→需求資料）；資料化 targeting resolver（範圍/形狀/人數）待接。
   const actor = getC(work, cmd.actorId);
   combatants[cmd.actorId] = {
     ...actor,
@@ -938,13 +972,13 @@ export function handleUseCombatSkill(
     work.combatants[cmd.actorId] = { ...a, counterStance: stance };
     work.results.push({ kind: 'counterStanceEstablished', actorId: String(cmd.actorId) });
   } else {
-    // 套用技能所有效果到合法目標。
+    // 套用技能所有效果到**合法目標集合**（已去重 + 篩側別，非 UI 原樣）。
     for (const effectId of skillView.effectIds) {
       const effect = ctx.definitions.getCombatEffect(effectId);
-      work = applyEffect(work, effect, cmd.actorId, cmd.skillId, cmd.targetCombatantIds, ctx);
+      work = applyEffect(work, effect, cmd.actorId, cmd.skillId, legalTargets, ctx);
     }
     // 反擊反應鏈（攻擊命中持架勢者）。
-    work = resolveCounters(work, cmd.actorId, skillView.actionKind, cmd.targetCombatantIds, ctx);
+    work = resolveCounters(work, cmd.actorId, skillView.actionKind, legalTargets, ctx);
   }
 
   // 記錄無傷害支援技能成功使用次數（§8.6；每角色每技能上限 3）。

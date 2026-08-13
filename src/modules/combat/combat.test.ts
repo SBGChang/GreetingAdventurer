@@ -175,6 +175,71 @@ const cases: readonly Case[] = [
     },
   },
   {
+    name: '攻擊技能不得作用我方隊友（側別過濾 → 全數不合法 → no-op）',
+    run: () => {
+      const ctx = makeCombatContext();
+      const started = handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx);
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const enc = started.nextSlice.encounters[encounterId]!;
+      const actorId = enc.currentActorId!;
+      // 找一個「非行動者」的玩家方 combatant 當隊友。
+      const ally = Object.values(enc.combatants).find(
+        (c) => c.side === 'player' && c.combatantId !== actorId,
+      );
+      assert(ally !== undefined, 'fixture 應有另一名玩家方 combatant 作為隊友');
+      const allyId = ally!.combatantId;
+      const before = ally!.health;
+      const res = handleUseCombatSkill(
+        started.nextSlice,
+        { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_STRIKE, targetCombatantIds: [allyId] },
+        ctx,
+      );
+      const after = res.nextSlice.encounters[encounterId]!.combatants[allyId]!;
+      assert(after.health === before, `攻擊我方隊友應被側別過濾（no-op），before=${before} after=${after.health}`);
+      assert(
+        countEvent(eventsOf(res.outgoingMessages), 'CombatActionResolved') === 0,
+        '目標全數不合法 → 不應行動',
+      );
+    },
+  },
+  {
+    name: '重複目標 ID 只命中一次（去重；單次與重複造成相同傷害）',
+    run: () => {
+      const ctx = makeCombatContext();
+      const started = handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx);
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const enc0 = started.nextSlice.encounters[encounterId]!;
+      const actorId = enc0.currentActorId!;
+      const enemyId = aliveEnemies(enc0)[0]!.combatantId;
+      // 把敵人 HP 拉高，讓單次傷害殺不死，才能區分「一次」與「兩次」命中。
+      const boosted: CombatState = {
+        ...started.nextSlice,
+        encounters: {
+          ...started.nextSlice.encounters,
+          [encounterId]: {
+            ...enc0,
+            combatants: {
+              ...enc0.combatants,
+              [enemyId]: { ...enc0.combatants[enemyId]!, health: 500, maxHealth: 500 },
+            },
+          },
+        },
+      };
+      const cmd = (targets: readonly CombatantId[]) => ({
+        type: 'useCombatSkill' as const,
+        encounterId,
+        actorId,
+        skillId: SKILL_STRIKE,
+        targetCombatantIds: targets,
+      });
+      const once = handleUseCombatSkill(boosted, cmd([enemyId]), ctx).nextSlice.encounters[encounterId]!.combatants[enemyId]!;
+      const twice = handleUseCombatSkill(boosted, cmd([enemyId, enemyId]), ctx).nextSlice.encounters[encounterId]!.combatants[enemyId]!;
+      assert(once.health < 500, '單次攻擊應造成傷害');
+      assert(once.health > 0, '單次攻擊不應直接擊殺（否則無法區分重複命中）');
+      assert(twice.health === once.health, `重複目標不得雙重命中：單次剩 ${once.health}、重複剩 ${twice.health}`);
+    },
+  },
+  {
     name: '全滅 → resolved + 恰一次 MasteryEarned',
     run: () => {
       const ctx = makeCombatContext();
