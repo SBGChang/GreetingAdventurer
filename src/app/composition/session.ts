@@ -30,6 +30,7 @@ import type {
   RngStreamId,
   RuntimeEntityKind,
   RuntimeId,
+  ModuleId,
   RuntimeIdCursor,
   Seed,
   TransactionId,
@@ -309,6 +310,21 @@ export function runDueJob(
   job: GameScheduledJob,
   assembler: ContextAssembler,
 ): GameStepResult {
+  // 以 jobId 從**目前** Scheduler 取權威 Job，並用它（非呼叫者傳入的快照）執行。呼叫者常持有同日到期
+  // 快照，但前一筆交易可能已取消／消耗其中某筆；若照舊快照重跑，NPC 地牢、刷新等 Job 會被重複結算。
+  // 不在佇列（已完成或被取消）→ 不開交易、不推進 cursor，回傳原封狀態。
+  const authoritative = state.core.scheduler.jobsById[job.jobId];
+  if (authoritative === undefined) {
+    return {
+      accepted: false,
+      state,
+      rejection: {
+        code: 'engine/job-not-scheduled',
+        sourceModule: 'core' as ModuleId,
+        details: { jobId: String(job.jobId) },
+      },
+    };
+  }
   const worldSeed = state.core.worldSeed as Seed;
   const holder: CursorHolder = { cursor: state.core.nextRuntimeSequence };
   const transactionId = mintId<TransactionId>(worldSeed, holder, 'transaction');
@@ -319,8 +335,8 @@ export function runDueJob(
     worldSeed,
     holder,
     transactionId,
-    job.jobId as string,
-    (cf) => routeJob(job, cf),
+    authoritative.jobId as string,
+    (cf) => routeJob(authoritative, cf),
     assembler,
   );
   // Job 於交易**成功提交**時才消耗（Scheduler dequeue）；拒絕則原始 State 完全不變（Job 留著，

@@ -176,6 +176,35 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
     },
   },
   {
+    name: '#1(R4)：已消耗的 Job 再次 runDueJob → 不開交易、拒絕、序號不變（不得重放結算）',
+    run: () => {
+      const g = createBringUpFixture(INPUT);
+      const afterRest = runGameCommand(g.state, restRequest(g.playerTeamId), assembler);
+      assert(afterRest.accepted, 'rest 應被接受');
+      if (!afterRest.accepted) return;
+      const job = Object.values(afterRest.state.core.scheduler.jobsById)[0]!;
+
+      const afterJob = runDueJob(afterRest.state, job, assembler);
+      assert(afterJob.accepted, 'Job 首次執行應被接受並消耗');
+      if (!afterJob.accepted) return;
+      const seqAfter = afterJob.state.core.nextRuntimeSequence as unknown as number;
+
+      // 拿同一筆（已被消耗的）Job 快照，對「消耗後」的狀態再跑一次。
+      const replay = runDueJob(afterJob.state, job, assembler);
+      assert(!replay.accepted, '已不在 Scheduler 的 Job 不得再次執行');
+      if (replay.accepted) return;
+      assert(
+        replay.rejection.code === 'engine/job-not-scheduled',
+        `拒絕碼應為 job-not-scheduled（實得 ${replay.rejection.code}）`,
+      );
+      assert(
+        (replay.state.core.nextRuntimeSequence as unknown as number) === seqAfter,
+        '重放被擋 → 不得推進 runtime 序號（根本未開交易）',
+      );
+      assert(replay.state === afterJob.state, '被擋時應原封回傳輸入狀態');
+    },
+  },
+  {
     name: '授權（#4）：以非玩家隊的 actorTeamId 下命令 → 拒絕，且不動任何 Slice',
     run: () => {
       const g = createBringUpFixture(INPUT);
