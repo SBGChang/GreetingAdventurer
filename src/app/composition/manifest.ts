@@ -13,7 +13,7 @@ import type {
   WorkflowId,
   MessageSourceId,
 } from '../../contracts/core';
-import type { GameDomainEventType } from './messages';
+import type { GameCommandType, GameDomainEventType, GameInternalCommandType } from './messages';
 import type { GameJobType } from './state';
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -46,14 +46,44 @@ export const JOB_TYPE_ORDER_BY_PHASE: Readonly<Record<JobPhase, readonly GameJob
 // WorkflowId 用 core 的品牌型別（`workflow:${K}`）——不再本地重宣告一個不相容的型別。
 export const TRAVEL_EVENT_WORKFLOW = 'workflow:travel-event' as WorkflowId;
 
+// 12_engine_runtime.md §「WorkflowDefinition」：startsFrom 是四種正式訊息中已註冊的 Game Command /
+// Scheduled Job / Domain Event（不能是任意 DTO）；steps 每步是一個有明確模組 handler 的 Internal Command，
+// 帶 required/optional 與 onAccepted/onRejected 轉移。
+export type WorkflowTransition =
+  | Readonly<{ kind: 'next'; stepIndex: number }>
+  | Readonly<{ kind: 'complete' }>
+  | Readonly<{ kind: 'reject'; code: string }>;
+
+export type WorkflowStepDefinition = Readonly<{
+  internalCommandType: GameInternalCommandType;
+  requirement: 'required' | 'optional';
+  onAccepted: WorkflowTransition;
+  onRejected: WorkflowTransition;
+}>;
+
 export type WorkflowDefinition = Readonly<{
   workflowId: WorkflowId;
-  // 此 Workflow 由哪個事件啟動；必須出現在 EVENT_SUBSCRIPTIONS_BY_TYPE 中該 workflowId 的訂閱裡。
-  startsFrom: GameDomainEventType;
+  // 啟動訊息；若為 Domain Event，必須出現在 EVENT_SUBSCRIPTIONS_BY_TYPE 中該 workflowId 的訂閱裡（且只此一種）。
+  startsFrom: GameCommandType | GameJobType | GameDomainEventType;
+  steps: readonly WorkflowStepDefinition[];
 }>;
 
 export const REGISTERED_WORKFLOWS: readonly WorkflowDefinition[] = [
-  { workflowId: TRAVEL_EVENT_WORKFLOW, startsFrom: 'TravelSegmentReached' },
+  {
+    workflowId: TRAVEL_EVENT_WORKFLOW,
+    startsFrom: 'TravelSegmentReached',
+    // 第一版：抵達一段 → 送一個 required Internal Command 推進，之後結束。接上 event-weight resolver 後，
+    // 命中事件會改走 OpenPlayerTravelInteraction 分支（屆時擴充為多步）。onRejected 也結束（plan 已變等
+    // 情況 no-op，不擋整條旅行）。
+    steps: [
+      {
+        internalCommandType: 'CompletePlayerTravelSegmentWithoutEvent',
+        requirement: 'required',
+        onAccepted: { kind: 'complete' },
+        onRejected: { kind: 'complete' },
+      },
+    ],
+  },
 ];
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -221,7 +251,8 @@ export function validateManifest(
     }
   }
 
-  // 每個註冊 Workflow 的 startsFrom 必須真的有對應訂閱（否則永遠不會被啟動）。
+  // 每個註冊 Workflow：startsFrom 必須有對應訂閱（否則永不啟動），且**只能**訂閱 startsFrom 一種事件——
+  // Workflow 由單一 startsFrom 啟動，對其他事件的反應是 steps（Internal Command），不是額外事件訂閱。
   for (const w of REGISTERED_WORKFLOWS) {
     const events = workflowSubscribedEvents.get(String(w.workflowId));
     if (events === undefined || !events.has(String(w.startsFrom))) {
@@ -229,6 +260,14 @@ export function validateManifest(
         code: 'manifest.workflow.startsFromNotSubscribed',
         detail: `Workflow "${String(w.workflowId)}" 宣告 startsFrom "${w.startsFrom}"，但未在 eventSubscriptionsByType 找到對應訂閱`,
       });
+    }
+    for (const ev of events ?? []) {
+      if (ev !== String(w.startsFrom)) {
+        out.push({
+          code: 'manifest.workflow.extraSubscription',
+          detail: `Workflow "${String(w.workflowId)}" 額外訂閱了非 startsFrom 的事件 "${ev}"（startsFrom="${String(w.startsFrom)}"）；跨事件反應應為 steps 而非訂閱`,
+        });
+      }
     }
   }
 

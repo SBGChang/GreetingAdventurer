@@ -8,12 +8,12 @@
 // 自足式：無外部框架、無 node/DOM 全域。
 
 import { validateRegistry, MODULE_CONTRACTS } from './registry';
-import { EXECUTION_ORDER_MANIFEST, validateManifest } from './manifest';
+import { EXECUTION_ORDER_MANIFEST, validateManifest, TRAVEL_EVENT_WORKFLOW } from './manifest';
 import { GAME_COMMAND_ENTRY, WORKFLOW_ENTRY, INTERNAL_COMMAND_OWNER } from './messages';
 import { applyMutation, createEmptyGameState, IMPLEMENTED_SLICES, SLICE_OWNER } from './state';
 import type { GameState } from './state';
 import { createTeamState } from '../../modules/team/public';
-import type { TeamId } from '../../contracts/core';
+import type { TeamId, EventSubscriptionId } from '../../contracts/core';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -131,6 +131,29 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
       assert(
         diagnostics.some((d) => d.code === 'manifest.workflow.startsFromNotSubscribed'),
         'startsFrom 無對應訂閱應被偵測',
+      );
+    },
+  },
+  {
+    name: 'manifest 偵測得到 Workflow 訂閱了非 startsFrom 的額外事件（#8）',
+    run: () => {
+      // 讓旅行 Workflow 額外訂閱 TravelCompleted（非其 startsFrom=TravelSegmentReached）。
+      const extra = {
+        eventType: 'TravelCompleted' as const,
+        subscriber: TRAVEL_EVENT_WORKFLOW,
+        subscriptionId: 'subscription.TravelCompleted.workflow:travel-event' as EventSubscriptionId,
+      };
+      const broken = {
+        ...EXECUTION_ORDER_MANIFEST,
+        eventSubscriptionsByType: {
+          ...EXECUTION_ORDER_MANIFEST.eventSubscriptionsByType,
+          TravelCompleted: [extra],
+        },
+      } as typeof EXECUTION_ORDER_MANIFEST;
+      const diagnostics = validateManifest(broken, ['teamPlanDue']);
+      assert(
+        diagnostics.some((d) => d.code === 'manifest.workflow.extraSubscription'),
+        'Workflow 訂閱非 startsFrom 事件應被偵測',
       );
     },
   },
