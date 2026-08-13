@@ -336,6 +336,25 @@ const cases: readonly Case[] = [
     },
   },
   {
+    name: 'recruit 跨城（來源隊在別城）→ 拒絕 not-in-same-city（硬條件，非擲骰）',
+    run: () => {
+      const base = fixtureTeamState();
+      const s0: TeamState = {
+        ...base,
+        teams: {
+          ...base.teams,
+          [NPC_TEAM_ID]: { ...base.teams[NPC_TEAM_ID]!, location: { kind: 'city', cityId: CITY_B } },
+        },
+      };
+      const ctx = makeContext();
+      const r = handleRecruitTavernAdventurer(s0, { type: 'recruitTavernAdventurer', targetCharacterId: NPC_LEADER_ID }, ctx);
+      assert(
+        !r.ok && r.rejection.code === 'team/not-in-same-city',
+        `跨城招募應拒絕 not-in-same-city（實得 ${r.ok ? 'ok' : r.rejection.code}）`,
+      );
+    },
+  },
+  {
     name: 'recruit multi-member team member rejected as alreadyInTeam',
     run: () => {
       // 建立含 NPC_LEADER 的 2 人隊。

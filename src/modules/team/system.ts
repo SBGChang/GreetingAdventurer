@@ -541,6 +541,13 @@ export function handleRecruitTavernAdventurer(
   if (sourceTeam.memberIds.length !== 1 || sourceTeam.leaderId !== target) {
     return reject('team/already-in-team');
   }
+  // 硬條件：同城才可招募（酒館冒險者在玩家**目前所在城**）。旅行中或跨城一律拒絕——這是資格判定，不是
+  // 擲骰結果，故用 reject。[仍缺（見 HANDOFF）] 酒館可見性（該 NPC 是否真的在此城酒館出現）需 city/content。
+  const playerLoc = playerTeam.location;
+  const targetLoc = sourceTeam.location;
+  if (playerLoc.kind !== 'city' || targetLoc.kind !== 'city' || playerLoc.cityId !== targetLoc.cityId) {
+    return reject('team/not-in-same-city');
+  }
 
   // 只有 Resolver 擲骰成功才轉移成員；失敗不得改動任何成員或資產。單次抽取，nextCursor 不需再串接
   // （本調用 stream 一次性；招募與離隊結算分屬不同調用/tag）。
