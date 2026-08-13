@@ -17,11 +17,13 @@ import {
 import {
   makeCombatContext,
   makeEncounter,
+  stubProgressionQuery,
   fixtureStartCommand,
   SKILL_STRIKE,
   SKILL_COUNTER,
   SKILL_HEAL,
   SKILL_BITE,
+  SKILL_CAST_DAMAGE,
   DELAY_STANDARD,
   EFF_COUNTER_DAMAGE,
   HERO_ID,
@@ -29,7 +31,7 @@ import {
   WEAPON_SET_A,
 } from './fixtures';
 import { localCell } from './state';
-import type { Revision } from '../../contracts/core';
+import type { Revision, SkillDefinitionId } from '../../contracts/core';
 import type { ApplyCombatCondition } from '../../contracts/character';
 
 // ── 迷你斷言工具 ─────────────────────────────────────────────────────────
@@ -237,6 +239,56 @@ const cases: readonly Case[] = [
       assert(once.health < 500, '單次攻擊應造成傷害');
       assert(once.health > 0, '單次攻擊不應直接擊殺（否則無法區分重複命中）');
       assert(twice.health === once.health, `重複目標不得雙重命中：單次剩 ${once.health}、重複剩 ${twice.health}`);
+    },
+  },
+  {
+    name: '側別由效果推定而非 actionKind：cast 傷害技能不得作用同側（把傷害標成 cast 也擋得住）',
+    run: () => {
+      const ctx = makeCombatContext();
+      const enc = {
+        ...makeEncounter([
+          { combatantId: 'p1', side: 'player', health: 100 },
+          { combatantId: 'm1', side: 'enemy', health: 100 },
+          { combatantId: 'm2', side: 'enemy', health: 80 },
+        ]),
+        currentActorId: 'm1' as CombatantId,
+      };
+      const state = upsertEncounter(createInitialCombatState(), enc);
+      const cast = (targetId: string) => ({
+        type: 'useCombatSkill' as const,
+        encounterId: enc.encounterId,
+        actorId: 'm1' as CombatantId,
+        skillId: SKILL_CAST_DAMAGE,
+        targetCombatantIds: [targetId as CombatantId],
+      });
+      // m1（enemy）以 cast 傷害點自己人 m2（同 enemy 側）→ 依效果篩側別 → no-op、m2 不受傷。
+      const sameSide = handleUseCombatSkill(state, cast('m2'), ctx).nextSlice.encounters[enc.encounterId]!.combatants['m2' as CombatantId]!;
+      assert(sameSide.health === 80, `cast 傷害不得作用同側（應維持 80，實得 ${sameSide.health}）`);
+      // 對照：點敵方 p1 應正常造成傷害（證明 no-op 是側別、不是技能壞了）。
+      const oppSide = handleUseCombatSkill(state, cast('p1'), ctx).nextSlice.encounters[enc.encounterId]!.combatants['p1' as CombatantId]!;
+      assert(oppSide.health < 100, `cast 傷害對敵方應生效（實得 ${oppSide.health}）`);
+    },
+  },
+  {
+    name: '#6：未學/偽造技能於 knows() 即擋下，不得先呼叫 getSkillView（不崩潰）',
+    run: () => {
+      const BOGUS = 'skill-bogus-not-a-def' as SkillDefinitionId;
+      // 真實 progression：偽造/未學技能 knows() 回 false。fixture getSkillView 對未知 id 會 throw，
+      // 故舊順序（先 getSkillView）會崩；新順序 knows() 先擋 → no-op。
+      const ctx = makeCombatContext({
+        progression: { ...stubProgressionQuery(), knows: (_c, skillId) => skillId !== BOGUS },
+      });
+      const started = handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx);
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const enc = started.nextSlice.encounters[encounterId]!;
+      const actorId = enc.currentActorId!;
+      const enemyId = aliveEnemies(enc)[0]!.combatantId;
+      const res = handleUseCombatSkill(
+        started.nextSlice,
+        { type: 'useCombatSkill', encounterId, actorId, skillId: BOGUS, targetCombatantIds: [enemyId] },
+        ctx,
+      );
+      assert(res.nextSlice === started.nextSlice, '未學技能應於 knows() no-op，未達 getSkillView（不崩潰）');
     },
   },
   {

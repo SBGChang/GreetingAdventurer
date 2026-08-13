@@ -102,6 +102,8 @@ export const SKILL_STRIKE = 'skill-strike' as SkillDefinitionId;
 export const SKILL_COUNTER = 'skill-counter' as SkillDefinitionId;
 export const SKILL_HEAL = 'skill-heal' as SkillDefinitionId;
 export const SKILL_BITE = 'skill-bite' as SkillDefinitionId;
+// actionKind='cast' 但帶 dealDamage 效果——用來證明側別由**效果**推定，非 actionKind（不能靠標成 cast 繞過）。
+export const SKILL_CAST_DAMAGE = 'skill-cast-damage' as SkillDefinitionId;
 
 export const EFF_DAMAGE = 'eff-damage' as CombatEffectDefinitionId;
 export const EFF_COUNTER_DAMAGE = 'eff-counter-damage' as CombatEffectDefinitionId;
@@ -206,11 +208,27 @@ function skillBite(): CombatSkillDefinitionView {
   };
 }
 
+function skillCastDamage(): CombatSkillDefinitionView {
+  return {
+    skillId: SKILL_CAST_DAMAGE,
+    activationHand: 'handless',
+    weaponRequirementIds: [],
+    actionKind: 'cast', // 標成 cast，但效果是 dealDamage —— 側別須由效果推定
+    masteryExperienceMode: 'damage',
+    techniqueIds: [],
+    targeting: { targetResolverId: 'res-target-single' as ResolverId },
+    actionDelayRuleId: DELAY_STANDARD,
+    effectIds: [EFF_MONSTER_DAMAGE],
+    resourceCosts: [],
+  };
+}
+
 const SKILL_VIEWS: Readonly<Record<string, CombatSkillDefinitionView>> = {
   [SKILL_STRIKE]: skillStrike(),
   [SKILL_COUNTER]: skillCounter(),
   [SKILL_HEAL]: skillHeal(),
   [SKILL_BITE]: skillBite(),
+  [SKILL_CAST_DAMAGE]: skillCastDamage(),
 };
 
 // ── Effects ─────────────────────────────────────────────────────────────

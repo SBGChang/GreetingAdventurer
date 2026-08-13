@@ -565,13 +565,15 @@ function applyEffect(
   const combatants = work.combatants;
   const results = work.results;
   const op = effect.operation;
+  const actorSide = combatants[actorId]?.side; // 逐效果側別守門的基準（下方 dealDamage/heal）
 
   switch (op.kind) {
     case 'dealDamage': {
       const rule = ctx.definitions.getDamageRule(op.damageRuleId);
       for (const targetId of targetIds) {
         const target = combatants[targetId];
-        if (target === undefined || target.state === 'dead') continue;
+        // 傷害**永不**作用己方——即使技能被標成 cast/perform 繞過清單層側別篩，這裡是最終不變量。
+        if (target === undefined || target.state === 'dead' || target.side === actorSide) continue;
         const amount = Math.max(
           0,
           Math.round(
@@ -605,7 +607,8 @@ function applyEffect(
       const rule = ctx.definitions.getHealRule(op.healRuleId);
       for (const targetId of targetIds) {
         const target = combatants[targetId];
-        if (target === undefined || target.state === 'dead') continue;
+        // 治療**永不**作用敵方（最終不變量，與清單層側別篩互為保險）。
+        if (target === undefined || target.state === 'dead' || target.side !== actorSide) continue;
         const amount = Math.max(
           0,
           Math.round(
@@ -870,15 +873,15 @@ function finishTurn(
   return result(upsertEncounter(state, encounter), messages);
 }
 
-// 解析合法目標集合（不信任 UI 傳入的 targetCombatantIds）：去重 → 存在且未死 → 依 actionKind 篩側別。
-// attack 只能作用敵方、support 只能作用己方；cast/guard/perform 的側別由技能語意決定，此處不強制。
-// [限制] 資料化 targeting resolver（targetResolverId：範圍/形狀/距離/人數上限）與 activationHand/
-// weaponRequirementIds 尚未接（見 handleUseCombatSkill 註）；此處先保證**結構不變量**（去重、存活、
-// 側別），杜絕本輪複審實測的「攻擊點到我方隊友受傷」與「同一目標 ID 重複命中」。
+// 解析合法目標集合（不信任 UI 傳入的 targetCombatantIds）：去重 → 存在且未死 → 依 requiredSide 篩側別。
+// requiredSide 由呼叫端從**效果**推定（dealDamage→'enemy'、heal→'ally'、其餘 undefined），不靠 actionKind，
+// 故把傷害技能標成 cast/perform 也擋得住。[限制] 資料化 targeting resolver（範圍/形狀/距離/人數上限）與
+// activationHand/weaponRequirementIds 尚未接（見 handleUseCombatSkill 註）；此處保證結構不變量（去重、存活、
+// 側別），杜絕「攻擊/施法點到我方隊友受傷」與「同一目標 ID 重複命中」。
 function legalTargetsFor(
   encounter: CombatEncounter,
   actorSide: 'player' | 'enemy',
-  actionKind: CombatActionKind,
+  requiredSide: 'enemy' | 'ally' | undefined,
   requested: readonly CombatantId[],
 ): CombatantId[] {
   const seen = new Set<string>();
@@ -888,8 +891,8 @@ function legalTargetsFor(
     seen.add(id as string);
     const c = encounter.combatants[id];
     if (c === undefined || c.state === 'dead') continue; // 不存在／已死不可為目標
-    if (actionKind === 'attack' && c.side === actorSide) continue; // 攻擊不得作用己方
-    if (actionKind === 'support' && c.side !== actorSide) continue; // 支援不得作用敵方
+    if (requiredSide === 'enemy' && c.side === actorSide) continue; // 攻擊性不得作用己方
+    if (requiredSide === 'ally' && c.side !== actorSide) continue; // 支援性不得作用敵方
     out.push(id);
   }
   return out;
@@ -911,14 +914,14 @@ export function handleUseCombatSkill(
   const actor0 = encounter.combatants[cmd.actorId];
   if (actor0 === undefined || actor0.state === 'dead') return result(state);
 
-  const skillView = ctx.definitions.getSkillView(cmd.skillId);
   const activeWeaponSetId = cmd.weaponSetId ?? actor0.activeWeaponSetId;
 
-  // 技能合法性（玩家角色）：必須**學會**且**配置在目前生效的武器組**——否則玩家可施放未學/未配置的
-  // 技能。敵方（monster）用自身招式，不受武器組配置限制。
+  // 技能合法性（玩家角色）：必須**學會**且**配置在目前生效的武器組**。這一關必須在取 SkillView **之前**：
+  // configureWeaponSet 尚未經技能驗證 Workflow（見 messages.ts），可能把不存在的技能 ID 寫入武器組;若先
+  // getSkillView 會直接拋錯。knows() 對偽造/未學技能回 false，於此擋下。敵方（monster）用自身招式，不受限。
   if (actor0.source.kind === 'character') {
     const characterId = actor0.source.characterId;
-    if (!ctx.progression.knows(characterId, cmd.skillId)) return result(state); // 未學會
+    if (!ctx.progression.knows(characterId, cmd.skillId)) return result(state); // 未學會/偽造 → 擋
     const configuredSet = ctx.loadout
       .getEquipmentLoadout(characterId)
       .weaponSets.find((w) => w.weaponSetId === activeWeaponSetId);
@@ -926,6 +929,8 @@ export function handleUseCombatSkill(
       return result(state); // 未配置在目前武器組
     }
   }
+
+  const skillView = ctx.definitions.getSkillView(cmd.skillId);
 
   // 資源足夠才付：原本以 Math.max(0,…) 夾到零，等於資源不足也能全效施放。先算總成本、確認足夠再扣。
   let healthCost = 0;
@@ -936,11 +941,18 @@ export function handleUseCombatSkill(
   }
   if (actor0.health < healthCost || actor0.mana < manaCost) return result(state); // 資源不足
 
-  // 合法目標集合（去重 + 存活 + 側別）——不信任 UI。attack/support 指定了目標卻**全數不合法**（如以攻擊
-  // 點選我方隊友），整個行動 no-op：不付代價、不空耗回合。guard/cast/perform 不受此空集門檻限制。
-  const legalTargets = legalTargetsFor(encounter, actor0.side, skillView.actionKind, cmd.targetCombatantIds);
-  const consumesTargets = skillView.actionKind === 'attack' || skillView.actionKind === 'support';
-  if (consumesTargets && cmd.targetCombatantIds.length > 0 && legalTargets.length === 0) {
+  // 依**效果**推定敵意（不靠 actionKind——否則把傷害技能標成 cast/perform 就能繞過側別、打到我方）：
+  // 任一 dealDamage → 攻擊性（目標須敵方）；否則任一 heal → 支援性（目標須己方）；其餘（adjustCtb/interrupt
+  // 等）側別待資料化 targeting resolver，此處不強制。指定了目標卻**全數不合法** → no-op（不付代價、不空耗）。
+  // applyEffect 另有逐效果側別守門（dealDamage 不作用己方、heal 不作用敵方），兩者互為保險。
+  const opKinds = skillView.effectIds.map((id) => ctx.definitions.getCombatEffect(id).operation.kind);
+  const requiredSide: 'enemy' | 'ally' | undefined = opKinds.includes('dealDamage')
+    ? 'enemy'
+    : opKinds.includes('heal')
+      ? 'ally'
+      : undefined;
+  const legalTargets = legalTargetsFor(encounter, actor0.side, requiredSide, cmd.targetCombatantIds);
+  if (requiredSide !== undefined && cmd.targetCombatantIds.length > 0 && legalTargets.length === 0) {
     return result(state);
   }
 
