@@ -10,7 +10,16 @@
 //   * 繼承：選定合法候選 → PlayerSuccessorSelected 並改 Leader；不合法被拒。
 //   * 舊 Plan Job 因 revision 不符安全跳過。
 
-import type { JobId, WorldDay, Revision, DomainEventDraft } from '../../contracts/core';
+import type {
+  JobId,
+  WorldDay,
+  Revision,
+  DomainEventDraft,
+  CharacterId,
+  Seed,
+  RngStreamId,
+  RngCursor,
+} from '../../contracts/core';
 import type {
   TeamPlanDueJob,
   StartNpcTeamPlanPayload,
@@ -38,6 +47,7 @@ import {
   fixtureTeamState,
   makeContext,
   stubResolverPort,
+  rngStepBool,
   PLAYER_TEAM_ID,
   NPC_TEAM_ID,
   PLAYER_LEADER_ID,
@@ -294,7 +304,9 @@ const cases: readonly Case[] = [
     name: 'recruit failure (resolver rolls false) leaves all state unchanged',
     run: () => {
       const s0 = fixtureTeamState();
-      const ctx = makeContext({ resolvers: stubResolverPort({ resolveRecruitmentSuccess: () => false }) });
+      const ctx = makeContext({
+        resolvers: stubResolverPort({ resolveRecruitmentSuccess: ({ rngContext }) => rngStepBool(false, rngContext) }),
+      });
       const r = handleRecruitTavernAdventurer(s0, { type: 'recruitTavernAdventurer', targetCharacterId: NPC_LEADER_ID }, ctx);
       assert(!r.ok && r.rejection.code === 'team/recruitment-failed', `recruitment-failed (got ${r.ok ? 'ok' : r.rejection.code})`);
     },
@@ -326,7 +338,10 @@ const cases: readonly Case[] = [
       const s0 = fixtureTeamState(worldDay);
       const ctx = makeContext({
         worldDay,
-        resolvers: stubResolverPort({ resolveMemberDeparture: ({ memberId }) => memberId === PLAYER_MEMBER_ID }),
+        resolvers: stubResolverPort({
+          resolveMemberDeparture: ({ memberId, rngContext }) =>
+            rngStepBool(memberId === PLAYER_MEMBER_ID, rngContext),
+        }),
       });
       const r = ok(handleBeginCityFreePeriod(s0, ctx));
       const player = r.result.nextSlice.teams[PLAYER_TEAM_ID]!;
@@ -338,6 +353,54 @@ const cases: readonly Case[] = [
       assert(spawned !== undefined && spawned.leaderId === PLAYER_MEMBER_ID && spawned.memberIds.length === 1, 'spawned team is single-member led by departer');
       // cityFree plan established.
       assert(player.activePlanId !== undefined, 'cityFree plan created');
+    },
+  },
+  {
+    name: 'retention: 離隊迴圈逐名串接游標（cursor 0,1 不重用 → 同機率不再恆同結果）',
+    run: () => {
+      const worldDay = 20000 as WorldDay;
+      const companion2 = 'char-companion-2' as CharacterId;
+      const base = fixtureTeamState(worldDay);
+      const playerTeam = base.teams[PLAYER_TEAM_ID]!;
+      const retention = base.memberRetention[PLAYER_TEAM_ID]!;
+      // 兩名非隊長成員皆滿 60 日 → 兩次擲骰。
+      const s0: TeamState = {
+        ...base,
+        teams: {
+          ...base.teams,
+          [PLAYER_TEAM_ID]: { ...playerTeam, memberIds: [...playerTeam.memberIds, companion2] },
+        },
+        memberRetention: {
+          ...base.memberRetention,
+          [PLAYER_TEAM_ID]: {
+            ...retention,
+            memberJoinedOnDay: {
+              ...retention.memberJoinedOnDay,
+              [companion2]: (worldDay - 200) as WorldDay,
+            },
+          },
+        },
+      };
+      // 記錄每名成員擲骰時看到的 cursor（皆回留隊，只驗游標串接，不擾動狀態）。
+      const seen: number[] = [];
+      const ctx = makeContext({
+        worldDay,
+        rngContext: {
+          worldSeed: 'seed-test' as Seed,
+          streamId: 'rng:test:departure' as RngStreamId,
+          cursor: 0 as RngCursor,
+        },
+        resolvers: stubResolverPort({
+          resolveMemberDeparture: ({ rngContext }) => {
+            seen.push(rngContext?.cursor ?? -1);
+            return rngStepBool(false, rngContext);
+          },
+        }),
+      });
+      ok(handleBeginCityFreePeriod(s0, ctx));
+      assert(seen.length === 2, `兩名合格成員各擲一次，實得 ${seen.length}`);
+      assert(seen[0] === 0 && seen[1] === 1, `游標須逐名串接 [0,1]，實得 [${seen.join(',')}]`);
+      assert(seen[0] !== seen[1], '兩名成員不得共用同一 cursor（否則同機率恆得相同結果）');
     },
   },
   {

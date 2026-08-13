@@ -22,6 +22,8 @@ import type {
   WorldDay,
   Revision,
   RngContext,
+  RngCursor,
+  RngStep,
   ModuleResult,
   ModuleOutcome,
   CommandRejection,
@@ -124,6 +126,9 @@ export interface TeamWorldReader {
 }
 
 // 資料調諧 Resolver（RNG 藏於其內；Handler 不含機率/公式，只消費結果）。
+// 擲骰型方法回傳 RngStep<boolean>（value=判定、nextCursor=續接游標），呼叫端須把 nextCursor 顯式串接到
+// 下一次抽取（見 12_engine_runtime.md §7.1、settleRetentionAndDepartures 的離隊迴圈）。只回 boolean 會丟失
+// 游標，使同一調用內的連續抽取全部落在同一 cursor → 相同結果。
 export interface TeamResolverPort {
   // 招募擲骰：至少接收招募者、目標、玩家隊目前正式人數（doc §2.3）。
   resolveRecruitmentSuccess(
@@ -133,7 +138,7 @@ export interface TeamResolverPort {
       currentFormalCount: number;
       rngContext?: RngContext;
     }>,
-  ): boolean;
+  ): RngStep<boolean>;
   // 留隊擲骰：接收工作淨收益缺口與隊長抵抗；缺口↑機率↑、抵抗↑機率↓（doc §2.3/§6.1）。
   resolveMemberDeparture(
     input: Readonly<{
@@ -143,7 +148,7 @@ export interface TeamResolverPort {
       workNet: number;
       rngContext?: RngContext;
     }>,
-  ): boolean;
+  ): RngStep<boolean>;
   // 預設戰鬥配置：以目前配置 + 全體正式成員產生合法且不重疊的九宮格站位（doc §3.1）。
   resolveDefaultPlacement(
     input: Readonly<{
@@ -537,14 +542,15 @@ export function handleRecruitTavernAdventurer(
     return reject('team/already-in-team');
   }
 
-  // 只有 Resolver 擲骰成功才轉移成員；失敗不得改動任何成員或資產。
-  const success = ctx.resolvers.resolveRecruitmentSuccess({
+  // 只有 Resolver 擲骰成功才轉移成員；失敗不得改動任何成員或資產。單次抽取，nextCursor 不需再串接
+  // （本調用 stream 一次性；招募與離隊結算分屬不同調用/tag）。
+  const recruitment = ctx.resolvers.resolveRecruitmentSuccess({
     recruiterLeaderId: playerTeam.leaderId,
     targetCharacterId: target,
     currentFormalCount: playerTeam.memberIds.length,
     ...(ctx.rngContext ? { rngContext: ctx.rngContext } : {}),
   });
-  if (!success) return reject('team/recruitment-failed');
+  if (!recruitment.value) return reject('team/recruitment-failed');
 
   // 關閉來源 Team、加入玩家正式成員、建立涵蓋全隊的新合法配置。
   const nextMembers = [...playerTeam.memberIds, target];
@@ -702,19 +708,25 @@ function settleRetentionAndDepartures(
   if (retention !== undefined) {
     const workNet = workNetOf(retention.currentWorkSettlement);
     const departed: CharacterId[] = [];
+    // 顯式串接游標：每名成員從前一擲的 nextCursor 續抽，否則全體共用 cursor 0 → 相同結果（全走或全留）。
+    // 被 continue 略過的成員不抽、不前進游標。無 rngContext（純單元 stub）時不串接。
+    let cursor: RngCursor | undefined = ctx.rngContext?.cursor;
     for (const memberId of team.memberIds) {
       if (memberId === team.leaderId) continue; // 隊長不參與
       const joinedOn = retention.memberJoinedOnDay[memberId];
       if (joinedOn === undefined) continue;
       if (ctx.worldDay - joinedOn < RETENTION_ACTIVATION_DAYS) continue; // 未滿 60 日
-      const leaves = ctx.resolvers.resolveMemberDeparture({
+      const rngContext =
+        ctx.rngContext !== undefined && cursor !== undefined ? { ...ctx.rngContext, cursor } : undefined;
+      const roll = ctx.resolvers.resolveMemberDeparture({
         teamId: team.teamId,
         memberId,
         leaderId: team.leaderId,
         workNet,
-        ...(ctx.rngContext ? { rngContext: ctx.rngContext } : {}),
+        ...(rngContext ? { rngContext } : {}),
       });
-      if (leaves) departed.push(memberId);
+      if (rngContext !== undefined) cursor = roll.nextCursor; // 續接：下一名成員從此抽起
+      if (roll.value) departed.push(memberId);
     }
 
     for (const memberId of departed) {

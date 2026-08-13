@@ -8,6 +8,20 @@
 
 ---
 
+## 2026-08-13 — #6 模組正確性收尾（c2 戰鬥技能合法性）+ b RNG 串接
+
+延續 backlog #6 與複審 #4。**c1/c3**（地牢互動查房、裝備副手/多格防具）上一輪已 commit;本輪做 **c2 + b**。
+
+**c2 — 戰鬥技能合法性（`handleUseCombatSkill`）**。原本任何技能照施:資源成本以 `Math.max(0, …)` 夾零,法力/生命不足也**全效**施放(下溢);且不查玩家角色是否**學會**、是否**配置在生效武器組**。改:玩家角色 → `progression.knows()` 且技能 ∈ 生效武器組 `selectedSkillIds`,否則 no-op;再算總成本、不足即 no-op,足夠才**精確扣**(不夾零)。怪物用自身招式,不受武器組限制。維持 combat 現行 `ModuleResult`「拒絕即 no-op」風格(不改 outcome 契約)。**目標側別合法性**(打友方/治敵方)需資料化 targeting resolver,留 TODO。測:法力不足→mana 不動+無 `CombatActionResolved`;未配置 `SKILL_BITE`→無傷、無事件。
+
+**b — RNG 串接(threading，§7.1 的 threading 缺陷)**。`TeamResolverPort` 的擲骰型方法只回 `boolean`,丟掉 `nextCursor`;離隊結算迴圈對每名成員重用同一 `ctx.rngContext`（cursor 恆 0）→ 同機率下**全體同結果**（要嘛全走、要嘛全留）。改:兩個擲骰方法回 `RngStep<boolean>`(對齊 `gathering` 既有樣板與 Session `session.ts:246` 的「多次抽取須顯式串接 nextRngCursor」註記);離隊迴圈**逐名串接** cursor(被 `continue` 略過者不抽、不進),招募單次抽取讀 `.value`。stub/測試共用 `rngStepBool()`（nextCursor = cursor+1，把品牌型別轉換集中一處）。測:兩名合格成員實見游標 `[0,1]`（非 `[0,0]`）—— 直接證串接、有牙(移除串接則 `seen[1]` 仍為 0 而失敗)。
+
+**未竟(誠實記帳)**:§7.1 仍缺 ① 同交易跨 tag 的 cursor 串接/sub-stream;② Event Subscriber 子 stream;③ 招募擲敗現以 `reject` 表達,應改「接受＋結果欄位」(合法指令、這次沒中 ≠ 非法)——屬 outcome 建模重構,牽動契約與 `transaction.test`,不在本輪 threading 範圍。
+
+`tsc` 乾淨、verify 全過（kernel + 7 模組 + composition + engine session + travel workflow）。
+
+---
+
 ## 2026-08-12 — 複審回合 3 + 旅行「做到底」：Workflow 訂閱機制,旅行端到端接通
 
 複審回合 3 抓到我上一輪引入/未竟的 3 個 P1:①`runDueJob` 在交易**前** dequeue,拒絕的 Job 仍被消耗(破壞回滾)——改成**只在提交時消耗**,失效 Job 由 Handler 接受並 no-op(dungeon `npcDungeonDay` 從拒絕改 no-op);③戰鬥授權只驗 Encounter 屬玩家隊,沒驗 `actorId`/`allyId` 是玩家方——補 `side==='player'`;②旅行改「停下等 Workflow」方向對,但 composition **沒有** Workflow 驅動者,真實 Session 停在段落邊界,而單元測試手動扮演 Workflow **把斷線藏起來**。

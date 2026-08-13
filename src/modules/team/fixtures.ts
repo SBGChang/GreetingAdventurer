@@ -19,6 +19,9 @@ import type {
   ContentPackId,
   WorldDay,
   Revision,
+  RngContext,
+  RngStep,
+  RngCursor,
 } from '../../contracts/core';
 import type {
   TeamDefinitionReader,
@@ -228,11 +231,17 @@ export function stubWorldReader(): TeamWorldReader {
 
 // ── Stub Resolver Port ──────────────────────────────────────────────────────
 
+// 擲骰型 Resolver 的 RngStep 建構子：nextCursor = 入參 cursor + 1（模擬「消費一格」），讓串接迴圈可見
+// 游標前進；無 rngContext 時以 0 起。stub 與測試覆寫共用，把品牌型別轉換集中於此。
+export function rngStepBool(value: boolean, rngContext?: RngContext): RngStep<boolean> {
+  return { value, nextCursor: (((rngContext?.cursor ?? 0) as number) + 1) as RngCursor };
+}
+
 // 預設：招募成功、成員不離隊、預設配置以 row-major 覆蓋全隊。
 export function stubResolverPort(overrides: Partial<TeamResolverPort> = {}): TeamResolverPort {
   const base: TeamResolverPort = {
-    resolveRecruitmentSuccess: () => true,
-    resolveMemberDeparture: () => false,
+    resolveRecruitmentSuccess: ({ rngContext }) => rngStepBool(true, rngContext),
+    resolveMemberDeparture: ({ rngContext }) => rngStepBool(false, rngContext),
     resolveDefaultPlacement: ({ memberIds }) => {
       const placements: Record<CharacterId, GridCell> = {};
       memberIds.forEach((id, i) => {
