@@ -64,10 +64,11 @@ npx tsx scripts/verify-modules.ts   # kernel + data-runtime + 7 模組 + composi
 | team | `StartTimedCityAction`、`StartChildStudyPlan`、`CreateNpcTeam`、`OpenPlayerTravelInteraction`、`MarkPlayerTravelInteractionAwaitingCombat`、`CompletePlayerTravelInteraction`、`AssignNpcMemberFreeAction`、`RecordTeamWorkSettlementValue`、`AttachQuestTemporaryMember` |
 
 > `CompletePlayerTravelSegmentWithoutEvent` **已實作並端到端接通**:`dueCityTravel` 發 `TravelSegmentReached`
-> 後停下,composition 的**旅行事件 Workflow 訂閱者**(見 `manifest.ts` 的 `WORKFLOW_EVENT_SUBSCRIPTIONS_BY_TYPE`
-> + `router.ts` 的 `WORKFLOW_SUBSCRIBERS`)送 `CompletePlayerTravelSegmentWithoutEvent` 推進。旅行由引擎自驅
-> 至抵達(`travel-integration.test`)。**待內容**:event weights + resolver 命中事件時改送
-> `OpenPlayerTravelInteraction`(Pending 互動分支,尚未實作)。
+> 後停下,**旅行事件 Workflow 訂閱者**送 `CompletePlayerTravelSegmentWithoutEvent` 推進。旅行由引擎自驅至抵達
+> (`travel-integration.test`)。Workflow 現與模組**共用**唯一有序 `EVENT_SUBSCRIPTIONS_BY_TYPE`
+> (`subscriber: ModuleId | WorkflowId`;R4 #5 已把第二張 `workflowEventSubscriptionsByType` 併回),身分/`startsFrom`
+> 於 `manifest.ts` 的 `REGISTERED_WORKFLOWS` 宣告並驗證,反應邏輯住 `app/workflows/player-travel-event.ts`。
+> **待內容**:event weights + resolver 命中事件時改送 `OpenPlayerTravelInteraction`(Pending 互動分支,尚未實作)。
 
 目前 PENDING 計數(對照 router 的 `PENDING_*`):**Game Command 11、Internal Command 15、Job 2**。另有 Game
 Command 未實作:inventory 的 `unequipItem`/`useItem`/`splitStack` 與四筆 encumbrance 指令、progression 的
@@ -90,7 +91,8 @@ Vite+React app、GameSession adapter、Projection/ViewModel、核心畫面(城�
 **仍待處理:**
 - **注入 context bag**:各模組定義了本地 port 型別(如 `CharacterHandlerContext`、`InventoryDeps`、`DungeonContext`、`MapHandlerContext`、`CombatHandlerContext`、`TeamHandlerContext`);composition 要提供具體實作。
 - **character / combat 的拒絕分類**(B.5 只轉了 dungeon):兩者仍以「回傳未變 slice」表示前置條件不符。character 的 21 個 no-op **多數是真正冪等**(程式自己註解「冪等」),只有 `handleCreatePartnerFamilyLink` 的硬條件(自我求婚、同性、未成年、已有配偶)是真拒絕;combat 的 16 個需逐點判讀。這是**逐點語意判斷**,不能用批次改寫。型別已備妥:改用 `ModuleOutcome<TSlice>`,照 `modules/dungeon/system.ts` 的 `accept()`/`reject()` 樣板。
-- **combat**:`CombatDefinitionReader` 缺 `getControlResistanceProfile`(Boss 控制抗性沒接);CombatRule 目前用固定 `COMBAT_RULE_ID` 常數,應由 world/map 來源綁定;偵測到的「詳細戰鬥用數值 resolver」以 `CombatResolverPort` 實現(非 `contracts/combat-power` 的聚合服務)。
+- **combat**:`CombatDefinitionReader` 缺 `getControlResistanceProfile`(Boss 控制抗性沒接);CombatRule 目前用固定 `COMBAT_RULE_ID` 常數,應由 world/map 來源綁定;偵測到的「詳細戰鬥用數值 resolver」以 `CombatResolverPort` 實現(非 `contracts/combat-power` 的聚合服務)。**R4 #3 後仍待**:`handleUseCombatSkill` 已做結構性目標合法性(去重 + 存活 + 依 actionKind 篩側別),但**資料化 `targeting.targetResolverId`**(範圍/形狀/距離/人數上限)與 **`activationHand` / `weaponRequirementIds`** 仍未執行;後者需 fixture 於武器組實裝武器 + 武器→需求資料,屬內容軌。
+- **inventory**:**R4 #6 後仍待**:`getEquipmentLoadout` 仍**惰性**建立(首次觸及時鑄);正式應在**角色誕生**時就由核心產生器鑄好三個武器組 ID(eager),UI/命令才能先查 ID 再引用。此 eager 流程與未建的角色生命週期/`NewGameBootstrapper` 綁在一起。另 `configureWeaponSet` 與 `equipItem` 兩條裝備路徑邏輯重疊,未來宜收斂為單一路徑。
 - **team**:`enterAdventureMap` 目前本地鑄 `MapInstanceId`(應由 map 模組擁有);`TeamQuery` 只有 `getPlayerControlledCharacterId`(無 `getPlayerCharacterId`)。
 - **dungeon**:`NpcDungeonRunView` 目前含 `rngContext`(doc §4 要求 Query 不公開;`getNpcProgress` 是遮蔽版)。
 - **map**:`ProtectMapContent` 不發事件(union 無此事件);`MapContentResolver`/`SpawnDraft` 是發明的本地 port(依 §7.1 慣例)。

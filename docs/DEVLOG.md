@@ -8,6 +8,26 @@
 
 ---
 
+## 2026-08-13 — 複審回合 4：4 個 P1 + 2 個 P2（玩法邊界與 ID 出處）
+
+「全綠不代表玩法邊界安全」。這輪 6 則全真、逐一修+測，各自 commit。
+
+**#1（P1）已消耗/取消的 Job 可重放** —— `runDueJob` 直接跑呼叫者傳入的 Job 快照，沒對照目前 `scheduler.jobsById`。同日快照裡，前一筆交易若取消/消耗後一筆，照舊快照重跑會**重複結算**（NPC 地牢、刷新）。改：依 `jobId` 從目前 Scheduler 取**權威** Job 來跑；不在佇列 → 不開交易、不推進 cursor、回 `engine/job-not-scheduled`。測：跑完 teamPlanDue 後拿同一快照重放 → 拒絕、序號不變、原封回傳。
+
+**#2（P1）招募擲敗永遠無法靠重試改變** —— 擲敗以 `reject` 表達，回滾 §7.2 cursor，下一次招募得**相同 CommandId → 相同 RNG stream/cursor → 相同骰值**（實測兩次 stream 完全相同）。機率「沒中」是正常玩法結果:改**接受並提交、不轉移角色**;提交推進序號，下次得新 stream。資格不符（隊滿等）才拒絕。（上一輪我把這列為「留待」，這輪照要求修掉。）
+
+**#3（P1）戰鬥目標可偽造與重複** —— `handleUseCombatSkill` 直接信任 UI 的 `targetCombatantIds`：攻擊技能可打我方隊友（80→50）、同一目標傳兩次傷兩次（100→40，應 70）。改：`legalTargetsFor` 先**去重 + 存活 + 依 actionKind 篩側別**（attack 只打敵、support 只作用己方），效果與反擊只套合法集合；attack/support 指定目標卻全數不合法則整個行動 no-op。**誠實未竟**：資料化 `targetResolverId`（範圍/形狀/人數）、`activationHand`/`weaponRequirementIds` 仍未驗（後者需 fixture 於武器組實裝武器 + 武器→需求資料）。
+
+**#4（P1）configureWeaponSet 產生非法/自相矛盾裝態** —— 只驗存在/擁有/kind，沒驗手部位置、不同步 `ItemInstance.location`、一件武器可同時被多組引用。改：主手須武器、副手須盾（或與主手同件的雙手武器）；原子同步 location（裝上→equipped、頂掉→回背包）；裝上時清掉其他武器組對同一件的引用（single-location）。
+
+**#5（P2）Workflow Manifest 與架構契約相反** —— 開了第二張 `workflowEventSubscriptionsByType`（模組 vs Workflow 對同一事件的順序失去單一真相）、本地重宣告不相容的 `WorkflowId`、無 `WorkflowDefinition`、Registry 只查 ID 在 Set、邏輯寫在 router。改：模組與 Workflow **共用**唯一有序 `EVENT_SUBSCRIPTIONS_BY_TYPE`（`subscriber: ModuleId | WorkflowId`，順序單一由陣列位置決定）；用 core 的 `WorkflowId`（`workflow:travel-event`）；`WorkflowDefinition` 帶 `startsFrom` 且 `validateManifest` 驗證其有對應訂閱；router 以 dispatch 表歸屬區分模組/Workflow（Workflow 無 mutation）；反應邏輯移到 `app/workflows/player-travel-event.ts`；registry 模組交叉驗證跳過 Workflow 訂閱者。travel-integration（引擎自驅端到端）仍過。
+
+**#6（P2）武器組 Runtime ID 繞過核心產生器** —— `getOrCreateLoadout` 以 `${characterId}:ws${i}` 偽造 ID，不經核心產生器、不推進 `nextRuntimeSequence`。改：`InventoryDeps.nextWeaponSetId()`（id-port 接 `next<WeaponSetId>('weapon-set')`）配發；fixture 預建 Loadout 以固定 ID 讓測試沿用 `${char}:ws{i}` 引用（fixture 可釘 ID，生產不可）。**誠實未竟**：仍是**惰性**建立；正式應在**角色誕生**時就鑄好 Loadout（讓 UI/命令能先查 ID 再引用），該 eager 流程與未建的角色生命週期/bootstrap 綁在一起。
+
+`tsc` 乾淨、verify 全過（+ 新增 job 重放、招募接受、攻擊側別/去重、手部/location/跨組、startsFrom、weapon-set ID 出處 等測）。
+
+---
+
 ## 2026-08-13 — #6 模組正確性收尾（c2 戰鬥技能合法性）+ b RNG 串接
 
 延續 backlog #6 與複審 #4。**c1/c3**（地牢互動查房、裝備副手/多格防具）上一輪已 commit;本輪做 **c2 + b**。
