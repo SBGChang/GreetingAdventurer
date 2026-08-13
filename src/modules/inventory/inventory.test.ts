@@ -22,6 +22,7 @@ import {
   reserveQuestItem,
   transferItem,
   configureWeaponSet,
+  createInitialLoadout,
   type InventoryHandlerResult,
 } from './system';
 import { createFixtureDeps, createFixtureReader, createFixtureState, FIXTURE } from './fixtures';
@@ -440,7 +441,7 @@ const cases: readonly Case[] = [
           { type: 'configureWeaponSet', characterId: 'runtime:character:other' as CharacterId, weaponSetId, mainHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] },
           deps,
         ),
-        'inventory/unknown-weapon-set',
+        'inventory/loadout-not-initialized', // 未建立 Loadout 的角色（不再惰性建立 → 明確拒絕）
         'other character weapon set',
       );
     },
@@ -556,23 +557,54 @@ const cases: readonly Case[] = [
     },
   },
   {
-    name: 'getOrCreateLoadout: 武器組 ID 由核心產生器配發（不再字串偽造 ${char}:ws{i}）',
+    name: 'createInitialLoadout: 三個武器組 ID 由核心產生器配發（不字串偽造 ${char}:ws{i}）',
     run: () => {
-      const deps = createFixtureDeps();
-      // 清掉預建 Loadout，強制惰性建立走 deps.nextWeaponSetId（裝甲不需武器組 ID，可觸發建立）。
-      const noLoadout: InventoryState = { ...createFixtureState(), equipmentLoadouts: {} };
-      const r = equipItem(
-        noLoadout,
-        { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.robeItemId, slotId: FIXTURE.bodySlot },
-        deps,
-      );
-      const next = expectOk(r, 'equip-armor');
-      const sets = next.equipmentLoadouts[FIXTURE.characterId]!.weaponSets;
-      for (const ws of sets) {
+      let n = 0;
+      const nextWeaponSetId = () => `runtime:weapon-set:core-${(n += 1)}` as WeaponSetId;
+      const loadout = createInitialLoadout(FIXTURE.characterId, nextWeaponSetId);
+      assert(loadout.weaponSets.length === 3, '應建立三個武器組');
+      for (const ws of loadout.weaponSets) {
         const id = String(ws.weaponSetId);
         assert(id.startsWith('runtime:weapon-set:'), `武器組 ID 應由核心產生器配發，實得 ${id}`);
         assert(!id.includes(':ws'), `不得再是偽造的 \${char}:ws{i} 格式，實得 ${id}`);
       }
+    },
+  },
+  {
+    name: '#1：Query 回傳的武器組 ID 就是 Handler 認得的 ID（不再 split-brain）',
+    run: () => {
+      const deps = createFixtureDeps();
+      const state = createFixtureState(); // 已預建 Loadout（角色誕生流程）
+      // UI 透過 Query 取得武器組 ID。
+      const view = createInventoryQuery(state, deps.reader).getEquipmentLoadout(FIXTURE.characterId);
+      const wsId = view.weaponSets[0]!.weaponSetId;
+      assert(!String(wsId).startsWith('uninitialized-loadout:'), 'Query 對已建 Loadout 不得回哨兵 ID');
+      // 把該 ID 送去 equip —— Handler 必須認得（不再回 unknown-weapon-set）。
+      const r = equipItem(
+        state,
+        { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: wsId },
+        deps,
+      );
+      const next = expectOk(r, 'equip with query-provided weaponSetId');
+      const loc = createInventoryQuery(next, deps.reader).getLocation(FIXTURE.swordItemId);
+      assert(loc?.kind === 'equipped' && loc.weaponSetId === wsId, 'Query 提供的 ID 應成功裝備於同一組');
+    },
+  },
+  {
+    name: '#1：未初始化角色 → Query 回哨兵 ID、Handler 明確拒絕 loadout-not-initialized（非 unknown-weapon-set）',
+    run: () => {
+      const deps = createFixtureDeps();
+      const fresh: InventoryState = { ...createFixtureState(), equipmentLoadouts: {} };
+      const view = createInventoryQuery(fresh, deps.reader).getEquipmentLoadout(FIXTURE.characterId);
+      assert(
+        String(view.weaponSets[0]!.weaponSetId).startsWith('uninitialized-loadout:'),
+        '未建 Loadout 應回明顯哨兵 ID（不偽造看似真實的 ${char}:ws0）',
+      );
+      expectReject(
+        equipItem(fresh, { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: view.weaponSets[0]!.weaponSetId }, deps),
+        'inventory/loadout-not-initialized',
+        'equip before loadout init',
+      );
     },
   },
 ];

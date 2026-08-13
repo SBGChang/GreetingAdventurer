@@ -40,6 +40,7 @@ import type {
 } from '../../contracts/inventory';
 import { createInventoryQuery } from './queries';
 import type {
+  CharacterEquipmentLoadout,
   EncumbranceResolution,
   InventoryState,
   ItemInstance,
@@ -398,7 +399,8 @@ export function equipItem(
     return reject('inventory/non-weapon-must-not-target-weapon-set');
   }
 
-  const loadout = getOrCreateLoadout(state, cmd.characterId, deps);
+  const loadout = requireLoadout(state, cmd.characterId);
+  if (loadout === undefined) return reject('inventory/loadout-not-initialized', { characterId: String(cmd.characterId) });
   // 雙手裝備以 occupiedSlots 同時占用主／副手（doc §282），不複製第二件 Item。
   const isTwoHanded = equip.occupiedSlots.length > 1;
 
@@ -534,7 +536,8 @@ export function configureWeaponSet(
   cmd: ConfigureWeaponSet,
   deps: InventoryDeps,
 ): InventoryHandlerResult {
-  const loadout = getOrCreateLoadout(state, cmd.characterId, deps);
+  const loadout = requireLoadout(state, cmd.characterId);
+  if (loadout === undefined) return reject('inventory/loadout-not-initialized', { characterId: String(cmd.characterId) });
   const idx = loadout.weaponSets.findIndex((w) => w.weaponSetId === cmd.weaponSetId);
   if (idx < 0) return reject('inventory/unknown-weapon-set', { weaponSetId: String(cmd.weaponSetId) });
 
@@ -708,22 +711,33 @@ export function evaluateTeamEncumbrance(
 }
 
 // ── Loadout 輔助 ───────────────────────────────────────────────────────────
-// 首次觸及某角色的 Loadout 時建立三個空武器組。武器組 ID 一律由核心產生器（deps.nextWeaponSetId）鑄，
-// 不再以字串偽造。註：這仍是「惰性建立」；正式的角色建立流程應在角色誕生時就鑄好 Loadout（見 HANDOFF），
-// 使 UI/命令能先查得武器組 ID 再引用——此處先把 ID 出處修正為核心產生器。
-function getOrCreateLoadout(state: InventoryState, characterId: CharacterId, deps: InventoryDeps) {
-  const existing = state.equipmentLoadouts[characterId];
-  if (existing) return existing;
+// **單一**建立入口：建立角色初始 Loadout（三個空武器組），ID 由核心產生器（nextWeaponSetId）鑄。正式的
+// 角色建立流程（角色誕生）應呼叫此函式，使 Loadout 在任何 equip/config 或 Query 之前就存在。這樣 Query 與
+// Handler 讀到**同一份真實 ID**——不再各自偽造（Query 曾以 `${char}:ws0` 偽造、Handler 另配核心 ID → UI
+// 拿到的 ID 送出即 unknown-weapon-set 的 split-brain）。
+export function createInitialLoadout(
+  characterId: CharacterId,
+  nextWeaponSetId: () => WeaponSetId,
+): CharacterEquipmentLoadout {
   const ws = (): WeaponSetLoadout => ({
-    weaponSetId: deps.nextWeaponSetId(),
+    weaponSetId: nextWeaponSetId(),
     selectedSkillIds: [undefined, undefined, undefined],
   });
   return {
     characterId,
     armorSlots: {} as Readonly<Record<EquipmentSlotId, ItemInstanceId | undefined>>,
-    weaponSets: [ws(), ws(), ws()] as readonly [WeaponSetLoadout, WeaponSetLoadout, WeaponSetLoadout],
+    weaponSets: [ws(), ws(), ws()],
     revision: 0,
   };
+}
+
+// 讀取已存在的 Loadout；不存在回 undefined（呼叫端以 loadout-not-initialized 拒絕）。**不惰性建立**——否則
+// Handler 會鑄出與 Query 不同的 ID（split-brain）。Loadout 由 createInitialLoadout 於角色建立時預先鑄好。
+function requireLoadout(
+  state: InventoryState,
+  characterId: CharacterId,
+): CharacterEquipmentLoadout | undefined {
+  return state.equipmentLoadouts[characterId];
 }
 
 function replaceWeaponSet(

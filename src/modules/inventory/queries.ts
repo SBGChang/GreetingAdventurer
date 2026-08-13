@@ -88,11 +88,14 @@ function locationMatches(sel: ItemLocationSelector, loc: ItemLocation): boolean 
   }
 }
 
-// 第一版預設空 Loadout：無配置角色回傳可預期的空三武器組（deterministic 合成 ID）。
-// TODO: 一旦 character/progression 建立角色即注入初始 Loadout，此 fallback 可移除。
-function emptyLoadoutView(characterId: CharacterId): CharacterEquipmentLoadoutView {
+// 尚未建立 Loadout 的角色（正式流程應在角色誕生時就以 createInitialLoadout 鑄好三個武器組）。此 fallback
+// 只是占位顯示：weaponSetId 用**明顯的哨兵前綴**，不再偽造 `${char}:ws0` 那種看似真實的 ID——先前 UI 拿它
+// 去 equip 會撞 unknown-weapon-set（split-brain）。現在 Handler 對未建 Loadout 一律回 loadout-not-initialized，
+// UI 也能由此前綴判定「尚未初始化」而不提供裝備操作。
+// TODO: 一旦角色建立流程一律預先鑄 Loadout，此 fallback 可移除。
+function uninitializedLoadoutView(characterId: CharacterId): CharacterEquipmentLoadoutView {
   const ws = (i: number): WeaponSetLoadoutView => ({
-    weaponSetId: `${characterId}:ws${i}` as WeaponSetId,
+    weaponSetId: `uninitialized-loadout:${characterId}:ws${i}` as WeaponSetId,
     mainHandItemId: undefined,
     offHandItemId: undefined,
     selectedSkillIds: [undefined, undefined, undefined],
@@ -204,7 +207,7 @@ export function createInventoryQuery(
 
     getEquipmentLoadout(characterId: CharacterId): CharacterEquipmentLoadoutView {
       const loadout = state.equipmentLoadouts[characterId];
-      return loadout ? loadoutToView(loadout) : emptyLoadoutView(characterId);
+      return loadout ? loadoutToView(loadout) : uninitializedLoadoutView(characterId);
     },
 
     getEncumbranceResolution(teamId: TeamId): EncumbranceResolutionView | undefined {

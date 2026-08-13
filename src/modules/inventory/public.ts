@@ -36,6 +36,7 @@ export {
   commitCombatItemUse,
   equipItem,
   configureWeaponSet,
+  createInitialLoadout,
   evaluateTeamEncumbrance,
   inventorySubscribers,
 } from './system';
