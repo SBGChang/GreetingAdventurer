@@ -550,7 +550,12 @@ export function handleRecruitTavernAdventurer(
     currentFormalCount: playerTeam.memberIds.length,
     ...(ctx.rngContext ? { rngContext: ctx.rngContext } : {}),
   });
-  if (!recruitment.value) return reject('team/recruitment-failed');
+  // 機率判定「這次沒中」是**正常玩法結果**，不是非法指令：以**接受**（提交、不轉移角色）表達，而非拒絕。
+  // 拒絕會回滾 §7.2 交易 cursor，下一次招募命令因此取得**相同的 CommandId → 相同 RNG stream/cursor →
+  // 相同骰值**，永遠無法靠重試改變結果。接受則推進序號，下一次得新 stream、重新擲。資格不符（隊滿、
+  // 已是成員、目標非單人隊…）才是拒絕。
+  // 註：目前不 emit 事件（契約無 RecruitmentResolved）；UI 觀察性事件是後續契約擴充,不在本修正範圍。
+  if (!recruitment.value) return accept(state);
 
   // 關閉來源 Team、加入玩家正式成員、建立涵蓋全隊的新合法配置。
   const nextMembers = [...playerTeam.memberIds, target];

@@ -301,14 +301,38 @@ const cases: readonly Case[] = [
     },
   },
   {
-    name: 'recruit failure (resolver rolls false) leaves all state unchanged',
+    name: 'recruit 擲敗 → 接受（正常玩法結果、不轉移角色），非拒絕（拒絕會回滾 cursor 使重試恆同結果）',
     run: () => {
       const s0 = fixtureTeamState();
       const ctx = makeContext({
         resolvers: stubResolverPort({ resolveRecruitmentSuccess: ({ rngContext }) => rngStepBool(false, rngContext) }),
       });
       const r = handleRecruitTavernAdventurer(s0, { type: 'recruitTavernAdventurer', targetCharacterId: NPC_LEADER_ID }, ctx);
-      assert(!r.ok && r.rejection.code === 'team/recruitment-failed', `recruitment-failed (got ${r.ok ? 'ok' : r.rejection.code})`);
+      assert(r.ok, `擲敗應接受（非拒絕），實得 ${r.ok ? 'ok' : r.rejection.code}`);
+      if (!r.ok) return;
+      const player = r.result.nextSlice.teams[PLAYER_TEAM_ID]!;
+      assert(!player.memberIds.includes(NPC_LEADER_ID), '擲敗不得把目標轉入玩家隊');
+      const source = r.result.nextSlice.teams[NPC_TEAM_ID]!;
+      assert(source.memberIds.includes(NPC_LEADER_ID), '擲敗不得改動來源隊');
+      assert(r.result.outgoingMessages.length === 0, '擲敗不應 emit 任何轉移事件');
+    },
+  },
+  {
+    name: 'recruit 資格不符（隊已滿）→ 拒絕（與擲敗不同，這是非法指令）',
+    run: () => {
+      const base = fixtureTeamState();
+      // 把玩家隊塞到滿員，招募任何人都應「資格不符」而拒絕。
+      const full = Array.from({ length: 9 }, (_, i) => `char-fill-${i}` as CharacterId);
+      const s0: TeamState = {
+        ...base,
+        teams: {
+          ...base.teams,
+          [PLAYER_TEAM_ID]: { ...base.teams[PLAYER_TEAM_ID]!, memberIds: full },
+        },
+      };
+      const ctx = makeContext();
+      const r = handleRecruitTavernAdventurer(s0, { type: 'recruitTavernAdventurer', targetCharacterId: NPC_LEADER_ID }, ctx);
+      assert(!r.ok, '隊滿時招募應拒絕');
     },
   },
   {
