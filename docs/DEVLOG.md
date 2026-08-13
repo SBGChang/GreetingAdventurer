@@ -8,6 +8,32 @@
 
 ---
 
+## 2026-08-13 — 複審回合 5：7 P1 + 1 P2（上輪修得太窄的補課 + 文件漂移）
+
+複審重現 7 P1 + 1 P2，多條直接證明 R4 修得太窄（只覆蓋窄測案例）。逐一修根、各自 commit。
+
+**#1 Query 仍偽造 WeaponSetId（split-brain）** —— R4 只改 Handler 配核心 ID，Query 的 `emptyLoadoutView` 仍回 `${char}:ws0`。UI 拿 Query 的 ID 去 equip → `unknown-weapon-set`。根治:Loadout 收斂為**單一** `createInitialLoadout`(角色誕生時鑄);Handler 改 `requireLoadout`(未建 → `loadout-not-initialized`,不再自行配 ID);Query 未建角色回明顯哨兵 ID(不偽造)。測:Query 給的 ID 能被 Handler 認得(round-trip)。**待接**:createInitialLoadout 進 bootstrap/角色生命週期。
+
+**#2 `runDueJob` 執行未到期 Job** —— 只驗在不在 Scheduler,沒驗 `dueDay <= worldDay`。補到期檢查(未到期 → `job-not-due`、不開交易)。**副作用**:bootstrap 與 travel-integration 測試原本就靠「提前執行未來 Job」跑,現改為先把世界時鐘推進到 `dueDay`(真實快轉語意)。
+
+**#3 cast/perform 仍可偽造目標側別** —— R4 側別只擋 `actionKind==='attack'`。把傷害技能標成 `cast` 就繞過、打隊友。根治:側別**由效果推定**(有 dealDamage→敵方、有 heal→己方),不看 actionKind;`applyEffect` 再逐效果守門(傷害永不作用己方、治療永不作用敵方)。
+
+**#4 `equipItem` 仍破壞 single-location** —— R4 只修了 `configureWeaponSet` 的跨組清除,漏了另一入口 `equipItem`。補上同樣的跨組清除。
+
+**#5 雙持被誤禁** —— R4 手部驗證讓副手只收盾,違反 GDD「同組可混搭兩把武器」。改:副手也收單手武器(仍擋單獨雙手武器/鎧甲/飾品)。R4 那條「單手劍不得放副手」測試翻正。
+
+**#6 `configureWeaponSet` 繞過技能驗證 Workflow** —— 直接路由到 Inventory,可寫入不存在的技能 ID;Combat 又在 `knows()` 前先 `getSkillView()`,遇偽造技能直接拋錯。安全面修:Combat 把 `knows()` 移到 `getSkillView()` **之前**,偽造/未學技能於 knows() no-op(不崩潰、不施放)。**待做**:configure 時的技能驗證 Workflow(屬未建的 application-workflow 層)。
+
+**#7 招募邊界仍缺(部分修)** —— 補**同城硬條件**(旅行中/跨城 → `not-in-same-city`)。仍缺 retryEligibilityResolverId(需重試計數 state + resolver)、酒館可見性(需內容)、社交 `inviteSuccessBonus`(需社交 Query)、`RecruitmentResolved` 結果事件(需契約)——皆記於 HANDOFF,未藏。
+
+**#8 WorkflowDefinition 仍縮水** —— 缺 `steps`、`startsFrom` 只支援事件、驗證器允許額外訂閱。補齊 `steps`(對齊 12_engine_runtime.md 的 `WorkflowStepDefinition`)、broaden `startsFrom`、`validateManifest` 加「Workflow 只能訂閱其 startsFrom」檢查。註:runtime 仍直接執行單步,完整 step-machine 未接。
+
+**文件漂移**(複審點名):HANDOFF 的 Workflow 表列與 RNG 段更新為現況(共用單一訂閱表、招募擲敗已改接受);`session.ts` dequeue 註解由「交易前」改回「成功提交時」。
+
+`tsc` 乾淨、verify 全過(新增:job 未到期、Query/Handler ID 一致、cast 側別、equipItem 跨組、雙持、knows() 前置、同城、extra-subscription 等測)。
+
+---
+
 ## 2026-08-13 — 複審回合 4：4 個 P1 + 2 個 P2（玩法邊界與 ID 出處）
 
 「全綠不代表玩法邊界安全」。這輪 6 則全真、逐一修+測，各自 commit。
