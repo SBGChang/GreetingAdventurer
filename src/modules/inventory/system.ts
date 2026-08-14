@@ -267,14 +267,30 @@ export function reserveCraftingInputs(
   cmd: ReserveCraftingInputs,
   _deps: InventoryDeps,
 ): InventoryHandlerResult {
-  if (cmd.itemIds.length === 0) return reject('inventory/empty-crafting-inputs');
+  if (cmd.inputs.length === 0) return reject('inventory/empty-crafting-inputs');
   let owner: CharacterId | undefined;
-  for (const id of cmd.itemIds) {
+  const seen = new Set<string>();
+  for (const input of cmd.inputs) {
+    const id = input.itemId;
+    // 重複 ID 原本會被接受，同一實體被 bump 兩次 revision、發兩次事件，第二筆還會覆蓋第一筆的保留量。
+    if (seen.has(String(id))) return reject('inventory/duplicate-crafting-input', { itemId: String(id) });
+    seen.add(String(id));
     const inst = state.items[id];
     if (!inst) return reject('inventory/unknown-item', { itemId: String(id) });
     if (inst.state !== 'active') return reject('inventory/item-not-active', { itemId: String(id) });
     if (isReservedActive(inst)) return reject('inventory/already-reserved', { itemId: String(id) });
     if (inst.ownerCharacterId === undefined) return reject('inventory/crafting-input-unowned', { itemId: String(id) });
+    // 數量必須是正整數且不超過該實體持有量；原本一律整疊保留，3 瓶藥水只用 1 瓶也會全鎖。
+    if (!Number.isInteger(input.quantity) || input.quantity < 1) {
+      return reject('inventory/invalid-crafting-input-quantity', { itemId: String(id), quantity: input.quantity });
+    }
+    if (input.quantity > inst.quantity) {
+      return reject('inventory/insufficient-crafting-input', {
+        itemId: String(id),
+        requested: input.quantity,
+        available: inst.quantity,
+      });
+    }
     if (owner === undefined) owner = inst.ownerCharacterId;
     else if (owner !== inst.ownerCharacterId) return reject('inventory/crafting-input-owner-mismatch');
   }
@@ -282,19 +298,22 @@ export function reserveCraftingInputs(
 
   let items = state.items;
   const messages: DomainEventDraft<unknown>[] = [];
-  for (const id of cmd.itemIds) {
-    const inst = items[id];
-    if (!inst) return reject('inventory/unknown-item', { itemId: String(id) });
+  for (const input of cmd.inputs) {
+    const inst = items[input.itemId];
+    if (!inst) return reject('inventory/unknown-item', { itemId: String(input.itemId) });
     const reservation: ItemReservation = {
       kind: 'craftingInput',
       ownerId: owner,
-      reservedQuantity: inst.quantity,
-      // 記下是哪一次製作保留了這批素材；消耗端（TransformCraftingItems，尚未實作）據此比對。
+      reservedQuantity: input.quantity,
+      // 完整的素材需求身分：哪一次製作、哪個配方、哪一格。消耗端（TransformCraftingItems，尚未實作）
+      // 據此比對素材確實是為這次製作的這一格保留的。
       craftingAttemptId: cmd.craftingAttemptId,
+      recipeId: cmd.recipeId,
+      slotId: input.slotId,
     };
     const next: ItemInstance = { ...inst, reservation, revision: inst.revision + 1 };
-    items = { ...items, [id]: next };
-    messages.push(emit({ type: 'ItemReservationChanged', itemId: id, reservation }));
+    items = { ...items, [input.itemId]: next };
+    messages.push(emit({ type: 'ItemReservationChanged', itemId: input.itemId, reservation }));
   }
   return accept({ ...state, items }, messages);
 }

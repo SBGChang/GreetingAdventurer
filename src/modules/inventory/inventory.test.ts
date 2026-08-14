@@ -32,6 +32,17 @@ import type { InventoryState } from './state';
 // 預設武器組 0（getOrCreateLoadout 以 `${characterId}:ws{i}` 命名）。
 const WS0 = `${FIXTURE.characterId}:ws0` as WeaponSetId;
 
+// ReserveCraftingInputs 的共用外殼：配方身分由 Crafting Workflow 驗證後帶進來（見契約註解）。
+const CRAFT_CMD = {
+  type: 'ReserveCraftingInputs',
+  craftingAttemptId: 'runtime:crafting-attempt:c1' as never,
+  recipeId: 'definition:crafting-recipe:test' as never,
+} as const;
+
+function craftInput(itemId: ItemInstanceId, quantity = 1) {
+  return { itemId, quantity, slotId: 'template-local:crafting-ingredient-slot:s1' as never };
+}
+
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
@@ -151,7 +162,7 @@ const cases: readonly Case[] = [
       const state = createFixtureState();
       const bad = reserveCraftingInputs(
         state,
-        { type: 'ReserveCraftingInputs', craftingAttemptId: 'runtime:crafting-attempt:c1' as never, itemIds: [FIXTURE.swordItemId, 'runtime:item-instance:ghost' as ItemInstanceId] },
+        { ...CRAFT_CMD, inputs: [craftInput(FIXTURE.swordItemId), craftInput('runtime:item-instance:ghost' as ItemInstanceId)] },
         deps,
       );
       expectReject(bad, 'inventory/unknown-item', 'craft-atomic-reject');
@@ -160,7 +171,7 @@ const cases: readonly Case[] = [
       assert(!q.isReserved(FIXTURE.swordItemId), 'craft-atomic: sword still unreserved');
       // valid set reserves all
       const good = expectOk(
-        reserveCraftingInputs(state, { type: 'ReserveCraftingInputs', craftingAttemptId: 'runtime:crafting-attempt:c1' as never, itemIds: [FIXTURE.swordItemId, FIXTURE.potionItemId] }, deps),
+        reserveCraftingInputs(state, { ...CRAFT_CMD, inputs: [craftInput(FIXTURE.swordItemId), craftInput(FIXTURE.potionItemId, 2)] }, deps),
         'craft-good',
       );
       const q2 = createInventoryQuery(good, deps.reader);
@@ -174,7 +185,56 @@ const cases: readonly Case[] = [
             String(reservation.craftingAttemptId) === 'runtime:crafting-attempt:c1',
           `craft-good: ${String(itemId)} records the crafting attempt it is reserved for`,
         );
+        // R9 #5：完整需求身分——配方 + 素材格。
+        assert(
+          reservation?.kind === 'craftingInput' && String(reservation.recipeId) === 'definition:crafting-recipe:test',
+          `craft-good: ${String(itemId)} records the recipe`,
+        );
+        assert(
+          reservation?.kind === 'craftingInput' && String(reservation.slotId) === 'template-local:crafting-ingredient-slot:s1',
+          `craft-good: ${String(itemId)} records the ingredient slot`,
+        );
       }
+      // R9 #5：保留量是「本次用掉的量」，不是整疊。3 瓶藥水只用 2 瓶。
+      const potionRes = good.items[FIXTURE.potionItemId]?.reservation;
+      assert(
+        potionRes?.reservedQuantity === 2,
+        `craft-good: 應只保留請求的 2 瓶（實得 ${String(potionRes?.reservedQuantity)}；整疊為 ${state.items[FIXTURE.potionItemId]?.quantity}）`,
+      );
+    },
+  },
+  {
+    // R9 #5：原本只有 itemIds，重複 ID 照單全收——同一實體被 bump 兩次 revision、發兩次事件。
+    name: 'reserveCraftingInputs: 重複的 itemId 一律拒絕',
+    run: () => {
+      const deps = createFixtureDeps();
+      expectReject(
+        reserveCraftingInputs(
+          createFixtureState(),
+          { ...CRAFT_CMD, inputs: [craftInput(FIXTURE.potionItemId), craftInput(FIXTURE.potionItemId)] },
+          deps,
+        ),
+        'inventory/duplicate-crafting-input',
+        'duplicate crafting input',
+      );
+    },
+  },
+  {
+    name: 'reserveCraftingInputs: 數量必須是正整數且不超過持有量',
+    run: () => {
+      const deps = createFixtureDeps();
+      const state = createFixtureState();
+      expectReject(
+        reserveCraftingInputs(state, { ...CRAFT_CMD, inputs: [craftInput(FIXTURE.potionItemId, 0)] }, deps),
+        'inventory/invalid-crafting-input-quantity',
+        'zero quantity',
+      );
+      // 藥水共 3 瓶，要 4 瓶應拒。
+      expectReject(
+        reserveCraftingInputs(state, { ...CRAFT_CMD, inputs: [craftInput(FIXTURE.potionItemId, 4)] }, deps),
+        'inventory/insufficient-crafting-input',
+        'over-requesting a stack',
+      );
     },
   },
   {

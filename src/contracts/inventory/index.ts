@@ -12,6 +12,7 @@ import type {
   BookDefinitionId,
   UseDelayRuleId,
   CraftingRecipeId,
+  CraftingIngredientSlotId,
   CraftingAttemptId,
   CharacterId,
   CityId,
@@ -221,6 +222,10 @@ export type ItemReservation =
       ownerId: CharacterId | AssetDistributionId | TeamId;
       reservedQuantity: number;
       craftingAttemptId: CraftingAttemptId;
+      // 完整的素材需求身分：哪一個配方的哪一格。少了這兩者就只知道「被某次製作保留」，
+      // 無法確認保留量是否真的對得上配方需求。
+      recipeId: CraftingRecipeId;
+      slotId: CraftingIngredientSlotId;
     }>
   | Readonly<{
       kind: 'pendingTransfer';
@@ -405,10 +410,22 @@ export type ReserveQuestItem = Readonly<{
   questId: QuestId;
 }>;
 
+// 一筆素材保留請求。原本只有 itemIds：表達不出「這次用掉幾個」，整疊藥水會被整疊保留；
+// 也表達不出「這是配方的哪一格」，重複 ID 更是照單全收（同一實體被 bump 兩次 revision／事件）。
+export type CraftingInputReservation = Readonly<{
+  itemId: ItemInstanceId;
+  quantity: number; // 本次製作實際用掉的數量，1..item.quantity；不是整疊
+  slotId: CraftingIngredientSlotId; // 對應 CraftingRecipeDefinition.ingredientSlots 的哪一格
+}>;
+
 export type ReserveCraftingInputs = Readonly<{
   type: 'ReserveCraftingInputs';
   craftingAttemptId: CraftingAttemptId;
-  itemIds: readonly ItemInstanceId[];
+  // 已由 Crafting Workflow 驗證過的配方身分（doc 20 §191：已學配方／Mastery／設施／材料合法性在
+  // Workflow 驗）。Inventory 的 Reader 讀不到配方定義，所以不重驗，只忠實記錄這份身分，讓消耗端
+  // （TransformCraftingItems）能比對素材確實是為這個配方的這一格保留的。
+  recipeId: CraftingRecipeId;
+  inputs: readonly CraftingInputReservation[];
 }>;
 
 export type ApplyQuestItemLifecycle = Readonly<{
