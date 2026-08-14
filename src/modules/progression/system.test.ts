@@ -2,12 +2,14 @@
 // 自足式單元測試（無外部框架、無 node/DOM 全域）。呼叫 runTests() 取得逐案 pass/fail。
 // 覆蓋核心成長行為：award MXP → 等級/主屬變化、採集 MXP 冪等、主屬 clamp 100、無升級時不發等級事件。
 
-import type { DomainEventDraft, EncounterId } from '../../contracts/core';
+import type { DomainEventDraft, EncounterId, CharacterId } from '../../contracts/core';
+import type { ProgressionDefinitionReader } from '../../contracts/progression';
 import { createInitialProgressionState } from './state';
 import {
   awardMasteryExperience,
   handleGrantGatheringMasteryExperience,
   handleCombatAttackMasteryEarned,
+  handleCombatSupportMasteryEarned,
   resolveLevel,
   computeTeachingResult,
 } from './system';
@@ -66,6 +68,40 @@ const cases: readonly Case[] = [
       );
       const exp3 = r3.nextSlice.characterProgress[HERO]?.masteries[SWORD_MASTERY]?.experience;
       assert(exp3 === 100, `不同 source 應再 +50（應 100，實得 ${exp3}）`);
+    },
+  },
+  {
+    name: '#2：同場多名支援者各自入帳（key 含 characterId:skillId，不誤擋他人）',
+    run: () => {
+      const base = makeFixtureReader();
+      const reader: ProgressionDefinitionReader = {
+        ...base,
+        getSupportMasteryAwardRule: () =>
+          ({ fixedExperiencePerUse: 10, masterySplits: [{ masteryId: SWORD_MASTERY, ratio: 1 }] }) as never,
+      };
+      const other = 'runtime:character:mage' as CharacterId;
+      const src = { kind: 'encounter' as const, encounterId: 'enc-1' as EncounterId };
+      const payload = (characterId: CharacterId) => ({
+        source: src,
+        characterId,
+        skillId: 'skill-heal' as never,
+        supportMasteryAwardRuleId: 'rule-support' as never,
+        creditedUseCount: 1,
+      });
+      const s0 = createInitialProgressionState();
+      const r1 = handleCombatSupportMasteryEarned(s0, payload(HERO), reader);
+      const r2 = handleCombatSupportMasteryEarned(r1.nextSlice, payload(other), reader);
+      const heroExp = r2.nextSlice.characterProgress[HERO]?.masteries[SWORD_MASTERY]?.experience;
+      const otherExp = r2.nextSlice.characterProgress[other]?.masteries[SWORD_MASTERY]?.experience;
+      assert(heroExp === 10, `HERO 應得 10（實得 ${heroExp}）`);
+      assert(otherExp === 10, `第二名支援者也應得 10（實得 ${otherExp}），不得被誤當重放`);
+      // 同一 (character, skill) 重放 → no-op。
+      const r3 = handleCombatSupportMasteryEarned(r2.nextSlice, payload(HERO), reader);
+      assert(
+        r3.nextSlice.characterProgress[HERO]?.masteries[SWORD_MASTERY]?.experience === 10,
+        'HERO 重放不得再加',
+      );
+      assert(r3.outgoingMessages.length === 0, 'HERO 重放不應再 emit');
     },
   },
   {

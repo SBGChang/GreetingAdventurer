@@ -366,24 +366,30 @@ function applyCharacterAwards(
   return { nextSlice: acc, outgoingMessages: messages, scheduledJobs: [] };
 }
 
-// 冪等 key：awardKind + CombatMasterySource（encounter/sequence）。attack/defense/support 各自成 key，
-// 故同一 encounter 的三種發放不互擋，但同一種重放會被擋。
-function masterySourceKey(awardKind: MasterySource, source: CombatMasterySource): string {
+// 冪等 key：awardKind + CombatMasterySource（encounter/sequence）+ 可選的 discriminant。attack/defense 每場
+// 只發一筆（characterAwards[] 聚合全隊）→ encounter 級 key 即可；**support 每名角色每個技能各發一筆**，故必須
+// 加 `${characterId}:${skillId}` discriminant，否則同場第一筆入帳後其餘全被當成重放（其他支援者/技能拿不到）。
+function masterySourceKey(
+  awardKind: MasterySource,
+  source: CombatMasterySource,
+  discriminant?: string,
+): string {
   const src =
     source.kind === 'encounter' ? `encounter:${source.encounterId}` : `combatSequence:${source.sequenceId}`;
-  return `${awardKind}:${src}`;
+  return discriminant !== undefined ? `${awardKind}:${src}:${discriminant}` : `${awardKind}:${src}`;
 }
 
-// 依 CombatMasterySource 冪等套用（doc §7.5）：已記帳的來源重放 → no-op（不重複發放、不再 emit 事件）；
-// 否則套用 awards 並把 key 寫進 masteryLedger。
+// 依 CombatMasterySource（+ discriminant）冪等套用（doc §7.5）：已記帳的 key 重放 → no-op（不重複發放、不再
+// emit 事件）；否則套用 awards 並把 key 寫進 masteryLedger。
 function applyMasteryOnce(
   state: ProgressionModuleState,
   awardKind: MasterySource,
   source: CombatMasterySource,
   awards: readonly Readonly<{ characterId: CharacterId; masteryId: MasteryId; amount: number }>[],
   reader: ProgressionDefinitionReader,
+  discriminant?: string,
 ): ModuleResult<ProgressionModuleState> {
-  const key = masterySourceKey(awardKind, source);
+  const key = masterySourceKey(awardKind, source, discriminant);
   if (state.masteryLedger[key]) return { nextSlice: state, outgoingMessages: [], scheduledJobs: [] };
   const r = applyCharacterAwards(state, awards, awardKind, reader);
   return {
@@ -423,7 +429,15 @@ export function handleCombatSupportMasteryEarned(
     masteryId: split.masteryId,
     amount: totalFixed * split.ratio,
   }));
-  return applyMasteryOnce(state, 'combat:support', payload.source, awards, reader);
+  // support 每名角色每技能各一筆 → key 需帶 characterId:skillId，否則同場其他支援者/技能被誤當重放。
+  return applyMasteryOnce(
+    state,
+    'combat:support',
+    payload.source,
+    awards,
+    reader,
+    `${payload.characterId}:${payload.skillId}`,
+  );
 }
 
 // ──────────────────────────────────────────────────────────────────────────
