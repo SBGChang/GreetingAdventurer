@@ -320,6 +320,25 @@ const cases: readonly Case[] = [
     },
   },
   {
+    name: '#4：Resolver 產生非法配置（全部同格）→ 退回合法 row-major，不寫入非法配置',
+    run: () => {
+      const s0 = fixtureTeamState();
+      const badResolver = stubResolverPort({
+        resolveDefaultPlacement: ({ memberIds }) => {
+          const out: Record<CharacterId, GridCell> = {};
+          for (const id of memberIds) out[id] = { floor: 0, row: 0, col: 0 }; // 全部塞 (0,0)
+          return out;
+        },
+      });
+      const ctx = makeContext({ resolvers: badResolver });
+      const r = ok(handleRecruitTavernAdventurer(s0, { type: 'recruitTavernAdventurer', targetCharacterId: NPC_LEADER_ID }, ctx));
+      const formation = r.result.nextSlice.combatFormations[PLAYER_TEAM_ID]!;
+      const cells = Object.values(formation.placements).map((c) => `${c.floor}:${c.row}:${c.col}`);
+      assert(cells.length === 3, '玩家隊 3 人應各有一格');
+      assert(cells.length === new Set(cells).size, `退回後配置不得有重疊（cells=${cells.join(',')}）`);
+    },
+  },
+  {
     name: 'recruit 擲敗 → 接受（正常玩法結果、不轉移角色），非拒絕（拒絕會回滾 cursor 使重試恆同結果）',
     run: () => {
       const s0 = fixtureTeamState();

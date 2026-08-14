@@ -592,6 +592,17 @@ export function handleRecruitTavernAdventurer(
   ]);
 }
 
+// 模組自算的 row-major 合法配置：memberIds[i] → (row=⌊i/3⌋, col=i%3, floor=0)。≤9 名成員恆合法（無重疊、
+// 不越界），供 Resolver 產生非法配置時的退路。
+function rowMajorPlacements(memberIds: readonly CharacterId[]): Record<CharacterId, GridCell> {
+  const cols = GRID_MAX + 1;
+  const out: Record<CharacterId, GridCell> = {};
+  memberIds.forEach((id, i) => {
+    out[id] = { floor: 0, row: Math.floor(i / cols), col: i % cols };
+  });
+  return out;
+}
+
 // 以 Resolver 產生涵蓋全隊的預設配置並替換（不在 Handler 寫死格位順序）。
 function recomputeFormation(
   state: TeamState,
@@ -600,11 +611,15 @@ function recomputeFormation(
   ctx: TeamHandlerContext,
 ): Readonly<{ next: TeamState; events: readonly DomainEventDraft<unknown>[] }> {
   const prev = state.combatFormations[teamId];
-  const placements = ctx.resolvers.resolveDefaultPlacement({
+  const resolved = ctx.resolvers.resolveDefaultPlacement({
     teamId,
     memberIds,
     current: prev?.placements ?? {},
   });
+  // Team 的配置不變量由 Team 自己守：資料化 Resolver 若產生非法配置（重疊/越界/漏配/floor≠0），退回模組
+  // 自算的 row-major 合法配置——絕不把非法配置寫進 State（Resolver 無權破壞本模組不變量）。
+  const placements: Readonly<Record<CharacterId, GridCell>> =
+    validatePlacements(memberIds, resolved).ok === true ? resolved : rowMajorPlacements(memberIds);
   const revision = prev !== undefined ? bump(prev.revision) : (0 as Revision);
   const next = upsertFormation(state, { teamId, placements, revision });
   const changed: TeamCombatFormationChangedEvent = { type: 'TeamCombatFormationChanged', teamId, placements, revision };
