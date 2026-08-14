@@ -41,6 +41,8 @@ import type {
   CharacterStatsQuery,
   StatusDefinition,
   TemporaryCharacterOrigin,
+  CharacterLifecycleKind,
+  CharacterLifecycleTokens,
   // Internal Command payloads
   CreateQuestTemporaryCharacter,
   CreateWorldAdventurerBatch,
@@ -205,19 +207,29 @@ function makeResult(
   };
 }
 
+// 生命週期 token：只跳指定種類，其餘原封不動。
+function bumpLifecycleTokens(
+  tokens: CharacterLifecycleTokens,
+  kinds: readonly CharacterLifecycleKind[],
+): CharacterLifecycleTokens {
+  let next = tokens;
+  for (const kind of kinds) next = { ...next, [kind]: bumpRevision(next[kind]) };
+  return next;
+}
+
 // 生命週期 Job draft（不含 jobId；由 Runner 配發）。
+// expectedRevision 由 payload 種類自己決定，不讓呼叫端傳——傳錯種類的 token 正是 R9 #3 的成因。
 function lifecycleJobDraft(
-  targetId: CharacterId,
+  character: Character,
   dueDay: WorldDay,
   payload: CharacterLifecycleJobPayload,
-  expectedRevision: Revision,
 ): ScheduledJobDraft<CharacterLifecycleJob> {
   return {
     type: 'characterLifecycleDue',
     dueDay,
     ownerModule: CHARACTER_MODULE_ID,
-    targetId,
-    expectedRevision,
+    targetId: character.characterId,
+    expectedRevision: character.lifecycleRevisions[payload.kind],
     payload,
   };
 }
@@ -275,8 +287,12 @@ function toDead(character: Character): Character {
     lifeState: 'dead',
     availability: 'unavailable',
     revision: bumpRevision(character.revision),
-    // lifeState 轉換使所有已排程的生命週期 Job 失效。
-    lifecycleRevision: bumpRevision(character.lifecycleRevision),
+    // 死亡使**所有**已排程的生命週期 Job 失效。
+    lifecycleRevisions: bumpLifecycleTokens(character.lifecycleRevisions, [
+      'adulthood',
+      'retirementCheck',
+      'naturalDeathCheck',
+    ]),
   };
 }
 
@@ -308,7 +324,7 @@ function newCharacter(
     condition: input.condition,
     ...(input.temporaryOrigin ? { temporaryOrigin: input.temporaryOrigin } : {}),
     revision: 0 as Revision,
-    lifecycleRevision: 0 as Revision,
+    lifecycleRevisions: { adulthood: 0 as Revision, retirementCheck: 0 as Revision, naturalDeathCheck: 0 as Revision },
   };
 }
 
@@ -728,9 +744,12 @@ export function handleCharacterLifecycleJob(
   const character = tryGetCharacter(state, job.targetId);
   // 角色不存在或已死亡 → 過期 Job，安靜丟棄。
   if (character === undefined || character.lifeState === 'dead') return makeResult(state);
-  // expectedRevision 原本完全沒驗（只在註解裡宣稱）。比對 lifecycleRevision 而非 revision：只有
-  // lifeState 轉換會讓它跳，所以受傷／狀態變更不會誤殺成年或自然死亡 Job（見契約 Character 註解）。
-  if (job.expectedRevision !== undefined && job.expectedRevision !== character.lifecycleRevision) {
+  // 比對**該種類自己的** token（見契約 CharacterLifecycleTokens）：受傷／狀態變更不會誤殺任何 Job，
+  // 退休也只作廢退休檢查、不作廢自然死亡檢查。
+  if (
+    job.expectedRevision !== undefined &&
+    job.expectedRevision !== character.lifecycleRevisions[job.payload.kind]
+  ) {
     return makeResult(state);
   }
 
@@ -790,10 +809,9 @@ function runRetirementCheck(
   if (decision.outcome === 'reschedule') {
     return makeResult(state, [], [
       lifecycleJobDraft(
-        character.characterId,
+        character,
         (ctx.worldDay + decision.nextCheckInDays) as WorldDay,
         { kind: 'retirementCheck' },
-        character.lifecycleRevision,
       ),
     ]);
   }
@@ -803,8 +821,9 @@ function runRetirementCheck(
     lifeState: 'retired',
     availability: 'unavailable',
     revision: bumpRevision(character.revision),
-    // 同 toDead：退休使剩餘的生命週期 Job（自然死亡檢查等）失效。
-    lifecycleRevision: bumpRevision(character.lifecycleRevision),
+    // 只作廢「退休檢查」。**不得**動到 naturalDeathCheck：退休角色仍會自然老死，連帶作廢會讓
+    // 出生時就排好的自然死亡 Job 永遠進不去（R9 #3）。
+    lifecycleRevisions: bumpLifecycleTokens(character.lifecycleRevisions, ['retirementCheck']),
   };
   return makeResult(upsertCharacter(state, next), [
     emit({ type: 'CharacterRetired', characterId: character.characterId, retiredOnDay: ctx.worldDay }),
@@ -827,10 +846,9 @@ function runNaturalDeathCheck(
   if (decision.outcome === 'reschedule') {
     return makeResult(state, [], [
       lifecycleJobDraft(
-        character.characterId,
+        character,
         (ctx.worldDay + decision.nextCheckInDays) as WorldDay,
         { kind: 'naturalDeathCheck' },
-        character.lifecycleRevision,
       ),
     ]);
   }
@@ -1105,30 +1123,27 @@ function scheduleLifecycleJobs(
   if (ageDays < lifecycle.adulthoodAgeDays) {
     jobs.push(
       lifecycleJobDraft(
-        character.characterId,
+        character,
         (character.birthDay + lifecycle.adulthoodAgeDays) as WorldDay,
         { kind: 'adulthood' },
-        character.lifecycleRevision,
       ),
     );
   }
   // 首次自然死亡檢查排在資料定義的自然壽命終點。
   jobs.push(
     lifecycleJobDraft(
-      character.characterId,
+      character,
       (character.birthDay + lifecycle.naturalLifeEndAgeDays) as WorldDay,
       { kind: 'naturalDeathCheck' },
-      character.lifecycleRevision,
     ),
   );
   // 有退休 Resolver 才排退休檢查（排在可玩年齡終點）。
   if (lifecycle.retirementResolverId !== undefined) {
     jobs.push(
       lifecycleJobDraft(
-        character.characterId,
+        character,
         (character.birthDay + lifecycle.playableAgeEndDays) as WorldDay,
         { kind: 'retirementCheck' },
-        character.lifecycleRevision,
       ),
     );
   }

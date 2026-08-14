@@ -167,12 +167,22 @@ export type Character = Readonly<{
   condition: CharacterCondition;
   temporaryOrigin?: TemporaryCharacterOrigin;
   revision: Revision;
-  // 生命週期專用版本。characterLifecycleDue Job 以此當 expectedRevision，而**不是** `revision`：
-  // `revision` 每次受傷、狀態變更、可用性調整都會跳，拿它驗會讓成年／退休／自然死亡 Job 全部過期
-  // 而永遠不觸發。只有「使已排程的生命週期 Job 失效」的轉換才跳這個值——即 lifeState 轉換
-  // （alive → retired / dead）。
-  lifecycleRevision: Revision;
+  // 生命週期排程 token，**逐種類分開**。characterLifecycleDue Job 以對應種類的值當 expectedRevision。
+  //
+  // 為什麼不是 `revision`：它每次受傷、狀態變更、可用性調整都會跳，拿它驗會讓成年／退休／自然死亡
+  // Job 在到期前就全部「過期」而永不觸發（R8 #6）。
+  // 為什麼不是單一個 lifecycleRevision：退休會跳它，連帶讓角色出生時就排好的**自然死亡** Job 一起
+  // 失效，退休角色從此不會自然老死（R9 #3）。三種 Job 的失效條件本來就不同，所以 token 也要分開。
+  lifecycleRevisions: CharacterLifecycleTokens;
 }>;
+
+export type CharacterLifecycleKind = 'adulthood' | 'retirementCheck' | 'naturalDeathCheck';
+
+// 各自的失效條件：
+//   adulthood        —— 死亡。
+//   retirementCheck  —— 死亡、或已經退休（不再需要退休檢查）。
+//   naturalDeathCheck—— 只有死亡。**退休不算**：退休角色仍會自然老死。
+export type CharacterLifecycleTokens = Readonly<Record<CharacterLifecycleKind, Revision>>;
 
 export type CharacterCondition = Readonly<{
   health: number;

@@ -89,7 +89,7 @@ export function createBringUpFixture(input: BringUpFixtureInput): BringUpFixture
     // bring-up：HP/MP 以固定值起手（正式開局由 progression capacity 決定上限）。
     condition: { health: 100, mana: 50, statuses: [] },
     revision: 0 as Revision,
-    lifecycleRevision: 0 as Revision,
+    lifecycleRevisions: { adulthood: 0 as Revision, retirementCheck: 0 as Revision, naturalDeathCheck: 0 as Revision },
   };
 
   const playerTeam: Team = {

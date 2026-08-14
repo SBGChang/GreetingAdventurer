@@ -36,6 +36,7 @@ import type {
   Sex,
   CharacterOrigin,
   TemporaryCharacterOrigin,
+  CharacterLifecycleTokens,
 } from '../../contracts/character';
 import type {
   CharacterHandlerContext,
@@ -82,7 +83,7 @@ export function makeCharacter(
     childIds?: readonly CharacterId[];
     innateTraitIds?: readonly CharacterTraitDefinitionId[];
     temporaryOrigin?: TemporaryCharacterOrigin;
-    lifecycleRevision?: Revision; // 供 characterLifecycleDue 的 expectedRevision 測試。
+    lifecycleRevisions?: CharacterLifecycleTokens; // 供 characterLifecycleDue 的 expectedRevision 測試。
   }>,
 ): Character {
   return {
@@ -100,7 +101,7 @@ export function makeCharacter(
     condition: input.condition ?? conditionOf(100, 50),
     ...(input.temporaryOrigin ? { temporaryOrigin: input.temporaryOrigin } : {}),
     revision: 0 as Revision,
-    lifecycleRevision: input.lifecycleRevision ?? (0 as Revision),
+    lifecycleRevisions: input.lifecycleRevisions ?? { adulthood: 0 as Revision, retirementCheck: 0 as Revision, naturalDeathCheck: 0 as Revision },
   };
 }
 

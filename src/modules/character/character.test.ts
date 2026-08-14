@@ -307,7 +307,7 @@ const cases: readonly Case[] = [
         characterId: 'kid' as CharacterId,
         birthDay: 0 as WorldDay,
         availability: 'unavailable',
-        lifecycleRevision: 1 as Revision,
+        lifecycleRevisions: { adulthood: 1 as Revision, retirementCheck: 0 as Revision, naturalDeathCheck: 0 as Revision },
       });
       const state = createCharacterState({ characters: [child] });
       const job: CharacterLifecycleJob = {
@@ -347,7 +347,7 @@ const cases: readonly Case[] = [
         dueDay: worldDay,
         ownerModule: 'character' as never,
         targetId: 'kid' as CharacterId,
-        expectedRevision: wounded.lifecycleRevision,
+        expectedRevision: wounded.lifecycleRevisions.adulthood,
         payload: { kind: 'adulthood' },
       };
       const res = handleCharacterLifecycleJob(job, state, makeContext({ worldDay }));
@@ -356,6 +356,83 @@ const cases: readonly Case[] = [
         '受傷不得讓成年 Job 過期',
       );
       assert(hasEvent(eventsOf(res.outgoingMessages), 'CharacterBecameAdult'), '應 emit CharacterBecameAdult');
+    },
+  },
+  {
+    // R9 #3：R8 #6 用單一 lifecycleRevision，退休會跳它 → 出生時就排好的自然死亡 Job 一起作廢，
+    // 退休角色從此不會自然老死（但 Handler 明明允許 retired 執行）。token 必須逐種類分開。
+    name: '生命週期 Job：退休不得作廢自然死亡 Job（退休角色仍會自然老死）',
+    run: () => {
+      const worldDay = 30000 as WorldDay; // > 自然壽命終點 29200
+      const born = makeCharacter({ characterId: 'elder' as CharacterId, birthDay: 0 as WorldDay });
+      // 出生時排好的自然死亡 Job，帶的是當時的 naturalDeathCheck token。
+      const deathJob: CharacterLifecycleJob = {
+        jobId: 'job-death' as never,
+        type: 'characterLifecycleDue',
+        dueDay: worldDay,
+        ownerModule: 'character' as never,
+        targetId: 'elder' as CharacterId,
+        expectedRevision: born.lifecycleRevisions.naturalDeathCheck,
+        payload: { kind: 'naturalDeathCheck' },
+      };
+
+      // 中途退休：跑一次 retirementCheck 並讓 resolver 判定觸發。
+      const retireJob: CharacterLifecycleJob = {
+        jobId: 'job-retire' as never,
+        type: 'characterLifecycleDue',
+        dueDay: 20075 as WorldDay,
+        ownerModule: 'character' as never,
+        targetId: 'elder' as CharacterId,
+        expectedRevision: born.lifecycleRevisions.retirementCheck,
+        payload: { kind: 'retirementCheck' },
+      };
+      const retired = handleCharacterLifecycleJob(
+        retireJob,
+        createCharacterState({ characters: [born] }),
+        makeContext({
+          worldDay: 20075 as WorldDay,
+          resolvers: stubResolverPort({ resolveRetirement: () => ({ outcome: 'trigger' }) }),
+        }),
+      );
+      assert(reqChar(retired.nextSlice, 'elder' as CharacterId).lifeState === 'retired', '前提：角色應已退休');
+
+      // 自然死亡 Job 到期：退休不得讓它過期。
+      const died = handleCharacterLifecycleJob(
+        deathJob,
+        retired.nextSlice,
+        makeContext({
+          worldDay,
+          resolvers: stubResolverPort({ resolveNaturalDeath: () => ({ outcome: 'trigger' }) }),
+        }),
+      );
+      assert(
+        reqChar(died.nextSlice, 'elder' as CharacterId).lifeState === 'dead',
+        '退休角色仍應自然老死（退休不得作廢自然死亡 Job）',
+      );
+      assert(hasEvent(eventsOf(died.outgoingMessages), 'CharacterDied'), '應 emit CharacterDied');
+    },
+  },
+  {
+    name: '生命週期 Job：退休後的舊退休檢查 Job 過期丟棄（該種類的 token 已跳）',
+    run: () => {
+      const born = makeCharacter({ characterId: 'elder2' as CharacterId, birthDay: 0 as WorldDay });
+      const retireJob: CharacterLifecycleJob = {
+        jobId: 'job-retire' as never,
+        type: 'characterLifecycleDue',
+        dueDay: 20075 as WorldDay,
+        ownerModule: 'character' as never,
+        targetId: 'elder2' as CharacterId,
+        expectedRevision: born.lifecycleRevisions.retirementCheck,
+        payload: { kind: 'retirementCheck' },
+      };
+      const ctx = makeContext({
+        worldDay: 20075 as WorldDay,
+        resolvers: stubResolverPort({ resolveRetirement: () => ({ outcome: 'trigger' }) }),
+      });
+      const retired = handleCharacterLifecycleJob(retireJob, createCharacterState({ characters: [born] }), ctx);
+      // 同一筆（或重複的）退休檢查再跑一次：token 已跳 → no-op，不得重複發 CharacterRetired。
+      const again = handleCharacterLifecycleJob(retireJob, retired.nextSlice, ctx);
+      assert(eventsOf(again.outgoingMessages).length === 0, '過期的退休檢查不得再發事件');
     },
   },
   {
