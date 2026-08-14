@@ -585,6 +585,9 @@ function applyEffect(
             }),
           ),
         );
+        // 有效傷害＝真正扣除的 HP：尾刀溢出（面板 30 打剩 5 HP）不計入熟練度，否則高傷武器靠尾刀
+        // 取得不合理的攻擊熟練度比例。面板 amount 仍用於顯示與致死判定。
+        const effectiveDamage = Math.min(amount, target.health);
         const nextHealth = target.health - amount;
         const dead = nextHealth <= 0;
         combatants[targetId] = {
@@ -595,10 +598,10 @@ function applyEffect(
         };
         results.push({ kind: 'dealDamage', targetId: String(targetId), amount, dead });
 
-        // 攻擊 MXP 帳本：只累計角色行動者對各 Mastery 的有效傷害。
+        // 攻擊 MXP 帳本：只累計角色行動者對各 Mastery 的**有效**傷害（非面板值）。
         const actor = combatants[actorId];
-        if (actor !== undefined && actor.source.kind === 'character' && amount > 0) {
-          recordAttackDamage(work, actor.source.characterId, ctx.resolvers.resolveAttackMastery(skillId), amount);
+        if (actor !== undefined && actor.source.kind === 'character' && effectiveDamage > 0) {
+          recordAttackDamage(work, actor.source.characterId, ctx.resolvers.resolveAttackMastery(skillId), effectiveDamage);
         }
       }
       return { ...work, combatants, results };

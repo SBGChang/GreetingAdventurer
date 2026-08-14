@@ -270,6 +270,39 @@ const cases: readonly Case[] = [
     },
   },
   {
+    name: '#4：溢出傷害不計入攻擊熟練度（尾刀只算真正扣除的 HP）',
+    run: () => {
+      const ctx = makeCombatContext();
+      const started = handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx);
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const enc0 = started.nextSlice.encounters[encounterId]!;
+      const actorId = enc0.currentActorId!;
+      const actor = enc0.combatants[actorId]!;
+      assert(actor.source.kind === 'character', '行動者應為玩家角色');
+      const characterId = actor.source.kind === 'character' ? actor.source.characterId : undefined;
+      const enemyId = aliveEnemies(enc0)[0]!.combatantId;
+      // 敵人壓到 5 HP：面板傷害（30）溢出 25，只有 5 是有效傷害。
+      const state: CombatState = {
+        ...started.nextSlice,
+        encounters: {
+          ...started.nextSlice.encounters,
+          [encounterId]: {
+            ...enc0,
+            combatants: { ...enc0.combatants, [enemyId]: { ...enc0.combatants[enemyId]!, health: 5 } },
+          },
+        },
+      };
+      const res = handleUseCombatSkill(
+        state,
+        { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_STRIKE, targetCombatantIds: [enemyId] },
+        ctx,
+      );
+      const ledger = res.nextSlice.encounters[encounterId]?.attackDamageByCharacter[characterId!] ?? {};
+      const total = Object.values(ledger).reduce((a, b) => a + b, 0);
+      assert(total === 5, `攻擊熟練度應記有效傷害 5（非面板 30），實得 ${total}`);
+    },
+  },
+  {
     name: '#6：未學/偽造技能於 knows() 即擋下，不得先呼叫 getSkillView（不崩潰）',
     run: () => {
       const BOGUS = 'skill-bogus-not-a-def' as SkillDefinitionId;
