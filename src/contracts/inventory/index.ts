@@ -194,11 +194,26 @@ export type ItemLocation =
   | Readonly<{ kind: 'assetDistributionEscrow'; distributionId: AssetDistributionId }>
   | Readonly<{ kind: 'removed'; reason: ItemRemovalReason }>;
 
-export type ItemReservation = Readonly<{
-  kind: 'questTarget' | 'craftingInput' | 'pendingTransfer';
-  ownerId: CharacterId | AssetDistributionId | TeamId;
-  reservedQuantity: number;
-}>;
+// 判別聯集而非 `kind` 欄位聯集：craftingInput 必須帶 craftingAttemptId，由編譯器強制。
+// 原本三種保留共用同一個扁平結構，ReserveCraftingInputs 收到的 craftingAttemptId 無處可放而被丟掉，
+// 素材保留給哪一次製作事後無從確認（也就無法在消耗時驗證是不是同一次）。
+export type ItemReservation =
+  | Readonly<{
+      kind: 'questTarget';
+      ownerId: CharacterId | AssetDistributionId | TeamId;
+      reservedQuantity: number;
+    }>
+  | Readonly<{
+      kind: 'craftingInput';
+      ownerId: CharacterId | AssetDistributionId | TeamId;
+      reservedQuantity: number;
+      craftingAttemptId: CraftingAttemptId;
+    }>
+  | Readonly<{
+      kind: 'pendingTransfer';
+      ownerId: CharacterId | AssetDistributionId | TeamId;
+      reservedQuantity: number;
+    }>;
 
 export type EncumbranceResolutionState = 'deferredDuringTravel' | 'awaitingPlayer';
 

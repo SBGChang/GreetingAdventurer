@@ -288,6 +288,8 @@ export function reserveCraftingInputs(
       kind: 'craftingInput',
       ownerId: owner,
       reservedQuantity: inst.quantity,
+      // 記下是哪一次製作保留了這批素材；消耗端（TransformCraftingItems，尚未實作）據此比對。
+      craftingAttemptId: cmd.craftingAttemptId,
     };
     const next: ItemInstance = { ...inst, reservation, revision: inst.revision + 1 };
     items = { ...items, [id]: next };

@@ -165,6 +165,16 @@ const cases: readonly Case[] = [
       );
       const q2 = createInventoryQuery(good, deps.reader);
       assert(q2.isReserved(FIXTURE.swordItemId) && q2.isReserved(FIXTURE.potionItemId), 'craft-good: both reserved');
+      // R8 #7 迴歸：craftingAttemptId 原本被丟掉，事後無從確認素材保留給哪一次製作。
+      for (const itemId of [FIXTURE.swordItemId, FIXTURE.potionItemId]) {
+        const reservation = good.items[itemId]?.reservation;
+        assert(reservation?.kind === 'craftingInput', `craft-good: ${String(itemId)} reserved as craftingInput`);
+        assert(
+          reservation?.kind === 'craftingInput' &&
+            String(reservation.craftingAttemptId) === 'runtime:crafting-attempt:c1',
+          `craft-good: ${String(itemId)} records the crafting attempt it is reserved for`,
+        );
+      }
     },
   },
   {
