@@ -82,6 +82,7 @@ export function makeCharacter(
     childIds?: readonly CharacterId[];
     innateTraitIds?: readonly CharacterTraitDefinitionId[];
     temporaryOrigin?: TemporaryCharacterOrigin;
+    lifecycleRevision?: Revision; // 供 characterLifecycleDue 的 expectedRevision 測試。
   }>,
 ): Character {
   return {
@@ -99,6 +100,7 @@ export function makeCharacter(
     condition: input.condition ?? conditionOf(100, 50),
     ...(input.temporaryOrigin ? { temporaryOrigin: input.temporaryOrigin } : {}),
     revision: 0 as Revision,
+    lifecycleRevision: input.lifecycleRevision ?? (0 as Revision),
   };
 }
 

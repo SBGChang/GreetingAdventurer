@@ -167,6 +167,11 @@ export type Character = Readonly<{
   condition: CharacterCondition;
   temporaryOrigin?: TemporaryCharacterOrigin;
   revision: Revision;
+  // 生命週期專用版本。characterLifecycleDue Job 以此當 expectedRevision，而**不是** `revision`：
+  // `revision` 每次受傷、狀態變更、可用性調整都會跳，拿它驗會讓成年／退休／自然死亡 Job 全部過期
+  // 而永遠不觸發。只有「使已排程的生命週期 Job 失效」的轉換才跳這個值——即 lifeState 轉換
+  // （alive → retired / dead）。
+  lifecycleRevision: Revision;
 }>;
 
 export type CharacterCondition = Readonly<{

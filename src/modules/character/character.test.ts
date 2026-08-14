@@ -11,6 +11,7 @@ import type {
   TransactionMessageDraft,
 } from '../../contracts/core';
 import type {
+  Character,
   CharacterState,
   FamilyLink,
   ApplyCombatCondition,
@@ -293,6 +294,67 @@ const cases: readonly Case[] = [
       };
       const res = handleCharacterLifecycleJob(job, state, makeContext({ worldDay }));
       assert(reqChar(res.nextSlice, 'kid' as CharacterId).availability === 'available', '成年應轉 available');
+      assert(hasEvent(eventsOf(res.outgoingMessages), 'CharacterBecameAdult'), '應 emit CharacterBecameAdult');
+    },
+  },
+  {
+    // R8 P2：expectedRevision 原本只寫在註解裡，從未比對。
+    name: '生命週期 Job：expectedRevision 與 lifecycleRevision 不符 → 過期丟棄',
+    run: () => {
+      const worldDay = 6000 as WorldDay;
+      // 角色的生命週期已推進過一次（例如已退休），舊 Job 帶的是 0。
+      const child = makeCharacter({
+        characterId: 'kid' as CharacterId,
+        birthDay: 0 as WorldDay,
+        availability: 'unavailable',
+        lifecycleRevision: 1 as Revision,
+      });
+      const state = createCharacterState({ characters: [child] });
+      const job: CharacterLifecycleJob = {
+        jobId: 'job-stale' as never,
+        type: 'characterLifecycleDue',
+        dueDay: worldDay,
+        ownerModule: 'character' as never,
+        targetId: 'kid' as CharacterId,
+        expectedRevision: 0 as Revision,
+        payload: { kind: 'adulthood' },
+      };
+      const res = handleCharacterLifecycleJob(job, state, makeContext({ worldDay }));
+      assert(
+        reqChar(res.nextSlice, 'kid' as CharacterId).availability === 'unavailable',
+        '過期 Job 不得改狀態',
+      );
+      assert(eventsOf(res.outgoingMessages).length === 0, '過期 Job 不得發事件');
+    },
+  },
+  {
+    // R8 P2 的另一半，也是不能直接拿 character.revision 驗的原因：受傷會跳 revision，
+    // 若拿它當 expectedRevision，成年／自然死亡 Job 會全部被誤判成過期而永遠不觸發。
+    name: '生命週期 Job：受傷跳 revision 但不跳 lifecycleRevision → 成年 Job 仍成立',
+    run: () => {
+      const worldDay = 6000 as WorldDay;
+      const injured = makeCharacter({
+        characterId: 'kid' as CharacterId,
+        birthDay: 0 as WorldDay,
+        availability: 'unavailable',
+      });
+      // 模擬排程後受過幾次傷：revision 已前進，lifecycleRevision 未動。
+      const wounded: Character = { ...injured, revision: 7 as Revision };
+      const state = createCharacterState({ characters: [wounded] });
+      const job: CharacterLifecycleJob = {
+        jobId: 'job-adult' as never,
+        type: 'characterLifecycleDue',
+        dueDay: worldDay,
+        ownerModule: 'character' as never,
+        targetId: 'kid' as CharacterId,
+        expectedRevision: wounded.lifecycleRevision,
+        payload: { kind: 'adulthood' },
+      };
+      const res = handleCharacterLifecycleJob(job, state, makeContext({ worldDay }));
+      assert(
+        reqChar(res.nextSlice, 'kid' as CharacterId).availability === 'available',
+        '受傷不得讓成年 Job 過期',
+      );
       assert(hasEvent(eventsOf(res.outgoingMessages), 'CharacterBecameAdult'), '應 emit CharacterBecameAdult');
     },
   },
