@@ -8,6 +8,24 @@
 
 ---
 
+## 2026-08-13 — 複審回合 6：5 個 P1（狀態不變量；現有測試沒覆蓋到）
+
+全是「tsc + verify 全綠但狀態不變量被破壞」的洞——現有測試沒測到。逐一修根、加不變量測試、各自 commit。
+
+**#1 戰鬥熟練度事件非冪等** —— `handleCombatAttack/Defense/SupportMasteryEarned` 用固定 awardKind、**完全沒用 `payload.source`**，同一 `CombatAttackMasteryEarned` 重放 → 經驗 50→100、又發 5 個事件。doc §7.5 要求以 `CombatMasterySource` 冪等。加 `masteryLedger`(key = awardKind + encounter/sequence);`applyMasteryOnce` 已記帳的來源重放 → no-op。attack/defense/support 各自 key,同 encounter 三種不互擋。
+
+**#2 裝備中物品可直接變任務貨物** —— `moveItemToTeamQuestCargo` 把物品移到 `teamQuestCargo` 卻沒動 Loadout,武器仍掛主手 → 破壞 single-location。(`reserveQuestItem` 刻意允許保留 equipped 物品,故此流程本就接受 equipped;修法是**同步卸下**而非拒絕。)加 `clearLoadoutRefIfEquipped`:物品離開 equipped 時,同一交易清掉所有武器組/裝甲格引用。transferItem/removeItem 本就對 equipped 物品拒絕,不受影響。
+
+**#3 離隊/刪隊沒同步戰鬥配置** —— 違反「成員變動須於同一交易產生合法配置」。離隊後:玩家隊配置仍含離隊者、新生成單人 NPC Team 無配置;招募刪除來源 Team 後舊配置殘留。修:`settleRetentionAndDepartures` 離隊後重建玩家隊配置 + 為每個新生成 NPC Team 建配置;`removeTeam` 一併清 `combatFormations`/`memberRetention`(招募走 removeTeam,故來源配置不再殘留)。
+
+**#4 溢出傷害算進熟練度** —— 對剩 5 HP 敵人面板 30 傷,帳本記 30(非真正扣的 5),高傷武器靠尾刀刷攻擊熟練度。改 `recordAttackDamage` 用 `min(面板, 目標當前 HP)`;面板值仍用於顯示與致死判定。
+
+**#5 配置未驗 `floor`** —— 格位只驗 row/col 範圍,重疊 key 卻含 floor → 同 row/col 但 floor 0 vs 99 可規避重疊檢查。戰鬥配置單一 3×3,floor 必為 0;非 0 現以 cell-out-of-range 拒絕。
+
+`tsc` 乾淨、verify 全過(新增:熟練度冪等、任務貨物卸裝、離隊/刪隊重建配置、溢出傷害、floor 等測)。
+
+---
+
 ## 2026-08-13 — 複審回合 5：7 P1 + 1 P2（上輪修得太窄的補課 + 文件漂移）
 
 複審重現 7 P1 + 1 P2，多條直接證明 R4 修得太窄（只覆蓋窄測案例）。逐一修根、各自 commit。
