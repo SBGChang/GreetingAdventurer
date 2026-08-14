@@ -638,10 +638,14 @@ export function handleApplyNpcDungeonSettlement(
       const content = tryGetContent(nextState, target.contentId);
       if (
         content === undefined ||
+        content.mapId !== command.mapId || // 內容須屬本次結算的地圖（不得跨圖結算）
         content.mapVersion !== instance.currentVersion ||
+        content.revision !== target.contentRevision || // 內容自 NPC 產生結果後已變（如委託 ProtectMapContent
+        // bump revision、或被玩家處理）→ 舊結果失效，不得再結算（否則舊 NPC 結果可清掉已受保護的內容）
+        content.npcResolverId !== result.resolverId || // Resolver 須與內容宣告的 npcResolverId 一致
         content.state !== 'available'
       ) {
-        skipped.push(result); // 已被玩家或其他結算處理（doc §6 skippedResults）
+        skipped.push(result); // 已被玩家或其他結算處理、或內容已變／受保護（doc §6 skippedResults）
         continue;
       }
       const resolved: MapContentInstance = {

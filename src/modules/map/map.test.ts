@@ -323,6 +323,48 @@ const cases: readonly Case[] = [
     },
   },
   {
+    name: '#3：內容 revision 已變（委託保護 bump）→ 舊 NPC 結果進 skipped，不清掉受保護內容',
+    run: () => {
+      const refreshed = handleMapRefreshCheck(regularJob(100), fixtureMapState(1), makeContext()).nextSlice;
+      const query = createMapQuery(refreshed, stubDefinitionReader());
+      const contentView = query.listAvailableContent(MAP_ID)[0]!;
+      const full = refreshed.contents[contentView.contentId]!;
+      // NPC 結果以「產生當下」的 revision 記錄目標。
+      const pending: PendingDungeonResult = {
+        target: { kind: 'mapContent', contentId: full.contentId, contentRevision: full.revision },
+        npcOrder: full.npcOrder ?? 1,
+        attemptedOnDay: 100 as WorldDay,
+        outcome: 'success',
+        resolverId: full.npcResolverId as ResolverId,
+        pendingRewardRefs: [],
+      };
+      const cmd: ApplyNpcDungeonSettlement = {
+        type: 'ApplyNpcDungeonSettlement',
+        runId: 'run-1' as NpcDungeonRunId,
+        mapId: MAP_ID,
+        mapVersion: 2,
+        distributionId: 'dist-1' as AssetDistributionId,
+        pendingResults: [pending],
+      };
+      // 模擬 NPC 結果產生後、結算前，內容被委託保護 → content revision 前進。
+      const protectedState = {
+        ...refreshed,
+        contents: {
+          ...refreshed.contents,
+          [full.contentId]: { ...full, revision: (full.revision + 1) as typeof full.revision, protectedByQuestIds: ['runtime:quest:q1' as never] },
+        },
+      };
+      const r = expectOk(handleApplyNpcDungeonSettlement(cmd, protectedState, makeContext()), 'settle-stale');
+      const applied = findEvent(eventsOf(r.outgoingMessages), 'NpcDungeonSettlementApplied');
+      assert(applied!.appliedResults.length === 0, 'revision 已變 → 舊結果不得套用');
+      assert(applied!.skippedResults.length === 1, '應進 skipped');
+      assert(
+        r.nextSlice.contents[full.contentId]!.state === 'available',
+        '受保護內容應維持 available（不被舊 NPC 結果清掉）',
+      );
+    },
+  },
+  {
     name: 'Pending: 有隊伍在圖內不當日刷新、次日無人才刷新',
     run: () => {
       const state = fixtureMapState(1);
