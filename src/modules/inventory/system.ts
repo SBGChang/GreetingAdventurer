@@ -31,6 +31,7 @@ import type {
   InventoryDomainEvent,
   ItemDefinitionReader,
   ItemLocation,
+  EquipmentHand,
   ItemReservation,
   MoveItemToTeamQuestCargo,
   RemoveItemInstance,
@@ -396,8 +397,17 @@ export function equipItem(
   const def = deps.reader.getItem(inst.definitionId);
   if (def.kind !== 'equipment') return reject('inventory/not-equipment');
   const equip = deps.reader.getEquipment(inst.definitionId);
-  // occupiedSlots 以資料表達合法位置（doc §2.3、§3.5 不變量 6）。
-  if (!equip.occupiedSlots.includes(cmd.slotId)) {
+  // 目標手由**玩家指名的 slotId** 解析，而不是從 equipmentKind 猜：單手武器兩手皆為合法手（雙持），
+  // 猜法表達不出「這把劍要放副手」。
+  const handForSlot: EquipmentHand | undefined =
+    equip.handSlots.mainHand === cmd.slotId
+      ? 'mainHand'
+      : equip.handSlots.offHand === cmd.slotId
+        ? 'offHand'
+        : undefined;
+  // 合法位置（doc §2.3、§3.5 不變量 6）：鎧甲／飾品看 occupiedSlots，手持裝備看 handSlots。
+  // 單手武器的 occupiedSlots 只有 [mainHandSlot]，光看它會擋掉合法的副手雙持。
+  if (handForSlot === undefined && !equip.occupiedSlots.includes(cmd.slotId)) {
     return reject('inventory/illegal-slot', { slotId: String(cmd.slotId) });
   }
 
@@ -428,12 +438,11 @@ export function equipItem(
     if (idx < 0) return reject('inventory/unknown-weapon-set', { weaponSetId: String(cmd.weaponSetId) });
     const set = loadout.weaponSets[idx]!;
 
-    // 目標手:雙手武器占滿主+副;盾牌屬副手;其餘單手武器屬主手。原本一律寫進主手,導致裝副手(盾)
-    // 被錯放到主手(offHand→mainHand bug)。[限制] 單手武器的「雙持副手」需 slot→hand 訊號,資料模型
-    // 目前未提供,故單手武器一律主手。
+    // 目標手：雙手武器占滿主+副；其餘依玩家指名的 slot 解析出的 handForSlot。單手武器指名副手 slot 即
+    // 雙持副手（GDD §511），不再一律塞主手。
     const previousMainIsTwoHanded =
       set.mainHandItemId !== undefined && set.offHandItemId === set.mainHandItemId;
-    const goesOffHand = !isTwoHanded && equip.equipmentKind === 'shield';
+    const goesOffHand = !isTwoHanded && handForSlot === 'offHand';
 
     let nextMain = set.mainHandItemId;
     let nextOff = set.offHandItemId;
@@ -581,15 +590,13 @@ export function configureWeaponSet(
   if ((mainTwoHanded || offTwoHanded) && cmd.mainHandItemId !== cmd.offHandItemId) {
     return reject('inventory/two-handed-must-occupy-both-hands');
   }
-  // 手部位置合法性：主手須為武器（盾/鎧甲/飾品不得放主手）。副手只收**盾**（其 occupiedSlots=[offHandSlot]），
-  // 或與主手同一件的雙手武器。
-  // [資料模型限制] 單手武器的 occupiedSlots 一律 [mainHandSlot]，模組**無從得知副手 slot**，若放副手則
-  // ItemLocation.slotId 會與主手撞位（先前 bug）。故一律拒絕單手武器放副手，與 equipItem「單手武器一律主手」
-  // 一致。GDD 的「同組雙持兩把武器」需先加 slot→hand 契約訊號（見 HANDOFF）才能正確表示。
-  if (mainEquip !== undefined && mainEquip.equipmentKind !== 'weapon') {
+  // 手部位置合法性一律問裝備自己的 handSlots（見契約 EquipmentHandSlots）：單手武器兩手皆可（雙持），
+  // 盾只有副手，鎧甲／飾品兩手皆無。不再用 equipmentKind 推導——R8 #1 那版把副手限定成盾，等於再次禁掉
+  // GDD §511 的同組雙持（R5 #5 已修過一次）。
+  if (mainEquip !== undefined && mainEquip.handSlots.mainHand === undefined) {
     return reject('inventory/illegal-hand', { hand: 'mainHand', kind: mainEquip.equipmentKind });
   }
-  if (offEquip !== undefined && cmd.offHandItemId !== cmd.mainHandItemId && offEquip.equipmentKind !== 'shield') {
+  if (offEquip !== undefined && offEquip.handSlots.offHand === undefined) {
     return reject('inventory/illegal-hand', { hand: 'offHand', kind: offEquip.equipmentKind });
   }
 
@@ -639,15 +646,20 @@ export function configureWeaponSet(
       revision: old.revision + 1,
     });
   }
-  // 裝上的物品 → equipped（slotId 取裝備自身 occupiedSlots[0]，帶 weaponSetId）；同步 ItemLocation。
+  // 裝上的物品 → equipped，slotId 取**實際配置的那隻手**對應的 slot（不是定義的 occupiedSlots[0]）。
+  // 同一把單手武器放主手或副手，location 必須分別落在主手／副手 slot，否則雙持兩把武器會同時宣稱占主手。
+  // 雙手武器 main===off，去重後以主手為錨（其 occupiedSlots 本就同時涵蓋兩格）。
   for (const newId of newItemIds) {
     const inst = working.items[newId];
     if (inst === undefined) continue;
     const eq = deps.reader.getEquipment(inst.definitionId);
+    const hand: EquipmentHand = newId === cmd.mainHandItemId ? 'mainHand' : 'offHand';
+    const slotId = eq.handSlots[hand];
+    if (slotId === undefined) return reject('inventory/illegal-hand', { hand, kind: eq.equipmentKind });
     const location: ItemLocation = {
       kind: 'equipped',
       characterId: cmd.characterId,
-      slotId: eq.occupiedSlots[0]!,
+      slotId,
       weaponSetId: cmd.weaponSetId,
     };
     working = withItem(working, { ...inst, location, revision: inst.revision + 1 });

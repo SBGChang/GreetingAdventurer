@@ -41,6 +41,7 @@ export const FIXTURE = {
   teamId: 'runtime:team:player' as TeamId,
   // Definition IDs
   swordDefId: 'definition:item:sword' as ItemDefinitionId,
+  axeDefId: 'definition:item:axe' as ItemDefinitionId, // 第二種單手武器：供「同組混搭兩種武器」的雙持測試
   greatswordDefId: 'definition:item:greatsword' as ItemDefinitionId,
   shieldDefId: 'definition:item:shield' as ItemDefinitionId,
   robeDefId: 'definition:item:robe' as ItemDefinitionId, // 多格甲：body + head
@@ -50,6 +51,7 @@ export const FIXTURE = {
   paperDefId: 'definition:item:paper' as ItemDefinitionId,
   // Item instance IDs
   swordItemId: 'runtime:item-instance:sword-1' as ItemInstanceId,
+  axeItemId: 'runtime:item-instance:axe-1' as ItemInstanceId,
   greatswordItemId: 'runtime:item-instance:greatsword-1' as ItemInstanceId,
   shieldItemId: 'runtime:item-instance:shield-1' as ItemInstanceId,
   robeItemId: 'runtime:item-instance:robe-1' as ItemInstanceId,
@@ -88,6 +90,8 @@ const swordDef: EquipmentDefinition = {
   rarity: 'common',
   relatedMasteryIds: [],
   occupiedSlots: [FIXTURE.mainHandSlot], // 單手
+  // 單手武器兩手皆可放（GDD §511 同組雙持）；放哪手就寫哪手的 slot。
+  handSlots: { mainHand: FIXTURE.mainHandSlot, offHand: FIXTURE.offHandSlot },
   // 五個主屬性係數必須齊全（PrimaryAttributeId 是 progression 的 5 字面值聯集，不是任意 ID）。
   primaryAttributeCoefficients: { muscle: 0, intelligence: 0, reaction: 0, coordination: 0, charisma: 0 },
   secondaryAttributeCoefficients: [],
@@ -101,6 +105,8 @@ const greatswordDef: EquipmentDefinition = {
   rarity: 'fine',
   relatedMasteryIds: [],
   occupiedSlots: [FIXTURE.mainHandSlot, FIXTURE.offHandSlot], // 雙手占主/副
+  // 雙手武器兩手皆列出，但 occupiedSlots.length > 1 表示必須同時占滿，非二選一。
+  handSlots: { mainHand: FIXTURE.mainHandSlot, offHand: FIXTURE.offHandSlot },
   // 五個主屬性係數必須齊全（PrimaryAttributeId 是 progression 的 5 字面值聯集，不是任意 ID）。
   primaryAttributeCoefficients: { muscle: 0, intelligence: 0, reaction: 0, coordination: 0, charisma: 0 },
   secondaryAttributeCoefficients: [],
@@ -109,6 +115,21 @@ const greatswordDef: EquipmentDefinition = {
 
 const noCoeff = { muscle: 0, intelligence: 0, reaction: 0, coordination: 0, charisma: 0 } as const;
 
+// 第二種單手武器。GDD §511「雙持：同組內可混搭兩種武器」——測試必須是兩個不同定義，
+// 而不是同一把劍的兩個實例。
+const axeDef: EquipmentDefinition = {
+  ...baseItem(FIXTURE.axeDefId, 'equipment', 28),
+  kind: 'equipment',
+  equipmentKind: 'weapon',
+  rarity: 'common',
+  relatedMasteryIds: [],
+  occupiedSlots: [FIXTURE.mainHandSlot], // 單手
+  handSlots: { mainHand: FIXTURE.mainHandSlot, offHand: FIXTURE.offHandSlot },
+  primaryAttributeCoefficients: noCoeff,
+  secondaryAttributeCoefficients: [],
+  skillEffectRefs: [],
+};
+
 const shieldDef: EquipmentDefinition = {
   ...baseItem(FIXTURE.shieldDefId, 'equipment', 20),
   kind: 'equipment',
@@ -116,6 +137,7 @@ const shieldDef: EquipmentDefinition = {
   rarity: 'common',
   relatedMasteryIds: [],
   occupiedSlots: [FIXTURE.offHandSlot], // 盾屬副手
+  handSlots: { offHand: FIXTURE.offHandSlot }, // 盾不得放主手
   primaryAttributeCoefficients: noCoeff,
   secondaryAttributeCoefficients: [],
   skillEffectRefs: [],
@@ -128,6 +150,7 @@ const robeDef: EquipmentDefinition = {
   rarity: 'common',
   relatedMasteryIds: [],
   occupiedSlots: [FIXTURE.bodySlot, FIXTURE.headSlot], // 多格甲：body + head
+  handSlots: {}, // 鎧甲不占手
   primaryAttributeCoefficients: noCoeff,
   secondaryAttributeCoefficients: [],
   skillEffectRefs: [],
@@ -140,6 +163,7 @@ const chestDef: EquipmentDefinition = {
   rarity: 'common',
   relatedMasteryIds: [],
   occupiedSlots: [FIXTURE.bodySlot], // 單格甲：body
+  handSlots: {}, // 鎧甲不占手
   primaryAttributeCoefficients: noCoeff,
   secondaryAttributeCoefficients: [],
   skillEffectRefs: [],
@@ -180,6 +204,7 @@ const useDelayRule: UseDelayRuleDefinition = {
 export function createFixtureReader(): ItemDefinitionReader {
   const defs: Record<string, ItemDefinition> = {
     [FIXTURE.swordDefId]: swordDef,
+    [FIXTURE.axeDefId]: axeDef,
     [FIXTURE.greatswordDefId]: greatswordDef,
     [FIXTURE.shieldDefId]: shieldDef,
     [FIXTURE.robeDefId]: robeDef,
@@ -258,6 +283,7 @@ export function createFixtureState(): InventoryState {
       [FIXTURE.swordItemId]: sword,
       [FIXTURE.potionItemId]: potion,
       [FIXTURE.greatswordItemId]: greatsword,
+      [FIXTURE.axeItemId]: bagItem(FIXTURE.axeItemId, FIXTURE.axeDefId),
       [FIXTURE.shieldItemId]: bagItem(FIXTURE.shieldItemId, FIXTURE.shieldDefId),
       [FIXTURE.robeItemId]: bagItem(FIXTURE.robeItemId, FIXTURE.robeDefId),
       [FIXTURE.chestItemId]: bagItem(FIXTURE.chestItemId, FIXTURE.chestDefId),

@@ -489,18 +489,62 @@ const cases: readonly Case[] = [
     },
   },
   {
-    name: 'configureWeaponSet: 單手武器不得放副手（資料模型無副手 slot 訊號 → 會撞位；與 equipItem 一致）',
+    // R9 #1：R8 #1 為了修 slotId 撞位而禁掉單手武器放副手，等於再次禁掉 GDD §511 的同組雙持
+    //（R5 #5 已修過一次）。正確解是手別契約 handSlots，不是禁用。
+    name: 'configureWeaponSet: 雙持——同組混搭兩種單手武器，各自寫進自己那手的 slot',
+    run: () => {
+      const deps = createFixtureDeps();
+      const next = expectOk(
+        configureWeaponSet(
+          createFixtureState(),
+          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, mainHandItemId: FIXTURE.swordItemId, offHandItemId: FIXTURE.axeItemId, selectedSkillIds: [undefined, undefined, undefined] },
+          deps,
+        ),
+        'dual-wield sword+axe',
+      );
+      const q = createInventoryQuery(next, deps.reader);
+      const swordLoc = q.getLocation(FIXTURE.swordItemId);
+      const axeLoc = q.getLocation(FIXTURE.axeItemId);
+      assert(swordLoc?.kind === 'equipped' && swordLoc.slotId === FIXTURE.mainHandSlot, '主手劍應寫主手 slot');
+      assert(axeLoc?.kind === 'equipped' && axeLoc.slotId === FIXTURE.offHandSlot, '副手斧應寫副手 slot（不得撞主手）');
+      assert(
+        swordLoc?.kind === 'equipped' && axeLoc?.kind === 'equipped' && swordLoc.slotId !== axeLoc.slotId,
+        '雙持兩把武器不得占同一個 slot',
+      );
+    },
+  },
+  {
+    name: 'configureWeaponSet: 盾不得放主手（handSlots 沒有 mainHand）',
     run: () => {
       const deps = createFixtureDeps();
       expectReject(
         configureWeaponSet(
           createFixtureState(),
-          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, offHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] },
+          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, mainHandItemId: FIXTURE.shieldItemId, selectedSkillIds: [undefined, undefined, undefined] },
           deps,
         ),
         'inventory/illegal-hand',
-        'one-handed weapon in off hand (unrepresentable dual-wield)',
+        'shield in main hand',
       );
+    },
+  },
+  {
+    name: 'equipItem: 單手武器指名副手 slot → 進副手（雙持），location.slotId 為副手',
+    run: () => {
+      const deps = createFixtureDeps();
+      const next = expectOk(
+        equipItem(
+          createFixtureState(),
+          { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.axeItemId, slotId: FIXTURE.offHandSlot, weaponSetId: WS0 },
+          deps,
+        ),
+        'equip axe to off hand',
+      );
+      const q = createInventoryQuery(next, deps.reader);
+      const axeLoc = q.getLocation(FIXTURE.axeItemId);
+      assert(axeLoc?.kind === 'equipped' && axeLoc.slotId === FIXTURE.offHandSlot, 'equipItem 應尊重指名的副手 slot');
+      const set0 = q.getEquipmentLoadout(FIXTURE.characterId).weaponSets[0];
+      assert(set0.offHandItemId === FIXTURE.axeItemId, '斧應登記在副手，而非主手');
     },
   },
   {

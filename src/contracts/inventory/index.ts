@@ -107,12 +107,25 @@ export type ItemDefinition = DefinitionHeader & Readonly<{
   unresolvedMapDisposition: 'toCityPermanentStock' | 'removeOnRefresh';
 }>;
 
+// 手部位置是**配置**決定的，不是定義決定的：同一把單手武器放主手或副手都合法（GDD §511 雙持——
+// 同組內可混搭兩種武器；§250 傷害倍率左手 ×0.5、右手 ×0.35）。`occupiedSlots` 只能說「占哪幾個 slot」，
+// 表達不出「這把單手武器現在在副手」，所以需要獨立的手別契約。
+export type EquipmentHand = 'mainHand' | 'offHand';
+
+// 可放置手別 → 放在該手時要寫進 ItemLocation.slotId 的 slot。
+//   單手武器：兩手皆列出（可雙持），各自對應自己那手的 slot。
+//   盾：只列 offHand。
+//   雙手武器：兩手皆列出，且 occupiedSlots.length > 1 表示必須**同時**占滿兩手（非二選一）。
+//   鎧甲／飾品：空物件——不可放任何一手。
+export type EquipmentHandSlots = Readonly<Partial<Record<EquipmentHand, EquipmentSlotId>>>;
+
 export type EquipmentDefinition = ItemDefinition & Readonly<{
   kind: 'equipment';
   equipmentKind: EquipmentKind;
   rarity: 'common' | 'fine' | 'epic' | 'legendary' | 'mythic';
   relatedMasteryIds: readonly MasteryId[];
   occupiedSlots: readonly EquipmentSlotId[];
+  handSlots: EquipmentHandSlots;
   primaryAttributeCoefficients: PrimaryAttributeCoefficients;
   secondaryAttributeCoefficients: readonly SecondaryAttributeCoefficients[];
   skillEffectRefs: readonly EquipmentSkillEffectRef[];
