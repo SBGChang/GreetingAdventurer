@@ -36,6 +36,9 @@ export type ProgressionModuleState = ProgressionState &
   Readonly<{
     grantLedger: Readonly<Record<GatheringGrantKey, true>>;
     dailyUsage: Readonly<Record<WorldDay, DailyUsageCounters>>;
+    // 戰鬥熟練度事件冪等帳本：key = `${awardKind}:${CombatMasterySource}`。同一來源重放不再重複發放
+    // （doc §7.5 要求以 CombatMasterySource 冪等）。attack/defense/support 各自成 key，同 encounter 三種不互擋。
+    masteryLedger: Readonly<Record<string, true>>;
   }>;
 
 // 空 slice：新局／新存檔起點。CharacterBorn 再逐一建立 characterProgress。
@@ -46,6 +49,7 @@ export function createInitialProgressionState(): ProgressionModuleState {
     childStudySessions: {},
     grantLedger: {},
     dailyUsage: {},
+    masteryLedger: {},
   };
 }
 

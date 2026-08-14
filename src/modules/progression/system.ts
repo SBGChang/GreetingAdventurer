@@ -32,6 +32,7 @@ import type {
   CombatAttackMasteryEarnedPayload,
   CombatDefenseMasteryEarnedPayload,
   CombatSupportMasteryEarnedPayload,
+  CombatMasterySource,
 } from '../../contracts/combat-sequence';
 import type { CraftingCompletedEvent } from '../../contracts/crafting';
 
@@ -343,8 +344,8 @@ export function handleGrantGatheringMasteryExperience(
 // §5.1 DomainEvent 訂閱：戰鬥攻擊／防禦 MXP（已由 Combat 分配）
 // ──────────────────────────────────────────────────────────────────────────
 
-// doc §5.1：依已分配的 characterAwards 逐筆發放；Progression 不重算傷害／權重。
-// TODO: 以 CombatMasterySource（payload.source）做冪等，避免重放同一 Encounter/Sequence 重複發放。
+// doc §5.1：依已分配的 characterAwards 逐筆發放；Progression 不重算傷害／權重。冪等由 applyMasteryOnce
+// 於呼叫端以 CombatMasterySource 把關（此函式本身不記帳）。
 function applyCharacterAwards(
   state: ProgressionModuleState,
   awards: readonly Readonly<{ characterId: CharacterId; masteryId: MasteryId; amount: number }>[],
@@ -365,12 +366,38 @@ function applyCharacterAwards(
   return { nextSlice: acc, outgoingMessages: messages, scheduledJobs: [] };
 }
 
+// 冪等 key：awardKind + CombatMasterySource（encounter/sequence）。attack/defense/support 各自成 key，
+// 故同一 encounter 的三種發放不互擋，但同一種重放會被擋。
+function masterySourceKey(awardKind: MasterySource, source: CombatMasterySource): string {
+  const src =
+    source.kind === 'encounter' ? `encounter:${source.encounterId}` : `combatSequence:${source.sequenceId}`;
+  return `${awardKind}:${src}`;
+}
+
+// 依 CombatMasterySource 冪等套用（doc §7.5）：已記帳的來源重放 → no-op（不重複發放、不再 emit 事件）；
+// 否則套用 awards 並把 key 寫進 masteryLedger。
+function applyMasteryOnce(
+  state: ProgressionModuleState,
+  awardKind: MasterySource,
+  source: CombatMasterySource,
+  awards: readonly Readonly<{ characterId: CharacterId; masteryId: MasteryId; amount: number }>[],
+  reader: ProgressionDefinitionReader,
+): ModuleResult<ProgressionModuleState> {
+  const key = masterySourceKey(awardKind, source);
+  if (state.masteryLedger[key]) return { nextSlice: state, outgoingMessages: [], scheduledJobs: [] };
+  const r = applyCharacterAwards(state, awards, awardKind, reader);
+  return {
+    ...r,
+    nextSlice: { ...r.nextSlice, masteryLedger: { ...r.nextSlice.masteryLedger, [key]: true } },
+  };
+}
+
 export function handleCombatAttackMasteryEarned(
   state: ProgressionModuleState,
   payload: CombatAttackMasteryEarnedPayload,
   reader: ProgressionDefinitionReader,
 ): ModuleResult<ProgressionModuleState> {
-  return applyCharacterAwards(state, payload.characterAwards, 'combat:attack', reader);
+  return applyMasteryOnce(state, 'combat:attack', payload.source, payload.characterAwards, reader);
 }
 
 export function handleCombatDefenseMasteryEarned(
@@ -378,7 +405,7 @@ export function handleCombatDefenseMasteryEarned(
   payload: CombatDefenseMasteryEarnedPayload,
   reader: ProgressionDefinitionReader,
 ): ModuleResult<ProgressionModuleState> {
-  return applyCharacterAwards(state, payload.characterAwards, 'combat:defense', reader);
+  return applyMasteryOnce(state, 'combat:defense', payload.source, payload.characterAwards, reader);
 }
 
 // 支援技能：固定 MXP 依 masterySplits 分配（ratio 總和恰為 1）。
@@ -396,7 +423,7 @@ export function handleCombatSupportMasteryEarned(
     masteryId: split.masteryId,
     amount: totalFixed * split.ratio,
   }));
-  return applyCharacterAwards(state, awards, 'combat:support', reader);
+  return applyMasteryOnce(state, 'combat:support', payload.source, awards, reader);
 }
 
 // ──────────────────────────────────────────────────────────────────────────

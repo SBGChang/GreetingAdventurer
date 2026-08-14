@@ -2,11 +2,12 @@
 // 自足式單元測試（無外部框架、無 node/DOM 全域）。呼叫 runTests() 取得逐案 pass/fail。
 // 覆蓋核心成長行為：award MXP → 等級/主屬變化、採集 MXP 冪等、主屬 clamp 100、無升級時不發等級事件。
 
-import type { DomainEventDraft } from '../../contracts/core';
+import type { DomainEventDraft, EncounterId } from '../../contracts/core';
 import { createInitialProgressionState } from './state';
 import {
   awardMasteryExperience,
   handleGrantGatheringMasteryExperience,
+  handleCombatAttackMasteryEarned,
   resolveLevel,
   computeTeachingResult,
 } from './system';
@@ -37,6 +38,36 @@ function eventTypes(messages: readonly unknown[]): string[] {
 type Case = Readonly<{ name: string; run: () => void }>;
 
 const cases: readonly Case[] = [
+  {
+    name: '#1：CombatAttackMasteryEarned 依 CombatMasterySource 冪等（重放不重複發放、不再 emit）',
+    run: () => {
+      const reader = makeFixtureReader();
+      const s0 = createInitialProgressionState();
+      const payload = {
+        source: { kind: 'encounter' as const, encounterId: 'enc-1' as EncounterId },
+        characterAwards: [{ characterId: HERO, masteryId: SWORD_MASTERY, amount: 50 }],
+      };
+      const r1 = handleCombatAttackMasteryEarned(s0, payload, reader);
+      const exp1 = r1.nextSlice.characterProgress[HERO]?.masteries[SWORD_MASTERY]?.experience;
+      assert(exp1 === 50, `首次應 +50，實得 ${exp1}`);
+      assert(eventTypes(r1.outgoingMessages).length > 0, '首次應 emit 事件');
+
+      // 重放同一 source → 不加、不 emit。
+      const r2 = handleCombatAttackMasteryEarned(r1.nextSlice, payload, reader);
+      const exp2 = r2.nextSlice.characterProgress[HERO]?.masteries[SWORD_MASTERY]?.experience;
+      assert(exp2 === 50, `重放不得再加（應維持 50，實得 ${exp2}）`);
+      assert(r2.outgoingMessages.length === 0, '重放不應再 emit 事件');
+
+      // 不同 source 仍會發放。
+      const r3 = handleCombatAttackMasteryEarned(
+        r2.nextSlice,
+        { ...payload, source: { kind: 'encounter' as const, encounterId: 'enc-2' as EncounterId } },
+        reader,
+      );
+      const exp3 = r3.nextSlice.characterProgress[HERO]?.masteries[SWORD_MASTERY]?.experience;
+      assert(exp3 === 100, `不同 source 應再 +50（應 100，實得 ${exp3}）`);
+    },
+  },
   {
     name: 'award MXP raises experience, level and derived attribute',
     run: () => {
