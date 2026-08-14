@@ -501,6 +501,7 @@ export function validatePlacements(
     const cell = placements[id];
     if (cell === undefined) continue;
     if (
+      cell.floor !== 0 || // 戰鬥配置只有單一 3×3，floor 必固定為 0；否則可用不同 floor 規避下方重疊檢查
       !Number.isInteger(cell.row) ||
       !Number.isInteger(cell.col) ||
       cell.row < GRID_MIN ||
@@ -754,6 +755,10 @@ function settleRetentionAndDepartures(
         revision: 0 as Revision,
       };
       next = upsertTeam(next, npcTeam);
+      // 新生成的單人 NPC Team 也必須有合法配置（成員變動須於同一交易產生配置）。
+      const npcFormation = recomputeFormation(next, spawnedTeamId, [memberId], ctx);
+      next = npcFormation.next;
+      events.push(...npcFormation.events);
       const ev: TeamMemberDepartedEvent = {
     type: 'TeamMemberDeparted',
         teamId: team.teamId,
@@ -762,6 +767,13 @@ function settleRetentionAndDepartures(
         spawnedTeamId,
       };
       events.push(emit(ev));
+    }
+
+    // 玩家隊成員變動 → 於同一交易重建其配置（移除離隊者，否則配置仍保留已離隊成員）。
+    if (departed.length > 0) {
+      const playerFormation = recomputeFormation(next, team.teamId, members, ctx);
+      next = playerFormation.next;
+      events.push(...playerFormation.events);
     }
 
     // Ledger 以新 cycleStartedOnDay 歸零；留隊成員的 joinedOn 保留。

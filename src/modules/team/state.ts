@@ -214,10 +214,16 @@ export function upsertTeam(state: TeamState, next: Team): TeamState {
   return { ...state, teams: { ...state.teams, [next.teamId]: next } };
 }
 
+// 刪除 Team 時一併清掉**以 teamId 為鍵**的附屬狀態（戰鬥配置、留隊帳本），否則會殘留指向已不存在
+// 隊伍的孤兒記錄（例：招募成功刪除來源單人 NPC Team 後，其舊配置仍留著）。
 export function removeTeam(state: TeamState, id: TeamId): TeamState {
   const teams = { ...state.teams };
   delete teams[id];
-  return { ...state, teams };
+  const combatFormations = { ...state.combatFormations };
+  delete combatFormations[id];
+  const memberRetention = { ...state.memberRetention };
+  delete memberRetention[id];
+  return { ...state, teams, combatFormations, memberRetention };
 }
 
 export function upsertPlan(state: TeamState, next: TeamPlan): TeamState {

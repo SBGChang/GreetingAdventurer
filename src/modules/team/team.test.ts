@@ -246,6 +246,23 @@ const cases: readonly Case[] = [
     },
   },
   {
+    name: '#5：floor 必為 0（不得用不同 floor 規避重疊）',
+    run: () => {
+      const s0 = fixtureTeamState();
+      const ctx = makeContext();
+      // 同 row/col、不同 floor：戰鬥配置單一 3×3，floor≠0 應被擋（否則兩人重疊卻過關）。
+      const placements: Record<string, GridCell> = {
+        [PLAYER_LEADER_ID]: { floor: 0, row: 1, col: 1 },
+        [PLAYER_MEMBER_ID]: { floor: 99, row: 1, col: 1 },
+      };
+      const r = handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, placements }, ctx);
+      assert(
+        !r.ok && r.rejection.code === 'team/formation-cell-out-of-range',
+        `floor≠0 應被擋（got ${r.ok ? 'ok' : r.rejection.code}）`,
+      );
+    },
+  },
+  {
     name: 'formation rejects benched member (missing placement)',
     run: () => {
       const s0 = fixtureTeamState();
@@ -294,6 +311,8 @@ const cases: readonly Case[] = [
       assert(player.memberIds.includes(NPC_LEADER_ID), 'target joined player team');
       assert(player.memberIds.length === 3, `player now 3 members (got ${player.memberIds.length})`);
       assert(r.result.nextSlice.teams[NPC_TEAM_ID] === undefined, 'source NPC team removed');
+      // #3：刪除來源 Team 後其配置不得殘留（removeTeam 一併清附屬狀態）。
+      assert(r.result.nextSlice.combatFormations[NPC_TEAM_ID] === undefined, '來源 NPC Team 的配置應一併移除');
       const types = eventTypes(r.result.outgoingMessages);
       assert(types.includes('TeamMemberJoined'), 'emits TeamMemberJoined');
       assert(types.includes('TeamMemberDeparted'), 'emits TeamMemberDeparted');
@@ -396,6 +415,17 @@ const cases: readonly Case[] = [
       assert(spawned !== undefined && spawned.leaderId === PLAYER_MEMBER_ID && spawned.memberIds.length === 1, 'spawned team is single-member led by departer');
       // cityFree plan established.
       assert(player.activePlanId !== undefined, 'cityFree plan created');
+      // #3：成員變動須於同一交易重建配置。玩家隊配置不得再含離隊者；新生成的 NPC Team 要有配置。
+      const playerFormation = r.result.nextSlice.combatFormations[PLAYER_TEAM_ID]!;
+      assert(
+        playerFormation !== undefined && playerFormation.placements[PLAYER_MEMBER_ID] === undefined,
+        '玩家隊配置不得再保留離隊成員',
+      );
+      const spawnedFormation = r.result.nextSlice.combatFormations[departed!.spawnedTeamId as never];
+      assert(
+        spawnedFormation !== undefined && spawnedFormation.placements[PLAYER_MEMBER_ID] !== undefined,
+        '新生成的單人 NPC Team 應有合法配置',
+      );
     },
   },
   {
