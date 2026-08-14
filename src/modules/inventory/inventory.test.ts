@@ -23,6 +23,7 @@ import {
   transferItem,
   configureWeaponSet,
   createInitialLoadout,
+  moveItemToTeamQuestCargo,
   type InventoryHandlerResult,
 } from './system';
 import { createFixtureDeps, createFixtureReader, createFixtureState, FIXTURE } from './fixtures';
@@ -554,6 +555,37 @@ const cases: readonly Case[] = [
       assert(ws1.mainHandItemId === FIXTURE.swordItemId, '新組 WS1 應引用該武器');
       const loc = createInventoryQuery(s2, deps.reader).getLocation(FIXTURE.swordItemId);
       assert(loc?.kind === 'equipped' && loc.weaponSetId === WS1, '武器 location 應指向 WS1');
+    },
+  },
+  {
+    name: '#2：裝備中物品移入任務貨物 → 同步從 Loadout 卸掉（不留懸空引用）',
+    run: () => {
+      const deps = createFixtureDeps();
+      const equipped = expectOk(
+        equipItem(createFixtureState(), { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: WS0 }, deps),
+        'equip',
+      );
+      assert(
+        createInventoryQuery(equipped, deps.reader).getLocation(FIXTURE.swordItemId)?.kind === 'equipped',
+        '前置：劍應 equipped',
+      );
+      const moved = expectOk(
+        moveItemToTeamQuestCargo(
+          equipped,
+          { type: 'MoveItemToTeamQuestCargo', itemId: FIXTURE.swordItemId, teamId: FIXTURE.teamId, questId: 'runtime:quest:q1' as never, carrierCharacterId: FIXTURE.characterId },
+          deps,
+        ),
+        'move-to-cargo',
+      );
+      assert(
+        createInventoryQuery(moved, deps.reader).getLocation(FIXTURE.swordItemId)?.kind === 'teamQuestCargo',
+        '劍應移到 teamQuestCargo',
+      );
+      const loadout = moved.equipmentLoadouts[FIXTURE.characterId]!;
+      const stillRef = loadout.weaponSets.some(
+        (ws) => ws.mainHandItemId === FIXTURE.swordItemId || ws.offHandItemId === FIXTURE.swordItemId,
+      );
+      assert(!stillRef, 'Loadout 不得再引用已移入任務貨物的劍（single-location）');
     },
   },
   {

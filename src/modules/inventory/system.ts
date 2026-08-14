@@ -323,7 +323,9 @@ export function moveItemToTeamQuestCargo(
     ownerCharacterId: undefined,
     revision: inst.revision + 1,
   };
-  return accept(withItem(state, next), [
+  // 若原本裝備中，同步從 Loadout 卸掉，否則 Loadout 仍把它當主手/裝甲（破壞 single-location）。
+  const working = clearLoadoutRefIfEquipped(withItem(state, next), from, cmd.itemId);
+  return accept(working, [
     emit({ type: 'InventoryTransferred', itemId: cmd.itemId, from, to, oldOwner, newOwner: undefined, reason: 'moveToTeamQuestCargo' }),
   ]);
 }
@@ -738,6 +740,55 @@ function requireLoadout(
   characterId: CharacterId,
 ): CharacterEquipmentLoadout | undefined {
   return state.equipmentLoadouts[characterId];
+}
+
+// 從 Loadout 卸掉某物品的所有引用（各武器組主/副手 + 各裝甲格）。當一件**裝備中**物品被移到別處
+// （任務貨物、轉移、移除…）時呼叫，避免 Loadout 懸空指向已離開 equipped 位置的物品（破壞 single-location）。
+function clearItemFromLoadout(
+  loadout: CharacterEquipmentLoadout,
+  itemId: ItemInstanceId,
+): CharacterEquipmentLoadout {
+  const clear = (ws: WeaponSetLoadout): WeaponSetLoadout => {
+    const m = ws.mainHandItemId === itemId ? undefined : ws.mainHandItemId;
+    const o = ws.offHandItemId === itemId ? undefined : ws.offHandItemId;
+    return m === ws.mainHandItemId && o === ws.offHandItemId ? ws : { ...ws, mainHandItemId: m, offHandItemId: o };
+  };
+  const s = loadout.weaponSets;
+  const weaponSets: readonly [WeaponSetLoadout, WeaponSetLoadout, WeaponSetLoadout] = [
+    clear(s[0]),
+    clear(s[1]),
+    clear(s[2]),
+  ];
+  const armorSlots: Record<EquipmentSlotId, ItemInstanceId | undefined> = { ...loadout.armorSlots };
+  let armorChanged = false;
+  for (const key of Object.keys(armorSlots) as EquipmentSlotId[]) {
+    if (armorSlots[key] === itemId) {
+      armorSlots[key] = undefined;
+      armorChanged = true;
+    }
+  }
+  const weaponChanged = weaponSets.some((ws, i) => ws !== loadout.weaponSets[i]);
+  if (!weaponChanged && !armorChanged) return loadout;
+  return { ...loadout, weaponSets, armorSlots, revision: loadout.revision + 1 };
+}
+
+// 若物品原本在某角色的 equipped 位置，回傳同步卸下該引用後的 State；否則原樣回傳。移出 equipped 的各路徑
+// （任務貨物、轉移、移除）共用，確保 Loadout 與 ItemLocation 一致。
+function clearLoadoutRefIfEquipped(
+  state: InventoryState,
+  from: ItemLocation,
+  itemId: ItemInstanceId,
+): InventoryState {
+  if (from.kind !== 'equipped') return state;
+  const loadout = state.equipmentLoadouts[from.characterId];
+  if (loadout === undefined) return state;
+  return {
+    ...state,
+    equipmentLoadouts: {
+      ...state.equipmentLoadouts,
+      [from.characterId]: clearItemFromLoadout(loadout, itemId),
+    },
+  };
 }
 
 function replaceWeaponSet(
