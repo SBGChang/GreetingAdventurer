@@ -189,20 +189,41 @@ export function createInventoryQuery(
       return r !== undefined && r.reservedQuantity > 0;
     },
 
+    // 權威是 **Loadout 的 slot 對應**，不是 ItemLocation.slotId。一件裝備只保存**一個**位置錨點，
+    // 但可以占用多個 slot：雙手武器同時占主／副手、多格鎧甲占 body+head。掃 location.slotId 會讓
+    // 雙手劍的副手查詢、長袍的頭部查詢回 undefined，即使 Loadout 明確顯示它們占著（複審 R10 #3）。
     getEquippedItem(
       characterId: CharacterId,
       slotId: EquipmentSlotId,
       weaponSetId?: WeaponSetId,
     ): ItemInstanceView | undefined {
-      for (const key of Object.keys(items)) {
-        const inst = items[key as ItemInstanceId];
-        if (!inst || inst.location.kind !== 'equipped') continue;
-        const loc = inst.location;
-        if (loc.characterId === characterId && loc.slotId === slotId && loc.weaponSetId === weaponSetId) {
-          return toView(inst);
-        }
+      const loadout = state.equipmentLoadouts[characterId];
+      if (loadout === undefined) return undefined;
+
+      if (weaponSetId !== undefined) {
+        const set = loadout.weaponSets.find((w) => w.weaponSetId === weaponSetId);
+        if (set === undefined) return undefined;
+        const occupies = (itemId: ItemInstanceId | undefined, hand: 'mainHand' | 'offHand'): boolean => {
+          if (itemId === undefined) return false;
+          const inst = items[itemId];
+          if (inst === undefined) return false;
+          const eq = reader.getEquipment(inst.definitionId);
+          // 雙手武器：occupiedSlots 已同時涵蓋兩手。
+          if (eq.occupiedSlots.length > 1) return eq.occupiedSlots.includes(slotId);
+          // 單手：占的是**它現在所在那隻手**的 slot，不是定義的 occupiedSlots[0]
+          //（單手武器的 occupiedSlots 一律 [mainHandSlot]，放副手時對不上）。
+          return eq.handSlots[hand] === slotId;
+        };
+        if (occupies(set.mainHandItemId, 'mainHand')) return toView(items[set.mainHandItemId!]!);
+        if (occupies(set.offHandItemId, 'offHand')) return toView(items[set.offHandItemId!]!);
+        return undefined;
       }
-      return undefined;
+
+      // 鎧甲等共用位置：armorSlots 已對每個被占用的 slot 都記了 itemId（多格鎧甲每格都指向同一件）。
+      const armorItemId = loadout.armorSlots[slotId];
+      if (armorItemId === undefined) return undefined;
+      const inst = items[armorItemId];
+      return inst === undefined ? undefined : toView(inst);
     },
 
     getEquipmentLoadout(characterId: CharacterId): CharacterEquipmentLoadoutView {

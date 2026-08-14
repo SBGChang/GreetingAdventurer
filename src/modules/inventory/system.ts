@@ -108,6 +108,31 @@ function isReservedActive(inst: ItemInstance): boolean {
   return inst.reservation !== undefined && inst.reservation.reservedQuantity > 0;
 }
 
+// 兩條裝備入口（equipItem / configureWeaponSet）共用的合法性判定。回傳 rejection code，合法則 undefined。
+//
+// 原本兩邊各驗各的：configureWeaponSet 只驗 Owner，於是 homeStorage 裡的裝備可以直接穿上（繞過住宅取物與
+// 攜帶重量），被 Quest 保留的物品也照收（違反「任務物不可裝備」）。Owner 是「誰的東西」，location 才是
+// 「東西在哪」——兩者不能互相代替（複審 R10 #2）。
+function equipLegalityRejection(
+  inst: ItemInstance,
+  characterId: CharacterId,
+  deps: InventoryDeps,
+): string | undefined {
+  if (inst.state !== 'active') return 'inventory/item-not-active';
+  if (inst.ownerCharacterId !== characterId) return 'inventory/not-owner';
+  if (deps.reader.getItem(inst.definitionId).kind !== 'equipment') return 'inventory/not-equipment';
+  // 只接受「這名角色背包裡」或「這名角色身上既有裝備」：homeStorage／商店／任務託管／清算託管／
+  // 地圖內容都必須先經各自的取物流程搬進背包。
+  const loc = inst.location;
+  const carried =
+    (loc.kind === 'characterBag' && loc.characterId === characterId) ||
+    (loc.kind === 'equipped' && loc.characterId === characterId);
+  if (!carried) return 'inventory/item-not-carried';
+  // 任何 active reservation 都擋：任務目標物、製作素材、待轉移物都不得裝備。
+  if (isReservedActive(inst)) return 'inventory/item-reserved';
+  return undefined;
+}
+
 function sameCharacterSet(a: readonly CharacterId[], b: readonly CharacterId[]): boolean {
   if (a.length !== b.length) return false;
   const sa = new Set<string>(a as readonly string[]);
@@ -280,6 +305,15 @@ export function reserveCraftingInputs(
     if (inst.state !== 'active') return reject('inventory/item-not-active', { itemId: String(id) });
     if (isReservedActive(inst)) return reject('inventory/already-reserved', { itemId: String(id) });
     if (inst.ownerCharacterId === undefined) return reject('inventory/crafting-input-unowned', { itemId: String(id) });
+    // 位置防線（doc 05 §367 本就要求驗「位置」）：已裝備的劍原本可以直接當素材，等 Transform 實作後
+    // 會消耗掉它卻在 Loadout 留下引用。素材只能來自背包或同一角色的住宅存放（複審 R10 #5）。
+    const loc = inst.location;
+    const usableAsMaterial =
+      (loc.kind === 'characterBag' && loc.characterId === inst.ownerCharacterId) ||
+      (loc.kind === 'homeStorage' && loc.characterId === inst.ownerCharacterId);
+    if (!usableAsMaterial) {
+      return reject('inventory/crafting-input-not-available', { itemId: String(id), location: loc.kind });
+    }
     // 數量必須是正整數且不超過該實體持有量；原本一律整疊保留，3 瓶藥水只用 1 瓶也會全鎖。
     if (!Number.isInteger(input.quantity) || input.quantity < 1) {
       return reject('inventory/invalid-crafting-input-quantity', { itemId: String(id), quantity: input.quantity });
@@ -410,11 +444,9 @@ export function equipItem(
 ): InventoryHandlerResult {
   const inst = state.items[cmd.itemId];
   if (!inst) return reject('inventory/unknown-item', { itemId: String(cmd.itemId) });
-  if (inst.state !== 'active') return reject('inventory/item-not-active');
-  if (inst.ownerCharacterId !== cmd.characterId) return reject('inventory/not-owner');
-  if (isReservedActive(inst)) return reject('inventory/item-reserved');
-  const def = deps.reader.getItem(inst.definitionId);
-  if (def.kind !== 'equipment') return reject('inventory/not-equipment');
+  // 與 configureWeaponSet 共用同一個合法性函式（見 equipLegalityRejection）。
+  const bad = equipLegalityRejection(inst, cmd.characterId, deps);
+  if (bad !== undefined) return reject(bad, { itemId: String(cmd.itemId) });
   const equip = deps.reader.getEquipment(inst.definitionId);
   // 目標手由**玩家指名的 slotId** 解析，而不是從 equipmentKind 猜：單手武器兩手皆為合法手（雙持），
   // 猜法表達不出「這把劍要放副手」。
@@ -483,10 +515,15 @@ export function equipItem(
         if (!displaced.includes(set.mainHandItemId)) displaced.push(set.mainHandItemId);
         nextMain = undefined;
       }
+      // 同一件從主手改裝到副手：必須清掉主手引用，否則兩手指向同一實體而 ItemLocation 只能指一手
+      //（複審 R10 #1）。
+      if (nextMain === cmd.itemId) nextMain = undefined;
       nextOff = cmd.itemId;
     } else {
       if (set.mainHandItemId !== undefined && set.mainHandItemId !== cmd.itemId) displaced.push(set.mainHandItemId);
       if (previousMainIsTwoHanded) nextOff = undefined; // 原雙手武器的副手佔位解除
+      // 同一件從副手改裝到主手：同理清掉副手引用。
+      if (nextOff === cmd.itemId) nextOff = undefined;
       nextMain = cmd.itemId;
     }
 
@@ -591,11 +628,9 @@ export function configureWeaponSet(
     if (itemId === undefined) continue;
     const item = state.items[itemId];
     if (item === undefined) return reject('inventory/unknown-item', { hand, itemId: String(itemId) });
-    if (item.state !== 'active') return reject('inventory/item-not-active', { hand });
-    if (item.ownerCharacterId !== cmd.characterId) return reject('inventory/not-owner', { hand });
-    if (deps.reader.getItem(item.definitionId).kind !== 'equipment') {
-      return reject('inventory/not-equipment', { hand });
-    }
+    // 與 equipItem 共用同一個合法性函式（位置、保留、Owner、種類），兩條入口不得再各驗各的。
+    const bad = equipLegalityRejection(item, cmd.characterId, deps);
+    if (bad !== undefined) return reject(bad, { hand, itemId: String(itemId) });
   }
 
   const equipOf = (itemId: ItemInstanceId | undefined) =>
@@ -608,6 +643,15 @@ export function configureWeaponSet(
   const offTwoHanded = offEquip !== undefined && offEquip.occupiedSlots.length > 1;
   if ((mainTwoHanded || offTwoHanded) && cmd.mainHandItemId !== cmd.offHandItemId) {
     return reject('inventory/two-handed-must-occupy-both-hands');
+  }
+  // 反向：只有雙手武器可以兩手同一件。單手武器 main===off 會讓 Loadout 兩手都指向同一實體，但
+  // ItemLocation 只能指向其中一手——雙持是**兩把**武器，不是一把佔兩次（複審 R10 #1）。
+  if (
+    cmd.mainHandItemId !== undefined &&
+    cmd.mainHandItemId === cmd.offHandItemId &&
+    !mainTwoHanded
+  ) {
+    return reject('inventory/one-handed-cannot-fill-both-hands', { itemId: String(cmd.mainHandItemId) });
   }
   // 手部位置合法性一律問裝備自己的 handSlots（見契約 EquipmentHandSlots）：單手武器兩手皆可（雙持），
   // 盾只有副手，鎧甲／飾品兩手皆無。不再用 equipmentKind 推導——R8 #1 那版把副手限定成盾，等於再次禁掉

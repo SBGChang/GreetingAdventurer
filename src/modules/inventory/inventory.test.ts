@@ -43,6 +43,16 @@ function craftInput(itemId: ItemInstanceId, quantity = 1) {
   return { itemId, quantity, slotId: 'template-local:crafting-ingredient-slot:s1' as never };
 }
 
+// 把某件物品搬到別的位置／掛上保留，供「位置與保留防線」測試使用。
+function withItemPatch(
+  state: InventoryState,
+  itemId: ItemInstanceId,
+  patch: Partial<InventoryState['items'][ItemInstanceId]>,
+): InventoryState {
+  const inst = state.items[itemId]!;
+  return { ...state, items: { ...state.items, [itemId]: { ...inst, ...patch } } };
+}
+
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
@@ -570,6 +580,158 @@ const cases: readonly Case[] = [
       assert(
         swordLoc?.kind === 'equipped' && axeLoc?.kind === 'equipped' && swordLoc.slotId !== axeLoc.slotId,
         '雙持兩把武器不得占同一個 slot',
+      );
+    },
+  },
+  {
+    // R10 #1：雙持是**兩把**武器，不是一把佔兩次。
+    name: 'configureWeaponSet: 單手武器不得兩手同一件',
+    run: () => {
+      const deps = createFixtureDeps();
+      expectReject(
+        configureWeaponSet(
+          createFixtureState(),
+          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, mainHandItemId: FIXTURE.swordItemId, offHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] },
+          deps,
+        ),
+        'inventory/one-handed-cannot-fill-both-hands',
+        'one item in both hands',
+      );
+    },
+  },
+  {
+    // R10 #1：把已在主手的劍改裝到副手，主手引用必須跟著清掉。
+    name: 'equipItem: 單手武器由主手改裝副手 → 主手引用清除，不得兩手同一件',
+    run: () => {
+      const deps = createFixtureDeps();
+      const inMain = expectOk(
+        equipItem(
+          createFixtureState(),
+          { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: WS0 },
+          deps,
+        ),
+        'sword to main hand',
+      );
+      const moved = expectOk(
+        equipItem(
+          inMain,
+          { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.offHandSlot, weaponSetId: WS0 },
+          deps,
+        ),
+        'sword to off hand',
+      );
+      const set0 = createInventoryQuery(moved, deps.reader).getEquipmentLoadout(FIXTURE.characterId).weaponSets[0];
+      assert(set0.offHandItemId === FIXTURE.swordItemId, '劍應在副手');
+      assert(set0.mainHandItemId === undefined, `主手引用應清除（實得 ${String(set0.mainHandItemId)}）`);
+    },
+  },
+  {
+    // R10 #2：Owner 是「誰的東西」，location 才是「東西在哪」。
+    name: '裝備入口：homeStorage 的裝備不得直接穿上（兩條入口一致）',
+    run: () => {
+      const deps = createFixtureDeps();
+      const stored = withItemPatch(createFixtureState(), FIXTURE.swordItemId, {
+        location: { kind: 'homeStorage', homeId: 'runtime:home:h1' as never, characterId: FIXTURE.characterId },
+      });
+      expectReject(
+        equipItem(stored, { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: WS0 }, deps),
+        'inventory/item-not-carried',
+        'equipItem from homeStorage',
+      );
+      expectReject(
+        configureWeaponSet(stored, { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, mainHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] }, deps),
+        'inventory/item-not-carried',
+        'configureWeaponSet from homeStorage',
+      );
+    },
+  },
+  {
+    name: '裝備入口：任務保留中的裝備不得穿上（兩條入口一致）',
+    run: () => {
+      const deps = createFixtureDeps();
+      const reserved = withItemPatch(createFixtureState(), FIXTURE.swordItemId, {
+        reservation: { kind: 'questTarget', ownerId: FIXTURE.characterId, reservedQuantity: 1 },
+      });
+      expectReject(
+        equipItem(reserved, { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: WS0 }, deps),
+        'inventory/item-reserved',
+        'equipItem a quest-reserved item',
+      );
+      expectReject(
+        configureWeaponSet(reserved, { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, mainHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] }, deps),
+        'inventory/item-reserved',
+        'configureWeaponSet a quest-reserved item',
+      );
+    },
+  },
+  {
+    // R10 #3：一件裝備只保存一個位置錨點，但可以占多個 slot。
+    name: 'getEquippedItem: 雙手武器查副手、多格鎧甲查頭部都要查得到',
+    run: () => {
+      const deps = createFixtureDeps();
+      const twoHanded = expectOk(
+        configureWeaponSet(
+          createFixtureState(),
+          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, mainHandItemId: FIXTURE.greatswordItemId, offHandItemId: FIXTURE.greatswordItemId, selectedSkillIds: [undefined, undefined, undefined] },
+          deps,
+        ),
+        'greatsword both hands',
+      );
+      const q = createInventoryQuery(twoHanded, deps.reader);
+      assert(q.getEquippedItem(FIXTURE.characterId, FIXTURE.mainHandSlot, WS0)?.itemId === FIXTURE.greatswordItemId, '雙手劍主手應查得到');
+      assert(
+        q.getEquippedItem(FIXTURE.characterId, FIXTURE.offHandSlot, WS0)?.itemId === FIXTURE.greatswordItemId,
+        '雙手劍**副手**也應查得到（它同時占兩格）',
+      );
+
+      // 多格鎧甲：長袍占 body + head，由 body 裝上，頭部查詢仍須命中。
+      const robed = expectOk(
+        equipItem(createFixtureState(), { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.robeItemId, slotId: FIXTURE.bodySlot }, deps),
+        'robe',
+      );
+      const q2 = createInventoryQuery(robed, deps.reader);
+      assert(q2.getEquippedItem(FIXTURE.characterId, FIXTURE.bodySlot)?.itemId === FIXTURE.robeItemId, '長袍 body 應查得到');
+      assert(
+        q2.getEquippedItem(FIXTURE.characterId, FIXTURE.headSlot)?.itemId === FIXTURE.robeItemId,
+        '長袍**頭部**也應查得到（多格鎧甲）',
+      );
+    },
+  },
+  {
+    // R10 #3 對照：副手單手武器要用它自己那隻手的 slot 查得到（occupiedSlots 只有 mainHand）。
+    name: 'getEquippedItem: 雙持時兩把武器各自以自己那手的 slot 查得到',
+    run: () => {
+      const deps = createFixtureDeps();
+      const dual = expectOk(
+        configureWeaponSet(
+          createFixtureState(),
+          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, mainHandItemId: FIXTURE.swordItemId, offHandItemId: FIXTURE.axeItemId, selectedSkillIds: [undefined, undefined, undefined] },
+          deps,
+        ),
+        'dual wield',
+      );
+      const q = createInventoryQuery(dual, deps.reader);
+      assert(q.getEquippedItem(FIXTURE.characterId, FIXTURE.mainHandSlot, WS0)?.itemId === FIXTURE.swordItemId, '主手應為劍');
+      assert(q.getEquippedItem(FIXTURE.characterId, FIXTURE.offHandSlot, WS0)?.itemId === FIXTURE.axeItemId, '副手應為斧');
+    },
+  },
+  {
+    // R10 #5：doc 05 §367 本就要求驗位置。
+    name: 'reserveCraftingInputs: 已裝備的物品不得當素材',
+    run: () => {
+      const deps = createFixtureDeps();
+      const equipped = expectOk(
+        equipItem(
+          createFixtureState(),
+          { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: WS0 },
+          deps,
+        ),
+        'equip sword',
+      );
+      expectReject(
+        reserveCraftingInputs(equipped, { ...CRAFT_CMD, inputs: [craftInput(FIXTURE.swordItemId)] }, deps),
+        'inventory/crafting-input-not-available',
+        'equipped item as crafting input',
       );
     },
   },
