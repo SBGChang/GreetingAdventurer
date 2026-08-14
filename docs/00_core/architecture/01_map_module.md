@@ -336,7 +336,7 @@ type NpcSequenceEntryView =
 
 | Internal Command | Map 的反應 |
 |---|---|
-| `SetMapRefreshLock` | 為鎮壓／討伐建立或解除 41 日刷新鎖。**設鎖時一併清除既有 Pending 登記**（`pendingSinceDay` / `pendingCheckScheduledFor`）。 |
+| `SetMapRefreshLock` | 為鎮壓／討伐建立或解除 41 日刷新鎖。**設鎖時一併清除既有 Pending 登記**（`pendingSinceDay` / `pendingCheckScheduledFor`）。**解鎖只有下鎖的那張委託能做**：`sourceQuestId` 須與現存鎖相符，無鎖或不符一律拒絕（`map/no-refresh-lock`、`map/refresh-lock-not-owned`）——否則任一委託都能提前解掉鎮壓／討伐目標地圖的鎖（複審 R11 #4）。 |
 
 > **刷新鎖與 Pending（依 GDD §183 更正）**:GDD 明定「討伐與鎮壓在生成時就使對應地圖進入三期減一天(41 日)的刷新鎖;不論委託是否被接取,期間皆跳過刷新日**且不建立 Pending**。鎖定在下一個應刷新日前一天解除,因此隔天可自然刷新;不補算、不累積。」
 >
@@ -419,9 +419,11 @@ sequenceDiagram
 ```text
 固定刷新日有人 → pendingRefresh = true
 最後一隊離開 → 登記 dueDay = currentDay + 1 的 pending Job
-次日：
-  無人 + 無鎖 → 刷新並清除 Pending
-  否則       → 保留 Pending，再登記下一日檢查
+              （同時把 refresh.pendingCheckScheduledFor 設為該日）
+次日（Job 的 dueDay 須仍等於 pendingCheckScheduledFor，否則已被取代 → no-op）：
+  有鎖       → 不刷新、不保留 Pending、不重排（GDD §183：鎖期間不建立 Pending）
+  無鎖 + 無人 → 刷新並清除 Pending（pendingCheckScheduledFor ← undefined）
+  無鎖 + 有人 → 保留 Pending，重排下一日檢查（pendingCheckScheduledFor ← 次日）
 ```
 
 固定 14 日節奏永遠依 `refreshOffsetDays` 推導；Pending 成功刷新不會改寫下一個固定刷新日。
