@@ -1016,6 +1016,15 @@ export function handleCombatEncounterResolved(
       revision: bump(session.revision),
     };
     return result(withPlayerSession(state, closed), [
+      // 探索開始時建立的 Distribution 必須一起收掉。原本戰敗只關 Session 就返城，那筆分配會永遠停在
+      // collecting——沒有任何路徑再碰得到它（closed 的 Session 不再匹配 AssetDistributionCompleted 分支）。
+      // 收集在此結束，戰敗前已入帳的戰利品照常分配。
+      internal(DISTRIBUTION_MODULE_ID, {
+        type: 'FinalizeAssetDistributionCollection',
+        distributionId: session.distributionId,
+      }),
+      // Session 直接 closed 而非 leaving：全隊戰敗不算「完成探索」，不得走 MapExplorationCompleted
+      // 那條（會發完成經驗）。返城由 StartReturnFromDungeon 驅動，不等 Distribution。
       internal(TEAM_MODULE_ID, { type: 'StartReturnFromDungeon', teamId: event.teamId, mapId: session.mapId }),
     ]);
   }

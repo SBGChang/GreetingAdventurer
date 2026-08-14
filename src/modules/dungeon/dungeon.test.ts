@@ -99,7 +99,7 @@ type Case = Readonly<{ name: string; run: () => void }>;
 
 const cases: readonly Case[] = [
   {
-    name: '#6：戰敗 → Session 收為 closed（不回 exploring）+ 送 StartReturnFromDungeon',
+    name: '#6：戰敗 → Session 收為 closed（不回 exploring）+ 送 StartReturnFromDungeon + 結束 Distribution',
     run: () => {
       const base = createFixtureState();
       const session = base.playerSessions[FIXTURE.teamId]!;
@@ -117,6 +117,15 @@ const cases: readonly Case[] = [
       assert(after.status === 'closed', `戰敗應收為 closed，不得回 exploring（實得 ${after.status}）`);
       const cmds = r.outgoingMessages.map((m) => (m as { command?: { type?: string } }).command?.type);
       assert(cmds.includes('StartReturnFromDungeon'), '戰敗應請 team 結束地牢 Plan + 返城');
+      // R8 #5 迴歸：戰敗曾只關 Session，探索開始時建立的 Distribution 永遠停在 collecting。
+      const finalize = r.outgoingMessages
+        .map((m) => (m as { command?: { type?: string; distributionId?: string } }).command)
+        .find((c) => c?.type === 'FinalizeAssetDistributionCollection');
+      assert(finalize !== undefined, '戰敗應結束探索 Distribution 的收集，不得留下 collecting');
+      assert(
+        finalize?.distributionId === session.distributionId,
+        '結束的必須是本次探索的 Distribution',
+      );
     },
   },
   {
