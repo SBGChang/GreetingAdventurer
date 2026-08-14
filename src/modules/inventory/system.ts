@@ -325,9 +325,17 @@ export function moveItemToTeamQuestCargo(
   };
   // 若原本裝備中，同步從 Loadout 卸掉，否則 Loadout 仍把它當主手/裝甲（破壞 single-location）。
   const working = clearLoadoutRefIfEquipped(withItem(state, next), from, cmd.itemId);
-  return accept(working, [
+  const events: DomainEventDraft<unknown>[] = [
     emit({ type: 'InventoryTransferred', itemId: cmd.itemId, from, to, oldOwner, newOwner: undefined, reason: 'moveToTeamQuestCargo' }),
-  ]);
+  ];
+  // 自動卸裝也必須發 EquipmentChanged，否則 character 能力上限、Combat Power、UI、快取都不知道裝備已卸下
+  // （若該裝提供生命上限，角色可能暫時保留高於新上限的 HP）。itemId: undefined 表示該 slot 已清空。
+  if (from.kind === 'equipped') {
+    events.push(
+      emit({ type: 'EquipmentChanged', characterId: from.characterId, slotId: from.slotId, weaponSetId: from.weaponSetId, itemId: undefined }),
+    );
+  }
+  return accept(working, events);
 }
 
 // ── CommitCombatItemUse（doc §5.3）──────────────────────────────────────────

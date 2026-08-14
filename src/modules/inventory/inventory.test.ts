@@ -569,18 +569,19 @@ const cases: readonly Case[] = [
         createInventoryQuery(equipped, deps.reader).getLocation(FIXTURE.swordItemId)?.kind === 'equipped',
         '前置：劍應 equipped',
       );
-      const moved = expectOk(
-        moveItemToTeamQuestCargo(
-          equipped,
-          { type: 'MoveItemToTeamQuestCargo', itemId: FIXTURE.swordItemId, teamId: FIXTURE.teamId, questId: 'runtime:quest:q1' as never, carrierCharacterId: FIXTURE.characterId },
-          deps,
-        ),
-        'move-to-cargo',
+      const moveResult = moveItemToTeamQuestCargo(
+        equipped,
+        { type: 'MoveItemToTeamQuestCargo', itemId: FIXTURE.swordItemId, teamId: FIXTURE.teamId, questId: 'runtime:quest:q1' as never, carrierCharacterId: FIXTURE.characterId },
+        deps,
       );
+      const moved = expectOk(moveResult, 'move-to-cargo');
       assert(
         createInventoryQuery(moved, deps.reader).getLocation(FIXTURE.swordItemId)?.kind === 'teamQuestCargo',
         '劍應移到 teamQuestCargo',
       );
+      // #3(R7)：自動卸裝也必須發 EquipmentChanged（否則 character 能力上限/Combat Power 不知裝備已卸）。
+      const evTypes = eventsOf(moveResult).map((e) => (e as { type?: string }).type);
+      assert(evTypes.includes('EquipmentChanged'), '自動卸裝應發 EquipmentChanged 事件');
       const loadout = moved.equipmentLoadouts[FIXTURE.characterId]!;
       const stillRef = loadout.weaponSets.some(
         (ws) => ws.mainHandItemId === FIXTURE.swordItemId || ws.offHandItemId === FIXTURE.swordItemId,
