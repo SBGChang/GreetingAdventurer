@@ -26,6 +26,7 @@ import {
   npcDungeonDay,
   handleNpcDungeonSettlementApplied,
   handleAssetDistributionCompleted,
+  handleCombatEncounterResolved,
 } from './system';
 import type { DungeonHandlerResult } from './system';
 import { createFixtureState, createFixtureContext, FIXTURE } from './fixtures';
@@ -65,6 +66,48 @@ function internalKinds(messages: readonly unknown[]): string[] {
 type Case = Readonly<{ name: string; run: () => void }>;
 
 const cases: readonly Case[] = [
+  {
+    name: '#6：戰敗 → Session 收為 closed（不回 exploring）+ 送 StartReturnFromDungeon',
+    run: () => {
+      const base = createFixtureState();
+      const session = base.playerSessions[FIXTURE.teamId]!;
+      const inCombat: DungeonModuleState = {
+        ...base,
+        playerSessions: { ...base.playerSessions, [FIXTURE.teamId]: { ...session, status: 'inCombat' } },
+      };
+      const event = {
+        teamId: FIXTURE.teamId,
+        outcome: 'defeat',
+        source: { kind: 'mapContent', mapId: FIXTURE.mapId, contentId: FIXTURE.eventContentId, encounterGroupId: 'grp' },
+      };
+      const r = handleCombatEncounterResolved(inCombat, event as never);
+      const after = r.nextSlice.playerSessions[FIXTURE.teamId]!;
+      assert(after.status === 'closed', `戰敗應收為 closed，不得回 exploring（實得 ${after.status}）`);
+      const cmds = r.outgoingMessages.map((m) => (m as { command?: { type?: string } }).command?.type);
+      assert(cmds.includes('StartReturnFromDungeon'), '戰敗應請 team 結束地牢 Plan + 返城');
+    },
+  },
+  {
+    name: '#6 對照：戰勝 → Session 回 exploring',
+    run: () => {
+      const base = createFixtureState();
+      const session = base.playerSessions[FIXTURE.teamId]!;
+      const inCombat: DungeonModuleState = {
+        ...base,
+        playerSessions: { ...base.playerSessions, [FIXTURE.teamId]: { ...session, status: 'inCombat' } },
+      };
+      const event = {
+        teamId: FIXTURE.teamId,
+        outcome: 'victory',
+        source: { kind: 'mapContent', mapId: FIXTURE.mapId, contentId: FIXTURE.eventContentId, encounterGroupId: 'grp' },
+      };
+      const r = handleCombatEncounterResolved(inCombat, event as never);
+      assert(
+        r.nextSlice.playerSessions[FIXTURE.teamId]!.status === 'exploring',
+        '戰勝應回到 exploring',
+      );
+    },
+  },
   {
     name: 'moveDungeonRoom accrues cells × 30 minutes and reveals the entered room',
     run: () => {

@@ -1002,7 +1002,21 @@ export function handleCombatEncounterResolved(
   const session = getPlayerSession(state, event.teamId);
   if (session === undefined || session.status !== 'inCombat') return noop(state);
 
-  // 戰鬥結束一律讓 Session 回到探索狀態（勝敗皆然）。
+  // 戰敗：探索**結束**——不得回到 exploring（否則全隊戰敗仍能繼續走地牢）。收掉 Session（closed）並請 team
+  // 結束地牢 Plan + 返城。[架構待做] 完整版應由 CombatTeamOutcome(canContinue=false) 統一驅動 Team+Dungeon
+  // 的退出（該事件與其 Team/Dungeon 訂閱尚未接入 Manifest，見 HANDOFF）。
+  if (event.outcome !== 'victory') {
+    const closed: PlayerExplorationSession = {
+      ...session,
+      status: 'closed',
+      revision: bump(session.revision),
+    };
+    return result(withPlayerSession(state, closed), [
+      internal(TEAM_MODULE_ID, { type: 'StartReturnFromDungeon', teamId: event.teamId, mapId: session.mapId }),
+    ]);
+  }
+
+  // 勝利：回到探索狀態。
   const restored: PlayerExplorationSession = {
     ...session,
     status: 'exploring',
@@ -1010,10 +1024,9 @@ export function handleCombatEncounterResolved(
   };
   const next = withPlayerSession(state, restored);
 
-  // 只有「來源為本圖內容 + 勝利」才正式處理該內容（doc §5.4 與 11 §432 的同一條件）。
+  // 只有「來源為本圖內容」才正式處理該內容（doc §5.4 與 11 §432 的同一條件）。
   const source = event.source;
-  if (event.outcome !== 'victory' || source.kind !== 'mapContent') return result(next);
-  if (source.mapId !== session.mapId) return result(next);
+  if (source.kind !== 'mapContent' || source.mapId !== session.mapId) return result(next);
 
   return result(next, [
     internal(MAP_MODULE_ID, {
