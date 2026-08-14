@@ -163,17 +163,17 @@ function reject(
   return { ok: false, rejection: { code, sourceModule: MAP_MODULE_ID, details } };
 }
 
+// 不帶 expectedRevision：Pending 檢查的存活判定是 `refresh.pendingCheckScheduledFor`（見
+// handleMapRefreshCheck）。掛一個不會被讀的 expectedRevision 只會讓下一個人以為它是防線。
 function pendingCheckJobDraft(
   mapId: MapInstanceId,
   dueDay: WorldDay,
-  expectedRevision: Revision,
 ): ScheduledJobDraft<MapRefreshCheckJob> {
   return {
     type: 'mapRefreshCheck',
     dueDay,
     ownerModule: MAP_MODULE_ID,
     targetId: mapId,
-    expectedRevision,
     payload: { reason: 'pending' },
   };
 }
@@ -354,9 +354,15 @@ export function handleMapRefreshCheck(
   const instance = tryGetInstance(state, job.targetId);
   if (instance === undefined) return makeResult(state); // 過期 Job：安靜丟棄
 
-  // 過期 Job：expectedRevision 與目前 instance 版本不符 → 安靜 no-op。同日排了多筆 Pending 檢查時，前一筆
-  // 刷新／登記已 bump revision，後續舊 Job 不得再刷，否則地圖版本連跳（1→2→3）。
-  if (job.expectedRevision !== undefined && instance.revision !== job.expectedRevision) {
+  // 過期 Pending Job 的判定用**刷新自己的 token**——`refresh.pendingCheckScheduledFor`——而不是
+  // `instance.revision`。R8 #2 拿整個 instance.revision 比對，但開門(§5.2)、陷阱、採集、內容結算都會
+  // bump 它：排好次日檢查後只要有人開一扇門，這筆 Job 就永遠變成 no-op，而且它不會再排下一次，地圖
+  // 從此不再刷新。pendingCheckScheduledFor 只由 Pending 登記/刷新本身改動，正常探索動作碰不到它。
+  //
+  // 這同時仍然擋掉 R8 #2 的原始情境（同日兩筆 Pending Job → 版本連跳）：第一筆跑完若刷新則把它清成
+  // undefined、若順延則改成新的一天，第二筆的 dueDay 兩種都對不上。
+  // regular（固定節奏）Job 不受此限——它由日曆推導，本來就沒有 pending token。
+  if (job.payload.reason === 'pending' && job.dueDay !== instance.refresh.pendingCheckScheduledFor) {
     return makeResult(state);
   }
 
@@ -381,7 +387,7 @@ export function handleMapRefreshCheck(
     return makeResult(
       upsertInstance(state, nextInstance),
       [emit({ type: 'MapRefreshPendingRegistered', mapId: instance.mapId, checkDay })],
-      [pendingCheckJobDraft(instance.mapId, checkDay, nextInstance.revision)],
+      [pendingCheckJobDraft(instance.mapId, checkDay)],
     );
   }
 
@@ -417,7 +423,7 @@ export function onTeamLocationChanged(
   return makeResult(
     upsertInstance(state, nextInstance),
     [emit({ type: 'MapRefreshPendingRegistered', mapId, checkDay })],
-    [pendingCheckJobDraft(mapId, checkDay, nextInstance.revision)],
+    [pendingCheckJobDraft(mapId, checkDay)],
   );
 }
 

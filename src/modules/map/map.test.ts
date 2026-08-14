@@ -108,27 +108,68 @@ type Case = Readonly<{ name: string; run: () => void }>;
 
 const cases: readonly Case[] = [
   {
-    name: '#2：同版本兩筆 mapRefreshCheck → 只刷一次（過期 revision 的 Job no-op，版本不連跳 1→2→3）',
+    name: '#2：同日兩筆 Pending Job → 只刷一次（版本不連跳 1→2→3）',
     run: () => {
-      const state = fixtureMapState(1);
-      const ctx = makeContext({ presence: stubPresence({ teamsInside: 0 }) });
-      const rev0 = state.instances[MAP_ID]!.revision;
-      const revJob = (id: string): MapRefreshCheckJob => ({
-        jobId: id as JobId,
-        type: 'mapRefreshCheck',
-        dueDay: 100 as WorldDay,
-        ownerModule: MAP_MODULE_ID,
-        targetId: MAP_ID,
-        payload: { reason: 'pending' },
-        expectedRevision: rev0,
-      });
-      const r1 = handleMapRefreshCheck(revJob('j1'), state, ctx);
+      // 先以「有人在圖內的固定刷新日」真正登記一次 Pending（pendingCheckScheduledFor=101）。
+      const occupied = makeContext({ worldDay: 100 as WorldDay, presence: stubPresence({ teamsInside: 1 }) });
+      const registered = handleMapRefreshCheck(regularJob(100), fixtureMapState(1), occupied);
+      assert(
+        registered.nextSlice.instances[MAP_ID]!.refresh.pendingCheckScheduledFor === 101,
+        '應登記次日 101 的 Pending 檢查',
+      );
+      // 次日無人：同一天排到兩筆 Pending Job（重複），只有第一筆該刷。
+      const empty = makeContext({ worldDay: 101 as WorldDay, presence: stubPresence({ teamsInside: 0 }) });
+      const dup = (id: string): MapRefreshCheckJob => ({ ...pendingJob(101), jobId: id as JobId });
+      const r1 = handleMapRefreshCheck(dup('j1'), registered.nextSlice, empty);
       assert(r1.nextSlice.instances[MAP_ID]!.currentVersion === 2, `首刷應到版本 2（實得 ${r1.nextSlice.instances[MAP_ID]!.currentVersion}）`);
-      // 第二筆仍帶舊 expectedRevision，但 instance revision 已被首刷 bump → 應 no-op、版本維持 2。
-      const r2 = handleMapRefreshCheck(revJob('j2'), r1.nextSlice, ctx);
+      // 首刷已把 pendingCheckScheduledFor 清成 undefined → 第二筆對不上，no-op。
+      const r2 = handleMapRefreshCheck(dup('j2'), r1.nextSlice, empty);
       assert(
         r2.nextSlice.instances[MAP_ID]!.currentVersion === 2,
-        `過期 revision 的 Job 不得再刷（版本應維持 2，實得 ${r2.nextSlice.instances[MAP_ID]!.currentVersion}）`,
+        `重複的 Pending Job 不得再刷（版本應維持 2，實得 ${r2.nextSlice.instances[MAP_ID]!.currentVersion}）`,
+      );
+    },
+  },
+  {
+    // R9 #2：R8 #2 拿 instance.revision 當存活判定，但開門/陷阱/採集都會 bump 它——排好次日檢查後
+    // 只要有人開一扇門，Job 就永遠 no-op，且不再排下一次，地圖從此不刷新。
+    name: '#2 迴歸：排好 Pending 檢查後開門（bump instance.revision）不得使該檢查失效',
+    run: () => {
+      const occupied = makeContext({ worldDay: 100 as WorldDay, presence: stubPresence({ teamsInside: 1 }) });
+      const registered = handleMapRefreshCheck(regularJob(100), fixtureMapState(1), occupied);
+      const revBefore = registered.nextSlice.instances[MAP_ID]!.revision;
+      // 用**模組自己排出來的** Job，而不是手刻的：這樣不論模組把什麼存活欄位掛上去，這個測試都會驗到它。
+      const scheduled = registered.scheduledJobs[0] as Omit<MapRefreshCheckJob, 'jobId'> | undefined;
+      assert(scheduled !== undefined, '登記 Pending 時應排出一筆檢查 Job');
+      const pendingFromModule: MapRefreshCheckJob = { ...scheduled!, jobId: 'job-pending-real' as JobId };
+
+      // 隊伍在圖內開了一扇紅門：純粹的探索動作，卻會 bump instance.revision。
+      const opened = expectOk(
+        handleOpenMapDoor(
+          {
+            type: 'OpenMapDoor',
+            teamId: TEAM_ID,
+            mapId: MAP_ID,
+            mapVersion: 1,
+            linkId: LINK_RED,
+            openedOnDungeonMinute: 5 as DungeonMinute,
+          },
+          registered.nextSlice,
+          occupied,
+        ),
+        'open-door',
+      );
+      assert(
+        opened.nextSlice.instances[MAP_ID]!.revision !== revBefore,
+        '前提：開門確實會 bump instance.revision',
+      );
+
+      // 次日無人 → 這筆 Pending 檢查仍必須刷新。
+      const empty = makeContext({ worldDay: 101 as WorldDay, presence: stubPresence({ teamsInside: 0 }) });
+      const refreshed = handleMapRefreshCheck(pendingFromModule, opened.nextSlice, empty);
+      assert(
+        refreshed.nextSlice.instances[MAP_ID]!.currentVersion === 2,
+        `開門不得讓 Pending 刷新永久失效（版本應為 2，實得 ${refreshed.nextSlice.instances[MAP_ID]!.currentVersion}）`,
       );
     },
   },
@@ -378,14 +419,18 @@ const cases: readonly Case[] = [
       assert(r1.scheduledJobs.length === 1, '應排一個 pending 檢查 Job');
       assert(r1.nextSlice.instances[MAP_ID]!.refresh.pendingSinceDay === 100, 'pendingSinceDay 應為 100');
 
-      // 次日仍有人 → 保留 Pending，仍不刷新。
+      // 次日仍有人 → 保留 Pending，仍不刷新，並把檢查順延到 102（同時排出 102 的新 Job）。
       const stillOccupied = makeContext({ worldDay: 101 as WorldDay, presence: stubPresence({ teamsInside: 1 }) });
       const r2 = handleMapRefreshCheck(pendingJob(101), r1.nextSlice, stillOccupied);
       assert(r2.nextSlice.instances[MAP_ID]!.currentVersion === 1, '仍有人時不應刷新');
+      assert(
+        r2.nextSlice.instances[MAP_ID]!.refresh.pendingCheckScheduledFor === 102,
+        '仍有人時應把 Pending 檢查順延到 102',
+      );
 
-      // 次日無人 → 刷新。
-      const empty = makeContext({ worldDay: 101 as WorldDay, presence: stubPresence({ teamsInside: 0 }) });
-      const r3 = handleMapRefreshCheck(pendingJob(101), r2.nextSlice, empty);
+      // 再次日無人 → 由順延出來的那筆 102 Job 刷新（101 那筆已被取代，不會再跑）。
+      const empty = makeContext({ worldDay: 102 as WorldDay, presence: stubPresence({ teamsInside: 0 }) });
+      const r3 = handleMapRefreshCheck(pendingJob(102), r2.nextSlice, empty);
       assert(r3.nextSlice.instances[MAP_ID]!.currentVersion === 2, '無人時應刷新到版本 2');
       assert(hasEvent(eventsOf(r3.outgoingMessages), 'MapRefreshed'), '應 emit MapRefreshed');
     },
