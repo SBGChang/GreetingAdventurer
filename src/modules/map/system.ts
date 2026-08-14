@@ -755,7 +755,19 @@ export function handleSetMapRefreshLock(
     ]);
   }
 
-  // release：清除刷新鎖。
+  // release：清除刷新鎖。**只有下鎖的那張委託能解自己的鎖**——原本任何 Quest 都能解掉別人的鎖，
+  // 等於一張無關委託就能讓鎮壓／討伐目標地圖提前恢復刷新，把已固定的目標狀態洗掉（複審 R11 #4）。
+  const existing = instance.refresh.refreshLock;
+  if (existing === undefined) {
+    return reject('map/no-refresh-lock', { mapId: String(command.mapId) });
+  }
+  if (existing.sourceQuestId !== command.sourceQuestId) {
+    return reject('map/refresh-lock-not-owned', {
+      mapId: String(command.mapId),
+      lockOwner: String(existing.sourceQuestId),
+      requestedBy: String(command.sourceQuestId),
+    });
+  }
   const nextInstance: MapInstance = {
     ...instance,
     refresh: { ...instance.refresh, refreshLock: undefined },

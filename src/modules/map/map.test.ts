@@ -466,6 +466,57 @@ const cases: readonly Case[] = [
     },
   },
   {
+    // R11 #4：原本任何 Quest 都能解掉別人下的鎖，等於一張無關委託就能讓鎮壓／討伐目標地圖提前恢復刷新。
+    name: 'RefreshLock: 只有下鎖的那張委託能解鎖',
+    run: () => {
+      const ctx = makeContext();
+      const setCmd: SetMapRefreshLock = {
+        type: 'SetMapRefreshLock',
+        mapId: MAP_ID,
+        mode: 'set',
+        reason: 'suppression',
+        releaseOnDay: 141 as WorldDay,
+        sourceQuestId: QUEST_ID,
+      };
+      const locked = expectOk(handleSetMapRefreshLock(setCmd, fixtureMapState(1), ctx), 'set-lock').nextSlice;
+
+      // 別張委託想解 → 拒絕，鎖必須還在。
+      const other = handleSetMapRefreshLock(
+        { type: 'SetMapRefreshLock', mapId: MAP_ID, mode: 'release', sourceQuestId: 'quest-other' as QuestId },
+        locked,
+        ctx,
+      );
+      assert(!other.ok, '別張委託不得解鎖');
+      assert(
+        other.ok || other.rejection.code === 'map/refresh-lock-not-owned',
+        `拒絕碼應為 map/refresh-lock-not-owned（實得 ${other.ok ? '-' : other.rejection.code}）`,
+      );
+      assert(locked.instances[MAP_ID]!.refresh.refreshLock !== undefined, '鎖必須仍在');
+
+      // 下鎖的委託解 → 成功。
+      const released = expectOk(
+        handleSetMapRefreshLock(
+          { type: 'SetMapRefreshLock', mapId: MAP_ID, mode: 'release', sourceQuestId: QUEST_ID },
+          locked,
+          ctx,
+        ),
+        'release-by-owner',
+      );
+      assert(released.nextSlice.instances[MAP_ID]!.refresh.refreshLock === undefined, '下鎖者應能解鎖');
+    },
+  },
+  {
+    name: 'RefreshLock: 沒有鎖時解鎖被拒（不靜默成功）',
+    run: () => {
+      const r = handleSetMapRefreshLock(
+        { type: 'SetMapRefreshLock', mapId: MAP_ID, mode: 'release', sourceQuestId: QUEST_ID },
+        fixtureMapState(1),
+        makeContext(),
+      );
+      assert(!r.ok && r.rejection.code === 'map/no-refresh-lock', '無鎖可解應拒絕');
+    },
+  },
+  {
     name: 'RefreshLock: 鎖定跨過固定刷新日不刷新；isRefreshLocked 依日判定',
     run: () => {
       const state = fixtureMapState(1);
