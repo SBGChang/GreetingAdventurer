@@ -447,54 +447,52 @@ type SubscriberDispatch = (
   event: unknown,
   state: GameState,
   ctxs: ModuleContexts,
-) => Readonly<{ mutation: SliceMutation }>;
+) => Readonly<{ mutation: SliceMutation; outgoing?: readonly TransactionMessageDraft[] }>;
+
+// 事件 Subscriber 的結果轉換：**同時**帶 mutation 與 outgoing（後續 Internal Command / Event）。先前只回
+// mutation，導致 Subscriber 發出的次級訊息（如 dungeon 收到 CombatEncounterResolved 後送 ResolvePlayerMapContent）
+// 被 Router 靜默丟棄，交易只跑原始一個事件。kernel EventSubscriber 本就支援 outgoing。
+function subscriberResult(
+  slice: GameSliceName,
+  result: AnyModuleResult,
+): Readonly<{ mutation: SliceMutation; outgoing?: readonly TransactionMessageDraft[] }> {
+  return {
+    mutation: toMutation(slice, result),
+    ...(result.outgoingMessages.length > 0 ? { outgoing: result.outgoingMessages } : {}),
+  };
+}
 
 const EVENT_SUBSCRIBERS: Readonly<Record<string, SubscriberDispatch>> = {
-  'TeamLocationChanged::map': (e, s, x) => ({
-    mutation: toMutation('map', map.onTeamLocationChanged(e as never, s.map, x.map)),
-  }),
-  'CombatEncounterResolved::dungeon': (e, s) => ({
-    mutation: toMutation('dungeon', dungeon.handleCombatEncounterResolved(s.dungeon, e as never)),
-  }),
-  'NpcDungeonSettlementApplied::dungeon': (e, s) => ({
-    mutation: toMutation('dungeon', dungeon.handleNpcDungeonSettlementApplied(s.dungeon, e as never)),
-  }),
-  'CombatAttackMasteryEarned::progression': (e, s, x) => ({
-    mutation: toMutation(
+  'TeamLocationChanged::map': (e, s, x) =>
+    subscriberResult('map', map.onTeamLocationChanged(e as never, s.map, x.map)),
+  'CombatEncounterResolved::dungeon': (e, s) =>
+    subscriberResult('dungeon', dungeon.handleCombatEncounterResolved(s.dungeon, e as never)),
+  'NpcDungeonSettlementApplied::dungeon': (e, s) =>
+    subscriberResult('dungeon', dungeon.handleNpcDungeonSettlementApplied(s.dungeon, e as never)),
+  'CombatAttackMasteryEarned::progression': (e, s, x) =>
+    subscriberResult(
       'progression',
       progression.handleCombatAttackMasteryEarned(s.progression, e as never, x.progression),
     ),
-  }),
-  'CombatDefenseMasteryEarned::progression': (e, s, x) => ({
-    mutation: toMutation(
+  'CombatDefenseMasteryEarned::progression': (e, s, x) =>
+    subscriberResult(
       'progression',
       progression.handleCombatDefenseMasteryEarned(s.progression, e as never, x.progression),
     ),
-  }),
-  'CombatSupportMasteryEarned::progression': (e, s, x) => ({
-    mutation: toMutation(
+  'CombatSupportMasteryEarned::progression': (e, s, x) =>
+    subscriberResult(
       'progression',
       progression.handleCombatSupportMasteryEarned(s.progression, e as never, x.progression),
     ),
-  }),
-  'CharacterBorn::progression': (e, s) => ({
-    mutation: toMutation(
+  'CharacterBorn::progression': (e, s) =>
+    subscriberResult(
       'progression',
       progression.handleCharacterBorn(s.progression, (e as { characterId: never }).characterId),
     ),
-  }),
-  'ProgressionCapacityChanged::character': (e, s, x) => ({
-    mutation: toMutation(
-      'character',
-      character.onStatsCapacityChanged(e as never, s.character, x.character),
-    ),
-  }),
-  'EquipmentChanged::character': (e, s, x) => ({
-    mutation: toMutation(
-      'character',
-      character.onStatsCapacityChanged(e as never, s.character, x.character),
-    ),
-  }),
+  'ProgressionCapacityChanged::character': (e, s, x) =>
+    subscriberResult('character', character.onStatsCapacityChanged(e as never, s.character, x.character)),
+  'EquipmentChanged::character': (e, s, x) =>
+    subscriberResult('character', character.onStatsCapacityChanged(e as never, s.character, x.character)),
 };
 
 // ──────────────────────────────────────────────────────────────────────────

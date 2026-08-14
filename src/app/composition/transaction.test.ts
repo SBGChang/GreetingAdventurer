@@ -149,6 +149,40 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
     },
   },
   {
+    name: '#1：Event Subscriber 的 outgoing 不被 Router 丟棄（CombatEncounterResolved → ResolvePlayerMapContent）',
+    run: () => {
+      const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
+      const base = baseState();
+      const session = base.dungeon.playerSessions[FIXTURE.teamId];
+      assert(session !== undefined, 'fixture 應有玩家 Session');
+      // Session 置為 inCombat，戰鬥勝利事件才會被 dungeon 收斂並送 ResolvePlayerMapContent。
+      const inCombat: GameState = {
+        ...base,
+        dungeon: {
+          ...base.dungeon,
+          playerSessions: {
+            ...base.dungeon.playerSessions,
+            [FIXTURE.teamId]: { ...session!, status: 'inCombat' },
+          },
+        },
+      };
+      const event = {
+        type: 'CombatEncounterResolved',
+        teamId: FIXTURE.teamId,
+        outcome: 'victory',
+        source: { kind: 'mapContent', mapId: FIXTURE.mapId, contentId: FIXTURE.eventContentId, encounterGroupId: 'grp' },
+      };
+      const subscribers = config.routeEventSubscribers({ event } as never);
+      assert(subscribers.length >= 1, '應有 dungeon 訂閱者綁定');
+      const reaction = subscribers[0]!(event as never, { workingState: inCombat } as never);
+      const outgoing = reaction.outgoing ?? [];
+      const hasResolve = outgoing.some(
+        (m) => (m as { command?: { type?: string } }).command?.type === 'ResolvePlayerMapContent',
+      );
+      assert(hasResolve, 'Subscriber 的 ResolvePlayerMapContent outgoing 必須被保留（先前被 Router 靜默丟棄）');
+    },
+  },
+  {
     name: '拒絕會回滾整筆交易（slice 與 scheduler 都不留痕跡）',
     run: () => {
       const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
