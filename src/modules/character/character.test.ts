@@ -413,6 +413,107 @@ const cases: readonly Case[] = [
     },
   },
   {
+    // R10 #4：R9 #3 把 token 拆成逐種類，卻沒有在結算時前進它——同 token 的兩筆成年 Job 會各發一次事件。
+    name: '生命週期 Job：成年結算會消耗 token，重複 Job 不得再發 CharacterBecameAdult',
+    run: () => {
+      const worldDay = 6000 as WorldDay; // > 成年門檻 5475
+      const child = makeCharacter({
+        characterId: 'kid' as CharacterId,
+        birthDay: 0 as WorldDay,
+        availability: 'unavailable',
+      });
+      const state = createCharacterState({ characters: [child] });
+      const job = (jobId: string): CharacterLifecycleJob => ({
+        jobId: jobId as never,
+        type: 'characterLifecycleDue',
+        dueDay: worldDay,
+        ownerModule: 'character' as never,
+        targetId: 'kid' as CharacterId,
+        expectedRevision: child.lifecycleRevisions.adulthood,
+        payload: { kind: 'adulthood' },
+      });
+      const ctx = makeContext({ worldDay });
+      const first = handleCharacterLifecycleJob(job('j1'), state, ctx);
+      assert(hasEvent(eventsOf(first.outgoingMessages), 'CharacterBecameAdult'), '首次應 emit CharacterBecameAdult');
+      // 第二筆是不同 Job ID、相同 token 的重複 Job：token 已被首次結算消耗 → 應丟棄。
+      const second = handleCharacterLifecycleJob(job('j2'), first.nextSlice, ctx);
+      assert(
+        !hasEvent(eventsOf(second.outgoingMessages), 'CharacterBecameAdult'),
+        '重複的成年 Job 不得再發一次 CharacterBecameAdult',
+      );
+    },
+  },
+  {
+    // R10 #4 的邊界：消耗是「結算時」消耗。Job 早到時什麼都沒發生，就**不得**消耗——否則那條 lane 的
+    // token 白白前進，真正到期的同一筆 Job 反而變成過期，角色永遠不會成年。
+    name: '生命週期 Job：成年 Job 早到不改狀態、也不消耗 token（之後到期仍生效）',
+    run: () => {
+      const child = makeCharacter({
+        characterId: 'kid2' as CharacterId,
+        birthDay: 0 as WorldDay,
+        availability: 'unavailable',
+      });
+      const state = createCharacterState({ characters: [child] });
+      const job: CharacterLifecycleJob = {
+        jobId: 'job-early' as never,
+        type: 'characterLifecycleDue',
+        dueDay: 5000 as WorldDay,
+        ownerModule: 'character' as never,
+        targetId: 'kid2' as CharacterId,
+        expectedRevision: child.lifecycleRevisions.adulthood,
+        payload: { kind: 'adulthood' },
+      };
+      // 早到（5000 < 成年門檻 5475）：不改狀態。
+      const early = handleCharacterLifecycleJob(job, state, makeContext({ worldDay: 5000 as WorldDay }));
+      assert(
+        reqChar(early.nextSlice, 'kid2' as CharacterId).availability === 'unavailable',
+        '早到的 Job 不得改狀態',
+      );
+      assert(eventsOf(early.outgoingMessages).length === 0, '早到的 Job 不得發事件');
+      // 同一筆 Job 於真正到期時仍須生效——token 沒有被早到那次白白消耗掉。
+      const onTime = handleCharacterLifecycleJob(job, early.nextSlice, makeContext({ worldDay: 6000 as WorldDay }));
+      assert(
+        hasEvent(eventsOf(onTime.outgoingMessages), 'CharacterBecameAdult'),
+        '早到不得消耗 token；到期時同一筆 Job 仍須生效',
+      );
+    },
+  },
+  {
+    // R10 #4：reschedule 也必須消耗 token，否則重複 Job 每輪各排一筆而增殖。
+    name: '生命週期 Job：自然死亡 reschedule 會消耗 token，重複 Job 不得再排一筆',
+    run: () => {
+      const elder = makeCharacter({ characterId: 'elder3' as CharacterId, birthDay: 0 as WorldDay });
+      const state = createCharacterState({ characters: [elder] });
+      const job = (jobId: string): CharacterLifecycleJob => ({
+        jobId: jobId as never,
+        type: 'characterLifecycleDue',
+        dueDay: 29200 as WorldDay,
+        ownerModule: 'character' as never,
+        targetId: 'elder3' as CharacterId,
+        expectedRevision: elder.lifecycleRevisions.naturalDeathCheck,
+        payload: { kind: 'naturalDeathCheck' },
+      });
+      const ctx = makeContext({
+        worldDay: 29200 as WorldDay,
+        resolvers: stubResolverPort({ resolveNaturalDeath: () => ({ outcome: 'reschedule', nextCheckInDays: 365 }) }),
+      });
+      const first = handleCharacterLifecycleJob(job('j1'), state, ctx);
+      assert(first.scheduledJobs.length === 1, '首次 reschedule 應排一筆後續檢查');
+      // 新 Job 必須帶**前進後**的 token，否則它和重複的舊 Job 無從區分。
+      const rescheduled = first.scheduledJobs[0] as { expectedRevision?: number };
+      assert(
+        rescheduled.expectedRevision !== elder.lifecycleRevisions.naturalDeathCheck,
+        '重排出來的新 Job 必須帶前進後的 token',
+      );
+      // 同 token 的重複舊 Job：不得再排一筆（否則逐輪增殖）。
+      const duplicate = handleCharacterLifecycleJob(job('j2'), first.nextSlice, ctx);
+      assert(
+        duplicate.scheduledJobs.length === 0,
+        `重複的舊 Job 不得再排一筆（實得 ${duplicate.scheduledJobs.length} 筆）`,
+      );
+    },
+  },
+  {
     name: '生命週期 Job：退休後的舊退休檢查 Job 過期丟棄（該種類的 token 已跳）',
     run: () => {
       const born = makeCharacter({ characterId: 'elder2' as CharacterId, birthDay: 0 as WorldDay });

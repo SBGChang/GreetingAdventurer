@@ -753,13 +753,23 @@ export function handleCharacterLifecycleJob(
     return makeResult(state);
   }
 
+  // 通過驗證 → **消耗**該 lane 的 token。R9 #3 把 token 拆成逐種類，卻沒有在結算／重排時前進它：
+  // 兩筆同 token 的成年 Job 會各發一次 CharacterBecameAdult；退休／自然死亡選擇 reschedule 時，
+  // 重複 Job 會各自再排一筆，逐輪增殖（複審 R10 #4）。
+  // 以下 runner 一律拿**已消耗**的 character，因此 reschedule 排出的新 Job 自動帶前進後的 token。
+  const consumed: Character = {
+    ...character,
+    revision: bumpRevision(character.revision),
+    lifecycleRevisions: bumpLifecycleTokens(character.lifecycleRevisions, [job.payload.kind]),
+  };
+
   switch (job.payload.kind) {
     case 'adulthood':
-      return runAdulthood(character, state, ctx);
+      return runAdulthood(consumed, state, ctx);
     case 'retirementCheck':
-      return runRetirementCheck(character, state, ctx);
+      return runRetirementCheck(consumed, state, ctx);
     case 'naturalDeathCheck':
-      return runNaturalDeathCheck(character, state, ctx);
+      return runNaturalDeathCheck(consumed, state, ctx);
     default:
       return makeResult(state);
   }
@@ -774,14 +784,15 @@ function runAdulthood(
   const lifecycle = ctx.definitions.getLifecycleRule(rule.lifecycleRuleId);
   const ageDays = ageDaysOf(character, ctx.worldDay);
   if (ageDays < lifecycle.adulthoodAgeDays) {
-    // 尚未成年（Job 早到或 revision 對不上）：不改狀態。
+    // 尚未成年（Job 早到）：不改狀態，**也不落地已消耗的 token**——同一筆 Job 之後仍需生效。
+    // 這裡回傳的是未寫入 consumed 的原始 state。
     return makeResult(state);
   }
   const oldAvailability = character.availability;
+  // character 已是消耗過 token 的版本（revision 也已 bump），此處不再重複 bump。
   const next: Character = {
     ...character,
     availability: 'available',
-    revision: bumpRevision(character.revision),
   };
   const messages: TransactionMessageDraft[] = [
     emit({ type: 'CharacterBecameAdult', characterId: character.characterId, ageDays }),
@@ -807,7 +818,8 @@ function runRetirementCheck(
 ): ModuleResult<CharacterState> {
   const decision = ctx.resolvers.resolveRetirement({ character, onDay: ctx.worldDay });
   if (decision.outcome === 'reschedule') {
-    return makeResult(state, [], [
+    // 必須寫回已消耗 token 的 character，否則新 Job 會帶著**舊** token，重複 Job 每輪各排一筆而增殖。
+    return makeResult(upsertCharacter(state, character), [], [
       lifecycleJobDraft(
         character,
         (ctx.worldDay + decision.nextCheckInDays) as WorldDay,
@@ -816,14 +828,12 @@ function runRetirementCheck(
     ]);
   }
   const oldAvailability = character.availability;
+  // retirementCheck 這條 lane 的 token 已於 handler 消耗（舊的退休檢查 Job 因此全部過期），
+  // 不需在此再跳一次。**不得**動到 naturalDeathCheck：退休角色仍會自然老死（R9 #3）。
   const next: Character = {
     ...character,
     lifeState: 'retired',
     availability: 'unavailable',
-    revision: bumpRevision(character.revision),
-    // 只作廢「退休檢查」。**不得**動到 naturalDeathCheck：退休角色仍會自然老死，連帶作廢會讓
-    // 出生時就排好的自然死亡 Job 永遠進不去（R9 #3）。
-    lifecycleRevisions: bumpLifecycleTokens(character.lifecycleRevisions, ['retirementCheck']),
   };
   return makeResult(upsertCharacter(state, next), [
     emit({ type: 'CharacterRetired', characterId: character.characterId, retiredOnDay: ctx.worldDay }),
@@ -844,7 +854,8 @@ function runNaturalDeathCheck(
 ): ModuleResult<CharacterState> {
   const decision = ctx.resolvers.resolveNaturalDeath({ character, onDay: ctx.worldDay });
   if (decision.outcome === 'reschedule') {
-    return makeResult(state, [], [
+    // 同 runRetirementCheck：寫回已消耗 token 的 character，新 Job 才會帶前進後的 token。
+    return makeResult(upsertCharacter(state, character), [], [
       lifecycleJobDraft(
         character,
         (ctx.worldDay + decision.nextCheckInDays) as WorldDay,
