@@ -6,6 +6,7 @@ import type {
   CombatItemUseCommitted,
   CreateItemInstance,
   EncumbranceResolutionOpened,
+  EquipmentChanged,
   InventoryTransferred,
   ItemRemoved,
   TransferItem,
@@ -580,6 +581,83 @@ const cases: readonly Case[] = [
       assert(
         swordLoc?.kind === 'equipped' && axeLoc?.kind === 'equipped' && swordLoc.slotId !== axeLoc.slotId,
         '雙持兩把武器不得占同一個 slot',
+      );
+    },
+  },
+  {
+    // R11 #1：原本只發 WeaponSetConfigured，character 能力上限／Combat Power／UI／快取都不知道裝備變了
+    //（與 R7 #3「自動卸裝沒發 EquipmentChanged」同一形狀）。
+    name: 'configureWeaponSet: 每隻佔用者有變的手都要發 EquipmentChanged',
+    run: () => {
+      const deps = createFixtureDeps();
+      const r = configureWeaponSet(
+        createFixtureState(),
+        { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, mainHandItemId: FIXTURE.swordItemId, offHandItemId: FIXTURE.shieldItemId, selectedSkillIds: [undefined, undefined, undefined] },
+        deps,
+      );
+      expectOk(r, 'configure sword+shield');
+      const changes = eventsOf(r)
+        .filter((e): e is EquipmentChanged => (e as { type?: string }).type === 'EquipmentChanged');
+      assert(changes.length === 2, `兩手都變 → 應發 2 筆 EquipmentChanged（實得 ${changes.length}）`);
+      const main = changes.find((c) => c.slotId === FIXTURE.mainHandSlot);
+      const off = changes.find((c) => c.slotId === FIXTURE.offHandSlot);
+      assert(main?.itemId === FIXTURE.swordItemId, '主手事件應帶劍');
+      assert(off?.itemId === FIXTURE.shieldItemId, '副手事件應帶盾');
+      assert(main?.weaponSetId === WS0 && off?.weaponSetId === WS0, '事件應帶所屬武器組');
+    },
+  },
+  {
+    name: 'configureWeaponSet: 清空一手 → 該手發 itemId undefined 的 EquipmentChanged',
+    run: () => {
+      const deps = createFixtureDeps();
+      const equipped = expectOk(
+        configureWeaponSet(
+          createFixtureState(),
+          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, mainHandItemId: FIXTURE.swordItemId, offHandItemId: FIXTURE.shieldItemId, selectedSkillIds: [undefined, undefined, undefined] },
+          deps,
+        ),
+        'equip both',
+      );
+      const r = configureWeaponSet(
+        equipped,
+        { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, mainHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] },
+        deps,
+      );
+      expectOk(r, 'drop the shield');
+      const changes = eventsOf(r)
+        .filter((e): e is EquipmentChanged => (e as { type?: string }).type === 'EquipmentChanged');
+      assert(changes.length === 1, `只有副手變 → 應恰發 1 筆（實得 ${changes.length}）`);
+      assert(changes[0]!.slotId === FIXTURE.offHandSlot, '應為副手 slot');
+      assert(changes[0]!.itemId === undefined, '清空的手 itemId 應為 undefined');
+    },
+  },
+  {
+    // R11 #3：雙手武器 main===off，卸下時 displaced 會出現同一實體兩次。
+    name: 'configureWeaponSet: 卸下雙手武器只更新該實體一次（revision 不得跳兩格）',
+    run: () => {
+      const deps = createFixtureDeps();
+      const equipped = expectOk(
+        configureWeaponSet(
+          createFixtureState(),
+          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, mainHandItemId: FIXTURE.greatswordItemId, offHandItemId: FIXTURE.greatswordItemId, selectedSkillIds: [undefined, undefined, undefined] },
+          deps,
+        ),
+        'equip greatsword',
+      );
+      const revAfterEquip = equipped.items[FIXTURE.greatswordItemId]!.revision;
+      const cleared = expectOk(
+        configureWeaponSet(
+          equipped,
+          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, selectedSkillIds: [undefined, undefined, undefined] },
+          deps,
+        ),
+        'clear both hands',
+      );
+      const after = cleared.items[FIXTURE.greatswordItemId]!;
+      assert(after.location.kind === 'characterBag', '雙手武器應卸回背包');
+      assert(
+        after.revision === revAfterEquip + 1,
+        `同一實體只該被更新一次（revision 應為 ${revAfterEquip + 1}，實得 ${after.revision}）`,
       );
     },
   },

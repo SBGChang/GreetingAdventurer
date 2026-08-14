@@ -672,9 +672,11 @@ export function configureWeaponSet(
   const newItemIds = rawNew.filter((id, i) => rawNew.indexOf(id) === i); // 去重（雙手武器 main===off）
   const prevSet = loadout.weaponSets[idx]!;
   // 本組原本的手部物品，若不再被引用 → 稍後卸回背包（否則 location 永遠停在 equipped）。
-  const displaced = [prevSet.mainHandItemId, prevSet.offHandItemId].filter(
+  // **去重**：雙手武器的 main===off，不去重會對同一實體跑兩次卸下迴圈，revision 白跳兩次（複審 R11 #3）。
+  const displacedRaw = [prevSet.mainHandItemId, prevSet.offHandItemId].filter(
     (x): x is ItemInstanceId => x !== undefined && !newItemSet.has(String(x)),
   );
+  const displaced = displacedRaw.filter((id, i) => displacedRaw.indexOf(id) === i);
 
   const updated: WeaponSetLoadout = {
     weaponSetId: cmd.weaponSetId,
@@ -729,8 +731,35 @@ export function configureWeaponSet(
   }
 
   const skillIds = cmd.selectedSkillIds.filter((x): x is NonNullable<typeof x> => x !== undefined);
+  // 每隻**佔用者有變**的手各發一筆 EquipmentChanged。原本只發 WeaponSetConfigured，於是改武器組配置後
+  // character 能力上限、Combat Power、UI 與快取都不知道裝備變了（若該裝給生命上限，角色可能停在高於新
+  // 上限的 HP）——與 R7 #3「自動卸裝沒發 EquipmentChanged」同一形狀（複審 R11 #1）。
+  const equipmentChanges: DomainEventDraft<unknown>[] = [];
+  for (const [hand, prevId, nextId] of [
+    ['mainHand', prevSet.mainHandItemId, cmd.mainHandItemId],
+    ['offHand', prevSet.offHandItemId, cmd.offHandItemId],
+  ] as const) {
+    if (prevId === nextId) continue;
+    // slot 由「這隻手」決定：新占用者優先，清空時退回舊占用者的同手 slot。
+    const refId = nextId ?? prevId;
+    if (refId === undefined) continue;
+    const refInst = working.items[refId];
+    if (refInst === undefined) continue;
+    const slotId = deps.reader.getEquipment(refInst.definitionId).handSlots[hand];
+    if (slotId === undefined) continue;
+    equipmentChanges.push(
+      emit({
+        type: 'EquipmentChanged',
+        characterId: cmd.characterId,
+        slotId,
+        weaponSetId: cmd.weaponSetId,
+        itemId: nextId,
+      }),
+    );
+  }
   return accept(working, [
     emit({ type: 'WeaponSetConfigured', characterId: cmd.characterId, weaponSetId: cmd.weaponSetId, itemIds: newItemIds, skillIds }),
+    ...equipmentChanges,
   ]);
 }
 
