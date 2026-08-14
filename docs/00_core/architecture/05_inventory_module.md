@@ -335,6 +335,8 @@ interface InventoryQuery {
 }
 ```
 
+> `getEquippedItem` 的權威是 **Loadout 的 slot 對應**,不是 `ItemLocation.slotId`。一件裝備只保存**一個**位置錨點,卻可以占用多個 slot:雙手武器同時占主/副手、多格鎧甲占 body+head。掃 `location.slotId` 會讓雙手劍的副手查詢、長袍的頭部查詢回 `undefined`,即使 Loadout 明確顯示它們占著。武器組以「該裝備現在在哪隻手」解析(單手武器的 `occupiedSlots` 只有 `[mainHandSlot]`,放副手時對不上),鎧甲則直接查 `armorSlots`(多格鎧甲每格都指向同一件)。(複審 R10 #3)
+
 一般條件若要判定「隊伍有人持有指定實體」，先由 Team Query 取得正式成員，再以 `getOwningCharacter` 驗證 Owner 是否在清單中；任務物則直接驗證精確 `teamQuestCargo(teamId, questId)`。兩者都不得建立隊伍物品所有權，也不得用「任意同類型物品」取代指定 ItemInstance。
 
 ```ts
@@ -355,8 +357,14 @@ type CarryCapacitySnapshot = {
 
 | Command | 前置條件 | Inventory 的責任 |
 |---|---|---|
-| `equipItem` | 角色可用、持有合法裝備、slot／weaponSet 合法。 | 移動 Item 到 equipped；發出裝備變更。 |
+| `equipItem` | 角色可用、持有合法裝備、slot／weaponSet 合法。**位置與保留防線見下**。 | 移動 Item 到 equipped；發出裝備變更。 |
 | `unequipItem` | 指定 slot／weaponSet 有可移除裝備。 | 移回同一角色背包，Owner 不變。 |
+
+> **兩條裝備入口共用同一個合法性判定**（`equipItem` 與 `configureWeaponSet`;複審 R10 #2）:
+>
+> - **Owner 不能代替 location。** Owner 是「誰的東西」,location 才是「東西在哪」。只接受**該角色背包內**或**該角色身上既有裝備**;`homeStorage` 必須先經住宅取物流程搬進背包(否則繞過攜帶重量),商店/任務託管/清算託管/地圖內容同理。
+> - **任何 active reservation 一律拒絕**:任務目標物、製作素材、待轉移物都不得裝備。
+> - **手部互斥**:只有雙手武器可以兩手同為一件。單手武器 `mainHand === offHand` 拒絕;把已在一手的裝備改裝到另一手時,必須清除原手引用——否則 Loadout 兩手指向同一實體,而 `ItemLocation` 只能指向其中一手(複審 R10 #1)。
 | `configureWeaponSet` | 裝備由角色持有、slot 相容，且選擇的技能已由 Workflow 驗證。 | 原子更新指定武器組的雙手配置與三個技能引用。 |
 | `useItem` | 持有可於非戰鬥使用的 Item、未被保留。 | 驗證並交給對應 Resolver；依結果消耗或保留。 |
 | `splitStack` | Item 可堆疊且數量足夠。 | 建立新 ItemInstance，保持來源與位置規則。 |
