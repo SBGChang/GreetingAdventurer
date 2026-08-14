@@ -214,8 +214,10 @@ export function upsertTeam(state: TeamState, next: Team): TeamState {
   return { ...state, teams: { ...state.teams, [next.teamId]: next } };
 }
 
-// 刪除 Team 時一併清掉**以 teamId 為鍵**的附屬狀態（戰鬥配置、留隊帳本），否則會殘留指向已不存在
-// 隊伍的孤兒記錄（例：招募成功刪除來源單人 NPC Team 後，其舊配置仍留著）。
+// 結束 Team aggregate：刪 Team 時一併清掉所有屬於它的附屬記錄——以 teamId 為鍵的（戰鬥配置、留隊帳本），
+// 以及以 teamId 為欄位的（進行中 Plan、成員 FreeAction）。否則會殘留指向已不存在隊伍的孤兒（例：招募成功
+// 刪除來源單人 NPC Team 後，其 Active Plan 仍存在並引用死掉的 Team）。到期的 teamPlanDue Job 因對應 Plan
+// 已移除,handleTeamPlanDueJob 的 `tryGetPlan===undefined → no-op` 會安全跳過,不會進 requireTeam 拋錯。
 export function removeTeam(state: TeamState, id: TeamId): TeamState {
   const teams = { ...state.teams };
   delete teams[id];
@@ -223,7 +225,11 @@ export function removeTeam(state: TeamState, id: TeamId): TeamState {
   delete combatFormations[id];
   const memberRetention = { ...state.memberRetention };
   delete memberRetention[id];
-  return { ...state, teams, combatFormations, memberRetention };
+  const plans: Record<TeamPlanId, TeamPlan> = {};
+  for (const [k, p] of Object.entries(state.plans)) if (p.teamId !== id) plans[k as TeamPlanId] = p;
+  const freeActions: Record<FreeActionId, MemberFreeAction> = {};
+  for (const [k, f] of Object.entries(state.freeActions)) if (f.teamId !== id) freeActions[k as FreeActionId] = f;
+  return { ...state, teams, combatFormations, memberRetention, plans, freeActions };
 }
 
 export function upsertPlan(state: TeamState, next: TeamPlan): TeamState {

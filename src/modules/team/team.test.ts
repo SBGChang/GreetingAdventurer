@@ -339,6 +339,27 @@ const cases: readonly Case[] = [
     },
   },
   {
+    name: '#5：招募刪除來源 Team → 其 Active Plan 一併清除（不留指向死掉 Team 的孤兒）',
+    run: () => {
+      const base = fixtureTeamState();
+      const planId = 'runtime:team-plan:npc-orphan';
+      // 給來源 NPC Team 一筆進行中的 Plan（僅需 teamId 讓 removeTeam 掃到；其餘欄位以 cast 帶過）。
+      const s0: TeamState = {
+        ...base,
+        plans: {
+          ...base.plans,
+          [planId]: { planId, teamId: NPC_TEAM_ID, kind: 'cityFree', startedOnDay: 0, status: 'active', payload: {}, revision: 0 },
+        } as never,
+      };
+      const r = ok(handleRecruitTavernAdventurer(s0, { type: 'recruitTavernAdventurer', targetCharacterId: NPC_LEADER_ID }, makeContext()));
+      assert(r.result.nextSlice.teams[NPC_TEAM_ID] === undefined, '來源 Team 應移除');
+      assert(
+        (r.result.nextSlice.plans as Record<string, unknown>)[planId] === undefined,
+        '來源 Team 的 Active Plan 應一併清除（否則孤兒 Plan/到期 Job 指向死掉的 Team）',
+      );
+    },
+  },
+  {
     name: 'recruit 擲敗 → 接受（正常玩法結果、不轉移角色），非拒絕（拒絕會回滾 cursor 使重試恆同結果）',
     run: () => {
       const s0 = fixtureTeamState();
