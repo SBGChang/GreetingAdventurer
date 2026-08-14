@@ -3,7 +3,11 @@
 // fixtures 手刻的 createFixtureReader）。這是 data-runtime 的第一個真實消費者，也是其餘模組 reader
 // 的樣板：一個 kind 家族一個窄化 Reader，領域 getter 委派到對應的 `.get(id)`。
 
-import type { DefinitionId, GatheringRuleId } from '../../contracts/core';
+import type {
+  ContentEventOptionId,
+  DefinitionId,
+  GatheringRuleId,
+} from '../../contracts/core';
 import type {
   DungeonDefinitionReader,
   DungeonInteractionRuleDefinition,
@@ -19,10 +23,15 @@ export const DUNGEON_DEFINITION_KINDS = {
   npcExplorationRule: 'npc-exploration-rule',
   npcTargetResolver: 'npc-dungeon-target-resolver',
   gatheringRule: 'gathering-rule',
+  contentEvent: 'content-event',
 } as const;
 
 // getGatheringInteractionView 只投影 gathering 定義的 dungeonInteractionMinutes（非完整定義）。
 type GatheringRuleDungeonView = Readonly<{ dungeonInteractionMinutes: number }>;
+
+// listContentEventOptionIds 同理：內容事件定義由內容軌擁有，Dungeon 只需要選項 ID 清單來驗證
+// 玩家送來的 optionId，不投影分支效果。
+type ContentEventDungeonView = Readonly<{ options: readonly Readonly<{ id: ContentEventOptionId }>[] }>;
 
 export function createDungeonDefinitionReader(registry: DefinitionRegistry): DungeonDefinitionReader {
   const interaction = narrowedDomainReader<DungeonInteractionRuleDefinition>(
@@ -45,6 +54,11 @@ export function createDungeonDefinitionReader(registry: DefinitionRegistry): Dun
     'reader:dungeon.gathering-rule',
     [DUNGEON_DEFINITION_KINDS.gatheringRule],
   );
+  const contentEvent = narrowedDomainReader<ContentEventDungeonView>(
+    registry,
+    'reader:dungeon.content-event',
+    [DUNGEON_DEFINITION_KINDS.contentEvent],
+  );
 
   return {
     getDungeonInteractionRule: (id) => interaction.get(id as unknown as DefinitionId),
@@ -54,5 +68,7 @@ export function createDungeonDefinitionReader(registry: DefinitionRegistry): Dun
       const view = gathering.get(id as unknown as DefinitionId);
       return { ruleId: id, dungeonInteractionMinutes: view.dungeonInteractionMinutes };
     },
+    listContentEventOptionIds: (definitionId) =>
+      contentEvent.get(definitionId as unknown as DefinitionId).options.map((option) => option.id),
   };
 }

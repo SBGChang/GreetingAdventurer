@@ -8,19 +8,27 @@
 //   - 玩家採集：ConsumeDungeonGatheringAction 依資料增加分鐘（§9.16）。
 //   - NPC Run：npcDungeonDay 依序列推進游標並在全清後進入 settling，三方結算後關閉（§9.3、§9.14、§9.22）。
 
-import type { AssetDistributionId, ModuleResult, NpcDungeonRunId } from '../../contracts/core';
+import type {
+  AssetDistributionId,
+  ContentEventOptionId,
+  InteractionId,
+  ModuleResult,
+  NpcDungeonRunId,
+} from '../../contracts/core';
 import type {
   MoveDungeonRoom,
   ConsumeDungeonGatheringAction,
   StartNpcDungeonRun,
   InteractDungeonContent,
+  ResolveDungeonInteraction,
 } from '../../contracts/dungeon';
 
 import type { DungeonModuleState } from './state';
-import { createInitialDungeonState } from './state';
+import { createInitialDungeonState, getPlayerSession } from './state';
 import {
   moveDungeonRoom,
   interactDungeonContent,
+  resolveDungeonInteraction,
   consumeDungeonGatheringAction,
   startNpcDungeonRun,
   npcDungeonDay,
@@ -39,6 +47,30 @@ function assert(condition: boolean, message: string): void {
 function ok(r: DungeonHandlerResult): ModuleResult<DungeonModuleState> {
   if (!r.ok) throw new Error(`expected accept, got rejection: ${r.rejection.code}`);
   return r.result;
+}
+
+// 走到「事件 Pending Interaction 已開啟」的狀態：移進內容所在房 R2 後互動。
+function openPendingEvent(): { state: DungeonModuleState; interactionId: InteractionId } {
+  const ctx = createFixtureContext();
+  const moved = ok(
+    moveDungeonRoom(
+      createFixtureState(),
+      FIXTURE.teamId,
+      { type: 'moveDungeonRoom', targetRoomId: FIXTURE.roomMiddle },
+      ctx,
+    ),
+  );
+  const opened = ok(
+    interactDungeonContent(
+      moved.nextSlice,
+      FIXTURE.teamId,
+      { type: 'interactDungeonContent', contentId: FIXTURE.eventContentId },
+      ctx,
+    ),
+  );
+  const interactionId = getPlayerSession(opened.nextSlice, FIXTURE.teamId)?.pendingInteraction?.interactionId;
+  if (interactionId === undefined) throw new Error('fixture: expected a pending interaction');
+  return { state: opened.nextSlice, interactionId };
 }
 
 // 取出外送訊息中的 event.type 清單。
@@ -155,6 +187,42 @@ const cases: readonly Case[] = [
       const cmd: InteractDungeonContent = { type: 'interactDungeonContent', contentId: FIXTURE.eventContentId };
       const r = interactDungeonContent(moved.nextSlice, FIXTURE.teamId, cmd, ctx);
       assert(r.ok, 'interact from the content room proceeds');
+    },
+  },
+  {
+    // R8 #4 迴歸：偽造的 optionId 曾清掉 Pending 並固定回報成功。
+    name: 'resolveDungeonInteraction rejects a forged optionId and keeps the pending interaction',
+    run: () => {
+      const { state, interactionId } = openPendingEvent();
+      const cmd: ResolveDungeonInteraction = {
+        type: 'resolveDungeonInteraction',
+        interactionId,
+        optionId: 'template-local:content-event-option:forged' as ContentEventOptionId,
+      };
+      const r = resolveDungeonInteraction(state, FIXTURE.teamId, cmd, createFixtureContext());
+      assert(!r.ok, 'a forged optionId must reject');
+      assert(
+        r.ok || r.rejection.code === 'dungeon.resolveDungeonInteraction.illegalOption',
+        'rejection names the illegal option',
+      );
+      // Session 不得被動到：Pending 仍在，玩家可以重送合法選項。
+      const session = getPlayerSession(state, FIXTURE.teamId);
+      assert(session?.pendingInteraction?.interactionId === interactionId, 'pending interaction survives');
+    },
+  },
+  {
+    name: 'resolveDungeonInteraction accepts the option declared by the content event definition',
+    run: () => {
+      const { state, interactionId } = openPendingEvent();
+      const cmd: ResolveDungeonInteraction = {
+        type: 'resolveDungeonInteraction',
+        interactionId,
+        optionId: FIXTURE.eventOptionId,
+      };
+      const r = ok(resolveDungeonInteraction(state, FIXTURE.teamId, cmd, createFixtureContext()));
+      const session = getPlayerSession(r.nextSlice, FIXTURE.teamId);
+      assert(session?.pendingInteraction === undefined, 'pending interaction cleared');
+      assert(session?.status === 'exploring', 'exploration resumes');
     },
   },
   {

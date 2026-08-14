@@ -576,8 +576,12 @@ export function resolveDungeonInteraction(
   const pending = session.pendingInteraction;
   if (pending === undefined || pending.interactionId !== cmd.interactionId) return reject('dungeon.resolveDungeonInteraction.preconditionFailed');
 
-  // TODO: 依 contentEventInstance 的選項表驗證 optionId 合法性並解析資料化結果（分支效果／戰鬥／
-  //       物品）。第一版主路徑只清除互動並要求 Map 依選項套用內容結果。
+  // optionId 必須是本事件定義的合法選項——不得信任 UI 傳入。偽造的 optionId 先前會清掉 Pending 並固定回報
+  // 成功；現在一律拒絕（不動 Session）。TODO: 依選項解析資料化結果（分支效果／戰鬥／物品）仍待內容軌。
+  const legalOptions = ctx.reader.listContentEventOptionIds(pending.contentEventInstance.definitionId);
+  if (!legalOptions.includes(cmd.optionId)) {
+    return reject('dungeon.resolveDungeonInteraction.illegalOption', { optionId: String(cmd.optionId) });
+  }
   const restored: PlayerExplorationSession = {
     ...session,
     pendingInteraction: undefined,

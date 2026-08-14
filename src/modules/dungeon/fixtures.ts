@@ -12,6 +12,8 @@ import type {
   GatheringNodeId,
   GatheringRuleId,
   ContentInstanceId,
+  ContentEventDefinitionId,
+  ContentEventOptionId,
   TeamId,
   CharacterId,
   TeamPlanId,
@@ -67,6 +69,8 @@ export const FIXTURE = {
   npcNode2: 'template-local:gathering-node:npc2' as GatheringNodeId,
 
   eventContentId: 'runtime:content-instance:event-1' as ContentInstanceId,
+  eventDefinitionId: 'definition:content-event:cave-shrine' as ContentEventDefinitionId,
+  eventOptionId: 'template-local:content-event-option:pray' as ContentEventOptionId,
 
   gatheringRulePlayer: 'definition:gathering-rule:herb' as GatheringRuleId,
   gatheringRuleNpc: 'definition:gathering-rule:npc' as GatheringRuleId,
@@ -130,6 +134,10 @@ export function createFixtureReader(): DungeonDefinitionReader {
       // 玩家採集 15 分鐘；其餘 10 分鐘（示例資料）。
       const minutes = id === FIXTURE.gatheringRulePlayer ? 15 : 10;
       return { ruleId: id, dungeonInteractionMinutes: minutes };
+    },
+    listContentEventOptionIds: (definitionId) => {
+      if (definitionId === FIXTURE.eventDefinitionId) return [FIXTURE.eventOptionId];
+      throw new Error(`fixture reader: unknown content event ${String(definitionId)}`);
     },
   };
 }
@@ -197,7 +205,8 @@ export function createFixtureMapPort(overrides?: Partial<DungeonMapPort>): Dunge
     getEncounterGroupId: () => undefined,
     getContentEventInstance: (_mapId, _contentId) => ({
       instanceId: 'runtime:content-event-instance:evt-1' as never,
-      definitionId: 'definition:content-event:cave-shrine' as never,
+      // 必須與 createFixtureReader 的合法選項表同一筆定義，否則 resolveDungeonInteraction 會誤拒。
+      definitionId: FIXTURE.eventDefinitionId,
       rngStreamId: 'rng-stream:evt-1' as RngStreamId,
     }),
     listNpcSequence: () => npcSequence,

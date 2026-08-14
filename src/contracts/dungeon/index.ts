@@ -149,6 +149,8 @@ export interface DungeonDefinitionReader {
     ruleId: GatheringRuleId;
     dungeonInteractionMinutes: number;
   }>;
+  // 內容事件的合法選項 ID 清單（供 resolveDungeonInteraction 驗證玩家送來的 optionId，不得信任 UI）。
+  listContentEventOptionIds(definitionId: ContentEventDefinitionId): readonly ContentEventOptionId[];
 }
 
 // Combat Sequence 的互動走**交易模型**，不是同步 Host Port。
