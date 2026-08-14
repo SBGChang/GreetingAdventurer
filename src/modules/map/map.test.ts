@@ -436,6 +436,36 @@ const cases: readonly Case[] = [
     },
   },
   {
+    // R10 #6：GDD §183——鎖期間「跳過刷新日**且不建立 Pending**」。架構書原本寫成「保留 Pending
+    // 並重排」，與 GDD 相反；實作會殘留一個永遠不會被重排的 marker。
+    name: 'RefreshLock: 設鎖時清除既有 Pending 登記（GDD §183：鎖期間不建立 Pending）',
+    run: () => {
+      // 先製造一筆 Pending：固定刷新日有人在圖內。
+      const occupied = makeContext({ worldDay: 100 as WorldDay, presence: stubPresence({ teamsInside: 1 }) });
+      const pending = handleMapRefreshCheck(regularJob(100), fixtureMapState(1), occupied);
+      assert(pending.nextSlice.instances[MAP_ID]!.refresh.pendingSinceDay === 100, '前提：應已登記 Pending');
+
+      const locked = expectOk(
+        handleSetMapRefreshLock(
+          {
+            type: 'SetMapRefreshLock',
+            mapId: MAP_ID,
+            mode: 'set',
+            reason: 'suppression',
+            releaseOnDay: 141 as WorldDay,
+            sourceQuestId: QUEST_ID,
+          },
+          pending.nextSlice,
+          occupied,
+        ),
+        'set-lock-over-pending',
+      );
+      const refresh = locked.nextSlice.instances[MAP_ID]!.refresh;
+      assert(refresh.pendingSinceDay === undefined, '設鎖應清除 pendingSinceDay');
+      assert(refresh.pendingCheckScheduledFor === undefined, '設鎖應清除 pendingCheckScheduledFor');
+    },
+  },
+  {
     name: 'RefreshLock: 鎖定跨過固定刷新日不刷新；isRefreshLocked 依日判定',
     run: () => {
       const state = fixtureMapState(1);

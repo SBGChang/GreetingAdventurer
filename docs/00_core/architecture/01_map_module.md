@@ -330,13 +330,17 @@ type NpcSequenceEntryView =
 | Job | 處理條件 | 成功結果 |
 |---|---|---|
 | `mapRefreshCheck(reason: regular)` | 當日符合該圖固定 14 日節奏。 | 刷新、標記 Pending，或因鎖定跳過。 |
-| `mapRefreshCheck(reason: pending)` | 此前已登記 Pending 次日檢查。 | 無人且未鎖定時刷新；否則保留 Pending 並重排。 |
+| `mapRefreshCheck(reason: pending)` | 此前已登記 Pending 次日檢查，且 Job 的 `dueDay` 仍等於 `refresh.pendingCheckScheduledFor`。 | 無人且未鎖定時刷新；**仍有人**時保留 Pending 並重排次日。**鎖定中**則不保留、不重排——見下。 |
 
 ### 5.2 Internal Command
 
 | Internal Command | Map 的反應 |
 |---|---|
-| `SetMapRefreshLock` | 為鎮壓／討伐建立或解除 41 日刷新鎖。 |
+| `SetMapRefreshLock` | 為鎮壓／討伐建立或解除 41 日刷新鎖。**設鎖時一併清除既有 Pending 登記**（`pendingSinceDay` / `pendingCheckScheduledFor`）。 |
+
+> **刷新鎖與 Pending（依 GDD §183 更正）**:GDD 明定「討伐與鎮壓在生成時就使對應地圖進入三期減一天(41 日)的刷新鎖;不論委託是否被接取,期間皆跳過刷新日**且不建立 Pending**。鎖定在下一個應刷新日前一天解除,因此隔天可自然刷新;不補算、不累積。」
+>
+> 本文件原先在 §5.1 寫「鎖定時保留 Pending 並逐日重排」,與 GDD 相反,且實作會留下一個永遠不會被重排的 Pending marker。**以 GDD 為準**:設鎖時清除 Pending;鎖定期間的 `mapRefreshCheck` 一律略過(不刷新、不登記 Pending、不重排);解鎖後等下一個固定刷新日自然刷新。(複審 R10 #6)
 | `ProtectMapContent` | 依 `mode: protect / release` 更新指定 Quest 的內容保護。 |
 | `ResolvePlayerMapContent` | 驗證玩家已合法處理指定內容與 `distributionId`，正式改變內容狀態。 |
 | `ApplyNpcDungeonSettlement` | 對暫存結果與 `distributionId` 做原子驗證，正式套用仍有效的內容處理結果。 |

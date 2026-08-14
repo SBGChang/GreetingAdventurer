@@ -738,7 +738,16 @@ export function handleSetMapRefreshLock(
     };
     const nextInstance: MapInstance = {
       ...instance,
-      refresh: { ...instance.refresh, refreshLock: lock },
+      refresh: {
+        ...instance.refresh,
+        refreshLock: lock,
+        // GDD §183：鎮壓／討伐鎖期間「皆跳過刷新日**且不建立 Pending**」，解除後等下一個固定刷新日
+        // ——不補算、不累積。所以設鎖時要一併清掉既有的 Pending 登記，否則會殘留一個永遠不會被重排的
+        // marker（複審 R10 #6；01_map_module.md §5.1 原本寫成「保留 Pending 並重排」，與 GDD 相反，
+        // 已一併更正）。
+        pendingSinceDay: undefined,
+        pendingCheckScheduledFor: undefined,
+      },
       revision: bump(instance.revision),
     };
     return accept(upsertInstance(state, nextInstance), [
