@@ -8,6 +8,26 @@
 
 ---
 
+## 2026-08-13 — 複審回合 7：6 個 P1（跨模組執行 + 狀態一致性）
+
+跨模組執行檢查抓到 6 個 P1。逐一修根、加測試、各自 commit。
+
+**#1 Subscriber 的後續訊息被 Router 靜默丟棄** —— 這是最有影響的一條。`SubscriberDispatch` 只回 `mutation`，模組 Subscriber 的 `outgoingMessages` 沒交給 Transaction Runner。實測戰鬥勝利後 dungeon 送的 `ResolvePlayerMapContent` 從未執行、地圖內容永遠停在 available；也波及 NPC 地牢結算與 progression 次級事件。kernel 的 EventSubscriber **本就支援 outgoing**（會 enqueue），只有 Router 沒供給。改 `SubscriberDispatch` 回 `{ mutation, outgoing? }`、`subscriberResult()` 帶上 outgoingMessages，全表改用它。
+
+**#2 支援熟練度冪等鍵範圍過大** —— R6 的 key 只有 `combat:support + encounterId`，但 Combat 每名角色每技能各發一筆 → 同場第一筆入帳後其餘全被當重放（第二名支援者拿不到）。key 加 `characterId:skillId` discriminant；attack/defense 聚合全隊於單一事件，維持 encounter 級 key。
+
+**#3 自動卸裝沒發 EquipmentChanged** —— R6 移任務貨物時清了 Loadout，但只發 `InventoryTransferred`。character 能力上限/Combat Power/UI/快取不知裝備已卸（若該裝給生命上限，角色可能暫留高於新上限的 HP）。卸裝時補發 `EquipmentChanged(itemId: undefined)`。
+
+**#4 Resolver 可寫入非法戰鬥配置** —— 玩家設站位走 `validatePlacements`，但招募/離隊的 `recomputeFormation` 直接信任 Resolver。實測 Resolver 把三人全塞 (0,0)，招募仍成功、非法重疊寫進 State。改：`recomputeFormation` 驗證 Resolver 輸出，非法則退回模組自算的 row-major 合法配置（Team 自己守不變量，Resolver 無權破壞）。
+
+**#5 removeTeam 留下 Active Plan/FreeAction** —— R6 清了 Formation/Retention，但 plans/freeActions 沒清。招募一個正跑 City Free Plan 的單人 NPC → Team 消失但 Plan 仍在、引用死掉的 Team。改：`removeTeam` 成為「結束 aggregate」——一併清所有 `teamId===id` 的 plans/freeActions。孤兒的 teamPlanDue Job 因對應 Plan 已移除,`handleTeamPlanDueJob` 的 `tryGetPlan===undefined → no-op` 安全跳過,不進 requireTeam。
+
+**#6 地牢戰敗後仍恢復探索** —— `handleCombatEncounterResolved` 勝敗一律回 exploring，全隊戰敗仍能走地牢。改：非勝利 → Session 收為 `closed`（不回 exploring）+ 送 `StartReturnFromDungeon` 讓 team 結束地牢 Plan + 返城。**架構待做**：完整版應由 `CombatTeamOutcome(canContinue=false)` 統一驅動 Team+Dungeon 退出（該事件與其訂閱尚未接入 Manifest）；目前 dungeon 直接驅動退出。
+
+`tsc` 乾淨、verify 全過（新增：subscriber outgoing 保留、支援多人入帳、卸裝發事件、非法配置退回、aggregate 清除、戰敗結束探索 等測）。
+
+---
+
 ## 2026-08-13 — 複審回合 6：5 個 P1（狀態不變量；現有測試沒覆蓋到）
 
 全是「tsc + verify 全綠但狀態不變量被破壞」的洞——現有測試沒測到。逐一修根、加不變量測試、各自 commit。
