@@ -444,9 +444,9 @@ const cases: readonly Case[] = [
     },
   },
   {
-    // R10 #4 的邊界：消耗是「結算時」消耗。Job 早到時什麼都沒發生，就**不得**消耗——否則那條 lane 的
-    // token 白白前進，真正到期的同一筆 Job 反而變成過期，角色永遠不會成年。
-    name: '生命週期 Job：成年 Job 早到不改狀態、也不消耗 token（之後到期仍生效）',
+    // R11 #2：Job 於交易成功提交時就被 Scheduler dequeue（no-op 也算成功），所以早到時單純不動作，
+    // 這筆成年 Job 就永久消失、角色再也不會成年。早到必須**重排**到正確的日子。
+    name: '生命週期 Job：成年 Job 早到不改狀態，但必須重排到正確到期日（否則永久消失）',
     run: () => {
       const child = makeCharacter({
         characterId: 'kid2' as CharacterId,
@@ -463,18 +463,34 @@ const cases: readonly Case[] = [
         expectedRevision: child.lifecycleRevisions.adulthood,
         payload: { kind: 'adulthood' },
       };
-      // 早到（5000 < 成年門檻 5475）：不改狀態。
+      // 早到（5000 < 成年門檻 5475）：不改狀態、不發事件。
       const early = handleCharacterLifecycleJob(job, state, makeContext({ worldDay: 5000 as WorldDay }));
       assert(
         reqChar(early.nextSlice, 'kid2' as CharacterId).availability === 'unavailable',
         '早到的 Job 不得改狀態',
       );
       assert(eventsOf(early.outgoingMessages).length === 0, '早到的 Job 不得發事件');
-      // 同一筆 Job 於真正到期時仍須生效——token 沒有被早到那次白白消耗掉。
-      const onTime = handleCharacterLifecycleJob(job, early.nextSlice, makeContext({ worldDay: 6000 as WorldDay }));
+      // 但必須排出一筆到期日正確的替代 Job，否則成年這條路就此斷掉。
+      assert(early.scheduledJobs.length === 1, '早到必須重排一筆成年 Job（Job 執行後會被 dequeue）');
+      const rescheduled = early.scheduledJobs[0] as {
+        dueDay?: number;
+        expectedRevision?: number;
+        payload?: { kind?: string };
+      };
+      assert(rescheduled.payload?.kind === 'adulthood', '重排的應仍是成年 Job');
+      assert(
+        rescheduled.dueDay === 5475,
+        `重排的到期日應為 birthDay + 成年門檻 = 5475（實得 ${String(rescheduled.dueDay)}）`,
+      );
+      // 重排出的 Job 於到期日執行 → 真的成年。
+      const onTime = handleCharacterLifecycleJob(
+        { ...job, jobId: 'job-real' as never, dueDay: 5475 as WorldDay, expectedRevision: rescheduled.expectedRevision as never },
+        early.nextSlice,
+        makeContext({ worldDay: 5475 as WorldDay }),
+      );
       assert(
         hasEvent(eventsOf(onTime.outgoingMessages), 'CharacterBecameAdult'),
-        '早到不得消耗 token；到期時同一筆 Job 仍須生效',
+        '重排出的 Job 到期時應真的成年',
       );
     },
   },

@@ -784,9 +784,14 @@ function runAdulthood(
   const lifecycle = ctx.definitions.getLifecycleRule(rule.lifecycleRuleId);
   const ageDays = ageDaysOf(character, ctx.worldDay);
   if (ageDays < lifecycle.adulthoodAgeDays) {
-    // 尚未成年（Job 早到）：不改狀態，**也不落地已消耗的 token**——同一筆 Job 之後仍需生效。
-    // 這裡回傳的是未寫入 consumed 的原始 state。
-    return makeResult(state);
+    // Job 早到：不改狀態，但**必須重排**。R10 #4 這裡只回傳未變的 state，以為「同一筆 Job 之後仍會生效」
+    // ——那是錯的：Job 於交易**成功提交時就被 Scheduler dequeue**（session.ts 的 dequeueJob；no-op 也算
+    // 成功），單純 no-op 會讓這筆成年 Job 永久消失，角色再也不會成年（複審 R11 #2）。
+    // token 照常消耗，重排出的新 Job 帶前進後的值，重複的舊 Job 因此對不上。
+    const dueDay = (character.birthDay + lifecycle.adulthoodAgeDays) as WorldDay;
+    return makeResult(upsertCharacter(state, character), [], [
+      lifecycleJobDraft(character, dueDay, { kind: 'adulthood' }),
+    ]);
   }
   const oldAvailability = character.availability;
   // character 已是消耗過 token 的版本（revision 也已 bump），此處不再重複 bump。
