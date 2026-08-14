@@ -8,6 +8,56 @@
 
 ---
 
+## 2026-08-14 — 複審回合 8：5 個 P1 + 2 個 P2（狀態邊界 + 未驗證的 Job/輸入）
+
+這回合的共同主題是**「宣稱有驗、其實沒驗」**：契約與註解都寫了防線（`expectedRevision`、選項合法性、
+`contentRevision`、`craftingAttemptId`），實作卻沒讀。全套 `tsc` 與 `verify-modules` 在修之前就是全綠的
+——因為這些全是現有測試沒覆蓋的狀態邊界。所以這輪每一項都補了會**咬**的迴歸測試：新測寫完後逐一把修正
+反轉（mutation check），確認測試真的紅，才算收。
+
+**#1 單手武器放副手時位置寫成主手** —— `EquipmentDefinition` 只宣告 `occupiedSlots`，單手武器的是
+`[mainHandSlot]`，模組根本沒有副手 slot 可記；`configureWeaponSet` 於是把 `ItemLocation.slotId` 寫成
+**主手**，和主手裝備衝突，也和 `equipItem`（單手一律進主手）互相矛盾。改：副手只收盾（其
+`occupiedSlots = [offHandSlot]`，slotId 才正確）或共用的雙手武器，單手武器放副手直接拒絕，兩條裝備路徑
+判定一致。**待做**：真雙持（一組兩把武器）需要資料模型補 slot→hand 的訊號。
+
+**#2 過期的地圖刷新 Job 仍會刷新** —— `handleMapRefreshCheck` 只確認實例存在，完全沒讀
+`job.expectedRevision`。同日產生的兩筆 Pending Job 都會跑，地圖版本從 1 連刷成 2、3。Job 本來就帶著
+`expectedRevision`，改為不符即 no-op：第一次刷新跳 revision，比它舊的 Job 全部自然出局。
+
+**#3 NPC 舊結果可清除已保護的內容** —— `handleApplyNpcDungeonSettlement` 只驗 mapVersion／內容狀態，
+忽略目標的 `contentRevision`、內容自己的 `mapId` 與 `npcResolverId`。委託保護內容（會跳 content revision）
+之後，保護前產生的 NPC 結果仍能把它結算掉。改為三者皆須相符，不符則轉入 `skippedResults`。
+
+**#4 任意偽造的事件選項都被當成成功** —— `resolveDungeonInteraction` 完全不驗 `optionId`：清掉 Pending
+並固定回報成功，UI 送什麼都算數。契約補 `DungeonDefinitionReader.listContentEventOptionIds`，非法選項一律
+拒絕且**不動 Session**（玩家可以重送合法選項）。兩個 Reader 都實作：真實 Reader 以
+`getGatheringInteractionView` 的同一個窄化投影模式從 `content-event` 定義取選項表，fixture 供其單一選項。
+資料化的分支結果（效果／戰鬥／物品）仍待內容軌，TODO 保留。
+
+**#5 戰敗留下永遠 collecting 的戰利品分配** —— 戰敗只關 Session 並開始返城，探索起始時建立的
+Distribution 沒有任何人收：Session 一旦 `closed` 就不再匹配 `AssetDistributionCompleted` 分支，那筆分配
+**再也碰不到**。改為與 `StartReturnFromDungeon` 一併送 `FinalizeAssetDistributionCollection`。Session 仍是
+直接 `closed` 而非 `leaving`——全隊戰敗不算完成探索，不得走 `MapExplorationCompleted`（會發完成經驗）那條。
+
+**#6（P2）生命週期 Job 的 revision 防線只存在於註解** —— `characterLifecycleDue` 帶著
+`expectedRevision`，Handler 的註解也寫了「Job 帶 expectedRevision」，但從沒讀過它。這條的陷阱是**不能拿
+`character.revision` 驗**：它每次受傷、狀態變更、可用性調整都會跳，拿它當防線會讓成年／自然死亡 Job 在
+到期前就全部「過期」而永不觸發。改為新增獨立的 `lifecycleRevision`，只在 lifeState 轉換（`toDead`、退休）
+時跳，五個 Job draft 改帶它、Handler 比對它。這兩種失敗模式各自有測試把關：拿掉防線、以及改用
+`revision` 驗，分別會紅在不同案例上。
+
+**#7（P2）製作保留遺失 Attempt 身分** —— `ReserveCraftingInputs` 帶著 `craftingAttemptId`，但
+`ItemReservation` 是扁平結構、無處可放，於是被丟掉；事後無從確認素材保留給哪一次製作。改成**判別聯集**，
+`craftingInput` 分支必填 `craftingAttemptId`，由編譯器在未來每個建構點強制，而不是一個會靜靜沒被設定的
+選填欄位。消耗端 `TransformCraftingItems` 在 `inventory/public.ts` 有宣告但**尚未實作**，所以今天還沒有
+對象可驗；這一步先把未來要比對的身分記下來。
+
+`tsc` 乾淨、verify 全過（新增：非法選項拒絕且保留 Pending、合法選項照常結算、戰敗結束 Distribution、
+生命週期 token 過期丟棄、受傷不誤殺 Job、製作保留記錄 Attempt 等測）。
+
+---
+
 ## 2026-08-13 — 複審回合 7：6 個 P1（跨模組執行 + 狀態一致性）
 
 跨模組執行檢查抓到 6 個 P1。逐一修根、加測試、各自 commit。
