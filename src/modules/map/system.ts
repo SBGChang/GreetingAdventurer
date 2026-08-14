@@ -354,6 +354,12 @@ export function handleMapRefreshCheck(
   const instance = tryGetInstance(state, job.targetId);
   if (instance === undefined) return makeResult(state); // 過期 Job：安靜丟棄
 
+  // 過期 Job：expectedRevision 與目前 instance 版本不符 → 安靜 no-op。同日排了多筆 Pending 檢查時，前一筆
+  // 刷新／登記已 bump revision，後續舊 Job 不得再刷，否則地圖版本連跳（1→2→3）。
+  if (job.expectedRevision !== undefined && instance.revision !== job.expectedRevision) {
+    return makeResult(state);
+  }
+
   // 鎖定中：跳過，固定日曆不位移（doc §7.1 / §5.1）。
   const lock = instance.refresh.refreshLock;
   if (lock !== undefined && lock.releaseOnDay > ctx.worldDay) {

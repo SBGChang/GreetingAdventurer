@@ -108,6 +108,31 @@ type Case = Readonly<{ name: string; run: () => void }>;
 
 const cases: readonly Case[] = [
   {
+    name: '#2：同版本兩筆 mapRefreshCheck → 只刷一次（過期 revision 的 Job no-op，版本不連跳 1→2→3）',
+    run: () => {
+      const state = fixtureMapState(1);
+      const ctx = makeContext({ presence: stubPresence({ teamsInside: 0 }) });
+      const rev0 = state.instances[MAP_ID]!.revision;
+      const revJob = (id: string): MapRefreshCheckJob => ({
+        jobId: id as JobId,
+        type: 'mapRefreshCheck',
+        dueDay: 100 as WorldDay,
+        ownerModule: MAP_MODULE_ID,
+        targetId: MAP_ID,
+        payload: { reason: 'pending' },
+        expectedRevision: rev0,
+      });
+      const r1 = handleMapRefreshCheck(revJob('j1'), state, ctx);
+      assert(r1.nextSlice.instances[MAP_ID]!.currentVersion === 2, `首刷應到版本 2（實得 ${r1.nextSlice.instances[MAP_ID]!.currentVersion}）`);
+      // 第二筆仍帶舊 expectedRevision，但 instance revision 已被首刷 bump → 應 no-op、版本維持 2。
+      const r2 = handleMapRefreshCheck(revJob('j2'), r1.nextSlice, ctx);
+      assert(
+        r2.nextSlice.instances[MAP_ID]!.currentVersion === 2,
+        `過期 revision 的 Job 不得再刷（版本應維持 2，實得 ${r2.nextSlice.instances[MAP_ID]!.currentVersion}）`,
+      );
+    },
+  },
+  {
     name: 'refresh: 版本 +1、空間重建、內容生成、NPC 序列全域不重複',
     run: () => {
       const state = fixtureMapState(1);
