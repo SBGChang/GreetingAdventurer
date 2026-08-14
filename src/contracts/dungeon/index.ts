@@ -185,7 +185,11 @@ export type PlayerExplorationSession = Readonly<{
   currentRoomId: RoomId;
   entryCell: GridCell;
   elapsedDungeonMinutes: DungeonMinute;
-  status: 'exploring' | 'inCombat' | 'leaving' | 'closed';
+  // leaving  —— 正常從出口離場：等 Distribution 完成後關閉 Session、發完成經驗、返城。
+  // defeated —— 全隊戰敗離場：同樣**等 Distribution 完成**（doc §443：競拍期間仍算位於冒險地，
+  //             不可開始返城），但不算完成探索，不發 MapExplorationCompleted 的完成經驗。
+  //             兩者分開才能既守住分配屏障、又不把戰敗當成通關。
+  status: 'exploring' | 'inCombat' | 'leaving' | 'defeated' | 'closed';
   pendingInteraction?: PendingDungeonInteraction;
   revision: Revision;
 }>;

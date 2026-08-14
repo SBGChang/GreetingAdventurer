@@ -99,7 +99,7 @@ type Case = Readonly<{ name: string; run: () => void }>;
 
 const cases: readonly Case[] = [
   {
-    name: '#6：戰敗 → Session 收為 closed（不回 exploring）+ 送 StartReturnFromDungeon + 結束 Distribution',
+    name: '#6/R9 #4：戰敗 → Session 轉 defeated（不回 exploring）+ 結束 Distribution，但**不**立刻返城',
     run: () => {
       const base = createFixtureState();
       const session = base.playerSessions[FIXTURE.teamId]!;
@@ -114,9 +114,8 @@ const cases: readonly Case[] = [
       };
       const r = handleCombatEncounterResolved(inCombat, event as never);
       const after = r.nextSlice.playerSessions[FIXTURE.teamId]!;
-      assert(after.status === 'closed', `戰敗應收為 closed，不得回 exploring（實得 ${after.status}）`);
+      assert(after.status === 'defeated', `戰敗應轉 defeated，不得回 exploring（實得 ${after.status}）`);
       const cmds = r.outgoingMessages.map((m) => (m as { command?: { type?: string } }).command?.type);
-      assert(cmds.includes('StartReturnFromDungeon'), '戰敗應請 team 結束地牢 Plan + 返城');
       // R8 #5 迴歸：戰敗曾只關 Session，探索開始時建立的 Distribution 永遠停在 collecting。
       const finalize = r.outgoingMessages
         .map((m) => (m as { command?: { type?: string; distributionId?: string } }).command)
@@ -125,6 +124,59 @@ const cases: readonly Case[] = [
       assert(
         finalize?.distributionId === session.distributionId,
         '結束的必須是本次探索的 Distribution',
+      );
+      // R9 #4：doc §443——競拍期間仍算位於冒險地，不可開始返城。返城必須等 AssetDistributionCompleted。
+      assert(
+        !cmds.includes('StartReturnFromDungeon'),
+        '戰敗當下不得開始返城（要等 Distribution 完成）',
+      );
+    },
+  },
+  {
+    // R9 #4：R8 #5 讓戰敗直接 closed，AssetDistributionCompleted 的玩家分支只吃 leaving，
+    // 競拍結束後那個事件就落空——Session 沒人關、返城沒人送。
+    name: 'R9 #4：戰敗的 Distribution 完成 → 關閉 Session + 返城，且不得發完成經驗',
+    run: () => {
+      const base = createFixtureState();
+      const session = base.playerSessions[FIXTURE.teamId]!;
+      const inCombat: DungeonModuleState = {
+        ...base,
+        playerSessions: { ...base.playerSessions, [FIXTURE.teamId]: { ...session, status: 'inCombat' } },
+      };
+      const defeat = handleCombatEncounterResolved(inCombat, {
+        teamId: FIXTURE.teamId,
+        outcome: 'defeat',
+        source: { kind: 'mapContent', mapId: FIXTURE.mapId, contentId: FIXTURE.eventContentId, encounterGroupId: 'grp' },
+      } as never);
+
+      const done = handleAssetDistributionCompleted(
+        defeat.nextSlice,
+        session.distributionId,
+        createFixtureContext(),
+      );
+      const after = done.nextSlice.playerSessions[FIXTURE.teamId]!;
+      assert(after.status === 'closed', `分配完成後才關 Session（實得 ${after.status}）`);
+      const cmds = done.outgoingMessages.map((m) => (m as { command?: { type?: string } }).command?.type);
+      assert(cmds.includes('StartReturnFromDungeon'), '分配完成後才返城');
+      assert(
+        !eventKinds(done.outgoingMessages).includes('MapExplorationCompleted'),
+        '戰敗不算完成探索，不得發 MapExplorationCompleted（完成經驗）',
+      );
+    },
+  },
+  {
+    name: 'R9 #4 對照：正常離場的 Distribution 完成 → 仍發 MapExplorationCompleted',
+    run: () => {
+      const base = createFixtureState();
+      const session = base.playerSessions[FIXTURE.teamId]!;
+      const leaving: DungeonModuleState = {
+        ...base,
+        playerSessions: { ...base.playerSessions, [FIXTURE.teamId]: { ...session, status: 'leaving' } },
+      };
+      const done = handleAssetDistributionCompleted(leaving, session.distributionId, createFixtureContext());
+      assert(
+        eventKinds(done.outgoingMessages).includes('MapExplorationCompleted'),
+        '正常離場仍應發完成經驗',
       );
     },
   },

@@ -948,30 +948,39 @@ export function handleAssetDistributionCompleted(
   // 玩家 Session 分支。
   for (const key of Object.keys(state.playerSessions)) {
     const session = state.playerSessions[key as TeamId];
-    if (session !== undefined && session.distributionId === distributionId && session.status === 'leaving') {
+    // leaving（正常離場）與 defeated（全隊戰敗）都在等這個事件——分配屏障對兩者一致：競拍結束前
+    // 不關 Session、不返城（doc §443）。差別只在完成經驗。
+    const awaiting = session?.status === 'leaving' || session?.status === 'defeated';
+    if (session !== undefined && session.distributionId === distributionId && awaiting) {
       const closed: PlayerExplorationSession = {
         ...session,
         status: 'closed',
         revision: bump(session.revision),
       };
-      const completion = ctx.map.getExplorationCompletion(session.mapId);
-      const messages: TransactionMessageDraft[] = [
-        event({
-          type: 'MapExplorationCompleted',
-          teamId: session.teamId,
-          mapId: session.mapId,
-          mapVersion: session.mapVersion,
-          explorationKey: completion.explorationKey,
-          experienceRuleId: completion.experienceRuleId,
-        }),
-        // team 契約的 StartReturnFromDungeon 只吃 teamId + mapId；離場城市由 team 自行
-        // 以 TeamWorldReader.getMapExitCity(mapId) 解析，不由 dungeon 傳出口房間。
+      const messages: TransactionMessageDraft[] = [];
+      // 只有正常離場才算完成探索；戰敗不得領完成經驗。
+      if (session.status === 'leaving') {
+        const completion = ctx.map.getExplorationCompletion(session.mapId);
+        messages.push(
+          event({
+            type: 'MapExplorationCompleted',
+            teamId: session.teamId,
+            mapId: session.mapId,
+            mapVersion: session.mapVersion,
+            explorationKey: completion.explorationKey,
+            experienceRuleId: completion.experienceRuleId,
+          }),
+        );
+      }
+      // team 契約的 StartReturnFromDungeon 只吃 teamId + mapId；離場城市由 team 自行
+      // 以 TeamWorldReader.getMapExitCity(mapId) 解析，不由 dungeon 傳出口房間。
+      messages.push(
         internal(TEAM_MODULE_ID, {
           type: 'StartReturnFromDungeon',
           teamId: session.teamId,
           mapId: session.mapId,
         }),
-      ];
+      );
       return result(withPlayerSession(state, closed), messages);
     }
   }
@@ -1010,22 +1019,21 @@ export function handleCombatEncounterResolved(
   // 結束地牢 Plan + 返城。[架構待做] 完整版應由 CombatTeamOutcome(canContinue=false) 統一驅動 Team+Dungeon
   // 的退出（該事件與其 Team/Dungeon 訂閱尚未接入 Manifest，見 HANDOFF）。
   if (event.outcome !== 'victory') {
-    const closed: PlayerExplorationSession = {
+    // 轉 defeated：探索結束（不得回 exploring），但**不在此關 Session、也不在此返城**。
+    // R8 #5 那版直接 closed + StartReturnFromDungeon，同一筆交易就開始返城，違反 doc §443
+    //（玩家在 awaitingPlayerBid 期間仍算位於冒險地，不可開始返城），而且 closed 的 Session 不再匹配
+    // AssetDistributionCompleted 分支，競拍結束後那個事件會落空。
+    // 正確順序：結束收集 → 等 AssetDistributionCompleted → 才關 Session 並返城（見該 Subscriber）。
+    const defeated: PlayerExplorationSession = {
       ...session,
-      status: 'closed',
+      status: 'defeated',
       revision: bump(session.revision),
     };
-    return result(withPlayerSession(state, closed), [
-      // 探索開始時建立的 Distribution 必須一起收掉。原本戰敗只關 Session 就返城，那筆分配會永遠停在
-      // collecting——沒有任何路徑再碰得到它（closed 的 Session 不再匹配 AssetDistributionCompleted 分支）。
-      // 收集在此結束，戰敗前已入帳的戰利品照常分配。
+    return result(withPlayerSession(state, defeated), [
       internal(DISTRIBUTION_MODULE_ID, {
         type: 'FinalizeAssetDistributionCollection',
         distributionId: session.distributionId,
       }),
-      // Session 直接 closed 而非 leaving：全隊戰敗不算「完成探索」，不得走 MapExplorationCompleted
-      // 那條（會發完成經驗）。返城由 StartReturnFromDungeon 驅動，不等 Distribution。
-      internal(TEAM_MODULE_ID, { type: 'StartReturnFromDungeon', teamId: event.teamId, mapId: session.mapId }),
     ]);
   }
 
