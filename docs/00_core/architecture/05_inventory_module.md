@@ -111,6 +111,7 @@ type EquipmentDefinition = ItemDefinition & {
   rarity: 'common' | 'fine' | 'epic' | 'legendary' | 'mythic';
   relatedMasteryIds: MasteryId[];
   occupiedSlots: EquipmentSlotId[];
+  handSlots: Partial<Record<'mainHand' | 'offHand', EquipmentSlotId>>;
   primaryAttributeCoefficients: PrimaryAttributeCoefficients;
   secondaryAttributeCoefficients: SecondaryAttributeCoefficients[];
   skillEffectRefs: EquipmentSkillEffectRef[];
@@ -120,6 +121,7 @@ type EquipmentDefinition = ItemDefinition & {
 - 主屬／副屬係數、品級預算、雙手裝備取捨與技能觸發效果都屬 Definition，不寫在實作邏輯內。
 - `relatedMasteryIds` 是武器／防具與熟練度的資料化關聯；武器攻擊仍以技能的 Attack Mastery Rule 為準，防禦經驗則由共用 Defense Routing Rule 對目前防禦裝備候選進行分配。
 - `occupiedSlots` 以資料表達單手、雙手、盾牌、鎧甲等互斥規則；Inventory 只驗證位置是否合法。
+- `handSlots` 表達**可放置手別 → 該手的 slot**。手部位置是配置決定的，不是定義決定的：同一把單手武器放主手或副手都合法（GDD §511 雙持——同組內可混搭兩種武器），`occupiedSlots` 說不出「這把單手武器現在在副手」。單手武器兩手皆列出、盾只列 `offHand`、鎧甲為空物件；雙手武器兩手皆列出且 `occupiedSlots.length > 1` 表示必須同時占滿。`ItemLocation.slotId` 一律取**實際配置的那隻手**對應的 slot，否則雙持兩把武器會同時宣稱占主手（複審 R9 #1；R8 #1 曾為了修撞位而誤禁雙持）。
 - 裝備效果沒有普通攻擊前提；若需觸發，必須引用技能條件／Tag／行為資料。
 
 ### 2.4 CombatConsumable 的使用延遲資料
@@ -225,11 +227,20 @@ Team 永遠不是一般 Item Owner，也不存在可自由使用的共享 `teamC
 - `teamQuestCargo` 是唯一帶有 TeamId 的特殊任務託管位置，不是隊伍財產。其中物品沒有角色 Owner，只能由綁定 Quest 的生命週期命令交付、回收，或在 Quest expired 後送入全隊分配流程；但必須指定 `carrierCharacterId` 作為實際攜帶者，並計入該角色重量。
 
 ```ts
-type ItemReservation = {
-  kind: 'questTarget' | 'craftingInput' | 'pendingTransfer';
-  ownerId: CharacterId | AssetDistributionId | TeamId;   // 個人所有者／清算托管／隊伍任務物資
-  reservedQuantity: number;
-};
+// 判別聯集：craftingInput 必須帶完整的素材需求身分，由編譯器強制。
+type ItemReservation =
+  | { kind: 'questTarget'; ownerId: ReservationOwnerId; reservedQuantity: number }
+  | {
+      kind: 'craftingInput';
+      ownerId: ReservationOwnerId;
+      reservedQuantity: number;        // 本次製作用掉的量，不是整疊
+      craftingAttemptId: CraftingAttemptId;
+      recipeId: CraftingRecipeId;
+      slotId: CraftingIngredientSlotId;
+    }
+  | { kind: 'pendingTransfer'; ownerId: ReservationOwnerId; reservedQuantity: number };
+
+type ReservationOwnerId = CharacterId | AssetDistributionId | TeamId; // 個人所有者／清算托管／隊伍任務物資
 ```
 
 ### 3.3 超載處理
@@ -364,7 +375,7 @@ type CarryCapacitySnapshot = {
 | `RemoveItemInstance` | 依明確原因將實體標為 removed；拒絕仍被非法保留或裝備的 Item。 |
 | `TransferItem` | 驗證來源、目的地、Owner 變更、保留與數量後移轉指定實體。 |
 | `ReserveQuestItem` | 以 Quest ID 保留指定實體。 |
-| `ReserveCraftingInputs` | 驗證完整素材集合的 Owner、位置、數量、Definition 與未保留狀態後，以同一 Crafting Attempt ID 原子保留；任一筆不合法時全部拒絕。 |
+| `ReserveCraftingInputs` | 輸入為 `{ craftingAttemptId, recipeId, inputs: { itemId, quantity, slotId }[] }`。驗證完整素材集合的 Owner、位置、數量、Definition 與未保留狀態後，以同一 Crafting Attempt ID 原子保留；任一筆不合法時全部拒絕。**重複 itemId 一律拒絕**（否則同一實體被 bump 兩次 revision、發兩次事件）；`quantity` 須為正整數且不超過該實體持有量，保留量即為請求量而非整疊。配方／Mastery／設施／材料 Tag 的合法性由 `startCrafting` Workflow 驗證（見 20 §191），Inventory 的 Reader 讀不到配方定義，只忠實記錄已驗證的 `recipeId` + `slotId` 供消耗端比對。 |
 | `ApplyQuestItemLifecycle` | 依未接取、完成、到期等明確指令回收、釋放或保留實體。 |
 | `MoveItemToTeamQuestCargo` | 驗證 Quest、Team、指定 Item、任務類型與正式攜帶者後，清除個人 Owner 並移入該 Quest 的任務物資空間；驗證攜帶者重量上限。 |
 | `ReleaseExpiredQuestCargo` | Quest expired 時清除任務保留，將仍存在的任務物資移入指定 Asset Distribution Escrow，並回傳實際移動的 Item ID 清單。 |

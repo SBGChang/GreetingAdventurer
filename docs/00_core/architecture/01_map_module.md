@@ -153,10 +153,16 @@ type MapInstance = {
   refresh: {
     offsetDays: number;                 // 與 Template 一致；存檔用於驗證
     pendingSinceDay?: WorldDay;
-    pendingCheckScheduledFor?: WorldDay;
+    pendingCheckScheduledFor?: WorldDay;  // 亦為 pending mapRefreshCheck 的存活判定（見下）
     refreshLock?: RefreshLock;
     lastRefreshedOnDay?: WorldDay;
   };
+
+  // pending `mapRefreshCheck` 的過期判定用 `refresh.pendingCheckScheduledFor`（Job 的 dueDay 須與它相符），
+  // **不是** `MapInstance.revision`：後者被開門、陷阱、採集、內容結算等一般探索動作 bump，拿它當判定會讓
+  // 排好的次日檢查被一扇門永久作廢，而且 no-op 路徑不會再排下一次，地圖從此不再刷新（複審 R9 #2）。
+  // pendingCheckScheduledFor 只由 Pending 登記與刷新本身改動，因此同時仍能擋掉同日重複 Job（首筆刷新會把它
+  // 清成 undefined、順延則改成新的一天，後續舊 Job 兩種都對不上）。regular（固定節奏）Job 不受此限。
 
   spatialRuntime: MapSpatialRuntime;
   revision: Revision;

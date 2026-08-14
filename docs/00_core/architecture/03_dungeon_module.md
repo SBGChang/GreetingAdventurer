@@ -50,6 +50,9 @@ interface DungeonDefinitionReader {
     ruleId: GatheringRuleId;
     dungeonInteractionMinutes: number;
   };
+  // 內容事件的合法選項清單。`resolveDungeonInteraction` 必須據此驗證玩家送來的 optionId：
+  // 不得信任 UI（複審 R8 #4——原本任意偽造的 optionId 都會清掉 Pending 並固定回報成功）。
+  listContentEventOptionIds(definitionId: ContentEventDefinitionId): ContentEventOptionId[];
 }
 
 type DungeonInteractionRuleDefinition = DefinitionHeader & {
@@ -128,7 +131,7 @@ type PlayerExplorationSession = {
   currentRoomId: RoomId;
   entryCell: GridCell;
   elapsedDungeonMinutes: DungeonMinute;
-  status: 'exploring' | 'inCombat' | 'leaving' | 'closed';
+  status: 'exploring' | 'inCombat' | 'leaving' | 'defeated' | 'closed';
   pendingInteraction?: PendingDungeonInteraction;
   revision: Revision;
 };
@@ -288,7 +291,7 @@ Dungeon Query 不公開其他隊伍的 RNG seed、未結算獎勵細節或可被
 | Event | Dungeon 的反應 |
 |---|---|
 | `NpcDungeonSettlementApplied` | 只將 `appliedResults` 的正式戰利品追加至 Distribution，關閉收集並令 Run 等待自動分配。 |
-| `AssetDistributionCompleted` | 若對應玩家 Session 正在 leaving，關閉 Session並開始返城；若對應 NPC Run 正在 settling，關閉 Run 並通知 Team。 |
+| `AssetDistributionCompleted` | 若對應玩家 Session 正在 **leaving 或 defeated**，關閉 Session 並開始返城；只有 leaving 才另發 `MapExplorationCompleted`（完成經驗）——全隊戰敗不算完成探索。若對應 NPC Run 正在 settling，關閉 Run 並通知 Team。 |
 | `CombatSequenceChallengeResolved` | 以 `sourceRef` 建立對應怪物 Pending Result；success 繼續，failure 立即令 Run 進入 settling。 |
 | `CombatSequenceReadyForSourceCommit` | 若 Run 尚未 settling，依 termination reason 進入 settling 並要求 Map 套用暫存結果。 |
 | `CombatSequenceSettled` | 若對應 NPC Run 正在 settling，標記戰鬥串結算完成；其餘兩項 Settlement 也完成時才關閉 Run。 |
@@ -440,7 +443,7 @@ useDungeonExit
   → StartReturnFromDungeon
 ```
 
-玩家在 `awaitingPlayerBid` 期間仍算位於冒險地，會阻止該 Map 刷新；不可開始返城、解雇成員或開始其他隊伍大動作。若探索中新增／離開成員，不回溯修改這次分配的參與者快照。
+玩家在 `awaitingPlayerBid` 期間仍算位於冒險地，會阻止該 Map 刷新；不可開始返城、解雇成員或開始其他隊伍大動作。**全隊戰敗同樣受這條約束**：戰敗時 Session 轉 `defeated`（探索結束、送 `FinalizeAssetDistributionCollection`），但**不在該筆交易關閉 Session、也不返城**；要等 `AssetDistributionCompleted` 才關閉並返城（複審 R9 #4；R8 #5 曾在戰敗當下直接關閉並返城，既違反本條，也讓分配完成事件落空——`closed` 的 Session 不再匹配該訂閱）。若探索中新增／離開成員，不回溯修改這次分配的參與者快照。
 
 ### 8.3 開門、陷阱與採集點的一次性狀態
 

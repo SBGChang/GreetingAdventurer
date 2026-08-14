@@ -155,7 +155,18 @@ type Character = {
   condition: CharacterCondition;
   temporaryOrigin?: TemporaryCharacterOrigin;
   revision: Revision;
+  lifecycleRevisions: CharacterLifecycleTokens;   // 生命週期排程 token，逐種類分開（見下）
 };
+
+type CharacterLifecycleKind = 'adulthood' | 'retirementCheck' | 'naturalDeathCheck';
+type CharacterLifecycleTokens = Record<CharacterLifecycleKind, Revision>;
+
+`characterLifecycleDue` Job 的 `expectedRevision` 一律比對**該種類自己的** `lifecycleRevisions[kind]`，不是 `revision`，也不是單一個共用 token：
+
+- 不能用 `revision`：它每次受傷、狀態變更、可用性調整都會跳，成年／退休／自然死亡 Job 會在到期前就全部「過期」而永不觸發（複審 R8 #6）。
+- 不能用單一 token：退休會跳它，連帶讓角色出生時就排好的**自然死亡** Job 一起失效，退休角色從此不會自然老死（複審 R9 #3）。
+
+各自的失效條件：`adulthood` 只在死亡時失效；`retirementCheck` 在死亡或已退休時失效；`naturalDeathCheck` **只**在死亡時失效——退休不算。
 
 type CharacterCondition = {
   health: number;

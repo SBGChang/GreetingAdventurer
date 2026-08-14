@@ -8,6 +8,75 @@
 
 ---
 
+## 2026-08-14 — 複審回合 9：4 個 P1 + 2 個 P2（**R8 修正自己造成的回歸**）
+
+這回合難堪但重要：**六條裡有三條是 R8 的修正親手造成的**，其中兩條是「修 A 洞挖出 B 洞」，一條是把
+早就修過的東西改回去。R8 那輪每一項都有 mutation-check 過的迴歸測試，測試也確實咬得住它們各自宣稱的
+那件事——但沒有一個測試涵蓋「這個修正**同時**破壞了什麼」。教訓寫在最後。
+
+**#1 雙持被再次禁掉（回歸）** —— R8 #1 為了修「單手武器放副手時 `slotId` 寫成主手」，直接拒絕單手武器
+放副手。那違反 GDD §511（同組內可混搭兩種武器）與 §250 的雙持傷害倍率，也牴觸雲華／維爾冬內容裡的
+單手武器定位。更難堪的是 **R5 #5 已經修過同一條**（見本檔 R5 段落：「雙持被誤禁——R4 手部驗證讓副手只
+收盾」），R8 又把它改了回去。禁用從來不是對的解，只是資料模型表達不出那個配置而已。改：契約新增
+`EquipmentDefinition.handSlots`（可放置手別 → 該手的 slot）。`occupiedSlots` 只能說「占幾個 slot」，說不出
+「這把單手武器現在在副手」——那是**配置**決定的，不是定義決定的。`configureWeaponSet` 依 handSlots 判定
+合法性、依**實際配置的那隻手**寫 `ItemLocation.slotId`；`equipItem` 改由玩家指名的 slotId 解析目標手，
+不再從 `equipmentKind` 猜。
+
+**#2 探索操作會讓 Pending 刷新永久失效（回歸）** —— R8 #2 拿 `MapInstance.revision` 當 Job 存活判定，但開門、
+陷阱、採集、內容結算全都會 bump 它。排好次日檢查後只要有人開一扇門，那筆 Job 就變成 no-op，而 no-op 路徑
+**不會再排下一次**，地圖從此不再刷新。這正是 R8 #6 我自己在 character 指出的同一個陷阱——當時沒把同一個
+透鏡套到 map 上。改：改驗刷新自己的 token `refresh.pendingCheckScheduledFor`（Job 的 dueDay 須與它相符），
+它只由 Pending 登記與刷新本身改動。同時仍擋得住 R8 #2 的原始情境。`pendingCheckJobDraft` 也不再掛
+`expectedRevision`——設了卻沒人讀的欄位，只會讓下一個人以為那裡有防線。
+
+**#3 退休後不會自然死亡（回歸）** —— R8 #6 用**單一** `lifecycleRevision`，退休會跳它，連帶讓角色出生時就
+排好的自然死亡 Job 一起失效；但 Handler 明明允許 retired 執行，於是退休角色永遠不會老死。一個 token 表達
+不了三種失效條件不同的 Job。改：拆成 `lifecycleRevisions`（逐種類一個）——`adulthood` 只在死亡失效、
+`retirementCheck` 在死亡或已退休失效、`naturalDeathCheck` **只**在死亡失效。`lifecycleJobDraft` 改成收
+`character` 並自己依 payload 種類取 token，不讓呼叫端傳——傳錯種類正是這條的成因。
+
+**#4 戰敗返城早於戰利品分配（回歸）** —— R8 #5 在同一筆交易關 Session、Finalize、開始返城。那違反
+03_dungeon_module.md §443（競拍期間仍算位於冒險地，不可開始返城），而且 `closed` 的 Session 不再匹配
+`AssetDistributionCompleted` 的玩家分支，競拍結束後那個事件會落空。改：新增 `defeated` 狀態——探索結束、
+收集結束，但 Session 留著、不返城；等 `AssetDistributionCompleted` 才關閉並返城。分配屏障對 leaving 與
+defeated 一致，差別只在**完成經驗只給 leaving**。
+
+**#5（P2）製作保留無法表達數量與素材需求** —— `ReserveCraftingInputs` 只有 `itemIds`：說不出這次用掉幾個
+（3 瓶藥水只用 1 瓶也整疊鎖住）、說不出對應配方哪一格，重複 ID 還照單全收（同一實體 bump 兩次 revision、
+發兩次事件，第二筆覆蓋第一筆）。值得注意的是 **05_inventory_module.md §367 本來就寫了要驗「數量」**——
+這條與其說是設計缺口，不如說是實作沒跟上文件。改：`inputs: { itemId, quantity, slotId }[]` + 命令帶
+`recipeId`，保留記下 `recipeId` + `slotId`；拒絕重複 ID、非正整數數量、超過持有量；保留量即請求量。配方本身
+的合法性仍由 `startCrafting` Workflow 驗（doc 20 §191）——Inventory 的 Reader 讀不到配方定義，這裡只忠實
+記錄已驗證的身分。**已知限制**：部分保留仍會鎖住整個實體（`isReservedActive` 是「有保留就算」），要等
+堆疊拆分才能真正只鎖 2 瓶。
+
+**#6（P2）正式架構文件沒跟上契約** —— R8／R9 動過的 Source Contract 都回寫了：`Character.lifecycleRevisions`
+（04）、`ItemReservation` 判別聯集 + `EquipmentDefinition.handSlots` + `ReserveCraftingInputs` 新輸入（05）、
+`PlayerExplorationSession.status` 加 `defeated` + `AssetDistributionCompleted` 的兩種來源 +
+`listContentEventOptionIds`（03）、pending 刷新的存活判定（01）。不回寫的話，下一位依正式文件實作的人會做出
+不相容的模型。
+
+### 這輪真正的教訓
+
+R8 的每一項都有 mutation-check 過的迴歸測試，而且都咬得住——問題不在測試不夠嚴，在**測試只涵蓋了修正
+宣稱要修的那件事**。三條回歸的共同形狀是：
+
+1. **「拒絕掉它」不是修正，是把缺陷換個位置。** #1 用禁用雙持來修 slotId 撞位。要問的是「這個配置合法嗎」——
+   合法就代表資料模型缺了東西，該補契約而不是擋使用者。
+2. **拿共用 revision 當存活判定，一定會誤殺。** #2 #3 是同一個錯誤的兩個實例。任何 `expectedRevision` 都要
+   先問「還有誰會 bump 這個計數器」。答案通常是「一堆不相干的動作」。
+3. **修「東西沒被收掉」時，要連順序一起想。** #4 為了不留下孤兒 Distribution 而提早關 Session，反而跳過了
+   分配屏障。
+4. **改動前先查這條有沒有修過。** #1 早在 R5 就修過一次。動一條看起來像「缺防護」的邏輯前，先 grep DEVLOG。
+
+`tsc` 乾淨、verify 全過（新增：雙持兩把武器落在不同 slot、盾不得放主手、equipItem 尊重指名副手、開門不得
+作廢 Pending 刷新、退休角色仍會自然老死、過期退休檢查丟棄、戰敗等分配完成才返城且不發完成經驗、正常離場
+仍發完成經驗、重複素材 ID 拒絕、數量邊界 等測）。全部經 mutation check：**每一條回歸都用「把 R8 的實作原樣
+放回去」驗過會紅**。
+
+---
+
 ## 2026-08-14 — 複審回合 8：5 個 P1 + 2 個 P2（狀態邊界 + 未驗證的 Job/輸入）
 
 這回合的共同主題是**「宣稱有驗、其實沒驗」**：契約與註解都寫了防線（`expectedRevision`、選項合法性、
