@@ -579,19 +579,15 @@ export function configureWeaponSet(
   if ((mainTwoHanded || offTwoHanded) && cmd.mainHandItemId !== cmd.offHandItemId) {
     return reject('inventory/two-handed-must-occupy-both-hands');
   }
-  // 手部位置合法性：主手須為武器（盾/鎧甲/飾品不得放主手）。副手可為**盾**或**單手武器**（雙持——GDD
-  // 允許同組混搭兩把武器），或與主手同一件的雙手武器；不得放單獨的雙手武器（上面已擋）或鎧甲/飾品。
+  // 手部位置合法性：主手須為武器（盾/鎧甲/飾品不得放主手）。副手只收**盾**（其 occupiedSlots=[offHandSlot]），
+  // 或與主手同一件的雙手武器。
+  // [資料模型限制] 單手武器的 occupiedSlots 一律 [mainHandSlot]，模組**無從得知副手 slot**，若放副手則
+  // ItemLocation.slotId 會與主手撞位（先前 bug）。故一律拒絕單手武器放副手，與 equipItem「單手武器一律主手」
+  // 一致。GDD 的「同組雙持兩把武器」需先加 slot→hand 契約訊號（見 HANDOFF）才能正確表示。
   if (mainEquip !== undefined && mainEquip.equipmentKind !== 'weapon') {
     return reject('inventory/illegal-hand', { hand: 'mainHand', kind: mainEquip.equipmentKind });
   }
-  const offOneHandedWeapon =
-    offEquip !== undefined && offEquip.equipmentKind === 'weapon' && offEquip.occupiedSlots.length === 1;
-  if (
-    offEquip !== undefined &&
-    cmd.offHandItemId !== cmd.mainHandItemId &&
-    offEquip.equipmentKind !== 'shield' &&
-    !offOneHandedWeapon
-  ) {
+  if (offEquip !== undefined && cmd.offHandItemId !== cmd.mainHandItemId && offEquip.equipmentKind !== 'shield') {
     return reject('inventory/illegal-hand', { hand: 'offHand', kind: offEquip.equipmentKind });
   }
 

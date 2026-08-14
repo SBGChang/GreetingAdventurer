@@ -479,17 +479,38 @@ const cases: readonly Case[] = [
     },
   },
   {
-    name: 'configureWeaponSet: 單手武器可放副手（雙持；GDD 允許同組混搭兩把武器）',
+    name: 'configureWeaponSet: 單手武器不得放副手（資料模型無副手 slot 訊號 → 會撞位；與 equipItem 一致）',
     run: () => {
       const deps = createFixtureDeps();
-      const r = configureWeaponSet(
-        createFixtureState(),
-        { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, offHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] },
-        deps,
+      expectReject(
+        configureWeaponSet(
+          createFixtureState(),
+          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, offHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] },
+          deps,
+        ),
+        'inventory/illegal-hand',
+        'one-handed weapon in off hand (unrepresentable dual-wield)',
       );
-      const next = expectOk(r, 'one-handed weapon in off hand (dual-wield)');
-      const loc = createInventoryQuery(next, deps.reader).getLocation(FIXTURE.swordItemId);
-      assert(loc?.kind === 'equipped' && loc.weaponSetId === WS0, '單手武器放副手應 equipped 於該組');
+    },
+  },
+  {
+    name: 'configureWeaponSet: 盾放副手 → ItemLocation.slotId 正確寫成副手（非主手）',
+    run: () => {
+      const deps = createFixtureDeps();
+      const next = expectOk(
+        configureWeaponSet(
+          createFixtureState(),
+          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, mainHandItemId: FIXTURE.swordItemId, offHandItemId: FIXTURE.shieldItemId, selectedSkillIds: [undefined, undefined, undefined] },
+          deps,
+        ),
+        'sword+shield',
+      );
+      const q = createInventoryQuery(next, deps.reader);
+      const shieldLoc = q.getLocation(FIXTURE.shieldItemId);
+      const swordLoc = q.getLocation(FIXTURE.swordItemId);
+      assert(shieldLoc?.kind === 'equipped' && shieldLoc.slotId === FIXTURE.offHandSlot, `盾 location.slotId 應為副手（實得 ${shieldLoc?.kind === 'equipped' ? String(shieldLoc.slotId) : '非 equipped'}）`);
+      assert(swordLoc?.kind === 'equipped' && swordLoc.slotId === FIXTURE.mainHandSlot, '劍 location.slotId 應為主手');
+      assert(shieldLoc?.kind === 'equipped' && swordLoc?.kind === 'equipped' && shieldLoc.slotId !== swordLoc.slotId, '主副手 slotId 不得相同（不撞位）');
     },
   },
   {
