@@ -108,6 +108,62 @@ function isReservedActive(inst: ItemInstance): boolean {
   return inst.reservation !== undefined && inst.reservation.reservedQuantity > 0;
 }
 
+// 兩條裝備入口共用的**事件產生**：比對整份 Loadout 前後差異，對每一個佔用者有變的位置各發一筆
+// EquipmentChanged。
+//
+// 為什麼要比對整份而不是各路徑自己發：手寫的發送點永遠會漏。R11 #1 補了 configureWeaponSet 的本組、
+// R12 #1 補了它清空的其他組，而 equipItem 依然漏了跨組清空；更糟的是 equipItem 對每一件被頂掉的物品
+// 都套用 `cmd.slotId`，於是被替換的雙手武器或別格鎧甲會被回報成「這次命令的那個 slot」清空了
+// （複審 R13 #1）。差異比對沒有這種漏法：位置變了就一定會發，slot 一定取自該位置本身。
+function equipmentChangeEvents(
+  characterId: CharacterId,
+  before: CharacterEquipmentLoadout,
+  after: CharacterEquipmentLoadout,
+  items: InventoryState['items'],
+  deps: InventoryDeps,
+): DomainEventDraft<unknown>[] {
+  const events: DomainEventDraft<unknown>[] = [];
+  const handSlotOf = (itemId: ItemInstanceId | undefined, hand: EquipmentHand): EquipmentSlotId | undefined => {
+    if (itemId === undefined) return undefined;
+    const inst = items[itemId];
+    return inst === undefined ? undefined : deps.reader.getEquipment(inst.definitionId).handSlots[hand];
+  };
+
+  for (let index = 0; index < after.weaponSets.length; index += 1) {
+    const prevSet = before.weaponSets[index];
+    const nextSet = after.weaponSets[index];
+    if (prevSet === undefined || nextSet === undefined) continue;
+    for (const hand of ['mainHand', 'offHand'] as const) {
+      const prevId = hand === 'mainHand' ? prevSet.mainHandItemId : prevSet.offHandItemId;
+      const nextId = hand === 'mainHand' ? nextSet.mainHandItemId : nextSet.offHandItemId;
+      if (prevId === nextId) continue;
+      // 清空時 slot 取自**被移走的那一件**在該手的 slot，不是命令帶的 slot。
+      const slotId = handSlotOf(nextId, hand) ?? handSlotOf(prevId, hand);
+      if (slotId === undefined) continue;
+      events.push(
+        emit({
+          type: 'EquipmentChanged',
+          characterId,
+          slotId,
+          weaponSetId: nextSet.weaponSetId,
+          itemId: nextId,
+        }),
+      );
+    }
+  }
+
+  // 鎧甲等共用位置：逐 slot 比對（多格鎧甲每格各發一筆，因為每格的佔用者都變了）。
+  const slotIds = new Set<string>([...Object.keys(before.armorSlots), ...Object.keys(after.armorSlots)]);
+  for (const slot of slotIds) {
+    const slotId = slot as EquipmentSlotId;
+    const prevId = before.armorSlots[slotId];
+    const nextId = after.armorSlots[slotId];
+    if (prevId === nextId) continue;
+    events.push(emit({ type: 'EquipmentChanged', characterId, slotId, itemId: nextId }));
+  }
+  return events;
+}
+
 // 兩條裝備入口（equipItem / configureWeaponSet）共用的合法性判定。回傳 rejection code，合法則 undefined。
 //
 // 原本兩邊各驗各的：configureWeaponSet 只驗 Owner，於是 homeStorage 裡的裝備可以直接穿上（繞過住宅取物與
@@ -574,15 +630,6 @@ export function equipItem(
       location: { kind: 'characterBag', characterId: cmd.characterId },
       revision: old.revision + 1,
     });
-    events.push(
-      emit({
-        type: 'EquipmentChanged',
-        characterId: cmd.characterId,
-        slotId: cmd.slotId,
-        weaponSetId: cmd.weaponSetId,
-        itemId: undefined, // 該位置已清空
-      }),
-    );
   }
 
   const equippedLocation: ItemLocation = {
@@ -602,7 +649,7 @@ export function equipItem(
     equipmentLoadouts: { ...working.equipmentLoadouts, [cmd.characterId]: nextLoadout },
   };
   events.push(
-    emit({ type: 'EquipmentChanged', characterId: cmd.characterId, slotId: cmd.slotId, weaponSetId: cmd.weaponSetId, itemId: cmd.itemId }),
+    ...equipmentChangeEvents(cmd.characterId, loadout, nextLoadout, state.items, deps),
   );
   return accept(nextState, events);
 }
@@ -696,34 +743,6 @@ export function configureWeaponSet(
     idx === 1 ? updated : clearFrom(s[1]),
     idx === 2 ? updated : clearFrom(s[2]),
   ];
-  // 被清空的**其他**武器組也必須各自發 EquipmentChanged。把 WS0 的武器改裝到 WS1 時 State 會正確清掉
-  // WS0，但事件只宣告 WS1 變更，依 weaponSetId 分別快取的 UI／戰力系統會留著 WS0 的舊資料
-  //（複審 R12 #1）。
-  const clearedElsewhere: DomainEventDraft<unknown>[] = [];
-  for (let i = 0; i < s.length; i += 1) {
-    if (i === idx) continue;
-    const before = s[i]!;
-    const after = nextSets[i]!;
-    for (const [hand, prevId, nextId] of [
-      ['mainHand', before.mainHandItemId, after.mainHandItemId],
-      ['offHand', before.offHandItemId, after.offHandItemId],
-    ] as const) {
-      if (prevId === nextId || prevId === undefined) continue;
-      const prevInst = state.items[prevId];
-      if (prevInst === undefined) continue;
-      const slotId = deps.reader.getEquipment(prevInst.definitionId).handSlots[hand];
-      if (slotId === undefined) continue;
-      clearedElsewhere.push(
-        emit({
-          type: 'EquipmentChanged',
-          characterId: cmd.characterId,
-          slotId,
-          weaponSetId: before.weaponSetId,
-          itemId: undefined,
-        }),
-      );
-    }
-  }
   const nextLoadout = { ...loadout, weaponSets: nextSets, revision: loadout.revision + 1 };
   let working: InventoryState = {
     ...state,
@@ -759,36 +778,10 @@ export function configureWeaponSet(
   }
 
   const skillIds = cmd.selectedSkillIds.filter((x): x is NonNullable<typeof x> => x !== undefined);
-  // 每隻**佔用者有變**的手各發一筆 EquipmentChanged。原本只發 WeaponSetConfigured，於是改武器組配置後
-  // character 能力上限、Combat Power、UI 與快取都不知道裝備變了（若該裝給生命上限，角色可能停在高於新
-  // 上限的 HP）——與 R7 #3「自動卸裝沒發 EquipmentChanged」同一形狀（複審 R11 #1）。
-  const equipmentChanges: DomainEventDraft<unknown>[] = [];
-  for (const [hand, prevId, nextId] of [
-    ['mainHand', prevSet.mainHandItemId, cmd.mainHandItemId],
-    ['offHand', prevSet.offHandItemId, cmd.offHandItemId],
-  ] as const) {
-    if (prevId === nextId) continue;
-    // slot 由「這隻手」決定：新占用者優先，清空時退回舊占用者的同手 slot。
-    const refId = nextId ?? prevId;
-    if (refId === undefined) continue;
-    const refInst = working.items[refId];
-    if (refInst === undefined) continue;
-    const slotId = deps.reader.getEquipment(refInst.definitionId).handSlots[hand];
-    if (slotId === undefined) continue;
-    equipmentChanges.push(
-      emit({
-        type: 'EquipmentChanged',
-        characterId: cmd.characterId,
-        slotId,
-        weaponSetId: cmd.weaponSetId,
-        itemId: nextId,
-      }),
-    );
-  }
   return accept(working, [
     emit({ type: 'WeaponSetConfigured', characterId: cmd.characterId, weaponSetId: cmd.weaponSetId, itemIds: newItemIds, skillIds }),
-    ...equipmentChanges,
-    ...clearedElsewhere,
+    // 整份 Loadout 差異比對：本組、被清空的其他組、以及任何位置變動一律涵蓋（見 equipmentChangeEvents）。
+    ...equipmentChangeEvents(cmd.characterId, loadout, nextLoadout, state.items, deps),
   ]);
 }
 

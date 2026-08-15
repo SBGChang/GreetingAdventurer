@@ -607,6 +607,65 @@ const cases: readonly Case[] = [
     },
   },
   {
+    // R13 #1：同一個漏洞的另一條入口。R12 只補了 configureWeaponSet。
+    name: 'equipItem: 跨武器組移裝 → 舊組也發 itemId undefined 的 EquipmentChanged',
+    run: () => {
+      const deps = createFixtureDeps();
+      const WS1 = `${FIXTURE.characterId}:ws1` as WeaponSetId;
+      const inWs0 = expectOk(
+        equipItem(
+          createFixtureState(),
+          { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: WS0 },
+          deps,
+        ),
+        'sword into WS0',
+      );
+      const moved = equipItem(
+        inWs0,
+        { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: WS1 },
+        deps,
+      );
+      expectOk(moved, 'sword into WS1');
+      const changes = eventsOf(moved)
+        .filter((e): e is EquipmentChanged => (e as { type?: string }).type === 'EquipmentChanged');
+      const ws0Change = changes.find((c) => c.weaponSetId === WS0);
+      const ws1Change = changes.find((c) => c.weaponSetId === WS1);
+      assert(ws1Change?.itemId === FIXTURE.swordItemId, 'WS1 應宣告裝上劍');
+      assert(ws0Change !== undefined, '被清空的 WS0 也必須發 EquipmentChanged');
+      assert(ws0Change?.itemId === undefined, 'WS0 的事件應宣告該手已清空');
+    },
+  },
+  {
+    // R13 #1 的另一半：被頂掉的物品，其清空事件的 slot 必須是**它自己**占的那個，
+    // 不是本次命令帶的 slotId。
+    name: 'equipItem: 頂掉雙手武器 → 清空事件用該武器自己的 slot，不是命令的 slot',
+    run: () => {
+      const deps = createFixtureDeps();
+      const twoHanded = expectOk(
+        equipItem(
+          createFixtureState(),
+          { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.greatswordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: WS0 },
+          deps,
+        ),
+        'greatsword occupies both hands',
+      );
+      // 用盾換掉它：命令的 slotId 是副手，但雙手武器同時占著主手，主手也必須被宣告清空。
+      const swapped = equipItem(
+        twoHanded,
+        { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.shieldItemId, slotId: FIXTURE.offHandSlot, weaponSetId: WS0 },
+        deps,
+      );
+      expectOk(swapped, 'shield replaces greatsword');
+      const changes = eventsOf(swapped)
+        .filter((e): e is EquipmentChanged => (e as { type?: string }).type === 'EquipmentChanged');
+      const mainChange = changes.find((c) => c.slotId === FIXTURE.mainHandSlot);
+      const offChange = changes.find((c) => c.slotId === FIXTURE.offHandSlot);
+      assert(offChange?.itemId === FIXTURE.shieldItemId, '副手應宣告裝上盾');
+      assert(mainChange !== undefined, '被頂掉的雙手武器占著主手，主手也必須發清空事件');
+      assert(mainChange?.itemId === undefined, '主手事件應宣告已清空');
+    },
+  },
+  {
     // R12 #1：跨組移裝時，被清空的舊組也必須發事件——依 weaponSetId 快取的 UI／戰力會留著舊資料。
     name: 'configureWeaponSet: 跨武器組移裝 → 舊組也發 itemId undefined 的 EquipmentChanged',
     run: () => {
