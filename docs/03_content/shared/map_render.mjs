@@ -77,7 +77,10 @@ const renderMapFloor = floor => {
     const centerY = (row - 0.5) * size;
     const special = room.entry ? `<text class="map-special" x="${centerX}" y="${centerY + 6}">入</text>`
       : room.exit ? `<text class="map-special" x="${centerX}" y="${centerY + 6}">出</text>`
-        : room.stair ? `<text class="map-stair" x="${centerX}" y="${centerY + 8}">${esc(room.stair === 'up' ? '↑' : '↓')}</text>` : '';
+        // `room.stair` 本身就是 '↑' 或 '↓'，直接畫。原本比對的是字串 'up'，而資料與驗證器用的是箭號，
+        // 於是**每一座**樓梯都落到 else 分支被畫成 ↓——四國全圖 0 個 ↑（複審 R13 #3）。
+        // 這個判斷是從雲華的舊 renderer 原樣抄過來的，抽共用時沒發現它一直是錯的。
+        : room.stair ? `<text class="map-stair" x="${centerX}" y="${centerY + 8}">${esc(room.stair === 'up' ? '↑' : room.stair === 'down' ? '↓' : room.stair)}</text>` : '';
     const marks = room.marks.map((mark, index) => renderMapMarker(mark, centerX + size * 0.26, centerY - size * 0.26, index)).join('');
     return `${special}${marks}`;
   }).join('');

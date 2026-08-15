@@ -71,12 +71,42 @@ const areAdjacent = (a, b) => {
 };
 
 // 單層檢查。
+// 房間自身必須是**一塊相連的區域**。房間＝一個移動節點（§94），格與格之間零成本；若把兩塊互不相鄰的
+// 區域寫成同一個房間，等於在地圖兩端開了一條免費傳送（複審 R13 #5）。
+const isContiguous = cells => {
+  if (cells.length <= 1) return true;
+  const remaining = new Set(cells);
+  const start = cells[0];
+  remaining.delete(start);
+  const queue = [start];
+  while (queue.length > 0) {
+    const [row, column] = parseMapCell(queue.shift());
+    for (const [rowDelta, columnDelta] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+      const neighbour = mapCell(row + rowDelta, column + columnDelta);
+      if (remaining.has(neighbour)) { remaining.delete(neighbour); queue.push(neighbour); }
+    }
+  }
+  return remaining.size === 0;
+};
+
 const validateFloor = (floor, layoutName, errors) => {
   const where = `${layoutName}／${floor.label}`;
   const owner = new Map();
 
+  // 房間 ID 必須唯一：連線是用 id 指名的，重複 id 會讓 `roomById` 只留下最後一筆，
+  // 前面同名房間的連線全部悄悄接到錯的房間上。
+  const seenIds = new Set();
+  floor.rooms.forEach(room => {
+    if (seenIds.has(room.id)) errors.push(`${where}：房間 ID「${room.id}」重複`);
+    seenIds.add(room.id);
+  });
+
   floor.rooms.forEach(room => {
     if (room.cells.length === 0) errors.push(`${where}：房間「${room.id}」沒有任何格`);
+    if (new Set(room.cells).size !== room.cells.length) errors.push(`${where}：房間「${room.id}」有重複的格`);
+    if (!isContiguous(room.cells)) {
+      errors.push(`${where}：房間「${room.id}」的格並非相連的一塊（§94：一個房間是一個移動節點）`);
+    }
     room.cells.forEach(cell => {
       const [row, column] = parseMapCell(cell);
       if (!Number.isInteger(row) || !Number.isInteger(column) || row < 1 || column < 1 || row > floor.rows || column > floor.columns) {
@@ -168,7 +198,11 @@ const validateLayout = (layout, errors) => {
   const entries = allRooms.filter(room => room.entry);
   const exits = allRooms.filter(room => room.exit);
   if (entries.length !== 1) errors.push(`${layout.name}：正式入口應恰為 1 個，實際 ${entries.length}`);
-  if (exits.length !== 1) errors.push(`${layout.name}：正式出口應恰為 1 個，實際 ${exits.length}`);
+  // GDD §164：每個探索地圖合計配置 **1～3 個出口**；出口可位於不同樓層，但皆計入同一張圖的出口數。
+  // 原本寫死「恰 1 個」，合法的雙出口地圖會被誤拒（複審 R13 #4）。
+  if (exits.length < 1 || exits.length > 3) {
+    errors.push(`${layout.name}：正式出口應為 1～3 個（GDD §164），實際 ${exits.length}`);
+  }
 
   layout.floors.forEach(floor => validateFloor(floor, layout.name, errors));
 
