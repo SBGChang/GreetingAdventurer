@@ -1,4 +1,5 @@
 import { balanceModel as sharedBalanceModel } from '../yunhua/yunhua_content.data.mjs';
+import { validateMapLayouts } from './map_model.mjs';
 
 const tierMeta = [
   { tier: 'I', rarity: '一般', scale: 1, priceScale: 1 },
@@ -122,10 +123,10 @@ export const createCultureData = config => {
     if (monsterCatalog.humanEncounters.length !== 5) errors.push(`人類 Encounter 應為 5，實際 ${monsterCatalog.humanEncounters.length}`);
     if (craftingCatalog.equipmentRecipes.filter(recipe => recipe.tier === 'I').length !== 18 || craftingCatalog.equipmentRecipes.filter(recipe => recipe.tier === 'II').length !== 18) errors.push('Tier I／II 裝備配方未各覆蓋 18 種底模');
     mapPoolTotals.filter(entry => entry.total !== 100).forEach(entry => errors.push(`${entry.map}／${entry.pool} 權重為 ${entry.total}`));
-    firstMapLayouts.flatMap(map => map.floors).forEach(entry => {
-      if (entry.grid.some(row => row.length !== entry.columns)) errors.push(`${entry.label} 格圖欄數不一致`);
-      if (entry.grid.length !== entry.rows) errors.push(`${entry.label} 格圖列數不一致`);
-    });
+    // 地圖：原本只比對列數與欄數，於是出口數量、樓梯配對、功能房單格限制、事件／大型敵人房大小、
+    // 紅門守護與連通性全部沒驗——錯誤版型照樣「驗證成功」（複審 R12 #5）。改用共用模型的完整驗證，
+    // 規則對應 01_map_module.md §94–101。
+    errors.push(...validateMapLayouts(firstMapLayouts));
     return {
       ok: errors.length === 0,
       errors,

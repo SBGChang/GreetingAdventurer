@@ -1,4 +1,6 @@
 import { balanceModel as sharedBalanceModel } from '../yunhua/yunhua_content.data.mjs';
+import { wildernessLayout, twoFloorLayout, nationalDungeonLayout } from '../shared/standard_layouts.mjs';
+import { validateMapLayouts } from '../shared/map_model.mjs';
 
 export const cultureMeta = {
   id: 'culture.vildun',
@@ -474,30 +476,31 @@ export const craftingCatalog = {
   ],
 };
 
-const floor = (label, grid, note) => ({ label, rows: grid.length, columns: grid[0].length, grid, note });
 export const mapLegend = { '#': '不存在', '.': '房間／通道', E: '入口', X: '出口', S: '樓梯', R: '固定採集點', T: '寶箱偏好', '?': '事件偏好', '!': '固定陷阱', B: '大體型敵人偏好' };
 export const firstMapLayouts = [
-  {
-    name: '白杉獵原', city: '杉脊堡', type: '一般野外型｜8×8 單層', floors: [
-      floor('單層｜白杉與凍溪', ['##E..###', '#....R##', '...##...', '.R....B.', '..!..##.', '...?...#', '#..T....', '###...X#'], '入口在北側林徑；出口在南側獵道。兩個採集點分別代表白杉林與凍溪。'),
+  wildernessLayout({
+    name: '白杉獵原', city: '杉脊堡', type: '一般野外型｜8×8 單層',
+    label: '單層｜白杉與凍溪',
+    note: '入口在北側林徑，出口在南側獵道。西坡與藏匿處各有一道紅門；兩處採集點分別代表白杉林與凍溪。',
+  }),
+  twoFloorLayout({
+    name: '沉潮船塚', city: '霜灣', type: '一般地牢型｜5×5 地上／地下',
+    floors: [
+      { label: '地上 1F｜退潮船骸', note: '中央樓梯 (3,3) 與地下同座標；貨艙以紅門封住，船骸外緣是潮鐵採集點。' },
+      { label: '地下 1F｜海蝕潮洞', note: '中央樓梯 (3,3) 上返；西南獸窟是 2×2 大型敵人偏好，紅門另一側為沉貨事件房。' },
     ],
-  },
-  {
-    name: '沉潮船塚', city: '霜灣', type: '一般地牢型｜5×5 地上／地下', floors: [
-      floor('地上 1F｜退潮船骸', ['#E.##', '...R#', '.!S..', '#..T.', '##..X'], '中央樓梯與地下同座標；船骸外緣有潮鐵採集點。'),
-      floor('地下 1F｜海蝕潮洞', ['##.##', '#...#', '.RS..', '.?..#', '#B###'], '中央樓梯上返；南側大室保留大型敵人偏好。'),
+  }),
+  nationalDungeonLayout({
+    name: '長夜誓塚', city: '霜灣', type: '地牢型國家迷宮｜6×6 地上 1F＋地下 5F',
+    floors: [
+      { label: '地上 1F｜誓石門庭', note: '門庭建立入口、第一座誓石採集點與下行樓梯 (2,5)。' },
+      { label: '地下 1F｜盾環廊', note: '上行 (2,5)、下行 (5,2)；環廊以陷阱與紅門後的寶箱教學為主。' },
+      { label: '地下 2F｜刻文廳', note: '上行 (5,2)、下行 (2,5)；誓石採集點以紅門與大室分隔。' },
+      { label: '地下 3F｜沉火塘', note: '上行 (2,5)、下行 (5,2)；舊火塘是事件偏好，不確認任何祖靈真相。' },
+      { label: '地下 4F｜長歌室', note: '上行 (5,2)、下行 (2,5)；鳴石採集點與大型敵人偏好分離。' },
+      { label: '地下 5F｜冬冠石座', note: '上行 (2,5)；最深層保留 2×2 Boss 石座與唯一正式出口。' },
     ],
-  },
-  {
-    name: '長夜誓塚', city: '霜灣', type: '地牢型國家迷宮｜6×6 地上 1F＋地下 5F', floors: [
-      floor('地上 1F｜誓石門庭', ['##E###', '#....#', '..!..#', '.R.S.#', '#..T.#', '######'], '門庭建立入口、第一座誓石採集點與下行樓梯。'),
-      floor('地下 1F｜盾環廊', ['######', '#T...#', '#..!.#', '#..S.#', '#?...#', '######'], '環廊以陷阱與寶箱教學為主。'),
-      floor('地下 2F｜刻文廳', ['######', '#.R..#', '#....#', '#..S.#', '#B...#', '######'], '固定誓石採集點避開大型敵人偏好房。'),
-      floor('地下 3F｜沉火塘', ['######', '#...T#', '#.S..#', '#..?##', '#....#', '######'], '舊火塘是事件偏好，不確認任何祖靈真相。'),
-      floor('地下 4F｜長歌室', ['######', '#B...#', '#..!.#', '#..S.#', '#.R..#', '######'], '鳴石採集點與大型敵人偏好分離。'),
-      floor('地下 5F｜冬冠石座', ['######', '#....#', '#.B..#', '#....#', '#T..X#', '######'], '最深層保留大型 Boss 房與唯一正式出口。'),
-    ],
-  },
+  }),
 ];
 
 export const firstMapConfigs = [
@@ -529,10 +532,7 @@ export const validationSummary = (() => {
   if (monsterCatalog.humanEncounters.length !== 5) errors.push(`人類 Encounter 應為 5，實際 ${monsterCatalog.humanEncounters.length}`);
   if (craftingCatalog.equipmentRecipes.filter(recipe => recipe.tier === 'I').length !== 18 || craftingCatalog.equipmentRecipes.filter(recipe => recipe.tier === 'II').length !== 18) errors.push('Tier I／II 裝備配方未各覆蓋 18 種底模');
   mapPoolTotals.filter(entry => entry.total !== 100).forEach(entry => errors.push(`${entry.map}／${entry.pool} 權重為 ${entry.total}`));
-  firstMapLayouts.flatMap(map => map.floors).forEach(entry => {
-    if (entry.grid.some(row => row.length !== entry.columns)) errors.push(`${entry.label} 格圖欄數不一致`);
-    if (entry.grid.length !== entry.rows) errors.push(`${entry.label} 格圖列數不一致`);
-  });
+  errors.push(...validateMapLayouts(firstMapLayouts));
   return {
     ok: errors.length === 0,
     errors,

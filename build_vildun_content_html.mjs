@@ -1,4 +1,5 @@
 import { writeFileSync } from 'node:fs';
+import { renderMapFloor, mapLegend, mapStyles } from './docs/03_content/shared/map_render.mjs';
 const cultureKey = process.argv[2] ?? 'vildun';
 const {
   cultureMeta,
@@ -137,30 +138,9 @@ const renderCrafting = () => section('crafting', '素材、製作、料理與書
   <h3>技能書與製作書</h3>${table(['書籍層級', 'Mastery 門檻', '取得', '內容'], craftingCatalog.books.map(row => row.map(esc)), 'compact')}
 `, '裝備品級與製作品質分離；消耗品沒有品質前綴，料理直接形成 FoodStatus。');
 
-const mapColors = { '#': '#1e2530', '.': '#fffdfa', E: '#b9dcfb', X: '#f4b9b5', S: '#fffdfa', R: '#fffdfa', T: '#fffdfa', '?': '#fffdfa', '!': '#fffdfa', B: '#fffdfa' };
-const mapSymbol = (char, x, y, size) => {
-  const centerX = x + size / 2;
-  const centerY = y + size / 2;
-  if (char === 'E' || char === 'X') return `<text class="map-special" x="${centerX}" y="${centerY + 6}">${char === 'E' ? '入' : '出'}</text>`;
-  if (char === 'S') return `<text class="map-stair" x="${centerX}" y="${centerY + 8}">↕</text>`;
-  if (char === 'R') return `<rect class="map-marker map-marker-resource" x="${centerX - 6}" y="${centerY - 6}" width="12" height="12" transform="rotate(45 ${centerX} ${centerY})"/>`;
-  const markerClasses = { T: 'treasure', '?': 'event', '!': 'trap', B: 'large' };
-  return markerClasses[char] ? `<circle class="map-marker map-marker-${markerClasses[char]}" cx="${centerX}" cy="${centerY}" r="7"/>` : '';
-};
-const renderMapFloor = floor => {
-  const size = floor.columns >= 8 ? 48 : 56;
-  const cells = floor.grid.flatMap((row, rowIndex) => [...row].map((char, columnIndex) => {
-    const x = columnIndex * size;
-    const y = rowIndex * size;
-    const rect = `<rect x="${x}" y="${y}" width="${size}" height="${size}" fill="${mapColors[char]}" stroke="${char === '#' ? '#1e2530' : '#263544'}" stroke-width="2"/>`;
-    return `${rect}${mapSymbol(char, x, y, size)}`;
-  })).join('');
-  return `<article class="map-floor"><h4>${esc(floor.label)}</h4><svg class="map-svg" viewBox="0 0 ${floor.columns * size} ${floor.rows * size}" role="img" aria-label="${esc(floor.label)} 格圖">${cells}</svg><p>${esc(floor.note)}</p></article>`;
-};
-const mapLegend = `<div class="map-legend" aria-label="格圖圖例"><span><i class="legend-tile entry"></i>入口</span><span><i class="legend-tile exit"></i>出口</span><span><i class="legend-stair">↕</i>同座標樓梯</span><span><i class="legend-marker treasure"></i>寶箱偏好</span><span><i class="legend-marker event"></i>事件偏好</span><span><i class="legend-marker large"></i>大體型敵人偏好</span><span><i class="legend-marker trap"></i>固定陷阱</span><span><i class="legend-marker resource"></i>素材偏好／固定採集點</span></div>`;
 const renderMaps = () => section('maps', '第一版三張探索地｜配置與素材權重', `
   <p class="lead">怪物不依地圖偏好種類：非人類一律從${esc(cultureMeta.name)}文化池選取，人類則讀取目前占領國文化池。地圖只定義地形、固定空間、陷阱與素材權重。</p>
-  <h3>格圖配置</h3><p class="section-note">黑色為不存在地塊；白色為可用房間／通道。入口、出口、樓梯與所有固定內容偏好已直接畫在圖上。</p>${mapLegend}
+  ${mapStyles}<h3>格圖配置</h3><p class="section-note">黑色為不存在地塊；相鄰白格沒有內線時視為同一房間。白色缺口是通道，紅線是紅門。每個紅門、素材偏好點與其他固定內容皆已直接畫在圖上。</p>${mapLegend}
   ${firstMapLayouts.map(layout => `<article class="map-layout"><header><h3>${esc(layout.name)}</h3><p>${esc(layout.city)}・${esc(layout.type)}</p></header><div class="map-layout-grid">${layout.floors.map(renderMapFloor).join('')}</div></article>`).join('')}
   <h3>地圖資料設定</h3>${table(['地圖', '對應城市', 'Tier', '類型', '版型', '出入口', '固定配置'], firstMapConfigs.map(map => [esc(map.name), esc(map.city), esc(map.tier), esc(map.kind), esc(map.layout), '1 個正式入口／1 個正式出口', '格圖所示固定空間與內容偏好']), 'compact')}
   <p class="section-note">採集點與寶箱分池，各池權重分別合計 100；怪物素材只由 Monster Definition 的掉落資料決定。</p>
