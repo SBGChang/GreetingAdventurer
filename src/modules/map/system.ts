@@ -730,6 +730,17 @@ export function handleSetMapRefreshLock(
     if (command.reason === undefined || command.releaseOnDay === undefined) {
       return reject('map/invalid-lock', { mode: command.mode });
     }
+    // 現存鎖屬於別張委託時不得覆蓋。R11 #4 只擋了 release，但 set 一樣會奪走所有權——別張委託直接
+    // 覆蓋後，原委託連自己下的鎖都解不掉（sourceQuestId 已被換成新的），等於繞過 R11 #4（複審 R12 #2）。
+    // 同一張委託重設（延長／改 reason）仍允許。
+    const held = instance.refresh.refreshLock;
+    if (held !== undefined && held.sourceQuestId !== command.sourceQuestId) {
+      return reject('map/refresh-lock-not-owned', {
+        mapId: String(command.mapId),
+        lockOwner: String(held.sourceQuestId),
+        requestedBy: String(command.sourceQuestId),
+      });
+    }
     const lock: RefreshLock = {
       lockId: ctx.ids.nextMapRefreshLockId(),
       reason: command.reason,

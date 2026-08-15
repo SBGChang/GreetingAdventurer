@@ -506,6 +506,44 @@ const cases: readonly Case[] = [
     },
   },
   {
+    // R12 #2：R11 #4 只擋了 release。別張委託直接用 set 覆蓋一樣會奪走所有權，而且覆蓋後原委託連
+    // 自己下的鎖都解不掉（sourceQuestId 已被換掉），等於繞過 R11 #4。
+    name: 'RefreshLock: 別張委託不得用 set 覆蓋現有鎖；原委託可重設',
+    run: () => {
+      const ctx = makeContext();
+      const setBy = (questId: QuestId): SetMapRefreshLock => ({
+        type: 'SetMapRefreshLock',
+        mapId: MAP_ID,
+        mode: 'set',
+        reason: 'suppression',
+        releaseOnDay: 141 as WorldDay,
+        sourceQuestId: questId,
+      });
+      const locked = expectOk(handleSetMapRefreshLock(setBy(QUEST_ID), fixtureMapState(1), ctx), 'set-lock').nextSlice;
+
+      const hijack = handleSetMapRefreshLock(setBy('quest-other' as QuestId), locked, ctx);
+      assert(!hijack.ok, '別張委託不得覆蓋現有鎖');
+      assert(
+        hijack.ok || hijack.rejection.code === 'map/refresh-lock-not-owned',
+        `拒絕碼應為 map/refresh-lock-not-owned（實得 ${hijack.ok ? '-' : hijack.rejection.code}）`,
+      );
+      assert(
+        locked.instances[MAP_ID]!.refresh.refreshLock?.sourceQuestId === QUEST_ID,
+        '鎖的所有權必須仍屬原委託',
+      );
+
+      // 同一張委託重設（延長期限）仍應允許。
+      const extended = expectOk(
+        handleSetMapRefreshLock({ ...setBy(QUEST_ID), releaseOnDay: 200 as WorldDay }, locked, ctx),
+        'owner re-set',
+      );
+      assert(
+        extended.nextSlice.instances[MAP_ID]!.refresh.refreshLock?.releaseOnDay === 200,
+        '原委託應可重設自己的鎖',
+      );
+    },
+  },
+  {
     name: 'RefreshLock: 沒有鎖時解鎖被拒（不靜默成功）',
     run: () => {
       const r = handleSetMapRefreshLock(
