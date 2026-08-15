@@ -733,7 +733,11 @@ export function handleSetMapRefreshLock(
     // 現存鎖屬於別張委託時不得覆蓋。R11 #4 只擋了 release，但 set 一樣會奪走所有權——別張委託直接
     // 覆蓋後，原委託連自己下的鎖都解不掉（sourceQuestId 已被換成新的），等於繞過 R11 #4（複審 R12 #2）。
     // 同一張委託重設（延長／改 reason）仍允許。
-    const held = instance.refresh.refreshLock;
+    // 只有**仍生效**的鎖才算被持有。`releaseOnDay <= worldDay` 已到期——刷新流程（§371）與
+    // `isRefreshLocked`（queries）都是這樣判定的，set 卻只看鎖存不存在，於是舊委託的殘留鎖會一直
+    // 擋住新委託下鎖（複審 R13 #2）。到期鎖視同不存在，直接由新委託覆蓋。
+    const existingLock = instance.refresh.refreshLock;
+    const held = existingLock !== undefined && existingLock.releaseOnDay > ctx.worldDay ? existingLock : undefined;
     if (held !== undefined && held.sourceQuestId !== command.sourceQuestId) {
       return reject('map/refresh-lock-not-owned', {
         mapId: String(command.mapId),

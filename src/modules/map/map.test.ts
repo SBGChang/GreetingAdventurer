@@ -544,6 +544,42 @@ const cases: readonly Case[] = [
     },
   },
   {
+    // R13 #2：刷新流程與 isRefreshLocked 都以 releaseOnDay <= worldDay 判定失效，set 卻只看鎖存不存在，
+    // 於是舊委託的殘留鎖會永遠擋住新委託。
+    name: 'RefreshLock: 已到期的舊鎖不得擋住新委託下鎖',
+    run: () => {
+      const setBy = (questId: QuestId, releaseOnDay: number): SetMapRefreshLock => ({
+        type: 'SetMapRefreshLock',
+        mapId: MAP_ID,
+        mode: 'set',
+        reason: 'suppression',
+        releaseOnDay: releaseOnDay as WorldDay,
+        sourceQuestId: questId,
+      });
+      // 舊委託在第 100 天下鎖，第 141 天到期。
+      const locked = expectOk(
+        handleSetMapRefreshLock(setBy(QUEST_ID, 141), fixtureMapState(1), makeContext({ worldDay: 100 as WorldDay })),
+        'old lock',
+      ).nextSlice;
+
+      // 第 141 天已到期（releaseOnDay <= worldDay）→ 新委託應可下鎖。
+      const renewed = expectOk(
+        handleSetMapRefreshLock(setBy('quest-new' as QuestId, 182), locked, makeContext({ worldDay: 141 as WorldDay })),
+        'new quest sets over an expired lock',
+      );
+      assert(
+        renewed.nextSlice.instances[MAP_ID]!.refresh.refreshLock?.sourceQuestId === 'quest-new',
+        '到期鎖應可被新委託取代',
+      );
+
+      // 對照：尚未到期時仍必須擋下。
+      const tooEarly = handleSetMapRefreshLock(
+        setBy('quest-new' as QuestId, 182), locked, makeContext({ worldDay: 140 as WorldDay }),
+      );
+      assert(!tooEarly.ok, '未到期的鎖仍不得被別張委託覆蓋');
+    },
+  },
+  {
     name: 'RefreshLock: 沒有鎖時解鎖被拒（不靜默成功）',
     run: () => {
       const r = handleSetMapRefreshLock(
