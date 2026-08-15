@@ -696,6 +696,34 @@ export function configureWeaponSet(
     idx === 1 ? updated : clearFrom(s[1]),
     idx === 2 ? updated : clearFrom(s[2]),
   ];
+  // 被清空的**其他**武器組也必須各自發 EquipmentChanged。把 WS0 的武器改裝到 WS1 時 State 會正確清掉
+  // WS0，但事件只宣告 WS1 變更，依 weaponSetId 分別快取的 UI／戰力系統會留著 WS0 的舊資料
+  //（複審 R12 #1）。
+  const clearedElsewhere: DomainEventDraft<unknown>[] = [];
+  for (let i = 0; i < s.length; i += 1) {
+    if (i === idx) continue;
+    const before = s[i]!;
+    const after = nextSets[i]!;
+    for (const [hand, prevId, nextId] of [
+      ['mainHand', before.mainHandItemId, after.mainHandItemId],
+      ['offHand', before.offHandItemId, after.offHandItemId],
+    ] as const) {
+      if (prevId === nextId || prevId === undefined) continue;
+      const prevInst = state.items[prevId];
+      if (prevInst === undefined) continue;
+      const slotId = deps.reader.getEquipment(prevInst.definitionId).handSlots[hand];
+      if (slotId === undefined) continue;
+      clearedElsewhere.push(
+        emit({
+          type: 'EquipmentChanged',
+          characterId: cmd.characterId,
+          slotId,
+          weaponSetId: before.weaponSetId,
+          itemId: undefined,
+        }),
+      );
+    }
+  }
   const nextLoadout = { ...loadout, weaponSets: nextSets, revision: loadout.revision + 1 };
   let working: InventoryState = {
     ...state,
@@ -760,6 +788,7 @@ export function configureWeaponSet(
   return accept(working, [
     emit({ type: 'WeaponSetConfigured', characterId: cmd.characterId, weaponSetId: cmd.weaponSetId, itemIds: newItemIds, skillIds }),
     ...equipmentChanges,
+    ...clearedElsewhere,
   ]);
 }
 

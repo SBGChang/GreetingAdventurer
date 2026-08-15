@@ -607,6 +607,36 @@ const cases: readonly Case[] = [
     },
   },
   {
+    // R12 #1：跨組移裝時，被清空的舊組也必須發事件——依 weaponSetId 快取的 UI／戰力會留著舊資料。
+    name: 'configureWeaponSet: 跨武器組移裝 → 舊組也發 itemId undefined 的 EquipmentChanged',
+    run: () => {
+      const deps = createFixtureDeps();
+      const WS1 = `${FIXTURE.characterId}:ws1` as WeaponSetId;
+      const inWs0 = expectOk(
+        configureWeaponSet(
+          createFixtureState(),
+          { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS0, mainHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] },
+          deps,
+        ),
+        'sword into WS0',
+      );
+      const moved = configureWeaponSet(
+        inWs0,
+        { type: 'configureWeaponSet', characterId: FIXTURE.characterId, weaponSetId: WS1, mainHandItemId: FIXTURE.swordItemId, selectedSkillIds: [undefined, undefined, undefined] },
+        deps,
+      );
+      expectOk(moved, 'sword into WS1');
+      const changes = eventsOf(moved)
+        .filter((e): e is EquipmentChanged => (e as { type?: string }).type === 'EquipmentChanged');
+      const ws1Change = changes.find((c) => c.weaponSetId === WS1);
+      const ws0Change = changes.find((c) => c.weaponSetId === WS0);
+      assert(ws1Change?.itemId === FIXTURE.swordItemId, 'WS1 應宣告裝上劍');
+      assert(ws0Change !== undefined, '被清空的 WS0 也必須發 EquipmentChanged');
+      assert(ws0Change?.itemId === undefined, 'WS0 的事件應宣告該手已清空');
+      assert(ws0Change?.slotId === FIXTURE.mainHandSlot, 'WS0 清空的應是主手 slot');
+    },
+  },
+  {
     name: 'configureWeaponSet: 清空一手 → 該手發 itemId undefined 的 EquipmentChanged',
     run: () => {
       const deps = createFixtureDeps();
