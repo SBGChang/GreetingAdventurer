@@ -29,7 +29,10 @@ import {
   HERO_ID,
   MAGE_ID,
   WEAPON_SET_A,
+  WEAPON_SET_B,
+  WEAPON_SET_C,
 } from './fixtures';
+import { makeCombatQuery } from './queries';
 import { localCell } from './state';
 import type { Revision, SkillDefinitionId } from '../../contracts/core';
 import type { ApplyCombatCondition } from '../../contracts/character';
@@ -59,6 +62,50 @@ function aliveEnemies(encounter: CombatEncounter): CombatantState[] {
 type Case = Readonly<{ name: string; run: () => void }>;
 
 const cases: readonly Case[] = [
+  {
+    // R14 #1：武器組可能存著失效的技能引用（舊存檔、被移除的內容、未載入的內容包）。
+    // getAvailableActions 直接 getSkillView 會讓**整個戰鬥選單 Query 拋錯**。
+    name: 'getAvailableActions: 武器組含失效技能引用時，選單仍可建立（跳過該技能而非拋錯）',
+    run: () => {
+      const GHOST = 'definition:skill:removed-by-content-update' as never;
+      const ctx = makeCombatContext();
+      const encounter = makeEncounter([
+        { combatantId: HERO_ID as unknown as CombatantId, side: 'player', currentCtb: 0, col: 1, characterId: HERO_ID },
+      ]);
+      const withActor: CombatEncounter = { ...encounter, currentActorId: HERO_ID as unknown as CombatantId };
+      const state = upsertEncounter(createInitialCombatState(), withActor);
+
+      // 武器組第一格是失效引用，第二格是正常技能。
+      const loadout = {
+        getEquipmentLoadout: () => ({
+          characterId: HERO_ID,
+          armorSlots: {},
+          weaponSets: [
+            { weaponSetId: WEAPON_SET_A, selectedSkillIds: [GHOST, SKILL_STRIKE, undefined] },
+            { weaponSetId: WEAPON_SET_B, selectedSkillIds: [undefined, undefined, undefined] },
+            { weaponSetId: WEAPON_SET_C, selectedSkillIds: [undefined, undefined, undefined] },
+          ],
+          revision: 0,
+        }),
+      } as unknown as typeof ctx.loadout;
+
+      const query = makeCombatQuery(state, { definitions: ctx.definitions, loadout, progression: ctx.progression });
+      let options;
+      try {
+        options = query.getAvailableActions(withActor.encounterId, HERO_ID as unknown as CombatantId);
+      } catch (error) {
+        throw new Error(`失效技能引用不得讓戰鬥選單拋錯：${error instanceof Error ? error.message : String(error)}`);
+      }
+      assert(
+        options.every((o) => String(o.skillId) !== String(GHOST)),
+        '失效技能不應出現在選單中',
+      );
+      assert(
+        options.some((o) => o.skillId === SKILL_STRIKE),
+        '同組的正常技能仍應列出（不得因一筆失效引用整組消失）',
+      );
+    },
+  },
   {
     name: 'CTB 倒扣式：最小 currentCtb 先行動；同值跨側玩家優先',
     run: () => {

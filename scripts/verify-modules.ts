@@ -16,6 +16,7 @@ import { runTests as resolvers } from '../src/app/content/resolvers.test';
 import { runTests as crossModulePorts } from '../src/app/content/cross-module-ports.test';
 import { runTests as bootstrap } from '../src/app/composition/bootstrap.test';
 import { runTests as travelIntegration } from '../src/app/composition/travel-integration.test';
+import { runTests as weaponSetWorkflow } from '../src/app/workflows/weapon-set-configuration.test';
 // 地基層測試自 Wave A 起就存在，但從未被這支腳本跑過。
 import { runKernelTests } from '../src/kernel/kernel.test';
 import { runKernelTests as dataKernels, allKernelTestsPass } from '../src/data-runtime/kernels.test';
@@ -57,6 +58,8 @@ const throwing: ReadonlyArray<readonly [string, () => void]> = [
   ['bootstrap', bootstrap],
   // travel：玩家旅行端到端——引擎自驅（旅行事件 Workflow 訂閱者送 CompleteSegment），非手動扮演。
   ['travel-integration', travelIntegration],
+  // workflow：武器組配置的跨模組技能驗證（Definition 存在／已學會／啟動手可用）。
+  ['weapon-set-workflow', weaponSetWorkflow],
 ];
 
 for (const [name, run] of throwing) {

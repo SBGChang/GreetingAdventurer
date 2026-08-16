@@ -37,6 +37,11 @@ import * as combat from '../../modules/combat/public';
 import * as team from '../../modules/team/public';
 
 import type { ProgressionDefinitionReader } from '../../contracts/progression';
+import type { ConfigureWeaponSet } from '../../contracts/inventory';
+import {
+  validateWeaponSetSkills,
+  WEAPON_SET_CONFIGURATION_WORKFLOW,
+} from '../workflows/weapon-set-configuration';
 import {
   applyMutation,
   type GameJobType,
@@ -264,8 +269,6 @@ const GAME_COMMAND_HANDLERS: Readonly<Partial<Record<GameCommandType, RootDispat
   // ── inventory：(state, cmd, deps) → ModuleOutcome ──
   equipItem: (c, _t, s, x) =>
     fromOutcome('inventory', inventory.equipItem(s.inventory, c as never, x.inventory)),
-  configureWeaponSet: (c, _t, s, x) =>
-    fromOutcome('inventory', inventory.configureWeaponSet(s.inventory, c as never, x.inventory)),
 
   // ── team：(state, cmd, ctx) → ModuleOutcome（beginCityFreePeriod 無 cmd）──
   startCityTravel: (c, _t, s, x) =>
@@ -285,7 +288,37 @@ const GAME_COMMAND_HANDLERS: Readonly<Partial<Record<GameCommandType, RootDispat
     fromOutcome('team', team.handleBeginCityFreePeriod(s.team, x.team)),
 };
 
-// 入口為 WORKFLOW 的 Game Command（gatherDungeonNode）：不是模組 Handler，交 Workflow Wave。
+// 入口為 WORKFLOW 的 Game Command：先由 Workflow 做跨模組驗證，通過後才委派給擁有 Slice 的模組
+// Handler（Workflow 不擁有 Slice）。驗證失敗即拒絕整筆交易，Slice 完全不動。
+const WORKFLOW_GAME_COMMAND_HANDLERS: Readonly<Partial<Record<GameCommandType, RootDispatch>>> = {
+  configureWeaponSet: (c, _t, s, x) => {
+    const cmd = c as ConfigureWeaponSet;
+    const rejection = validateWeaponSetSkills(cmd, {
+      knows: (characterId, skillId) => x.combat.progression.knows(characterId, skillId),
+      tryGetSkill: (skillId) => {
+        // 窄化 Reader 對未註冊 Definition 會拋錯；Workflow 要的是「不存在」這個答案，不是例外。
+        try {
+          return x.combat.definitions.getSkillView(skillId);
+        } catch {
+          return undefined;
+        }
+      },
+    });
+    if (rejection !== undefined) {
+      return {
+        accepted: false,
+        rejection: {
+          code: rejection.code,
+          sourceModule: WEAPON_SET_CONFIGURATION_WORKFLOW as unknown as ModuleId,
+          details: rejection.details,
+        },
+      };
+    }
+    return fromOutcome('inventory', inventory.configureWeaponSet(s.inventory, cmd as never, x.inventory));
+  },
+};
+
+// 入口為 WORKFLOW 但其 Workflow 尚未實作者（gatherDungeonNode）。
 const WORKFLOW_ENTRY_SET: ReadonlySet<GameCommandType> = new Set(
   (Object.keys(GAME_COMMAND_ENTRY) as GameCommandType[]).filter(
     (type) => GAME_COMMAND_ENTRY[type] === WORKFLOW_ENTRY,
@@ -376,9 +409,23 @@ export function routeGameCommand(
     throw new Error(`routeGameCommand: "${type}" 不在 GAME_COMMAND_ENTRY（未註冊的 Game Command）`);
   }
   if (WORKFLOW_ENTRY_SET.has(type)) {
-    throw new Error(
-      `routeGameCommand: "${type}" 的入口是 Workflow，不直接路由到模組 Handler（待 Workflow Wave 實作）`,
-    );
+    const workflowDispatch = WORKFLOW_GAME_COMMAND_HANDLERS[type];
+    if (workflowDispatch === undefined) {
+      throw new Error(
+        `routeGameCommand: "${type}" 的入口是 Workflow，但該 Workflow 尚未實作` +
+          `（見 router.ts 的 WORKFLOW_GAME_COMMAND_HANDLERS）`,
+      );
+    }
+    return (ctx) => {
+      const denied = authorizeGameCommand(envelope.command, envelope.actorTeamId, ctx.workingState);
+      if (denied !== undefined) return { accepted: false, rejection: denied };
+      return workflowDispatch(
+        envelope.command,
+        envelope.actorTeamId,
+        ctx.workingState,
+        contextFactory(ctx.workingState),
+      );
+    };
   }
   const dispatch = GAME_COMMAND_HANDLERS[type];
   if (dispatch === undefined) {

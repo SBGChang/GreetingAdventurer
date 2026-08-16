@@ -13,6 +13,19 @@ import type { CombatState, CombatEncounter, CombatantState } from './state';
 import { requireEncounter, tryGetEncounter } from './state';
 import type { CombatHandlerContext } from './system';
 
+// Reader 對未註冊的 Definition 會拋錯（窄化 reader 的 `.get()` 契約）。Query 不得因為一筆失效引用
+// 就整個失敗，故在此收斂為 undefined 由呼叫端跳過。
+function tryGetSkillView(
+  deps: QueryDeps,
+  skillId: SkillDefinitionId,
+): ReturnType<CombatHandlerContext['definitions']['getSkillView']> | undefined {
+  try {
+    return deps.definitions.getSkillView(skillId);
+  } catch {
+    return undefined;
+  }
+}
+
 function toCombatantView(c: CombatantState): CombatantView {
   return {
     combatantId: c.combatantId,
@@ -49,7 +62,9 @@ function toEncounterView(encounter: CombatEncounter): CombatEncounterView {
 }
 
 // 依賴 loadout / definitions 推導可用技能選項；純讀取。
-type QueryDeps = Pick<CombatHandlerContext, 'definitions' | 'loadout'>;
+// progression 也是 Query 的依賴：戰鬥選單必須先確認角色**學會**該技能，才去取 Skill Definition
+//（見 getAvailableActions 的防禦性讀取）。
+type QueryDeps = Pick<CombatHandlerContext, 'definitions' | 'loadout' | 'progression'>;
 
 export function makeCombatQuery(state: CombatState, deps: QueryDeps): CombatQuery {
   return {
@@ -93,7 +108,13 @@ export function makeCombatQuery(state: CombatState, deps: QueryDeps): CombatQuer
       for (const set of loadout.weaponSets) {
         for (const skillId of set.selectedSkillIds) {
           if (skillId === undefined) continue;
-          const view = deps.definitions.getSkillView(skillId as SkillDefinitionId);
+          // 防禦性讀取：武器組裡可能存著失效的技能引用——舊存檔、被移除的內容、或未載入的內容包。
+          // 直接 getSkillView 會讓**整個戰鬥選單 Query 拋錯**，而不是把那一項當成不可用
+          //（複審 R14 #1）。同 handleUseCombatSkill 的作法：先 knows() 擋掉未學／偽造的 ID，
+          // 再對取不到 Definition 的情況跳過該技能。
+          if (!deps.progression.knows(actor.source.characterId, skillId as SkillDefinitionId)) continue;
+          const view = tryGetSkillView(deps, skillId as SkillDefinitionId);
+          if (view === undefined) continue;
           const requiresSwitch = actor.activeWeaponSetId !== set.weaponSetId;
           options.push({
             skillId: view.skillId,

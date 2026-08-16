@@ -172,7 +172,10 @@ export const GAME_COMMAND_ENTRY: Readonly<Record<GameCommandType, GameCommandEnt
   // inventory
   equipItem: 'inventory' as ModuleId,
   unequipItem: 'inventory' as ModuleId,
-  configureWeaponSet: 'inventory' as ModuleId,
+  // 入口為 Workflow：05_inventory_module.md §1.2 —— selectedSkillIds 的合法性（Definition 存在、
+  // 角色已學會、啟動手可用）要跨 Progression 與 Combat 內容判定，Inventory 不得同步查別的模組。
+  // 由 weapon-set-configuration Workflow 驗證後才交給 Inventory Handler 寫入。
+  configureWeaponSet: WORKFLOW_ENTRY,
   useItem: 'inventory' as ModuleId,
   splitStack: 'inventory' as ModuleId,
   transferItemForEncumbrance: 'inventory' as ModuleId,
