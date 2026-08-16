@@ -149,6 +149,7 @@ export const teamModuleContract: ModuleContract = {
     'AttachQuestTemporaryMember',
   ],
   handlesJobs: ['teamPlanDue', 'freeActionDue', 'nonPlayerMemberCityFreeDayTick'],
+  sendsInternalCommands: ['StartNpcDungeonRun'],
   // Wave B 未實作任何 subscriber 函式（CharacterAvailabilityChanged / CharacterRetired /
   // QuestSettled / CombatEncounterResolved / ItemConsumed / RouteAccessChanged 皆待補）。
   subscriptionHandlerIds: [] as readonly EventSubscriptionId[],

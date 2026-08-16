@@ -76,6 +76,7 @@ export const characterModuleContract: ModuleContract = {
     'ApplyFoodStatusEffects',
   ],
   handlesJobs: ['characterLifecycleDue'],
+  sendsInternalCommands: [],
   // subscriptionId 命名依 12_engine_runtime.md §5.2：`subscription.<eventType>.<subscriber>`，
   // 且必須與 app/composition/manifest.ts 的宣告逐字相符（啟動驗證會比對）。
   subscriptionHandlerIds: [

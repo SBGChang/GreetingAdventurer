@@ -163,10 +163,33 @@ export function validateRegistry(
       detail: `Job type "${jobType}" 已宣告由模組處理，但 Router 沒有對應 dispatch，且未列入 UNAVAILABLE_CAPABILITIES`,
     });
   }
+  // 5c) **送出端 → Owner** 交叉驗證（複審 R15 P1-5）。
+  //
+  // 模組可以送出 Internal Command 給別的模組，但過去沒有任何地方宣告「我會送什麼」，
+  // Registry 因此驗不到「送出去的命令沒有人收」。dungeon 送 StartAssetDistribution 而
+  // Distribution 模組不存在，啟動驗證卻全綠——要等玩家真的開始探索，才在交易中失敗。
+  // 現在 ModuleContract.sendsInternalCommands 把送出端也納入宣告，這裡比對它有沒有 Owner。
+  for (const c of contracts) {
+    for (const commandType of c.sendsInternalCommands) {
+      if (commandType in INTERNAL_COMMAND_OWNER) continue;
+      if (commandType in gaps.internalCommands) continue;
+      out.push({
+        code: 'registry.internalCommand.noOwner',
+        detail: `模組 "${c.id}" 會送出 Internal Command "${commandType}"，但沒有任何模組宣告接收它，且未列入 UNAVAILABLE_CAPABILITIES`,
+      });
+    }
+  }
+
   // 清單只能變短：列了卻根本沒有這條路由，代表清單過期。
+  // Internal Command 的「已宣告路由」= 有人接收 **或** 有人送出。缺 Owner 的送出端正是需要列入
+  // 清單的情形，所以不能只看接收端，否則合法的缺口記錄會被誤判成過期。
+  const declaredInternalCommands = new Set<string>([
+    ...Object.keys(INTERNAL_COMMAND_OWNER),
+    ...contracts.flatMap((c) => c.sendsInternalCommands),
+  ]);
   for (const [kind, owners] of [
     ['gameCommands', Object.keys(GAME_COMMAND_ENTRY)],
-    ['internalCommands', Object.keys(INTERNAL_COMMAND_OWNER)],
+    ['internalCommands', [...declaredInternalCommands]],
     ['jobs', [...jobOwners.keys()]],
   ] as const) {
     for (const declared of Object.keys(gaps[kind])) {

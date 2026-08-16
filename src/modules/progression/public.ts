@@ -56,6 +56,7 @@ export const progressionModuleContract: ModuleContract = {
   handlesGameCommands: ['learnFromBook', 'startTeaching'],
   handlesInternalCommands: [],
   handlesJobs: [],
+  sendsInternalCommands: [],
   subscriptionHandlerIds: [
     'subscription.CombatAttackMasteryEarned.progression' as EventSubscriptionId,
     'subscription.CombatDefenseMasteryEarned.progression' as EventSubscriptionId,

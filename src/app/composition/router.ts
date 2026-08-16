@@ -297,14 +297,9 @@ const WORKFLOW_GAME_COMMAND_HANDLERS: Readonly<Partial<Record<GameCommandType, R
     const cmd = c as ConfigureWeaponSet;
     const rejection = validateWeaponSetSkills(cmd, {
       knows: (characterId, skillId) => x.combat.progression.knows(characterId, skillId),
-      tryGetSkill: (skillId) => {
-        // 窄化 Reader 對未註冊 Definition 會拋錯；Workflow 要的是「不存在」這個答案，不是例外。
-        try {
-          return x.combat.definitions.getSkillView(skillId);
-        } catch {
-          return undefined;
-        }
-      },
+      // 「不存在」由 Reader 契約直接回答；不攔例外——攔了會把 Reader 內部的程式錯誤也一併
+      // 誤判成「技能不存在」（規範 §6）。
+      tryGetSkill: (skillId) => x.combat.definitions.trySkillView(skillId),
     });
     if (rejection !== undefined) {
       return {

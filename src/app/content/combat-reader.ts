@@ -116,6 +116,7 @@ export function createCombatDefinitionReader(registry: DefinitionRegistry): Comb
     getEncounterGroup: (id) => encounterGroup.get(id as unknown as DefinitionId),
     getMonster: (id) => monster.get(id as unknown as DefinitionId),
     getSkillView: (id) => skill.get(id as unknown as DefinitionId),
+    trySkillView: (id) => skill.tryGet(id as unknown as DefinitionId),
     getOpeningCtbRule: (id) => openingCtb.get(id as unknown as DefinitionId),
     getActionDelayRule: (id) => actionDelay.get(id as unknown as DefinitionId),
     getCombatStatus: (id) => status.get(id as unknown as DefinitionId),

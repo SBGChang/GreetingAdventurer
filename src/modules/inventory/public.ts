@@ -90,6 +90,7 @@ export const INVENTORY_MODULE_CONTRACT: ModuleContract = {
     'EvaluateTeamEncumbrance',
   ],
   handlesJobs: [],
+  sendsInternalCommands: [],
   // Inventory 不自訂事件重算（doc §3.3）；超載抵達後重算由 encumbrance-transition-workflow 觸發。
   subscriptionHandlerIds: [] as readonly EventSubscriptionId[],
   emits: [

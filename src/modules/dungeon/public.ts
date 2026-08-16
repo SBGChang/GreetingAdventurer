@@ -82,6 +82,16 @@ export const dungeonModuleContract: ModuleContract = {
   ],
   handlesInternalCommands: ['StartNpcDungeonRun', 'ConsumeDungeonGatheringAction'],
   handlesJobs: ['npcDungeonDay'],
+  // 送出端宣告：其中兩筆（Distribution）目前**無人接收**，見 UNAVAILABLE_CAPABILITIES。
+  sendsInternalCommands: [
+    'OpenMapDoor',
+    'ResolvePlayerMapContent',
+    'ApplyNpcDungeonSettlement',
+    'StartCombatEncounter',
+    'StartReturnFromDungeon',
+    'StartAssetDistribution',
+    'FinalizeAssetDistributionCollection',
+  ],
   // 只登記**已實作**的 subscriber（原本宣告 9 筆但只寫了 4 個函式；宣告卻沒有實作會讓啟動
   // 驗證誤放行、路由時才炸）。其餘待 combat-sequence / map 刷新反應實作後再加回。
   // 命名依 12_engine_runtime.md §5.2 的 `subscription.<eventType>.<subscriber>`。

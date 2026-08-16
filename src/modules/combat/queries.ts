@@ -13,19 +13,6 @@ import type { CombatState, CombatEncounter, CombatantState } from './state';
 import { requireEncounter, tryGetEncounter } from './state';
 import type { CombatHandlerContext } from './system';
 
-// Reader 對未註冊的 Definition 會拋錯（窄化 reader 的 `.get()` 契約）。Query 不得因為一筆失效引用
-// 就整個失敗，故在此收斂為 undefined 由呼叫端跳過。
-function tryGetSkillView(
-  deps: QueryDeps,
-  skillId: SkillDefinitionId,
-): ReturnType<CombatHandlerContext['definitions']['getSkillView']> | undefined {
-  try {
-    return deps.definitions.getSkillView(skillId);
-  } catch {
-    return undefined;
-  }
-}
-
 function toCombatantView(c: CombatantState): CombatantView {
   return {
     combatantId: c.combatantId,
@@ -109,11 +96,13 @@ export function makeCombatQuery(state: CombatState, deps: QueryDeps): CombatQuer
         for (const skillId of set.selectedSkillIds) {
           if (skillId === undefined) continue;
           // 防禦性讀取：武器組裡可能存著失效的技能引用——舊存檔、被移除的內容、或未載入的內容包。
-          // 直接 getSkillView 會讓**整個戰鬥選單 Query 拋錯**，而不是把那一項當成不可用
-          //（複審 R14 #1）。同 handleUseCombatSkill 的作法：先 knows() 擋掉未學／偽造的 ID，
-          // 再對取不到 Definition 的情況跳過該技能。
+          // 直接 getSkillView 會讓**整個戰鬥選單 Query 拋錯**，而不是把那一項當成不可用（複審 R14 #1）。
+          //
+          // 「不存在」由 Reader 契約的 trySkillView 回答，**不是**攔 getSkillView 的例外：攔例外會把
+          // Reader 內部的程式錯誤也一併誤判成「技能不存在」，屬規範 §6 禁止的「捕捉 Reader 例外後繼續」。
+          // 先 knows() 擋掉未學／偽造的 ID（同 handleUseCombatSkill），再確認 Definition 是否存在。
           if (!deps.progression.knows(actor.source.characterId, skillId as SkillDefinitionId)) continue;
-          const view = tryGetSkillView(deps, skillId as SkillDefinitionId);
+          const view = deps.definitions.trySkillView(skillId as SkillDefinitionId);
           if (view === undefined) continue;
           const requiresSwitch = actor.activeWeaponSetId !== set.weaponSetId;
           options.push({

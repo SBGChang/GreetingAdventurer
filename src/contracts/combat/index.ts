@@ -265,6 +265,13 @@ export interface CombatDefinitionReader {
   getEncounterGroup(id: EncounterGroupDefinitionId): EncounterGroupDefinition;
   getMonster(id: MonsterDefinitionId): MonsterDefinition;
   getSkillView(id: SkillDefinitionId): CombatSkillDefinitionView;
+  // 「這筆技能定義存在嗎」是一個**合法的問題**，不該只能靠攔截 getSkillView 的例外來回答。
+  //
+  // 武器組裡可能存著失效的技能引用（舊存檔、被移除的內容、未載入的內容包），讀取端需要區分
+  // 「沒有這筆定義」與「讀取過程出錯」。用 try/catch 兩者都會被收成同一個結果，連 Reader 內部的
+  // 程式錯誤都會被靜默當成「技能不存在」——那正是規範 §6 禁止的「捕捉 Reader 例外後繼續」。
+  // data-runtime 的 DefinitionReader 本來就有 tryGet；這裡把該能力沿用到領域介面上。
+  trySkillView(id: SkillDefinitionId): CombatSkillDefinitionView | undefined;
   getOpeningCtbRule(id: OpeningCtbRuleId): OpeningCtbRuleDefinition;
   getActionDelayRule(id: ActionDelayRuleId): ActionDelayRuleDefinition;
   getCombatStatus(id: CombatStatusDefinitionId): CombatStatusDefinition;

@@ -85,8 +85,18 @@ export const UNAVAILABLE_CAPABILITIES: Readonly<{
     // 注意：這一項**有** Router dispatch，但 Handler 明確仍是 no-op。「有 dispatch」不等於「已完成」，
     // 所以本清單以人工維護的理由為準，不從 dispatch 存在與否反推（複審 R15 P1-6）。
     commandAlly: 'Router 有 dispatch，但 Handler 明確仍是 no-op，尚未實作指揮隊友',
+    // 地牢探索流程**尚未閉合**（規範 §10）。這兩筆會送出無人接收的 Distribution 命令，
+    // 真的執行會在同一交易內失敗；其餘地牢命令雖然各自可路由，但沒有 startPlayerExploration
+    // 就不會有 Session，實務上無從進入。等 Distribution 模組落地、且陷阱／事件效果／NPC 戰鬥
+    // 都改為資料化解析之後，才把這兩項移除。
+    startPlayerExploration: '送出 StartAssetDistribution，但 Distribution 模組尚未實作',
+    useDungeonExit: '送出 FinalizeAssetDistributionCollection，但 Distribution 模組尚未實作',
   },
   internalCommands: {
+    // Distribution 模組尚未實作——沒有 Slice、沒有 Handler、INTERNAL_COMMAND_OWNER 也沒有這兩筆。
+    // dungeon 已經在送它們，所以凡是會送出它們的流程目前都跑不完（見下方 gameCommands 的地牢項目）。
+    StartAssetDistribution: 'Distribution 模組尚未實作（無 Slice／Handler／Owner）',
+    FinalizeAssetDistributionCollection: 'Distribution 模組尚未實作（無 Slice／Handler／Owner）',
     ApplyQuestItemLifecycle: 'inventory 宣告接收，Wave B 未實作',
     ReleaseExpiredQuestCargo: 'inventory 宣告接收，Wave B 未實作',
     ConsumeBookForLearning: 'inventory 宣告接收，Wave B 未實作',

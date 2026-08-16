@@ -312,6 +312,7 @@ export function stubDefinitionReader(): CombatDefinitionReader {
       if (v === undefined) throw new Error(`no skill view ${String(id)}`);
       return v;
     },
+    trySkillView: (id) => SKILL_VIEWS[id],
     getOpeningCtbRule: () => OPENING_RULE,
     getActionDelayRule: () => DELAY_RULE,
     getCombatStatus: (id): CombatStatusDefinition => ({

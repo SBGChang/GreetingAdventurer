@@ -29,6 +29,14 @@ export type ModuleContract = Readonly<{
   handlesGameCommands: readonly string[];
   handlesInternalCommands: readonly string[];
   handlesJobs: readonly string[];
+  // 本模組會**送出**哪些 Internal Command。
+  //
+  // 原本契約只宣告「接收什麼」（handles*）與「發出哪些事件」（emits），沒有任何地方宣告「送出哪些
+  // Internal Command」。於是 Registry 無從檢查「送出去的命令有沒有人收」——dungeon 送
+  // StartAssetDistribution／FinalizeAssetDistributionCollection，而 Distribution 模組根本不存在，
+  // 啟動驗證卻完全看不到；要等玩家真的開始探索，才在交易中因找不到 Owner 而失敗（複審 R15 P1-5）。
+  // 宣告了才驗得到：見 registry 的「送出端 → Owner」交叉驗證。
+  sendsInternalCommands: readonly string[];
   // 只註冊本模組可提供的 handler；事件綁定與順序由 Composition Manifest 唯一擁有。
   subscriptionHandlerIds: readonly EventSubscriptionId[];
   emits: readonly string[];

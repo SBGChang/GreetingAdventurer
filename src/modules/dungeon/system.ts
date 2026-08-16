@@ -598,7 +598,7 @@ export function resolveDungeonInteraction(
       resolution: {
         resolverId: defaultResolverId(),
         outcome: 'success',
-        details: { optionId: String(cmd.optionId) as unknown as string },
+        details: { optionId: String(cmd.optionId) },
       },
     }),
   ];
