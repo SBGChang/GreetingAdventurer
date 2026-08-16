@@ -8,6 +8,56 @@
 
 ---
 
+## 2026-08-16 — 複審回合 14：技能驗證 Workflow、戰鬥選單防禦、驗證器值域
+
+本輪依 `docs/review/程序與結構的審核結果.md`。**工作樹仍由另一工作持有**（四國內容擴充為四城九迷宮），
+故只動 `src/` 與 `shared/map_model.mjs`；`build_yunhua_content_html.mjs` 與四國內容檔一律未碰，也未重新
+產生 HTML。
+
+**#1 武器組技能配置缺少 Workflow（P1）** —— `configureWeaponSet` 直接路由到 Inventory，而 Inventory 只驗
+物品、持有人與手部，`selectedSkillIds` **原樣存下**。技能是否存在屬內容、是否學會屬 Progression，兩者
+Inventory 都不得同步查，所以根本沒有人驗——不存在／已移除／未載入／未學會的技能 ID 全都進得了武器組。
+接著 `getAvailableActions` 對它們呼叫 `getSkillView`，**整個戰鬥選單 Query 直接拋錯**。
+
+改：新增 weapon-set-configuration Workflow，依序驗「Definition 存在 → 已學會 → 啟動手真的有裝備」
+（`bothHands` 要兩手、`handless` 不需要手），通過才委派 Inventory handler；失敗即拒絕整筆交易，Loadout
+不動。這順帶補上了**Game Command → Workflow 入口**的分派路徑——`routeGameCommand` 原本對這類命令只會
+拋「待 Workflow Wave 實作」。Inventory 依 §5.1 從 `handlesGameCommands` 移除該命令（一個 Game Command
+只能有一個入口），但仍擁有並寫入 Loadout Slice。
+
+`getAvailableActions` 則**獨立於 Workflow**改為防禦性讀取：未學會的跳過、取不到 Definition 的跳過。舊存檔
+帶著失效引用時，選單仍建得起來，而且同組的正常技能不會跟著消失。
+
+**#4 驗證器值域未封閉（P2）** —— 未知 mark、`portal` 這種連線種類、以及不屬於該房間的 anchor，三者同時
+存在時驗證器仍回傳零錯誤。這三種都不是「看起來怪」而是**會被下游靜默誤解**：未知 mark 讓 Renderer 去查
+不存在的標記定義、未知連線種類會被畫成「有缺口但不是紅門」的通道（資料語意被悄悄改寫）、錯誤 anchor 把
+符號畫到別的房間或圖外。改為封閉值域 + anchor 必須屬於自己的格。
+
+### 兩件沒做的事，以及為什麼
+
+**① 技能的 `weaponRequirementIds` 驗不了。** 審核要求驗「武器需求是否符合新武器組」，但
+`EquipmentDefinition` **沒有裝備側的 requirement 標記欄位**——combat 與 combat-power 都只宣告了技能側，
+裝備那一側根本沒有可比對的資料。要真的驗，得先在 inventory 契約補欄位並由內容軌填資料。當下內容檔正被
+另一工作改寫，不宜擅自新增內容契約，故明確標為待辦而非默默略過。
+
+**② 雲華的重複驗證器與 Renderer 沒有收斂。** 審核的另外兩條 P1 都落在
+`build_yunhua_content_html.mjs` 與雲華資料上，而那兩個檔案帶著另一工作的未提交變更。動它們等於把別人
+未完成的工作提交進我的 commit（前幾輪已經誤犯過一次 `git add -A`）。因此保留原狀並記入 HANDOFF。
+
+### 這輪的教訓
+
+1. **「沒有人負責驗」是一種可預測的缺口。** 當一項規則需要跨三個模組的事實，而架構禁止模組互相同步查詢時，
+   若組合層沒有對應的 Workflow，那條規則就是**沒人在驗**——不是驗漏，是從一開始就沒有實作點。找這類洞的
+   方法是問：這條規則的資料分屬哪些模組？誰有權同時看到它們？
+2. **Query 也會 crash，不只 Handler。** 過去幾輪的防線都加在寫入路徑；這次的 P1 是**讀取**路徑炸掉。窄化
+   Reader 的 `.get()` 會拋，任何 Query 直接呼叫它都得先想「這筆引用可能是壞的」。
+3. **驗證器缺的往往是值域，不是規則。** #4 三項都不是漏了某條規則，而是欄位型別在執行期是開放字串。
+
+`tsc` 乾淨、verify 全過（新增 weapon-set-workflow 一組共 8 案 + 戰鬥選單防禦 1 案）。戰鬥選單那條經
+mutation check：拿掉防線即重現原本的拋錯。四國現有資料在加嚴後的驗證器下仍全部通過。
+
+---
+
 ## 2026-08-16 — 複審回合 13：4 個 P1 + 1 個 P2（收斂發送點、抄來的舊 bug、驗證器過嚴與過鬆）
 
 **本輪在共用工作樹上進行**：另一個工作同時在把四國擴充成四城九迷宮（改寫四國 `*_content.data.mjs`／`.md`／
