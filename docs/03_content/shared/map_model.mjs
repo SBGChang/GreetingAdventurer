@@ -44,6 +44,12 @@ export const mapEdgeKey = (a, b) => [a, b].sort().join('|');
 
 const FUNCTIONAL = ['entry', 'exit', 'stair', 'trap'];
 
+// 封閉值域。開放字串會被 Renderer 靜默誤解：未知 mark 讓它去查不存在的標記定義（可能直接拋錯），
+// 未知連線種類會被當成「有缺口但不是紅門」的通道，等於把資料語意悄悄改寫（複審 R14 #4）。
+export const MAP_MARKS = ['treasure', 'event', 'large', 'trap', 'resource'];
+export const MAP_CONNECTION_TYPES = ['open', 'door'];
+export const MAP_STAIR_DIRECTIONS = ['↑', '↓'];
+
 // 房間身上有哪些互斥功能（trap 以 marks 表示，其餘是旗標）。
 const functionsOf = room => {
   const found = [];
@@ -116,6 +122,20 @@ const validateFloor = (floor, layoutName, errors) => {
       owner.set(cell, room.id);
     });
 
+    // 封閉值域：未知的 mark / 樓梯方向不得通過。
+    room.marks.forEach(mark => {
+      if (!MAP_MARKS.includes(mark)) {
+        errors.push(`${where}：房間「${room.id}」的 mark「${String(mark)}」不是合法值（${MAP_MARKS.join('／')}）`);
+      }
+    });
+    if (room.stair !== undefined && !MAP_STAIR_DIRECTIONS.includes(room.stair)) {
+      errors.push(`${where}：房間「${room.id}」的 stair「${String(room.stair)}」不是合法值（↑／↓）`);
+    }
+    // anchor 只是圖示對齊點，但必須真的落在這個房間裡——否則符號會被畫到別的房間或圖外。
+    if (room.anchor !== undefined && !room.cells.includes(room.anchor)) {
+      errors.push(`${where}：房間「${room.id}」的 anchor (${room.anchor}) 不屬於該房間的格`);
+    }
+
     // §98：互斥的 1×1 功能房間，且不得是內容生成位置。
     const functions = functionsOf(room);
     if (functions.length > 1) {
@@ -162,6 +182,11 @@ const validateFloor = (floor, layoutName, errors) => {
     }
     if (!from.cells.includes(connection.fromCell)) errors.push(`${where}：連線端點 (${connection.fromCell}) 不屬於「${connection.from}」`);
     if (!to.cells.includes(connection.toCell)) errors.push(`${where}：連線端點 (${connection.toCell}) 不屬於「${connection.to}」`);
+    if (!MAP_CONNECTION_TYPES.includes(connection.type)) {
+      errors.push(
+        `${where}：連線 ${connection.from}→${connection.to} 的 type「${String(connection.type)}」不是合法值（open／door）`,
+      );
+    }
     if (!areAdjacent(connection.fromCell, connection.toCell)) {
       errors.push(`${where}：連線 ${connection.from}→${connection.to} 的兩端 (${connection.fromCell})(${connection.toCell}) 並非正交相鄰`);
     }
