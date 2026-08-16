@@ -16,6 +16,7 @@ import { combatModuleContract } from '../../modules/combat/public';
 import { teamModuleContract } from '../../modules/team/public';
 
 import {
+  GAME_COMMAND_ENTRY,
   GAME_COMMAND_OWNER,
   INTERNAL_COMMAND_OWNER,
   type GameCommandType,
@@ -24,11 +25,14 @@ import {
 import {
   EXECUTION_ORDER_MANIFEST,
   REGISTERED_WORKFLOWS,
+  UNAVAILABLE_CAPABILITIES,
   validateManifest,
   type ExecutionOrderManifest,
   type ManifestDiagnostic,
 } from './manifest';
 import { SLICE_OWNER, isGameSliceName, type GameJobType } from './state';
+// Router 的**實際** dispatch table：宣告表不能當成 Handler 存在的證據（見下方 5b）。
+import { IMPLEMENTED_ROUTES } from './router';
 
 // ──────────────────────────────────────────────────────────────────────────
 // 已實作模組
@@ -125,6 +129,55 @@ export function validateRegistry(
     }
   }
   out.push(...validateManifest(manifest, [...jobOwners.keys()] as GameJobType[]));
+
+  // 5b) **宣告 vs 實作**交叉驗證（複審 R15 P1-4）。
+  //
+  // 這是本函式先前最大的盲點：它只比對 ModuleContract、Owner 表與 Manifest 三份**宣告**彼此是否一致，
+  // 而真正的 Handler 表在 router.ts。三份宣告可以完美自洽，Router 卻一個 Handler 都沒有——啟動驗證
+  // 全綠，玩家送出命令才拋錯。現在改為直接比對 Router 實際的 dispatch table。
+  //
+  // 尚未閉合的能力必須**明示**列在 UNAVAILABLE_CAPABILITIES；那份清單只能變短，移除後若仍缺 Handler，
+  // 這裡就會失敗。
+  const gaps = UNAVAILABLE_CAPABILITIES;
+  for (const commandType of Object.keys(GAME_COMMAND_ENTRY)) {
+    if (IMPLEMENTED_ROUTES.gameCommands.has(commandType)) continue;
+    if (commandType in gaps.gameCommands) continue;
+    out.push({
+      code: 'registry.gameCommand.noHandler',
+      detail: `Game Command "${commandType}" 已宣告入口，但 Router 沒有對應 dispatch，且未列入 UNAVAILABLE_CAPABILITIES`,
+    });
+  }
+  for (const commandType of Object.keys(INTERNAL_COMMAND_OWNER)) {
+    if (IMPLEMENTED_ROUTES.internalCommands.has(commandType)) continue;
+    if (commandType in gaps.internalCommands) continue;
+    out.push({
+      code: 'registry.internalCommand.noHandler',
+      detail: `Internal Command "${commandType}" 已宣告由模組接收，但 Router 沒有對應 dispatch，且未列入 UNAVAILABLE_CAPABILITIES`,
+    });
+  }
+  for (const jobType of jobOwners.keys()) {
+    if (IMPLEMENTED_ROUTES.jobs.has(jobType)) continue;
+    if (jobType in gaps.jobs) continue;
+    out.push({
+      code: 'registry.job.noHandler',
+      detail: `Job type "${jobType}" 已宣告由模組處理，但 Router 沒有對應 dispatch，且未列入 UNAVAILABLE_CAPABILITIES`,
+    });
+  }
+  // 清單只能變短：列了卻根本沒有這條路由，代表清單過期。
+  for (const [kind, owners] of [
+    ['gameCommands', Object.keys(GAME_COMMAND_ENTRY)],
+    ['internalCommands', Object.keys(INTERNAL_COMMAND_OWNER)],
+    ['jobs', [...jobOwners.keys()]],
+  ] as const) {
+    for (const declared of Object.keys(gaps[kind])) {
+      if (!(owners as readonly string[]).includes(declared)) {
+        out.push({
+          code: 'registry.capability.unknownGap',
+          detail: `UNAVAILABLE_CAPABILITIES.${kind} 列出的 "${declared}" 不是已宣告的路由`,
+        });
+      }
+    }
+  }
 
   // 6) Manifest 的每筆**模組**訂閱都必須對應到該模組真的註冊過的 subscriptionHandlerId。Workflow 訂閱者
   //    不是模組（其註冊與 startsFrom 由 validateManifest 檢查），故在此模組交叉驗證中跳過。

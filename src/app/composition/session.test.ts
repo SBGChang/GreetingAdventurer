@@ -85,7 +85,7 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
       const result = runGameCommand(s0, openRedDoor, assembler);
       assert(!result.accepted, '門不連接目前房間應被拒絕');
       if (result.accepted) return;
-      assert(result.rejection.sourceModule === 'dungeon', '拒絕應來自 dungeon');
+      assert(result.rejection.source === 'dungeon', '拒絕應來自 dungeon');
       assert(
         requireInstance(result.state.map, FIXTURE.mapId).spatialRuntime.doorStates[FIXTURE.redDoorLink]!
           .state === 'closed',

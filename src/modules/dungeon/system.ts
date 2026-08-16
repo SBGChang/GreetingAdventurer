@@ -223,7 +223,7 @@ function reject(
 ): DungeonHandlerResult {
   return {
     ok: false,
-    rejection: { code, sourceModule: DUNGEON_MODULE_ID, ...(details ? { details } : {}) },
+    rejection: { code, source: DUNGEON_MODULE_ID, ...(details ? { details } : {}) },
   };
 }
 

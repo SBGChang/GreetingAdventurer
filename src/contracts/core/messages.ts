@@ -36,9 +36,16 @@ export type TaggedMessage<TType extends string, TPayload> = Readonly<{ type: TTy
 // 任何可被 Router 分派的訊息的結構性下界。
 export type AnyTaggedMessage = Readonly<{ type: string }>;
 
+// 拒絕的來源可能是三種之一：擁有 Slice 的模組、組合層的 Workflow、或 Kernel 自己（例如 Job 未到期）。
+// 原本只宣告 `sourceModule: ModuleId`，於是 Workflow 與 kernel 都得 `as unknown as ModuleId` 硬轉——
+// 型別上不可信，UI 與日誌也無法安全區分是誰拒的（複審 R15 P1-3）。
+export const KERNEL_REJECTION_SOURCE = 'kernel' as const;
+export type KernelSourceId = typeof KERNEL_REJECTION_SOURCE;
+export type RejectionSourceId = MessageSourceId | KernelSourceId;
+
 export type CommandRejection = Readonly<{
   code: string;
-  sourceModule: ModuleId;
+  source: RejectionSourceId;
   details?: Readonly<Record<string, string | number | boolean>>;
 }>;
 

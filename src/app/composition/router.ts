@@ -37,6 +37,8 @@ import * as combat from '../../modules/combat/public';
 import * as team from '../../modules/team/public';
 
 import type { ProgressionDefinitionReader } from '../../contracts/progression';
+import { KERNEL_REJECTION_SOURCE } from '../../contracts/core';
+import { UNAVAILABLE_CAPABILITIES, FEATURE_NOT_AVAILABLE } from './manifest';
 import type { ConfigureWeaponSet } from '../../contracts/inventory';
 import {
   validateWeaponSetSkills,
@@ -309,7 +311,7 @@ const WORKFLOW_GAME_COMMAND_HANDLERS: Readonly<Partial<Record<GameCommandType, R
         accepted: false,
         rejection: {
           code: rejection.code,
-          sourceModule: WEAPON_SET_CONFIGURATION_WORKFLOW as unknown as ModuleId,
+          source: WEAPON_SET_CONFIGURATION_WORKFLOW,
           details: rejection.details,
         },
       };
@@ -327,9 +329,17 @@ const WORKFLOW_ENTRY_SET: ReadonlySet<GameCommandType> = new Set(
 
 // 契約宣告由模組接收、但 Wave B 尚未實作的 Game Command（對照 GAME_COMMAND_OWNER，即扣掉
 // Workflow 入口後仍缺 Handler 者）。與 PENDING_INTERNAL_COMMANDS 同理：明確清單，不靜默成功。
+// 兩種入口都要掃：模組入口缺 Handler、Workflow 入口缺 Workflow dispatch。原本只掃 GAME_COMMAND_OWNER
+// （即扣掉 Workflow 入口者），所以 `gatherDungeonNode` 這種「宣告 Workflow 入口但沒有 Workflow」
+// 根本不會出現在清單裡（複審 R15 P1-4）。
 export const PENDING_GAME_COMMANDS: readonly GameCommandType[] = (
-  Object.keys(GAME_COMMAND_OWNER) as GameCommandType[]
-).filter((type) => GAME_COMMAND_HANDLERS[type] === undefined);
+  Object.keys(GAME_COMMAND_ENTRY) as GameCommandType[]
+).filter((type) =>
+  GAME_COMMAND_ENTRY[type] === WORKFLOW_ENTRY
+    ? WORKFLOW_GAME_COMMAND_HANDLERS[type] === undefined
+    : GAME_COMMAND_HANDLERS[type] === undefined,
+);
+
 
 // ──────────────────────────────────────────────────────────────────────────
 // 授權：玩家命令只能作用在 actorTeamId 擁有的資料
@@ -357,7 +367,7 @@ function authorizeGameCommand(
   const owner = (GAME_COMMAND_ENTRY[command.type] ?? ('composition' as ModuleId)) as ModuleId;
   const deny = (reason: string): CommandRejection => ({
     code: `authorization.${command.type}.${reason}`,
-    sourceModule: owner,
+    source: owner,
     details: { actorTeamId: String(actorTeamId) },
   });
 
@@ -408,12 +418,27 @@ export function routeGameCommand(
   if (entry === undefined) {
     throw new Error(`routeGameCommand: "${type}" 不在 GAME_COMMAND_ENTRY（未註冊的 Game Command）`);
   }
+  // 已宣告但尚未閉合的能力：回傳**型別化拒絕**，不是拋例外。UI 因此能顯示可呈現的結果，而不是撞上
+  // 執行期例外；同時也不會被誤當成成功 no-op（複審 R15 P1-4）。
+  const capabilityGap = UNAVAILABLE_CAPABILITIES.gameCommands[type];
+  if (capabilityGap !== undefined) {
+    return () => ({
+      accepted: false,
+      rejection: {
+        code: FEATURE_NOT_AVAILABLE,
+        source: KERNEL_REJECTION_SOURCE,
+        details: { commandType: type, reason: capabilityGap },
+      },
+    });
+  }
   if (WORKFLOW_ENTRY_SET.has(type)) {
     const workflowDispatch = WORKFLOW_GAME_COMMAND_HANDLERS[type];
     if (workflowDispatch === undefined) {
+      // 走到這裡代表既沒有 Workflow、也沒有列入 UNAVAILABLE_CAPABILITIES——啟動驗證本該先擋下
+      // （manifest.workflow.missingForCommandEntry）。
       throw new Error(
-        `routeGameCommand: "${type}" 的入口是 Workflow，但該 Workflow 尚未實作` +
-          `（見 router.ts 的 WORKFLOW_GAME_COMMAND_HANDLERS）`,
+        `routeGameCommand: "${type}" 的入口是 Workflow，但該 Workflow 尚未實作，` +
+          `且未列入 UNAVAILABLE_CAPABILITIES（啟動驗證應已擋下）`,
       );
     }
     return (ctx) => {
@@ -429,9 +454,10 @@ export function routeGameCommand(
   }
   const dispatch = GAME_COMMAND_HANDLERS[type];
   if (dispatch === undefined) {
+    // 同上：未列入 UNAVAILABLE_CAPABILITIES 卻缺 Handler，是註冊錯誤而非執行期狀況。
     throw new Error(
-      `routeGameCommand: "${type}" 由 "${entry}" 宣告接收，但 Wave B 未實作該 Handler` +
-        `（見 router.ts 的 PENDING_GAME_COMMANDS）`,
+      `routeGameCommand: "${type}" 由 "${entry}" 宣告接收，但未實作 Handler，` +
+        `且未列入 UNAVAILABLE_CAPABILITIES（啟動驗證應已擋下）`,
     );
   }
   return (ctx) => {
@@ -612,3 +638,14 @@ export function createTransactionConfig(
     },
   };
 }
+
+// 供 Registry 交叉驗證用：Router **實際**有 dispatch 的路由。宣告表（ModuleContract）不能當成
+// Handler 存在的證據——那正是「啟動驗證全綠、玩家走進去才拋錯」的根因（複審 R15 P1-4）。
+export const IMPLEMENTED_ROUTES = {
+  gameCommands: new Set<string>([
+    ...Object.keys(GAME_COMMAND_HANDLERS),
+    ...Object.keys(WORKFLOW_GAME_COMMAND_HANDLERS),
+  ]),
+  internalCommands: new Set<string>(Object.keys(INTERNAL_COMMAND_HANDLERS)),
+  jobs: new Set<string>(Object.keys(JOB_HANDLERS)),
+} as const;

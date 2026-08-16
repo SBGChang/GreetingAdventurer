@@ -199,7 +199,7 @@ function reject(
   code: string,
   details?: Readonly<Record<string, string | number | boolean>>,
 ): TeamHandlerResult {
-  return { ok: false, rejection: { code, sourceModule: TEAM_MODULE_ID, ...(details ? { details } : {}) } };
+  return { ok: false, rejection: { code, source: TEAM_MODULE_ID, ...(details ? { details } : {}) } };
 }
 
 function accept(

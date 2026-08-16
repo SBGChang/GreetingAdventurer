@@ -160,7 +160,7 @@ function reject(
   code: string,
   details?: Readonly<Record<string, string | number | boolean>>,
 ): MapHandlerResult {
-  return { ok: false, rejection: { code, sourceModule: MAP_MODULE_ID, details } };
+  return { ok: false, rejection: { code, source: MAP_MODULE_ID, details } };
 }
 
 // 不帶 expectedRevision：Pending 檢查的存活判定是 `refresh.pendingCheckScheduledFor`（見

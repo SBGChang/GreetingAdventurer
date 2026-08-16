@@ -60,6 +60,7 @@ import type {
   TeamId,
   TeamPlanId,
 } from '../../contracts/core';
+import { KERNEL_REJECTION_SOURCE } from '../../contracts/core';
 import { deterministicRng, nextRuntimeId, runTransaction, type SchedulingEffects } from '../../kernel';
 
 import type { CharacterIdAllocator } from '../../modules/character/public';
@@ -323,7 +324,7 @@ export function runDueJob(
       state,
       rejection: {
         code: 'engine/job-not-scheduled',
-        sourceModule: 'core' as ModuleId,
+        source: KERNEL_REJECTION_SOURCE,
         details: { jobId: String(job.jobId) },
       },
     };
@@ -336,7 +337,7 @@ export function runDueJob(
       state,
       rejection: {
         code: 'engine/job-not-due',
-        sourceModule: 'core' as ModuleId,
+        source: KERNEL_REJECTION_SOURCE,
         details: { jobId: String(job.jobId), dueDay: Number(authoritative.dueDay), worldDay: Number(state.core.worldDay) },
       },
     };

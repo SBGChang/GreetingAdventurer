@@ -74,7 +74,7 @@ function reject(
   code: string,
   details?: Readonly<Record<string, string | number | boolean>>,
 ): InventoryHandlerResult {
-  return { ok: false, rejection: { code, sourceModule: INVENTORY_MODULE_ID, details } };
+  return { ok: false, rejection: { code, source: INVENTORY_MODULE_ID, details } };
 }
 
 function accept(

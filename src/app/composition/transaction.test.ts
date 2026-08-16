@@ -42,6 +42,8 @@ import {
 } from './router';
 import { createEmptyGameState, type GameScheduledJob, type GameState } from './state';
 import type { GameCommand } from './messages';
+import { FEATURE_NOT_AVAILABLE, UNAVAILABLE_CAPABILITIES } from './manifest';
+import { validateRegistry } from './registry';
 import { createTeamState } from '../../modules/team/public';
 
 function assert(condition: boolean, message: string): void {
@@ -196,7 +198,7 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
       assert(!outcome.accepted, 'Map Version 不符應被拒絕');
       if (outcome.accepted) return;
       assert(outcome.state === s0, '拒絕時必須原封回傳 baseState');
-      assert(outcome.rejection.sourceModule === 'dungeon', '拒絕應標明來源模組');
+      assert(outcome.rejection.source === 'dungeon', '拒絕應標明來源模組');
       assert(
         outcome.rejection.code === 'dungeon.consumeDungeonGatheringAction.preconditionFailed',
         `拒絕碼（實得 ${outcome.rejection.code}）`,
@@ -306,35 +308,55 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
     },
   },
   {
-    name: '入口為 Workflow 的 Game Command（gatherDungeonNode）不直接路由，明確報錯',
+    // R15 P1-4：尚未閉合的能力改回**型別化拒絕**，不再拋例外——UI 要拿到可呈現的結果。
+    name: '尚未閉合的 Workflow 入口（gatherDungeonNode）回傳 feature-not-available，不拋例外',
     run: () => {
-      let message = '';
-      try {
-        routeGameCommand(
-          envelope({ type: 'gatherDungeonNode', nodeId: FIXTURE.gatherNodePlayer } as GameCommand, FIXTURE.teamId),
-          contexts,
-        );
-      } catch (e) {
-        message = e instanceof Error ? e.message : String(e);
-      }
-      assert(message.includes('Workflow'), `應指出入口是 Workflow（實得 "${message}"）`);
+      const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
+      const root = routeGameCommand(
+        envelope({ type: 'gatherDungeonNode', nodeId: FIXTURE.gatherNodePlayer } as GameCommand, FIXTURE.teamId),
+        contexts,
+      );
+      const outcome = runTransaction(config, baseState(), TX, root, null);
+      assert(!outcome.accepted, '未閉合的能力應被拒絕，而不是成功');
+      if (outcome.accepted) return;
+      assert(
+        outcome.rejection.code === FEATURE_NOT_AVAILABLE,
+        `拒絕碼應為 ${FEATURE_NOT_AVAILABLE}（實得 "${outcome.rejection.code}"）`,
+      );
+      assert(outcome.rejection.source === 'kernel', '來源應標明為 kernel');
+      assert(
+        typeof outcome.rejection.details?.reason === 'string',
+        '拒絕應附上「為什麼還不能用」的理由',
+      );
     },
   },
   {
-    name: '契約宣告但未實作的 Game Command 會明確報錯',
+    name: '契約宣告但未實作的 Game Command 同樣回傳 feature-not-available',
     run: () => {
       assert(PENDING_GAME_COMMANDS.includes('unequipItem'), 'unequipItem 應在未實作清單');
-      let message = '';
-      try {
-        // unequipItem 由 inventory 宣告接收，但 Wave B 沒有寫 Handler。
-        routeGameCommand(
-          envelope({ type: 'unequipItem' } as unknown as GameCommand, PLAYER_TEAM),
-          contexts,
-        );
-      } catch (e) {
-        message = e instanceof Error ? e.message : String(e);
+      const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
+      const root = routeGameCommand(
+        envelope({ type: 'unequipItem' } as unknown as GameCommand, PLAYER_TEAM),
+        contexts,
+      );
+      const outcome = runTransaction(config, baseState(), TX, root, null);
+      assert(!outcome.accepted, '未實作的命令應被拒絕');
+      if (outcome.accepted) return;
+      assert(outcome.rejection.code === FEATURE_NOT_AVAILABLE, '應回傳 feature-not-available');
+    },
+  },
+  {
+    // 這條是 R15 P1-4 的核心：宣告表自洽 ≠ Router 真的有 Handler。
+    name: '啟動驗證會比對 Router 實際 dispatch，未實作且未列入清單者即報錯',
+    run: () => {
+      // 目前所有缺口都已明示列入 UNAVAILABLE_CAPABILITIES，因此驗證應無診斷。
+      assert(validateRegistry().length === 0, '目前所有未閉合路由都應已明示列入清單');
+      // 每一項缺口都必須附理由（不是空字串）。
+      for (const kind of ['gameCommands', 'internalCommands', 'jobs'] as const) {
+        for (const [route, reason] of Object.entries(UNAVAILABLE_CAPABILITIES[kind])) {
+          assert(reason.trim().length > 0, `${kind}.${route} 缺少「為什麼還不能用」的理由`);
+        }
       }
-      assert(message.includes('未實作'), `應指出 Handler 未實作（實得 "${message}"）`);
     },
   },
 

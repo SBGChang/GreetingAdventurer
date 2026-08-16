@@ -12,11 +12,11 @@
 // Workflow 不擁有 Slice：驗證通過後仍由 Inventory Handler 寫入；驗證失敗則整筆拒絕（交易回滾，
 // Loadout 不變）。
 
-import type { CharacterId, SkillDefinitionId } from '../../contracts/core';
+import type { CharacterId, SkillDefinitionId, WorkflowId } from '../../contracts/core';
 import type { CombatSkillDefinitionView } from '../../contracts/combat';
 import type { ConfigureWeaponSet } from '../../contracts/inventory';
 
-export const WEAPON_SET_CONFIGURATION_WORKFLOW = 'workflow:weapon-set-configuration';
+export const WEAPON_SET_CONFIGURATION_WORKFLOW = 'workflow:weapon-set-configuration' as WorkflowId;
 
 // 驗證所需的跨模組讀取面。由組合層注入，Workflow 本身維持純函式。
 export type WeaponSetValidationPorts = Readonly<{

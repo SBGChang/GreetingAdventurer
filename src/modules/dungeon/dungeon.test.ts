@@ -361,7 +361,7 @@ const cases: readonly Case[] = [
           r.rejection.code === 'dungeon.consumeDungeonGatheringAction.preconditionFailed',
           `rejection code (got ${r.rejection.code})`,
         );
-        assert(r.rejection.sourceModule === 'dungeon', 'rejection names the source module');
+        assert(r.rejection.source === 'dungeon', 'rejection names the source module');
       }
     },
   },

@@ -45,6 +45,73 @@ export const JOB_TYPE_ORDER_BY_PHASE: Readonly<Record<JobPhase, readonly GameJob
 
 // WorkflowId 用 core 的品牌型別（`workflow:${K}`）——不再本地重宣告一個不相容的型別。
 export const TRAVEL_EVENT_WORKFLOW = 'workflow:travel-event' as WorkflowId;
+// 由 Game Command 啟動的 Workflow（身分宣告在其實作檔，此處引用以維持單一真相）。
+import { WEAPON_SET_CONFIGURATION_WORKFLOW } from '../workflows/weapon-set-configuration';
+import { GAME_COMMAND_ENTRY, WORKFLOW_ENTRY } from './messages';
+
+// ──────────────────────────────────────────────────────────────────────────
+// Feature Capability：宣告了路由但**尚未閉合**的公開能力（複審 R15 P1-4）
+// ──────────────────────────────────────────────────────────────────────────
+//
+// 契約宣告 ≠ 有實作。這份清單把「已宣告但還不能用」變成**明示**狀態，取代兩種壞行為：
+//   1. 啟動驗證全綠、玩家送出後才 throw。
+//   2. 靜默成功 no-op。
+// 列在此處的命令：啟動驗證不會抱怨它缺 Handler／Workflow，但 Router 一律回傳型別化的
+// `engine/feature-not-available` 拒絕（不是例外）。UI 應據此隱藏或停用對應功能頁。
+//
+// **這份清單只能變短。** 實作完成就把該項移除；移除後若仍缺 Handler，啟動驗證會立刻失敗。
+// 每一項都必須附**理由**。理由欄位不是註解裝飾：它是「為什麼還不能用」的唯一紀錄，也讓下一個人知道
+// 移除它需要先完成什麼。
+export type CapabilityGap = Readonly<Record<string, string>>;
+
+export const UNAVAILABLE_CAPABILITIES: Readonly<{
+  gameCommands: CapabilityGap;
+  internalCommands: CapabilityGap;
+  jobs: CapabilityGap;
+}> = {
+  gameCommands: {
+    gatherDungeonNode: '入口宣告為 Workflow，但 dungeon gathering workflow 尚未實作',
+    unequipItem: 'Wave B 未實作 Handler',
+    useItem: 'Wave B 未實作 Handler',
+    splitStack: 'Wave B 未實作 Handler',
+    transferItemForEncumbrance: 'Wave B 未實作 Handler（超載處理四命令）',
+    storeItemForEncumbrance: 'Wave B 未實作 Handler（超載處理四命令）',
+    abandonItemForEncumbrance: 'Wave B 未實作 Handler（超載處理四命令）',
+    reassignQuestCargoCarrierForEncumbrance: 'Wave B 未實作 Handler（超載處理四命令）',
+    learnFromBook: 'Wave B 未實作 Handler',
+    startTeaching: 'Wave B 未實作 Handler',
+    chooseCityFreeAction: 'Wave B 未實作 Handler',
+    dismissMember: 'Wave B 未實作 Handler',
+    // 注意：這一項**有** Router dispatch，但 Handler 明確仍是 no-op。「有 dispatch」不等於「已完成」，
+    // 所以本清單以人工維護的理由為準，不從 dispatch 存在與否反推（複審 R15 P1-6）。
+    commandAlly: 'Router 有 dispatch，但 Handler 明確仍是 no-op，尚未實作指揮隊友',
+  },
+  internalCommands: {
+    ApplyQuestItemLifecycle: 'inventory 宣告接收，Wave B 未實作',
+    ReleaseExpiredQuestCargo: 'inventory 宣告接收，Wave B 未實作',
+    ConsumeBookForLearning: 'inventory 宣告接收，Wave B 未實作',
+    TransformCraftingItems: 'inventory 宣告接收，Wave B 未實作；消耗端須比對保留的 craftingAttemptId',
+    ConsumeCuisineIngredients: 'inventory 宣告接收，Wave B 未實作',
+    ConsumeCombatSequenceRetrySupply: 'inventory 宣告接收，Wave B 未實作',
+    StartTimedCityAction: 'team 宣告接收，Wave B 未實作',
+    StartChildStudyPlan: 'team 宣告接收，Wave B 未實作',
+    CreateNpcTeam: 'team 宣告接收，Wave B 未實作',
+    OpenPlayerTravelInteraction: 'team 宣告接收，Wave B 未實作（旅行事件 Pending 互動分支）',
+    MarkPlayerTravelInteractionAwaitingCombat: 'team 宣告接收，Wave B 未實作',
+    CompletePlayerTravelInteraction: 'team 宣告接收，Wave B 未實作',
+    AssignNpcMemberFreeAction: 'team 宣告接收，Wave B 未實作',
+    RecordTeamWorkSettlementValue: 'team 宣告接收，Wave B 未實作',
+    AttachQuestTemporaryMember: 'team 宣告接收，Wave B 未實作',
+  },
+  jobs: {
+    freeActionDue: 'team 宣告處理，Wave B 未實作',
+    nonPlayerMemberCityFreeDayTick: 'team 宣告處理，Wave B 未實作',
+  },
+};
+
+export const FEATURE_NOT_AVAILABLE = 'engine/feature-not-available';
+
+export { WEAPON_SET_CONFIGURATION_WORKFLOW };
 
 // 12_engine_runtime.md §「WorkflowDefinition」：startsFrom 是四種正式訊息中已註冊的 Game Command /
 // Scheduled Job / Domain Event（不能是任意 DTO）；steps 每步是一個有明確模組 handler 的 Internal Command，
@@ -61,17 +128,24 @@ export type WorkflowStepDefinition = Readonly<{
   onRejected: WorkflowTransition;
 }>;
 
+// Workflow 的啟動來源分三種。原本 `startsFrom` 是三種字串的裸聯集，`validateManifest()` 只能假設
+// 「所有 Workflow 都由 Domain Event 啟動」並要求它出現在事件訂閱表——由 Game Command 或 Job 啟動的
+// Workflow 根本表達不出來（複審 R15 P1-3）。改成判別聯集後，驗證才能依種類分流。
+export type WorkflowStart =
+  | Readonly<{ kind: 'domainEvent'; eventType: GameDomainEventType }>
+  | Readonly<{ kind: 'gameCommand'; commandType: GameCommandType }>
+  | Readonly<{ kind: 'job'; jobType: GameJobType }>;
+
 export type WorkflowDefinition = Readonly<{
   workflowId: WorkflowId;
-  // 啟動訊息；若為 Domain Event，必須出現在 EVENT_SUBSCRIPTIONS_BY_TYPE 中該 workflowId 的訂閱裡（且只此一種）。
-  startsFrom: GameCommandType | GameJobType | GameDomainEventType;
+  startsFrom: WorkflowStart;
   steps: readonly WorkflowStepDefinition[];
 }>;
 
 export const REGISTERED_WORKFLOWS: readonly WorkflowDefinition[] = [
   {
     workflowId: TRAVEL_EVENT_WORKFLOW,
-    startsFrom: 'TravelSegmentReached',
+    startsFrom: { kind: 'domainEvent', eventType: 'TravelSegmentReached' },
     // 第一版：抵達一段 → 送一個 required Internal Command 推進，之後結束。接上 event-weight resolver 後，
     // 命中事件會改走 OpenPlayerTravelInteraction 分支（屆時擴充為多步）。onRejected 也結束（plan 已變等
     // 情況 no-op，不擋整條旅行）。
@@ -83,6 +157,13 @@ export const REGISTERED_WORKFLOWS: readonly WorkflowDefinition[] = [
         onRejected: { kind: 'complete' },
       },
     ],
+  },
+  {
+    workflowId: WEAPON_SET_CONFIGURATION_WORKFLOW,
+    startsFrom: { kind: 'gameCommand', commandType: 'configureWeaponSet' },
+    // 無 Internal Command 步驟：本 Workflow 的職責是**跨模組驗證**（技能 Definition 存在、角色已學會、
+    // 啟動手可用），通過後直接委派擁有 Slice 的 Inventory Handler 寫入。驗證失敗即拒絕整筆交易。
+    steps: [],
   },
 ];
 
@@ -251,24 +332,74 @@ export function validateManifest(
     }
   }
 
-  // 每個註冊 Workflow：startsFrom 必須有對應訂閱（否則永不啟動），且**只能**訂閱 startsFrom 一種事件——
-  // Workflow 由單一 startsFrom 啟動，對其他事件的反應是 steps（Internal Command），不是額外事件訂閱。
+  // 每個註冊 Workflow 依 startsFrom **種類**分流驗證。原本一律當成事件啟動，Game Command／Job 啟動的
+  // Workflow 會被誤判為「未訂閱」（複審 R15 P1-3）。
   for (const w of REGISTERED_WORKFLOWS) {
     const events = workflowSubscribedEvents.get(String(w.workflowId));
-    if (events === undefined || !events.has(String(w.startsFrom))) {
-      out.push({
-        code: 'manifest.workflow.startsFromNotSubscribed',
-        detail: `Workflow "${String(w.workflowId)}" 宣告 startsFrom "${w.startsFrom}"，但未在 eventSubscriptionsByType 找到對應訂閱`,
-      });
-    }
-    for (const ev of events ?? []) {
-      if (ev !== String(w.startsFrom)) {
+
+    if (w.startsFrom.kind === 'domainEvent') {
+      // 事件啟動：必須有對應訂閱（否則永不啟動），且**只能**訂閱 startsFrom 一種事件——
+      // 對其他事件的反應是 steps（Internal Command），不是額外事件訂閱。
+      const eventType = String(w.startsFrom.eventType);
+      if (events === undefined || !events.has(eventType)) {
         out.push({
-          code: 'manifest.workflow.extraSubscription',
-          detail: `Workflow "${String(w.workflowId)}" 額外訂閱了非 startsFrom 的事件 "${ev}"（startsFrom="${String(w.startsFrom)}"）；跨事件反應應為 steps 而非訂閱`,
+          code: 'manifest.workflow.startsFromNotSubscribed',
+          detail: `Workflow "${String(w.workflowId)}" 宣告由事件 "${eventType}" 啟動，但未在 eventSubscriptionsByType 找到對應訂閱`,
         });
       }
+      for (const ev of events ?? []) {
+        if (ev !== eventType) {
+          out.push({
+            code: 'manifest.workflow.extraSubscription',
+            detail: `Workflow "${String(w.workflowId)}" 額外訂閱了非 startsFrom 的事件 "${ev}"（startsFrom="${eventType}"）；跨事件反應應為 steps 而非訂閱`,
+          });
+        }
+      }
+      continue;
     }
+
+    // 非事件啟動的 Workflow 不得掛事件訂閱——那代表它有第二個入口。
+    if (events !== undefined && events.size > 0) {
+      out.push({
+        code: 'manifest.workflow.unexpectedSubscription',
+        detail: `Workflow "${String(w.workflowId)}" 由 ${w.startsFrom.kind} 啟動，卻另外訂閱了事件 ${[...events].join('、')}`,
+      });
+    }
+
+    if (w.startsFrom.kind === 'gameCommand') {
+      // Game Command 啟動：GAME_COMMAND_ENTRY 必須把該命令標為 Workflow 入口，否則入口宣告與 Workflow
+      // 註冊互相矛盾（一個命令只能有一個入口，§5.1）。
+      const commandType = w.startsFrom.commandType;
+      if (GAME_COMMAND_ENTRY[commandType] !== WORKFLOW_ENTRY) {
+        out.push({
+          code: 'manifest.workflow.commandEntryMismatch',
+          detail: `Workflow "${String(w.workflowId)}" 宣告由 Game Command "${commandType}" 啟動，但 GAME_COMMAND_ENTRY 沒有把它標為 Workflow 入口`,
+        });
+      }
+    } else if (!(registeredJobTypes as readonly string[]).includes(w.startsFrom.jobType)) {
+      out.push({
+        code: 'manifest.workflow.unknownJobType',
+        detail: `Workflow "${String(w.workflowId)}" 宣告由 Job "${w.startsFrom.jobType}" 啟動，但該 Job type 未註冊`,
+      });
+    }
+  }
+
+  // 反向：每一個標為 Workflow 入口的 Game Command 都必須有註冊的 Workflow。原本只檢查 Workflow → 入口，
+  // 沒檢查入口 → Workflow，所以 `gatherDungeonNode` 這種「宣告了 Workflow 入口但沒有 Workflow」的狀態
+  // 完全不會被啟動驗證發現，要等玩家送出才拋錯（複審 R15 P1-3／P1-4）。
+  const workflowStartCommands = new Set<string>(
+    REGISTERED_WORKFLOWS.filter((w) => w.startsFrom.kind === 'gameCommand').map((w) =>
+      String((w.startsFrom as Extract<WorkflowStart, { kind: 'gameCommand' }>).commandType),
+    ),
+  );
+  for (const [commandType, entry] of Object.entries(GAME_COMMAND_ENTRY)) {
+    if (entry !== WORKFLOW_ENTRY) continue;
+    if (workflowStartCommands.has(commandType)) continue;
+    if (commandType in UNAVAILABLE_CAPABILITIES.gameCommands) continue;
+    out.push({
+      code: 'manifest.workflow.missingForCommandEntry',
+      detail: `Game Command "${commandType}" 的入口宣告為 Workflow，但 REGISTERED_WORKFLOWS 沒有對應的 Workflow，且它不在 UNAVAILABLE_CAPABILITIES`,
+    });
   }
 
   return out;
