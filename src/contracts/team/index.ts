@@ -80,6 +80,9 @@ export interface TeamDefinitionReader {
 // TeamPlanRuleDefinition（doc 於 Reader 引用但未定義；此處推導，見交接報告）。
 export type TeamPlanRuleDefinition = DefinitionHeader & {
   kind: TeamPlanKind;
+  // 該計畫佔用的天數。原本寫死在 Handler（家中年度休息 365、城內設施休息 1），
+  // 而 Handler 自己的註解就標著「[DATA] 休息天數屬 TeamPlanRule」。365 是遊戲節奏，不是結構。
+  durationDays: number;
 };
 
 // ── 玩家／NPC 旅行規則 ──────────────────────────────────────────────────
@@ -121,7 +124,8 @@ export type RecentActivityRuleDefinition = DefinitionHeader & {
 };
 
 export type MemberRetentionRuleDefinition = DefinitionHeader & {
-  activationDaysAfterJoin: 60;
+  // 型別原本是字面值 `60`——那等於把可調的量鎖進型別，換一份 Pack 也改不動。值屬於資料，域屬於型別。
+  activationDaysAfterJoin: number;
   expectedNetSettlementResolverId: ResolverId;
   departureChanceResolverId: ResolverId;
   excludedExpenseKinds: ['equipmentPurchase'];

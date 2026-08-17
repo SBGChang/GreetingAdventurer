@@ -32,7 +32,10 @@ import type {
   InternalCommandDraft,
   ScheduledJobDraft,
   AnyScheduledJob,
+  MemberRetentionRuleId,
+  TeamPlanRuleId,
 } from '../../contracts/core';
+import { MAX_FORMAL_MEMBERS, GRID_MIN, GRID_MAX } from '../../contracts/core';
 import type {
   TeamDefinitionReader,
   // Player Command payloads
@@ -62,6 +65,7 @@ import type {
   // Support types
   TeamLocation,
   TeamPlanPayload,
+  TeamPlanKind,
   StartNpcDungeonRunPayload,
 } from '../../contracts/team';
 import type { GridCell } from '../../contracts/map';
@@ -96,11 +100,8 @@ export const TEAM_MODULE_ID = 'team' as ModuleId;
 const TEAM_OWNER_MODULE = 'team' as TeamModuleId;
 const DUNGEON_MODULE_ID = 'dungeon' as ModuleId;
 
-export const MAX_FORMAL_MEMBERS = 9;
-export const RETENTION_ACTIVATION_DAYS = 60;
-export const HOME_YEAR_REST_DAYS = 365;
-const GRID_MIN = 0;
-const GRID_MAX = 2; // 3×3 己方格：row/col ∈ [0,2]
+// MAX_FORMAL_MEMBERS / GRID_MIN / GRID_MAX 已移入 contracts/core/invariants.ts（結構不變量集中處）。
+// RETENTION_ACTIVATION_DAYS 與 HOME_YEAR_REST_DAYS 是**可調內容**，改由 Rule Definition 提供——見下方 TeamRuleReader。
 
 // ──────────────────────────────────────────────────────────────────────────
 // 注入 Port（讓 Handler 保持純函式；真實組合由 Composition 注入，測試注入決定性 stub）
@@ -162,6 +163,10 @@ export interface TeamResolverPort {
 export type TeamHandlerContext = Readonly<{
   worldDay: WorldDay;
   definitions: TeamDefinitionReader;
+  // 目前生效的規則 ID（與 DungeonContext.interactionRuleId 同一慣例：Composition 由內容供給，
+  // Handler 只負責帶入並讀取）。缺對應規則時一律 typed rejection，不得回退成寫死的天數。
+  memberRetentionRuleId: MemberRetentionRuleId;
+  teamPlanRuleIdByKind: Readonly<Partial<Record<TeamPlanKind, TeamPlanRuleId>>>;
   world: TeamWorldReader;
   ids: TeamIdAllocator;
   resolvers: TeamResolverPort;
@@ -419,8 +424,19 @@ export function handleRest(
     if (team.location.kind !== 'city') return reject('team/not-in-city');
   }
 
-  // [DATA] 休息天數屬 TeamPlanRule；此處以第一版固定值（年度家中休息 365、城內設施休息 1）。
-  const days = cmd.planKind === 'homeRest' ? HOME_YEAR_REST_DAYS : 1;
+  // 休息天數由 TeamPlanRule 提供（原本是寫死的 365 / 1）。沒有對應規則＝內容沒給，明確拒絕。
+  const planRuleId = ctx.teamPlanRuleIdByKind[cmd.planKind];
+  if (planRuleId === undefined) {
+    return reject('team/plan-rule-missing', { planKind: cmd.planKind });
+  }
+  const planRule = ctx.definitions.getTeamPlanRule(planRuleId);
+  if (planRule.kind !== cmd.planKind) {
+    return reject('team/plan-rule-kind-mismatch', {
+      planKind: cmd.planKind,
+      ruleKind: planRule.kind,
+    });
+  }
+  const days = planRule.durationDays;
   const dueDay = (ctx.worldDay + days) as WorldDay;
   const planId = ctx.ids.nextTeamPlanId();
   const plan: TeamPlan = {
@@ -720,7 +736,9 @@ export function handleBeginCityFreePeriod(
   return accept(next, settled.events, []);
 }
 
-// 留隊判定（doc §6.1）：入隊滿 60 日的非隊長正式成員，依 workNet 擲離隊骰。
+// 留隊判定（doc §6.1）：入隊滿指定日數的非隊長正式成員，依 workNet 擲離隊骰。
+// 日數由 MemberRetentionRule 提供（原本是 Handler 裡的 RETENTION_ACTIVATION_DAYS = 60，
+// 而契約的 activationDaysAfterJoin 早就存在——程式等於又抄了一份資料）。
 // 擲中者立即離隊，並在目前城市成為自己為隊長的一人 NPC Team。之後 Ledger 以新 cycle 歸零。
 function settleRetentionAndDepartures(
   state: TeamState,
@@ -734,6 +752,9 @@ function settleRetentionAndDepartures(
   let members = team.memberIds;
 
   if (retention !== undefined) {
+    const activationDays = ctx.definitions.getMemberRetentionRule(
+      ctx.memberRetentionRuleId,
+    ).activationDaysAfterJoin;
     const workNet = workNetOf(retention.currentWorkSettlement);
     const departed: CharacterId[] = [];
     // 顯式串接游標：每名成員從前一擲的 nextCursor 續抽，否則全體共用 cursor 0 → 相同結果（全走或全留）。
@@ -743,7 +764,7 @@ function settleRetentionAndDepartures(
       if (memberId === team.leaderId) continue; // 隊長不參與
       const joinedOn = retention.memberJoinedOnDay[memberId];
       if (joinedOn === undefined) continue;
-      if (ctx.worldDay - joinedOn < RETENTION_ACTIVATION_DAYS) continue; // 未滿 60 日
+      if (ctx.worldDay - joinedOn < activationDays) continue; // 未達留隊判定生效日數（由規則提供）
       const rngContext =
         ctx.rngContext !== undefined && cursor !== undefined ? { ...ctx.rngContext, cursor } : undefined;
       const roll = ctx.resolvers.resolveMemberDeparture({

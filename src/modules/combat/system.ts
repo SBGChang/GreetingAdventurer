@@ -31,9 +31,11 @@ import type {
   ModuleId,
   ModuleResult,
   ModuleOutcome,
+  CombatRuleId,
   TransactionMessageDraft,
   DeterministicRng,
 } from '../../contracts/core';
+import { SUPPORT_USE_CAP, GRID_MIN, GRID_MAX } from '../../contracts/core';
 import type {
   CombatDefinitionReader,
   CombatEncounterSource,
@@ -77,7 +79,7 @@ const CHARACTER_MODULE = 'character' as ModuleId;
 const INVENTORY_MODULE = 'inventory' as ModuleId;
 const MAP_MODULE = 'map' as ModuleId;
 
-const SUPPORT_USE_CAP = 3; // §3.2 / §8.6：同角色同支援技能每場最多記 3 次。
+// SUPPORT_USE_CAP 已移入 contracts/core/invariants.ts（§3.2 / §8.6）。
 const PRIMARY_ATTRIBUTE_IDS: readonly PrimaryAttributeId[] = [
   'muscle',
   'intelligence',
@@ -157,6 +159,10 @@ export interface CombatResolverPort {
 
 export type CombatHandlerContext = Readonly<{
   definitions: CombatDefinitionReader;
+  // 本場遭遇適用的 CombatRule。原本是 Handler 內的常數 `'combat-rule-standard'`——換一份 Content Pack
+  // 也永遠是同一套戰鬥規則。真正的來源是遭遇的 world/map 綁定，由 Composition 解析後帶入
+  // （與 DungeonContext.interactionRuleId、TeamHandlerContext.memberRetentionRuleId 同一慣例）。
+  combatRuleId: CombatRuleId;
   progression: ProgressionQuery;
   loadout: CombatLoadoutQuery;
   formation: CombatFormationQuery;
@@ -530,7 +536,7 @@ function applyOpeningCtb(
   const group = ctx.definitions.getEncounterGroup(source.encounterGroupId);
   void group;
   // combatRule 綁定於 EncounterGroup 之外；此處第一版以固定 CombatRuleId 由 reader 提供。
-  const rule = ctx.definitions.getCombatRule(COMBAT_RULE_ID);
+  const rule = ctx.definitions.getCombatRule(ctx.combatRuleId);
   const opening = ctx.definitions.getOpeningCtbRule(rule.openingCtbRuleId);
   for (const id of Object.keys(combatants) as CombatantId[]) {
     const c = combatants[id]!;
@@ -539,9 +545,6 @@ function applyOpeningCtb(
     combatants[id] = { ...c, currentCtb: ctb };
   }
 }
-
-// 第一版固定 CombatRule 入口（Composition 會以來源 world/map 綁定；此處以常數對接 reader）。
-const COMBAT_RULE_ID = 'combat-rule-standard' as Parameters<CombatDefinitionReader['getCombatRule']>[0];
 
 export function handleStartCombatEncounter(
   state: CombatState,
@@ -1224,18 +1227,17 @@ export function handleCombatRest(
   if (actor === undefined) return reject('combat/actor-not-in-encounter', { actorId: String(cmd.actorId) });
   if (actor.state === 'dead') return reject('combat/actor-dead', { actorId: String(cmd.actorId) });
 
-  const rule = ctx.definitions.getCombatRule(COMBAT_RULE_ID);
+  const rule = ctx.definitions.getCombatRule(ctx.combatRuleId);
   const delayRule = ctx.definitions.getActionDelayRule(rule.combatRestDelayRuleId);
   const attrs = attributesOf(actor, ctx);
   const delay = Math.max(delayRule.minimumDelay, delayRule.baseDelay - ctbReduction(delayRule.reductions, attrs));
 
-  // 回復少量 HP/MP（第一版固定小額；資料化細節待接）。
-  const RESTORE = 5;
+  // 回復量由 CombatRule 提供（原本是 Handler 裡的固定 5）。
   const combatants = { ...encounter.combatants };
   const acted = decrementActorStatuses({
     ...actor,
-    health: Math.min(actor.maxHealth, actor.health + RESTORE),
-    mana: actor.mana + RESTORE,
+    health: Math.min(actor.maxHealth, actor.health + rule.combatRestHealthRestore),
+    mana: actor.mana + rule.combatRestManaRestore,
     currentCtb: actor.currentCtb + delay,
     externalCtbIncreaseSinceOwnAction: 0,
     revision: bumpRevision(actor.revision),

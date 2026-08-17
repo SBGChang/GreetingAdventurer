@@ -23,6 +23,12 @@ import type { RestCommand } from '../../contracts/team';
 import { createBringUpFixture, type BringUpFixtureInput } from './bring-up-bootstrap';
 import { runGameCommand, runDueJob, type ContextAssembler } from '../../app/composition/session';
 import { unusedContext } from './session-fixture';
+import {
+  stubDefinitionReader as teamStubDefinitionReader,
+  MEMBER_RETENTION_RULE,
+  HOME_REST_PLAN_RULE,
+  CITY_FACILITY_PLAN_RULE,
+} from '../../modules/team/fixtures';
 import type { ModuleContexts } from '../../app/composition/router';
 import type { GameCommand } from '../../app/composition/messages';
 import type { GameScheduledJob, GameState } from '../../app/composition/state';
@@ -36,12 +42,16 @@ const INPUT: BringUpFixtureInput = {
   startCityId: 'definition:city:home' as CityId,
 };
 
-// `rest` 與其到期 Job 都只需 team 的 worldDay + ids；其餘 team port 與其他模組 context 都不應被觸及。
+// `rest` 需要 team 的 worldDay + ids + **計畫規則**：休息天數改由 TeamPlanRule 提供（原本寫死 365），
+// 所以這裡必須給真的 definitions reader。這正是資料化的效果——沒有規則就沒有休息天數。
+// 其餘 team port 與其他模組 context 仍不應被觸及。
 const assembler: ContextAssembler = (runtime): ModuleContexts => ({
   team: {
     worldDay: runtime.worldDay,
     ids: runtime.ids.team,
-    definitions: unusedContext('team.definitions'),
+    definitions: teamStubDefinitionReader(),
+    memberRetentionRuleId: MEMBER_RETENTION_RULE,
+    teamPlanRuleIdByKind: { homeRest: HOME_REST_PLAN_RULE, cityFacilityAction: CITY_FACILITY_PLAN_RULE },
     world: unusedContext('team.world'),
     resolvers: unusedContext('team.resolvers'),
   },

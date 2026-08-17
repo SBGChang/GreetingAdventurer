@@ -9,6 +9,7 @@
     "verify:modules": "tsx scripts/verify-modules.ts",
     "verify:contracts": "tsx scripts/check-contract-duplicates.ts",
     "verify:discipline": "tsx scripts/verify-runtime-discipline.ts",
+    "verify:gap": "tsx scripts/verify-implementation-gap.ts",
     "verify:content-sync": "node scripts/verify-content-sync.mjs",
     "verify:content-scope": "node scripts/verify-content-scope.mjs",
     "verify": "npm run typecheck && npm run verify:discipline && npm run verify:modules && npm run verify:content-sync",

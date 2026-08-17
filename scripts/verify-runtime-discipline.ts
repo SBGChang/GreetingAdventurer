@@ -14,8 +14,18 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
+import {
+  createProgram,
+  findHardcodedContentIds,
+  findNamedNumericConstants,
+  sanctionedMarkerLineRanges,
+} from './lib/ast-gates';
+
 const ROOT = resolve(import.meta.dirname, '..');
 const SRC = join(ROOT, 'src');
+
+// 型別導向的檢查需要一個完整的 Program（帶 type checker）。建一次共用。
+const program = createProgram(join(ROOT, 'tsconfig.json'));
 
 // ──────────────────────────────────────────────────────────────────────────
 // 什麼算「測試／Bring-up」——規範 §13 的清單
@@ -255,35 +265,29 @@ function checkProductionDependencyGraph(): Failure[] {
 }
 
 // ──────────────────────────────────────────────────────────────────────────
-// 檢查 2：正式路徑不得寫死內容 ID（§5）
+// 檢查 2：正式路徑不得寫死內容 ID（§5）——型別導向
 // ──────────────────────────────────────────────────────────────────────────
 //
-// 判斷依據是專案的 ID 命名慣例：`definition:` / `runtime:` / `template-local:` / `resolver:` 前綴。
-// 內容 ID 必須來自 Definition、Command 或 Query，寫在 Handler 裡代表換 Pack 不會變。
+// 早期版本用 regex 找 `'definition:…'` / `'runtime:…'` / `'resolver:…'` 這幾個字串前綴。那漏掉了
+// 整整一類：
 //
-// **本檢查刻意不支援豁免。** §7／§6 有語法上分不出來的合法情形（去品牌、計數起點），所以需要
-// 明示豁免；§5 沒有——規範的五個合法出口裡沒有「把 ID 寫在 Handler 裡並附上理由」這一項。
-// 留了豁免路徑，`resolver:dungeon-default` 這種佔位就會用一行註解「修掉」而不是補契約。
-// ID 的形狀是「前綴 + 冒號分隔的 kebab／英數片段」，不含空白或中日韓文字。若不限制形狀，
-// 以 `resolver:` 開頭的**錯誤訊息**也會被當成 ID（本門禁第一次跑就誤判了一筆）。
-const CONTENT_ID_RE = /'((?:definition|runtime|template-local|resolver):[A-Za-z0-9._-]+(?::[A-Za-z0-9._-]+)*)'/g;
-
-function checkNoHardcodedContentIds(productionFiles: readonly string[]): Failure[] {
-  const failures: Failure[] = [];
-  for (const file of productionFiles) {
-    const lines = readFileSync(file, 'utf8').split('\n');
-    lines.forEach((line, i) => {
-      // 註解與說明文字裡出現 ID 是合理的（用於解釋），只看實際程式碼。
-      const code = line.replace(/\/\/.*$/, '');
-      for (const m of code.matchAll(CONTENT_ID_RE)) {
-        failures.push({
-          check: 'hardcoded-content-id',
-          detail: `${relative(ROOT, file).replace(/\\/g, '/')}:${i + 1} 寫死內容 ID '${m[1]}'\n        ${line.trim()}`,
-        });
-      }
-    });
-  }
-  return failures;
+//     const COMBAT_RULE_ID = 'combat-rule-standard' as CombatRuleId;
+//
+// 字串本身沒有前綴，前綴在**型別**（`CombatRuleId = DefinitionId<'combat-rule'>`）裡。regex 檢查的是
+// 「我挑的語法」，不是「準則要求的性質」——而準則要問的是「這個東西的名字屬不屬於 Content Pack」。
+//
+// 現在由 type checker 回答：任何字面值，只要它被當成 brand tag 為 `definition:` / `runtime:` /
+// `ephemeral:` / `template-local:` / `resolver` / `content-pack` 的型別在用，就是違規。ID 字面上長
+// 什麼樣不再重要。`module:` / `workflow:` / `definition-reader` 等**程式身分** brand 不在此列——
+// 模組本來就必須在程式裡宣告自己是誰。
+//
+// **本檢查刻意不支援豁免。** §7／§6 有語法上分不出來的合法情形，所以需要明示豁免；§5 沒有——
+// 規範的五個合法出口裡沒有「把 ID 寫在 Handler 裡並附上理由」這一項。
+function checkNoHardcodedContentIds(): Failure[] {
+  return findHardcodedContentIds(program, (f) => testOnlyReason(f) === undefined).map((f) => ({
+    check: 'hardcoded-content-id',
+    detail: `${relative(ROOT, f.file).replace(/\\/g, '/')}:${f.line} ${f.detail}\n        ${f.text}`,
+  }));
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -356,7 +360,7 @@ function checkNoValueFallbacks(productionFiles: readonly string[]): Failure[] {
 // 的 9 筆基準線）：既有的不必逐筆寫幾乎一樣的理由去淹掉純量那 6 筆真債，新增的一律讓建置失敗、逼人看一眼。
 //
 // 基準線只能往下。要新增就先問自己：左邊那個東西是內容嗎？
-const EMPTY_COLLECTION_BASELINE = 31; // 2026-08-17 起算
+const EMPTY_COLLECTION_BASELINE = 29; // 2026-08-17 起算（31 → 29：detectCycle 改以非空 tuple 表達不變量）
 
 function collectEmptyCollectionFallbacks(productionFiles: readonly string[]): string[] {
   const found: string[] = [];
@@ -388,20 +392,105 @@ function checkEmptyCollectionRatchet(productionFiles: readonly string[]): Failur
 }
 
 // ──────────────────────────────────────────────────────────────────────────
+// 檢查 6：正式路徑不得有未完成標記（§5「用 TODO 註解把未完成行為合理化」）
+// ──────────────────────────────────────────────────────────────────────────
+//
+// 前面五項檢查都在看**語法形狀**，但規範真正要擋的一大類是「固定行為」——事件選項一律成功、
+// 控制抗性一律 1 倍、旅行一律無事件。那些程式碼在語法上完全正常，沒有 `??`、沒有轉型、
+// 沒有寫死 ID，靜態掃描抓不到。
+//
+// 唯一可靠的線索是**作者自己留下的字**：寫這段程式的人幾乎都知道它沒做完，並且會寫下來。
+// 所以這裡直接把那些字列為違規。這不是靠關鍵字猜測品質，而是承認一件事——
+// 「我知道這裡沒做完」與「這裡可以進正式 Runtime」不能同時成立。
+//
+// 要移除標記只有兩條路：把它做完，或把該 Capability 關掉。改寫註解措辭不算。
+//
+// **為什麼這一項不在阻擋清單裡，而是獨立的 `npm run verify:gap`：**
+// 前面幾項量的是「已經寫下來的程式寫得對不對」——那是可以要求隨時為真的。這一項量的是
+// 「還有多少沒寫」：建立當下 101 筆，內容是地牢事件選項、NPC 戰鬥、控制抗性、Distribution 模組……
+// 也就是這個專案剩下的開發工作本身。把它接進阻擋門禁，等於在遊戲做完之前 CI 永遠是紅的，
+// 而永遠紅的門禁只會訓練所有人忽略它——那比沒有門禁更糟。
+//
+// 兩者混在一起還會毀掉一個更重要的訊號：紀律門禁綠燈的意思應該是「已完成的部分沒有偷工」，
+// 而不是「遊戲做完了」。分開之後兩個數字各自誠實：紀律 0，缺口 101。
+// 缺口清到 0 時，把它移進上面的 checks 陣列即可。
+const UNFINISHED_MARKERS: readonly { pattern: RegExp; why: string }[] = [
+  { pattern: /\bTODO\b/, why: 'TODO' },
+  { pattern: /\bFIXME\b/, why: 'FIXME' },
+  { pattern: /\bHACK\b/, why: 'HACK' },
+  { pattern: /\[DATA\]/, why: '[DATA]' },
+  { pattern: /\[INVENTED\]/, why: '[INVENTED]' },
+  { pattern: /\[AMBIGUITY\]|\(AMBIGUITY\)/, why: 'AMBIGUITY' },
+  { pattern: /佔位/, why: '佔位' },
+  { pattern: /待接|待補|待實作|待資料|待內容/, why: '待接／待補' },
+  { pattern: /第一版(?:固定|僅|只|暫)/, why: '第一版固定／暫代' },
+  { pattern: /尚未實作|未實作/, why: '尚未實作' },
+  { pattern: /暫代|暫時|暫定/, why: '暫代' },
+];
+
+export function checkNoUnfinishedMarkers(productionFiles: readonly string[]): Failure[] {
+  const sanctioned = sanctionedMarkerLineRanges(program);
+  const failures: Failure[] = [];
+  for (const file of productionFiles) {
+    const ranges = sanctioned.get(file.replace(/\\/g, '/')) ?? sanctioned.get(file) ?? [];
+    const lines = readFileSync(file, 'utf8').split('\n');
+    lines.forEach((line, i) => {
+      const lineNo = i + 1;
+      if (ranges.some(([from, to]) => lineNo >= from && lineNo <= to)) return;
+      const hit = UNFINISHED_MARKERS.find((m) => m.pattern.test(line));
+      if (hit === undefined) return;
+      failures.push({
+        check: 'unfinished-marker',
+        detail: `${relative(ROOT, file).replace(/\\/g, '/')}:${lineNo} 未完成標記（${hit.why}）\n        ${line.trim()}`,
+      });
+    });
+  }
+  return failures;
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// 檢查 7：正式 Handler 檔不得自帶字面值常數（§6）
+// ──────────────────────────────────────────────────────────────────────────
+//
+// `const RESTORE = 5;`、`const HOME_YEAR_REST_DAYS = 365;`——不是 `??` 形狀，前面的檢查看不到。
+// 模組層級具名常數這個形狀本身就在宣告一個可調參數，而可調參數屬於 Definition／Rule。
+// 真正的結構不變量集中在 `contracts/core/invariants.ts`，由該檔單一持有；合法寫法只有「從那裡匯入」。
+const LITERAL_CONST_SCOPE = /[/\\]src[/\\](?:modules|app)[/\\]/;
+
+function checkNoNamedNumericConstants(): Failure[] {
+  return findNamedNumericConstants(
+    program,
+    (f) => testOnlyReason(f) === undefined,
+    (f) => LITERAL_CONST_SCOPE.test(f),
+  ).map((f) => ({
+    check: 'named-numeric-constant',
+    detail: `${relative(ROOT, f.file).replace(/\\/g, '/')}:${f.line} ${f.detail}\n        ${f.text}`,
+  }));
+}
+
+// ──────────────────────────────────────────────────────────────────────────
 // 主程序
 // ──────────────────────────────────────────────────────────────────────────
 
 // 檢查 2～4 的對象：src 底下所有**非**測試／Bring-up 的檔案。
 // 用「全部非測試檔」而不是「依賴圖可達的檔案」，是為了讓還沒被任何根引用到的正式檔也受檢——
 // 否則新寫的 Handler 在接上路由之前是免檢的，那正是最容易寫進暫代行為的時候。
-const productionFiles = walkFiles(SRC).filter((f) => testOnlyReason(f) === undefined);
+export const productionFiles = walkFiles(SRC).filter((f) => testOnlyReason(f) === undefined);
+
+// 只有被直接執行時才跑主程序：verify-implementation-gap.ts 會 import 本檔取用
+// checkNoUnfinishedMarkers 與 productionFiles，不該連帶把整套門禁跑一遍。
+const isEntryPoint = process.argv[1]?.replace(/\\/g, '/').endsWith('verify-runtime-discipline.ts') ?? false;
+if (!isEntryPoint) {
+  // 供 gap 報告 import；不執行任何檢查。
+} else {
 
 const checks: readonly { name: string; run: () => Failure[] }[] = [
   { name: '正式依賴圖不含測試／Bring-up（§13）', run: checkProductionDependencyGraph },
-  { name: '無硬編碼內容 ID（§5）', run: () => checkNoHardcodedContentIds(productionFiles) },
+  { name: '無硬編碼內容 ID（§5，型別導向）', run: checkNoHardcodedContentIds },
   { name: '無跨語意強制轉型（§7）', run: () => checkNoCrossSemanticCasts(productionFiles) },
   { name: '無玩法數值 fallback（§6）', run: () => checkNoValueFallbacks(productionFiles) },
   { name: '空集合預設未超過基準線（§6 附註）', run: () => checkEmptyCollectionRatchet(productionFiles) },
+  { name: '無具名數值常數（§6）', run: checkNoNamedNumericConstants },
   { name: '豁免皆附理由（§14）', run: () => checkAllowancesHaveReasons(productionFiles) },
   { name: '豁免數未超過基準線（§14）', run: () => checkExemptionRatchet(productionFiles) },
 ];
@@ -429,3 +518,6 @@ if (total > 0) {
   process.exit(1);
 }
 console.log('RUNTIME DISCIPLINE PASSED');
+console.log('（實作缺口另計，不阻擋建置：npm run verify:gap）');
+
+} // isEntryPoint

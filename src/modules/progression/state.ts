@@ -28,8 +28,9 @@ export type DailyUsageCounters = Readonly<{
   commerceUses: number;
 }>;
 
-export const DAILY_CONVERSATION_CAP = 6;
-export const DAILY_COMMERCE_CAP = 6;
+// 每日次數上限（doc §2.5 的「交流共用 6 次、買賣共用 6 次」）曾以常數宣告於此，但**沒有任何程式使用**
+// ——每日次數功能尚未實作。留著等於先把平衡值寫進程式，實作時多半也會直接沿用而不去問它該不該是資料。
+// 上限是可調內容，等功能實作時由 Rule Definition 提供。
 
 // 具體擁有的 slice（契約 ProgressionState 的超集合）。
 export type ProgressionModuleState = ProgressionState &

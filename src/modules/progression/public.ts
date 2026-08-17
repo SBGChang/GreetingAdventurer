@@ -22,8 +22,6 @@ export {
   createCharacterProgression,
   createMasteryProgress,
   gatheringGrantKey,
-  DAILY_CONVERSATION_CAP,
-  DAILY_COMMERCE_CAP,
 } from './state';
 
 // 純 handler／subscriber 與成長核心。

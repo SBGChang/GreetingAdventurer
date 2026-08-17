@@ -16,6 +16,7 @@ import type {
   TransactionMessageDraft,
   DomainEventDraft,
 } from '../../contracts/core';
+import { MAX_MASTERY_LEVEL, MAX_PRIMARY_ATTRIBUTE } from '../../contracts/core';
 import type {
   ProgressionDefinitionReader,
   MasteryDefinition,
@@ -55,8 +56,9 @@ const PRIMARY_ATTRIBUTE_IDS: readonly PrimaryAttributeId[] = [
   'charisma',
 ];
 
-const MAX_LEVEL = 10;
-const MAX_ATTRIBUTE = 100;
+// 兩者已移入 contracts/core/invariants.ts；此處保留本地別名以免動到大量使用點。
+const MAX_LEVEL = MAX_MASTERY_LEVEL;
+const MAX_ATTRIBUTE = MAX_PRIMARY_ATTRIBUTE;
 
 function zeroAttributes(): PrimaryAttributes {
   return { muscle: 0, intelligence: 0, reaction: 0, coordination: 0, charisma: 0 };

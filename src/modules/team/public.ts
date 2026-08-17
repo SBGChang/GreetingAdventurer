@@ -45,11 +45,10 @@ export type {
 } from './state';
 
 // ── System（Handler + Job + Internal-Command 執行器 + 注入 Port）────────────
+// MAX_FORMAL_MEMBERS 改由 contracts/core/invariants.ts 提供（結構不變量集中處）；
+// RETENTION_ACTIVATION_DAYS / HOME_YEAR_REST_DAYS 已改為 Rule Definition 的資料，不再是常數。
 export {
   TEAM_MODULE_ID,
-  MAX_FORMAL_MEMBERS,
-  RETENTION_ACTIVATION_DAYS,
-  HOME_YEAR_REST_DAYS,
   // 玩家 Command
   handleStartCityTravel,
   handleEnterAdventureMap,

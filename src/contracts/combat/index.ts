@@ -246,6 +246,10 @@ export type CombatRuleDefinition = DefinitionHeader & {
   openingCtbRuleId: OpeningCtbRuleId;
   combatRestDelayRuleId: ActionDelayRuleId;
   defenseMasteryRoutingRuleId: DefenseMasteryRoutingRuleId;
+  // 戰鬥休息的回復量。原本是 Handler 裡的 `const RESTORE = 5`，且自承「第一版固定小額；資料化細節待接」。
+  // 回復多少是平衡，換一份 Pack 就該不同——它從來不是結構。
+  combatRestHealthRestore: number;
+  combatRestManaRestore: number;
 };
 
 export type OpeningCtbRuleDefinition = DefinitionHeader & {

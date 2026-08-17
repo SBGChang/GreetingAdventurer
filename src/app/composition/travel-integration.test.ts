@@ -9,7 +9,7 @@
 
 import type { JobId, WorldDay } from '../../contracts/core';
 import { handleStartCityTravel, tryGetTeam, tryGetPlan, type TeamHandlerResult } from '../../modules/team/public';
-import { fixtureTeamState, makeContext as teamMakeContext, stubDefinitionReader as teamStubReader, CITY_B, ROUTE_AB, TRAVEL_MODE_3 } from '../../modules/team/fixtures';
+import { fixtureTeamState, makeContext as teamMakeContext, stubDefinitionReader as teamStubReader, CITY_B, ROUTE_AB, TRAVEL_MODE_3, MEMBER_RETENTION_RULE, HOME_REST_PLAN_RULE, CITY_FACILITY_PLAN_RULE } from '../../modules/team/fixtures';
 
 import { runDueJob, type ContextAssembler } from './session';
 import { unusedContext } from '../../testing/composition/session-fixture';
@@ -31,6 +31,10 @@ const assembler: ContextAssembler = (runtime): ModuleContexts => ({
     worldDay: runtime.worldDay,
     ids: runtime.ids.team,
     definitions: teamStubReader(),
+    // 旅行路徑不會讀到這兩項，但 Context 是完整型別；給 fixture 值而不是空物件，
+    // 讓「缺規則」是一個要刻意製造的情形，而不是預設狀態。
+    memberRetentionRuleId: MEMBER_RETENTION_RULE,
+    teamPlanRuleIdByKind: { homeRest: HOME_REST_PLAN_RULE, cityFacilityAction: CITY_FACILITY_PLAN_RULE },
     world: unusedContext('team.world'),
     resolvers: unusedContext('team.resolvers'),
   },

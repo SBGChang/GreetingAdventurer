@@ -306,6 +306,9 @@ export function stubDefinitionReader(): CombatDefinitionReader {
       openingCtbRuleId: OPENING_CTB_RULE,
       combatRestDelayRuleId: DELAY_STANDARD,
       defenseMasteryRoutingRuleId: 'defense-routing' as never,
+      // 原本寫死在 handleCombatRest 的 5/5，現在由規則資料供給。
+      combatRestHealthRestore: 5,
+      combatRestManaRestore: 5,
     }),
     getEncounterGroup: () => encounterGroup(),
     getMonster: () => goblin(),
@@ -456,6 +459,7 @@ export function stubIdAllocator(prefix = 'gen'): CombatIdAllocator {
 export function makeCombatContext(overrides: Partial<CombatHandlerContext> = {}): CombatHandlerContext {
   return {
     definitions: overrides.definitions ?? stubDefinitionReader(),
+    combatRuleId: overrides.combatRuleId ?? COMBAT_RULE_ID,
     progression: overrides.progression ?? stubProgressionQuery(),
     loadout: overrides.loadout ?? stubLoadoutQuery(),
     formation: overrides.formation ?? stubFormationQuery(),

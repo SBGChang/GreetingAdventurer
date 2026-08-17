@@ -16,6 +16,8 @@ import type {
   TravelModeId,
   NpcTravelRuleId,
   ExperienceAwardRuleId,
+  TeamPlanRuleId,
+  MemberRetentionRuleId,
   ContentPackId,
   WorldDay,
   Revision,
@@ -71,6 +73,11 @@ export const TRAVEL_MODE_3 = 'travel-3' as TravelModeId;
 export const TRAVEL_MODE_6 = 'travel-6' as TravelModeId;
 export const TRAVEL_MODE_9 = 'travel-9' as TravelModeId;
 export const NPC_TRAVEL_RULE = 'npc-travel-6' as NpcTravelRuleId;
+
+// 計畫與留隊規則：正式路徑由 Content Pack 供給，fixture 代表「資料齊全」的那一側。
+export const HOME_REST_PLAN_RULE = 'plan-rule-home-rest' as TeamPlanRuleId;
+export const CITY_FACILITY_PLAN_RULE = 'plan-rule-city-facility' as TeamPlanRuleId;
+export const MEMBER_RETENTION_RULE = 'retention-rule-standard' as MemberRetentionRuleId;
 
 const TRAVEL_XP_RULE = 'xp-travel' as ExperienceAwardRuleId;
 const TRAVEL_EVENT_PROFILE = 'travel-events' as PlayerTravelEventWeightProfileId;
@@ -187,7 +194,13 @@ export function stubDefinitionReader(): TeamDefinitionReader {
       kind: 'craft',
       requiredFreeDays: 3,
     }),
-    getTeamPlanRule: (id): TeamPlanRuleDefinition => ({ ...header(id), kind: 'cityFree' }),
+    // durationDays 依 fixture 的 plan rule id 給值：homeRest 365、其餘 1。
+    // 正式路徑由 Content Pack 提供；fixture 在此代表「資料齊全」的那一側，
+    // 缺資料那一側由 makeContext 的 teamPlanRuleIdByKind 留空來測試。
+    getTeamPlanRule: (id): TeamPlanRuleDefinition =>
+      String(id) === String(HOME_REST_PLAN_RULE)
+        ? { ...header(id), kind: 'homeRest', durationDays: 365 }
+        : { ...header(id), kind: 'cityFacilityAction', durationDays: 1 },
     getRecentActivityRule: (id: RecentActivityRuleId): RecentActivityRuleDefinition => ({
       ...header(id),
       maxRecordsPerCharacter: 10,
@@ -277,6 +290,11 @@ export function makeContext(overrides: Partial<TeamHandlerContext> = {}): TeamHa
   return {
     worldDay: overrides.worldDay ?? (20000 as WorldDay),
     definitions: overrides.definitions ?? stubDefinitionReader(),
+    memberRetentionRuleId: overrides.memberRetentionRuleId ?? MEMBER_RETENTION_RULE,
+    teamPlanRuleIdByKind: overrides.teamPlanRuleIdByKind ?? {
+      homeRest: HOME_REST_PLAN_RULE,
+      cityFacilityAction: CITY_FACILITY_PLAN_RULE,
+    },
     world: overrides.world ?? stubWorldReader(),
     ids: overrides.ids ?? makeIdAllocator(),
     resolvers: overrides.resolvers ?? stubResolverPort(),

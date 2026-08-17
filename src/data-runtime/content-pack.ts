@@ -252,9 +252,14 @@ function readBoolean(obj: JsonObject, key: string): boolean | undefined {
 
 // ── 相依循環偵測（§1.1：Pack 相依必須無循環）───────────────────────────────
 
+// 回傳型別以**非空 tuple** 表達「有循環就一定至少一個節點」。原本是 `readonly ContentPackId[]`，
+// 於是呼叫端讀 `nodes[0]` 時型別上可能是 undefined，只好寫 `?? ('' as ContentPackId)`——
+// 一個假的 ContentPackId，永遠不會發生卻永遠留在那裡。把不變量寫進型別就不需要那個預設值。
+type NonEmpty<T> = readonly [T, ...T[]];
+
 function detectCycle(
   packs: readonly ContentPackReference[],
-): { cyclic: true; nodes: readonly ContentPackId[] } | { cyclic: false } {
+): { cyclic: true; nodes: NonEmpty<ContentPackId> } | { cyclic: false } {
   const edges = new Map<ContentPackId, readonly ContentPackId[]>();
   for (const p of packs) {
     edges.set(
@@ -269,30 +274,38 @@ function detectCycle(
   for (const p of packs) color.set(p.packId, WHITE);
 
   const stack: ContentPackId[] = [];
-  let cycle: ContentPackId[] | undefined;
 
-  const visit = (node: ContentPackId): boolean => {
+  // 回傳找到的循環而不是 boolean + 外層可變變數：非空性因此隨著值一起傳出去，
+  // 呼叫端不必再補一個「理論上不會發生」的預設值。
+  const visit = (node: ContentPackId): NonEmpty<ContentPackId> | undefined => {
     color.set(node, GRAY);
     stack.push(node);
-    for (const next of edges.get(node) ?? []) {
-      const c = color.get(next);
-      if (c === undefined) continue; // 缺 Pack 另行報 MissingRequiredPack
-      if (c === GRAY) {
-        const from = stack.indexOf(next);
-        cycle = stack.slice(from >= 0 ? from : 0);
-        return true;
+    const outgoing = edges.get(node);
+    if (outgoing !== undefined) {
+      for (const next of outgoing) {
+        const c = color.get(next);
+        if (c === undefined) continue; // 缺 Pack 另行報 MissingRequiredPack
+        if (c === GRAY) {
+          const from = Math.max(0, stack.indexOf(next));
+          const head = stack[from];
+          // head 必存在（stack 至少含 node 本身），但用實際檢查而不是斷言取得它。
+          if (head !== undefined) return [head, ...stack.slice(from + 1)];
+        }
+        if (c === WHITE) {
+          const found = visit(next);
+          if (found !== undefined) return found;
+        }
       }
-      if (c === WHITE && visit(next)) return true;
     }
     stack.pop();
     color.set(node, BLACK);
-    return false;
+    return undefined;
   };
 
   for (const p of packs) {
-    if (color.get(p.packId) === WHITE && visit(p.packId)) {
-      return { cyclic: true, nodes: cycle ?? [] };
-    }
+    if (color.get(p.packId) !== WHITE) continue;
+    const nodes = visit(p.packId);
+    if (nodes !== undefined) return { cyclic: true, nodes };
   }
   return { cyclic: false };
 }
@@ -352,7 +365,7 @@ export function loadContent(input: LoadContentInput): CompileContentResult {
     diagnostics.push({
       severity: 'error',
       code: DataLoadCode.CyclicPackDependency,
-      packId: cycle.nodes[0] ?? ('' as ContentPackId),
+      packId: cycle.nodes[0],
       filePath: 'manifest.json',
       messageKey: 'data.load.cyclicPackDependency',
       details: { cycle: [...cycle.nodes] },
