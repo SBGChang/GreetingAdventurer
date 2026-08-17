@@ -208,7 +208,7 @@ const INTERNAL_COMMAND_HANDLERS: Readonly<Partial<Record<GameInternalCommandType
 
   // ── combat：(state, cmd, ctx) → ModuleResult ─────────────────────────────
   StartCombatEncounter: (c, s, x) =>
-    acceptResult('combat', combat.handleStartCombatEncounter(s.combat, c as never, x.combat)),
+    fromOutcome('combat', combat.handleStartCombatEncounter(s.combat, c as never, x.combat)),
 
   // ── team：(state, payload, ctx) → ModuleOutcome ──────────────────────────
   StartReturnFromDungeon: (c, s, x) =>
@@ -260,13 +260,13 @@ const GAME_COMMAND_HANDLERS: Readonly<Partial<Record<GameCommandType, RootDispat
   // ── combat：(state, cmd, ctx) → ModuleResult。combat 尚未轉 ModuleOutcome，非法輸入以
   //    「回傳未變 slice」表示（HANDOFF 已列為待逐點判讀）；此處一律 acceptResult。 ──
   useCombatSkill: (c, _t, s, x) =>
-    acceptResult('combat', combat.handleUseCombatSkill(s.combat, c as never, x.combat)),
+    fromOutcome('combat', combat.handleUseCombatSkill(s.combat, c as never, x.combat)),
   useCombatItem: (c, _t, s, x) =>
-    acceptResult('combat', combat.handleUseCombatItem(s.combat, c as never, x.combat)),
+    fromOutcome('combat', combat.handleUseCombatItem(s.combat, c as never, x.combat)),
   commandAlly: (c, _t, s, x) =>
-    acceptResult('combat', combat.handleCommandAlly(s.combat, c as never, x.combat)),
+    fromOutcome('combat', combat.handleCommandAlly(s.combat, c as never, x.combat)),
   combatRest: (c, _t, s, x) =>
-    acceptResult('combat', combat.handleCombatRest(s.combat, c as never, x.combat)),
+    fromOutcome('combat', combat.handleCombatRest(s.combat, c as never, x.combat)),
 
   // ── inventory：(state, cmd, deps) → ModuleOutcome ──
   equipItem: (c, _t, s, x) =>

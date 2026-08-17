@@ -3,7 +3,7 @@
 // runTests() 執行全部案例；任一失敗即 throw，供最外層 harness 判定。
 
 import type { CombatantId, EncounterId } from '../../contracts/core';
-import type { TransactionMessageDraft } from '../../contracts/core';
+import type { TransactionMessageDraft, ModuleOutcome, ModuleResult } from '../../contracts/core';
 import type { CombatDomainEvent } from '../../contracts/combat';
 
 import type { CombatState, CombatEncounter, CombatantState } from './state';
@@ -12,6 +12,8 @@ import {
   handleStartCombatEncounter,
   handleUseCombatSkill,
   handleEnemyTurn,
+  handleCombatRest,
+  handleCommandAlly,
   advanceToNextActor,
 } from './system';
 import {
@@ -40,6 +42,20 @@ import type { ApplyCombatCondition } from '../../contracts/character';
 // ── 迷你斷言工具 ─────────────────────────────────────────────────────────
 function assert(cond: boolean, msg: string): void {
   if (!cond) throw new Error(msg);
+}
+
+// P1-6：可拒絕的 Handler 改回 ModuleOutcome 之後，測試必須明講它預期接受還是拒絕。
+// 這正是改動的重點——原本兩者都長成「回傳未變 slice」，測試寫不出區別，所以也就測不到。
+function ok(outcome: ModuleOutcome<CombatState>): ModuleResult<CombatState> {
+  if (!outcome.ok) throw new Error(`預期接受，實際拒絕：${outcome.rejection.code}`);
+  return outcome.result;
+}
+function rejectedWith(outcome: ModuleOutcome<CombatState>, code: string): void {
+  if (outcome.ok) throw new Error(`預期拒絕 "${code}"，實際接受`);
+  assert(
+    outcome.rejection.code === code,
+    `預期拒絕碼 "${code}"，實際 "${outcome.rejection.code}"`,
+  );
 }
 function eventsOf(messages: readonly TransactionMessageDraft[]): CombatDomainEvent[] {
   return messages
@@ -139,23 +155,25 @@ const cases: readonly Case[] = [
     name: '傷害技能擊殺一名敵人',
     run: () => {
       const ctx = makeCombatContext();
-      const started = handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx);
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
       const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
       const encounter = started.nextSlice.encounters[encounterId]!;
       const actorId = encounter.currentActorId!;
       assert(encounter.combatants[actorId]!.side === 'player', '開場行動者應為玩家（反應較高先手）');
 
       const enemyId = aliveEnemies(encounter)[0]!.combatantId;
-      const res = handleUseCombatSkill(
-        started.nextSlice,
-        {
-          type: 'useCombatSkill',
-          encounterId,
-          actorId,
-          skillId: SKILL_STRIKE,
-          targetCombatantIds: [enemyId],
-        },
-        ctx,
+      const res = ok(
+        handleUseCombatSkill(
+          started.nextSlice,
+          {
+            type: 'useCombatSkill',
+            encounterId,
+            actorId,
+            skillId: SKILL_STRIKE,
+            targetCombatantIds: [enemyId],
+          },
+          ctx,
+        ),
       );
       const after = res.nextSlice.encounters[encounterId]!;
       const enemy = after.combatants[enemyId]!;
@@ -165,10 +183,10 @@ const cases: readonly Case[] = [
     },
   },
   {
-    name: '資源不足 → 技能不施放（no-op，不夾零）',
+    name: '資源不足 → 拒絕（不施放、不扣、不夾零）',
     run: () => {
       const ctx = makeCombatContext();
-      const started = handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx);
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
       const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
       const encounter = started.nextSlice.encounters[encounterId]!;
       const actorId = encounter.currentActorId!;
@@ -191,43 +209,33 @@ const cases: readonly Case[] = [
         { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_HEAL, targetCombatantIds: [actorId] },
         ctx,
       );
-      const after = res.nextSlice.encounters[encounterId]!.combatants[actorId]!;
-      assert(after.mana === 3, `法力不足應原樣不動（不扣、不夾零），實際 mana=${after.mana}`);
-      assert(
-        countEvent(eventsOf(res.outgoingMessages), 'CombatActionResolved') === 0,
-        '資源不足不應 emit CombatActionResolved',
-      );
+      // P1-6 前是「回傳未變 slice」，與「成功但這回合沒事發生」無從區分——Runner 會照常提交。
+      rejectedWith(res, 'combat/insufficient-resources');
     },
   },
   {
-    name: '技能未配置於目前武器組 → 不施放（no-op）',
+    name: '技能未配置於目前武器組 → 拒絕（不施放）',
     run: () => {
       const ctx = makeCombatContext();
-      const started = handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx);
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
       const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
       const encounter = started.nextSlice.encounters[encounterId]!;
       const actorId = encounter.currentActorId!;
       const enemyId = aliveEnemies(encounter)[0]!.combatantId;
-      const before = encounter.combatants[enemyId]!.health;
       // SKILL_BITE 是敵方招式，不在玩家武器組 selectedSkillIds 內。
       const res = handleUseCombatSkill(
         started.nextSlice,
         { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_BITE, targetCombatantIds: [enemyId] },
         ctx,
       );
-      const after = res.nextSlice.encounters[encounterId]!.combatants[enemyId]!;
-      assert(after.health === before, `未配置技能不應造成傷害，before=${before} after=${after.health}`);
-      assert(
-        countEvent(eventsOf(res.outgoingMessages), 'CombatActionResolved') === 0,
-        '未配置技能不應 emit CombatActionResolved',
-      );
+      rejectedWith(res, 'combat/skill-not-in-active-weapon-set');
     },
   },
   {
-    name: '攻擊技能不得作用我方隊友（側別過濾 → 全數不合法 → no-op）',
+    name: '攻擊技能不得作用我方隊友（側別過濾 → 全數不合法 → 拒絕）',
     run: () => {
       const ctx = makeCombatContext();
-      const started = handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx);
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
       const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
       const enc = started.nextSlice.encounters[encounterId]!;
       const actorId = enc.currentActorId!;
@@ -237,25 +245,19 @@ const cases: readonly Case[] = [
       );
       assert(ally !== undefined, 'fixture 應有另一名玩家方 combatant 作為隊友');
       const allyId = ally!.combatantId;
-      const before = ally!.health;
       const res = handleUseCombatSkill(
         started.nextSlice,
         { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_STRIKE, targetCombatantIds: [allyId] },
         ctx,
       );
-      const after = res.nextSlice.encounters[encounterId]!.combatants[allyId]!;
-      assert(after.health === before, `攻擊我方隊友應被側別過濾（no-op），before=${before} after=${after.health}`);
-      assert(
-        countEvent(eventsOf(res.outgoingMessages), 'CombatActionResolved') === 0,
-        '目標全數不合法 → 不應行動',
-      );
+      rejectedWith(res, 'combat/no-legal-target');
     },
   },
   {
     name: '重複目標 ID 只命中一次（去重；單次與重複造成相同傷害）',
     run: () => {
       const ctx = makeCombatContext();
-      const started = handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx);
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
       const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
       const enc0 = started.nextSlice.encounters[encounterId]!;
       const actorId = enc0.currentActorId!;
@@ -281,8 +283,8 @@ const cases: readonly Case[] = [
         skillId: SKILL_STRIKE,
         targetCombatantIds: targets,
       });
-      const once = handleUseCombatSkill(boosted, cmd([enemyId]), ctx).nextSlice.encounters[encounterId]!.combatants[enemyId]!;
-      const twice = handleUseCombatSkill(boosted, cmd([enemyId, enemyId]), ctx).nextSlice.encounters[encounterId]!.combatants[enemyId]!;
+      const once = ok(handleUseCombatSkill(boosted, cmd([enemyId]), ctx)).nextSlice.encounters[encounterId]!.combatants[enemyId]!;
+      const twice = ok(handleUseCombatSkill(boosted, cmd([enemyId, enemyId]), ctx)).nextSlice.encounters[encounterId]!.combatants[enemyId]!;
       assert(once.health < 500, '單次攻擊應造成傷害');
       assert(once.health > 0, '單次攻擊不應直接擊殺（否則無法區分重複命中）');
       assert(twice.health === once.health, `重複目標不得雙重命中：單次剩 ${once.health}、重複剩 ${twice.health}`);
@@ -290,6 +292,7 @@ const cases: readonly Case[] = [
   },
   {
     name: '側別由效果推定而非 actionKind：cast 傷害技能不得作用同側（把傷害標成 cast 也擋得住）',
+    // P1-6：同側目標現在是拒絕而非 no-op；對照組（打敵方）仍應成功，證明擋的是側別不是技能壞了。
     run: () => {
       const ctx = makeCombatContext();
       const enc = {
@@ -308,11 +311,10 @@ const cases: readonly Case[] = [
         skillId: SKILL_CAST_DAMAGE,
         targetCombatantIds: [targetId as CombatantId],
       });
-      // m1（enemy）以 cast 傷害點自己人 m2（同 enemy 側）→ 依效果篩側別 → no-op、m2 不受傷。
-      const sameSide = handleUseCombatSkill(state, cast('m2'), ctx).nextSlice.encounters[enc.encounterId]!.combatants['m2' as CombatantId]!;
-      assert(sameSide.health === 80, `cast 傷害不得作用同側（應維持 80，實得 ${sameSide.health}）`);
-      // 對照：點敵方 p1 應正常造成傷害（證明 no-op 是側別、不是技能壞了）。
-      const oppSide = handleUseCombatSkill(state, cast('p1'), ctx).nextSlice.encounters[enc.encounterId]!.combatants['p1' as CombatantId]!;
+      // m1（enemy）以 cast 傷害點自己人 m2（同 enemy 側）→ 依效果篩側別 → 拒絕、m2 不受傷。
+      rejectedWith(handleUseCombatSkill(state, cast('m2'), ctx), 'combat/no-legal-target');
+      // 對照：點敵方 p1 應正常造成傷害（證明擋下的是側別、不是技能壞了）。
+      const oppSide = ok(handleUseCombatSkill(state, cast('p1'), ctx)).nextSlice.encounters[enc.encounterId]!.combatants['p1' as CombatantId]!;
       assert(oppSide.health < 100, `cast 傷害對敵方應生效（實得 ${oppSide.health}）`);
     },
   },
@@ -320,7 +322,7 @@ const cases: readonly Case[] = [
     name: '#4：溢出傷害不計入攻擊熟練度（尾刀只算真正扣除的 HP）',
     run: () => {
       const ctx = makeCombatContext();
-      const started = handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx);
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
       const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
       const enc0 = started.nextSlice.encounters[encounterId]!;
       const actorId = enc0.currentActorId!;
@@ -339,10 +341,12 @@ const cases: readonly Case[] = [
           },
         },
       };
-      const res = handleUseCombatSkill(
-        state,
-        { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_STRIKE, targetCombatantIds: [enemyId] },
-        ctx,
+      const res = ok(
+        handleUseCombatSkill(
+          state,
+          { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_STRIKE, targetCombatantIds: [enemyId] },
+          ctx,
+        ),
       );
       const ledger = res.nextSlice.encounters[encounterId]?.attackDamageByCharacter[characterId!] ?? {};
       const total = Object.values(ledger).reduce((a, b) => a + b, 0);
@@ -354,11 +358,11 @@ const cases: readonly Case[] = [
     run: () => {
       const BOGUS = 'skill-bogus-not-a-def' as SkillDefinitionId;
       // 真實 progression：偽造/未學技能 knows() 回 false。fixture getSkillView 對未知 id 會 throw，
-      // 故舊順序（先 getSkillView）會崩；新順序 knows() 先擋 → no-op。
+      // 故舊順序（先 getSkillView）會崩；新順序 knows() 先擋。
       const ctx = makeCombatContext({
         progression: { ...stubProgressionQuery(), knows: (_c, skillId) => skillId !== BOGUS },
       });
-      const started = handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx);
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
       const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
       const enc = started.nextSlice.encounters[encounterId]!;
       const actorId = enc.currentActorId!;
@@ -368,17 +372,16 @@ const cases: readonly Case[] = [
         { type: 'useCombatSkill', encounterId, actorId, skillId: BOGUS, targetCombatantIds: [enemyId] },
         ctx,
       );
-      assert(res.nextSlice === started.nextSlice, '未學技能應於 knows() no-op，未達 getSkillView（不崩潰）');
+      // 拒絕碼本身就是「擋在 knows() 這一關」的證據：走到 getSkillView 會是例外而非拒絕。
+      rejectedWith(res, 'combat/skill-not-learned');
     },
   },
   {
     name: '全滅 → resolved + 恰一次 MasteryEarned',
     run: () => {
       const ctx = makeCombatContext();
-      let state: CombatState = handleStartCombatEncounter(
-        createInitialCombatState(),
-        fixtureStartCommand(),
-        ctx,
+      let state: CombatState = ok(
+        handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx),
       ).nextSlice;
       const encounterId = Object.keys(state.encounters)[0]! as EncounterId;
 
@@ -394,13 +397,15 @@ const cases: readonly Case[] = [
         if (actor.side === 'player') {
           const target = aliveEnemies(encounter)[0];
           if (target === undefined) break;
-          res = handleUseCombatSkill(
-            state,
-            { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_STRIKE, targetCombatantIds: [target.combatantId] },
-            ctx,
+          res = ok(
+            handleUseCombatSkill(
+              state,
+              { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_STRIKE, targetCombatantIds: [target.combatantId] },
+              ctx,
+            ),
           );
         } else {
-          res = handleEnemyTurn(state, encounterId, ctx);
+          res = ok(handleEnemyTurn(state, encounterId, ctx));
         }
         allEvents.push(...eventsOf(res.outgoingMessages));
         state = res.nextSlice;
@@ -433,10 +438,8 @@ const cases: readonly Case[] = [
           }),
         },
       });
-      let state: CombatState = handleStartCombatEncounter(
-        createInitialCombatState(),
-        fixtureStartCommand(),
-        ctx,
+      let state: CombatState = ok(
+        handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx),
       ).nextSlice;
       const encounterId = Object.keys(state.encounters)[0]! as EncounterId;
 
@@ -451,13 +454,15 @@ const cases: readonly Case[] = [
         if (actor.side === 'player') {
           const target = aliveEnemies(encounter)[0];
           if (target === undefined) break;
-          res = handleUseCombatSkill(
-            state,
-            { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_STRIKE, targetCombatantIds: [target.combatantId] },
-            ctx,
+          res = ok(
+            handleUseCombatSkill(
+              state,
+              { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_STRIKE, targetCombatantIds: [target.combatantId] },
+              ctx,
+            ),
           );
         } else {
-          res = handleEnemyTurn(state, encounterId, ctx);
+          res = ok(handleEnemyTurn(state, encounterId, ctx));
         }
         allCommands.push(...commandsOf(res.outgoingMessages));
         state = res.nextSlice;
@@ -508,13 +513,87 @@ const cases: readonly Case[] = [
       encounter = { ...encounter, currentActorId: 'e' as CombatantId, readyQueue: ['e' as CombatantId] };
       const state = upsertEncounter(createInitialCombatState(), encounter);
 
-      const res = handleEnemyTurn(state, encounter.encounterId, ctx);
+      const res = ok(handleEnemyTurn(state, encounter.encounterId, ctx));
       const after = res.nextSlice.encounters[encounter.encounterId]!;
       const attacker = after.combatants['e' as CombatantId]!;
       const defender = after.combatants['p' as CombatantId]!;
       assert(attacker.health === 70, `攻擊者應受 30 反擊傷害（100→70），實際 ${attacker.health}`);
       assert(defender.counterStance === undefined, '反擊後架勢應解除');
       assert(defender.health === 95, `防守者應受敵方 5 點咬擊（100→95），實際 ${defender.health}`);
+    },
+  },
+  {
+    // P1-6：這兩種情形原本合併成 `encounter === undefined || state === 'resolved'` 的同一個 no-op。
+    // 合併掉的是有用資訊——「這場戰鬥不存在」與「這場戰鬥已經打完了」對呼叫端是不同的事。
+    name: 'P1-6：Encounter 不存在與已結算是兩種不同的拒絕，不再是同一個 no-op',
+    run: () => {
+      const ctx = makeCombatContext();
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const encounter = started.nextSlice.encounters[encounterId]!;
+      const actorId = encounter.currentActorId!;
+
+      const GHOST = 'runtime:encounter~test~ghost' as EncounterId;
+      rejectedWith(
+        handleCombatRest(started.nextSlice, { type: 'combatRest', encounterId: GHOST, actorId }, ctx),
+        'combat/encounter-not-found',
+      );
+
+      const resolvedState: CombatState = {
+        ...started.nextSlice,
+        encounters: {
+          ...started.nextSlice.encounters,
+          [encounterId]: { ...encounter, state: 'resolved' },
+        },
+      };
+      rejectedWith(
+        handleCombatRest(resolvedState, { type: 'combatRest', encounterId, actorId }, ctx),
+        'combat/encounter-resolved',
+      );
+    },
+  },
+  {
+    name: 'P1-6：combatRest 正常路徑接受；非當前行動者則拒絕',
+    run: () => {
+      const ctx = makeCombatContext();
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const encounter = started.nextSlice.encounters[encounterId]!;
+      const actorId = encounter.currentActorId!;
+
+      const rested = ok(
+        handleCombatRest(started.nextSlice, { type: 'combatRest', encounterId, actorId }, ctx),
+      );
+      const after = rested.nextSlice.encounters[encounterId]!.combatants[actorId]!;
+      const before = encounter.combatants[actorId]!;
+      assert(after.currentCtb > before.currentCtb, '休息應增加行動延遲');
+
+      // 別人的回合送 combatRest：原本是靜默 no-op，玩家看不出指令沒生效。
+      const other = Object.values(encounter.combatants).find((c) => c.combatantId !== actorId)!;
+      rejectedWith(
+        handleCombatRest(
+          started.nextSlice,
+          { type: 'combatRest', encounterId, actorId: other.combatantId },
+          ctx,
+        ),
+        'combat/not-current-actor',
+      );
+    },
+  },
+  {
+    // 規範 §10：未閉合的 Capability 不得表現成「送出成功但什麼都沒發生」。
+    // 正常情況下 Router 會在 dispatch 前就以 engine/feature-not-available 擋下；這是第二道保險。
+    name: 'P1-6：commandAlly 尚未實作 → 明確拒絕，不是成功 no-op',
+    run: () => {
+      const ctx = makeCombatContext();
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const enc = started.nextSlice.encounters[encounterId]!;
+      const allyId = Object.values(enc.combatants).find((c) => c.side === 'player')!.combatantId;
+      rejectedWith(
+        handleCommandAlly(started.nextSlice, { type: 'commandAlly', encounterId, allyId, directive: {} }, ctx),
+        'combat/command-ally-not-implemented',
+      );
     },
   },
 ];

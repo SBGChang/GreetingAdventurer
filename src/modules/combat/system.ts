@@ -30,6 +30,7 @@ import type {
   Revision,
   ModuleId,
   ModuleResult,
+  ModuleOutcome,
   TransactionMessageDraft,
   DeterministicRng,
 } from '../../contracts/core';
@@ -183,6 +184,57 @@ function result(
   messages: readonly TransactionMessageDraft[] = [],
 ): ModuleResult<CombatState> {
   return { nextSlice: state, outgoingMessages: messages, scheduledJobs: [] };
+}
+
+// ── 可拒絕 Handler 的回傳（B.5：全模組統一為 contracts/core 的 ModuleOutcome）──
+//
+// Combat 原本一律以「回傳未變 slice」表示前置條件不符：不是你的回合、技能沒學會、法力不足、
+// 目標非法——全部長得跟「成功但這回合沒事發生」一模一樣。Transaction Runner 因此分不出該不該回滾，
+// 玩家送出非法指令會被當成成功，UI 也拿不到任何可呈現的理由。
+//
+// 判準（規範「冪等 no-op vs 偽裝的 fallback」）：問「如果資料齊全，這裡還會 no-op 嗎？」
+// 會 → 冪等，保留 result()；不會 → 它在掩蓋一個應該被拒絕的情況，改 reject()。
+// 本模組逐點跑過的結論：只有 resolveEncounter 的「已結算」是真冪等，其餘 15 筆都是拒絕。
+export type CombatHandlerResult = ModuleOutcome<CombatState>;
+
+function accept(
+  state: CombatState,
+  messages: readonly TransactionMessageDraft[] = [],
+): CombatHandlerResult {
+  return { ok: true, result: result(state, messages) };
+}
+
+function acceptOf(res: ModuleResult<CombatState>): CombatHandlerResult {
+  return { ok: true, result: res };
+}
+
+function reject(
+  code: string,
+  details?: Readonly<Record<string, string | number | boolean>>,
+): CombatHandlerResult {
+  return {
+    ok: false,
+    rejection: { code, source: COMBAT_MODULE_ID, ...(details ? { details } : {}) },
+  };
+}
+
+// Encounter 取用的共同前置：不存在 vs 已結算是**兩種**不同的拒絕，原本合併成同一個 no-op。
+function requireLiveEncounter(
+  state: CombatState,
+  encounterId: EncounterId,
+): CombatEncounter | CombatHandlerResult {
+  const encounter = tryGetEncounter(state, encounterId);
+  if (encounter === undefined) {
+    return reject('combat/encounter-not-found', { encounterId: String(encounterId) });
+  }
+  if (encounter.state === 'resolved') {
+    return reject('combat/encounter-resolved', { encounterId: String(encounterId) });
+  }
+  return encounter;
+}
+
+function isRejection(v: CombatEncounter | CombatHandlerResult): v is CombatHandlerResult {
+  return 'ok' in v;
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -495,14 +547,13 @@ export function handleStartCombatEncounter(
   state: CombatState,
   cmd: StartCombatEncounterCommand,
   ctx: CombatHandlerContext,
-): ModuleResult<CombatState> {
+): CombatHandlerResult {
   const formation = ctx.formation.getPlayerFormation(cmd.teamId);
 
-  // §5.1 驗證：正式成員 1..9，且恰配置每人一次。
+  // §5.1 驗證：正式成員 1..9，且恰配置每人一次。隊員上限 9 是結構不變量（規範明列）。
   const count = formation.members.length;
   if (count < 1 || count > 9) {
-    // TODO: 以 CommandRejection 回報漏配 / 第十名 / 額外候補；第一版拒絕即為 no-op。
-    return result(state);
+    return reject('combat/formation-size-invalid', { teamId: String(cmd.teamId), memberCount: count });
   }
 
   const playerCombatants = buildPlayerCombatants(formation, ctx);
@@ -559,7 +610,7 @@ export function handleStartCombatEncounter(
       source: cmd.source,
     }),
   ];
-  return result(upsertEncounter(state, encounter), messages);
+  return accept(upsertEncounter(state, encounter), messages);
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -946,13 +997,20 @@ export function handleUseCombatSkill(
   state: CombatState,
   cmd: UseCombatSkillCommand,
   ctx: CombatHandlerContext,
-): ModuleResult<CombatState> {
-  const encounter = tryGetEncounter(state, cmd.encounterId);
-  if (encounter === undefined || encounter.state === 'resolved') return result(state);
+): CombatHandlerResult {
+  const live = requireLiveEncounter(state, cmd.encounterId);
+  if (isRejection(live)) return live;
+  const encounter = live;
   // 前置：Encounter 等待該行動者（不變量 4：非法輸入不進 Resolver）。
-  if (encounter.currentActorId !== cmd.actorId) return result(state);
+  if (encounter.currentActorId !== cmd.actorId) {
+    return reject('combat/not-current-actor', {
+      actorId: String(cmd.actorId),
+      currentActorId: String(encounter.currentActorId),
+    });
+  }
   const actor0 = encounter.combatants[cmd.actorId];
-  if (actor0 === undefined || actor0.state === 'dead') return result(state);
+  if (actor0 === undefined) return reject('combat/actor-not-in-encounter', { actorId: String(cmd.actorId) });
+  if (actor0.state === 'dead') return reject('combat/actor-dead', { actorId: String(cmd.actorId) });
 
   const activeWeaponSetId = cmd.weaponSetId ?? actor0.activeWeaponSetId;
 
@@ -961,12 +1019,20 @@ export function handleUseCombatSkill(
   // getSkillView 會直接拋錯。knows() 對偽造/未學技能回 false，於此擋下。敵方（monster）用自身招式，不受限。
   if (actor0.source.kind === 'character') {
     const characterId = actor0.source.characterId;
-    if (!ctx.progression.knows(characterId, cmd.skillId)) return result(state); // 未學會/偽造 → 擋
+    if (!ctx.progression.knows(characterId, cmd.skillId)) {
+      return reject('combat/skill-not-learned', {
+        characterId: String(characterId),
+        skillId: String(cmd.skillId),
+      });
+    }
     const configuredSet = ctx.loadout
       .getEquipmentLoadout(characterId)
       .weaponSets.find((w) => w.weaponSetId === activeWeaponSetId);
     if (configuredSet === undefined || !configuredSet.selectedSkillIds.includes(cmd.skillId)) {
-      return result(state); // 未配置在目前武器組
+      return reject('combat/skill-not-in-active-weapon-set', {
+        skillId: String(cmd.skillId),
+        weaponSetId: String(activeWeaponSetId),
+      });
     }
   }
 
@@ -979,11 +1045,19 @@ export function handleUseCombatSkill(
     if (cost.resource === 'health') healthCost += cost.amount;
     else manaCost += cost.amount;
   }
-  if (actor0.health < healthCost || actor0.mana < manaCost) return result(state); // 資源不足
+  if (actor0.health < healthCost || actor0.mana < manaCost) {
+    return reject('combat/insufficient-resources', {
+      skillId: String(cmd.skillId),
+      healthCost,
+      manaCost,
+      health: actor0.health,
+      mana: actor0.mana,
+    });
+  }
 
   // 依**效果**推定敵意（不靠 actionKind——否則把傷害技能標成 cast/perform 就能繞過側別、打到我方）：
   // 任一 dealDamage → 攻擊性（目標須敵方）；否則任一 heal → 支援性（目標須己方）；其餘（adjustCtb/interrupt
-  // 等）側別待資料化 targeting resolver，此處不強制。指定了目標卻**全數不合法** → no-op（不付代價、不空耗）。
+  // 等）側別待資料化 targeting resolver，此處不強制。指定了目標卻**全數不合法** → 拒絕（不付代價、不空耗）。
   // applyEffect 另有逐效果側別守門（dealDamage 不作用己方、heal 不作用敵方），兩者互為保險。
   const opKinds = skillView.effectIds.map((id) => ctx.definitions.getCombatEffect(id).operation.kind);
   const requiredSide: 'enemy' | 'ally' | undefined = opKinds.includes('dealDamage')
@@ -993,7 +1067,11 @@ export function handleUseCombatSkill(
       : undefined;
   const legalTargets = legalTargetsFor(encounter, actor0.side, requiredSide, cmd.targetCombatantIds);
   if (requiredSide !== undefined && cmd.targetCombatantIds.length > 0 && legalTargets.length === 0) {
-    return result(state);
+    return reject('combat/no-legal-target', {
+      skillId: String(cmd.skillId),
+      requiredSide,
+      requestedTargets: cmd.targetCombatantIds.length,
+    });
   }
 
   // 起始 Working（就地可變 combatants 副本）。
@@ -1057,7 +1135,7 @@ export function handleUseCombatSkill(
     results: work.results,
   });
 
-  return finishTurn(state, work, cmd.actorId, ctx, [actionEvent]);
+  return acceptOf(finishTurn(state, work, cmd.actorId, ctx, [actionEvent]));
 }
 
 function tallySupportUse(
@@ -1089,13 +1167,18 @@ export function handleEnemyTurn(
   state: CombatState,
   encounterId: EncounterId,
   ctx: CombatHandlerContext,
-): ModuleResult<CombatState> {
-  const encounter = tryGetEncounter(state, encounterId);
-  if (encounter === undefined || encounter.state === 'resolved') return result(state);
+): CombatHandlerResult {
+  const live = requireLiveEncounter(state, encounterId);
+  if (isRejection(live)) return live;
+  const encounter = live;
   const actorId = encounter.currentActorId;
-  if (actorId === undefined) return result(state);
+  if (actorId === undefined) {
+    return reject('combat/no-current-actor', { encounterId: String(encounterId) });
+  }
   const actor = encounter.combatants[actorId];
-  if (actor === undefined || actor.side !== 'enemy' || actor.state === 'dead') return result(state);
+  if (actor === undefined) return reject('combat/actor-not-in-encounter', { actorId: String(actorId) });
+  if (actor.side !== 'enemy') return reject('combat/actor-not-enemy', { actorId: String(actorId) });
+  if (actor.state === 'dead') return reject('combat/actor-dead', { actorId: String(actorId) });
 
   const choice = ctx.resolvers.chooseEnemyAction({ encounter, actorId });
   if (choice === undefined) {
@@ -1103,7 +1186,7 @@ export function handleEnemyTurn(
     const combatants = { ...encounter.combatants };
     combatants[actorId] = { ...actor, currentCtb: actor.currentCtb + 100, revision: bumpRevision(actor.revision) };
     const work: Working = { encounter: { ...encounter, combatants }, combatants, results: [] };
-    return finishTurn(state, work, actorId, ctx, []);
+    return acceptOf(finishTurn(state, work, actorId, ctx, []));
   }
   // 敵方選招同樣走 useCombatSkill 主路（保證效果 / 延遲 / 補位 / 結算一致）。
   return handleUseCombatSkill(
@@ -1127,12 +1210,19 @@ export function handleCombatRest(
   state: CombatState,
   cmd: CombatRestCommand,
   ctx: CombatHandlerContext,
-): ModuleResult<CombatState> {
-  const encounter = tryGetEncounter(state, cmd.encounterId);
-  if (encounter === undefined || encounter.state === 'resolved') return result(state);
-  if (encounter.currentActorId !== cmd.actorId) return result(state);
+): CombatHandlerResult {
+  const live = requireLiveEncounter(state, cmd.encounterId);
+  if (isRejection(live)) return live;
+  const encounter = live;
+  if (encounter.currentActorId !== cmd.actorId) {
+    return reject('combat/not-current-actor', {
+      actorId: String(cmd.actorId),
+      currentActorId: String(encounter.currentActorId),
+    });
+  }
   const actor = encounter.combatants[cmd.actorId];
-  if (actor === undefined || actor.state === 'dead') return result(state);
+  if (actor === undefined) return reject('combat/actor-not-in-encounter', { actorId: String(cmd.actorId) });
+  if (actor.state === 'dead') return reject('combat/actor-dead', { actorId: String(cmd.actorId) });
 
   const rule = ctx.definitions.getCombatRule(COMBAT_RULE_ID);
   const delayRule = ctx.definitions.getActionDelayRule(rule.combatRestDelayRuleId);
@@ -1162,28 +1252,37 @@ export function handleCombatRest(
     actorId: cmd.actorId,
     results: work.results,
   });
-  return finishTurn(state, work, cmd.actorId, ctx, [actionEvent]);
+  return acceptOf(finishTurn(state, work, cmd.actorId, ctx, [actionEvent]));
 }
 
 // ──────────────────────────────────────────────────────────────────────────
-// §5.2 useCombatItem / commandAlly（stub // TODO）
+// §5.2 useCombatItem / commandAlly
 // ──────────────────────────────────────────────────────────────────────────
 
 export function handleUseCombatItem(
   state: CombatState,
   cmd: UseCombatItemCommand,
   _ctx: CombatHandlerContext,
-): ModuleResult<CombatState> {
-  const encounter = tryGetEncounter(state, cmd.encounterId);
-  if (encounter === undefined || encounter.state === 'resolved') return result(state);
-  if (encounter.currentActorId !== cmd.actorId) return result(state);
+): CombatHandlerResult {
+  const live = requireLiveEncounter(state, cmd.encounterId);
+  if (isRejection(live)) return live;
+  const encounter = live;
+  if (encounter.currentActorId !== cmd.actorId) {
+    return reject('combat/not-current-actor', {
+      actorId: String(cmd.actorId),
+      currentActorId: String(encounter.currentActorId),
+    });
+  }
   // inventory 契約的 CommitCombatItemUse 只吃 { itemId, userId }：userId 是使用者的
   // CharacterId，不是 CombatantId。怪物沒有背包，非角色行動者直接視為非法。
   const actor = encounter.combatants[cmd.actorId];
-  if (actor === undefined || actor.source.kind !== 'character') return result(state);
+  if (actor === undefined) return reject('combat/actor-not-in-encounter', { actorId: String(cmd.actorId) });
+  if (actor.source.kind !== 'character') {
+    return reject('combat/actor-has-no-inventory', { actorId: String(cmd.actorId) });
+  }
   // TODO: 完整戰鬥道具 workflow —— 待 CombatItemUseCommitted 回來後才套效果 / 延遲。
   //   第一版僅發出提交草案，不改 Encounter 快照。
-  return result(state, [
+  return accept(state, [
     command(INVENTORY_MODULE, {
       type: 'CommitCombatItemUse',
       itemId: cmd.itemInstanceId,
@@ -1192,15 +1291,17 @@ export function handleUseCombatItem(
   ]);
 }
 
+// 指揮隊友尚未實作。列於 manifest 的 UNAVAILABLE_CAPABILITIES，Router 在 dispatch **之前**就回
+// `engine/feature-not-available`，所以正常情況下走不到這裡。這個拒絕是第二道保險：萬一有人把它從
+// 清單移除卻忘了實作，會拿到明確失敗，而不是「送出成功、隊友沒反應」的假成功（規範 §10）。
 export function handleCommandAlly(
   state: CombatState,
   cmd: CommandAllyCommand,
   _ctx: CombatHandlerContext,
-): ModuleResult<CombatState> {
-  const encounter = tryGetEncounter(state, cmd.encounterId);
-  if (encounter === undefined || encounter.state === 'resolved') return result(state);
-  // TODO: 寫入一次性 AI 指令（隊友仍以自己的行動時機執行）。第一版為 no-op。
-  return result(state);
+): CombatHandlerResult {
+  const live = requireLiveEncounter(state, cmd.encounterId);
+  if (isRejection(live)) return live;
+  return reject('combat/command-ally-not-implemented', { encounterId: String(cmd.encounterId) });
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -1214,7 +1315,10 @@ function resolveEncounter(
   ctx: CombatHandlerContext,
   priorMessages: readonly TransactionMessageDraft[],
 ): ModuleResult<CombatState> {
-  if (encounter0.state === 'resolved') return result(state); // 冪等：只結算一次
+  // **真冪等**，不是偽裝的拒絕：判準是「資料齊全時這裡還會 no-op 嗎」——會，因為已結算的 Encounter
+  // 本來就只該結算一次（重複結算會重發成長事件）。本模組其餘 15 個「回傳未變 slice」都通不過這個
+  // 判準，已改為 typed rejection；只有這一筆留著。契約由 combat.test 的重複結算案例釘住。
+  if (encounter0.state === 'resolved') return result(state);
 
   const encounter: CombatEncounter = { ...encounter0, state: 'resolved', currentActorId: undefined, readyQueue: [] };
   const messages: TransactionMessageDraft[] = [...priorMessages];
