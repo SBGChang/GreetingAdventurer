@@ -314,9 +314,11 @@ function checkNoCrossSemanticCasts(productionFiles: readonly string[]): Failure[
 // ──────────────────────────────────────────────────────────────────────────
 //
 // `?? 5`、`?? 1`、`?? 'female'` 這類寫法把「缺資料」變成「有一個看起來合理的值」，是規範點名的
-// 方便性 fallback。空集合預設（`?? []`、`?? {}`、`?? 0` 的計數用途）通常是結構性的，但同樣需要
-// 明示豁免——因為從語法分不出「計數從 0 起」與「傷害預設 0」。
-const VALUE_FALLBACK_RE = /\?\?\s*(-?\d+(?:\.\d+)?|'[^']*'|"[^"]*")/g;
+// 方便性 fallback。從語法分不出「計數從 0 起」與「傷害預設 0」，所以純量一律要明示豁免。
+const SCALAR_FALLBACK_RE = /\?\?\s*(-?\d+(?:\.\d+)?|'[^']*'|"[^"]*")/g;
+
+// 空集合預設（`?? []`、`?? {}`）另計，理由見下方 checkEmptyCollectionRatchet。
+const EMPTY_COLLECTION_FALLBACK_RE = /\?\?\s*(\[\s*\]|\{\s*\})/g;
 
 function checkNoValueFallbacks(productionFiles: readonly string[]): Failure[] {
   const failures: Failure[] = [];
@@ -325,7 +327,7 @@ function checkNoValueFallbacks(productionFiles: readonly string[]): Failure[] {
     lines.forEach((line, i) => {
       const code = line.replace(/\/\/.*$/, '');
       if (isExempt(lines, i)) return;
-      for (const m of code.matchAll(VALUE_FALLBACK_RE)) {
+      for (const m of code.matchAll(SCALAR_FALLBACK_RE)) {
         failures.push({
           check: 'value-fallback',
           detail: `${relative(ROOT, file).replace(/\\/g, '/')}:${i + 1} 對缺值給了預設 \`?? ${m[1]}\`\n        ${line.trim()}`,
@@ -334,6 +336,53 @@ function checkNoValueFallbacks(productionFiles: readonly string[]): Failure[] {
     });
   }
   return failures;
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// 檢查 5：空集合預設的 ratchet（§6 附註）
+// ──────────────────────────────────────────────────────────────────────────
+//
+// 為什麼跟純量分開算，而不是同一份豁免帳：
+//
+// 建立本檢查時逐筆看過當時全部 31 筆，**沒有一筆是從內容讀出來的**。全是兩種形狀——選填建構參數
+// （`createTeamState({ teams?: Team[] })` 的 `input.teams ?? []`）與查無此鍵的集合（`edges.get(n) ?? []`、
+// `state.recentActivities[id] ?? []`）。這兩種的「空」是集合的單位元，不是替代缺失內容的假值：沒有任何
+// Content Pack 會讓「未指定的隊伍」變成三支預設隊伍。
+//
+// 但真正該擋的形狀是存在的——`skillView.effects ?? []` 會把壞掉的內容引用變成「這個技能沒有效果」。
+// 它跟上面那 31 筆語法完全相同。所以檢查留著，只是換成計數式 ratchet（同 check-contract-duplicates
+// 的 9 筆基準線）：既有的不必逐筆寫幾乎一樣的理由去淹掉純量那 6 筆真債，新增的一律讓建置失敗、逼人看一眼。
+//
+// 基準線只能往下。要新增就先問自己：左邊那個東西是內容嗎？
+const EMPTY_COLLECTION_BASELINE = 31; // 2026-08-17 起算
+
+function collectEmptyCollectionFallbacks(productionFiles: readonly string[]): string[] {
+  const found: string[] = [];
+  for (const file of productionFiles) {
+    const lines = readFileSync(file, 'utf8').split('\n');
+    lines.forEach((line, i) => {
+      const code = line.replace(/\/\/.*$/, '');
+      if (isExempt(lines, i)) return;
+      for (const _ of code.matchAll(EMPTY_COLLECTION_FALLBACK_RE)) {
+        found.push(`${relative(ROOT, file).replace(/\\/g, '/')}:${i + 1}\n        ${line.trim()}`);
+      }
+    });
+  }
+  return found;
+}
+
+function checkEmptyCollectionRatchet(productionFiles: readonly string[]): Failure[] {
+  const found = collectEmptyCollectionFallbacks(productionFiles);
+  if (found.length <= EMPTY_COLLECTION_BASELINE) return [];
+  return [
+    {
+      check: 'empty-collection-ratchet',
+      detail:
+        `空集合預設 ${found.length} 筆 > 基準線 ${EMPTY_COLLECTION_BASELINE}\n` +
+        `        新增的那筆左邊是內容嗎？是就補契約，不是就連同理由把基準線調高。全部位置：\n        ` +
+        found.join('\n        '),
+    },
+  ];
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -350,6 +399,7 @@ const checks: readonly { name: string; run: () => Failure[] }[] = [
   { name: '無硬編碼內容 ID（§5）', run: () => checkNoHardcodedContentIds(productionFiles) },
   { name: '無跨語意強制轉型（§7）', run: () => checkNoCrossSemanticCasts(productionFiles) },
   { name: '無玩法數值 fallback（§6）', run: () => checkNoValueFallbacks(productionFiles) },
+  { name: '空集合預設未超過基準線（§6 附註）', run: () => checkEmptyCollectionRatchet(productionFiles) },
   { name: '豁免皆附理由（§14）', run: () => checkAllowancesHaveReasons(productionFiles) },
   { name: '豁免數未超過基準線（§14）', run: () => checkExemptionRatchet(productionFiles) },
 ];
@@ -369,6 +419,9 @@ for (const check of checks) {
 console.log('');
 console.log(`受檢正式檔案：${productionFiles.length}`);
 console.log(`豁免：${countExemptions(productionFiles)} / 基準線 ${EXEMPTION_BASELINE}`);
+console.log(
+  `空集合預設：${collectEmptyCollectionFallbacks(productionFiles).length} / 基準線 ${EMPTY_COLLECTION_BASELINE}`,
+);
 if (total > 0) {
   console.log(`RUNTIME DISCIPLINE FAILED：共 ${total} 筆違規`);
   process.exit(1);

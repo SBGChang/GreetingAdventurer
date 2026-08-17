@@ -6,6 +6,10 @@
   "description": "Greeting Adventurer — React/TypeScript/Electron implementation of the archived design blueprint.",
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "verify:modules": "tsx scripts/verify-modules.ts",
+    "verify:contracts": "tsx scripts/check-contract-duplicates.ts",
+    "verify:discipline": "tsx scripts/verify-runtime-discipline.ts",
+    "verify": "npm run typecheck && npm run verify:discipline && npm run verify:modules",
     "content:yunhua": "node build_yunhua_content_html.mjs",
     "content:vildun": "node build_vildun_content_html.mjs",
     "content:aurelien": "node build_aurelien_content_html.mjs",
