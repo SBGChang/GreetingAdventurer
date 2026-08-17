@@ -354,12 +354,17 @@ export function handleApplyCombatCondition(
   }
   const max = ctx.stats.getStats(command.characterId);
 
+  // delta 未指定＝本命令不改動這一項（例如只帶 statusChanges 的呼叫），不是「改動 0」的預設值。
+  // 差別在寫法上看不出來，所以把「不動」寫成不做加法，而不是加一個 0。
+  const withDelta = (base: number, delta: number | undefined): number =>
+    delta === undefined ? base : base + delta;
+
   let health = clampUpper(
-    clampNonNegative(character.condition.health + (command.healthDelta ?? 0)),
+    clampNonNegative(withDelta(character.condition.health, command.healthDelta)),
     max.maxHealth,
   );
   const mana = clampUpper(
-    clampNonNegative(character.condition.mana + (command.manaDelta ?? 0)),
+    clampNonNegative(withDelta(character.condition.mana, command.manaDelta)),
     max.maxMana,
   );
 
@@ -376,7 +381,7 @@ export function handleApplyCombatCondition(
       statusInstanceId: ctx.ids.nextStatusInstanceId(),
       statusId: change.statusId,
       appliedOnDay: ctx.worldDay,
-      stacks: change.stacks ?? 1,
+      stacks: change.stacks,
     };
     const [nextStatuses, applied] = applyStatus(statuses, def, instance);
     statuses = nextStatuses;

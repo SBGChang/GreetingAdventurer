@@ -84,6 +84,7 @@ export function makeProgressionQuery(
       const progression = progressionOf(characterId);
       return requirements.every((req) => {
         const mp = progression?.masteries[req.masteryId];
+        // runtime-discipline-allow: 沒練過的熟練度就是 Lv.0；Mastery Lv.0～10 是規範明列的結構不變量，非可調內容。
         return (mp?.level ?? 0) >= req.minLevel;
       });
     },

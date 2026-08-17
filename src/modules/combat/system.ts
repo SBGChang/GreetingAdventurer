@@ -252,12 +252,47 @@ function backfillSide(
 // §8.1 倒扣式 CTB 排程
 // ──────────────────────────────────────────────────────────────────────────
 
+// ── 計數與走訪的共用件 ──────────────────────────────────────────────────────
+//
+// 這三個工具存在的理由是同一個：把「鍵一定在」與「累加從 0 起」這兩件事各講一次，而不是在
+// 每個使用點寫一個 `?? 0`。那些 `?? 0` 從語法上與「缺資料就給預設玩法值」完全一樣（規範 §6），
+// 但語意不同——分不出來的東西就不該散在十個地方。
+
+/** `Object.entries` 的具名鍵版本。鍵取自該物件本身，值必然存在，故不需要任何預設。 */
+function entriesOf<K extends string, V>(record: Readonly<Partial<Record<K, V>>>): [K, V][] {
+  return Object.entries(record) as [K, V][];
+}
+
+/** 對可變 Record 累加。0 是加法單位元、寫在這裡一次，不是「缺資料時的預設值」。 */
+function addToRecord<K extends string>(record: Partial<Record<K, number>>, key: K, amount: number): void {
+  // runtime-discipline-allow: 累加起點；本函式的存在就是為了讓這個 0 只出現一次，而不是散在八個呼叫點。
+  record[key] = (record[key] ?? 0) + amount;
+}
+
+/** 對 Map 累加。理由同上。 */
+function addToMap<K>(map: Map<K, number>, key: K, amount: number): void {
+  // runtime-discipline-allow: 同 addToRecord，累加起點而非玩法預設值。
+  map.set(key, (map.get(key) ?? 0) + amount);
+}
+
+/** 累加後夾上限。計數起點與上限都在這裡表達，呼叫端不必自己拆成「先讀舊值再夾」。 */
+function addToRecordCapped<K extends string>(
+  record: Partial<Record<K, number>>,
+  key: K,
+  amount: number,
+  cap: number,
+): void {
+  // runtime-discipline-allow: 同 addToRecord；上限由呼叫端以參數傳入，不在此處寫死。
+  record[key] = Math.min(cap, (record[key] ?? 0) + amount);
+}
+
 function ctbReduction(
   reductions: readonly Readonly<{ primaryAttribute: PrimaryAttributeId; reductionPerPoint: number }>[],
   attrs: Attributes,
 ): number {
   let sum = 0;
-  for (const r of reductions) sum += (attrs[r.primaryAttribute] ?? 0) * r.reductionPerPoint;
+  // Attributes 的鍵是 PrimaryAttributeId 的有限聯集（總覆蓋 Record），值必然存在。
+  for (const r of reductions) sum += attrs[r.primaryAttribute] * r.reductionPerPoint;
   return sum;
 }
 
@@ -315,12 +350,14 @@ function subtractDownRefill(
 
     const min = Math.min(...sched.map((c) => c.currentCtb));
     const combatants: Record<CombatantId, CombatantState> = { ...current.combatants };
+    const atZero: CombatantId[] = [];
     for (const c of sched) {
-      combatants[c.combatantId] = { ...c, currentCtb: c.currentCtb - min };
+      const reduced: CombatantState = { ...c, currentCtb: c.currentCtb - min };
+      combatants[c.combatantId] = reduced;
+      // 原本回頭查 `combatants[id]?.currentCtb ?? 1` 再比對 0——那個 `?? 1` 是拿「不等於 0」
+      // 當哨兵在用：查無此人就被當成「還沒輪到」而靜默排除。倒扣後的值就在手上，直接判斷。
+      if (reduced.currentCtb === 0) atZero.push(c.combatantId);
     }
-    const atZero = sched
-      .map((c) => c.combatantId)
-      .filter((id) => (combatants[id]?.currentCtb ?? 1) === 0);
 
     const withCombatants: CombatEncounter = { ...current, combatants };
     if (atZero.length > 0) {
@@ -748,7 +785,7 @@ function recordAttackDamage(
 ): void {
   const ledger = { ...work.encounter.attackDamageByCharacter };
   const perChar = { ...(ledger[characterId] ?? {}) };
-  perChar[masteryId] = (perChar[masteryId] ?? 0) + amount;
+  addToRecord(perChar, masteryId, amount);
   ledger[characterId] = perChar;
   // work.encounter 是 Readonly，這裡以就地重建（Working 於呼叫端整體重組）。
   (work as { encounter: CombatEncounter }).encounter = {
@@ -1040,8 +1077,7 @@ function tallySupportUse(
   }
   const characterId = actor.source.characterId;
   const perChar = { ...(encounter.supportMasteryUseCounts[characterId] ?? {}) };
-  const prev = perChar[skillId] ?? 0;
-  perChar[skillId] = Math.min(SUPPORT_USE_CAP, prev + 1);
+  addToRecordCapped(perChar, skillId, 1, SUPPORT_USE_CAP);
   return { ...encounter.supportMasteryUseCounts, [characterId]: perChar };
 }
 
@@ -1272,16 +1308,13 @@ type Award = Readonly<{ characterId: CharacterId; masteryId: MasteryId; amount: 
 // 攻擊 MXP：依角色對各敵人造成的有效傷害比例分配（§8.6）。
 function computeAttackAwards(encounter: CombatEncounter, budget: number): Award[] {
   let total = 0;
-  for (const characterId of Object.keys(encounter.attackDamageByCharacter) as CharacterId[]) {
-    const perMastery = encounter.attackDamageByCharacter[characterId] ?? {};
-    for (const masteryId of Object.keys(perMastery) as MasteryId[]) total += perMastery[masteryId] ?? 0;
+  for (const [, perMastery] of entriesOf(encounter.attackDamageByCharacter)) {
+    for (const [, dmg] of entriesOf(perMastery)) total += dmg;
   }
   if (total <= 0 || budget <= 0) return [];
   const awards: Award[] = [];
-  for (const characterId of Object.keys(encounter.attackDamageByCharacter) as CharacterId[]) {
-    const perMastery = encounter.attackDamageByCharacter[characterId] ?? {};
-    for (const masteryId of Object.keys(perMastery) as MasteryId[]) {
-      const dmg = perMastery[masteryId] ?? 0;
+  for (const [characterId, perMastery] of entriesOf(encounter.attackDamageByCharacter)) {
+    for (const [masteryId, dmg] of entriesOf(perMastery)) {
       if (dmg <= 0) continue;
       awards.push({ characterId, masteryId, amount: (dmg / total) * budget });
     }
@@ -1298,14 +1331,20 @@ function computeDefenseAwards(
   if (budget <= 0 || encounter.defenseFormationRows.length === 0) return [];
   const occupiedRows = [...new Set(encounter.defenseFormationRows.map((e) => e.row))].sort((a, b) => a - b);
   const weightOfRow = new Map<number, number>();
+  // 由前至後第一/二/三個有人排權重 3/2/1（§8.6）。走訪權重表而不是走訪排——場地 3×3 是結構不變量，
+  // 有人排至多 3 個，但即使多出來也是「不在權重表內」而非「權重 0」，兩者要分得開（見下方 continue）。
   const weights = [3, 2, 1];
-  occupiedRows.forEach((row, i) => weightOfRow.set(row, weights[i] ?? 0));
+  weights.forEach((weight, i) => {
+    const row = occupiedRows[i];
+    if (row !== undefined) weightOfRow.set(row, weight);
+  });
 
   const perChar = new Map<CharacterId, number>();
   let totalWeight = 0;
   for (const entry of encounter.defenseFormationRows) {
-    const w = weightOfRow.get(entry.row) ?? 0;
-    perChar.set(entry.characterId, (perChar.get(entry.characterId) ?? 0) + w);
+    const w = weightOfRow.get(entry.row);
+    if (w === undefined) continue; // 該排不在權重表內（3×3 下不會發生）；不是「權重 0」。
+    addToMap(perChar, entry.characterId, w);
     totalWeight += w;
   }
   if (totalWeight <= 0) return [];
@@ -1335,10 +1374,8 @@ function computeSupportAwards(
   ctx: CombatHandlerContext,
 ): SupportAwardEvent[] {
   const out: SupportAwardEvent[] = [];
-  for (const characterId of Object.keys(encounter.supportMasteryUseCounts) as CharacterId[]) {
-    const perSkill = encounter.supportMasteryUseCounts[characterId] ?? {};
-    for (const skillId of Object.keys(perSkill) as SkillDefinitionId[]) {
-      const count = perSkill[skillId] ?? 0;
+  for (const [characterId, perSkill] of entriesOf(encounter.supportMasteryUseCounts)) {
+    for (const [skillId, count] of entriesOf(perSkill)) {
       if (count <= 0) continue;
       const skillView = ctx.definitions.getSkillView(skillId);
       if (skillView.supportMasteryAwardRuleId === undefined) continue;

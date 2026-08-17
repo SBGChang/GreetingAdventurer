@@ -389,8 +389,8 @@ export function loadContent(input: LoadContentInput): CompileContentResult {
       const schemaVersion = readNumber(raw, 'schemaVersion');
       const enabled = readBoolean(raw, 'enabled');
       const declaredPackId = readString(raw, 'packId') as ContentPackId | undefined;
-      const sourcePath =
-        readString(raw, 'sourcePath') ?? `${contentRoot}/${kind ?? 'unknown'}/${id ?? `#${index}`}.json`;
+      // runtime-discipline-allow: 壞資料的診斷標籤，不是內容值——下面幾行正要把 kind/id 缺失報成錯誤，標籤本來就得描述得出缺欄位的那筆定義。
+      const sourcePath = readString(raw, 'sourcePath') ?? `${contentRoot}/${kind ?? 'unknown'}/${id ?? `#${index}`}.json`;
 
       const missing: string[] = [];
       if (id === undefined) missing.push('id');

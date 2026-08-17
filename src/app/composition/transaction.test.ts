@@ -96,6 +96,7 @@ function baseState(): GameState {
   return {
     ...createEmptyGameState({
       worldSeed: 'transaction-test',
+      startDay: 0,
       // 玩家隊 = dungeon 探索 Session 的隊伍：Game Command 授權要求 actorTeamId === playerTeamId。
       team: createTeamState({ playerTeamId: FIXTURE.teamId }),
     }),

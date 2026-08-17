@@ -86,6 +86,7 @@ export function baseState(): GameState {
   return {
     ...createEmptyGameState({
       worldSeed: 'session-smoke-test',
+      startDay: 0,
       team: createTeamState({ playerTeamId: PLAYER_TEAM }),
     }),
     dungeon: dungeonAtMiddle(),

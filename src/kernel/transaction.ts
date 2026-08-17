@@ -97,6 +97,7 @@ function isInternalCommandDraft(
 }
 
 function notificationCount(mutation: SliceMutation): number {
+  // runtime-discipline-allow: 沒有 notifications 陣列就是沒有通知，這是計數而非玩法值；kernel 記帳用，換 Content Pack 不會變。
   return mutation.notifications?.length ?? 0;
 }
 

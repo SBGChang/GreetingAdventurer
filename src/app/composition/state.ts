@@ -97,14 +97,16 @@ export function isGameSliceName(name: string): name is GameSliceName {
 
 export type CreateEmptyGameStateInput = Readonly<{
   worldSeed: string;
-  startDay?: number;
+  // 必填。世界從第幾天開始是**內容**（曆法起點會隨 Pack 改變），不是結構不變量；
+  // 原本選填、缺省 0，等於把它固定在程式裡。呼叫端（未來的 NewGameBootstrapper）必須明講。
+  startDay: number;
   team: TeamState;
 }>;
 
 export function createEmptyGameState(input: CreateEmptyGameStateInput): GameState {
   return {
     core: {
-      worldDay: input.startDay ?? 0,
+      worldDay: input.startDay,
       worldSeed: input.worldSeed,
       nextRuntimeSequence: 0 as CoreState<GameScheduledJob>['nextRuntimeSequence'],
       scheduler: { jobsById: {} as Readonly<Record<JobId, GameScheduledJob>>, revision: 0 },

@@ -24,6 +24,7 @@ const PLAYER_TEAM = 'runtime:team~test~0' as TeamId;
 function emptyState(): GameState {
   return createEmptyGameState({
     worldSeed: 'composition-test',
+    startDay: 0,
     // 只需要一個能通過型別的最小 team slice；本檔測的是註冊面，不是隊伍規則。
     team: createTeamState({ playerTeamId: PLAYER_TEAM }),
   });

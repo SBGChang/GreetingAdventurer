@@ -51,19 +51,23 @@ function clamp(value: number, min: number | undefined, max: number | undefined):
 //  - linear : bias + Σ (weight_i · input_i)          （bias 缺省 = 加法單位元 0）
 //  - product: bias · Π (input_i ^ exponent_i)         （bias 缺省 = 乘法單位元 1）
 
-export type WeightedTerm = Readonly<{
-  inputKey: string;
-  weight?: number; // linear 係數
-  exponent?: number; // product 次方
-}>;
+// 係數與次方**必填**，而且依 mode 分成兩種項。原本是單一 `{ weight?, exponent? }` 兩者皆選填，
+// kernel 缺省補 1——但係數與次方就是調校量，跟本檔 LogisticCurveParams.bias 已經寫明的理由一樣
+// （「曲線位置是調校量，不得由程式補預設」）。同一份 kernel 不能兩套標準：內容沒給係數，代表這條
+// 公式還沒調校完，不是「係數是 1」。
+//
+// 分成兩型而不是把兩個欄位都設成必填：linear 用不到次方、product 用不到係數，要求作者填一個
+// 不影響結果的欄位只會逼出隨便填的值——那跟預設值一樣糟，只是換人填。
+export type LinearTerm = Readonly<{ inputKey: string; weight: number }>;
+export type ProductTerm = Readonly<{ inputKey: string; exponent: number }>;
 
-export type WeightedLinearProductParams = Readonly<{
-  mode: 'linear' | 'product';
-  terms: readonly WeightedTerm[];
-  bias?: number;
-  clampMin?: number;
-  clampMax?: number;
-}>;
+type ClampBounds = Readonly<{ bias?: number; clampMin?: number; clampMax?: number }>;
+
+export type WeightedLinearProductParams = ClampBounds &
+  (
+    | Readonly<{ mode: 'linear'; terms: readonly LinearTerm[] }>
+    | Readonly<{ mode: 'product'; terms: readonly ProductTerm[] }>
+  );
 
 export function weightedLinearProduct(
   params: WeightedLinearProductParams,
@@ -72,7 +76,7 @@ export function weightedLinearProduct(
   if (params.mode === 'linear') {
     let acc = params.bias === undefined ? 0 : requireFiniteParam(params.bias, 'bias');
     params.terms.forEach((term, i) => {
-      const weight = requireFiniteParam(term.weight ?? 1, `terms[${i}].weight`);
+      const weight = requireFiniteParam(term.weight, `terms[${i}].weight`);
       acc += weight * requireInput(inputs, term.inputKey);
     });
     return clamp(acc, params.clampMin, params.clampMax);
@@ -80,7 +84,7 @@ export function weightedLinearProduct(
   // product
   let acc = params.bias === undefined ? 1 : requireFiniteParam(params.bias, 'bias');
   params.terms.forEach((term, i) => {
-    const exponent = requireFiniteParam(term.exponent ?? 1, `terms[${i}].exponent`);
+    const exponent = requireFiniteParam(term.exponent, `terms[${i}].exponent`);
     acc *= Math.pow(requireInput(inputs, term.inputKey), exponent);
   });
   return clamp(acc, params.clampMin, params.clampMax);

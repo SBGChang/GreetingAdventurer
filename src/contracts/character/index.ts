@@ -356,11 +356,15 @@ export type ApplyFoodStatusEffects = Readonly<{
 }>;
 
 // 狀態變更描述（事件與命令共用；來源文件未給精確 schema）(AMBIGUITY)。
-export type CharacterStatusChange = Readonly<{
-  statusId: CharacterStatusDefinitionId;
-  change: 'applied' | 'removed' | 'refreshed';
-  stacks?: number;
-}>;
+//
+// 以 `change` 判別：層數只有在套用／刷新時才有意義，移除時沒有。原本 `stacks?: number` 對三種變更
+// 一視同仁，Handler 於是寫 `change.stacks ?? 1`——那個 1 是**玩法值**（要疊幾層是內容決定的），
+// 不是結構預設。改成聯集後，該講層數的地方必須講，不該講的地方講不出來。
+export type CharacterStatusChange = Readonly<{ statusId: CharacterStatusDefinitionId }> &
+  (
+    | Readonly<{ change: 'applied' | 'refreshed'; stacks: number }>
+    | Readonly<{ change: 'removed' }>
+  );
 
 // ──────────────────────────────────────────────────────────────────────────
 // §5.3 Character 自己處理的 Job（characterLifecycleDue）
