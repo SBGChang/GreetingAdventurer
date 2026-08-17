@@ -28,8 +28,10 @@ const TEST_ONLY_PATTERNS: readonly { pattern: RegExp; why: string }[] = [
   { pattern: /(^|[/\\])fixtures\.ts$/, why: '模組測試 Fixture' },
   { pattern: /fixture[^/\\]*\.ts$/, why: '測試 Fixture' },
   { pattern: /(^|[/\\])testing[/\\]/, why: '測試專用目錄' },
-  // Bring-up Bootstrap：檔案自身已聲明它不是正式 NewGameBootstrapper。
-  { pattern: /(^|[/\\])bootstrap\.ts$/, why: 'Bring-up Bootstrap（非正式 NewGameBootstrapper）' },
+  // 這裡曾經有一筆 `/bootstrap\.ts$/`，把 bring-up bootstrap 以**檔名**排除在四項檢查之外。
+  // 那是個陷阱：正式 NewGameBootstrapper 最自然的落點就叫 bootstrap.ts，寫上去的那天它會安靜地
+  // 免檢——而 Bootstrap 正是最該受檢的地方（§1.1 要派生屬性、驗內容、排生命週期 Job）。
+  // Bring-up 版本已改名並移入 src/testing/，靠**位置**排除；檔名 bootstrap.ts 現在是受檢的。
 ];
 
 function testOnlyReason(file: string): string | undefined {

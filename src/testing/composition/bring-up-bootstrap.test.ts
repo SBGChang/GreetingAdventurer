@@ -20,12 +20,12 @@ import type {
 } from '../../contracts/core';
 import type { RestCommand } from '../../contracts/team';
 
-import { createBringUpFixture, type BringUpFixtureInput } from './bootstrap';
-import { runGameCommand, runDueJob, type ContextAssembler } from './session';
+import { createBringUpFixture, type BringUpFixtureInput } from './bring-up-bootstrap';
+import { runGameCommand, runDueJob, type ContextAssembler } from '../../app/composition/session';
 import { unusedContext } from './session-fixture';
-import type { ModuleContexts } from './router';
-import type { GameCommand } from './messages';
-import type { GameScheduledJob, GameState } from './state';
+import type { ModuleContexts } from '../../app/composition/router';
+import type { GameCommand } from '../../app/composition/messages';
+import type { GameScheduledJob, GameState } from '../../app/composition/state';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);

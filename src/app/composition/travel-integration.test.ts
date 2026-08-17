@@ -12,7 +12,7 @@ import { handleStartCityTravel, tryGetTeam, tryGetPlan, type TeamHandlerResult }
 import { fixtureTeamState, makeContext as teamMakeContext, stubDefinitionReader as teamStubReader, CITY_B, ROUTE_AB, TRAVEL_MODE_3 } from '../../modules/team/fixtures';
 
 import { runDueJob, type ContextAssembler } from './session';
-import { unusedContext } from './session-fixture';
+import { unusedContext } from '../../testing/composition/session-fixture';
 import type { ModuleContexts } from './router';
 import { createEmptyGameState, type GameScheduledJob, type GameState } from './state';
 

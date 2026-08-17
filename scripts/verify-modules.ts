@@ -14,7 +14,7 @@ import { runTests as dungeonReader } from '../src/app/content/dungeon-reader.tes
 import { runTests as moduleReaders } from '../src/app/content/readers.test';
 import { runTests as resolvers } from '../src/app/content/resolvers.test';
 import { runTests as crossModulePorts } from '../src/app/content/cross-module-ports.test';
-import { runTests as bootstrap } from '../src/app/composition/bootstrap.test';
+import { runTests as bootstrap } from '../src/testing/composition/bring-up-bootstrap.test';
 import { runTests as travelIntegration } from '../src/app/composition/travel-integration.test';
 import { runTests as weaponSetWorkflow } from '../src/app/workflows/weapon-set-configuration.test';
 // 地基層測試自 Wave A 起就存在，但從未被這支腳本跑過。

@@ -27,8 +27,8 @@ import { createCharacterProgression } from '../../modules/progression/public';
 import type { Team, TeamCombatFormation } from '../../modules/team/public';
 import { createTeamState } from '../../modules/team/public';
 
-import { createIdPortsForBootstrap } from './session';
-import { createEmptyGameState, type GameState } from './state';
+import { createIdPortsForBootstrap } from '../../app/composition/session';
+import { createEmptyGameState, type GameState } from '../../app/composition/state';
 
 export type BringUpFixtureInput = Readonly<{
   worldSeed: string;

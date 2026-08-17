@@ -14,7 +14,7 @@ import { requireInstance } from '../../modules/map/public';
 import { FIXTURE, createFixtureState } from '../../modules/dungeon/fixtures';
 
 import { runGameCommand } from './session';
-import { baseState, makeAssembler, openRedDoor } from './session-fixture';
+import { baseState, makeAssembler, openRedDoor } from '../../testing/composition/session-fixture';
 import type { GameState } from './state';
 
 function assert(condition: boolean, message: string): void {

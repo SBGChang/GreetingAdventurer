@@ -23,10 +23,10 @@ import { createMapState } from '../../modules/map/public';
 import { makeContext as mapMakeContext } from '../../modules/map/fixtures';
 import { createTeamState } from '../../modules/team/public';
 
-import type { ContextAssembler } from './session';
-import type { ModuleContexts } from './router';
-import type { GameCommand } from './messages';
-import { createEmptyGameState, type GameState } from './state';
+import type { ContextAssembler } from '../../app/composition/session';
+import type { ModuleContexts } from '../../app/composition/router';
+import type { GameCommand } from '../../app/composition/messages';
+import { createEmptyGameState, type GameState } from '../../app/composition/state';
 
 export const PLAYER_TEAM = FIXTURE.teamId as TeamId;
 

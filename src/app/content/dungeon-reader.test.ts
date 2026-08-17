@@ -20,7 +20,7 @@ import { FIXTURE } from '../../modules/dungeon/fixtures';
 import { requireInstance } from '../../modules/map/public';
 
 import { runGameCommand } from '../composition/session';
-import { baseState, makeAssembler, openRedDoor } from '../composition/session-fixture';
+import { baseState, makeAssembler, openRedDoor } from '../../testing/composition/session-fixture';
 
 import { createDungeonDefinitionReader, DUNGEON_DEFINITION_KINDS } from './dungeon-reader';
 

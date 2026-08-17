@@ -18,16 +18,30 @@
 | context 工廠 | `router.ts`:`ModuleContextFactory = (state)=>ModuleContexts`,每次 dispatch 以當前 workingState 重建(query 工廠皆吃快照,§3.1 rule 3) | ✅ |
 | 引擎 Session | `session.ts`:§7.2 交易私有 runtime-id cursor(seed 自 `core.nextRuntimeSequence`、鑄 envelope+entity+job ID、提交寫回)、真實 kernel id/rng ports;內容以注入的 `ContextAssembler` 供給 | ✅ + 測試(跨模組級聯 openDungeonDoor→OpenMapDoor→真 map slice) |
 | 內容 adapter | `src/app/content/`:reader adapter(全 7 模組)+ resolver adapter(核心+§7.1 資料調校樣板)+ 真實跨模組 Query port(DungeonTeamPort/CombatLoadoutQuery;硬的 DungeonMapPort 等待) | ✅ + 測試(data-runtime 首批真實消費者) |
-| bring-up fixture | `bootstrap.ts`:`createBringUpFixture` 組出**最小可驅動** State(玩家隊+隊長+空成長檔+站位),bootstrap cursor 鑄 ID + 輸入驗證。**非**正式 §1.1 NewGameBootstrapper(缺 archetype 屬性派生、生命週期 Job、內容/城/archetype 驗證、diagnostics/route/phase——多卡在內容) | ✅ + 測試(bring-up 切片:bootstrap→`rest`→提交→**執行到期 Job**→golden 重播,只碰已實作模組) |
+| bring-up fixture | `src/testing/composition/bring-up-bootstrap.ts`:`createBringUpFixture` 組出**最小可驅動** State(玩家隊+隊長+空成長檔+站位),bootstrap cursor 鑄 ID + 輸入驗證。**非**正式 §1.1 NewGameBootstrapper(缺 archetype 屬性派生、生命週期 Job、內容/城/archetype 驗證、diagnostics/route/phase——多卡在內容)。**住在 `src/testing/` 是刻意的**:門禁以目錄排除它,`bootstrap.ts` 這個檔名現在受檢,正式 Bootstrap 寫上去不會免檢 | ✅ + 測試(bring-up 切片:bootstrap→`rest`→提交→**執行到期 Job**→golden 重播,只碰已實作模組) |
 | 授權 | `router.ts`:玩家命令 dispatch 前檢查 actorTeamId 擁有目標(全域 actorTeamId===playerTeamId;teamId/characterId/encounterId 目標須屬 actorTeam;戰鬥員須 `side==='player'`) | ✅ + 測試 |
 | Workflow 訂閱 | Workflow 反應事件、送 Internal Command 但不擁有 Slice:kernel EventSubscriber `mutation` 改為選填;模組與 Workflow **共用**唯一有序 `EVENT_SUBSCRIPTIONS_BY_TYPE`(`subscriber: ModuleId \| WorkflowId`);`WorkflowDefinition` 帶 `startsFrom` + `steps`,`validateManifest` 驗證(含「只訂閱 startsFrom」);反應邏輯在 `app/workflows/player-travel-event.ts`。首個:**旅行事件 Workflow**(TravelSegmentReached→CompleteSegment) | ✅ + 測試(travel 端到端 + manifest 驗證) |
 
 **驗證指令:**
 ```bash
 npm install
-npm run typecheck              # tsc --noEmit,目前 0 錯誤
-npx tsx scripts/verify-modules.ts   # kernel + data-runtime + 7 模組 + composition + 交易接線,目前全過
+npm run verify
 ```
+
+`npm run verify` = `typecheck` → `verify:discipline` → `verify:modules`（由便宜且結構性的先跑）。
+三者也可單獨執行；另有 `verify:contracts`（契約重複 ratchet,基準線 9,已含在 verify:modules 內）。
+
+**`verify:discipline` 是正式 Runtime 紀律門禁**(`scripts/verify-runtime-discipline.ts`,規範 §14)。
+它擋的是測試抓不到的那一類:測試資料滲進正式路徑、內容 ID 寫死、型別轉換掩蓋契約缺口、缺資料
+偷給預設值。目前**全綠**,兩條 ratchet 只能往下:
+
+| 帳 | 現值 | 意義 |
+|---|---|---|
+| 豁免 | 6 | `runtime-discipline-allow: <理由>`,理由必填;無理由的標記本身算違規 |
+| 空集合預設 | 31 | `?? []`／`?? {}` 計數式 ratchet(全部是選填建構參數與查無此鍵,無一讀自內容) |
+
+新增任一項都會讓建置失敗,要調高基準線得在 commit message 說明為什麼那筆債值得欠。
+**硬編碼內容 ID 檢查不接受豁免**——§5 的五個合法出口裡沒有「寫在 Handler 裡並附理由」。
 
 ## 待辦(依建議順序)
 
