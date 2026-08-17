@@ -112,6 +112,73 @@ function resolveImport(fromFile: string, spec: string): string | undefined {
 type Failure = Readonly<{ check: string; detail: string }>;
 
 // ──────────────────────────────────────────────────────────────────────────
+// 豁免機制（§14）
+// ──────────────────────────────────────────────────────────────────────────
+//
+// 為什麼豁免必須帶理由：門禁清零最省力的路徑永遠是灑一排註解，而那正是規範點名的
+// 「用 TODO 註解把未完成行為合理化」。要求理由把「順手繞過」變成「寫得出來才准過」，
+// 而理由寫不出來的那一刻，通常就是發現它其實是真違規的那一刻。
+//
+// 為什麼還要 ratchet：單靠「有理由」擋不住理由愈寫愈廉價。總數只能往下，等同宣告
+// 豁免是**債**不是設計選項——與 `check-contract-duplicates.ts` 的基準線同一個道理。
+//
+// 格式：`runtime-discipline-allow: <理由>`（同一行）。
+const ALLOW_RE = /runtime-discipline-allow:[ \t]*(\S[^\n]*?)[ \t]*$/;
+const ALLOW_MARKER = 'runtime-discipline-allow';
+
+// 豁免總數基準線。**只能往下改。**調降時一併更新這行的日期與 commit，
+// 讓後來的人看得出它確實在收斂而不是被人偷偷調上去。
+const EXEMPTION_BASELINE = 0; // 2026-08-17 起算
+
+function allowanceReason(line: string): string | undefined {
+  return ALLOW_RE.exec(line)?.[1];
+}
+
+/** 帶標記卻沒寫理由 = 沒有豁免。原本的違規照樣會報，這裡再多報一筆格式錯誤。 */
+function checkAllowancesHaveReasons(productionFiles: readonly string[]): Failure[] {
+  const failures: Failure[] = [];
+  for (const file of productionFiles) {
+    const lines = readFileSync(file, 'utf8').split('\n');
+    lines.forEach((line, i) => {
+      if (!line.includes(ALLOW_MARKER)) return;
+      if (allowanceReason(line) !== undefined) return;
+      failures.push({
+        check: 'allowance-without-reason',
+        detail:
+          `${relative(ROOT, file).replace(/\\/g, '/')}:${i + 1} 豁免沒有理由\n` +
+          `        ${line.trim()}\n` +
+          `        格式須為 \`${ALLOW_MARKER}: <理由>\`——說明它為什麼不是暫代行為`,
+      });
+    });
+  }
+  return failures;
+}
+
+function countExemptions(productionFiles: readonly string[]): number {
+  let count = 0;
+  for (const file of productionFiles) {
+    for (const line of readFileSync(file, 'utf8').split('\n')) {
+      if (allowanceReason(line) !== undefined) count += 1;
+    }
+  }
+  return count;
+}
+
+function checkExemptionRatchet(productionFiles: readonly string[]): Failure[] {
+  const actual = countExemptions(productionFiles);
+  if (actual <= EXEMPTION_BASELINE) return [];
+  return [
+    {
+      check: 'exemption-ratchet',
+      detail:
+        `豁免數 ${actual} > 基準線 ${EXEMPTION_BASELINE}\n` +
+        `        新增豁免前請先確認它不是真違規；確定要留就連同理由一起把基準線調高，\n` +
+        `        並在 commit message 說明為什麼這筆債值得欠。`,
+    },
+  ];
+}
+
+// ──────────────────────────────────────────────────────────────────────────
 // 檢查 1：正式依賴圖不得含測試／Bring-up（§13）
 // ──────────────────────────────────────────────────────────────────────────
 //
@@ -178,6 +245,10 @@ function checkProductionDependencyGraph(): Failure[] {
 //
 // 判斷依據是專案的 ID 命名慣例：`definition:` / `runtime:` / `template-local:` / `resolver:` 前綴。
 // 內容 ID 必須來自 Definition、Command 或 Query，寫在 Handler 裡代表換 Pack 不會變。
+//
+// **本檢查刻意不支援豁免。** §7／§6 有語法上分不出來的合法情形（去品牌、計數起點），所以需要
+// 明示豁免；§5 沒有——規範的五個合法出口裡沒有「把 ID 寫在 Handler 裡並附上理由」這一項。
+// 留了豁免路徑，`resolver:dungeon-default` 這種佔位就會用一行註解「修掉」而不是補契約。
 // ID 的形狀是「前綴 + 冒號分隔的 kebab／英數片段」，不含空白或中日韓文字。若不限制形狀，
 // 以 `resolver:` 開頭的**錯誤訊息**也會被當成 ID（本門禁第一次跑就誤判了一筆）。
 const CONTENT_ID_RE = /'((?:definition|runtime|template-local|resolver):[A-Za-z0-9._-]+(?::[A-Za-z0-9._-]+)*)'/g;
@@ -215,7 +286,7 @@ function checkNoCrossSemanticCasts(productionFiles: readonly string[]): Failure[
     lines.forEach((line, i) => {
       const code = line.replace(/\/\/.*$/, '');
       if (!code.includes('as unknown as')) return;
-      if (line.includes('runtime-discipline-allow')) return;
+      if (allowanceReason(line) !== undefined) return;
       failures.push({
         check: 'cross-semantic-cast',
         detail: `${relative(ROOT, file).replace(/\\/g, '/')}:${i + 1} 使用 as unknown as（缺契約？）\n        ${line.trim()}`,
@@ -240,7 +311,7 @@ function checkNoValueFallbacks(productionFiles: readonly string[]): Failure[] {
     const lines = readFileSync(file, 'utf8').split('\n');
     lines.forEach((line, i) => {
       const code = line.replace(/\/\/.*$/, '');
-      if (line.includes('runtime-discipline-allow')) return;
+      if (allowanceReason(line) !== undefined) return;
       for (const m of code.matchAll(VALUE_FALLBACK_RE)) {
         failures.push({
           check: 'value-fallback',
@@ -266,6 +337,8 @@ const checks: readonly { name: string; run: () => Failure[] }[] = [
   { name: '無硬編碼內容 ID（§5）', run: () => checkNoHardcodedContentIds(productionFiles) },
   { name: '無跨語意強制轉型（§7）', run: () => checkNoCrossSemanticCasts(productionFiles) },
   { name: '無玩法數值 fallback（§6）', run: () => checkNoValueFallbacks(productionFiles) },
+  { name: '豁免皆附理由（§14）', run: () => checkAllowancesHaveReasons(productionFiles) },
+  { name: '豁免數未超過基準線（§14）', run: () => checkExemptionRatchet(productionFiles) },
 ];
 
 let total = 0;
@@ -282,6 +355,7 @@ for (const check of checks) {
 
 console.log('');
 console.log(`受檢正式檔案：${productionFiles.length}`);
+console.log(`豁免：${countExemptions(productionFiles)} / 基準線 ${EXEMPTION_BASELINE}`);
 if (total > 0) {
   console.log(`RUNTIME DISCIPLINE FAILED：共 ${total} 筆違規`);
   process.exit(1);
