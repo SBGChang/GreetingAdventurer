@@ -1,0 +1,72 @@
+name: verify
+
+# 沒有 CI 的時候，repo 裡所有門禁都只是「開發者記得跑才有用」的腳本。
+# 這個 workflow 是它們唯一的強制點：push 到 main 與所有 PR 都必須全過。
+#
+# 步驟刻意拆開而不是只跑 `npm run verify`，因為失敗時要一眼看出是哪一道門擋下來的。
+# 順序由便宜且結構性的往後排：型別 → Runtime 紀律 → 模組測試。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  runtime:
+    name: 型別 · Runtime 紀律 · 模組測試
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - run: npm ci
+
+      - name: typecheck
+        run: npm run typecheck
+
+      # 正式 Runtime 紀律門禁（規範 §14）：測試抓不到的那一類——
+      # 測試資料滲進正式路徑、內容 ID 寫死、型別轉換掩蓋契約缺口、缺資料偷給預設值。
+      - name: verify:discipline
+        run: npm run verify:discipline
+
+      - name: verify:modules
+        run: npm run verify:modules
+
+  content:
+    name: 內容產物同步 · 工作範圍
+    runs-on: ubuntu-latest
+    steps:
+      # fetch-depth: 0 是必要的：content-scope 要比對 diff range，content-sync 要開 worktree。
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - run: npm ci
+
+      # committed 的閱讀頁必須等於「用 committed 的資料重新產生的結果」。
+      # Builder 自帶內容驗證，所以資料本身不合規也會在這裡失敗。
+      - name: verify:content-sync
+        run: npm run verify:content-sync
+
+      # 一項工作只能修改它宣告的 scope 允許的路徑（scripts/content-scope.json）。
+      # scope 由分支名推斷：content/<culture>/… → culture:<culture>；其餘為 engine。
+      - name: verify:content-scope
+        env:
+          CONTENT_SCOPE_RANGE: >-
+            ${{ github.event_name == 'pull_request'
+                && format('{0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha)
+                || format('{0}..{1}', github.event.before, github.sha) }}
+        run: npm run verify:content-scope

@@ -1,0 +1,60 @@
+{
+  "$comment": [
+    "工作範圍宣告。每一項工作屬於一個 scope；scope 決定它**可以修改哪些路徑**。",
+    "verify-content-scope.mjs 以 git diff range 比對，動到 allow 以外的路徑即失敗。",
+    "",
+    "為什麼需要這個：文化內容工作只該調整該文化的資料。但 Builder、Shared Factory、Schema、",
+    "驗證器與引擎程式都在同一個 repo，沒有任何機制擋住『順手改一下共用檔讓我的資料過』——",
+    "那會讓一國的內容需求變成四國共用行為的改動，而且不會有任何測試失敗。",
+    "",
+    "scope 由 --scope 參數、CONTENT_SCOPE 環境變數，或分支名稱推斷（content/<culture>/… ）。",
+    "都沒有時使用 default。"
+  ],
+
+  "default": "engine",
+
+  "scopes": {
+    "culture:yunhua": {
+      "why": "雲華內容工作：只調整雲華自己的資料與說明",
+      "allow": ["docs/03_content/yunhua/**"]
+    },
+    "culture:vildun": {
+      "why": "維爾冬內容工作：只調整維爾冬自己的資料與說明",
+      "allow": ["docs/03_content/vildun/**"]
+    },
+    "culture:aurelien": {
+      "why": "奧雷利安內容工作：只調整奧雷利安自己的資料與說明",
+      "allow": ["docs/03_content/aurelien/**"]
+    },
+    "culture:safir": {
+      "why": "薩菲爾內容工作：只調整薩菲爾自己的資料與說明",
+      "allow": ["docs/03_content/safir/**"]
+    },
+
+    "content-platform": {
+      "why": "內容平台工作：共用 Factory／地圖模型／渲染器／版型／Builder。會同時影響四國，故與單一文化工作分開。",
+      "allow": ["docs/03_content/shared/**", "build_*.mjs", "docs/03_content/*/*_content.html"]
+    },
+
+    "engine": {
+      "why": "引擎與工具工作：src、scripts、設定、文件。不得改動文化資料——那是內容工作的範圍。",
+      "allow": [
+        "src/**",
+        "scripts/**",
+        ".github/**",
+        "package.json",
+        "package-lock.json",
+        "tsconfig.json",
+        "HANDOFF.md",
+        "README.md",
+        ".gitignore",
+        ".claude/**",
+        "docs/00_core/**",
+        "docs/01_world/**",
+        "docs/02_systems/**",
+        "docs/review/**",
+        "docs/DEVLOG.md"
+      ]
+    }
+  }
+}
