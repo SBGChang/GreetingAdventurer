@@ -2,6 +2,7 @@
 // Progression 公開 Query port 實作（doc §4）。
 // 純讀取：以目前 slice + Reader 推導 View，不改動 state。
 
+import { MIN_MASTERY_LEVEL } from '../../contracts/core';
 import type { CharacterId, MasteryId, DefinitionId } from '../../contracts/core';
 import type {
   ProgressionDefinitionReader,
@@ -84,8 +85,9 @@ export function makeProgressionQuery(
       const progression = progressionOf(characterId);
       return requirements.every((req) => {
         const mp = progression?.masteries[req.masteryId];
-        // runtime-discipline-allow: 沒練過的熟練度就是 Lv.0；Mastery Lv.0～10 是規範明列的結構不變量，非可調內容。
-        return (mp?.level ?? 0) >= req.minLevel;
+        // 沒練過的熟練度就是等級域的下界。用具名不變量而不是裸 0：這樣「為什麼是 0」寫在
+        // invariants.ts 裡，而不是靠讀者猜這個 0 是計數起點還是隨手給的預設值。
+        return (mp?.level ?? MIN_MASTERY_LEVEL) >= req.minLevel;
       });
     },
 

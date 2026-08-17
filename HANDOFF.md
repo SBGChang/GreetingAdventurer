@@ -28,20 +28,37 @@ npm install
 npm run verify
 ```
 
-`npm run verify` = `typecheck` → `verify:discipline` → `verify:modules`（由便宜且結構性的先跑）。
-三者也可單獨執行；另有 `verify:contracts`（契約重複 ratchet,基準線 9,已含在 verify:modules 內）。
+`npm run verify` = `typecheck` → `verify:discipline` → `verify:modules` → `verify:content-sync`。
+另有 `verify:contracts`(契約重複 ratchet,基準線 9,已含在 verify:modules 內)、
+`verify:content-scope`(工作範圍門禁,需 diff range,由 CI 帶入)、
+`verify:gap`(實作缺口報告,**不阻擋**)。
 
-**`verify:discipline` 是正式 Runtime 紀律門禁**(`scripts/verify-runtime-discipline.ts`,規範 §14)。
-它擋的是測試抓不到的那一類:測試資料滲進正式路徑、內容 ID 寫死、型別轉換掩蓋契約缺口、缺資料
-偷給預設值。目前**全綠**,兩條 ratchet 只能往下:
+**CI**:`.github/workflows/verify.yml`,push 到 main 與所有 PR 都跑。沒有它的時候,
+上面每一支都只是「開發者記得跑才有用」的腳本。
 
-| 帳 | 現值 | 意義 |
-|---|---|---|
-| 豁免 | 6 | `runtime-discipline-allow: <理由>`,理由必填;無理由的標記本身算違規 |
-| 空集合預設 | 31 | `?? []`／`?? {}` 計數式 ratchet(全部是選填建構參數與查無此鍵,無一讀自內容) |
+**`verify:discipline` 是正式 Runtime 紀律門禁**(規範 §14),六項全綠、**零豁免、零基準線**:
 
-新增任一項都會讓建置失敗,要調高基準線得在 commit message 說明為什麼那筆債值得欠。
-**硬編碼內容 ID 檢查不接受豁免**——§5 的五個合法出口裡沒有「寫在 Handler 裡並附理由」。
+| 檢查 | 擋什麼 |
+|---|---|
+| 正式依賴圖(§13) | 測試資料／Bring-up 出現在正式可達路徑 |
+| 硬編碼內容 ID(§5) | **型別導向**:字面值的型別是 `definition:`／`runtime:`／`resolver` 等內容 brand |
+| 跨語意轉型(§7) | `as unknown as` |
+| 玩法數值 fallback(§6) | `?? 5`／`?? 'female'` 這類純量預設 |
+| 內容讀取預設成空(§6) | `skillView.effectIds ?? []`——壞內容引用變成「沒有子項」 |
+| 具名數值常數(§6) | `const RESTORE = 5` 這類住在 handler 檔裡的可調量 |
+
+**沒有逐行豁免機制。** 原本的 `runtime-discipline-allow: <理由>` 已整套移除——理由寫得再好,
+那仍是一個可以替任何一行開後門的機制。合法語意改為收斂到**兩個具名位置**,由檢查器依位置辨識:
+
+- `src/contracts/core/invariants.ts` —— 結構不變量(3×3、隊員上限 9、Mastery 等級域、主屬上限)
+- `src/kernel/accumulate.ts` —— 計數與累加起點(`addToRecord`／`addToMap`／`countOf`)
+
+要主張某個語意合法,做法是把它搬進這兩個檔並具名,而不是在原地寫一行註解。
+
+**`verify:gap` 量的是另一件事**:正式路徑裡作者自己標記為未完成的地方,目前 **101 筆**
+(地牢事件選項、NPC 戰鬥、控制抗性、Distribution 模組…)。它刻意**不阻擋建置**——那是專案剩下的
+開發工作,不是已完成程式碼的偷工;接進 CI 會讓建置在遊戲做完前永遠是紅的,而永遠紅的門禁只會被繞過。
+清到 0 就把該檢查移進紀律門禁。兩個數字分開才都誠實:**紀律 0,缺口 101**。
 
 ## 待辦(依建議順序)
 

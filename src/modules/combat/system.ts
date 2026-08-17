@@ -14,6 +14,7 @@
 // 「stub // TODO」：戰鬥道具 workflow、commandAlly 一次性指令、Boss 重複中斷免疫細節、
 //   跨武器組切換延遲、interruptCasting 的多段技能保留。
 
+import { addToRecord, addToMap, addToRecordCapped } from '../../kernel/accumulate';
 import type {
   EncounterId,
   CombatantId,
@@ -321,28 +322,8 @@ function entriesOf<K extends string, V>(record: Readonly<Partial<Record<K, V>>>)
   return Object.entries(record) as [K, V][];
 }
 
-/** 對可變 Record 累加。0 是加法單位元、寫在這裡一次，不是「缺資料時的預設值」。 */
-function addToRecord<K extends string>(record: Partial<Record<K, number>>, key: K, amount: number): void {
-  // runtime-discipline-allow: 累加起點；本函式的存在就是為了讓這個 0 只出現一次，而不是散在八個呼叫點。
-  record[key] = (record[key] ?? 0) + amount;
-}
-
-/** 對 Map 累加。理由同上。 */
-function addToMap<K>(map: Map<K, number>, key: K, amount: number): void {
-  // runtime-discipline-allow: 同 addToRecord，累加起點而非玩法預設值。
-  map.set(key, (map.get(key) ?? 0) + amount);
-}
-
-/** 累加後夾上限。計數起點與上限都在這裡表達，呼叫端不必自己拆成「先讀舊值再夾」。 */
-function addToRecordCapped<K extends string>(
-  record: Partial<Record<K, number>>,
-  key: K,
-  amount: number,
-  cap: number,
-): void {
-  // runtime-discipline-allow: 同 addToRecord；上限由呼叫端以參數傳入，不在此處寫死。
-  record[key] = Math.min(cap, (record[key] ?? 0) + amount);
-}
+// addToRecord / addToMap / addToRecordCapped 已移入 kernel/accumulate.ts —— 計數語意集中一處，
+// 門禁依位置辨識，不再需要逐行豁免註解。
 
 function ctbReduction(
   reductions: readonly Readonly<{ primaryAttribute: PrimaryAttributeId; reductionPerPoint: number }>[],

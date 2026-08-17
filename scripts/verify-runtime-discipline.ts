@@ -124,83 +124,29 @@ function resolveImport(fromFile: string, spec: string): string | undefined {
 type Failure = Readonly<{ check: string; detail: string }>;
 
 // ──────────────────────────────────────────────────────────────────────────
-// 豁免機制（§14）
+// ──────────────────────────────────────────────────────────────────────────
+// 合法語意的認定：靠**位置**，不靠逐行豁免
 // ──────────────────────────────────────────────────────────────────────────
 //
-// 為什麼豁免必須帶理由：門禁清零最省力的路徑永遠是灑一排註解，而那正是規範點名的
-// 「用 TODO 註解把未完成行為合理化」。要求理由把「順手繞過」變成「寫得出來才准過」，
-// 而理由寫不出來的那一刻，通常就是發現它其實是真違規的那一刻。
+// 這裡曾經有一套 `runtime-discipline-allow: <理由>` 註解機制，附帶「理由必填」與數量 ratchet。
+// 它已整套移除，原因是：**那是一個可以替任何一行程式開豁免的後門。** 理由寫得再好，機制本身
+// 仍然容許下一個人拿它繞過真違規，而 review 幾乎不可能逐筆去質疑「這個理由夠不夠格」。
 //
-// 為什麼還要 ratchet：單靠「有理由」擋不住理由愈寫愈廉價。總數只能往下，等同宣告
-// 豁免是**債**不是設計選項——與 `check-contract-duplicates.ts` 的基準線同一個道理。
+// 取而代之的是把每一種合法語意收斂到**一個具名的位置**，讓檢查器依位置辨識：
 //
-// 格式：`runtime-discipline-allow: <理由>`，寫在**該行或其上一行**。允許上一行是因為一個講得清楚的
-// 理由通常比程式碼本身長，硬擠同一行只會逼人把理由縮短成「這樣沒問題」——那就退回沒有理由的狀態了。
-const ALLOW_RE = /runtime-discipline-allow:[ \t]*(\S[^\n]*?)[ \t]*$/;
-const ALLOW_MARKER = 'runtime-discipline-allow';
+//   結構不變量（3×3、隊員上限 9、Mastery 等級域…）→ src/contracts/core/invariants.ts
+//   計數與累加起點（`(x ?? 0) + n` 這一類）        → src/kernel/accumulate.ts
+//
+// 差別很實際：舊機制下「我這行有理由」只是**宣稱**；新做法要主張某個語意合法，你得把它搬進
+// 共用檔並具名——那件事本身會被 review 看見，而且下一個有同樣需求的人會複用它，
+// 而不是再開一個新豁免。
+const SANCTIONED_SEMANTICS: readonly RegExp[] = [
+  /[/\\\\]contracts[/\\\\]core[/\\\\]invariants\.ts$/,
+  /[/\\\\]kernel[/\\\\]accumulate\.ts$/,
+];
 
-// 豁免總數基準線。**只能往下改。**調降時一併更新這行的日期與 commit，
-// 讓後來的人看得出它確實在收斂而不是被人偷偷調上去。
-// 6 筆的組成（2026-08-17 清零時定案）：
-//   combat/system.ts ×3   —— addToRecord / addToMap / addToRecordCapped 的累加起點。
-//                            這三個工具的存在目的就是把原本散在八個呼叫點的 `?? 0` 收成三處。
-//   kernel/transaction.ts —— 沒有 notifications 陣列＝零則通知（kernel 記帳）。
-//   progression/queries.ts —— 沒練過＝Lv.0；Mastery Lv.0～10 是規範明列的結構不變量。
-//   data-runtime/content-pack.ts —— 壞資料的診斷標籤，不是內容值。
-const EXEMPTION_BASELINE = 6; // 2026-08-17 起算
-
-function allowanceReason(line: string): string | undefined {
-  return ALLOW_RE.exec(line)?.[1];
-}
-
-/** 第 index 行是否被豁免：該行或上一行帶著附理由的標記。 */
-function isExempt(lines: readonly string[], index: number): boolean {
-  if (allowanceReason(lines[index] ?? '') !== undefined) return true;
-  return index > 0 && allowanceReason(lines[index - 1] ?? '') !== undefined;
-}
-
-/** 帶標記卻沒寫理由 = 沒有豁免。原本的違規照樣會報，這裡再多報一筆格式錯誤。 */
-function checkAllowancesHaveReasons(productionFiles: readonly string[]): Failure[] {
-  const failures: Failure[] = [];
-  for (const file of productionFiles) {
-    const lines = readFileSync(file, 'utf8').split('\n');
-    lines.forEach((line, i) => {
-      if (!line.includes(ALLOW_MARKER)) return;
-      if (allowanceReason(line) !== undefined) return;
-      failures.push({
-        check: 'allowance-without-reason',
-        detail:
-          `${relative(ROOT, file).replace(/\\/g, '/')}:${i + 1} 豁免沒有理由\n` +
-          `        ${line.trim()}\n` +
-          `        格式須為 \`${ALLOW_MARKER}: <理由>\`——說明它為什麼不是暫代行為`,
-      });
-    });
-  }
-  return failures;
-}
-
-function countExemptions(productionFiles: readonly string[]): number {
-  let count = 0;
-  for (const file of productionFiles) {
-    for (const line of readFileSync(file, 'utf8').split('\n')) {
-      if (allowanceReason(line) !== undefined) count += 1;
-    }
-  }
-  return count;
-}
-
-function checkExemptionRatchet(productionFiles: readonly string[]): Failure[] {
-  const actual = countExemptions(productionFiles);
-  if (actual <= EXEMPTION_BASELINE) return [];
-  return [
-    {
-      check: 'exemption-ratchet',
-      detail:
-        `豁免數 ${actual} > 基準線 ${EXEMPTION_BASELINE}\n` +
-        `        新增豁免前請先確認它不是真違規；確定要留就連同理由一起把基準線調高，\n` +
-        `        並在 commit message 說明為什麼這筆債值得欠。`,
-    },
-  ];
+function isSanctionedSemanticsFile(file: string): boolean {
+  return SANCTIONED_SEMANTICS.some((re) => re.test(file));
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -305,7 +251,7 @@ function checkNoCrossSemanticCasts(productionFiles: readonly string[]): Failure[
     lines.forEach((line, i) => {
       const code = line.replace(/\/\/.*$/, '');
       if (!code.includes('as unknown as')) return;
-      if (isExempt(lines, i)) return;
+      if (isSanctionedSemanticsFile(file)) return;
       failures.push({
         check: 'cross-semantic-cast',
         detail: `${relative(ROOT, file).replace(/\\/g, '/')}:${i + 1} 使用 as unknown as（缺契約？）\n        ${line.trim()}`,
@@ -320,10 +266,11 @@ function checkNoCrossSemanticCasts(productionFiles: readonly string[]): Failure[
 // ──────────────────────────────────────────────────────────────────────────
 //
 // `?? 5`、`?? 1`、`?? 'female'` 這類寫法把「缺資料」變成「有一個看起來合理的值」，是規範點名的
-// 方便性 fallback。從語法分不出「計數從 0 起」與「傷害預設 0」，所以純量一律要明示豁免。
+// 方便性 fallback。從語法分不出「計數從 0 起」與「傷害預設 0」——所以合法的計數起點一律集中在
+// kernel/accumulate.ts，由該檔的**位置**放行（見上方「合法語意的認定」）。其餘一律違規。
 const SCALAR_FALLBACK_RE = /\?\?\s*(-?\d+(?:\.\d+)?|'[^']*'|"[^"]*")/g;
 
-// 空集合預設（`?? []`、`?? {}`）另計，理由見下方 checkEmptyCollectionRatchet。
+// 空集合預設（`?? []`、`?? {}`）另有針對性檢查，理由見 checkNoContentEmptyFallbacks。
 const EMPTY_COLLECTION_FALLBACK_RE = /\?\?\s*(\[\s*\]|\{\s*\})/g;
 
 function checkNoValueFallbacks(productionFiles: readonly string[]): Failure[] {
@@ -332,7 +279,7 @@ function checkNoValueFallbacks(productionFiles: readonly string[]): Failure[] {
     const lines = readFileSync(file, 'utf8').split('\n');
     lines.forEach((line, i) => {
       const code = line.replace(/\/\/.*$/, '');
-      if (isExempt(lines, i)) return;
+      if (isSanctionedSemanticsFile(file)) return;
       for (const m of code.matchAll(SCALAR_FALLBACK_RE)) {
         failures.push({
           check: 'value-fallback',
@@ -347,50 +294,41 @@ function checkNoValueFallbacks(productionFiles: readonly string[]): Failure[] {
 // ──────────────────────────────────────────────────────────────────────────
 // 檢查 5：空集合預設的 ratchet（§6 附註）
 // ──────────────────────────────────────────────────────────────────────────
+// 為什麼不是「所有 `?? []` 都違規」，也不是計數式 ratchet：
 //
-// 為什麼跟純量分開算，而不是同一份豁免帳：
+// 建立本檢查時逐筆看過全部 31 筆，**沒有一筆是從內容讀出來的**。全是兩種形狀——選填建構參數
+// （`createTeamState({ teams?: Team[] })` 的 `input.teams ?? []`）與查無此鍵的集合（`edges.get(n) ?? []`）。
+// 那兩種的「空」是集合的單位元，不是替代缺失內容的假值：沒有任何 Content Pack 會讓「未指定的隊伍」
+// 變成三支預設隊伍。全部報成違規只會製造 29 筆雜訊，而基準線又只是換個名字的豁免帳。
 //
-// 建立本檢查時逐筆看過當時全部 31 筆，**沒有一筆是從內容讀出來的**。全是兩種形狀——選填建構參數
-// （`createTeamState({ teams?: Team[] })` 的 `input.teams ?? []`）與查無此鍵的集合（`edges.get(n) ?? []`、
-// `state.recentActivities[id] ?? []`）。這兩種的「空」是集合的單位元，不是替代缺失內容的假值：沒有任何
-// Content Pack 會讓「未指定的隊伍」變成三支預設隊伍。
-//
-// 但真正該擋的形狀是存在的——`skillView.effects ?? []` 會把壞掉的內容引用變成「這個技能沒有效果」。
-// 它跟上面那 31 筆語法完全相同。所以檢查留著，只是換成計數式 ratchet（同 check-contract-duplicates
-// 的 9 筆基準線）：既有的不必逐筆寫幾乎一樣的理由去淹掉純量那 6 筆真債，新增的一律讓建置失敗、逼人看一眼。
-//
-// 基準線只能往下。要新增就先問自己：左邊那個東西是內容嗎？
-const EMPTY_COLLECTION_BASELINE = 29; // 2026-08-17 起算（31 → 29：detectCycle 改以非空 tuple 表達不變量）
+// 真正該擋的是**從內容讀出來卻預設成空**：`skillView.effectIds ?? []` 會把壞掉的內容引用悄悄變成
+// 「這個技能沒有效果」。所以檢查改成只看這一種——左側是 Definition／View 的讀取，或 Reader 的 getter。
+// 目前為 0 筆；它擋的是還沒發生的那一類，不是既有的那 29 筆。
+const CONTENT_READ_LHS = /(?:\.definitions\.|\.reader\.|\bget[A-Z]\w*\(|\bView\b|Definition\b)/;
 
-function collectEmptyCollectionFallbacks(productionFiles: readonly string[]): string[] {
+function collectContentEmptyFallbacks(productionFiles: readonly string[]): string[] {
   const found: string[] = [];
   for (const file of productionFiles) {
+    if (isSanctionedSemanticsFile(file)) continue;
     const lines = readFileSync(file, 'utf8').split('\n');
     lines.forEach((line, i) => {
       const code = line.replace(/\/\/.*$/, '');
-      if (isExempt(lines, i)) return;
-      for (const _ of code.matchAll(EMPTY_COLLECTION_FALLBACK_RE)) {
-        found.push(`${relative(ROOT, file).replace(/\\/g, '/')}:${i + 1}\n        ${line.trim()}`);
+      for (const m of code.matchAll(EMPTY_COLLECTION_FALLBACK_RE)) {
+        const lhs = code.slice(0, m.index ?? 0);
+        if (!CONTENT_READ_LHS.test(lhs)) continue;
+        found.push(`${relative(ROOT, file).replace(/\\\\/g, '/')}:${i + 1}\n        ${line.trim()}`);
       }
     });
   }
   return found;
 }
 
-function checkEmptyCollectionRatchet(productionFiles: readonly string[]): Failure[] {
-  const found = collectEmptyCollectionFallbacks(productionFiles);
-  if (found.length <= EMPTY_COLLECTION_BASELINE) return [];
-  return [
-    {
-      check: 'empty-collection-ratchet',
-      detail:
-        `空集合預設 ${found.length} 筆 > 基準線 ${EMPTY_COLLECTION_BASELINE}\n` +
-        `        新增的那筆左邊是內容嗎？是就補契約，不是就連同理由把基準線調高。全部位置：\n        ` +
-        found.join('\n        '),
-    },
-  ];
+function checkNoContentEmptyFallbacks(productionFiles: readonly string[]): Failure[] {
+  return collectContentEmptyFallbacks(productionFiles).map((detail) => ({
+    check: 'content-empty-fallback',
+    detail: `${detail}\n        內容讀取不得預設成空集合——缺內容要明確失敗，不是「這個東西沒有子項」。`,
+  }));
 }
-
 // ──────────────────────────────────────────────────────────────────────────
 // 檢查 6：正式路徑不得有未完成標記（§5「用 TODO 註解把未完成行為合理化」）
 // ──────────────────────────────────────────────────────────────────────────
@@ -489,10 +427,8 @@ const checks: readonly { name: string; run: () => Failure[] }[] = [
   { name: '無硬編碼內容 ID（§5，型別導向）', run: checkNoHardcodedContentIds },
   { name: '無跨語意強制轉型（§7）', run: () => checkNoCrossSemanticCasts(productionFiles) },
   { name: '無玩法數值 fallback（§6）', run: () => checkNoValueFallbacks(productionFiles) },
-  { name: '空集合預設未超過基準線（§6 附註）', run: () => checkEmptyCollectionRatchet(productionFiles) },
+  { name: '內容讀取不得預設成空集合（§6）', run: () => checkNoContentEmptyFallbacks(productionFiles) },
   { name: '無具名數值常數（§6）', run: checkNoNamedNumericConstants },
-  { name: '豁免皆附理由（§14）', run: () => checkAllowancesHaveReasons(productionFiles) },
-  { name: '豁免數未超過基準線（§14）', run: () => checkExemptionRatchet(productionFiles) },
 ];
 
 let total = 0;
@@ -509,10 +445,6 @@ for (const check of checks) {
 
 console.log('');
 console.log(`受檢正式檔案：${productionFiles.length}`);
-console.log(`豁免：${countExemptions(productionFiles)} / 基準線 ${EXEMPTION_BASELINE}`);
-console.log(
-  `空集合預設：${collectEmptyCollectionFallbacks(productionFiles).length} / 基準線 ${EMPTY_COLLECTION_BASELINE}`,
-);
 if (total > 0) {
   console.log(`RUNTIME DISCIPLINE FAILED：共 ${total} 筆違規`);
   process.exit(1);

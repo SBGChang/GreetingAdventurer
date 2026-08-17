@@ -6,6 +6,7 @@
 // 非職責：不放任何模組規則、不硬編任何具體模組。所有 slice-registry 與 handler map 皆由
 //         呼叫者注入（route*／applyMutation），kernel 只負責路由順序、因果收斂與原子性。
 
+import { countOf as accumulateCountOf } from './accumulate';
 import type {
   AnyScheduledJob,
   JobId,
@@ -97,8 +98,7 @@ function isInternalCommandDraft(
 }
 
 function notificationCount(mutation: SliceMutation): number {
-  // runtime-discipline-allow: 沒有 notifications 陣列就是沒有通知，這是計數而非玩法值；kernel 記帳用，換 Content Pack 不會變。
-  return mutation.notifications?.length ?? 0;
+  return accumulateCountOf(mutation.notifications);
 }
 
 // 執行一筆交易。baseState 永不改動；成功時回傳 committed workingState 與 outbox，

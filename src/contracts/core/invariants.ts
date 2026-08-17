@@ -30,6 +30,7 @@ export const MAX_FORMAL_MEMBERS = 9;
 // ── 成長 ────────────────────────────────────────────────────────────────────
 
 /** Mastery 等級域 Lv.0～10。等級**數量**是結構；每一級要多少經驗是 curve 資料。 */
+export const MIN_MASTERY_LEVEL = 0;
 export const MAX_MASTERY_LEVEL = 10;
 
 /** 主屬性上限 100。上限是結構；成長速度與分布是資料。 */

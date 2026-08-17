@@ -128,6 +128,10 @@ export const DataLoadCode = {
   PackIdMismatch: 'data.load.packIdMismatch',
 } as const;
 
+// 診斷訊息在指涉一筆「連 kind/id 都缺」的定義時所用的占位字。它是錯誤訊息的一部分，
+// 不是任何內容值——沒有 Content Pack 會讓這個字改變意思。
+const MISSING_FIELD_LABEL = 'unknown';
+
 // ── 純函式 hash（決定性、同步、無 I/O）─────────────────────────────────────
 
 // `Array.isArray` narrows 成 `any[]`，無法把 readonly 陣列從 JsonValue 聯集裡排除（TS 已知限制），
@@ -402,8 +406,11 @@ export function loadContent(input: LoadContentInput): CompileContentResult {
       const schemaVersion = readNumber(raw, 'schemaVersion');
       const enabled = readBoolean(raw, 'enabled');
       const declaredPackId = readString(raw, 'packId') as ContentPackId | undefined;
-      // runtime-discipline-allow: 壞資料的診斷標籤，不是內容值——下面幾行正要把 kind/id 缺失報成錯誤，標籤本來就得描述得出缺欄位的那筆定義。
-      const sourcePath = readString(raw, 'sourcePath') ?? `${contentRoot}/${kind ?? 'unknown'}/${id ?? `#${index}`}.json`;
+      // 壞資料的診斷標籤，不是內容值——下面幾行正要把 kind/id 缺失報成錯誤，
+      // 標籤本來就得描述得出「缺了欄位的那一筆定義」是哪一筆。缺項以具名占位字表示。
+      const sourcePath =
+        readString(raw, 'sourcePath') ??
+        `${contentRoot}/${kind ?? MISSING_FIELD_LABEL}/${id ?? `#${index}`}.json`;
 
       const missing: string[] = [];
       if (id === undefined) missing.push('id');
