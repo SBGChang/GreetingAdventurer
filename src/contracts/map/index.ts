@@ -40,6 +40,7 @@ import type {
   CharacterArchetypeId,
   AssetDistributionId,
   NpcDungeonRunId,
+  NpcDungeonTargetResolverId,
 } from '../core';
 
 // 跨模組引用：NPC 地牢結算命令需引用 Dungeon 的暫存結果。
@@ -163,7 +164,7 @@ export interface MapDefinitionReader {
     ruleId: GatheringRuleId;
     npcPolicy?:
       | Readonly<{ eligible: false }>
-      | Readonly<{ eligible: true; pointCost: number; resolverId: ResolverId }>;
+      | Readonly<{ eligible: true; pointCost: number; resolverId: NpcDungeonTargetResolverId }>;
   }>;
 }
 
@@ -200,7 +201,7 @@ export type GatheringNodeRuntimeState = Readonly<{
   state: 'available' | 'harvested';
   npcOrder?: number;
   npcPointCost?: number;
-  npcResolverId?: ResolverId;
+  npcResolverId?: NpcDungeonTargetResolverId;
   harvestResolutionId?: GatheringResolutionId;
   harvestedByTeamId?: TeamId;
   harvestedOnDay?: WorldDay;
@@ -252,7 +253,7 @@ export type MapContentInstance = Readonly<{
   payload: MapContentPayload;
   npcOrder?: number;
   npcPointCost?: number;
-  npcResolverId?: ResolverId;
+  npcResolverId?: NpcDungeonTargetResolverId;
   state: 'available' | 'resolved' | 'removedByRefresh';
   protectedByQuestIds: readonly QuestId[];
   resolvedOnDay?: WorldDay;
@@ -271,7 +272,13 @@ export type MapState = Readonly<{
 
 // [INVENTED] 文件以 `resolution`/`resolver` 描述內容處理結果但未給出結構。
 export type MapContentResolution = Readonly<{
-  resolverId: ResolverId;
+  // 內容結果可能由**兩個不同的 Resolver 家族**產生，所以這裡是聯集而不是單一型別：
+  //   * 玩家路徑：泛用 ResolverId（目前 dungeon 仍以固定值填入——那是還沒補的資料缺口，
+  //     見 skill 的 cleanup-backlog C1／B1；補上「玩家內容解析 Resolver」的資料欄位後才會消失）。
+  //   * NPC 路徑：NpcDungeonTargetResolverId（該筆結果由哪個 NPC 目標 Resolver Definition 產生）。
+  // 先前兩者都宣告成 ResolverId，等於把「內容 Definition 的 ID」當成「Resolver 註冊 ID」在用；
+  // 移除 `as unknown as DefinitionId` 之後型別檢查立刻抓到（規範 §7）。
+  resolverId: ResolverId | NpcDungeonTargetResolverId;
   outcome: 'success' | 'failure';
   details?: Readonly<Record<string, JsonValue>>;
 }>;
@@ -299,14 +306,14 @@ export type NpcSequenceEntryView =
       kind: 'mapContent';
       npcOrder: number;
       pointCost: number;
-      resolverId: ResolverId;
+      resolverId: NpcDungeonTargetResolverId;
       contentId: ContentInstanceId;
     }>
   | Readonly<{
       kind: 'gatheringNode';
       npcOrder: number;
       pointCost: number;
-      resolverId: ResolverId;
+      resolverId: NpcDungeonTargetResolverId;
       nodeId: GatheringNodeId;
       gatheringRuleId: GatheringRuleId;
       mapVersion: number;
@@ -444,7 +451,8 @@ export type MapContentResolved = Readonly<{
   mapId: MapInstanceId;
   contentId: ContentInstanceId;
   distributionId?: AssetDistributionId;
-  resolver: ResolverId;
+  // 與 MapContentResolution.resolverId 同一個聯集：事件必須能表達兩種 Resolver 家族。
+  resolver: ResolverId | NpcDungeonTargetResolverId;
   resolution: MapContentResolution;
 }>;
 

@@ -8,18 +8,8 @@
 // 分派,合起來讓旅行從「停在段落邊界」變成「自行推進至抵達」,而推進仍走可攔截的 Internal Command 路徑。
 
 import type { JobId, WorldDay } from '../../contracts/core';
-import {
-  fixtureTeamState,
-  makeContext as teamMakeContext,
-  stubDefinitionReader as teamStubReader,
-  handleStartCityTravel,
-  tryGetTeam,
-  tryGetPlan,
-  CITY_B,
-  ROUTE_AB,
-  TRAVEL_MODE_3,
-  type TeamHandlerResult,
-} from '../../modules/team/public';
+import { handleStartCityTravel, tryGetTeam, tryGetPlan, type TeamHandlerResult } from '../../modules/team/public';
+import { fixtureTeamState, makeContext as teamMakeContext, stubDefinitionReader as teamStubReader, CITY_B, ROUTE_AB, TRAVEL_MODE_3 } from '../../modules/team/fixtures';
 
 import { runDueJob, type ContextAssembler } from './session';
 import { unusedContext } from './session-fixture';

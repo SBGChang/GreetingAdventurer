@@ -69,14 +69,14 @@ export function createTeamDefinitionReader(registry: DefinitionRegistry): TeamDe
   );
 
   return {
-    getPlayerTravelMode: (id) => playerTravel.get(id as unknown as DefinitionId),
-    getNpcTravelRule: (id) => npcTravel.get(id as unknown as DefinitionId),
-    getFreeActionRule: (id) => freeAction.get(id as unknown as DefinitionId),
-    getTeamPlanRule: (id) => teamPlan.get(id as unknown as DefinitionId),
-    getRecentActivityRule: (id) => recentActivity.get(id as unknown as DefinitionId),
-    getMemberRetentionRule: (id) => memberRetention.get(id as unknown as DefinitionId),
-    getRecruitmentRule: (id) => recruitment.get(id as unknown as DefinitionId),
-    getTeamFormationRule: (id) => teamFormation.get(id as unknown as DefinitionId),
-    getNonPlayerMemberDailySocialPracticeRule: (id) => socialPractice.get(id as unknown as DefinitionId),
+    getPlayerTravelMode: (id) => playerTravel.get(id),
+    getNpcTravelRule: (id) => npcTravel.get(id),
+    getFreeActionRule: (id) => freeAction.get(id),
+    getTeamPlanRule: (id) => teamPlan.get(id),
+    getRecentActivityRule: (id) => recentActivity.get(id),
+    getMemberRetentionRule: (id) => memberRetention.get(id),
+    getRecruitmentRule: (id) => recruitment.get(id),
+    getTeamFormationRule: (id) => teamFormation.get(id),
+    getNonPlayerMemberDailySocialPracticeRule: (id) => socialPractice.get(id),
   };
 }

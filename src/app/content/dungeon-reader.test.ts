@@ -16,7 +16,7 @@ import {
   type DefinitionRegistry,
 } from '../../data-runtime';
 
-import { FIXTURE } from '../../modules/dungeon/public';
+import { FIXTURE } from '../../modules/dungeon/fixtures';
 import { requireInstance } from '../../modules/map/public';
 
 import { runGameCommand } from '../composition/session';

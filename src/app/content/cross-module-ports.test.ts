@@ -3,7 +3,7 @@
 
 import type { CharacterId, CityId, MapInstanceId, Revision, TeamId } from '../../contracts/core';
 import { createTeamState, type Team } from '../../modules/team/public';
-import { createFixtureState as inventoryFixtureState, createFixtureReader as inventoryReader } from '../../modules/inventory/public';
+import { createFixtureState as inventoryFixtureState, createFixtureReader as inventoryReader } from '../../modules/inventory/fixtures';
 
 import { createDungeonTeamPort, createCombatLoadoutQuery } from './cross-module-ports';
 

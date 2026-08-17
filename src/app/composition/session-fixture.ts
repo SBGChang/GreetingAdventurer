@@ -18,14 +18,9 @@ import type {
 import type { DungeonDefinitionReader, OpenDungeonDoor } from '../../contracts/dungeon';
 import type { MapInstance } from '../../contracts/map';
 
-import {
-  FIXTURE,
-  createFixtureState,
-  createFixtureReader,
-  createFixtureMapPort,
-  createFixtureTeamPort,
-} from '../../modules/dungeon/public';
-import { createMapState, makeContext as mapMakeContext } from '../../modules/map/public';
+import { FIXTURE, createFixtureState, createFixtureReader, createFixtureMapPort, createFixtureTeamPort } from '../../modules/dungeon/fixtures';
+import { createMapState } from '../../modules/map/public';
+import { makeContext as mapMakeContext } from '../../modules/map/fixtures';
 import { createTeamState } from '../../modules/team/public';
 
 import type { ContextAssembler } from './session';

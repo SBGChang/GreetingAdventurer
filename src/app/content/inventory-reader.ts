@@ -42,10 +42,10 @@ export function createItemDefinitionReader(registry: DefinitionRegistry): ItemDe
   ]);
 
   return {
-    getItem: (id) => item.get(id as unknown as DefinitionId),
-    getEquipment: (id) => equipment.get(id as unknown as DefinitionId),
-    getUseDelayRule: (id) => useDelay.get(id as unknown as DefinitionId),
-    getNonCombatUseRule: (id) => nonCombatUse.get(id as unknown as DefinitionId),
-    getBook: (id) => book.get(id as unknown as DefinitionId),
+    getItem: (id) => item.get(id),
+    getEquipment: (id) => equipment.get(id),
+    getUseDelayRule: (id) => useDelay.get(id),
+    getNonCombatUseRule: (id) => nonCombatUse.get(id),
+    getBook: (id) => book.get(id),
   };
 }

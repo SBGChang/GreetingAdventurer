@@ -45,18 +45,7 @@ export {
 export { makeDungeonQuery } from './queries';
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
-export {
-  FIXTURE,
-  createFixtureReader,
-  createFixtureMapPort,
-  createFixtureTeamPort,
-  createFixtureContext,
-  createFixtureState,
-} from './fixtures';
 
-// ── Tests ──────────────────────────────────────────────────────────────────––
-export { runTests, runTestResults, allTestsPass } from './dungeon.test';
-export type { DungeonTestResult } from './dungeon.test';
 
 // ── Module contract（doc §10 交接清單對照）──────────────────────────────────
 // 事件綁定與執行順序由 Composition Manifest 唯一擁有；此處只宣告本模組可提供的 Handler。
@@ -117,3 +106,8 @@ export const dungeonModuleContract: ModuleContract = {
     'dungeon/close-requires-triple-settlement' as InvariantId,
   ],
 };
+
+// ── Fixtures／Tests 不由 public.ts 對外 ───────────────────────────────────────
+// public.ts 是模組的**正式對外面**。從這裡再匯出 fixtures 或 test runner，等於讓正式依賴圖
+// 可以走到測試資料——規範 §13 的判準是「只要正式程式**可以**引用就算違反」，不需要真的用到。
+// 測試請直接 import './fixtures' 與 './<module>.test'。門禁：scripts/verify-runtime-discipline.ts

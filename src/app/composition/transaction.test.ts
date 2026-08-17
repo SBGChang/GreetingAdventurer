@@ -23,12 +23,8 @@ import type {
 } from '../../contracts/core';
 import { runTransaction, type SchedulingEffects } from '../../kernel';
 
-import {
-  createFixtureContext,
-  createFixtureState,
-  FIXTURE,
-  consumeDungeonGatheringAction,
-} from '../../modules/dungeon/public';
+import { consumeDungeonGatheringAction } from '../../modules/dungeon/public';
+import { createFixtureContext, createFixtureState, FIXTURE } from '../../modules/dungeon/fixtures';
 import type { ConsumeDungeonGatheringAction, MoveDungeonRoom } from '../../contracts/dungeon';
 
 import {

@@ -11,7 +11,7 @@
 // cursor/路由/跨模組 Slice 變更全部是真的。鋪設共用於 session-fixture.ts。
 
 import { requireInstance } from '../../modules/map/public';
-import { FIXTURE, createFixtureState } from '../../modules/dungeon/public';
+import { FIXTURE, createFixtureState } from '../../modules/dungeon/fixtures';
 
 import { runGameCommand } from './session';
 import { baseState, makeAssembler, openRedDoor } from './session-fixture';

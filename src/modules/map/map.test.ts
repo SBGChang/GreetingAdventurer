@@ -334,7 +334,7 @@ const cases: readonly Case[] = [
         npcOrder: content.npcOrder ?? 1,
         attemptedOnDay: 100 as WorldDay,
         outcome: 'success',
-        resolverId: content.npcResolverId as ResolverId,
+        resolverId: content.npcResolverId!,
         pendingRewardRefs: [],
       };
       const cmd: ApplyNpcDungeonSettlement = {
@@ -376,7 +376,7 @@ const cases: readonly Case[] = [
         npcOrder: full.npcOrder ?? 1,
         attemptedOnDay: 100 as WorldDay,
         outcome: 'success',
-        resolverId: full.npcResolverId as ResolverId,
+        resolverId: full.npcResolverId!,
         pendingRewardRefs: [],
       };
       const cmd: ApplyNpcDungeonSettlement = {

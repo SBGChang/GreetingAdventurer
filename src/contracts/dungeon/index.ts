@@ -33,6 +33,7 @@ import type {
   NpcExplorationRuleId,
   InteractionRuleId,
   ResolverId,
+  NpcDungeonTargetResolverId,
   GatheringRuleId,
   ExperienceAwardRuleId,
   EncounterGroupDefinitionId,
@@ -143,7 +144,7 @@ export type NpcExplorationRuleDefinition = DefinitionHeader &
 
 export interface DungeonDefinitionReader {
   getNpcExplorationRule(id: NpcExplorationRuleId): NpcExplorationRuleDefinition;
-  getNpcResolver(id: ResolverId): NpcDungeonTargetResolverDefinition;
+  getNpcResolver(id: NpcDungeonTargetResolverId): NpcDungeonTargetResolverDefinition;
   getDungeonInteractionRule(id: InteractionRuleId): DungeonInteractionRuleDefinition;
   getGatheringInteractionView(id: GatheringRuleId): Readonly<{
     ruleId: GatheringRuleId;
@@ -225,7 +226,8 @@ export type PendingDungeonResult = Readonly<{
   npcOrder: number;
   attemptedOnDay: WorldDay;
   outcome: 'success' | 'failure' | 'skip';
-  resolverId: ResolverId;
+  // 這筆結果是由哪個 **NPC 目標 Resolver Definition** 產生的（不是泛用 ResolverId）。
+  resolverId: NpcDungeonTargetResolverId;
   combatSequenceResultId?: CombatSequenceChallengeResultId;
   pendingRewardRefs: readonly PendingRewardRef[];
 }>;

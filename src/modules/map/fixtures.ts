@@ -38,6 +38,7 @@ import type {
   CultureId,
   RouteId,
   DeterministicRng,
+  NpcDungeonTargetResolverId,
 } from '../../contracts/core';
 import type {
   MapState,
@@ -92,9 +93,9 @@ const EVENT_POOL_ID = 'event-pool-1' as MapEventPoolId;
 const LOCAL_CULTURE_RULE_ID = 'culture-local-1' as CultureContentRuleId;
 const HUMAN_CULTURE_RULE_ID = 'culture-human-1' as CultureContentRuleId;
 
-const MONSTER_RESOLVER_ID = 'resolver-monster' as ResolverId;
-const CHEST_RESOLVER_ID = 'resolver-chest' as ResolverId;
-const GATHER_RESOLVER_ID = 'resolver-gather' as ResolverId;
+const MONSTER_RESOLVER_ID = 'definition:npc-dungeon-target-resolver:monster' as NpcDungeonTargetResolverId;
+const CHEST_RESOLVER_ID = 'definition:npc-dungeon-target-resolver:chest' as NpcDungeonTargetResolverId;
+const GATHER_RESOLVER_ID = 'definition:npc-dungeon-target-resolver:gather' as NpcDungeonTargetResolverId;
 const ENCOUNTER_GROUP_ID = 'enc-group-1' as EncounterGroupDefinitionId;
 const EVENT_DEF_ID = 'content-event-1' as ContentEventDefinitionId;
 const MONSTER_CONTENT_DEF_ID = 'def-monster' as DefinitionId;
@@ -194,8 +195,8 @@ export function stubDefinitionReader(): MapDefinitionReader {
     getMapTemplate: () => TEMPLATE,
     getMapSpawnRule: () => SPAWN_RULE,
     getNpcSequenceRule: (id): NpcSequenceRuleDefinition => ({
-      ...header(id as unknown as DefinitionId),
-      id: id as unknown as DefinitionId,
+      ...header(id),
+      id: id,
       npcSequenceRuleId: id,
     }),
     getContentDefinition: (id): MapContentDefinition => ({

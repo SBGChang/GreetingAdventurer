@@ -82,32 +82,7 @@ export type {
 // ── Query ─────────────────────────────────────────────────────────────────
 export { createTeamQuery, createTeamPresenceQuery } from './queries';
 
-// ── Fixtures ────────────────────────────────────────────────────────────––
-export {
-  fixtureTeamState,
-  makeFormation,
-  makeContext,
-  makeIdAllocator,
-  stubDefinitionReader,
-  stubWorldReader,
-  stubResolverPort,
-  PLAYER_TEAM_ID,
-  NPC_TEAM_ID,
-  PLAYER_LEADER_ID,
-  PLAYER_MEMBER_ID,
-  NPC_LEADER_ID,
-  CITY_A,
-  CITY_B,
-  ROUTE_AB,
-  TRAVEL_MODE_3,
-  TRAVEL_MODE_6,
-  TRAVEL_MODE_9,
-  NPC_TRAVEL_RULE,
-} from './fixtures';
 
-// ── Tests ─────────────────────────────────────────────────────────────────
-export { runTests, runTestResults } from './team.test';
-export type { TeamTestResult } from './team.test';
 
 // ── ModuleContract 宣告（事件綁定與執行順序由 Composition Manifest 唯一擁有）──
 export const teamModuleContract: ModuleContract = {
@@ -180,3 +155,8 @@ export const teamModuleContract: ModuleContract = {
     'team.memberInAtMostOneTeam' as InvariantId,
   ],
 };
+
+// ── Fixtures／Tests 不由 public.ts 對外 ───────────────────────────────────────
+// public.ts 是模組的**正式對外面**。從這裡再匯出 fixtures 或 test runner，等於讓正式依賴圖
+// 可以走到測試資料——規範 §13 的判準是「只要正式程式**可以**引用就算違反」，不需要真的用到。
+// 測試請直接 import './fixtures' 與 './<module>.test'。門禁：scripts/verify-runtime-discipline.ts

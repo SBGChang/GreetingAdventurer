@@ -29,6 +29,7 @@ import type {
   CommandRejection,
   DeterministicRng,
   RngContext,
+  NpcDungeonTargetResolverId,
 } from '../../contracts/core';
 import type {
   MapState,
@@ -95,7 +96,7 @@ export type SpawnDraft = Readonly<{
   payload: MapContentPayload;
   npcEligible: boolean;
   npcPointCost?: number;
-  npcResolverId?: ResolverId;
+  npcResolverId?: NpcDungeonTargetResolverId;
 }>;
 
 export interface MapContentResolver {

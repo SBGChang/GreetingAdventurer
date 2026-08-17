@@ -7,6 +7,10 @@ import type { Brand, DefinitionId, RuntimeId, EphemeralId, TemplateLocalId } fro
 export type ModuleId<K extends string = string> = Brand<string, `module:${K}`>;
 export type WorkflowId<K extends string = string> = Brand<string, `workflow:${K}`>;
 export type ResolverId = Brand<string, 'resolver'>;
+// NpcDungeonTargetResolverDefinition **是內容 Definition**（帶 DefinitionHeader），因此以 DefinitionId
+// 定址，不是 ResolverId。兩者混用會讓 Definition Reader 收到一個根本不屬於 definition 家族的 ID——
+// 先前靠 `as unknown as DefinitionId` 蓋住，移除該轉型後型別檢查立刻抓到（規範 §7）。
+export type NpcDungeonTargetResolverId = DefinitionId<'npc-dungeon-target-resolver'>;
 export type SchemaId = Brand<string, 'schema'>;
 export type ContentPackId = Brand<string, 'content-pack'>;
 export type RngStreamId = Brand<string, 'rng-stream'>;

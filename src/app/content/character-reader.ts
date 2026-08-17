@@ -50,11 +50,11 @@ export function createCharacterDefinitionReader(registry: DefinitionRegistry): C
   );
 
   return {
-    getArchetype: (id) => archetype.get(id as unknown as DefinitionId),
-    getLifecycleRule: (id) => lifecycle.get(id as unknown as DefinitionId),
-    getStatusDefinition: (id) => status.get(id as unknown as DefinitionId),
-    getBirthRule: (id) => birth.get(id as unknown as DefinitionId),
-    getTemporaryCharacterRule: (id) => temporary.get(id as unknown as DefinitionId),
-    getWorldAdventurerGenerationRule: (id) => worldAdventurer.get(id as unknown as DefinitionId),
+    getArchetype: (id) => archetype.get(id),
+    getLifecycleRule: (id) => lifecycle.get(id),
+    getStatusDefinition: (id) => status.get(id),
+    getBirthRule: (id) => birth.get(id),
+    getTemporaryCharacterRule: (id) => temporary.get(id),
+    getWorldAdventurerGenerationRule: (id) => worldAdventurer.get(id),
   };
 }

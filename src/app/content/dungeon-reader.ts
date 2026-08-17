@@ -61,14 +61,14 @@ export function createDungeonDefinitionReader(registry: DefinitionRegistry): Dun
   );
 
   return {
-    getDungeonInteractionRule: (id) => interaction.get(id as unknown as DefinitionId),
-    getNpcExplorationRule: (id) => npcExploration.get(id as unknown as DefinitionId),
-    getNpcResolver: (id) => npcResolver.get(id as unknown as DefinitionId),
+    getDungeonInteractionRule: (id) => interaction.get(id),
+    getNpcExplorationRule: (id) => npcExploration.get(id),
+    getNpcResolver: (id) => npcResolver.get(id),
     getGatheringInteractionView: (id: GatheringRuleId) => {
-      const view = gathering.get(id as unknown as DefinitionId);
+      const view = gathering.get(id);
       return { ruleId: id, dungeonInteractionMinutes: view.dungeonInteractionMinutes };
     },
     listContentEventOptionIds: (definitionId) =>
-      contentEvent.get(definitionId as unknown as DefinitionId).options.map((option) => option.id),
+      contentEvent.get(definitionId).options.map((option) => option.id),
   };
 }

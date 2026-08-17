@@ -86,16 +86,16 @@ export function createProgressionDefinitionReader(
   );
 
   return {
-    getMastery: (id) => mastery.get(id as unknown as DefinitionId),
-    getMasteryCurve: (id) => masteryCurve.get(id as unknown as DefinitionId),
-    getSkill: (id) => skill.get(id as unknown as DefinitionId),
-    getTeachingRule: (id) => teaching.get(id as unknown as DefinitionId),
-    getExperienceAwardRule: (id) => experienceAward.get(id as unknown as DefinitionId),
+    getMastery: (id) => mastery.get(id),
+    getMasteryCurve: (id) => masteryCurve.get(id),
+    getSkill: (id) => skill.get(id),
+    getTeachingRule: (id) => teaching.get(id),
+    getExperienceAwardRule: (id) => experienceAward.get(id),
     listSocialMasteryBenefits: () => socialBenefit.list(),
-    getAttackMasteryAwardRule: (id) => attackAward.get(id as unknown as DefinitionId),
-    getDefenseMasteryRoutingRule: (id) => defenseRouting.get(id as unknown as DefinitionId),
-    getSupportMasteryAwardRule: (id) => supportAward.get(id as unknown as DefinitionId),
-    getAgeExperienceRule: (id) => ageExperience.get(id as unknown as DefinitionId),
-    getChildEducationRule: (id) => childEducation.get(id as unknown as DefinitionId),
+    getAttackMasteryAwardRule: (id) => attackAward.get(id),
+    getDefenseMasteryRoutingRule: (id) => defenseRouting.get(id),
+    getSupportMasteryAwardRule: (id) => supportAward.get(id),
+    getAgeExperienceRule: (id) => ageExperience.get(id),
+    getChildEducationRule: (id) => childEducation.get(id),
   };
 }

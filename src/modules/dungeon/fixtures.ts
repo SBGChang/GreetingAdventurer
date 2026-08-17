@@ -32,6 +32,7 @@ import type {
   Seed,
   RngStreamId,
   RngCursor,
+  NpcDungeonTargetResolverId,
 } from '../../contracts/core';
 import type {
   DungeonDefinitionReader,
@@ -78,7 +79,7 @@ export const FIXTURE = {
   lootDistributionRuleId:
     'definition:asset-distribution-rule:dungeon-loot' as AssetDistributionRuleId,
   npcExplorationRuleId: 'definition:npc-exploration-rule:base' as NpcExplorationRuleId,
-  resolverId: 'resolver:dungeon-target' as ResolverId,
+  resolverId: 'definition:npc-dungeon-target-resolver:dungeon' as NpcDungeonTargetResolverId,
   trapResolverId: 'resolver:trap' as ResolverId,
   explorationExperienceRuleId: 'definition:experience-award-rule:explore' as ExperienceAwardRuleId,
 } as const;
@@ -110,7 +111,7 @@ const npcExplorationRule: NpcExplorationRuleDefinition = {
 };
 
 const npcResolver: NpcDungeonTargetResolverDefinition = {
-  id: FIXTURE.resolverId as unknown as NpcDungeonTargetResolverDefinition['id'],
+  id: FIXTURE.resolverId,
   schemaVersion: 1,
   packId: PACK,
   enabled: true,

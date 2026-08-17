@@ -140,8 +140,10 @@ const POWER_TABLE: Readonly<Record<string, number>> = {
 };
 
 // ── DefinitionHeader helper（id 統一折成基底 DefinitionId，供各 Definition 型別複用）──
-function header(id: string) {
-  return { id: id as unknown as DefinitionId, schemaVersion: 1, packId: PACK_ID, enabled: true as const };
+// 保留傳入的品牌型別：回傳 `id: string` 會讓每個 Definition 的 id 退化成裸字串，
+// 呼叫端就得再轉型回去（那正是 as unknown as 的來源之一）。
+function header<T extends string>(id: T) {
+  return { id, schemaVersion: 1, packId: PACK_ID, enabled: true as const };
 }
 
 // ── Skill Views ─────────────────────────────────────────────────────────

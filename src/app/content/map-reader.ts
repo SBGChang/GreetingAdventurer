@@ -43,13 +43,13 @@ export function createMapDefinitionReader(registry: DefinitionRegistry): MapDefi
   ]);
 
   return {
-    getMapTemplate: (id) => template.get(id as unknown as DefinitionId),
-    getMapSpawnRule: (id) => spawn.get(id as unknown as DefinitionId),
-    getNpcSequenceRule: (id) => npcSequence.get(id as unknown as DefinitionId),
-    getContentDefinition: (id) => content.get(id as unknown as DefinitionId),
+    getMapTemplate: (id) => template.get(id),
+    getMapSpawnRule: (id) => spawn.get(id),
+    getNpcSequenceRule: (id) => npcSequence.get(id),
+    getContentDefinition: (id) => content.get(id),
     getGatheringMapView: (id) => ({
       ruleId: id,
-      npcPolicy: gathering.get(id as unknown as DefinitionId).npcPolicy,
+      npcPolicy: gathering.get(id).npcPolicy,
     }),
   };
 }
