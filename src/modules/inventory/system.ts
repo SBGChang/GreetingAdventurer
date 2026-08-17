@@ -191,8 +191,8 @@ function equipLegalityRejection(
 
 function sameCharacterSet(a: readonly CharacterId[], b: readonly CharacterId[]): boolean {
   if (a.length !== b.length) return false;
-  const sa = new Set<string>(a as readonly string[]);
-  for (const c of b) if (!sa.has(c as unknown as string)) return false;
+  const sa = new Set<CharacterId>(a);
+  for (const c of b) if (!sa.has(c)) return false;
   return true;
 }
 
@@ -802,7 +802,7 @@ export function evaluateTeamEncumbrance(
     // 全隊不超載：關閉既有 Resolution 並恢復一般操作（doc §3.3）。
     if (!existing) return accept(state, []); // 冪等 no-op。
     const nextResolutions = { ...state.encumbranceResolutions };
-    delete (nextResolutions as Record<string, EncumbranceResolution>)[existing.resolutionId as unknown as string];
+    delete nextResolutions[existing.resolutionId];
     return accept({ ...state, encumbranceResolutions: nextResolutions }, [
       emit({ type: 'EncumbranceResolutionClosed', resolutionId: existing.resolutionId, teamId: cmd.teamId }),
     ]);

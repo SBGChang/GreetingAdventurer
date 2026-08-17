@@ -101,17 +101,17 @@ export function createTeamQuery(state: TeamState): TeamQuery {
 
     listTavernVisitorIds(cityId: CityId): CharacterId[] {
       // 同城隊伍中，正式成員的 active/resting 自由行動為 tavernVisit 者。
-      const teamsAtCity = new Set<string>();
+      const teamsAtCity = new Set<TeamId>();
       for (const t of Object.values(state.teams)) {
         if (t.location.kind === 'city' && t.location.cityId === cityId) {
-          teamsAtCity.add(t.teamId as unknown as string);
+          teamsAtCity.add(t.teamId);
         }
       }
       const out: CharacterId[] = [];
       for (const f of Object.values(state.freeActions)) {
         if (f.payload.kind !== 'tavernVisit') continue;
         if (f.status !== 'active' && f.status !== 'resting') continue;
-        if (!teamsAtCity.has(f.teamId as unknown as string)) continue;
+        if (!teamsAtCity.has(f.teamId)) continue;
         const team = state.teams[f.teamId];
         if (team !== undefined && team.memberIds.includes(f.memberId)) out.push(f.memberId);
       }

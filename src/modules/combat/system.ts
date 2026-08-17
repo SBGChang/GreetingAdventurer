@@ -276,7 +276,7 @@ function orderReadyBatch(
   const players = ids.filter((id) => encounter.combatants[id]?.side === 'player');
   const enemies = ids.filter((id) => encounter.combatants[id]?.side === 'enemy');
   const rc = encounter.rngContext;
-  let cursor = rc.cursor as unknown as number;
+  let cursor = rc.cursor as number;
 
   const shuffle = (arr: CombatantId[]): CombatantId[] => {
     const a = [...arr];
@@ -288,7 +288,7 @@ function orderReadyBatch(
         minInclusive: 0,
         maxInclusive: i,
       });
-      cursor = step.nextCursor as unknown as number;
+      cursor = step.nextCursor as number;
       const j = step.value;
       const tmp = a[i]!;
       a[i] = a[j]!;

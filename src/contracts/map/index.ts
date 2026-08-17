@@ -41,6 +41,7 @@ import type {
   AssetDistributionId,
   NpcDungeonRunId,
   NpcDungeonTargetResolverId,
+  EncounterId,
 } from '../core';
 
 // 跨模組引用：NPC 地牢結算命令需引用 Dungeon 的暫存結果。
@@ -254,6 +255,10 @@ export type MapContentInstance = Readonly<{
   npcOrder?: number;
   npcPointCost?: number;
   npcResolverId?: NpcDungeonTargetResolverId;
+  // 玩家路徑的內容解析 Resolver。與 npcResolverId 對稱：NPC 側早就有，玩家側一直沒有，
+  // 於是 dungeon 無資料可讀、只能填固定值。選填是因為資料尚未存在（正式 Content Pack 未建立，
+  // 見 F4）——缺的時候 Handler 一律 typed rejection，**不得**代它挑一個預設 Resolver。
+  playerResolverId?: ResolverId;
   state: 'available' | 'resolved' | 'removedByRefresh';
   protectedByQuestIds: readonly QuestId[];
   resolvedOnDay?: WorldDay;
@@ -271,17 +276,25 @@ export type MapState = Readonly<{
 // ──────────────────────────────────────────────────────────────────────────
 
 // [INVENTED] 文件以 `resolution`/`resolver` 描述內容處理結果但未給出結構。
+//
+// 判別鍵是「**這筆結果由什麼產生**」，因為那決定了要附哪一種身分：
+//   * contentResolver：玩家路徑。內容自己的解析 Resolver（MapContentInstance.playerResolverId）。
+//   * npcTargetResolver：NPC 路徑。該筆結果由哪個 NPC 目標 Resolver Definition 產生。
+//   * combatEncounter：內容由一場戰鬥解決（怪物組／Boss）。**沒有任何內容 Resolver 跑過**，
+//     能指認的身分是那場遭遇本身。
+//
+// 原本是單一形狀 `{ resolverId: ResolverId | NpcDungeonTargetResolverId }`，於是第三種情形無從表達，
+// dungeon 在戰鬥收斂時只好填一個寫死的 'resolver:dungeon-default'（規範 §5）。那不是隨手寫死：
+// 型別逼著它交出一個它沒有的東西。聯集化之後三條路徑都能說實話，寫死的那個常數也就沒有存在理由。
 export type MapContentResolution = Readonly<{
-  // 內容結果可能由**兩個不同的 Resolver 家族**產生，所以這裡是聯集而不是單一型別：
-  //   * 玩家路徑：泛用 ResolverId（目前 dungeon 仍以固定值填入——那是還沒補的資料缺口，
-  //     見 skill 的 cleanup-backlog C1／B1；補上「玩家內容解析 Resolver」的資料欄位後才會消失）。
-  //   * NPC 路徑：NpcDungeonTargetResolverId（該筆結果由哪個 NPC 目標 Resolver Definition 產生）。
-  // 先前兩者都宣告成 ResolverId，等於把「內容 Definition 的 ID」當成「Resolver 註冊 ID」在用；
-  // 移除 `as unknown as DefinitionId` 之後型別檢查立刻抓到（規範 §7）。
-  resolverId: ResolverId | NpcDungeonTargetResolverId;
   outcome: 'success' | 'failure';
   details?: Readonly<Record<string, JsonValue>>;
-}>;
+}> &
+  (
+    | Readonly<{ kind: 'contentResolver'; resolverId: ResolverId }>
+    | Readonly<{ kind: 'npcTargetResolver'; resolverId: NpcDungeonTargetResolverId }>
+    | Readonly<{ kind: 'combatEncounter'; encounterId: EncounterId }>
+  );
 
 // [INVENTED] 固定陷阱處理結果的結構；文件僅稱 `resolution`。
 export type MapTrapResolution = Readonly<{
@@ -446,13 +459,13 @@ export type MapContentGenerated = Readonly<{
   contentIds: readonly ContentInstanceId[];
 }>;
 
+// `resolver` 欄位已移除：它是 `resolution` 的其中一個欄位的複本，而聯集化之後
+// combatEncounter 那一支根本沒有 resolver 可複製。訂閱者請直接判別 `resolution.kind`。
 export type MapContentResolved = Readonly<{
   type: 'MapContentResolved';
   mapId: MapInstanceId;
   contentId: ContentInstanceId;
   distributionId?: AssetDistributionId;
-  // 與 MapContentResolution.resolverId 同一個聯集：事件必須能表達兩種 Resolver 家族。
-  resolver: ResolverId | NpcDungeonTargetResolverId;
   resolution: MapContentResolution;
 }>;
 

@@ -692,12 +692,10 @@ export function handleApplyFoodStatusEffects(
   const character = tryGetCharacter(state, command.characterId);
   if (character === undefined || character.lifeState === 'dead') return makeResult(state);
 
-  // 第一版：effectId 已被 Crafting 解析為 statusId 對照；此處以 EffectDefinitionId 當作 statusId 對照鍵。
-  // TODO: 導入 Effect→Status 對照表；目前僅示範 apply/remove 的 Slice 寫入路徑。
+  // Effect→Status 對照由送出端（Crafting）完成；本命令收到的已是 StatusId（見契約宣告的理由）。
   let statuses = character.condition.statuses;
   const statusChanges: CharacterStatusChange[] = [];
-  for (const effectId of command.effectIds) {
-    const statusId = effectId as unknown as CharacterStatusInstance['statusId'];
+  for (const statusId of command.statusIds) {
     if (command.operation === 'remove') {
       statuses = statuses.filter((s) => s.statusId !== statusId);
       statusChanges.push({ statusId, change: 'removed' });

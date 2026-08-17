@@ -32,8 +32,15 @@ export type DefinitionViewMapper<TView> = (def: Readonly<ContentDefinition>) => 
 export type DefinitionReaderSpec<TView = Readonly<ContentDefinition>> = Readonly<{
   readerId: DefinitionReaderId;
   ownedKinds: readonly string[];
-  mapView?: DefinitionViewMapper<TView>;
+  // 必填。曾經選填，缺省時以 `def as unknown as TView` 恆等投影帶過——但那個恆等只有在
+  // TView 真的是 ContentDefinition 時才成立，而型別系統攔不住 `createDefinitionReader<SomeView>`
+  // 忘記給投影：讀出來的東西會頂著 SomeView 的型別、實際上是原始 Definition，錯誤要到欄位讀成
+  // undefined 才浮現。改成必填後那個轉型沒有存在理由。不做投影的呼叫端傳 identityDefinitionView。
+  mapView: DefinitionViewMapper<TView>;
 }>;
+
+// TView = Readonly<ContentDefinition> 時的投影。型別上就是恆等函式，不需要任何轉型。
+export const identityDefinitionView: DefinitionViewMapper<Readonly<ContentDefinition>> = (def) => def;
 
 class NarrowedReader<TView> implements DefinitionReader<TView> {
   readonly readerId: DefinitionReaderId;
@@ -47,9 +54,7 @@ class NarrowedReader<TView> implements DefinitionReader<TView> {
     this.readerId = spec.readerId;
     this.ownedKinds = [...spec.ownedKinds];
     this.ownedSet = new Set(spec.ownedKinds);
-    // 若未提供 mapView，TView 必為 Readonly<ContentDefinition>（identity 投影）。
-    this.mapView =
-      spec.mapView ?? ((def: Readonly<ContentDefinition>) => def as unknown as TView);
+    this.mapView = spec.mapView;
   }
 
   private owns(def: Readonly<ContentDefinition> | undefined): def is Readonly<ContentDefinition> {

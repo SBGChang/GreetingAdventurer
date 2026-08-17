@@ -9,7 +9,11 @@ export type Seed = string;
 export type LocalizationKey = string;
 
 export type JsonScalar = string | number | boolean | null;
-export type JsonValue = JsonScalar | JsonValue[] | { [key: string]: JsonValue };
+// 陣列成員為 readonly：本專案的 JSON 一律是**讀進來的內容資料**，各處都以 `readonly T[]` 持有
+// （如 RawContentManifest.packs）。原本宣告成可變 `JsonValue[]`，於是 readonly 資料轉不進 JsonValue，
+// 而那個轉不進去被 `as unknown as` 蓋掉了——不是型別對不上，是 JsonValue 說不出自己資料的形狀。
+// `T[]` 仍可指派給 `readonly T[]`，所以放寬只增加可指派性，不影響既有建構端。
+export type JsonValue = JsonScalar | readonly JsonValue[] | { [key: string]: JsonValue };
 
 // branded 別名基底；不得對已 branded 的 ID 再套第二層 Brand。
 export type Brand<T, K extends string> = T & { readonly __brand: K };

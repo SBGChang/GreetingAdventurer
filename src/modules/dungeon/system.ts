@@ -92,6 +92,10 @@ const TEAM_MODULE_ID = 'team' as ModuleId;
 // Map 的窄化讀 Port：Dungeon 只讀需要的地形／內容真相，不擁有 Map State。
 export interface DungeonMapPort {
   getMapVersion(mapId: MapInstanceId): number;
+  // 該內容的玩家路徑解析 Resolver（MapContentInstance.playerResolverId）。內容擁有者是 Map，
+  // 所以由 Map 供給而不是 Dungeon 自己挑一個。未設定回 undefined —— 呼叫端須明確拒絕，
+  // 不得代填預設值（原本 dungeon 寫死 'resolver:dungeon-default'，規範 §5）。
+  getContentResolverId(mapId: MapInstanceId, contentId: ContentInstanceId): ResolverId | undefined;
   // 入口房間與其入口小格（進場立即揭露）。
   getEntranceRoom(mapId: MapInstanceId): Readonly<{ roomId: RoomId; entryCell: GridCell }>;
   isExitRoom(mapId: MapInstanceId, roomId: RoomId): boolean;
@@ -550,6 +554,12 @@ export function interactDungeonContent(
 
   // chest / control / kidnap 等：直接要求 Map 處理內容（doc §6.1 ResolvePlayerMapContent）。
   // TODO: control / kidnap 需先解決守衛內容；第一版主路徑只處理直接可取的 chest。
+  const resolverId = ctx.map.getContentResolverId(session.mapId, cmd.contentId);
+  if (resolverId === undefined) {
+    return reject('dungeon.interactDungeonContent.contentResolverMissing', {
+      contentId: String(cmd.contentId),
+    });
+  }
   const messages: TransactionMessageDraft[] = [
     internal(MAP_MODULE_ID, {
       type: 'ResolvePlayerMapContent',
@@ -557,7 +567,7 @@ export function interactDungeonContent(
       mapId: session.mapId,
       contentId: cmd.contentId,
       distributionId: session.distributionId,
-      resolution: { resolverId: defaultResolverId(), outcome: 'success' },
+      resolution: { kind: 'contentResolver', resolverId, outcome: 'success' },
     }),
   ];
   return accept(state, messages);
@@ -582,6 +592,12 @@ export function resolveDungeonInteraction(
   if (!legalOptions.includes(cmd.optionId)) {
     return reject('dungeon.resolveDungeonInteraction.illegalOption', { optionId: String(cmd.optionId) });
   }
+  const resolverId = ctx.map.getContentResolverId(session.mapId, pending.contentId);
+  if (resolverId === undefined) {
+    return reject('dungeon.resolveDungeonInteraction.contentResolverMissing', {
+      contentId: String(pending.contentId),
+    });
+  }
   const restored: PlayerExplorationSession = {
     ...session,
     pendingInteraction: undefined,
@@ -596,7 +612,8 @@ export function resolveDungeonInteraction(
       contentId: pending.contentId,
       distributionId: session.distributionId,
       resolution: {
-        resolverId: defaultResolverId(),
+        kind: 'contentResolver',
+        resolverId,
         outcome: 'success',
         details: { optionId: String(cmd.optionId) },
       },
@@ -992,11 +1009,6 @@ export function handleAssetDistributionCompleted(
 // 內部工具
 // ──────────────────────────────────────────────────────────────────────────
 
-// 第一版預設 resolver 佔位；真實 resolver 由內容 Definition 指定（doc §2）。
-function defaultResolverId(): ResolverId {
-  return 'resolver:dungeon-default' as ResolverId;
-}
-
 // ──────────────────────────────────────────────────────────────────────────
 // CombatEncounterResolved 訂閱者（doc §5.4 表：「對玩家內容處理結果發出 Map 請求，
 // 或將 Session 從 inCombat 恢復」）
@@ -1049,6 +1061,9 @@ export function handleCombatEncounterResolved(
   const source = event.source;
   if (source.kind !== 'mapContent' || source.mapId !== session.mapId) return result(next);
 
+  // Subscriber 不得拒絕（§7.2 rule 6），所以這裡不能走「缺 resolver 就拒絕」那條路——但也不必：
+  // 這筆內容是被**這場戰鬥**解決的，沒有任何內容 Resolver 跑過。能指認的身分就是 encounterId，
+  // 而它就在事件裡。原本填寫死常數，是因為舊契約只允許 resolverId 一種形狀。
   return result(next, [
     internal(MAP_MODULE_ID, {
       type: 'ResolvePlayerMapContent',
@@ -1056,7 +1071,7 @@ export function handleCombatEncounterResolved(
       mapId: session.mapId,
       contentId: source.contentId,
       distributionId: session.distributionId,
-      resolution: { resolverId: defaultResolverId(), outcome: 'success' },
+      resolution: { kind: 'combatEncounter', encounterId: event.encounterId, outcome: 'success' },
     }),
   ]);
 }

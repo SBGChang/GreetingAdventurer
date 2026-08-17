@@ -610,7 +610,6 @@ export function handleResolvePlayerMapContent(
       mapId: command.mapId,
       contentId: command.contentId,
       distributionId: command.distributionId,
-      resolver: command.resolution.resolverId,
       resolution: command.resolution,
     }),
   ]);
@@ -669,8 +668,7 @@ export function handleApplyNpcDungeonSettlement(
           mapId: command.mapId,
           contentId: target.contentId,
           distributionId: command.distributionId,
-          resolver: result.resolverId,
-          resolution: { resolverId: result.resolverId, outcome: 'success' },
+          resolution: { kind: 'npcTargetResolver', resolverId: result.resolverId, outcome: 'success' },
         }),
       );
     } else {

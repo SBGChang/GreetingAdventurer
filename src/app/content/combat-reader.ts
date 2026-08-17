@@ -59,10 +59,13 @@ export function createCombatDefinitionReader(registry: DefinitionRegistry): Comb
     COMBAT_DEFINITION_KINDS.monster,
   ]);
   // getSkillView 投影：CombatSkillDefinitionView 以 skillId 為鍵、不帶 DefinitionHeader，故自訂 mapView。
+  // 與 domainDefinitionView 同一個形狀：作者資料原樣攤開 + 補上鍵。逐欄位驗證**所有** Reader 都還沒有
+  // （投影信任 `data` 的形狀），那是正式 Content Pack schema 驗證的工作，不是這一行的——見 F4。
   const skill = createDefinitionReader<CombatSkillDefinitionView>(registry, {
     readerId: 'reader:combat.skill' as DefinitionReaderId,
     ownedKinds: [COMBAT_DEFINITION_KINDS.skill],
-    mapView: (def) => ({ ...(def.data as object), skillId: def.id } as unknown as CombatSkillDefinitionView),
+    mapView: (def) =>
+      ({ ...(def.data as Record<string, unknown>), skillId: def.id } as CombatSkillDefinitionView),
   });
   const openingCtb = narrowedDomainReader<OpeningCtbRuleDefinition>(registry, 'reader:combat.opening-ctb-rule', [
     COMBAT_DEFINITION_KINDS.openingCtbRule,

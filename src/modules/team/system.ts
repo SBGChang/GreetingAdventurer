@@ -481,11 +481,11 @@ export function validatePlacements(
   placements: Readonly<Record<CharacterId, GridCell>>,
 ): PlacementValidation {
   const placedIds = Object.keys(placements) as CharacterId[];
-  const memberSet = new Set<string>(memberIds as readonly string[]);
+  const memberSet = new Set<CharacterId>(memberIds);
 
   // 非正式成員被配置。
   for (const id of placedIds) {
-    if (!memberSet.has(id as unknown as string)) {
+    if (!memberSet.has(id)) {
       return { ok: false, code: 'team/formation-non-member', details: { characterId: String(id) } };
     }
   }

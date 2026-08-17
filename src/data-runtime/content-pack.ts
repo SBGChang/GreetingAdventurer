@@ -130,16 +130,22 @@ export const DataLoadCode = {
 
 // ── 純函式 hash（決定性、同步、無 I/O）─────────────────────────────────────
 
+// `Array.isArray` narrows 成 `any[]`，無法把 readonly 陣列從 JsonValue 聯集裡排除（TS 已知限制），
+// 於是 else 分支仍帶著陣列型別、無法以 string 索引。具名述詞讓兩個分支都真的窄化。
+function isJsonArray(value: JsonValue): value is readonly JsonValue[] {
+  return Array.isArray(value);
+}
+
 // 針對 JsonValue 做 key 排序的 canonical 序列化，確保「檔案列舉順序」不影響 hash（§11.1）。
 export function canonicalJson(value: JsonValue): string {
   if (value === null || typeof value !== 'object') {
     return JSON.stringify(value);
   }
-  if (Array.isArray(value)) {
+  if (isJsonArray(value)) {
     return `[${value.map((v) => canonicalJson(v)).join(',')}]`;
   }
   const keys = Object.keys(value).sort();
-  const parts = keys.map((k) => `${JSON.stringify(k)}:${canonicalJson(value[k] as JsonValue)}`);
+  const parts = keys.map((k) => `${JSON.stringify(k)}:${canonicalJson(value[k]!)}`);
   return `{${parts.join(',')}}`;
 }
 
@@ -491,8 +497,8 @@ export function loadContent(input: LoadContentInput): CompileContentResult {
 
 // manifest / pack → JsonValue（供 canonical hash 使用；型別已是 JSON 可表示形狀）。
 function toJsonManifest(manifest: RawContentManifest): JsonValue {
-  return manifest as unknown as JsonValue;
+  return manifest as JsonValue;
 }
 function toJsonPack(pack: RawContentPack): JsonValue {
-  return pack as unknown as JsonValue;
+  return pack as JsonValue;
 }

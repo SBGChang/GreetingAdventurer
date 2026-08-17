@@ -81,6 +81,9 @@ export const FIXTURE = {
   npcExplorationRuleId: 'definition:npc-exploration-rule:base' as NpcExplorationRuleId,
   resolverId: 'definition:npc-dungeon-target-resolver:dungeon' as NpcDungeonTargetResolverId,
   trapResolverId: 'resolver:trap' as ResolverId,
+  // 玩家內容解析 Resolver。正式路徑由 MapContentInstance.playerResolverId 供給；
+  // fixture 一律回這一筆，好讓「有資料」與「缺資料」兩種情形都測得到。
+  contentResolverId: 'resolver:map-content' as ResolverId,
   explorationExperienceRuleId: 'definition:experience-award-rule:explore' as ExperienceAwardRuleId,
 } as const;
 
@@ -186,6 +189,7 @@ const npcSequence: readonly NpcSequenceEntryView[] = [
 export function createFixtureMapPort(overrides?: Partial<DungeonMapPort>): DungeonMapPort {
   const base: DungeonMapPort = {
     getMapVersion: () => FIXTURE.mapVersion,
+    getContentResolverId: () => FIXTURE.contentResolverId,
     getEntranceRoom: () => ({ roomId: FIXTURE.roomEntrance, entryCell: ENTRANCE_CELL }),
     isExitRoom: (_mapId, roomId) => roomId === FIXTURE.roomExit,
     getRoomTraversal: (_mapId, fromRoomId, _fromEntryCell, toRoomId) =>

@@ -32,7 +32,7 @@ export function nextRuntimeId<TId extends RuntimeId>(
   input: Readonly<{ worldSeed: Seed; entityKind: RuntimeEntityKind; cursor: RuntimeIdCursor }>,
 ): RuntimeIdAllocation<TId> {
   assertRuntimeIdCursor(input.cursor);
-  const id = formatRuntimeId(input.worldSeed, input.entityKind, input.cursor) as unknown as TId;
+  const id = formatRuntimeId(input.worldSeed, input.entityKind, input.cursor) as TId;
   return { id, nextCursor: (input.cursor + 1) as RuntimeIdCursor };
 }
 

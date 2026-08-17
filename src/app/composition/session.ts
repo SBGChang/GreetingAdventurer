@@ -331,7 +331,7 @@ export function runDueJob(
   }
   // 尚未到期的 Job 不得執行：到期日在未來 → 不開交易、不推進 cursor。Scheduler 是「已排定」而非「已到期」，
   // 呼叫者須自行判斷 dueDay；此處是最後防線，避免提前結算未來工作。
-  if ((authoritative.dueDay as unknown as number) > (state.core.worldDay as unknown as number)) {
+  if (authoritative.dueDay > state.core.worldDay) {
     return {
       accepted: false,
       state,

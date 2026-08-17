@@ -342,12 +342,17 @@ export type ApplyCombatCondition = Readonly<{
   statusChanges?: readonly CharacterStatusChange[];
 }>;
 
+// 帶的是**已解析的 StatusId**，不是 EffectId。原本宣告成 `effectIds: EffectDefinitionId[]`，
+// Handler 再 `as unknown as` 當成 statusId 用——但 Character 沒有能力做那層對照：它的 Reader 只有
+// getStatusDefinition，Effect 定義的擁有者是 Crafting／Combat 而不是 Character。§12：不擁有這個事實
+// 的地方不得決定它。對照因此留在送出端（Crafting Workflow，尚未實作），契約在此陳述它收到的是什麼。
+// 兩個 ID 家族若剛好同名，原本的轉型會在執行期查不到 Status 而靜默失效——那正是這裡要擋掉的。
 export type ApplyFoodStatusEffects = Readonly<{
   type: 'ApplyFoodStatusEffects';
   characterId: CharacterId;
   foodStatusRevision: Revision;
   operation: 'apply' | 'remove';
-  effectIds: readonly EffectDefinitionId[];
+  statusIds: readonly CharacterStatusDefinitionId[];
 }>;
 
 // 狀態變更描述（事件與命令共用；來源文件未給精確 schema）(AMBIGUITY)。
