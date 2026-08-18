@@ -405,16 +405,15 @@ export type ConfigureCombatFormationCommand = Readonly<{
   placements: Readonly<Record<CharacterId, GridCell>>;
 }>;
 
+// 尚未註冊：chooseCityFreeAction、dismissMember（兩者 Handler 皆未撰寫）。
 export type TeamGameCommand =
   | StartCityTravelCommand
   | EnterAdventureMapCommand
   | ReturnToCityCommand
-  | ChooseCityFreeActionCommand
   | BeginCityFreePeriodCommand
   | RestCommand
   | SelectPlayerSuccessorCommand
   | RecruitTavernAdventurerCommand
-  | DismissMemberCommand
   | ConfigureCombatFormationCommand;
 
 // ── ScheduledJob ────────────────────────────────────────────────────────
@@ -446,10 +445,9 @@ export type NonPlayerMemberCityFreeDayTickJob = ScheduledJobBase<
   NonPlayerMemberCityFreeDayTickJobPayload
 >;
 
-export type TeamScheduledJob =
-  | TeamPlanDueJob
-  | FreeActionDueJob
-  | NonPlayerMemberCityFreeDayTickJob;
+// 只列**已實作**的 Job。尚未註冊：freeActionDue、nonPlayerMemberCityFreeDayTick
+// （team 宣告處理，Handler 未撰寫）。
+export type TeamScheduledJob = TeamPlanDueJob;
 
 // ── Internal Command payload（inbound；欄位依 prose 推導）─────────────────
 export type StartReturnFromDungeonPayload = Readonly<{
@@ -543,19 +541,14 @@ export type AttachQuestTemporaryMemberPayload = Readonly<{
   questId: QuestId;
 }>;
 
+// 只列**已實作**的接收能力。尚未註冊：StartTimedCityAction、StartChildStudyPlan、CreateNpcTeam、
+// OpenPlayerTravelInteraction、MarkPlayerTravelInteractionAwaitingCombat、
+// CompletePlayerTravelInteraction、AssignNpcMemberFreeAction、RecordTeamWorkSettlementValue、
+// AttachQuestTemporaryMember。
 export type TeamInboundInternalCommand =
   | StartReturnFromDungeonPayload
-  | StartTimedCityActionPayload
-  | StartChildStudyPlanPayload
-  | CreateNpcTeamPayload
   | StartNpcTeamPlanPayload
-  | OpenPlayerTravelInteractionPayload
-  | CompletePlayerTravelSegmentWithoutEventPayload
-  | MarkPlayerTravelInteractionAwaitingCombatPayload
-  | CompletePlayerTravelInteractionPayload
-  | AssignNpcMemberFreeActionPayload
-  | RecordTeamWorkSettlementValuePayload
-  | AttachQuestTemporaryMemberPayload;
+  | CompletePlayerTravelSegmentWithoutEventPayload;
 
 // 輸出 Internal Command（唯一處理者：dungeon）。
 // B.5：不再自行複寫欄位，直接引用 dungeon 契約的真實型別——兩份宣告一旦漂移，

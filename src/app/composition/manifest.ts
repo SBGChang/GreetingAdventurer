@@ -23,11 +23,11 @@ import type { GameJobType } from './state';
 // 每個已註冊 Job Type 必須在此恰好出現一次；缺漏或重複由 kernel createScheduler 於啟動時 throw。
 export const JOB_TYPE_ORDER_BY_PHASE: Readonly<Record<JobPhase, readonly GameJobType[]>> = {
   // 既有行動完成：玩家旅行段落、NPC 抵達、自由活動、NPC 地牢日。
-  completeAction: ['teamPlanDue', 'freeActionDue', 'npcDungeonDay'],
+  completeAction: ['teamPlanDue'],
   // 接受期限／實際結束期限／鎖定到期。（quest 的 questDeadline 於其 Wave 併入。）
   closeDeadline: [],
   // 固定日曆批次：地圖刷新、商店、護衛候選。
-  worldCadence: ['mapRefreshCheck', 'nonPlayerMemberCityFreeDayTick'],
+  worldCadence: ['mapRefreshCheck'],
   // 必須延到當日排程、且不是交易內即時因果的反應。
   worldReaction: ['characterLifecycleDue'],
   // NPC 決策與下一輪行動。（npc-behavior 的 Job 於其 Wave 併入。）
@@ -49,77 +49,17 @@ export const TRAVEL_EVENT_WORKFLOW = 'workflow:travel-event' as WorkflowId;
 import { WEAPON_SET_CONFIGURATION_WORKFLOW } from '../workflows/weapon-set-configuration';
 import { GAME_COMMAND_ENTRY, WORKFLOW_ENTRY } from './messages';
 
-// ──────────────────────────────────────────────────────────────────────────
-// Feature Capability：宣告了路由但**尚未閉合**的公開能力（複審 R15 P1-4）
-// ──────────────────────────────────────────────────────────────────────────
+// 未完成的能力**不進註冊表**。
 //
-// 契約宣告 ≠ 有實作。這份清單把「已宣告但還不能用」變成**明示**狀態，取代兩種壞行為：
-//   1. 啟動驗證全綠、玩家送出後才 throw。
-//   2. 靜默成功 no-op。
-// 列在此處的命令：啟動驗證不會抱怨它缺 Handler／Workflow，但 Router 一律回傳型別化的
-// `engine/feature-not-available` 拒絕（不是例外）。UI 應據此隱藏或停用對應功能頁。
+// 這裡曾經有 UNAVAILABLE_CAPABILITIES：一份「已宣告路由但尚未閉合」的清單，配合 Router 回傳
+// `engine/feature-not-available`。它比「玩家按下去才 throw」好，但仍然違反規範 §10——
+// 未閉合的 Capability 不得進正式 Manifest、不得註冊 Game Command 入口。清單存在的期間，
+// 34 筆未完成能力一直待在正式註冊表裡，而啟動驗證是綠的。
 //
-// **這份清單只能變短。** 實作完成就把該項移除；移除後若仍缺 Handler，啟動驗證會立刻失敗。
-// 每一項都必須附**理由**。理由欄位不是註解裝飾：它是「為什麼還不能用」的唯一紀錄，也讓下一個人知道
-// 移除它需要先完成什麼。
-export type CapabilityGap = Readonly<Record<string, string>>;
-
-export const UNAVAILABLE_CAPABILITIES: Readonly<{
-  gameCommands: CapabilityGap;
-  internalCommands: CapabilityGap;
-  jobs: CapabilityGap;
-}> = {
-  gameCommands: {
-    gatherDungeonNode: '入口宣告為 Workflow，但 dungeon gathering workflow 尚未實作',
-    unequipItem: 'Wave B 未實作 Handler',
-    useItem: 'Wave B 未實作 Handler',
-    splitStack: 'Wave B 未實作 Handler',
-    transferItemForEncumbrance: 'Wave B 未實作 Handler（超載處理四命令）',
-    storeItemForEncumbrance: 'Wave B 未實作 Handler（超載處理四命令）',
-    abandonItemForEncumbrance: 'Wave B 未實作 Handler（超載處理四命令）',
-    reassignQuestCargoCarrierForEncumbrance: 'Wave B 未實作 Handler（超載處理四命令）',
-    learnFromBook: 'Wave B 未實作 Handler',
-    startTeaching: 'Wave B 未實作 Handler',
-    chooseCityFreeAction: 'Wave B 未實作 Handler',
-    dismissMember: 'Wave B 未實作 Handler',
-    // 注意：這一項**有** Router dispatch，但 Handler 明確仍是 no-op。「有 dispatch」不等於「已完成」，
-    // 所以本清單以人工維護的理由為準，不從 dispatch 存在與否反推（複審 R15 P1-6）。
-    commandAlly: 'Router 有 dispatch，但 Handler 明確仍是 no-op，尚未實作指揮隊友',
-    // 地牢探索流程**尚未閉合**（規範 §10）。這兩筆會送出無人接收的 Distribution 命令，
-    // 真的執行會在同一交易內失敗；其餘地牢命令雖然各自可路由，但沒有 startPlayerExploration
-    // 就不會有 Session，實務上無從進入。等 Distribution 模組落地、且陷阱／事件效果／NPC 戰鬥
-    // 都改為資料化解析之後，才把這兩項移除。
-    startPlayerExploration: '送出 StartAssetDistribution，但 Distribution 模組尚未實作',
-    useDungeonExit: '送出 FinalizeAssetDistributionCollection，但 Distribution 模組尚未實作',
-  },
-  internalCommands: {
-    // Distribution 模組尚未實作——沒有 Slice、沒有 Handler、INTERNAL_COMMAND_OWNER 也沒有這兩筆。
-    // dungeon 已經在送它們，所以凡是會送出它們的流程目前都跑不完（見下方 gameCommands 的地牢項目）。
-    StartAssetDistribution: 'Distribution 模組尚未實作（無 Slice／Handler／Owner）',
-    FinalizeAssetDistributionCollection: 'Distribution 模組尚未實作（無 Slice／Handler／Owner）',
-    ApplyQuestItemLifecycle: 'inventory 宣告接收，Wave B 未實作',
-    ReleaseExpiredQuestCargo: 'inventory 宣告接收，Wave B 未實作',
-    ConsumeBookForLearning: 'inventory 宣告接收，Wave B 未實作',
-    TransformCraftingItems: 'inventory 宣告接收，Wave B 未實作；消耗端須比對保留的 craftingAttemptId',
-    ConsumeCuisineIngredients: 'inventory 宣告接收，Wave B 未實作',
-    ConsumeCombatSequenceRetrySupply: 'inventory 宣告接收，Wave B 未實作',
-    StartTimedCityAction: 'team 宣告接收，Wave B 未實作',
-    StartChildStudyPlan: 'team 宣告接收，Wave B 未實作',
-    CreateNpcTeam: 'team 宣告接收，Wave B 未實作',
-    OpenPlayerTravelInteraction: 'team 宣告接收，Wave B 未實作（旅行事件 Pending 互動分支）',
-    MarkPlayerTravelInteractionAwaitingCombat: 'team 宣告接收，Wave B 未實作',
-    CompletePlayerTravelInteraction: 'team 宣告接收，Wave B 未實作',
-    AssignNpcMemberFreeAction: 'team 宣告接收，Wave B 未實作',
-    RecordTeamWorkSettlementValue: 'team 宣告接收，Wave B 未實作',
-    AttachQuestTemporaryMember: 'team 宣告接收，Wave B 未實作',
-  },
-  jobs: {
-    freeActionDue: 'team 宣告處理，Wave B 未實作',
-    nonPlayerMemberCityFreeDayTick: 'team 宣告處理，Wave B 未實作',
-  },
-};
-
-export const FEATURE_NOT_AVAILABLE = 'engine/feature-not-available';
+// 現在的作法：未實作的 Command / Job 直接不出現在 contracts 的 union，因此不會進入
+// GameCommand、GAME_COMMAND_ENTRY、INTERNAL_COMMAND_OWNER 或 Manifest。Registry 對任何
+// 「已宣告卻缺 Handler」一律報錯，Router 於載入期斷言，沒有第三種狀態。
+// 設計仍在 docs/00_core/architecture/ 各模組文件；實作完成時再加回 union 即可。
 
 export { WEAPON_SET_CONFIGURATION_WORKFLOW };
 
@@ -224,10 +164,13 @@ export const EVENT_SUBSCRIPTIONS_BY_TYPE: Readonly<
   TeamLocationChanged: [sub('TeamLocationChanged', 'map')],
 
   // 戰鬥結束 → dungeon 收斂（回復 Session、對勝利內容發 ResolvePlayerMapContent）。
-  CombatEncounterResolved: [sub('CombatEncounterResolved', 'dungeon')],
+  // dungeon 的收斂訂閱不綁定：戰敗路徑會送 FinalizeAssetDistributionCollection，而 Distribution
+  // 模組不存在。訂閱者不能拒絕已發生的事實，所以只能不註冊，直到 Distribution 落地。
+  CombatEncounterResolved: [],
 
   // NPC 地城結算套用完成 → dungeon 記錄三方結算之一。
-  NpcDungeonSettlementApplied: [sub('NpcDungeonSettlementApplied', 'dungeon')],
+  // 同上：NPC 結算同樣送 Distribution 命令。
+  NpcDungeonSettlementApplied: [],
 
   // 戰鬥成長事件 → progression 發放 MXP。
   CombatAttackMasteryEarned: [sub('CombatAttackMasteryEarned', 'progression')],
@@ -405,10 +348,9 @@ export function validateManifest(
   for (const [commandType, entry] of Object.entries(GAME_COMMAND_ENTRY)) {
     if (entry !== WORKFLOW_ENTRY) continue;
     if (workflowStartCommands.has(commandType)) continue;
-    if (commandType in UNAVAILABLE_CAPABILITIES.gameCommands) continue;
     out.push({
       code: 'manifest.workflow.missingForCommandEntry',
-      detail: `Game Command "${commandType}" 的入口宣告為 Workflow，但 REGISTERED_WORKFLOWS 沒有對應的 Workflow，且它不在 UNAVAILABLE_CAPABILITIES`,
+      detail: `Game Command "${commandType}" 的入口宣告為 Workflow，但 REGISTERED_WORKFLOWS 沒有對應的 Workflow`,
     });
   }
 

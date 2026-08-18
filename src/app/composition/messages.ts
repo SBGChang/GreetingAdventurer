@@ -16,13 +16,9 @@ import type {
   InventoryInternalCommand,
   InventoryDomainEvent,
 } from '../../contracts/inventory';
-import type { ProgressionGameCommand, ProgressionDomainEvent } from '../../contracts/progression';
+import type { ProgressionDomainEvent } from '../../contracts/progression';
 import type { MapInternalCommand, MapDomainEvent } from '../../contracts/map';
-import type {
-  DungeonGameCommand,
-  DungeonInternalCommand,
-  DungeonDomainEvent,
-} from '../../contracts/dungeon';
+import type { DungeonGameCommand, DungeonDomainEvent } from '../../contracts/dungeon';
 import type {
   CombatGameCommand,
   CombatInternalCommand,
@@ -38,9 +34,13 @@ import type {
 // 三種訊息的全遊戲聯集
 // ──────────────────────────────────────────────────────────────────────────
 
+// Progression 目前沒有任何已實作的 Game Command（learnFromBook / startTeaching 的 Handler 未撰寫），
+// 因此不在此 union——沒有能力就不該有註冊表面。
+// Progression 與 Dungeon 目前沒有任何已註冊的 Game Command：
+//   progression —— learnFromBook / startTeaching 的 Handler 未撰寫。
+//   dungeon     —— 只註冊四筆已實作且只送有 Owner 命令者，見 contracts/dungeon 說明。
 export type GameCommand =
   | InventoryGameCommand
-  | ProgressionGameCommand
   | DungeonGameCommand
   | CombatGameCommand
   | TeamGameCommand;
@@ -49,7 +49,6 @@ export type GameInternalCommand =
   | CharacterInternalCommand
   | InventoryInternalCommand
   | MapInternalCommand
-  | DungeonInternalCommand
   | CombatInternalCommand
   | TeamInboundInternalCommand;
 
@@ -114,14 +113,8 @@ export const INTERNAL_COMMAND_OWNER: Readonly<Record<GameInternalCommandType, Mo
   TransferItem: 'inventory' as ModuleId,
   ReserveQuestItem: 'inventory' as ModuleId,
   ReserveCraftingInputs: 'inventory' as ModuleId,
-  ApplyQuestItemLifecycle: 'inventory' as ModuleId,
   MoveItemToTeamQuestCargo: 'inventory' as ModuleId,
-  ReleaseExpiredQuestCargo: 'inventory' as ModuleId,
-  ConsumeBookForLearning: 'inventory' as ModuleId,
-  TransformCraftingItems: 'inventory' as ModuleId,
-  ConsumeCuisineIngredients: 'inventory' as ModuleId,
   CommitCombatItemUse: 'inventory' as ModuleId,
-  ConsumeCombatSequenceRetrySupply: 'inventory' as ModuleId,
   EvaluateTeamEncumbrance: 'inventory' as ModuleId,
 
   // map
@@ -134,25 +127,14 @@ export const INTERNAL_COMMAND_OWNER: Readonly<Record<GameInternalCommandType, Mo
   HarvestMapGatheringNode: 'map' as ModuleId,
 
   // dungeon
-  StartNpcDungeonRun: 'dungeon' as ModuleId,
-  ConsumeDungeonGatheringAction: 'dungeon' as ModuleId,
 
   // combat
   StartCombatEncounter: 'combat' as ModuleId,
 
   // team
   StartReturnFromDungeon: 'team' as ModuleId,
-  StartTimedCityAction: 'team' as ModuleId,
-  StartChildStudyPlan: 'team' as ModuleId,
-  CreateNpcTeam: 'team' as ModuleId,
   StartNpcTeamPlan: 'team' as ModuleId,
-  OpenPlayerTravelInteraction: 'team' as ModuleId,
   CompletePlayerTravelSegmentWithoutEvent: 'team' as ModuleId,
-  MarkPlayerTravelInteractionAwaitingCombat: 'team' as ModuleId,
-  CompletePlayerTravelInteraction: 'team' as ModuleId,
-  AssignNpcMemberFreeAction: 'team' as ModuleId,
-  RecordTeamWorkSettlementValue: 'team' as ModuleId,
-  AttachQuestTemporaryMember: 'team' as ModuleId,
 };
 
 // §5.1：每個 Game Command 必須恰好有一個入口接收者——領域 Module Handler **或**
@@ -165,52 +147,35 @@ export const WORKFLOW_ENTRY = 'workflow' as const;
 export type GameCommandEntry = ModuleId | typeof WORKFLOW_ENTRY;
 
 export const GAME_COMMAND_ENTRY: Readonly<Record<GameCommandType, GameCommandEntry>> = {
-  // 入口為 Workflow：03_dungeon_module.md §5.1 —— 不直接路由到 Dungeon Handler，
-  // 由 gathering workflow 轉為 ConsumeDungeonGatheringAction。
-  gatherDungeonNode: WORKFLOW_ENTRY,
+  // dungeon（僅四筆；入場／離場／採集與 NPC 流程皆未註冊，見 contracts/dungeon）
+  moveDungeonRoom: 'dungeon' as ModuleId,
+  openDungeonDoor: 'dungeon' as ModuleId,
+  interactDungeonContent: 'dungeon' as ModuleId,
+  resolveDungeonInteraction: 'dungeon' as ModuleId,
 
   // inventory
   equipItem: 'inventory' as ModuleId,
-  unequipItem: 'inventory' as ModuleId,
   // 入口為 Workflow：05_inventory_module.md §1.2 —— selectedSkillIds 的合法性（Definition 存在、
   // 角色已學會、啟動手可用）要跨 Progression 與 Combat 內容判定，Inventory 不得同步查別的模組。
   // 由 weapon-set-configuration Workflow 驗證後才交給 Inventory Handler 寫入。
   configureWeaponSet: WORKFLOW_ENTRY,
-  useItem: 'inventory' as ModuleId,
-  splitStack: 'inventory' as ModuleId,
-  transferItemForEncumbrance: 'inventory' as ModuleId,
-  storeItemForEncumbrance: 'inventory' as ModuleId,
-  abandonItemForEncumbrance: 'inventory' as ModuleId,
-  reassignQuestCargoCarrierForEncumbrance: 'inventory' as ModuleId,
 
   // progression
-  learnFromBook: 'progression' as ModuleId,
-  startTeaching: 'progression' as ModuleId,
 
   // dungeon
-  startPlayerExploration: 'dungeon' as ModuleId,
-  moveDungeonRoom: 'dungeon' as ModuleId,
-  openDungeonDoor: 'dungeon' as ModuleId,
-  useDungeonExit: 'dungeon' as ModuleId,
-  interactDungeonContent: 'dungeon' as ModuleId,
-  resolveDungeonInteraction: 'dungeon' as ModuleId,
 
   // combat
   useCombatSkill: 'combat' as ModuleId,
-  useCombatItem: 'combat' as ModuleId,
-  commandAlly: 'combat' as ModuleId,
   combatRest: 'combat' as ModuleId,
 
   // team
   startCityTravel: 'team' as ModuleId,
   enterAdventureMap: 'team' as ModuleId,
   returnToCity: 'team' as ModuleId,
-  chooseCityFreeAction: 'team' as ModuleId,
   beginCityFreePeriod: 'team' as ModuleId,
   rest: 'team' as ModuleId,
   selectPlayerSuccessor: 'team' as ModuleId,
   recruitTavernAdventurer: 'team' as ModuleId,
-  dismissMember: 'team' as ModuleId,
   configureCombatFormation: 'team' as ModuleId,
 };
 

@@ -58,16 +58,9 @@ export const INVENTORY_MODULE_CONTRACT: ModuleContract = {
   // Game Command 判別值一律 camelCase（core messages.ts 的訊息判別欄約定）。
   handlesGameCommands: [
     'equipItem',
-    'unequipItem',
     // configureWeaponSet 的**入口**是 weapon-set-configuration Workflow（§5.1：一個 Game Command 只能有
     // 一個入口，不可與模組兼有）。Inventory 仍然擁有並寫入 Loadout Slice——由該 Workflow 驗證完
     // selectedSkillIds 後委派 `configureWeaponSet` handler，只是不再是 root 入口。
-    'useItem',
-    'splitStack',
-    'transferItemForEncumbrance',
-    'storeItemForEncumbrance',
-    'abandonItemForEncumbrance',
-    'reassignQuestCargoCarrierForEncumbrance',
   ],
   handlesInternalCommands: [
     'CreateItemInstance',
@@ -75,14 +68,8 @@ export const INVENTORY_MODULE_CONTRACT: ModuleContract = {
     'TransferItem',
     'ReserveQuestItem',
     'ReserveCraftingInputs',
-    'ApplyQuestItemLifecycle',
     'MoveItemToTeamQuestCargo',
-    'ReleaseExpiredQuestCargo',
-    'ConsumeBookForLearning',
-    'TransformCraftingItems',
-    'ConsumeCuisineIngredients',
     'CommitCombatItemUse',
-    'ConsumeCombatSequenceRetrySupply',
     'EvaluateTeamEncumbrance',
   ],
   handlesJobs: [],

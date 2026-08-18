@@ -25,7 +25,6 @@ import {
 import {
   EXECUTION_ORDER_MANIFEST,
   REGISTERED_WORKFLOWS,
-  UNAVAILABLE_CAPABILITIES,
   validateManifest,
   type ExecutionOrderManifest,
   type ManifestDiagnostic,
@@ -136,69 +135,43 @@ export function validateRegistry(
   // 而真正的 Handler 表在 router.ts。三份宣告可以完美自洽，Router 卻一個 Handler 都沒有——啟動驗證
   // 全綠，玩家送出命令才拋錯。現在改為直接比對 Router 實際的 dispatch table。
   //
-  // 尚未閉合的能力必須**明示**列在 UNAVAILABLE_CAPABILITIES；那份清單只能變短，移除後若仍缺 Handler，
-  // 這裡就會失敗。
-  const gaps = UNAVAILABLE_CAPABILITIES;
+  // **沒有例外清單。** 這裡曾經比對一份 UNAVAILABLE_CAPABILITIES，讓「已宣告但沒有 Handler」
+  // 成為一種被允許的狀態。那等於在正式註冊表裡保留未完成能力：啟動驗證全綠、Manifest 有它、
+  // Router 有它的入口，只是按下去會被拒絕。現在未完成的能力一律不進契約 union，
+  // 因此「宣告了卻沒有 Handler」只可能是註冊錯誤，一律報告。
   for (const commandType of Object.keys(GAME_COMMAND_ENTRY)) {
     if (IMPLEMENTED_ROUTES.gameCommands.has(commandType)) continue;
-    if (commandType in gaps.gameCommands) continue;
     out.push({
       code: 'registry.gameCommand.noHandler',
-      detail: `Game Command "${commandType}" 已宣告入口，但 Router 沒有對應 dispatch，且未列入 UNAVAILABLE_CAPABILITIES`,
+      detail: `Game Command "${commandType}" 已宣告入口，但 Router 沒有對應 dispatch`,
     });
   }
   for (const commandType of Object.keys(INTERNAL_COMMAND_OWNER)) {
     if (IMPLEMENTED_ROUTES.internalCommands.has(commandType)) continue;
-    if (commandType in gaps.internalCommands) continue;
     out.push({
       code: 'registry.internalCommand.noHandler',
-      detail: `Internal Command "${commandType}" 已宣告由模組接收，但 Router 沒有對應 dispatch，且未列入 UNAVAILABLE_CAPABILITIES`,
+      detail: `Internal Command "${commandType}" 已宣告由模組接收，但 Router 沒有對應 dispatch`,
     });
   }
   for (const jobType of jobOwners.keys()) {
     if (IMPLEMENTED_ROUTES.jobs.has(jobType)) continue;
-    if (jobType in gaps.jobs) continue;
     out.push({
       code: 'registry.job.noHandler',
-      detail: `Job type "${jobType}" 已宣告由模組處理，但 Router 沒有對應 dispatch，且未列入 UNAVAILABLE_CAPABILITIES`,
+      detail: `Job type "${jobType}" 已宣告由模組處理，但 Router 沒有對應 dispatch`,
     });
   }
   // 5c) **送出端 → Owner** 交叉驗證（複審 R15 P1-5）。
   //
   // 模組可以送出 Internal Command 給別的模組，但過去沒有任何地方宣告「我會送什麼」，
-  // Registry 因此驗不到「送出去的命令沒有人收」。dungeon 送 StartAssetDistribution 而
-  // Distribution 模組不存在，啟動驗證卻全綠——要等玩家真的開始探索，才在交易中失敗。
-  // 現在 ModuleContract.sendsInternalCommands 把送出端也納入宣告，這裡比對它有沒有 Owner。
+  // Registry 因此驗不到「送出去的命令沒有人收」。送出無人接收的命令＝該流程一定跑不完，
+  // 因此它是錯誤，不是可登記的缺口。
   for (const c of contracts) {
     for (const commandType of c.sendsInternalCommands) {
       if (commandType in INTERNAL_COMMAND_OWNER) continue;
-      if (commandType in gaps.internalCommands) continue;
       out.push({
         code: 'registry.internalCommand.noOwner',
-        detail: `模組 "${c.id}" 會送出 Internal Command "${commandType}"，但沒有任何模組宣告接收它，且未列入 UNAVAILABLE_CAPABILITIES`,
+        detail: `模組 "${c.id}" 會送出 Internal Command "${commandType}"，但沒有任何模組宣告接收它`,
       });
-    }
-  }
-
-  // 清單只能變短：列了卻根本沒有這條路由，代表清單過期。
-  // Internal Command 的「已宣告路由」= 有人接收 **或** 有人送出。缺 Owner 的送出端正是需要列入
-  // 清單的情形，所以不能只看接收端，否則合法的缺口記錄會被誤判成過期。
-  const declaredInternalCommands = new Set<string>([
-    ...Object.keys(INTERNAL_COMMAND_OWNER),
-    ...contracts.flatMap((c) => c.sendsInternalCommands),
-  ]);
-  for (const [kind, owners] of [
-    ['gameCommands', Object.keys(GAME_COMMAND_ENTRY)],
-    ['internalCommands', [...declaredInternalCommands]],
-    ['jobs', [...jobOwners.keys()]],
-  ] as const) {
-    for (const declared of Object.keys(gaps[kind])) {
-      if (!(owners as readonly string[]).includes(declared)) {
-        out.push({
-          code: 'registry.capability.unknownGap',
-          detail: `UNAVAILABLE_CAPABILITIES.${kind} 列出的 "${declared}" 不是已宣告的路由`,
-        });
-      }
     }
   }
 

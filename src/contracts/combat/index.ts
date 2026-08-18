@@ -418,11 +418,10 @@ export type CombatRestCommand = Readonly<{
   encounterId: EncounterId;
   actorId: CombatantId;
 }>;
-export type CombatGameCommand =
-  | UseCombatSkillCommand
-  | UseCombatItemCommand
-  | CommandAllyCommand
-  | CombatRestCommand;
+// 只列已實作的。尚未註冊：
+//   useCombatItem —— 只送出 CommitCombatItemUse，不套效果、不加延遲，卻回報成功。
+//   commandAlly   —— Handler 從未寫過。
+export type CombatGameCommand = UseCombatSkillCommand | CombatRestCommand;
 
 // combat 作為唯一 Handler 接收的 Internal Command（目前僅一筆）。
 export type CombatInternalCommand = StartCombatEncounterCommand;

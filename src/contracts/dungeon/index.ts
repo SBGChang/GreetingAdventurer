@@ -311,12 +311,27 @@ export type ResolveDungeonInteraction = Readonly<{
   optionId: ContentEventOptionId;
 }>;
 
+// **Dungeon 整個模組目前不註冊任何能力。**
+//
+// 原因不是個別 Handler 沒寫，而是流程收斂不了：入場、NPC 探索結算、以及戰敗路徑都會送出
+// StartAssetDistribution / FinalizeAssetDistributionCollection，而 Distribution 模組不存在
+// （沒有 Slice、沒有 Handler、沒有 Owner）。任何真的跑起來的地牢流程都會在交易中失敗。
+//
+// 規範 §10：未閉合的 Capability 不進正式 Manifest、不註冊入口。移動／開門／互動／解析雖然
+// 各自已實作且有模組測試，但它們是同一個未閉合流程的一部分——單獨開放只會讓玩家進到
+// 一個結束不了的狀態。
+//
+// 已註冊的，只有下列四筆：它們已實作、有測試，且**只送出有 Owner 的命令**
+// （OpenMapDoor / ResolvePlayerMapContent，皆由 map 接收）。
+//
+// 不註冊：startPlayerExploration、useDungeonExit（送 Distribution 命令）、gatherDungeonNode
+// （Workflow 未實作）、StartNpcDungeonRun 與 npcDungeonDay（NPC 流程同樣送 Distribution），
+// 以及全部 Event Subscriber（戰敗路徑會送 FinalizeAssetDistributionCollection）。
+//
+// 結果是玩家目前無法進入地牢——那正是「未閉合就不開放」該有的樣子。Handler 與測試都保留。
 export type DungeonGameCommand =
-  | StartPlayerExploration
   | MoveDungeonRoom
   | OpenDungeonDoor
-  | GatherDungeonNode
-  | UseDungeonExit
   | InteractDungeonContent
   | ResolveDungeonInteraction;
 
@@ -353,7 +368,7 @@ export type ConsumeDungeonGatheringAction = Readonly<{
   nodeId: GatheringNodeId;
 }>;
 
-export type DungeonInternalCommand = StartNpcDungeonRun | ConsumeDungeonGatheringAction;
+// 同上：NPC 地牢流程也會送出 Distribution 命令，故不註冊。
 
 // ──────────────────────────────────────────────────────────────────────────
 // 6. 輸出 DomainEvent（最少 payload）

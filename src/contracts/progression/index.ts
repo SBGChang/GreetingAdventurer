@@ -294,7 +294,8 @@ export type StartTeachingCommand = Readonly<{
 }>;
 
 // B.5：補齊原本缺席的訊息聯集宣告（判別欄由各 payload 自帶）。
-export type ProgressionGameCommand = LearnFromBookCommand | StartTeachingCommand;
+// Progression 目前**沒有**已實作的 Game Command。learnFromBook / startTeaching 的 Handler 尚未撰寫，
+// 因此不宣告 union——沒有能力就不該有註冊表面（設計見 06_progression_module.md）。
 
 // ──────────────────────────────────────────────────────────────────────────
 // §6 傳授規則

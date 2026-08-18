@@ -38,7 +38,6 @@ import * as team from '../../modules/team/public';
 
 import type { ProgressionDefinitionReader } from '../../contracts/progression';
 import { KERNEL_REJECTION_SOURCE } from '../../contracts/core';
-import { UNAVAILABLE_CAPABILITIES, FEATURE_NOT_AVAILABLE } from './manifest';
 import type { ConfigureWeaponSet } from '../../contracts/inventory';
 import {
   validateWeaponSetSkills,
@@ -141,7 +140,8 @@ function fromOutcome(slice: GameSliceName, outcome: AnyModuleOutcome): Accepted 
 // Internal Command 分派表
 //
 // 只登記**真的有實作**的 Handler。模組 ModuleContract 宣告了但 Wave B 沒寫的，
-// 列在 PENDING_INTERNAL_COMMANDS，讓「缺口」是一張明確清單而不是執行期驚喜。
+// 未實作的能力不會出現在契約 union，因此這張表必須覆蓋 INTERNAL_COMMAND_OWNER 的每一筆；
+// 對不上就在載入期丟錯（見下方斷言）。
 // ──────────────────────────────────────────────────────────────────────────
 
 type Dispatch = (command: unknown, state: GameState, ctxs: ModuleContexts) => Accepted | Rejected;
@@ -201,10 +201,6 @@ const INTERNAL_COMMAND_HANDLERS: Readonly<Partial<Record<GameInternalCommandType
     fromOutcome('map', map.handleHarvestMapGatheringNode(c as never, s.map, x.map)),
 
   // ── dungeon：(state, cmd, ctx) → ModuleOutcome ───────────────────────────
-  StartNpcDungeonRun: (c, s, x) =>
-    fromOutcome('dungeon', dungeon.startNpcDungeonRun(s.dungeon, c as never, x.dungeon)),
-  ConsumeDungeonGatheringAction: (c, s, x) =>
-    fromOutcome('dungeon', dungeon.consumeDungeonGatheringAction(s.dungeon, c as never, x.dungeon)),
 
   // ── combat：(state, cmd, ctx) → ModuleResult ─────────────────────────────
   StartCombatEncounter: (c, s, x) =>
@@ -219,11 +215,18 @@ const INTERNAL_COMMAND_HANDLERS: Readonly<Partial<Record<GameInternalCommandType
     fromOutcome('team', team.handleCompletePlayerTravelSegmentWithoutEvent(s.team, c as never, x.team)),
 };
 
-// 契約宣告會處理、但 Wave B 沒有實作的 Internal Command。
-// 這不是「可以忽略」的清單：路由到這些型別會直接丟錯，不會靜默成功。
-export const PENDING_INTERNAL_COMMANDS: readonly GameInternalCommandType[] = (
+// 註冊即必須有 Handler。這裡曾經是一張「已宣告但未實作」的清單（PENDING_INTERNAL_COMMANDS），
+// 那等於允許未完成能力存在於正式註冊表。現在它是**載入期斷言**：對不上就起不來。
+// 未實作的能力不該出現在 INTERNAL_COMMAND_OWNER——它應該先從契約 union 移除。
+const UNHANDLED_INTERNAL_COMMANDS = (
   Object.keys(INTERNAL_COMMAND_OWNER) as GameInternalCommandType[]
 ).filter((type) => INTERNAL_COMMAND_HANDLERS[type] === undefined);
+if (UNHANDLED_INTERNAL_COMMANDS.length > 0) {
+  throw new Error(
+    `Internal Command 已註冊但無 Handler：${UNHANDLED_INTERNAL_COMMANDS.join(', ')}。` +
+      `未實作的能力請從 contracts 的 InternalCommand union 移除，而不是留在註冊表裡。`,
+  );
+}
 
 // ──────────────────────────────────────────────────────────────────────────
 // Game Command（Root）分派表
@@ -243,9 +246,7 @@ type RootDispatch = (
 ) => Accepted | Rejected;
 
 const GAME_COMMAND_HANDLERS: Readonly<Partial<Record<GameCommandType, RootDispatch>>> = {
-  // ── dungeon：(state, teamId, cmd?, ctx) → ModuleOutcome。teamId ← envelope.actorTeamId ──
-  startPlayerExploration: (_c, t, s, x) =>
-    fromOutcome('dungeon', dungeon.startPlayerExploration(s.dungeon, t, x.dungeon)),
+  // ── dungeon：(state, teamId, cmd, ctx) → ModuleOutcome。teamId ← envelope.actorTeamId ──
   moveDungeonRoom: (c, t, s, x) =>
     fromOutcome('dungeon', dungeon.moveDungeonRoom(s.dungeon, t, c as never, x.dungeon)),
   openDungeonDoor: (c, t, s, x) =>
@@ -254,17 +255,11 @@ const GAME_COMMAND_HANDLERS: Readonly<Partial<Record<GameCommandType, RootDispat
     fromOutcome('dungeon', dungeon.interactDungeonContent(s.dungeon, t, c as never, x.dungeon)),
   resolveDungeonInteraction: (c, t, s, x) =>
     fromOutcome('dungeon', dungeon.resolveDungeonInteraction(s.dungeon, t, c as never, x.dungeon)),
-  useDungeonExit: (c, t, s, x) =>
-    fromOutcome('dungeon', dungeon.useDungeonExit(s.dungeon, t, c as never, x.dungeon)),
 
-  // ── combat：(state, cmd, ctx) → ModuleResult。combat 尚未轉 ModuleOutcome，非法輸入以
-  //    「回傳未變 slice」表示（HANDOFF 已列為待逐點判讀）；此處一律 acceptResult。 ──
+  // ── combat：(state, cmd, ctx) → ModuleOutcome ──
+  //    useCombatItem / commandAlly 不註冊（前者不套效果卻回成功，後者未實作）。
   useCombatSkill: (c, _t, s, x) =>
     fromOutcome('combat', combat.handleUseCombatSkill(s.combat, c as never, x.combat)),
-  useCombatItem: (c, _t, s, x) =>
-    fromOutcome('combat', combat.handleUseCombatItem(s.combat, c as never, x.combat)),
-  commandAlly: (c, _t, s, x) =>
-    fromOutcome('combat', combat.handleCommandAlly(s.combat, c as never, x.combat)),
   combatRest: (c, _t, s, x) =>
     fromOutcome('combat', combat.handleCombatRest(s.combat, c as never, x.combat)),
 
@@ -322,18 +317,18 @@ const WORKFLOW_ENTRY_SET: ReadonlySet<GameCommandType> = new Set(
   ),
 );
 
-// 契約宣告由模組接收、但 Wave B 尚未實作的 Game Command（對照 GAME_COMMAND_OWNER，即扣掉
-// Workflow 入口後仍缺 Handler 者）。與 PENDING_INTERNAL_COMMANDS 同理：明確清單，不靜默成功。
-// 兩種入口都要掃：模組入口缺 Handler、Workflow 入口缺 Workflow dispatch。原本只掃 GAME_COMMAND_OWNER
-// （即扣掉 Workflow 入口者），所以 `gatherDungeonNode` 這種「宣告 Workflow 入口但沒有 Workflow」
-// 根本不會出現在清單裡（複審 R15 P1-4）。
-export const PENDING_GAME_COMMANDS: readonly GameCommandType[] = (
-  Object.keys(GAME_COMMAND_ENTRY) as GameCommandType[]
-).filter((type) =>
+// 註冊即必須有入口（模組 Handler 或 Workflow）。同 Internal Command：載入期斷言，不是清單。
+const UNHANDLED_GAME_COMMANDS = (Object.keys(GAME_COMMAND_ENTRY) as GameCommandType[]).filter((type) =>
   GAME_COMMAND_ENTRY[type] === WORKFLOW_ENTRY
     ? WORKFLOW_GAME_COMMAND_HANDLERS[type] === undefined
     : GAME_COMMAND_HANDLERS[type] === undefined,
 );
+if (UNHANDLED_GAME_COMMANDS.length > 0) {
+  throw new Error(
+    `Game Command 已註冊但無入口：${UNHANDLED_GAME_COMMANDS.join(', ')}。` +
+      `未實作的能力請從 contracts 的 GameCommand union 移除。`,
+  );
+}
 
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -384,15 +379,11 @@ function authorizeGameCommand(
     case 'configureCombatFormation':
       return command.teamId === actorTeamId ? undefined : deny('teamNotOwnedByActor');
     case 'equipItem':
-    case 'unequipItem':
     case 'configureWeaponSet':
       return isMemberOf(state, actorTeamId, command.characterId)
         ? undefined
         : deny('characterNotInActorTeam');
-    case 'commandAlly':
-      return combatantOwned(command.encounterId, command.allyId);
     case 'useCombatSkill':
-    case 'useCombatItem':
     case 'combatRest':
       return combatantOwned(command.encounterId, command.actorId);
     default:
@@ -412,19 +403,6 @@ export function routeGameCommand(
   const entry = GAME_COMMAND_ENTRY[type];
   if (entry === undefined) {
     throw new Error(`routeGameCommand: "${type}" 不在 GAME_COMMAND_ENTRY（未註冊的 Game Command）`);
-  }
-  // 已宣告但尚未閉合的能力：回傳**型別化拒絕**，不是拋例外。UI 因此能顯示可呈現的結果，而不是撞上
-  // 執行期例外；同時也不會被誤當成成功 no-op（複審 R15 P1-4）。
-  const capabilityGap = UNAVAILABLE_CAPABILITIES.gameCommands[type];
-  if (capabilityGap !== undefined) {
-    return () => ({
-      accepted: false,
-      rejection: {
-        code: FEATURE_NOT_AVAILABLE,
-        source: KERNEL_REJECTION_SOURCE,
-        details: { commandType: type, reason: capabilityGap },
-      },
-    });
   }
   if (WORKFLOW_ENTRY_SET.has(type)) {
     const workflowDispatch = WORKFLOW_GAME_COMMAND_HANDLERS[type];
@@ -480,17 +458,20 @@ const JOB_HANDLERS: Readonly<Partial<Record<GameJobType, JobDispatch>>> = {
     acceptResult('character', character.handleCharacterLifecycleJob(j as never, s.character, x.character)),
   mapRefreshCheck: (j, s, x) =>
     acceptResult('map', map.handleMapRefreshCheck(j as never, s.map, x.map)),
-  npcDungeonDay: (j, s, x) =>
-    fromOutcome('dungeon', dungeon.npcDungeonDay(s.dungeon, (j as GameScheduledJob).targetId as never, x.dungeon)),
   teamPlanDue: (j, s, x) =>
     acceptResult('team', team.handleTeamPlanDueJob(s.team, j as never, x.team)),
 };
 
-// Manifest 註冊了 Phase 順序、但 Wave B 未實作 Handler 的 Job（team 的 freeActionDue /
-// nonPlayerMemberCityFreeDayTick）。路由到這些會明確報錯，不靜默丟棄一個到期的 Job。
-export const PENDING_JOBS: readonly GameJobType[] = (
-  Object.values(JOB_TYPE_ORDER_BY_PHASE).flat() as GameJobType[]
-).filter((type) => JOB_HANDLERS[type] === undefined);
+// 同上：Manifest 排了 Phase 順序卻沒有 Handler 的 Job，載入期就失敗。
+const UNHANDLED_JOBS = (Object.values(JOB_TYPE_ORDER_BY_PHASE).flat() as GameJobType[]).filter(
+  (type) => JOB_HANDLERS[type] === undefined,
+);
+if (UNHANDLED_JOBS.length > 0) {
+  throw new Error(
+    `Job 已在 Manifest 註冊但無 Handler：${UNHANDLED_JOBS.join(', ')}。` +
+      `未實作的 Job 請從 TeamScheduledJob 等 union 與 JOB_TYPE_ORDER_BY_PHASE 一併移除。`,
+  );
+}
 
 // 把一筆到期 Job 轉為 runTransaction 的 rootHandler。
 export function routeJob(
@@ -500,8 +481,7 @@ export function routeJob(
   const dispatch = JOB_HANDLERS[job.type];
   if (dispatch === undefined) {
     throw new Error(
-      `routeJob: Job type "${job.type}" 已在 Manifest 註冊，但 Wave B 未實作對應 Handler` +
-        `（見 router.ts 的 PENDING_JOBS）`,
+      `routeJob: Job type "${job.type}" 已在 Manifest 註冊，但沒有對應 Handler`,
     );
   }
   return (ctx) => dispatch(job, ctx.workingState, contextFactory(ctx.workingState));
@@ -600,8 +580,7 @@ export function createTransactionConfig(
       const dispatch = INTERNAL_COMMAND_HANDLERS[type];
       if (dispatch === undefined) {
         throw new Error(
-          `routeInternalCommand: "${type}" 由 "${expectedOwner}" 宣告處理，但 Wave B 未實作該 Handler` +
-            `（見 router.ts 的 PENDING_INTERNAL_COMMANDS）`,
+          `routeInternalCommand: "${type}" 由 "${expectedOwner}" 宣告處理，但沒有對應 Handler`,
         );
       }
       return (command, ctx) => dispatch(command, ctx.workingState, contextFactory(ctx.workingState));

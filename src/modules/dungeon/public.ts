@@ -59,37 +59,24 @@ export const dungeonModuleContract: ModuleContract = {
     'asset-distribution-query' as ReaderPortId,
     // combat-sequence 不是「讀」的 Port：改走 Internal Command（out）+ 事件訂閱（in），見 contracts/dungeon。
   ],
+  // **不註冊任何能力**：整條流程依賴不存在的 Distribution 模組（見 contracts/dungeon 的說明）。
+  // Handler 與測試都還在，這裡宣告的是「對外開放什麼」，答案目前是「沒有」。
   handlesGameCommands: [
-    'startPlayerExploration',
     'moveDungeonRoom',
     'openDungeonDoor',
     'interactDungeonContent',
     'resolveDungeonInteraction',
-    'useDungeonExit',
-    // gatherDungeonNode 不直接路由到 Dungeon Handler（doc §5.1）；由 gathering workflow 轉為
-    // ConsumeDungeonGatheringAction。
   ],
-  handlesInternalCommands: ['StartNpcDungeonRun', 'ConsumeDungeonGatheringAction'],
-  handlesJobs: ['npcDungeonDay'],
-  // 送出端宣告：其中兩筆（Distribution）目前**無人接收**，見 UNAVAILABLE_CAPABILITIES。
-  sendsInternalCommands: [
-    'OpenMapDoor',
-    'ResolvePlayerMapContent',
-    'ApplyNpcDungeonSettlement',
-    'StartCombatEncounter',
-    'StartReturnFromDungeon',
-    'StartAssetDistribution',
-    'FinalizeAssetDistributionCollection',
-  ],
+  handlesInternalCommands: [],
+  handlesJobs: [],
+  // 只宣告**有 Owner** 的送出。Distribution 三筆無人接收，因此送出它們的流程
+  // （入場／離場／NPC 結算／戰敗收斂）一律不註冊——宣告送出一個沒人收的命令，
+  // 等於保證那條流程跑不完。
+  sendsInternalCommands: ['OpenMapDoor', 'ResolvePlayerMapContent'],
   // 只登記**已實作**的 subscriber（原本宣告 9 筆但只寫了 4 個函式；宣告卻沒有實作會讓啟動
   // 驗證誤放行、路由時才炸）。其餘待 combat-sequence / map 刷新反應實作後再加回。
   // 命名依 12_engine_runtime.md §5.2 的 `subscription.<eventType>.<subscriber>`。
-  subscriptionHandlerIds: [
-    'subscription.NpcDungeonSettlementApplied.dungeon',
-    'subscription.CombatSequenceSettled.dungeon',
-    'subscription.AssetDistributionCompleted.dungeon',
-    'subscription.CombatEncounterResolved.dungeon',
-  ] as readonly string[] as readonly EventSubscriptionId[],
+  subscriptionHandlerIds: [] as readonly EventSubscriptionId[],
   emits: [
     'PlayerDungeonSessionStarted',
     'PlayerDungeonTimeAdvanced',

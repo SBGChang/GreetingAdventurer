@@ -51,7 +51,8 @@ export const progressionModuleContract: ModuleContract = {
   id: 'progression' as ModuleId,
   owns: 'progression' as StateSliceName,
   reads: ['reader:progression-definition' as ReaderPortId],
-  handlesGameCommands: ['learnFromBook', 'startTeaching'],
+  // 兩筆 Handler 皆未撰寫，故不註冊任何 Game Command。
+  handlesGameCommands: [],
   handlesInternalCommands: [],
   handlesJobs: [],
   sendsInternalCommands: [],

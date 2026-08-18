@@ -72,7 +72,8 @@ export const combatModuleContract: ModuleContract = {
     'reader:combat-formation' as ReaderPortId,
     'reader:combat-power' as ReaderPortId,
   ],
-  handlesGameCommands: ['useCombatSkill', 'useCombatItem', 'commandAlly', 'combatRest'],
+  // useCombatItem 只送出提交命令、不套效果卻回成功；commandAlly 從未實作。兩者皆不註冊。
+  handlesGameCommands: ['useCombatSkill', 'combatRest'],
   handlesInternalCommands: ['StartCombatEncounter'],
   handlesJobs: [],
   sendsInternalCommands: ['ApplyCombatCondition', 'CommitCombatItemUse'],

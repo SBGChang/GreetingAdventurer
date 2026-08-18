@@ -369,16 +369,12 @@ export type ReassignQuestCargoCarrierForEncumbrance = Readonly<{
   newCarrierCharacterId: CharacterId;
 }>;
 
-export type InventoryGameCommand =
-  | EquipItem
-  | UnequipItem
-  | ConfigureWeaponSet
-  | UseItem
-  | SplitStack
-  | TransferItemForEncumbrance
-  | StoreItemForEncumbrance
-  | AbandonItemForEncumbrance
-  | ReassignQuestCargoCarrierForEncumbrance;
+// 只列**已實作**的能力。未實作的 Command 不得出現在此 union——它一旦在這裡，就會進入
+// GameCommand、GAME_COMMAND_ENTRY 與 Router，變成「已註冊但按下去不會動」的公開表面。
+// 設計仍在 docs/00_core/architecture/05_inventory_module.md；實作完成時再加回來。
+//
+// 尚未註冊：unequipItem、useItem、splitStack、以及四筆 encumbrance 指令。
+export type InventoryGameCommand = EquipItem | ConfigureWeaponSet;
 
 // ── Internal Command payloads (handled by inventory) ────────────────────────
 export type CreateItemInstance = Readonly<{
@@ -492,20 +488,17 @@ export type EvaluateTeamEncumbrance = Readonly<{
   teamId: TeamId;
 }>;
 
+// 只列**已實作**的接收能力。宣告接收卻沒有 Handler，會讓啟動驗證與 Router 都認為它可用。
+// 尚未註冊：ApplyQuestItemLifecycle、ReleaseExpiredQuestCargo、ConsumeBookForLearning、
+// TransformCraftingItems、ConsumeCuisineIngredients、ConsumeCombatSequenceRetrySupply。
 export type InventoryInternalCommand =
   | CreateItemInstance
   | RemoveItemInstance
   | TransferItem
   | ReserveQuestItem
   | ReserveCraftingInputs
-  | ApplyQuestItemLifecycle
   | MoveItemToTeamQuestCargo
-  | ReleaseExpiredQuestCargo
-  | ConsumeBookForLearning
-  | TransformCraftingItems
-  | ConsumeCuisineIngredients
   | CommitCombatItemUse
-  | ConsumeCombatSequenceRetrySupply
   | EvaluateTeamEncumbrance;
 
 // ── Domain Event payloads (emitted by inventory) ────────────────────────────

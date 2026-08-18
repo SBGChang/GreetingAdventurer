@@ -164,15 +164,16 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
     run: () => {
       const g = createBringUpFixture(INPUT);
       const jobId = 'runtime:job~npc~absent' as JobId;
-      // dungeon slice 為空 → 這個 NPC Run 不存在 → npcDungeonDay 應「接受並 no-op」。
+      // map slice 為空 → 這個 map instance 不存在 → mapRefreshCheck 應「接受並 no-op」。
+      // （原本用 npcDungeonDay，但 dungeon 的 Job 已不註冊——整條流程依賴不存在的 Distribution 模組。）
       const job = {
-        type: 'npcDungeonDay',
+        type: 'mapRefreshCheck',
         jobId,
         dueDay: g.state.core.worldDay,
-        ownerModule: 'dungeon' as ModuleId,
-        targetId: 'runtime:npc-dungeon-run:absent' as NpcDungeonRunId,
+        ownerModule: 'map' as ModuleId,
+        targetId: 'runtime:map-instance:absent',
         payload: {},
-      } as GameScheduledJob;
+      } as unknown as GameScheduledJob;
       // 把過期 Job 放進 Scheduler（模擬它是排定的到期工作）。
       const state: GameState = {
         ...g.state,
@@ -224,11 +225,11 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
       const g = createBringUpFixture(INPUT);
       const jobId = 'runtime:job~future' as JobId;
       const future = {
-        type: 'npcDungeonDay',
+        type: 'mapRefreshCheck',
         jobId,
         dueDay: (g.state.core.worldDay as unknown as number) + 1, // 明日到期
-        ownerModule: 'dungeon' as ModuleId,
-        targetId: 'runtime:npc-dungeon-run:x' as NpcDungeonRunId,
+        ownerModule: 'map' as ModuleId,
+        targetId: 'runtime:map-instance:x',
         payload: {},
       } as unknown as GameScheduledJob;
       const state: GameState = {

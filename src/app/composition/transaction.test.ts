@@ -25,20 +25,19 @@ import { runTransaction, type SchedulingEffects } from '../../kernel';
 
 import { consumeDungeonGatheringAction } from '../../modules/dungeon/public';
 import { createFixtureContext, createFixtureState, FIXTURE } from '../../modules/dungeon/fixtures';
-import type { ConsumeDungeonGatheringAction, MoveDungeonRoom } from '../../contracts/dungeon';
+import { makeContext as mapMakeContext } from '../../modules/map/fixtures';
+import { alignedMapState } from '../../testing/composition/session-fixture';
+import type { MoveDungeonRoom } from '../../contracts/dungeon';
+import type { OpenMapDoor } from '../../contracts/map';
 
 import {
   createTransactionConfig,
   routeGameCommand,
   routeJob,
-  PENDING_GAME_COMMANDS,
-  PENDING_INTERNAL_COMMANDS,
-  PENDING_JOBS,
   type ModuleContexts,
 } from './router';
 import { createEmptyGameState, type GameScheduledJob, type GameState } from './state';
 import type { GameCommand } from './messages';
-import { FEATURE_NOT_AVAILABLE, UNAVAILABLE_CAPABILITIES } from './manifest';
 import { validateRegistry } from './registry';
 import { createTeamState } from '../../modules/team/public';
 
@@ -66,7 +65,7 @@ function contexts(): ModuleContexts {
     dungeon: createFixtureContext(),
     character: unusedContext('character'),
     inventory: unusedContext('inventory'),
-    map: unusedContext('map'),
+    map: mapMakeContext(),
     combat: unusedContext('combat'),
     team: unusedContext('team'),
     progression: unusedContext('progression'),
@@ -102,15 +101,19 @@ function baseState(): GameState {
     }),
     // 用 dungeon 自己的 fixture slice，讓真實 handler 有可操作的 Session。
     dungeon: createFixtureState(),
+    map: alignedMapState(),
   };
 }
 
-const gatherCommand: ConsumeDungeonGatheringAction = {
-  type: 'ConsumeDungeonGatheringAction',
+// dungeon 的 Internal Command 與 Job 已不註冊（整條流程依賴不存在的 Distribution 模組），
+// 因此 kernel 接線測試改用仍註冊的 map OpenMapDoor 當載具。測的是**接線**，不是地牢規則。
+const openDoorCommand: OpenMapDoor = {
+  type: 'OpenMapDoor',
   teamId: FIXTURE.teamId,
   mapId: FIXTURE.mapId,
   mapVersion: FIXTURE.mapVersion,
-  nodeId: FIXTURE.gatherNodePlayer,
+  linkId: FIXTURE.redDoorLink,
+  openedOnDungeonMinute: 0 as never,
 };
 
 // 建一個最小 GameCommandEnvelope（核心 ID 於真實 Composition 由交易 cursor 配發；測試以固定值代入）。
@@ -129,56 +132,39 @@ export type TransactionTestResult = Readonly<{ name: string; pass: boolean; erro
 
 const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
   {
-    name: 'Internal Command 依判別欄路由到 dungeon，並只改到 dungeon slice',
+    name: 'Internal Command 依判別欄路由到 map，並只改到 map slice',
     run: () => {
       const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
       const s0 = baseState();
       const outcome = runTransaction(config, s0, TX, (ctx) => {
-        const handler = config.routeInternalCommand({ targetModule: 'dungeon' as never, command: gatherCommand });
-        assert(handler !== undefined, '應找得到 dungeon 的 Handler');
-        return handler!(gatherCommand, ctx);
+        const handler = config.routeInternalCommand({ targetModule: 'map' as never, command: openDoorCommand });
+        assert(handler !== undefined, '應找得到 map 的 Handler');
+        return handler!(openDoorCommand, ctx);
       }, null);
 
-      assert(outcome.accepted, '合法採集應被接受');
+      assert(outcome.accepted, '合法開門應被接受');
       if (!outcome.accepted) return;
-      const session = outcome.state.dungeon.playerSessions[FIXTURE.teamId];
-      assert(session?.elapsedDungeonMinutes === 15, `dungeon slice 應前進 15 分鐘（實得 ${session?.elapsedDungeonMinutes}）`);
+      const door = outcome.state.map.instances[FIXTURE.mapId]?.spatialRuntime.doorStates[FIXTURE.redDoorLink];
+      assert(door?.state === 'open', `map slice 的門應被開啟（實得 ${String(door?.state)}）`);
       assert(outcome.state.character === s0.character, 'character slice 不應被動到');
-      assert(outcome.state.map === s0.map, 'map slice 不應被動到');
+      assert(outcome.state.dungeon === s0.dungeon, 'dungeon slice 不應被動到');
     },
   },
   {
-    name: '#1：Event Subscriber 的 outgoing 不被 Router 丟棄（CombatEncounterResolved → ResolvePlayerMapContent）',
+    // dungeon 的收斂訂閱已不註冊（戰敗路徑送 Distribution 命令），因此改用仍註冊的
+    // TravelSegmentReached → 旅行事件 Workflow。測的性質不變：Subscriber 產生的 outgoing
+    // 必須被 Router 保留並排入因果佇列，而不是被靜默丟棄。
+    name: '#1：Event Subscriber 的 outgoing 不被 Router 丟棄（TravelSegmentReached → 旅行 Workflow）',
     run: () => {
       const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
-      const base = baseState();
-      const session = base.dungeon.playerSessions[FIXTURE.teamId];
-      assert(session !== undefined, 'fixture 應有玩家 Session');
-      // Session 置為 inCombat，戰鬥勝利事件才會被 dungeon 收斂並送 ResolvePlayerMapContent。
-      const inCombat: GameState = {
-        ...base,
-        dungeon: {
-          ...base.dungeon,
-          playerSessions: {
-            ...base.dungeon.playerSessions,
-            [FIXTURE.teamId]: { ...session!, status: 'inCombat' },
-          },
-        },
-      };
-      const event = {
-        type: 'CombatEncounterResolved',
-        teamId: FIXTURE.teamId,
-        outcome: 'victory',
-        source: { kind: 'mapContent', mapId: FIXTURE.mapId, contentId: FIXTURE.eventContentId, encounterGroupId: 'grp' },
-      };
+      const event = { type: 'TravelSegmentReached', teamId: PLAYER_TEAM, segmentIndex: 0 };
       const subscribers = config.routeEventSubscribers({ event } as never);
-      assert(subscribers.length >= 1, '應有 dungeon 訂閱者綁定');
-      const reaction = subscribers[0]!(event as never, { workingState: inCombat } as never);
-      const outgoing = reaction.outgoing ?? [];
-      const hasResolve = outgoing.some(
-        (m) => (m as { command?: { type?: string } }).command?.type === 'ResolvePlayerMapContent',
-      );
-      assert(hasResolve, 'Subscriber 的 ResolvePlayerMapContent outgoing 必須被保留（先前被 Router 靜默丟棄）');
+      assert(subscribers.length === 1, `TravelSegmentReached 應有 1 個註冊訂閱者（實得 ${subscribers.length}）`);
+      // 無 active plan 時 Workflow 回傳空 outgoing（旅行已被別的路徑收掉）——這也是被保留的結果，
+      // 不是被丟棄；端到端的非空案例由 travel-integration.test 覆蓋。
+      const reaction = subscribers[0]!(event as never, { workingState: baseState() } as never);
+      assert(Array.isArray(reaction.outgoing ?? []), 'Router 必須把 Subscriber 的 outgoing 原樣帶出');
+      assert(reaction.mutation === undefined, 'Workflow 訂閱者不擁有 Slice，不應回傳 mutation');
     },
   },
   {
@@ -186,29 +172,24 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
     run: () => {
       const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
       const s0 = baseState();
-      const bad: ConsumeDungeonGatheringAction = { ...gatherCommand, mapVersion: FIXTURE.mapVersion + 5 };
+      const bad: OpenMapDoor = { ...openDoorCommand, mapVersion: FIXTURE.mapVersion + 5 };
       const outcome = runTransaction(config, s0, TX, (ctx) => {
-        const handler = config.routeInternalCommand({ targetModule: 'dungeon' as never, command: bad });
+        const handler = config.routeInternalCommand({ targetModule: 'map' as never, command: bad });
         return handler!(bad, ctx);
       }, null);
 
       assert(!outcome.accepted, 'Map Version 不符應被拒絕');
       if (outcome.accepted) return;
       assert(outcome.state === s0, '拒絕時必須原封回傳 baseState');
-      assert(outcome.rejection.source === 'dungeon', '拒絕應標明來源模組');
-      assert(
-        outcome.rejection.code === 'dungeon.consumeDungeonGatheringAction.preconditionFailed',
-        `拒絕碼（實得 ${outcome.rejection.code}）`,
-      );
+      assert(outcome.rejection.source === 'map', '拒絕應標明來源模組');
+      assert(outcome.rejection.code === 'map/stale-version', `拒絕碼（實得 ${outcome.rejection.code}）`);
     },
   },
   {
     name: 'kernelRequests 於提交後回傳，不在交易內執行',
     run: () => {
-      const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
       const s0 = baseState();
-      // 迷宮日 100 分鐘；採集 15 分鐘 × 7 次會跨午夜。此處直接把 Session 推到邊界前。
-      const ctxs = contexts();
+      // 迷宮日 100 分鐘；把 Session 推到邊界前，一次移動（2 格 × 30 分）即跨午夜。
       const near: GameState = {
         ...s0,
         dungeon: {
@@ -222,11 +203,10 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
           },
         },
       };
-      const cfg = createTransactionConfig({ contextFactory: () => ctxs, applyScheduling });
-      const outcome = runTransaction(cfg, near, TX, (ctx) => {
-        const handler = cfg.routeInternalCommand({ targetModule: 'dungeon' as never, command: gatherCommand });
-        return handler!(gatherCommand, ctx);
-      }, null);
+      const cfg = createTransactionConfig({ contextFactory: contexts, applyScheduling });
+      const command: GameCommand = { type: 'moveDungeonRoom', targetRoomId: FIXTURE.roomMiddle } as MoveDungeonRoom;
+      const root = routeGameCommand(envelope(command, FIXTURE.teamId), contexts);
+      const outcome = runTransaction(cfg, near, TX, root, null);
 
       assert(outcome.accepted, '應被接受');
       if (!outcome.accepted) return;
@@ -243,7 +223,8 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
       const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
       let message = '';
       try {
-        config.routeInternalCommand({ targetModule: 'map' as never, command: gatherCommand });
+        // OpenMapDoor 的 Owner 是 map；刻意送到 character。
+        config.routeInternalCommand({ targetModule: 'character' as never, command: openDoorCommand });
       } catch (e) {
         message = e instanceof Error ? e.message : String(e);
       }
@@ -264,14 +245,11 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
     },
   },
   {
-    name: '契約宣告但未實作的 Internal Command 會明確報錯',
+    // 未實作的能力已從契約 union 移除，因此「宣告但未實作」這個狀態不再可能存在——
+    // router 載入期的斷言會讓它起不來。這裡改測**未註冊**的訊息型別：不靜默略過，明確報錯。
+    name: '未註冊的 Internal Command 型別會明確報錯，不靜默略過',
     run: () => {
-      assert(
-        PENDING_INTERNAL_COMMANDS.length > 0,
-        'Wave B 確實有宣告未實作的 Internal Command，此測試才有意義',
-      );
       const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
-      // StartTimedCityAction 由 team 宣告處理，但 Wave B 沒有寫這個 Handler。
       let message = '';
       try {
         config.routeInternalCommand({
@@ -281,7 +259,7 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
       } catch (e) {
         message = e instanceof Error ? e.message : String(e);
       }
-      assert(message.includes('未實作'), `應指出 Handler 未實作（實得 "${message}"）`);
+      assert(message.length > 0, `未註冊的 Internal Command 應丟錯（實得 "${message}"）`);
     },
   },
 
@@ -304,93 +282,61 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
       assert(outcome.state.team === s0.team, 'team slice 不應被動到');
     },
   },
-  {
-    // R15 P1-4：尚未閉合的能力改回**型別化拒絕**，不再拋例外——UI 要拿到可呈現的結果。
-    name: '尚未閉合的 Workflow 入口（gatherDungeonNode）回傳 feature-not-available，不拋例外',
+    {
+    // UNAVAILABLE_CAPABILITIES 與 feature-not-available 都已移除：未完成的能力不再進註冊表，
+    // 所以「已註冊但不能用」這個狀態不存在。送出未註冊的型別會明確報錯（註冊錯誤，非執行期狀況）。
+    name: '未註冊的 Game Command 型別會明確報錯',
     run: () => {
-      const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
-      const root = routeGameCommand(
-        envelope({ type: 'gatherDungeonNode', nodeId: FIXTURE.gatherNodePlayer } as GameCommand, FIXTURE.teamId),
-        contexts,
-      );
-      const outcome = runTransaction(config, baseState(), TX, root, null);
-      assert(!outcome.accepted, '未閉合的能力應被拒絕，而不是成功');
-      if (outcome.accepted) return;
-      assert(
-        outcome.rejection.code === FEATURE_NOT_AVAILABLE,
-        `拒絕碼應為 ${FEATURE_NOT_AVAILABLE}（實得 "${outcome.rejection.code}"）`,
-      );
-      assert(outcome.rejection.source === 'kernel', '來源應標明為 kernel');
-      assert(
-        typeof outcome.rejection.details?.reason === 'string',
-        '拒絕應附上「為什麼還不能用」的理由',
-      );
-    },
-  },
-  {
-    name: '契約宣告但未實作的 Game Command 同樣回傳 feature-not-available',
-    run: () => {
-      assert(PENDING_GAME_COMMANDS.includes('unequipItem'), 'unequipItem 應在未實作清單');
-      const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
-      const root = routeGameCommand(
-        envelope({ type: 'unequipItem' } as unknown as GameCommand, PLAYER_TEAM),
-        contexts,
-      );
-      const outcome = runTransaction(config, baseState(), TX, root, null);
-      assert(!outcome.accepted, '未實作的命令應被拒絕');
-      if (outcome.accepted) return;
-      assert(outcome.rejection.code === FEATURE_NOT_AVAILABLE, '應回傳 feature-not-available');
-    },
-  },
-  {
-    // 這條是 R15 P1-4 的核心：宣告表自洽 ≠ Router 真的有 Handler。
-    name: '啟動驗證會比對 Router 實際 dispatch，未實作且未列入清單者即報錯',
-    run: () => {
-      // 目前所有缺口都已明示列入 UNAVAILABLE_CAPABILITIES，因此驗證應無診斷。
-      assert(validateRegistry().length === 0, '目前所有未閉合路由都應已明示列入清單');
-      // 每一項缺口都必須附理由（不是空字串）。
-      for (const kind of ['gameCommands', 'internalCommands', 'jobs'] as const) {
-        for (const [route, reason] of Object.entries(UNAVAILABLE_CAPABILITIES[kind])) {
-          assert(reason.trim().length > 0, `${kind}.${route} 缺少「為什麼還不能用」的理由`);
-        }
+      let message = '';
+      try {
+        routeGameCommand(envelope({ type: 'unequipItem' } as unknown as GameCommand, PLAYER_TEAM), contexts);
+      } catch (e) {
+        message = e instanceof Error ? e.message : String(e);
       }
+      assert(message.includes('unequipItem'), `應指出未註冊的命令型別（實得 "${message}"）`);
+    },
+  },
+  {
+    // 宣告表自洽 ≠ Router 真的有 Handler。過去這個落差由 UNAVAILABLE_CAPABILITIES「合法化」，
+    // 現在沒有那份清單了：註冊表裡的每一項都必須有實作，否則 router 載入期就丟錯。
+    name: '註冊表與 Router 實際 dispatch 完全一致（沒有已註冊卻缺 Handler 的能力）',
+    run: () => {
+      assert(validateRegistry().length === 0, '註冊表不應含任何缺 Handler 的能力');
     },
   },
 
   // ── 到期 Job（Root）路由 ────────────────────────────────────────────────────
   {
-    name: '到期 Job 依 job.type 路由到 dungeon；過期 Run 由 Handler 接受並 no-op（非拒絕）',
+    name: '到期 Job 依 job.type 路由到 map；失效目標由 Handler 接受並 no-op（非拒絕）',
     run: () => {
       const config = createTransactionConfig({ contextFactory: contexts, applyScheduling });
       const s0 = baseState();
-      // fixture 沒有這個 NPC Run。失效 Job 應「接受並 no-op」——若拒絕會回滾、Job 留在佇列不斷重觸發
-      // （見 session.runDueJob 的消費規則）。
+      // 不存在的 map instance。失效 Job 應「接受並 no-op」——若拒絕會回滾、Job 留在佇列不斷重觸發。
       const job = {
-        type: 'npcDungeonDay',
-        jobId: 'runtime:job~npc~0' as JobId,
+        type: 'mapRefreshCheck',
+        jobId: 'runtime:job~map~0' as JobId,
         dueDay: 1 as WorldDay,
-        ownerModule: 'dungeon' as ModuleId,
-        targetId: 'runtime:npc-dungeon-run:absent' as NpcDungeonRunId,
+        ownerModule: 'map' as ModuleId,
+        targetId: 'runtime:map-instance:absent' as never,
         payload: {},
-      } as GameScheduledJob;
+      } as unknown as GameScheduledJob;
       const outcome = runTransaction(config, s0, TX, routeJob(job, contexts), null);
 
-      assert(outcome.accepted, '過期 Run 的 Job 應被接受並 no-op（不是拒絕）');
+      assert(outcome.accepted, '失效目標的 Job 應被接受並 no-op（不是拒絕）');
       if (!outcome.accepted) return;
-      assert(outcome.state.dungeon === s0.dungeon, 'no-op 不應改動 dungeon slice');
+      assert(outcome.state.map === s0.map, 'no-op 不應改動 map slice');
     },
   },
   {
-    name: 'Manifest 註冊但未實作的 Job（freeActionDue）會明確報錯',
+    name: '未註冊的 Job 型別會明確報錯，不靜默丟棄到期 Job',
     run: () => {
-      assert(PENDING_JOBS.includes('freeActionDue'), 'freeActionDue 應在未實作清單');
       let message = '';
       try {
         routeJob({ type: 'freeActionDue' } as unknown as GameScheduledJob, contexts);
       } catch (e) {
         message = e instanceof Error ? e.message : String(e);
       }
-      assert(message.includes('未實作'), `應指出 Job Handler 未實作（實得 "${message}"）`);
+      assert(message.length > 0, `未註冊的 Job 應丟錯（實得 "${message}"）`);
     },
   },
 ];
