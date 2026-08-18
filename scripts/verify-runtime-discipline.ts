@@ -18,7 +18,6 @@ import {
   createProgram,
   findHardcodedContentIds,
   findNamedNumericConstants,
-  sanctionedMarkerLineRanges,
 } from './lib/ast-gates';
 
 const ROOT = resolve(import.meta.dirname, '..');

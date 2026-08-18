@@ -63,8 +63,15 @@ jobs:
 
       # 一項工作只能修改它宣告的 scope 允許的路徑（scripts/content-scope.json）。
       # scope 由分支名推斷：content/<culture>/… → culture:<culture>；其餘為 engine。
+      # scope 必須**明確**帶入：CI 是 detached HEAD，分支名推斷不可靠，靜默落回 engine
+      # 會讓文化工作的越界改動整批通過。由 PR 分支名決定，取不到就是 engine（引擎工作），
+      # 而 engine 本身也被禁止改文化資料，所以兩個方向都擋得住。
       - name: verify:content-scope
         env:
+          CONTENT_SCOPE: >-
+            ${{ startsWith(github.head_ref || github.ref_name, 'content/')
+                && format('culture:{0}', split(github.head_ref || github.ref_name, '/')[1])
+                || 'engine' }}
           CONTENT_SCOPE_RANGE: >-
             ${{ github.event_name == 'pull_request'
                 && format('{0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha)

@@ -12,7 +12,7 @@
     "verify:gap": "tsx scripts/verify-implementation-gap.ts",
     "verify:content-sync": "node scripts/verify-content-sync.mjs",
     "verify:content-scope": "node scripts/verify-content-scope.mjs",
-    "verify": "npm run typecheck && npm run verify:discipline && npm run verify:modules && npm run verify:content-sync",
+    "verify": "npm run typecheck && npm run verify:discipline && npm run verify:modules && npm run verify:content-sync && npm run verify:content-scope",
     "content:all": "npm run content:yunhua && npm run content:vildun && npm run content:aurelien && npm run content:safir",
     "content:yunhua": "node build_yunhua_content_html.mjs",
     "content:vildun": "node build_vildun_content_html.mjs",

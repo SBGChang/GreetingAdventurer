@@ -195,39 +195,6 @@ export function findNamedNumericConstants(
   return findings;
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// 未完成標記：被規範認可的「登記處」不算違規
-// ──────────────────────────────────────────────────────────────────────────
-//
-// `UNAVAILABLE_CAPABILITIES` 是規範指定用來登記未閉合能力的地方，而且**要求每一項附書面理由**。
-// 那些理由當然會寫「尚未實作」——那不是把未完成偽裝成可用，那正是在明講它不可用。
-// 純文字掃描會把這份登記表本身當成 36 筆違規，所以要由 AST 把它的行號範圍排除掉。
-export function sanctionedMarkerLineRanges(
-  program: ts.Program,
-): Map<string, readonly (readonly [number, number])[]> {
-  const out = new Map<string, (readonly [number, number])[]>();
-  const SANCTIONED = new Set(['UNAVAILABLE_CAPABILITIES', 'PENDING_GAME_COMMANDS', 'PENDING_INTERNAL_COMMANDS', 'PENDING_JOBS']);
-
-  for (const sf of program.getSourceFiles()) {
-    if (sf.isDeclarationFile) continue;
-    const walk = (node: ts.Node): void => {
-      if (
-        ts.isVariableDeclaration(node) &&
-        ts.isIdentifier(node.name) &&
-        SANCTIONED.has(node.name.text)
-      ) {
-        // 用 node.pos / node.end 而不是 getStart()：後者需要 parent 指標，而 Program 預設不建立，
-        // 從別的腳本 import 時就會炸。pos 含前置註解，對「排除這個宣告的行號範圍」反而正確——
-        // 說明該清單為何存在的那段註解本來就該一起排除。
-        const start = sf.getLineAndCharacterOfPosition(node.pos).line + 1;
-        const end = sf.getLineAndCharacterOfPosition(node.end).line + 1;
-        const list = out.get(sf.fileName) ?? [];
-        list.push([start, end]);
-        out.set(sf.fileName, list);
-      }
-      ts.forEachChild(node, walk);
-    };
-    walk(sf);
-  }
-  return out;
-}
+// 這裡曾經有 sanctionedMarkerLineRanges()：把 UNAVAILABLE_CAPABILITIES 等「未完成清單」的行號
+// 範圍整段排除在標記掃描之外。那份清單已經刪除（未完成能力不再進註冊表），所以這個特例
+// 也一併移除——沒有任何宣告可以讓一段程式碼免於受檢。

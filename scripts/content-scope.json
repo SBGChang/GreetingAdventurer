@@ -8,34 +8,51 @@
     "那會讓一國的內容需求變成四國共用行為的改動，而且不會有任何測試失敗。",
     "",
     "scope 由 --scope 參數、CONTENT_SCOPE 環境變數，或分支名稱推斷（content/<culture>/… ）。",
-    "都沒有時使用 default。"
+    "都沒有時使用 default。",
+    "文化 scope 只允許 *.data.mjs 與 *.md：產出的 HTML 由 Builder 生成（改它等於改產物而非來源），共用 Factory／版型／Builder 會同時影響四國，屬 content-platform。注意 .data.mjs 目前仍是可執行 JavaScript，因此這道門禁擋得住『改到別人的檔』，擋不住『在自己的檔裡寫程式邏輯』——那要等內容改成純 JSON 才能真正保證。"
   ],
-
   "default": "engine",
-
   "scopes": {
     "culture:yunhua": {
-      "why": "雲華內容工作：只調整雲華自己的資料與說明",
-      "allow": ["docs/03_content/yunhua/**"]
+      "why": "yunhua 內容工作：只調整該文化自己的**資料與說明**",
+      "allow": [
+        "docs/03_content/yunhua/*.data.mjs",
+        "docs/03_content/yunhua/*.md"
+      ],
+      "denyNote": "產出的 *_content.html 由 Builder 生成，屬 content-platform scope；共用 Factory／Builder／Schema 亦然。"
     },
     "culture:vildun": {
-      "why": "維爾冬內容工作：只調整維爾冬自己的資料與說明",
-      "allow": ["docs/03_content/vildun/**"]
+      "why": "vildun 內容工作：只調整該文化自己的**資料與說明**",
+      "allow": [
+        "docs/03_content/vildun/*.data.mjs",
+        "docs/03_content/vildun/*.md"
+      ],
+      "denyNote": "產出的 *_content.html 由 Builder 生成，屬 content-platform scope；共用 Factory／Builder／Schema 亦然。"
     },
     "culture:aurelien": {
-      "why": "奧雷利安內容工作：只調整奧雷利安自己的資料與說明",
-      "allow": ["docs/03_content/aurelien/**"]
+      "why": "aurelien 內容工作：只調整該文化自己的**資料與說明**",
+      "allow": [
+        "docs/03_content/aurelien/*.data.mjs",
+        "docs/03_content/aurelien/*.md"
+      ],
+      "denyNote": "產出的 *_content.html 由 Builder 生成，屬 content-platform scope；共用 Factory／Builder／Schema 亦然。"
     },
     "culture:safir": {
-      "why": "薩菲爾內容工作：只調整薩菲爾自己的資料與說明",
-      "allow": ["docs/03_content/safir/**"]
+      "why": "safir 內容工作：只調整該文化自己的**資料與說明**",
+      "allow": [
+        "docs/03_content/safir/*.data.mjs",
+        "docs/03_content/safir/*.md"
+      ],
+      "denyNote": "產出的 *_content.html 由 Builder 生成，屬 content-platform scope；共用 Factory／Builder／Schema 亦然。"
     },
-
     "content-platform": {
       "why": "內容平台工作：共用 Factory／地圖模型／渲染器／版型／Builder。會同時影響四國，故與單一文化工作分開。",
-      "allow": ["docs/03_content/shared/**", "build_*.mjs", "docs/03_content/*/*_content.html"]
+      "allow": [
+        "docs/03_content/shared/**",
+        "build_*.mjs",
+        "docs/03_content/*/*_content.html"
+      ]
     },
-
     "engine": {
       "why": "引擎與工具工作：src、scripts、設定、文件。不得改動文化資料——那是內容工作的範圍。",
       "allow": [

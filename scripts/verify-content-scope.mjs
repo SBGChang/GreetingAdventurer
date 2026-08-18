@@ -31,7 +31,12 @@ function arg(name) {
 }
 
 function git(...args) {
-  return execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 28 }).trim();
+  // -c core.quotepath=false：否則 git 會把非 ASCII 路徑加引號並八進位轉義，glob 永遠對不上。
+  return execFileSync('git', ['-c', 'core.quotepath=false', ...args], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    maxBuffer: 1 << 28,
+  }).trim();
 }
 
 function currentBranch() {
@@ -102,7 +107,10 @@ if (scope === undefined) {
   process.exit(2);
 }
 
-const range = arg('range') ?? process.env.CONTENT_SCOPE_RANGE ?? 'origin/main..HEAD';
+// 本機預設只看**最新一筆 commit**：長期未推送的分支累積了多個 scope 的工作，
+// 拿 origin/main..HEAD 去比會把別人早先提交的內容工作一起算進來，變成無意義的紅燈。
+// CI 一律以 PR／push 的真實範圍覆寫（見 .github/workflows/verify.yml）。
+const range = arg('range') ?? process.env.CONTENT_SCOPE_RANGE ?? 'HEAD~1..HEAD';
 
 let changed;
 try {
