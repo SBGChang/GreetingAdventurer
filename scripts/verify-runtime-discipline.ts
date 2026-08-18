@@ -356,14 +356,11 @@ const UNFINISHED_MARKERS: readonly { pattern: RegExp; why: string }[] = [
 ];
 
 export function checkNoUnfinishedMarkers(productionFiles: readonly string[]): Failure[] {
-  const sanctioned = sanctionedMarkerLineRanges(program);
   const failures: Failure[] = [];
   for (const file of productionFiles) {
-    const ranges = sanctioned.get(file.replace(/\\/g, '/')) ?? sanctioned.get(file) ?? [];
     const lines = readFileSync(file, 'utf8').split('\n');
     lines.forEach((line, i) => {
       const lineNo = i + 1;
-      if (ranges.some(([from, to]) => lineNo >= from && lineNo <= to)) return;
       const hit = UNFINISHED_MARKERS.find((m) => m.pattern.test(line));
       if (hit === undefined) return;
       failures.push({
