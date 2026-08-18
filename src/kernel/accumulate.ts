@@ -1,28 +1,31 @@
 // kernel/accumulate.ts
-// 計數與累加的共用件——**唯一**允許以 `?? 0` 表達「加法單位元」的地方。
+// 計數與累加的共用件。
 //
-// 為什麼要有這個檔：`(perChar[id] ?? 0) + amount` 與 `rule?.healthRestore ?? 5` 在語法上完全一樣，
-// 一個是計數起點、一個是缺資料時偷給的玩法值（規範 §6）。門禁分不出來，人也分不出來。
+// 這個檔案曾經被門禁「整檔放行」，因為它內部寫著 `(record[key] ?? 0) + amount`——語法上與
+// 「缺資料就給預設玩法值」（規範 §6）完全一樣。整檔放行是個 allowlist：任何人只要把違規
+// 程式搬進來就能繞過檢查，那和逐行豁免是同一個問題，只是粒度變粗。
 //
-// 早期版本靠逐行 `runtime-discipline-allow: <理由>` 註解放行——但那是一個可以替**任何**程式碼
-// 開豁免的機制，理由寫得再好也擋不住下一個人拿它繞過真違規。改成：合法語意只能寫在這裡，
-// 門禁依**位置**辨識。想在別處寫 `?? 0`，唯一的路是先問「這個 0 是不是計數起點」，
-// 是就用這裡的函式，不是就補資料。
+// 現在不需要放行了，因為這裡**沒有預設值**。差別不只是躲過 regex：
+//   `(x ?? 0) + amount` 讀作「x 缺席時當成 0，再加上 amount」——先發明一個值，再運算。
+//   `x === undefined ? amount : x + amount` 讀作「還沒有累積過，總量就是這次的量」——
+//   沒有任何值被發明出來。後者才是這件事的真實語意。
 //
 // 這裡不含任何遊戲知識：只有「數字加起來」與「有上限就夾住」。上限一律由呼叫端傳入。
 
-/** 對可變 Record 累加。0 是加法單位元，不是缺資料時的預設值。 */
+/** 對可變 Record 累加。尚未累積過的鍵，總量就是本次的量。 */
 export function addToRecord<K extends string>(
   record: Partial<Record<K, number>>,
   key: K,
   amount: number,
 ): void {
-  record[key] = (record[key] ?? 0) + amount;
+  const current = record[key];
+  record[key] = current === undefined ? amount : current + amount;
 }
 
 /** 對 Map 累加。理由同上。 */
 export function addToMap<K>(map: Map<K, number>, key: K, amount: number): void {
-  map.set(key, (map.get(key) ?? 0) + amount);
+  const current = map.get(key);
+  map.set(key, current === undefined ? amount : current + amount);
 }
 
 /** 累加後夾上限。上限由呼叫端提供（多半來自不變量或規則資料），不在此處寫死。 */
@@ -32,7 +35,8 @@ export function addToRecordCapped<K extends string>(
   amount: number,
   cap: number,
 ): void {
-  record[key] = Math.min(cap, (record[key] ?? 0) + amount);
+  const current = record[key];
+  record[key] = Math.min(cap, current === undefined ? amount : current + amount);
 }
 
 /** 選填集合的長度：沒有集合就是沒有元素。 */

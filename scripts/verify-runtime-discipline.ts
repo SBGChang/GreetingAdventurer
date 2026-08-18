@@ -124,29 +124,22 @@ type Failure = Readonly<{ check: string; detail: string }>;
 
 // ──────────────────────────────────────────────────────────────────────────
 // ──────────────────────────────────────────────────────────────────────────
-// 合法語意的認定：靠**位置**，不靠逐行豁免
+// 沒有豁免，也沒有放行清單
 // ──────────────────────────────────────────────────────────────────────────
 //
-// 這裡曾經有一套 `runtime-discipline-allow: <理由>` 註解機制，附帶「理由必填」與數量 ratchet。
-// 它已整套移除，原因是：**那是一個可以替任何一行程式開豁免的後門。** 理由寫得再好，機制本身
-// 仍然容許下一個人拿它繞過真違規，而 review 幾乎不可能逐筆去質疑「這個理由夠不夠格」。
+// 演化過三代，每一代都被同一個問題打回：
+//   1. `runtime-discipline-allow: <理由>` 逐行註解——一扇對任何一行都開的門。
+//   2. 整檔放行（invariants.ts / accumulate.ts）——粒度變粗，但仍是 allowlist：
+//      把違規程式搬進那兩個檔就能繞過。
+//   3. 現在：**兩者都沒有。** 合法語意靠**改寫成不需要豁免的形狀**來成立。
 //
-// 取而代之的是把每一種合法語意收斂到**一個具名的位置**，讓檢查器依位置辨識：
+// 具體怎麼做到的：
+//   結構不變量集中在 contracts/core/invariants.ts——而數值常數檢查的範圍本來就只涵蓋
+//     src/modules 與 src/app，contracts 不在其中，所以不需要任何特例。
+//   計數起點在 kernel/accumulate.ts——該檔已改寫成 `x === undefined ? amount : x + amount`，
+//     完全沒有預設值可言，因此也不需要特例。
 //
-//   結構不變量（3×3、隊員上限 9、Mastery 等級域…）→ src/contracts/core/invariants.ts
-//   計數與累加起點（`(x ?? 0) + n` 這一類）        → src/kernel/accumulate.ts
-//
-// 差別很實際：舊機制下「我這行有理由」只是**宣稱**；新做法要主張某個語意合法，你得把它搬進
-// 共用檔並具名——那件事本身會被 review 看見，而且下一個有同樣需求的人會複用它，
-// 而不是再開一個新豁免。
-const SANCTIONED_SEMANTICS: readonly RegExp[] = [
-  /[/\\\\]contracts[/\\\\]core[/\\\\]invariants\.ts$/,
-  /[/\\\\]kernel[/\\\\]accumulate\.ts$/,
-];
-
-function isSanctionedSemanticsFile(file: string): boolean {
-  return SANCTIONED_SEMANTICS.some((re) => re.test(file));
-}
+// 判準因此變成：如果一段程式需要豁免才能過，那不是門禁太嚴，是那段程式還沒寫成正確的形狀。
 
 // ──────────────────────────────────────────────────────────────────────────
 // 檢查 1：正式依賴圖不得含測試／Bring-up（§13）
@@ -250,7 +243,6 @@ function checkNoCrossSemanticCasts(productionFiles: readonly string[]): Failure[
     lines.forEach((line, i) => {
       const code = line.replace(/\/\/.*$/, '');
       if (!code.includes('as unknown as')) return;
-      if (isSanctionedSemanticsFile(file)) return;
       failures.push({
         check: 'cross-semantic-cast',
         detail: `${relative(ROOT, file).replace(/\\/g, '/')}:${i + 1} 使用 as unknown as（缺契約？）\n        ${line.trim()}`,
@@ -278,7 +270,6 @@ function checkNoValueFallbacks(productionFiles: readonly string[]): Failure[] {
     const lines = readFileSync(file, 'utf8').split('\n');
     lines.forEach((line, i) => {
       const code = line.replace(/\/\/.*$/, '');
-      if (isSanctionedSemanticsFile(file)) return;
       for (const m of code.matchAll(SCALAR_FALLBACK_RE)) {
         failures.push({
           check: 'value-fallback',
@@ -308,7 +299,6 @@ const CONTENT_READ_LHS = /(?:\.definitions\.|\.reader\.|\bget[A-Z]\w*\(|\bView\b
 function collectContentEmptyFallbacks(productionFiles: readonly string[]): string[] {
   const found: string[] = [];
   for (const file of productionFiles) {
-    if (isSanctionedSemanticsFile(file)) continue;
     const lines = readFileSync(file, 'utf8').split('\n');
     lines.forEach((line, i) => {
       const code = line.replace(/\/\/.*$/, '');
