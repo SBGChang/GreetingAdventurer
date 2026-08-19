@@ -633,11 +633,16 @@ export type PlayerInteractionOpenedEvent = Readonly<{
   kind: 'travelEvent' | 'succession' | 'lootAuction' | 'dungeonEvent';
 }>;
 
+// elapsedDays 曾經宣告成字面型別 `365`。那是最強形式的硬編碼：住家休息的時長已經由
+// `TeamPlanRuleDefinition.durationDays`（內容）決定，但事件的**型別**只接受 365，於是換一份
+// Content Pack 把時長改成 180 天會直接編譯失敗——資料在型別上就被否決了。
+// 現在是 number，且發送端**不重述**這個量：它由 plan 的 dueOnDay − startedOnDay 導出，
+// 所以永遠等於該次 Plan 真正跑掉的天數。不要改回字面型別，也不要在發送端寫任何天數常數。
 export type HomeYearRestCompletedEvent = Readonly<{
   type: 'HomeYearRestCompleted';
   teamId: TeamId;
   memberIds: readonly CharacterId[];
-  elapsedDays: 365;
+  elapsedDays: number;
 }>;
 
 export type PlayerSuccessorSelectedEvent = Readonly<{

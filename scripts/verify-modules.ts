@@ -20,6 +20,8 @@ import { runTests as weaponSetWorkflow } from '../src/app/workflows/weapon-set-c
 // 地基層測試自 Wave A 起就存在，但從未被這支腳本跑過。
 import { runKernelTests } from '../src/kernel/kernel.test';
 import { runKernelTests as dataKernels, allKernelTestsPass } from '../src/data-runtime/kernels.test';
+// content-pack 載入器：524 行、先前完全沒有測試，而它是「缺資料必須失敗」的第一道關卡。
+import { runTests as contentPackLoader } from '../src/data-runtime/content-pack.test';
 // 契約重複宣告的 ratchet：不准再長出新的影子型別。
 import { runTests as contractDuplicates, remainingDuplicateCount } from './check-contract-duplicates';
 
@@ -34,6 +36,8 @@ const throwing: ReadonlyArray<readonly [string, () => void]> = [
       if (!allKernelTestsPass()) throw new Error('data-runtime kernel tests failed');
     },
   ],
+  // data-runtime 載入器：Manifest／Pack 標頭（§8）、重複 ID、循環相依、壞 header 的失敗路徑。
+  ['data-runtime content-pack', contentPackLoader],
   ['character', character],
   ['inventory', inventory],
   ['map', map],

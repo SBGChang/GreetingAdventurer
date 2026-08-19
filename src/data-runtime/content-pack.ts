@@ -9,6 +9,7 @@ import type {
   ContentPackId,
   DefinitionId,
   JsonValue,
+  ResolverId,
 } from '../contracts/core';
 import type { DataDiagnostic } from './validation';
 
@@ -50,9 +51,46 @@ export type RawContentManifest = Readonly<{
 // 可選 `sourcePath` 讓 diagnostics 精準定位到來源檔。
 export type RawContentDefinition = JsonObject;
 
+// Runtime 自己的資料契約身分。**這不是內容**——它是「這一版程式能吃哪一版 pack」的宣告，
+// 屬規範 §4 允許的程式身分（同 Module ID / Schema kind）。Content Pack 不得覆寫它。
+// 升 packSchemaVersion 的同時必須提供 Migration（§7 第 4 步），不得只改數字。
+export const RUNTIME_DATA_CONTRACT = {
+  runtimeVersion: '0.1.0',
+  packSchemaVersion: 1,
+} as const;
+
+// Pack 宣告它相容哪些 Runtime（§8「相容的 Runtime 版本」）。
+export type PackRuntimeCompatibility = Readonly<{
+  minRuntimeVersion: string;
+  maxRuntimeVersion?: string;
+}>;
+
+// Pack 的文化與功能範圍（§8）。base pack 的 cultureIds 為空＝不綁文化。
+export type PackScope = Readonly<{
+  cultureIds: readonly string[];
+  features: readonly string[];
+}>;
+
+// §8 的 pack 標頭。原本只有 packId / version / definitions 三個欄位，缺了規範 §8 明列的
+// schemaVersion、Definition kind 清單、必要 Resolver 清單、文化與功能範圍、Runtime 相容版本。
+// 缺這些不只是不方便——Bootstrap Gate（§11 第 2／6／7 步）因此驗不了三件事：
+//   * 這份 pack 用到的 Resolver 是否全部已註冊（§11 要求「未註冊 Resolver 無法啟動」）；
+//   * 這份 pack 裝進來的 kind 是否就是它自己宣告的那些（否則新 kind 可以無聲滲入）；
+//   * 這份 pack 配不配這一版 Runtime（否則舊 pack 會以錯誤語意被讀進來）。
+//
+// **`definitionFiles` 刻意不在這裡。** 13_data_runtime.md §1 明定「編譯器可產生索引，不要求作者
+// 手動維護巨大總表」，所以檔案清單由 ContentRepository 列舉檔案時導出（每筆 definition 自帶
+// sourcePath），不是作者手寫的欄位。手寫總表只會變成另一個會跟真實檔案漂移的複本。
 export type RawContentPack = Readonly<{
   packId: ContentPackId;
   version: string;
+  schemaVersion: number;
+  runtimeCompatibility: PackRuntimeCompatibility;
+  scope: PackScope;
+  // 本 pack 允許出現的 Definition kind。宣告了卻沒有任何定義，或出現未宣告的 kind，皆為 error。
+  declaredKinds: readonly string[];
+  // 本 pack 的資料引用到的 Resolver。Bootstrap 必須確認它們都已註冊才能啟動。
+  requiredResolverIds: readonly ResolverId[];
   definitions: readonly RawContentDefinition[];
 }>;
 
@@ -126,6 +164,11 @@ export const DataLoadCode = {
   MalformedDefinition: 'data.load.malformedDefinition',
   DuplicateDefinitionId: 'data.load.duplicateDefinitionId',
   PackIdMismatch: 'data.load.packIdMismatch',
+  // §8 pack 標頭檢查。
+  PackSchemaVersionUnsupported: 'data.load.packSchemaVersionUnsupported',
+  RuntimeVersionIncompatible: 'data.load.runtimeVersionIncompatible',
+  UndeclaredDefinitionKind: 'data.load.undeclaredDefinitionKind',
+  DeclaredKindWithoutDefinitions: 'data.load.declaredKindWithoutDefinitions',
 } as const;
 
 // 診斷訊息在指涉一筆「連 kind/id 都缺」的定義時所用的占位字。它是錯誤訊息的一部分，
@@ -252,6 +295,53 @@ function readNumber(obj: JsonObject, key: string): number | undefined {
 function readBoolean(obj: JsonObject, key: string): boolean | undefined {
   const v = obj[key];
   return typeof v === 'boolean' ? v : undefined;
+}
+
+// ── Runtime 版本相容（§8）──────────────────────────────────────────────────
+//
+// 刻意只實作 `major.minor.patch` 的數值比較，不引入 semver 套件也不支援 prerelease／range 語法：
+// pack 只需要表達「這版之後／之前」，而少一種語法就少一種解析歧異。欄位形狀不合法時回 false
+// （＝不相容）而不是「當成沒限制」——那會讓打錯的版本字串變成靜默放行。
+// 逐段解析成三元 tuple。不用 map + `as [number, number, number]`：那個轉型會讓長度不變量只存在於
+// 註解裡，而下游一旦以索引讀取就又需要 `?? 0` 之類的預設值。明確取出三段、三段都驗過才回傳，
+// tuple 的長度因此是型別上的事實，比較函式不再需要任何預設值。
+function parseVersionSegment(text: string): number | undefined {
+  return /^\d+$/.test(text) ? Number(text) : undefined;
+}
+
+function parseVersion(text: string): readonly [number, number, number] | undefined {
+  const parts = text.split('.');
+  if (parts.length !== 3) return undefined;
+  const [rawMajor, rawMinor, rawPatch] = parts;
+  if (rawMajor === undefined || rawMinor === undefined || rawPatch === undefined) return undefined;
+  const major = parseVersionSegment(rawMajor);
+  const minor = parseVersionSegment(rawMinor);
+  const patch = parseVersionSegment(rawPatch);
+  if (major === undefined || minor === undefined || patch === undefined) return undefined;
+  return [major, minor, patch];
+}
+
+function compareVersions(a: readonly [number, number, number], b: readonly [number, number, number]): number {
+  const [aMajor, aMinor, aPatch] = a;
+  const [bMajor, bMinor, bPatch] = b;
+  if (aMajor !== bMajor) return aMajor < bMajor ? -1 : 1;
+  if (aMinor !== bMinor) return aMinor < bMinor ? -1 : 1;
+  if (aPatch !== bPatch) return aPatch < bPatch ? -1 : 1;
+  return 0;
+}
+
+export function runtimeSatisfies(
+  runtimeVersion: string,
+  compatibility: PackRuntimeCompatibility,
+): boolean {
+  const runtime = parseVersion(runtimeVersion);
+  const min = parseVersion(compatibility.minRuntimeVersion);
+  if (runtime === undefined || min === undefined) return false;
+  if (compareVersions(runtime, min) < 0) return false;
+  if (compatibility.maxRuntimeVersion === undefined) return true;
+  const max = parseVersion(compatibility.maxRuntimeVersion);
+  if (max === undefined) return false;
+  return compareVersions(runtime, max) <= 0;
 }
 
 // ── 相依循環偵測（§1.1：Pack 相依必須無循環）───────────────────────────────
@@ -390,9 +480,46 @@ export function loadContent(input: LoadContentInput): CompileContentResult {
     }
   }
 
+  // 2.5) Pack 標頭（§8）：schemaVersion 與 Runtime 相容性。
+  //
+  // 這一關擺在收集 definition **之前**：pack 的 schemaVersion 不對，代表它每一筆定義的欄位語意
+  // 都可能不同，繼續解析只會產生一堆看起來合理但意思錯了的資料。寧可整份拒絕。
+  for (const packId of manifest.loadOrder) {
+    const pack = packById.get(packId);
+    if (pack === undefined) continue; // 已於步驟 1 報過
+    if (pack.schemaVersion !== RUNTIME_DATA_CONTRACT.packSchemaVersion) {
+      diagnostics.push({
+        severity: 'error',
+        code: DataLoadCode.PackSchemaVersionUnsupported,
+        packId,
+        filePath: `${pack.packId}/pack.json`,
+        fieldPath: 'schemaVersion',
+        messageKey: 'data.load.packSchemaVersionUnsupported',
+        details: { declared: pack.schemaVersion, supported: RUNTIME_DATA_CONTRACT.packSchemaVersion },
+      });
+    }
+    if (!runtimeSatisfies(RUNTIME_DATA_CONTRACT.runtimeVersion, pack.runtimeCompatibility)) {
+      diagnostics.push({
+        severity: 'error',
+        code: DataLoadCode.RuntimeVersionIncompatible,
+        packId,
+        filePath: `${pack.packId}/pack.json`,
+        fieldPath: 'runtimeCompatibility',
+        messageKey: 'data.load.runtimeVersionIncompatible',
+        details: {
+          runtimeVersion: RUNTIME_DATA_CONTRACT.runtimeVersion,
+          minRuntimeVersion: pack.runtimeCompatibility.minRuntimeVersion,
+          maxRuntimeVersion: pack.runtimeCompatibility.maxRuntimeVersion ?? null,
+        },
+      });
+    }
+  }
+
   // 3) 依 loadOrder + 檔內順序收集 definition；偵測重複 ID
   const ordered: ContentDefinition[] = [];
   const byId = new Map<DefinitionId, ContentDefinition>();
+  // 每個 pack 實際出現過的 kind，用於比對 declaredKinds（兩個方向都要對）。
+  const seenKindsByPack = new Map<ContentPackId, Set<string>>();
 
   for (const packId of manifest.loadOrder) {
     const pack = packById.get(packId);
@@ -452,6 +579,25 @@ export function loadContent(input: LoadContentInput): CompileContentResult {
         return;
       }
 
+      // 未宣告的 kind 不得無聲進入 registry：pack.json 的 declaredKinds 是這份 pack 的
+      // 內容範圍宣告，資料多長出一種 kind 代表宣告與內容已經不一致。
+      if (!pack.declaredKinds.includes(kind)) {
+        diagnostics.push({
+          severity: 'error',
+          code: DataLoadCode.UndeclaredDefinitionKind,
+          packId,
+          filePath: sourcePath,
+          definitionId: id,
+          fieldPath: 'kind',
+          messageKey: 'data.load.undeclaredDefinitionKind',
+          details: { kind, declaredKinds: [...pack.declaredKinds] },
+        });
+        return;
+      }
+      const seenKinds = seenKindsByPack.get(packId) ?? new Set<string>();
+      seenKinds.add(kind);
+      seenKindsByPack.set(packId, seenKinds);
+
       const existing = byId.get(id);
       if (existing !== undefined) {
         // §1.1：相同 Definition ID 不可默默後蓋前 → error，保留前者不覆蓋。
@@ -479,6 +625,28 @@ export function loadContent(input: LoadContentInput): CompileContentResult {
       byId.set(id, def);
       ordered.push(def);
     });
+  }
+
+  // 3.5) 宣告了 kind 卻沒有任何定義 → error。
+  //
+  // 這個方向同樣重要：`declaredKinds` 是 Bootstrap 判斷「這個 Capability 的內容到齊了嗎」的依據。
+  // 宣告一個 kind 再讓它空著，等於在宣告面上假裝內容存在，而 Reader 要到執行期才會發現讀不到。
+  for (const packId of manifest.loadOrder) {
+    const pack = packById.get(packId);
+    if (pack === undefined) continue;
+    const seen = seenKindsByPack.get(packId) ?? new Set<string>();
+    for (const kind of pack.declaredKinds) {
+      if (seen.has(kind)) continue;
+      diagnostics.push({
+        severity: 'error',
+        code: DataLoadCode.DeclaredKindWithoutDefinitions,
+        packId,
+        filePath: `${pack.packId}/pack.json`,
+        fieldPath: 'declaredKinds',
+        messageKey: 'data.load.declaredKindWithoutDefinitions',
+        details: { kind },
+      });
+    }
   }
 
   if (diagnostics.length > 0) {

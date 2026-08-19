@@ -41,11 +41,13 @@ import {
   handleStartNpcTeamPlan,
   handleTeamPlanDueJob,
   handleCompletePlayerTravelSegmentWithoutEvent,
+  handleRest,
 } from './system';
 import { createTeamQuery, createTeamPresenceQuery } from './queries';
 import {
   fixtureTeamState,
   makeContext,
+  stubDefinitionReader,
   stubResolverPort,
   rngStepBool,
   PLAYER_TEAM_ID,
@@ -614,6 +616,54 @@ const cases: readonly Case[] = [
       const back = handleTeamPlanDueJob(ret.result.nextSlice, rjob, makeContext({ worldDay: rjob.dueDay }));
       const backTeam = back.nextSlice.teams[PLAYER_TEAM_ID]!;
       assert(backTeam.location.kind === 'city', 'returned to a city');
+    },
+  },
+  {
+    // 規範 §17 的「同一套 Runtime 載入不同平衡 Pack 必須產生不同結果」在最小切片上的證明。
+    // 這個量原本在兩處寫死：契約把 elapsedDays 宣告成字面型別 365（換 Pack 會編譯失敗），
+    // handler 又自己填了一次 365。現在只有 TeamPlanRule.durationDays 一個來源。
+    name: 'homeRest: elapsedDays follows the content pack rule (not a hardcoded 365)',
+    run: () => {
+      const worldDay = 20000 as WorldDay;
+      const atHome = (s: TeamState): TeamState => ({
+        ...s,
+        teams: {
+          ...s.teams,
+          [PLAYER_TEAM_ID]: {
+            ...s.teams[PLAYER_TEAM_ID]!,
+            location: { kind: 'home', homeId: 'home-1' as never },
+          },
+        },
+      });
+
+      // 只換 Content Pack 的一個數值，Runtime 完全不動。
+      const elapsedDaysFromPack = (durationDays: number): number => {
+        const base = stubDefinitionReader();
+        const ctx = makeContext({
+          worldDay,
+          definitions: {
+            ...base,
+            getTeamPlanRule: (id) => ({ ...base.getTeamPlanRule(id), durationDays }),
+          },
+        });
+        const started = ok(
+          handleRest(atHome(fixtureTeamState(worldDay)), { type: 'rest', planKind: 'homeRest' }, ctx),
+        );
+        const job = materializeJob(started.result.scheduledJobs[0], 1);
+        const due = handleTeamPlanDueJob(
+          started.result.nextSlice,
+          job,
+          makeContext({ worldDay: job.dueDay }),
+        );
+        const ev = findEvent<{ elapsedDays: number }>(due.outgoingMessages, 'HomeYearRestCompleted');
+        if (ev === undefined) {
+          throw new Error(`no HomeYearRestCompleted emitted for durationDays=${durationDays}`);
+        }
+        return ev.elapsedDays;
+      };
+
+      assert(elapsedDaysFromPack(365) === 365, '365 天的 Pack → elapsedDays 365');
+      assert(elapsedDaysFromPack(180) === 180, '180 天的 Pack → elapsedDays 180（不得仍回 365）');
     },
   },
   {

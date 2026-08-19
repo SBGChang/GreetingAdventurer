@@ -1113,13 +1113,26 @@ function dueReturnToCity(state: TeamState, plan: TeamPlan): ModuleResult<TeamSta
   );
 }
 
+// Plan 實際跑掉的天數。**不是內容**——時長由 TeamPlanRule.durationDays 決定並已寫進 dueOnDay，
+// 這裡只是把它讀回來。到期 Job 觸發的 Plan 必然有 dueOnDay（handleStartTeamPlan 一律設），缺了
+// 代表 Plan 是被非法建構出來的：明確拋錯，不給預設天數（給了就等於悄悄回到寫死的 365）。
+function elapsedDaysOf(plan: TeamPlan): number {
+  if (plan.dueOnDay === undefined) {
+    throw new Error(
+      `team: plan ${String(plan.planId)}（kind=${plan.kind}）沒有 dueOnDay，無法導出經過天數——` +
+        `到期 Plan 必須由 handleStartTeamPlan 以 TeamPlanRule.durationDays 設定 dueOnDay`,
+    );
+  }
+  return plan.dueOnDay - plan.startedOnDay;
+}
+
 function dueHomeRest(state: TeamState, plan: TeamPlan): ModuleResult<TeamState> {
   const team = requireTeam(state, plan.teamId);
   const yearRest: HomeYearRestCompletedEvent = {
     type: 'HomeYearRestCompleted',
     teamId: plan.teamId,
     memberIds: team.memberIds,
-    elapsedDays: 365,
+    elapsedDays: elapsedDaysOf(plan),
   };
   return duePlanComplete(state, plan, [emit(yearRest)]);
 }

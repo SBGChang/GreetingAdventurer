@@ -6,3 +6,4 @@ export * from './readers';
 export * from './validation';
 export * from './resolver-registry';
 export * from './kernels';
+export * from './contribution';
