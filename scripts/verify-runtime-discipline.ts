@@ -108,6 +108,21 @@ function importsOf(file: string): string[] {
   return specs;
 }
 
+// 逐行讀檔，**行尾一律正規化**。
+//
+// 為什麼這是一個具名函式而不是四個 `.split('\n')`：下游每個檢查都用 `line.replace(/\/\/.*$/, '')`
+// 去掉註解，而 JavaScript 的 `.` **不匹配 `\r`**，沒有 `m` flag 的 `$` 又只錨定字串結尾。所以在
+// CRLF 檔案上那個 replace 完全不會命中——註解一行都沒被去掉，於是**註解文字被當成程式碼掃描**。
+//
+// 這不是假設：本門禁在 LF 工作樹上全綠，同一個 commit 在新 checkout 的 CRLF 工作樹上報出 13 筆
+// 幻影違規，全部來自「討論 `?? 0` 的註解」。CI 跑 ubuntu（LF）所以從未觸發，但任何 Windows 上的
+// 新 clone 都會踩到——而門禁的失敗方向是「無聲地不再過濾註解」，比直接壞掉更難察覺。
+//
+// 在讀檔的這一層解決，下游就沒有任何 regex 需要知道行尾這件事。
+function readLines(file: string): string[] {
+  return readFileSync(file, 'utf8').split(/\r?\n/);
+}
+
 function resolveImport(fromFile: string, spec: string): string | undefined {
   const base = resolve(dirname(fromFile), spec);
   for (const candidate of [`${base}.ts`, join(base, 'index.ts')]) {
@@ -239,7 +254,7 @@ function checkNoHardcodedContentIds(): Failure[] {
 function checkNoCrossSemanticCasts(productionFiles: readonly string[]): Failure[] {
   const failures: Failure[] = [];
   for (const file of productionFiles) {
-    const lines = readFileSync(file, 'utf8').split('\n');
+    const lines = readLines(file);
     lines.forEach((line, i) => {
       const code = line.replace(/\/\/.*$/, '');
       if (!code.includes('as unknown as')) return;
@@ -267,7 +282,7 @@ const EMPTY_COLLECTION_FALLBACK_RE = /\?\?\s*(\[\s*\]|\{\s*\})/g;
 function checkNoValueFallbacks(productionFiles: readonly string[]): Failure[] {
   const failures: Failure[] = [];
   for (const file of productionFiles) {
-    const lines = readFileSync(file, 'utf8').split('\n');
+    const lines = readLines(file);
     lines.forEach((line, i) => {
       const code = line.replace(/\/\/.*$/, '');
       for (const m of code.matchAll(SCALAR_FALLBACK_RE)) {
@@ -299,7 +314,7 @@ const CONTENT_READ_LHS = /(?:\.definitions\.|\.reader\.|\bget[A-Z]\w*\(|\bView\b
 function collectContentEmptyFallbacks(productionFiles: readonly string[]): string[] {
   const found: string[] = [];
   for (const file of productionFiles) {
-    const lines = readFileSync(file, 'utf8').split('\n');
+    const lines = readLines(file);
     lines.forEach((line, i) => {
       const code = line.replace(/\/\/.*$/, '');
       for (const m of code.matchAll(EMPTY_COLLECTION_FALLBACK_RE)) {
@@ -358,7 +373,7 @@ const UNFINISHED_MARKERS: readonly { pattern: RegExp; why: string }[] = [
 export function checkNoUnfinishedMarkers(productionFiles: readonly string[]): Failure[] {
   const failures: Failure[] = [];
   for (const file of productionFiles) {
-    const lines = readFileSync(file, 'utf8').split('\n');
+    const lines = readLines(file);
     lines.forEach((line, i) => {
       const lineNo = i + 1;
       const hit = UNFINISHED_MARKERS.find((m) => m.pattern.test(line));
