@@ -54,10 +54,12 @@
       ]
     },
     "engine": {
-      "why": "引擎與工具工作：src、scripts、設定、文件。不得改動文化資料——那是內容工作的範圍。",
+      "why": "引擎與工具工作：src、scripts、content-source（Content Pack 作者層）、content（Compiler 產物）、設定、文件。不得改動 docs/03_content 的文化設計來源——那是內容工作的範圍。",
       "allow": [
         "src/**",
         "scripts/**",
+        "content-source/**",
+        "content/**",
         ".github/**",
         "package.json",
         "package-lock.json",

@@ -1,0 +1,1651 @@
+[
+  {
+    "cumulativeExperienceThresholds": [
+      0,
+      200000,
+      500000,
+      1000000,
+      1700000,
+      2700000,
+      4200000,
+      6400000,
+      10000000,
+      15600000,
+      24000000
+    ],
+    "enabled": true,
+    "id": "mastery-curve.core.shared",
+    "kind": "mastery-curve",
+    "maxLevel": 10,
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery-curve.core.shared"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.one-hand-weapon",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.one-hand-weapon"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.two-hand-weapon",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "coordination": 1,
+        "muscle": 4,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "muscle": 4,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "muscle": 4,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "muscle": 4,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "muscle": 4,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "muscle": 4,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "muscle": 4,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "muscle": 4,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "muscle": 4,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "muscle": 4,
+        "reaction": 1
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.two-hand-weapon"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.throwing-weapon",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.throwing-weapon"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.shooting-weapon",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.shooting-weapon"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.one-hand-staff",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "coordination": 1,
+        "intelligence": 3,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "intelligence": 3,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "intelligence": 3,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "intelligence": 3,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "intelligence": 3,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "intelligence": 3,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "intelligence": 3,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "intelligence": 3,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "intelligence": 3,
+        "reaction": 1
+      },
+      {
+        "coordination": 1,
+        "intelligence": 3,
+        "reaction": 1
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.one-hand-staff"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.two-hand-staff",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.two-hand-staff"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.wind-instrument",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.wind-instrument"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.string-instrument",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "charisma": 3,
+        "coordination": 2,
+        "intelligence": 1
+      },
+      {
+        "charisma": 3,
+        "coordination": 2,
+        "intelligence": 1
+      },
+      {
+        "charisma": 3,
+        "coordination": 2,
+        "intelligence": 1
+      },
+      {
+        "charisma": 3,
+        "coordination": 2,
+        "intelligence": 1
+      },
+      {
+        "charisma": 3,
+        "coordination": 2,
+        "intelligence": 1
+      },
+      {
+        "charisma": 3,
+        "coordination": 2,
+        "intelligence": 1
+      },
+      {
+        "charisma": 3,
+        "coordination": 2,
+        "intelligence": 1
+      },
+      {
+        "charisma": 3,
+        "coordination": 2,
+        "intelligence": 1
+      },
+      {
+        "charisma": 3,
+        "coordination": 2,
+        "intelligence": 1
+      },
+      {
+        "charisma": 3,
+        "coordination": 2,
+        "intelligence": 1
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.string-instrument"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.cloth-armor",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "charisma": 1,
+        "coordination": 1,
+        "reaction": 3
+      },
+      {
+        "charisma": 1,
+        "coordination": 1,
+        "reaction": 3
+      },
+      {
+        "charisma": 1,
+        "coordination": 1,
+        "reaction": 3
+      },
+      {
+        "charisma": 1,
+        "coordination": 1,
+        "reaction": 3
+      },
+      {
+        "charisma": 1,
+        "coordination": 1,
+        "reaction": 3
+      },
+      {
+        "charisma": 1,
+        "coordination": 1,
+        "reaction": 3
+      },
+      {
+        "charisma": 1,
+        "coordination": 1,
+        "reaction": 3
+      },
+      {
+        "charisma": 1,
+        "coordination": 1,
+        "reaction": 3
+      },
+      {
+        "charisma": 1,
+        "coordination": 1,
+        "reaction": 3
+      },
+      {
+        "charisma": 1,
+        "coordination": 1,
+        "reaction": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.cloth-armor"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.light-armor",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "muscle": 1,
+        "reaction": 2
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.light-armor"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.medium-armor",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      },
+      {
+        "coordination": 2,
+        "muscle": 2,
+        "reaction": 1
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.medium-armor"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.heavy-armor",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "coordination": 1,
+        "muscle": 4
+      },
+      {
+        "coordination": 1,
+        "muscle": 4
+      },
+      {
+        "coordination": 1,
+        "muscle": 4
+      },
+      {
+        "coordination": 1,
+        "muscle": 4
+      },
+      {
+        "coordination": 1,
+        "muscle": 4
+      },
+      {
+        "coordination": 1,
+        "muscle": 4
+      },
+      {
+        "coordination": 1,
+        "muscle": 4
+      },
+      {
+        "coordination": 1,
+        "muscle": 4
+      },
+      {
+        "coordination": 1,
+        "muscle": 4
+      },
+      {
+        "coordination": 1,
+        "muscle": 4
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.heavy-armor"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.one-hand-shield",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.one-hand-shield"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.two-hand-shield",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.two-hand-shield"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.smithing",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "coordination": 2,
+        "muscle": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 3
+      },
+      {
+        "coordination": 2,
+        "muscle": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.smithing"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.tailoring",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "coordination": 3,
+        "intelligence": 2
+      },
+      {
+        "coordination": 3,
+        "intelligence": 2
+      },
+      {
+        "coordination": 3,
+        "intelligence": 2
+      },
+      {
+        "coordination": 3,
+        "intelligence": 2
+      },
+      {
+        "coordination": 3,
+        "intelligence": 2
+      },
+      {
+        "coordination": 3,
+        "intelligence": 2
+      },
+      {
+        "coordination": 3,
+        "intelligence": 2
+      },
+      {
+        "coordination": 3,
+        "intelligence": 2
+      },
+      {
+        "coordination": 3,
+        "intelligence": 2
+      },
+      {
+        "coordination": 3,
+        "intelligence": 2
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.tailoring"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.handicraft",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.handicraft"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.alchemy",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      },
+      {
+        "coordination": 1,
+        "intelligence": 4
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.alchemy"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.cooking",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "charisma": 1,
+        "coordination": 2,
+        "intelligence": 2
+      },
+      {
+        "charisma": 1,
+        "coordination": 2,
+        "intelligence": 2
+      },
+      {
+        "charisma": 1,
+        "coordination": 2,
+        "intelligence": 2
+      },
+      {
+        "charisma": 1,
+        "coordination": 2,
+        "intelligence": 2
+      },
+      {
+        "charisma": 1,
+        "coordination": 2,
+        "intelligence": 2
+      },
+      {
+        "charisma": 1,
+        "coordination": 2,
+        "intelligence": 2
+      },
+      {
+        "charisma": 1,
+        "coordination": 2,
+        "intelligence": 2
+      },
+      {
+        "charisma": 1,
+        "coordination": 2,
+        "intelligence": 2
+      },
+      {
+        "charisma": 1,
+        "coordination": 2,
+        "intelligence": 2
+      },
+      {
+        "charisma": 1,
+        "coordination": 2,
+        "intelligence": 2
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.cooking"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.gathering",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      },
+      {
+        "coordination": 2,
+        "intelligence": 1,
+        "reaction": 2
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.gathering"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.social",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "charisma": 4,
+        "intelligence": 1
+      },
+      {
+        "charisma": 4,
+        "intelligence": 1
+      },
+      {
+        "charisma": 4,
+        "intelligence": 1
+      },
+      {
+        "charisma": 4,
+        "intelligence": 1
+      },
+      {
+        "charisma": 4,
+        "intelligence": 1
+      },
+      {
+        "charisma": 4,
+        "intelligence": 1
+      },
+      {
+        "charisma": 4,
+        "intelligence": 1
+      },
+      {
+        "charisma": 4,
+        "intelligence": 1
+      },
+      {
+        "charisma": 4,
+        "intelligence": 1
+      },
+      {
+        "charisma": 4,
+        "intelligence": 1
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.social"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.attack-magic",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "intelligence": 4,
+        "reaction": 1
+      },
+      {
+        "intelligence": 4,
+        "reaction": 1
+      },
+      {
+        "intelligence": 4,
+        "reaction": 1
+      },
+      {
+        "intelligence": 4,
+        "reaction": 1
+      },
+      {
+        "intelligence": 4,
+        "reaction": 1
+      },
+      {
+        "intelligence": 4,
+        "reaction": 1
+      },
+      {
+        "intelligence": 4,
+        "reaction": 1
+      },
+      {
+        "intelligence": 4,
+        "reaction": 1
+      },
+      {
+        "intelligence": 4,
+        "reaction": 1
+      },
+      {
+        "intelligence": 4,
+        "reaction": 1
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.attack-magic"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.defense-magic",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      },
+      {
+        "coordination": 2,
+        "intelligence": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.defense-magic"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.blessing-magic",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      },
+      {
+        "charisma": 3,
+        "intelligence": 2
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.blessing-magic"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.curse-magic",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {
+        "charisma": 2,
+        "intelligence": 3
+      },
+      {
+        "charisma": 2,
+        "intelligence": 3
+      },
+      {
+        "charisma": 2,
+        "intelligence": 3
+      },
+      {
+        "charisma": 2,
+        "intelligence": 3
+      },
+      {
+        "charisma": 2,
+        "intelligence": 3
+      },
+      {
+        "charisma": 2,
+        "intelligence": 3
+      },
+      {
+        "charisma": 2,
+        "intelligence": 3
+      },
+      {
+        "charisma": 2,
+        "intelligence": 3
+      },
+      {
+        "charisma": 2,
+        "intelligence": 3
+      },
+      {
+        "charisma": 2,
+        "intelligence": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.curse-magic"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.quest-purchase",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.quest-purchase"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.quest-delivery",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.quest-delivery"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.quest-escort",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.quest-escort"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.quest-rescue",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.quest-rescue"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.quest-exploration",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.quest-exploration"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.quest-suppression",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.quest-suppression"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.quest-subjugation",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.quest-subjugation"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.map-exploration",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.map-exploration"
+  },
+  {
+    "automaticKnowledgeUnlocks": [],
+    "curveId": "mastery-curve.core.shared",
+    "enabled": true,
+    "id": "mastery.core.travel",
+    "kind": "mastery",
+    "packId": "pack:core",
+    "primaryAttributeGainsByLevel": [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#mastery.core.travel"
+  },
+  {
+    "enabled": true,
+    "id": "social-mastery-benefit.core.social",
+    "inviteSuccessBonusGainsByLevel": [
+      0.5,
+      0.5,
+      1,
+      1,
+      1.5,
+      1.5,
+      2,
+      2,
+      3,
+      3
+    ],
+    "kind": "social-mastery-benefit",
+    "masteryId": "mastery.core.social",
+    "memberDepartureResistanceGainsByLevel": [
+      0.5,
+      0.5,
+      1,
+      1,
+      1.5,
+      1.5,
+      2,
+      2,
+      3,
+      3
+    ],
+    "packId": "pack:core",
+    "personalTradeBonusGainsByLevel": [
+      0.5,
+      0.5,
+      1,
+      1,
+      1.5,
+      1.5,
+      2,
+      3,
+      4,
+      5
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/progression.json#social-mastery-benefit.core.social"
+  }
+]

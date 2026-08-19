@@ -14,6 +14,8 @@ import { runTests as dungeonReader } from '../src/app/content/dungeon-reader.tes
 import { runTests as moduleReaders } from '../src/app/content/readers.test';
 import { runTests as resolvers } from '../src/app/content/resolvers.test';
 import { runTests as crossModulePorts } from '../src/app/content/cross-module-ports.test';
+// 正式 Content Pack 端到端：磁碟 JSON → ContentRepository → Registry → 窄化 Reader → 模組純函式。
+import { runTests as contentPackIntegration } from '../src/app/content/content-pack-integration.test';
 import { runTests as bootstrap } from '../src/testing/composition/bring-up-bootstrap.test';
 import { runTests as travelIntegration } from '../src/app/composition/travel-integration.test';
 import { runTests as weaponSetWorkflow } from '../src/app/workflows/weapon-set-configuration.test';
@@ -58,6 +60,9 @@ const throwing: ReadonlyArray<readonly [string, () => void]> = [
   ['resolvers', resolvers],
   // content：真實跨模組 Query Port adapter（讀真實 sibling Slice，取代 fixture stub）。
   ['cross-module-ports', crossModulePorts],
+  // content：**正式** pack（content/**）驅動真實模組計算。前面的 reader 測試都用記憶體 fixture，
+  // 只有這一支證明「作者寫下的數字真的算出了遊戲結果」。
+  ['content-pack-integration', contentPackIntegration],
   // bootstrap：開機骨架端到端——NewGameBootstrapper → 玩家命令 → 提交 → golden 重播。
   ['bootstrap', bootstrap],
   // travel：玩家旅行端到端——引擎自驅（旅行事件 Workflow 訂閱者送 CompleteSegment），非手動扮演。

@@ -1,0 +1,16 @@
+{
+  "loadOrder": [
+    "pack:core"
+  ],
+  "localizationBundles": [],
+  "manifestVersion": "1.0.0",
+  "packs": [
+    {
+      "contentRoot": "core",
+      "optional": false,
+      "packId": "pack:core",
+      "requiredPacks": [],
+      "version": "1.0.0"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "declaredKinds": [
+    "mastery",
+    "mastery-curve",
+    "social-mastery-benefit"
+  ],
+  "packId": "pack:core",
+  "requiredResolverIds": [],
+  "runtimeCompatibility": {
+    "minRuntimeVersion": "0.1.0"
+  },
+  "schemaVersion": 1,
+  "scope": {
+    "cultureIds": [],
+    "features": [
+      "progression"
+    ]
+  },
+  "version": "1.0.0"
+}

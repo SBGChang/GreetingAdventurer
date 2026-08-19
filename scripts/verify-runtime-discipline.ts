@@ -73,11 +73,33 @@ const PRODUCTION_ROOTS: readonly string[] = [
   'src/app/workflows/weapon-set-configuration.ts',
   'src/kernel/index.ts',
   'src/data-runtime/index.ts',
+  // ContentRepository Platform Port：正式路徑讀內容的唯一入口。它必須受檢——這裡是
+  // 「缺檔就跳過」「壞 JSON 就給空陣列」最有誘因發生的地方。
+  'src/platform/content-repository.ts',
 ];
 
 // ──────────────────────────────────────────────────────────────────────────
 // 工具
 // ──────────────────────────────────────────────────────────────────────────
+
+// 逐行檢查的共用讀取：**先去掉行尾的 CR**，再回傳行陣列。
+//
+// 為什麼需要這一步：本 repo 在 Windows 上是 CRLF checkout（.gitattributes 未指定，git 會轉換），
+// 所以每一行都以 `\r` 結尾。而 JavaScript 正規表達式的 `.` **不匹配 line terminator**，而 `\r`
+// 正是其中之一——於是 `line.replace(/\/\/.*$/, '')` 這個「去掉行註解」的動作在 CRLF 檔上
+// 完全失效（`.*` 停在 `\r` 前，`$` 又要求字串結尾，整個 match 失敗）。
+//
+// 後果不是漏抓，而是**誤抓**：任何在註解裡「提到」被禁樣式的句子都會被當成違規。實測有兩筆——
+// `src/contracts/crafting/index.ts` 用註解說明「不要寫 `effectId as unknown as statusId`」，
+// 反而讓那份正確的說明變成一筆違規。門禁一旦開始誤報，下一步就是被繞過。
+function codeLinesOf(file: string): readonly string[] {
+  return readFileSync(file, 'utf8').split('\n').map((line) => line.replace(/\r$/, ''));
+}
+
+// 去掉行註解後的程式碼部分（不含區塊註解——那由 stripComments 處理整檔的情形）。
+function codeOnly(line: string): string {
+  return line.replace(/\/\/.*$/, '');
+}
 
 function walkFiles(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
@@ -221,8 +243,26 @@ function checkProductionDependencyGraph(): Failure[] {
 //
 // **本檢查刻意不支援豁免。** §7／§6 有語法上分不出來的合法情形，所以需要明示豁免；§5 沒有——
 // 規範的五個合法出口裡沒有「把 ID 寫在 Handler 裡並附上理由」這一項。
+// 內容作者層（`content-source/**`）。**這裡是內容 ID 唯一合法的地方**——它就是內容本身。
+//
+// 這不是豁免機制的回歸。§5 檢查的用意是「Handler 不得自行決定內容」；判斷依據是**位置**，
+// 與 `contracts/core/invariants.ts` 持有結構不變量、`kernel/accumulate.ts` 持有計數起點完全同型：
+// 要主張某個語意合法，做法是把它搬到那個具名位置，而不是在原地寫一行註解放行自己。
+//
+// 作者層寫下 `'pack:core' as ContentPackId` 是它的**職責**：Content Pack 的身分只能由內容宣告。
+// 反過來說，正式 Runtime 一旦 import 這個目錄就是違規——那由上方的依賴圖檢查（§13）擋，
+// 兩道檢查合起來才完整：內容 ID 只准出現在內容裡，而內容不准被程式讀進正式路徑。
+const CONTENT_AUTHORING_ROOT = 'content-source/';
+
+function isContentAuthoring(file: string): boolean {
+  return relative(ROOT, file).replace(/\\/g, '/').startsWith(CONTENT_AUTHORING_ROOT);
+}
+
 function checkNoHardcodedContentIds(): Failure[] {
-  return findHardcodedContentIds(program, (f) => testOnlyReason(f) === undefined).map((f) => ({
+  return findHardcodedContentIds(
+    program,
+    (f) => testOnlyReason(f) === undefined && !isContentAuthoring(f),
+  ).map((f) => ({
     check: 'hardcoded-content-id',
     detail: `${relative(ROOT, f.file).replace(/\\/g, '/')}:${f.line} ${f.detail}\n        ${f.text}`,
   }));
@@ -239,9 +279,9 @@ function checkNoHardcodedContentIds(): Failure[] {
 function checkNoCrossSemanticCasts(productionFiles: readonly string[]): Failure[] {
   const failures: Failure[] = [];
   for (const file of productionFiles) {
-    const lines = readFileSync(file, 'utf8').split('\n');
+    const lines = codeLinesOf(file);
     lines.forEach((line, i) => {
-      const code = line.replace(/\/\/.*$/, '');
+      const code = codeOnly(line);
       if (!code.includes('as unknown as')) return;
       failures.push({
         check: 'cross-semantic-cast',
@@ -267,9 +307,9 @@ const EMPTY_COLLECTION_FALLBACK_RE = /\?\?\s*(\[\s*\]|\{\s*\})/g;
 function checkNoValueFallbacks(productionFiles: readonly string[]): Failure[] {
   const failures: Failure[] = [];
   for (const file of productionFiles) {
-    const lines = readFileSync(file, 'utf8').split('\n');
+    const lines = codeLinesOf(file);
     lines.forEach((line, i) => {
-      const code = line.replace(/\/\/.*$/, '');
+      const code = codeOnly(line);
       for (const m of code.matchAll(SCALAR_FALLBACK_RE)) {
         failures.push({
           check: 'value-fallback',
@@ -299,9 +339,9 @@ const CONTENT_READ_LHS = /(?:\.definitions\.|\.reader\.|\bget[A-Z]\w*\(|\bView\b
 function collectContentEmptyFallbacks(productionFiles: readonly string[]): string[] {
   const found: string[] = [];
   for (const file of productionFiles) {
-    const lines = readFileSync(file, 'utf8').split('\n');
+    const lines = codeLinesOf(file);
     lines.forEach((line, i) => {
-      const code = line.replace(/\/\/.*$/, '');
+      const code = codeOnly(line);
       for (const m of code.matchAll(EMPTY_COLLECTION_FALLBACK_RE)) {
         const lhs = code.slice(0, m.index ?? 0);
         if (!CONTENT_READ_LHS.test(lhs)) continue;
@@ -358,7 +398,7 @@ const UNFINISHED_MARKERS: readonly { pattern: RegExp; why: string }[] = [
 export function checkNoUnfinishedMarkers(productionFiles: readonly string[]): Failure[] {
   const failures: Failure[] = [];
   for (const file of productionFiles) {
-    const lines = readFileSync(file, 'utf8').split('\n');
+    const lines = codeLinesOf(file);
     lines.forEach((line, i) => {
       const lineNo = i + 1;
       const hit = UNFINISHED_MARKERS.find((m) => m.pattern.test(line));
