@@ -36,6 +36,13 @@ export type CombatSequenceSourceId = RuntimeId<'combat-sequence-source'>;
 export type CombatSequenceSourceCommitId = RuntimeId<'combat-sequence-source-commit'>;
 export type CombatSequenceRuleId = DefinitionId<'combat-sequence-rule'>;
 export type RetrySupplyPolicyId = DefinitionId<'retry-supply-policy'>;
+// 成功率 kernel 的調校參數定位。
+//
+// 原本規則只有 `successChanceResolverId`，於是「用哪一條公式」是資料，「這條公式的係數」卻無處可放——
+// data-runtime 的 kernel-resolver 樣板（app/content/resolvers.ts 的 KernelResolverInput）要求呼叫端帶
+// `paramsDefId`，而唯一知道該用哪筆參數的內容就是這條規則。缺這個欄位的後果不是少一層間接，
+// 是 bias/terms 只能寫進程式（規範 §6 明令禁止）。詳見實作回報「我改了自己的契約嗎」。
+export type CombatSequenceSuccessChanceParamsId = DefinitionId<'combat-sequence-success-chance-params'>;
 
 // ── 來源與生命週期列舉（§1.3、§4）────────────────────────────────────────
 export type CombatSequenceSource =
@@ -61,6 +68,7 @@ export type CombatSequenceChallengeOutcome = 'success' | 'failure' | 'skippedBef
 export type CombatSequenceRuleDefinition = DefinitionHeader & {
   combatPowerRuleId: CombatPowerRuleId;
   successChanceResolverId: ResolverId;
+  successChanceParamsId: CombatSequenceSuccessChanceParamsId;
   retryRelativePowerGapMaximum: number;
   maxRetryCountPerChallenge: number;
   retrySupplyPolicyId: RetrySupplyPolicyId;

@@ -57,14 +57,28 @@ export type PlayerConversationUsageView = {
   remainingCount: number;
 };
 
+// 為什麼 getPlayerProposalAffinityResult 與 getHomeTutorPriceModifier 回傳 `| undefined`
+// （doc §3 的原始簽章是非選填）：
+//
+// 兩者都需要「該冒險者對玩家的好感度」當輸入，而 doc §1 明訂三類角色**沒有**可用好感度——
+// 玩家主角自己、Quest Temporary 角色與 Child Team 成員，加上尚未完成 Affinity Provisioning 的角色。
+// 對這些角色，非選填的簽章只剩兩條路：回一個固定結果（`acceptedByAffinity: false`／價格修正 1），
+// 或整個拋錯。前者正是規範點名的「Resolver 不在就用固定結果」——它會讓「沒有好感度」與
+// 「好感度真的不足」在呼叫端無法區分，也會在換上真內容後行為不變；後者則讓一次正常的
+// UI 投影（例如角色互動畫面詢問「這個人能不能求婚」）因為對象是任務角色而炸掉。
+//
+// 因此改為「查無此事實 → undefined」，由呼叫端（Marriage 流程／Economy Quote）自行決定
+// 是拒絕還是不顯示該選項。`getPlayerAffinity` 原本就是這個形狀，此處只是讓另外兩個方法一致。
 export interface SocialQuery {
   getPlayerAffinity(adventurerId: CharacterId): number | undefined;
   getPlayerConversationUsage(
     playerCharacterId: CharacterId,
     worldDay: WorldDay,
   ): PlayerConversationUsageView;
-  getPlayerProposalAffinityResult(adventurerId: CharacterId): PlayerProposalAffinityResult;
-  getHomeTutorPriceModifier(adventurerId: CharacterId): number;
+  getPlayerProposalAffinityResult(
+    adventurerId: CharacterId,
+  ): PlayerProposalAffinityResult | undefined;
+  getHomeTutorPriceModifier(adventurerId: CharacterId): number | undefined;
 }
 
 // ── 輸入：玩家 Game Command（§4.1）───────────────────────────────────

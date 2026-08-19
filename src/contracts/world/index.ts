@@ -133,6 +133,10 @@ export interface WorldDefinitionReader {
   getAdventureSite(id: AdventureSiteId): AdventureSiteDefinition;
   getRoute(id: RouteId): RouteDefinition;
   getConflictRule(id: ConflictRuleId): ConflictRuleDefinition;
+  // doc §2.4 定義了 PassagePolicyDefinition，但 §2.1 的 Reader 沒有對應 getter——於是那個型別
+  // 在整個 Runtime 裡沒有任何讀取路徑，Route/Nation 的 passagePolicyId 只能指向讀不到的東西。
+  // 通行判定（doc §7.2）需要它才能取得 requirementResolverId，故補上。
+  getPassagePolicy(id: PassagePolicyId): PassagePolicyDefinition;
   getWorldFact(id: WorldFactId): WorldFactDefinition;
   listRoutesFrom(cityId: CityId): readonly RouteDefinition[];
 }
@@ -167,6 +171,10 @@ export type EventWeightScope = Readonly<{
 
 export type ConflictState = {
   conflictId: ConflictId;
+  // doc §3.3 的 State 沒有帶規則來源，但 §5.1 的 worldConflictResolve 只以 ConflictId 定址，
+  // 而結案要用的 outcomeResolverId 只存在於 ConflictRuleDefinition 上。少了這個欄位，
+  // 結案 Job 沒有任何合法途徑找到自己該用哪個 Resolver（只能寫死一個 ID＝規範 §5 違規）。
+  conflictRuleId: ConflictRuleId;
   attackerNationId: NationId;
   defenderNationId: NationId;
   affectedRegionIds: RegionId[];
@@ -219,6 +227,11 @@ export type RouteAccessView = Readonly<{
   routeId: RouteId;
   accessState: RouteAccessState;
   reason?: RouteAccessReason;
+  // doc §7.2：「WorldQuery 取得 Route 與 Passage Policy → InventoryQuery 提供通行證 → Passage
+  // Resolver 判定」。原本的 View 只有 accessState，通行流程拿不到 Policy，Team 就只能自己猜一個
+  // Resolver。此欄位是該流程的 World 側輸出：取自 RouteDefinition.passagePolicyId，沒有就是沒有
+  //（World 不代替內容決定要不要有通行政策）。
+  passagePolicyId?: PassagePolicyId;
 }>;
 
 export type MarketPressureView = Readonly<{
@@ -318,6 +331,11 @@ export type SetWorldFactCommand = Readonly<{
   factId: WorldFactId;
   value: JsonScalar;
   sourceId: EntitySourceRef;
+  // doc §5.2 要求 SetWorldFact「驗證 Fact Definition、值型別與**來源**後更新旗標」，而
+  // WorldFactDefinition.allowedSourceKinds 是那道驗證的資料。EntitySourceRef 是一串 branded ID
+  // 的 union，執行期分不出種類（要分只能剖字串前綴＝把 ID 格式當契約用）。所以送出端必須自己
+  // 宣告來源種類，World 才驗得到 allowedSourceKinds。
+  sourceKind: WorldFactSourceKind;
 }>;
 
 export type WorldInternalCommand =
@@ -348,9 +366,14 @@ export type RouteAccessChanged = Readonly<{
   reason?: RouteAccessReason;
 }>;
 
+// conflictRuleId 是 doc §6「最少 payload」以外的追加欄位。理由：戰爭的市場／事件權重／通行後果是
+// ConflictRuleDefinition 上的三組 EffectDefinitionId，而 World 不擁有 Effect 語意（見 07 doc §1.2 與
+// §5.2 的命令清單——World 只收「已決定好的」ApplyMarketPressure/SetRouteAccess）。要把 Effect 展開成
+// 那些命令的是一條編排 Workflow；沒有規則來源，訂閱者無從查到自己該展開哪些 Effect。
 export type ConflictStarted = Readonly<{
   type: 'ConflictStarted';
   conflictId: ConflictId;
+  conflictRuleId: ConflictRuleId;
   nationIds: readonly NationId[];
   regionIds: readonly RegionId[];
 }>;
@@ -358,6 +381,7 @@ export type ConflictStarted = Readonly<{
 export type ConflictResolved = Readonly<{
   type: 'ConflictResolved';
   conflictId: ConflictId;
+  conflictRuleId: ConflictRuleId;
   outcome: ConflictOutcome;
 }>;
 

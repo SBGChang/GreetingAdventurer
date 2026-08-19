@@ -27,15 +27,18 @@ const CONTRACTS = 'src/contracts';
 //   npc-behavior 擁有：NpcStopPolicyId
 //   ContentEventInstance：內容/事件模組尚不存在；暫由 dungeon 擁有（其形狀較完整）
 //
-// 已收斂（本輪移除）：economy 的 CreateEconomyAccountCommand / GrantCurrencyCommand /
+// 已收斂（前輪移除）：economy 的 CreateEconomyAccountCommand / GrantCurrencyCommand /
 //   TransferCurrencyCommand、combat-sequence 的三個 *MasteryEarnedPayload、team 的
 //   PlayerInteractionOpenedEvent —— distribution / combat 的重複宣告已改為 import 擁有者型別。
+//
+// 已收斂（Wave D 移除，基準線 9 → 6）：`CharacterEquipmentLoadoutView`、`EquipmentDefinition`、
+//   `EquipmentCoefficientChannelId`。三者原本是 contracts/statistics 為了不相依 inventory 而
+//   宣告的 `Readonly<Record<string, unknown>>` 佔位型別。derived-statistics 服務實作時把它們
+//   換成 import inventory 的真實型別——用 unknown 袋子讀裝備係數，必然要在讀取端補一個
+//   `as unknown as`，那正是規範 §7 點名的「用轉型掩蓋契約缺口」。
 const KNOWN_DUPLICATES = new Set<string>([
-  'CharacterEquipmentLoadoutView',
   'ConsumeCombatSequenceRetrySupply',
   'ContentEventInstance',
-  'EquipmentCoefficientChannelId',
-  'EquipmentDefinition',
   'EquipmentSkillEffectRef',
   'FacilityKind',
   'MoneyValue',

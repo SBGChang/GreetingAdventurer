@@ -73,6 +73,20 @@ const PRODUCTION_ROOTS: readonly string[] = [
   'src/app/workflows/weapon-set-configuration.ts',
   'src/kernel/index.ts',
   'src/data-runtime/index.ts',
+  // Wave D：補齊的模組與純服務。加進正式根，依賴圖檢查（§13）才會涵蓋它們——
+  // 在此之前它們只受「掃 src 下所有非測試檔」的那幾項檢查，測試資料滲入是驗不到的。
+  'src/modules/city/public.ts',
+  'src/modules/quest/public.ts',
+  'src/modules/social/public.ts',
+  'src/modules/economy/public.ts',
+  'src/modules/world/public.ts',
+  'src/modules/crafting/public.ts',
+  'src/modules/distribution/public.ts',
+  'src/modules/combat-sequence/public.ts',
+  'src/modules/npc-behavior/public.ts',
+  'src/domain-services/statistics/public.ts',
+  'src/domain-services/gathering/public.ts',
+  'src/domain-services/combat-power/public.ts',
   // ContentRepository Platform Port：正式路徑讀內容的唯一入口。它必須受檢——這裡是
   // 「缺檔就跳過」「壞 JSON 就給空陣列」最有誘因發生的地方。
   'src/platform/content-repository.ts',
