@@ -15,6 +15,7 @@ import type {
   CombatEffectDefinition,
   CombatHealRuleDefinition,
   CombatInterruptionRuleDefinition,
+  CombatControlResistanceProfileDefinition,
   CombatRuleDefinition,
   CombatSkillDefinitionView,
   CombatStatusDefinition,
@@ -42,6 +43,7 @@ export const COMBAT_DEFINITION_KINDS = {
   healRule: 'combat-heal-rule',
   ctbAdjustmentRule: 'combat-ctb-adjustment-rule',
   interruptionRule: 'combat-interruption-rule',
+  controlResistanceProfile: 'combat-control-resistance-profile',
   equipmentEffect: 'equipment-effect',
   aiPolicy: 'combat-ai-policy',
   experienceBudget: 'encounter-experience-budget',
@@ -95,6 +97,11 @@ export function createCombatDefinitionReader(registry: DefinitionRegistry): Comb
     'reader:combat.interruption-rule',
     [COMBAT_DEFINITION_KINDS.interruptionRule],
   );
+  const controlResistance = narrowedDomainReader<CombatControlResistanceProfileDefinition>(
+    registry,
+    'reader:combat.control-resistance-profile',
+    [COMBAT_DEFINITION_KINDS.controlResistanceProfile],
+  );
   const equipmentEffect = narrowedDomainReader<EquipmentEffectDefinition>(
     registry,
     'reader:combat.equipment-effect',
@@ -128,6 +135,7 @@ export function createCombatDefinitionReader(registry: DefinitionRegistry): Comb
     getHealRule: (id) => heal.get(id),
     getCtbAdjustmentRule: (id) => ctbAdjust.get(id),
     getCombatInterruptionRule: (id) => interruption.get(id),
+    getControlResistanceProfile: (id) => controlResistance.get(id),
     getEquipmentEffect: (id) => equipmentEffect.get(id),
     getAiPolicy: (id) => aiPolicy.get(id),
     getExperienceBudget: (id) => experienceBudget.get(id),

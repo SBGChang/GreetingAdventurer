@@ -23,6 +23,7 @@ import type {
   CombatDamageRuleId,
   CombatHealRuleId,
   CombatCtbAdjustmentRuleId,
+  CombatInterruptionRuleId,
   CombatStatusDefinitionId,
   EncounterExperienceBudgetId,
   MonsterExperienceProfileId,
@@ -54,6 +55,7 @@ import type {
   CombatHealRuleDefinition,
   CombatCtbAdjustmentRuleDefinition,
   CombatInterruptionRuleDefinition,
+  CombatControlResistanceProfileDefinition,
   EquipmentEffectDefinition,
   CombatAiPolicyDefinition,
   EncounterExperienceBudgetDefinition,
@@ -104,15 +106,24 @@ export const SKILL_HEAL = 'skill-heal' as SkillDefinitionId;
 export const SKILL_BITE = 'skill-bite' as SkillDefinitionId;
 // actionKind='cast' 但帶 dealDamage 效果——用來證明側別由**效果**推定，非 actionKind（不能靠標成 cast 繞過）。
 export const SKILL_CAST_DAMAGE = 'skill-cast-damage' as SkillDefinitionId;
+// 純控制技能：只帶 adjustCtb／interruptCasting，不帶傷害——側別因此不由 dealDamage 推定，
+// 正好是「其餘效果側別待資料化 targeting resolver」那條路徑上的受測對象。
+export const SKILL_CTB_DELAY = 'skill-ctb-delay' as SkillDefinitionId;
+export const SKILL_INTERRUPT = 'skill-interrupt' as SkillDefinitionId;
 
 export const EFF_DAMAGE = 'eff-damage' as CombatEffectDefinitionId;
 export const EFF_COUNTER_DAMAGE = 'eff-counter-damage' as CombatEffectDefinitionId;
 export const EFF_HEAL = 'eff-heal' as CombatEffectDefinitionId;
 export const EFF_MONSTER_DAMAGE = 'eff-monster-damage' as CombatEffectDefinitionId;
+// 控制類效果（§2.6 控制抗性的受測對象）。
+export const EFF_CTB_DELAY = 'eff-ctb-delay' as CombatEffectDefinitionId;
+export const EFF_INTERRUPT = 'eff-interrupt' as CombatEffectDefinitionId;
 
 export const DMG_PHYSICAL = 'dmg-physical' as CombatDamageRuleId;
 export const DMG_MONSTER = 'dmg-monster' as CombatDamageRuleId;
 export const HEAL_RULE = 'heal-basic' as CombatHealRuleId;
+export const CTB_RULE = 'ctb-standard' as CombatCtbAdjustmentRuleId;
+export const INTERRUPT_RULE = 'interrupt-standard' as CombatInterruptionRuleId;
 
 export const RES_DAMAGE = 'res-damage' as ResolverId;
 export const RES_MONSTER_DAMAGE = 'res-monster-damage' as ResolverId;
@@ -132,11 +143,16 @@ export const SUPPORT_AWARD_RULE = 'support-award-heal' as SupportMasteryAwardRul
 export const MAP_ID = 'map-1' as MapInstanceId;
 export const CONTENT_ID = 'content-1' as ContentInstanceId;
 
+const RES_CTB = 'res-ctb' as ResolverId;
+
 // resolvePower 對照表（資料調校 kernel 的決定性 stub 輸出）。
 const POWER_TABLE: Readonly<Record<string, number>> = {
   [RES_DAMAGE]: 30,
   [RES_MONSTER_DAMAGE]: 5,
   [RES_HEAL]: 10,
+  // CTB 調整量：取設計基準的「標準 +14 CTB」。挑 14 是為了讓折算看得出取整方向——
+  // 菁英 ×0.75 = 10.5 → floor 10（不是 11），Boss ×0.50 = 7。
+  [RES_CTB]: 14,
 };
 
 // ── DefinitionHeader helper（id 統一折成基底 DefinitionId，供各 Definition 型別複用）──
@@ -225,12 +241,30 @@ function skillCastDamage(): CombatSkillDefinitionView {
   };
 }
 
+// 純控制技能：只有 adjustCtb（或 interruptCasting），沒有 dealDamage／heal。
+function controlSkill(skillId: SkillDefinitionId, effectId: CombatEffectDefinitionId): CombatSkillDefinitionView {
+  return {
+    skillId,
+    activationHand: 'handless',
+    weaponRequirementIds: [],
+    actionKind: 'perform',
+    masteryExperienceMode: 'fixedSupport',
+    techniqueIds: [],
+    targeting: { targetResolverId: 'res-target-single' as ResolverId },
+    actionDelayRuleId: DELAY_STANDARD,
+    effectIds: [effectId],
+    resourceCosts: [],
+  };
+}
+
 const SKILL_VIEWS: Readonly<Record<string, CombatSkillDefinitionView>> = {
   [SKILL_STRIKE]: skillStrike(),
   [SKILL_COUNTER]: skillCounter(),
   [SKILL_HEAL]: skillHeal(),
   [SKILL_BITE]: skillBite(),
   [SKILL_CAST_DAMAGE]: skillCastDamage(),
+  [SKILL_CTB_DELAY]: controlSkill(SKILL_CTB_DELAY, EFF_CTB_DELAY),
+  [SKILL_INTERRUPT]: controlSkill(SKILL_INTERRUPT, EFF_INTERRUPT),
 };
 
 // ── Effects ─────────────────────────────────────────────────────────────
@@ -242,6 +276,14 @@ const EFFECTS: Readonly<Record<string, CombatEffectDefinition>> = {
   [EFF_COUNTER_DAMAGE]: damageEffect(EFF_COUNTER_DAMAGE, DMG_PHYSICAL),
   [EFF_MONSTER_DAMAGE]: damageEffect(EFF_MONSTER_DAMAGE, DMG_MONSTER),
   [EFF_HEAL]: { ...header(EFF_HEAL), operation: { kind: 'heal', healRuleId: HEAL_RULE } },
+  [EFF_CTB_DELAY]: {
+    ...header(EFF_CTB_DELAY),
+    operation: { kind: 'adjustCtb', adjustmentRuleId: CTB_RULE },
+  },
+  [EFF_INTERRUPT]: {
+    ...header(EFF_INTERRUPT),
+    operation: { kind: 'interruptCasting', interruptionRuleId: INTERRUPT_RULE },
+  },
 };
 
 function damageRule(id: CombatDamageRuleId, channel: CombatDamageChannel, resolverId: ResolverId): CombatDamageRuleDefinition {
@@ -266,8 +308,15 @@ const DELAY_RULE: ActionDelayRuleDefinition = {
   minimumDelay: 10,
 };
 
+// ── 控制抗性檔（§2.6）─────────────────────────────────────────────────────
+// 數值取自設計基準 balanceModel.controlResistanceRules：
+//   一般 100%（無上限、無中斷免疫）／菁英 75%／Boss 50% + 兩次自身行動間上限 18 + 中斷免疫。
+export const CTRL_NORMAL = 'ctrl-none' as CombatControlResistanceProfileId;
+export const CTRL_ELITE = 'ctrl-elite' as CombatControlResistanceProfileId;
+export const CTRL_BOSS = 'ctrl-boss' as CombatControlResistanceProfileId;
+
 // ── Monster / Encounter / Experience ────────────────────────────────────
-function goblin(): MonsterDefinition {
+function goblin(controlResistanceProfileId: CombatControlResistanceProfileId = CTRL_NORMAL): MonsterDefinition {
   return {
     ...header(GOBLIN_ID),
     cultureId: 'culture-wild' as never,
@@ -277,7 +326,7 @@ function goblin(): MonsterDefinition {
     attributes: { health: 20, muscle: 10, intelligence: 5, reaction: 10, coordination: 10, charisma: 5 },
     skillIds: [SKILL_BITE],
     naturalAttackProfileId: 'natk-goblin' as MonsterNaturalAttackProfileId,
-    controlResistanceProfileId: 'ctrl-none' as CombatControlResistanceProfileId,
+    controlResistanceProfileId,
     aiPolicyId: 'ai-aggressive' as CombatAiPolicyId,
     experienceProfileId: XP_PROFILE,
   };
@@ -296,7 +345,9 @@ function encounterGroup(): EncounterGroupDefinition {
 }
 
 // ── Definition Reader stub ──────────────────────────────────────────────
-export function stubDefinitionReader(): CombatDefinitionReader {
+export function stubDefinitionReader(
+  monsterControlProfileId: CombatControlResistanceProfileId = CTRL_NORMAL,
+): CombatDefinitionReader {
   const notImplemented = (what: string) => (): never => {
     throw new Error(`stubDefinitionReader: ${what} not needed in fixtures`);
   };
@@ -311,7 +362,7 @@ export function stubDefinitionReader(): CombatDefinitionReader {
       combatRestManaRestore: 5,
     }),
     getEncounterGroup: () => encounterGroup(),
-    getMonster: () => goblin(),
+    getMonster: () => goblin(monsterControlProfileId),
     getSkillView: (id) => {
       const v = SKILL_VIEWS[id];
       if (v === undefined) throw new Error(`no skill view ${String(id)}`);
@@ -339,13 +390,35 @@ export function stubDefinitionReader(): CombatDefinitionReader {
     getHealRule: (id): CombatHealRuleDefinition => ({ ...header(id), powerResolverId: RES_HEAL }),
     getCtbAdjustmentRule: (id): CombatCtbAdjustmentRuleDefinition => ({
       ...header(id),
-      amountResolverId: 'res-ctb' as ResolverId,
+      amountResolverId: RES_CTB,
     }),
     getCombatInterruptionRule: (id): CombatInterruptionRuleDefinition => ({
       ...header(id),
       appliesToActionKinds: ['cast', 'perform'],
       interruptionDelayRuleId: DELAY_STANDARD,
     }),
+    getControlResistanceProfile: (id): CombatControlResistanceProfileDefinition => {
+      if (String(id) === String(CTRL_ELITE)) {
+        return {
+          ...header(id),
+          ctbIncreaseMultiplier: 0.75,
+          interruptionImmunityUntilOwnActionAfterSuccess: false,
+        };
+      }
+      if (String(id) === String(CTRL_BOSS)) {
+        return {
+          ...header(id),
+          ctbIncreaseMultiplier: 0.5,
+          maxExternalCtbIncreaseBeforeOwnAction: 18,
+          interruptionImmunityUntilOwnActionAfterSuccess: true,
+        };
+      }
+      return {
+        ...header(id),
+        ctbIncreaseMultiplier: 1,
+        interruptionImmunityUntilOwnActionAfterSuccess: false,
+      };
+    },
     getEquipmentEffect: notImplemented('getEquipmentEffect') as unknown as (
       id: never,
     ) => EquipmentEffectDefinition,
@@ -386,10 +459,16 @@ export function stubProgressionQuery(): ProgressionQuery {
   };
 }
 
-function loadoutFor(characterId: CharacterId): CharacterEquipmentLoadoutView {
+// 一個武器組最多配 3 個技能（契約的 tuple 長度就是這條結構不變量），所以不能為了測試把第 4、5
+// 個技能塞進預設組——要測其他技能就換這一組的內容，由呼叫端指定。
+type WeaponSetSkills = CharacterEquipmentLoadoutView['weaponSets'][number]['selectedSkillIds'];
+
+const DEFAULT_WEAPON_SET_SKILLS: WeaponSetSkills = [SKILL_STRIKE, SKILL_COUNTER, SKILL_HEAL];
+
+function loadoutFor(characterId: CharacterId, skills: WeaponSetSkills): CharacterEquipmentLoadoutView {
   const set = (id: WeaponSetId): CharacterEquipmentLoadoutView['weaponSets'][number] => ({
     weaponSetId: id,
-    selectedSkillIds: [SKILL_STRIKE, SKILL_COUNTER, SKILL_HEAL],
+    selectedSkillIds: skills,
   });
   return {
     characterId,
@@ -399,8 +478,8 @@ function loadoutFor(characterId: CharacterId): CharacterEquipmentLoadoutView {
   };
 }
 
-export function stubLoadoutQuery(): CombatLoadoutQuery {
-  return { getEquipmentLoadout: (characterId) => loadoutFor(characterId) };
+export function stubLoadoutQuery(skills: WeaponSetSkills = DEFAULT_WEAPON_SET_SKILLS): CombatLoadoutQuery {
+  return { getEquipmentLoadout: (characterId) => loadoutFor(characterId, skills) };
 }
 
 export function stubFormationQuery(): CombatFormationQuery {

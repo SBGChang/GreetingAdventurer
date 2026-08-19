@@ -26,6 +26,12 @@ import {
   SKILL_HEAL,
   SKILL_BITE,
   SKILL_CAST_DAMAGE,
+  SKILL_CTB_DELAY,
+  SKILL_INTERRUPT,
+  CTRL_ELITE,
+  CTRL_BOSS,
+  stubDefinitionReader,
+  stubLoadoutQuery,
   DELAY_STANDARD,
   EFF_COUNTER_DAMAGE,
   HERO_ID,
@@ -594,6 +600,226 @@ const cases: readonly Case[] = [
         handleCommandAlly(started.nextSlice, { type: 'commandAlly', encounterId, allyId, directive: {} }, ctx),
         'combat/command-ally-not-implemented',
       );
+    },
+  },
+  // ── 控制抗性（§2.6）─────────────────────────────────────────────────────
+  // resistedCtbIncrease() 先前兩條分支同一個回傳值（整體 `return raw`），倍率恆為 1——
+  // 規範 §5 點名的「缺少控制抗性時使用倍率 1」。以下四案釘住三個量全部來自抗性檔資料。
+  {
+    name: '控制抗性：外來 CTB 增加依抗性檔折算並向下取整',
+    run: () => {
+      // 同一個 raw（resolvePower stub 給 14，取自設計基準「標準 +14 CTB」），只換抗性檔 →
+      // 結果必須不同。這就是「同一套 Runtime 換一份 Content Pack，行為要跟著改變」。
+      const appliedFor = (profile: Parameters<typeof stubDefinitionReader>[0]): number => {
+        const ctx = makeCombatContext({
+          definitions: stubDefinitionReader(profile),
+          loadout: stubLoadoutQuery([SKILL_CTB_DELAY, SKILL_INTERRUPT, SKILL_STRIKE]),
+        });
+        const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
+        const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+        const encounter = started.nextSlice.encounters[encounterId]!;
+        const actorId = encounter.currentActorId!;
+        const enemyId = aliveEnemies(encounter)[0]!.combatantId;
+        const before = encounter.combatants[enemyId]!.currentCtb;
+        const res = ok(
+          handleUseCombatSkill(
+            started.nextSlice,
+            { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_CTB_DELAY, targetCombatantIds: [enemyId] },
+            ctx,
+          ),
+        );
+        const after = res.nextSlice.encounters[encounterId]!.combatants[enemyId]!;
+        assert(
+          after.externalCtbIncreaseSinceOwnAction === after.currentCtb - before,
+          '累積量必須等於實際套用量',
+        );
+        return after.currentCtb - before;
+      };
+
+      const normal = appliedFor(undefined);
+      const elite = appliedFor(CTRL_ELITE);
+      const boss = appliedFor(CTRL_BOSS);
+      assert(normal === 14, `一般 ×1.00 → 14（實得 ${normal}）`);
+      // 14 × 0.75 = 10.5 → floor 10。設計要求「單次 CTB 增加向下取整」，不是四捨五入的 11。
+      assert(elite === 10, `菁英 ×0.75 → floor(10.5)=10（實得 ${elite}）`);
+      assert(boss === 7, `Boss ×0.50 → 7（實得 ${boss}）`);
+    },
+  },
+  {
+    name: '控制抗性：兩次自身行動間的累積上限會夾住，額滿後不再增加',
+    run: () => {
+      // Boss 檔：×0.5、上限 18。預先設好累積量，驗證夾的是「剩餘額度」而不是單次值。
+      const applyWithAccumulated = (accumulated: number): number => {
+        const ctx = makeCombatContext({
+          definitions: stubDefinitionReader(CTRL_BOSS),
+          loadout: stubLoadoutQuery([SKILL_CTB_DELAY, SKILL_INTERRUPT, SKILL_STRIKE]),
+        });
+        const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
+        const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+        const encounter = started.nextSlice.encounters[encounterId]!;
+        const actorId = encounter.currentActorId!;
+        const enemyId = aliveEnemies(encounter)[0]!.combatantId;
+        const primed: CombatState = {
+          ...started.nextSlice,
+          encounters: {
+            ...started.nextSlice.encounters,
+            [encounterId]: {
+              ...encounter,
+              combatants: {
+                ...encounter.combatants,
+                [enemyId]: {
+                  ...encounter.combatants[enemyId]!,
+                  externalCtbIncreaseSinceOwnAction: accumulated,
+                },
+              },
+            },
+          },
+        };
+        const before = primed.encounters[encounterId]!.combatants[enemyId]!.currentCtb;
+        const res = ok(
+          handleUseCombatSkill(
+            primed,
+            { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_CTB_DELAY, targetCombatantIds: [enemyId] },
+            ctx,
+          ),
+        );
+        return res.nextSlice.encounters[encounterId]!.combatants[enemyId]!.currentCtb - before;
+      };
+
+      assert(applyWithAccumulated(0) === 7, '尚未累積 → 完整的 7');
+      // 已累積 14、上限 18 → 只剩 4 的額度，折算後的 7 被夾成 4。
+      const nearCap = applyWithAccumulated(14);
+      assert(nearCap === 4, `剩餘額度 4 應夾住折算值 7（實得 ${nearCap}）`);
+      assert(applyWithAccumulated(18) === 0, '額度已滿 → 完全不再增加');
+      assert(applyWithAccumulated(25) === 0, '超額（例如中途換過抗性檔）→ 不得變成負值倒扣');
+    },
+  },
+  {
+    name: '控制抗性：Boss 成功被中斷一次後免疫再次中斷，一般怪物不免疫',
+    run: () => {
+      const runInterrupt = (
+        profile: Parameters<typeof stubDefinitionReader>[0],
+      ): { firstCleared: boolean; immuneAfterFirst: boolean; secondCleared: boolean } => {
+        const ctx = makeCombatContext({
+          definitions: stubDefinitionReader(profile),
+          loadout: stubLoadoutQuery([SKILL_CTB_DELAY, SKILL_INTERRUPT, SKILL_STRIKE]),
+        });
+        const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
+        const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+        const encounter = started.nextSlice.encounters[encounterId]!;
+        const actorId = encounter.currentActorId!;
+        const enemyId = aliveEnemies(encounter)[0]!.combatantId;
+
+        // 讓敵人處於讀條狀態（interruptCasting 的前置條件），並指定當前行動者為玩家。
+        const casting = {
+          skillId: SKILL_BITE,
+          actionKind: 'cast' as const,
+          targetCombatantIds: [actorId],
+          remainingDelay: 20,
+        };
+        const withCasting = (state: CombatState, immune: boolean): CombatState => {
+          const enc = state.encounters[encounterId]!;
+          return {
+            ...state,
+            encounters: {
+              ...state.encounters,
+              [encounterId]: {
+                ...enc,
+                currentActorId: actorId,
+                combatants: {
+                  ...enc.combatants,
+                  [enemyId]: {
+                    ...enc.combatants[enemyId]!,
+                    casting,
+                    interruptionImmuneUntilOwnAction: immune,
+                  },
+                },
+              },
+            },
+          };
+        };
+
+        const first = ok(
+          handleUseCombatSkill(
+            withCasting(started.nextSlice, false),
+            { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_INTERRUPT, targetCombatantIds: [enemyId] },
+            ctx,
+          ),
+        );
+        const afterFirst = first.nextSlice.encounters[encounterId]!.combatants[enemyId]!;
+
+        // 第二次中斷：沿用第一次得到的免疫旗標，並讓敵人再次讀條。
+        const second = ok(
+          handleUseCombatSkill(
+            withCasting(first.nextSlice, afterFirst.interruptionImmuneUntilOwnAction),
+            { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_INTERRUPT, targetCombatantIds: [enemyId] },
+            ctx,
+          ),
+        );
+        const afterSecond = second.nextSlice.encounters[encounterId]!.combatants[enemyId]!;
+
+        return {
+          firstCleared: afterFirst.casting === undefined,
+          immuneAfterFirst: afterFirst.interruptionImmuneUntilOwnAction,
+          secondCleared: afterSecond.casting === undefined,
+        };
+      };
+
+      const boss = runInterrupt(CTRL_BOSS);
+      assert(boss.firstCleared, 'Boss 第一次應被成功中斷');
+      assert(boss.immuneAfterFirst, 'Boss 抗性檔宣告「成功中斷後取得免疫」');
+      assert(!boss.secondCleared, 'Boss 第二次中斷應被免疫擋下（讀條仍在）');
+
+      const normal = runInterrupt(undefined);
+      assert(normal.firstCleared, '一般怪物第一次應被成功中斷');
+      assert(!normal.immuneAfterFirst, '一般抗性檔不授予中斷免疫');
+      assert(normal.secondCleared, '一般怪物第二次中斷照樣生效');
+    },
+  },
+  {
+    name: '自身行動完成時清空行動窗：combatRest 與 useCombatSkill 一致',
+    run: () => {
+      // combatRest 曾經只清 externalCtbIncreaseSinceOwnAction、漏掉 interruptionImmuneUntilOwnAction。
+      // 免疫實作之後，那會讓休息過一次的 Boss 永久免疫中斷。兩條路徑現在共用 clearOwnActionWindow()。
+      const ctx = makeCombatContext();
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const encounter = started.nextSlice.encounters[encounterId]!;
+      const actorId = encounter.currentActorId!;
+      const enemyId = aliveEnemies(encounter)[0]!.combatantId;
+      const primed: CombatState = {
+        ...started.nextSlice,
+        encounters: {
+          ...started.nextSlice.encounters,
+          [encounterId]: {
+            ...encounter,
+            combatants: {
+              ...encounter.combatants,
+              [actorId]: {
+                ...encounter.combatants[actorId]!,
+                externalCtbIncreaseSinceOwnAction: 12,
+                interruptionImmuneUntilOwnAction: true,
+              },
+            },
+          },
+        },
+      };
+
+      const rested = ok(handleCombatRest(primed, { type: 'combatRest', encounterId, actorId }, ctx));
+      const afterRest = rested.nextSlice.encounters[encounterId]!.combatants[actorId]!;
+      assert(afterRest.externalCtbIncreaseSinceOwnAction === 0, 'combatRest 應清空累積的外來 CTB');
+      assert(!afterRest.interruptionImmuneUntilOwnAction, 'combatRest 也必須清掉中斷免疫');
+
+      const acted = ok(
+        handleUseCombatSkill(
+          primed,
+          { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_STRIKE, targetCombatantIds: [enemyId] },
+          ctx,
+        ),
+      );
+      const afterAct = acted.nextSlice.encounters[encounterId]!.combatants[actorId]!;
+      assert(afterAct.externalCtbIncreaseSinceOwnAction === 0, 'useCombatSkill 應清空累積的外來 CTB');
+      assert(!afterAct.interruptionImmuneUntilOwnAction, 'useCombatSkill 也必須清掉中斷免疫');
     },
   },
 ];
