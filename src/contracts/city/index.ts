@@ -392,12 +392,18 @@ export type ReleaseHomeTeacherCommand = Readonly<{
   postId: HomeTeachingPostId;
 }>;
 
+// 只列**已註冊 Handler**的 Game Command（慣例同 contracts/dungeon、contracts/quest）。
+// `GAME_COMMAND_ENTRY` 是非 Partial 的 `Record<GameCommandType, …>`，所以留在這個聯集裡就必須
+// 指定入口，而沒有 Handler 的入口會讓啟動驗證失敗——那正是規範 §10「未閉合的 Capability 不進
+// 正式 Manifest、不註冊 Game Command 入口」。型別本身仍匯出，實作完成時加回聯集即可。
+//
+// 未註冊：
+//   * `startFacilityAction` —— 耗時城市行動的計時屬 team 的 `StartTimedCityAction`，team 尚未實作。
+//   * `assignHomeTeacher`   —— 教學崗位的經驗結算屬 progression，教師指派的閉合流程尚未接通。
 export type CityGameCommand =
   | BuyShopOfferCommand
   | SellItemToShopCommand
-  | StartFacilityActionCommand
   | BuyOrUpgradeHomeCommand
-  | AssignHomeTeacherCommand
   | ReleaseHomeTeacherCommand;
 
 // askTavernIntel 為 Application Workflow（分別送 RevealTavernIntel 與 Social 額度命令），非單一 City Command。

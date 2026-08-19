@@ -35,6 +35,15 @@ import * as map from '../../modules/map/public';
 import * as dungeon from '../../modules/dungeon/public';
 import * as combat from '../../modules/combat/public';
 import * as team from '../../modules/team/public';
+import * as city from '../../modules/city/public';
+import * as quest from '../../modules/quest/public';
+import * as social from '../../modules/social/public';
+import * as economy from '../../modules/economy/public';
+import * as world from '../../modules/world/public';
+import * as crafting from '../../modules/crafting/public';
+import * as distribution from '../../modules/distribution/public';
+import * as combatSequence from '../../modules/combat-sequence/public';
+import * as npcBehavior from '../../modules/npc-behavior/public';
 
 import type { ProgressionDefinitionReader } from '../../contracts/progression';
 import { KERNEL_REJECTION_SOURCE } from '../../contracts/core';
@@ -61,8 +70,10 @@ import {
   type GameInternalCommandType,
 } from './messages';
 import {
+  EVENT_SUBSCRIPTIONS_BY_TYPE,
   EXECUTION_ORDER_MANIFEST,
   JOB_TYPE_ORDER_BY_PHASE,
+  type EventSubscription,
   type ExecutionOrderManifest,
 } from './manifest';
 import { WORKFLOW_SUBSCRIBERS } from '../workflows/player-travel-event';
@@ -80,6 +91,18 @@ export type ModuleContexts = Readonly<{
   team: team.TeamHandlerContext;
   // progression 的 handler 直接吃 Reader（沒有 context bag）。
   progression: ProgressionDefinitionReader;
+
+  // Wave D。各模組自行宣告本地 port 型別（§7.1 慣例），此處只負責把它們列進同一個 bag；
+  // 具體實作由 GameSession 注入的 ContextAssembler 提供。
+  city: city.CityHandlerContext;
+  quest: quest.QuestHandlerContext;
+  social: social.SocialHandlerContext;
+  economy: economy.EconomyHandlerContext;
+  world: world.WorldHandlerContext;
+  crafting: crafting.CraftingHandlerContext;
+  distribution: distribution.AssetDistributionHandlerContext;
+  combatSequence: combatSequence.CombatSequenceContext;
+  npcBehavior: npcBehavior.NpcBehaviorContext;
 }>;
 
 // 跨模組 Query 只吃 State 快照（各 createXxxQuery 都是 (state) => Query），因此 Context 必須用
@@ -182,6 +205,11 @@ const INTERNAL_COMMAND_HANDLERS: Readonly<Partial<Record<GameInternalCommandType
     fromOutcome('inventory', inventory.moveItemToTeamQuestCargo(s.inventory, c as never, x.inventory)),
   CommitCombatItemUse: (c, s, x) =>
     fromOutcome('inventory', inventory.commitCombatItemUse(s.inventory, c as never, x.inventory)),
+  ConsumeCombatSequenceRetrySupply: (c, s, x) =>
+    fromOutcome(
+      'inventory',
+      inventory.consumeCombatSequenceRetrySupply(s.inventory, c as never, x.inventory),
+    ),
   EvaluateTeamEncumbrance: (c, s, x) =>
     fromOutcome('inventory', inventory.evaluateTeamEncumbrance(s.inventory, c as never, x.inventory)),
 
@@ -205,6 +233,133 @@ const INTERNAL_COMMAND_HANDLERS: Readonly<Partial<Record<GameInternalCommandType
   // ── combat：(state, cmd, ctx) → ModuleResult ─────────────────────────────
   StartCombatEncounter: (c, s, x) =>
     fromOutcome('combat', combat.handleStartCombatEncounter(s.combat, c as never, x.combat)),
+
+  // ── city：(command, state, ctx) → ModuleOutcome ──
+  ReserveShopOfferForQuest: (c, s, x) =>
+    fromOutcome('city', city.handleReserveShopOfferForQuest(c as never, s.city, x.city)),
+  ReleaseQuestShopOffer: (c, s, x) =>
+    fromOutcome('city', city.handleReleaseQuestShopOffer(c as never, s.city, x.city)),
+  SetFacilityAvailability: (c, s, x) =>
+    fromOutcome('city', city.handleSetFacilityAvailability(c as never, s.city, x.city)),
+  ApplyCityMetricEffect: (c, s, x) =>
+    fromOutcome('city', city.handleApplyCityMetricEffect(c as never, s.city, x.city)),
+  TransferHomeOwnership: (c, s, x) =>
+    fromOutcome('city', city.handleTransferHomeOwnership(c as never, s.city, x.city)),
+  InterruptHomeTeachingPost: (c, s, x) =>
+    fromOutcome('city', city.handleInterruptHomeTeachingPost(c as never, s.city, x.city)),
+  RevealTavernIntel: (c, s, x) =>
+    fromOutcome('city', city.handleRevealTavernIntel(c as never, s.city, x.city)),
+
+  // ── quest：(state, command, ctx) → ModuleOutcome ──
+  AcceptQuestForNpcTeam: (c, s, x) =>
+    fromOutcome('quest', quest.handleAcceptQuestForNpcTeam(s.quest, c as never, x.quest)),
+  ClaimQuestForNpcTeam: (c, s, x) =>
+    fromOutcome('quest', quest.handleClaimQuestForNpcTeam(s.quest, c as never, x.quest)),
+  ReleaseNpcQuestClaim: (c, s, x) =>
+    fromOutcome('quest', quest.handleReleaseNpcQuestClaim(s.quest, c as never, x.quest)),
+
+  // ── social：(command, state, ctx) → ModuleOutcome ──
+  ProvisionPlayerAffinity: (c, s, x) =>
+    fromOutcome('social', social.handleProvisionPlayerAffinity(c as never, s.social, x.social)),
+  ConsumePlayerConversationAllowance: (c, s, x) =>
+    fromOutcome(
+      'social',
+      social.handleConsumePlayerConversationAllowance(c as never, s.social, x.social),
+    ),
+
+  // ── economy：(command, state, ctx) → ModuleOutcome ──
+  //    金錢是 economy 獨占的 Slice；city／distribution／quest 一律經這四筆命令請它記帳。
+  TransferCurrency: (c, s, x) =>
+    fromOutcome('economy', economy.handleTransferCurrency(c as never, s.economy, x.economy)),
+  GrantCurrency: (c, s, x) =>
+    fromOutcome('economy', economy.handleGrantCurrency(c as never, s.economy, x.economy)),
+  RemoveCurrency: (c, s, x) =>
+    fromOutcome('economy', economy.handleRemoveCurrency(c as never, s.economy, x.economy)),
+  CreateEconomyAccount: (c, s, x) =>
+    fromOutcome('economy', economy.handleCreateEconomyAccount(c as never, s.economy, x.economy)),
+
+  // ── world：(command, state, ctx) → ModuleOutcome ──
+  ChangeRegionControl: (c, s, x) =>
+    fromOutcome('world', world.handleChangeRegionControl(c as never, s.world, x.world)),
+  SetRouteAccess: (c, s, x) =>
+    fromOutcome('world', world.handleSetRouteAccess(c as never, s.world, x.world)),
+  ApplyMarketPressure: (c, s, x) =>
+    fromOutcome('world', world.handleApplyMarketPressure(c as never, s.world, x.world)),
+  ApplyEventWeightModifier: (c, s, x) =>
+    fromOutcome('world', world.handleApplyEventWeightModifier(c as never, s.world, x.world)),
+  SetWorldFact: (c, s, x) =>
+    fromOutcome('world', world.handleSetWorldFact(c as never, s.world, x.world)),
+
+  // ── distribution：(command, state, ctx) → ModuleOutcome ──
+  //    dungeon 早就在送這三筆命令；先前沒有 Owner，交易到一半才會失敗。
+  StartAssetDistribution: (c, s, x) =>
+    fromOutcome(
+      'distribution',
+      distribution.handleStartAssetDistribution(c as never, s.distribution, x.distribution),
+    ),
+  AppendAssetDistributionResult: (c, s, x) =>
+    fromOutcome(
+      'distribution',
+      distribution.handleAppendAssetDistributionResult(c as never, s.distribution, x.distribution),
+    ),
+  FinalizeAssetDistributionCollection: (c, s, x) =>
+    fromOutcome(
+      'distribution',
+      distribution.handleFinalizeAssetDistributionCollection(
+        c as never,
+        s.distribution,
+        x.distribution,
+      ),
+    ),
+
+  // ── combat-sequence：(state, cmd, ctx) → ModuleOutcome ──
+  StartCombatSequence: (c, s, x) =>
+    fromOutcome(
+      'combatSequence',
+      combatSequence.handleStartCombatSequence(s.combatSequence, c as never, x.combatSequence),
+    ),
+  ResolveNextCombatSequenceChallenge: (c, s, x) =>
+    fromOutcome(
+      'combatSequence',
+      combatSequence.handleResolveNextCombatSequenceChallenge(
+        s.combatSequence,
+        c as never,
+        x.combatSequence,
+      ),
+    ),
+  SkipNextCombatSequenceChallenge: (c, s, x) =>
+    fromOutcome(
+      'combatSequence',
+      combatSequence.handleSkipNextCombatSequenceChallenge(
+        s.combatSequence,
+        c as never,
+        x.combatSequence,
+      ),
+    ),
+  StopCombatSequence: (c, s, x) =>
+    fromOutcome(
+      'combatSequence',
+      combatSequence.handleStopCombatSequence(s.combatSequence, c as never, x.combatSequence),
+    ),
+  CommitCombatSequenceSourceResults: (c, s, x) =>
+    fromOutcome(
+      'combatSequence',
+      combatSequence.handleCommitCombatSequenceSourceResults(
+        s.combatSequence,
+        c as never,
+        x.combatSequence,
+      ),
+    ),
+  InvalidateCombatSequence: (c, s, x) =>
+    fromOutcome(
+      'combatSequence',
+      combatSequence.handleInvalidateCombatSequence(s.combatSequence, c as never, x.combatSequence),
+    ),
+  ReleaseCombatSequence: (c, s, x) =>
+    fromOutcome(
+      'combatSequence',
+      combatSequence.handleReleaseCombatSequence(s.combatSequence, c as never, x.combatSequence),
+    ),
 
   // ── team：(state, payload, ctx) → ModuleOutcome ──────────────────────────
   StartReturnFromDungeon: (c, s, x) =>
@@ -283,6 +438,47 @@ const GAME_COMMAND_HANDLERS: Readonly<Partial<Record<GameCommandType, RootDispat
     fromOutcome('team', team.handleSelectPlayerSuccessor(s.team, c as never, x.team)),
   beginCityFreePeriod: (_c, _t, s, x) =>
     fromOutcome('team', team.handleBeginCityFreePeriod(s.team, x.team)),
+
+  // ── city：(command, state, ctx) → ModuleOutcome。城市命令的對象由 payload 指名，
+  //    擁有權由 router 上游的 authorizeGameCommand 以 actorTeamId 把關。──
+  buyShopOffer: (c, _t, s, x) =>
+    fromOutcome('city', city.handleBuyShopOffer(c as never, s.city, x.city)),
+  sellItemToShop: (c, _t, s, x) =>
+    fromOutcome('city', city.handleSellItemToShop(c as never, s.city, x.city)),
+  buyOrUpgradeHome: (c, _t, s, x) =>
+    fromOutcome('city', city.handleBuyOrUpgradeHome(c as never, s.city, x.city)),
+  releaseHomeTeacher: (c, _t, s, x) =>
+    fromOutcome('city', city.handleReleaseHomeTeacher(c as never, s.city, x.city)),
+
+  // ── quest：(state, cmd, actorTeamId, ctx)。接取委託的隊伍身分來自 envelope，不在 payload。──
+  acceptQuest: (c, t, s, x) =>
+    fromOutcome('quest', quest.handleAcceptQuest(s.quest, c as never, t, x.quest)),
+
+  // ── social：(state, cmd, ctx) ──
+  interactWithAdventurer: (c, _t, s, x) =>
+    fromOutcome('social', social.handleInteractWithAdventurer(s.social, c as never, x.social)),
+  proposeMarriageToTeamMember: (c, _t, s, x) =>
+    fromOutcome(
+      'social',
+      social.handleProposeMarriageToTeamMember(s.social, c as never, x.social),
+    ),
+
+  // ── distribution：(state, teamId, cmd, ctx)。出價／放棄／結算輪皆以 actorTeamId 為主體。──
+  submitLootBid: (c, t, s, x) =>
+    fromOutcome(
+      'distribution',
+      distribution.handleSubmitLootBid(s.distribution, t, c as never, x.distribution),
+    ),
+  passLootItem: (c, t, s, x) =>
+    fromOutcome(
+      'distribution',
+      distribution.handlePassLootItem(s.distribution, t, c as never, x.distribution),
+    ),
+  resolveLootAuctionRound: (c, t, s, x) =>
+    fromOutcome(
+      'distribution',
+      distribution.handleResolveLootAuctionRound(s.distribution, t, c as never, x.distribution),
+    ),
 };
 
 // 入口為 WORKFLOW 的 Game Command：先由 Workflow 做跨模組驗證，通過後才委派給擁有 Slice 的模組
@@ -460,6 +656,43 @@ const JOB_HANDLERS: Readonly<Partial<Record<GameJobType, JobDispatch>>> = {
     acceptResult('map', map.handleMapRefreshCheck(j as never, s.map, x.map)),
   teamPlanDue: (j, s, x) =>
     acceptResult('team', team.handleTeamPlanDueJob(s.team, j as never, x.team)),
+
+  // ── city：(job, state, ctx) → ModuleOutcome ──
+  shopRefresh: (j, s, x) => fromOutcome('city', city.handleShopRefresh(j as never, s.city, x.city)),
+  escortGeneration: (j, s, x) =>
+    fromOutcome('city', city.handleEscortGeneration(j as never, s.city, x.city)),
+  cityPopulationReview: (j, s, x) =>
+    fromOutcome('city', city.handleCityPopulationReview(j as never, s.city, x.city)),
+
+  // ── quest：(state, job, ctx) ──
+  questDeadline: (j, s, x) =>
+    fromOutcome('quest', quest.handleQuestDeadline(s.quest, j as never, x.quest)),
+
+  // ── world：(job, state, ctx) ──
+  worldConflictCheck: (j, s, x) =>
+    fromOutcome('world', world.handleWorldConflictCheck(j as never, s.world, x.world)),
+  worldConflictResolve: (j, s, x) =>
+    fromOutcome('world', world.handleWorldConflictResolve(j as never, s.world, x.world)),
+  marketPressureExpire: (j, s, x) =>
+    fromOutcome('world', world.handleMarketPressureExpire(j as never, s.world, x.world)),
+  eventWeightModifierExpire: (j, s, x) =>
+    fromOutcome('world', world.handleEventWeightModifierExpire(j as never, s.world, x.world)),
+
+  // ── crafting：(job, state, ctx) ──
+  foodStatusExpiry: (j, s, x) =>
+    fromOutcome('crafting', crafting.handleFoodStatusExpiry(j as never, s.crafting, x.crafting)),
+
+  // ── npc-behavior：(state, job, ctx) ──
+  npcDecisionDue: (j, s, x) =>
+    fromOutcome(
+      'npcBehavior',
+      npcBehavior.npcDecisionDue(s.npcBehavior, j as never, x.npcBehavior),
+    ),
+  npcChainAdvance: (j, s, x) =>
+    fromOutcome(
+      'npcBehavior',
+      npcBehavior.npcChainAdvance(s.npcBehavior, j as never, x.npcBehavior),
+    ),
 };
 
 // 同上：Manifest 排了 Phase 順序卻沒有 Handler 的 Job，載入期就失敗。
@@ -541,6 +774,46 @@ const EVENT_SUBSCRIBERS: Readonly<Record<string, SubscriberDispatch>> = {
     subscriberResult('character', character.onStatsCapacityChanged(e as never, s.character, x.character)),
   'EquipmentChanged::character': (e, s, x) =>
     subscriberResult('character', character.onStatsCapacityChanged(e as never, s.character, x.character)),
+
+  // ── quest：目標完成一律由事件累計，quest 不查別的模組 State ──
+  'MapContentResolved::quest': (e, s, x) =>
+    subscriberResult('quest', quest.onMapContentResolved(e as never, s.quest, x.quest)),
+  'TeamLocationChanged::quest': (e, s, x) =>
+    subscriberResult('quest', quest.onTeamLocationChanged(e as never, s.quest, x.quest)),
+  'CombatEncounterResolved::quest': (e, s, x) =>
+    subscriberResult('quest', quest.onCombatEncounterResolved(e as never, s.quest, x.quest)),
+  'CharacterDied::quest': (e, s, x) =>
+    subscriberResult('quest', quest.onCharacterDied(e as never, s.quest, x.quest)),
+  'CharacterCreated::quest': (e, s, x) =>
+    subscriberResult('quest', quest.onCharacterCreated(e as never, s.quest, x.quest)),
+
+  // ── economy：三個訂閱只遞增對應報價 scope 的 Epoch 並發 PriceQuoteInvalidated，
+  //    **不複製** world／character／social 的 State（那會變成第二份真相）。──
+  'MarketPressureChanged::economy': (e, s) =>
+    subscriberResult('economy', economy.onMarketPressureChanged(e as never, s.economy)),
+  'CharacterReputationChanged::economy': (e, s) =>
+    subscriberResult('economy', economy.onCharacterReputationChanged(e as never, s.economy)),
+  'PlayerAffinityChanged::economy': (e, s) =>
+    subscriberResult('economy', economy.onPlayerAffinityChanged(e as never, s.economy)),
+
+  // ── combat-sequence：重試補給被消耗後才推進（消耗端在 inventory）──
+  'CombatSequenceRetrySupplyConsumed::combat-sequence': (e, s, x) =>
+    subscriberResult(
+      'combatSequence',
+      combatSequence.onCombatSequenceRetrySupplyConsumed(s.combatSequence, e as never, x.combatSequence),
+    ),
+
+  // ── npc-behavior：NPC 的行動鏈由 team 的已發生事實推進 ──
+  'TeamPlanCompleted::npc-behavior': (e, s, x) =>
+    subscriberResult(
+      'npcBehavior',
+      npcBehavior.onTeamPlanCompleted(s.npcBehavior, e as never, x.npcBehavior),
+    ),
+  'TeamMemberDeparted::npc-behavior': (e, s, x) =>
+    subscriberResult(
+      'npcBehavior',
+      npcBehavior.onTeamMemberDeparted(s.npcBehavior, e as never, x.npcBehavior),
+    ),
 };
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -611,6 +884,29 @@ export function createTransactionConfig(
       return subscribers;
     },
   };
+}
+
+// 反向斷言：**有 Subscriber 實作但 Manifest 沒有綁定**，載入期就失敗。
+//
+// 先前只有正向檢查（Manifest 綁了卻沒有實作 → 拋錯）。缺了這一半的後果實測過一次：Wave D 把
+// 11 個新 Subscriber 寫進 EVENT_SUBSCRIBERS，但忘了加進 EVENT_SUBSCRIPTIONS_BY_TYPE——啟動驗證
+// 全綠、測試全綠，而那 11 個訂閱者**永遠不會被呼叫**。這正是本專案反覆出現的「宣告 ≠ 接線」，
+// 而且是最難察覺的那個方向：功能看起來存在，只是靜靜地不執行。
+const BOUND_SUBSCRIPTION_KEYS = new Set(
+  Object.values(EVENT_SUBSCRIPTIONS_BY_TYPE)
+    .flat()
+    .filter((binding): binding is EventSubscription => binding !== undefined)
+    .map((binding) => `${binding.eventType}::${String(binding.subscriber)}`),
+);
+const UNBOUND_SUBSCRIBERS = Object.keys(EVENT_SUBSCRIBERS).filter(
+  (key) => !BOUND_SUBSCRIPTION_KEYS.has(key),
+);
+if (UNBOUND_SUBSCRIBERS.length > 0) {
+  throw new Error(
+    `Subscriber 已實作但 Manifest 未綁定：${UNBOUND_SUBSCRIBERS.join(', ')}。` +
+      `未綁定的訂閱者永遠不會被呼叫——請加進 EVENT_SUBSCRIPTIONS_BY_TYPE（順序也在那裡決定），` +
+      `或如果該能力尚未閉合，就連 Subscriber 實作一起移除。`,
+  );
 }
 
 // 供 Registry 交叉驗證用：Router **實際**有 dispatch 的路由。宣告表（ModuleContract）不能當成

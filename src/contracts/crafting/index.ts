@@ -297,7 +297,10 @@ export type FoodStatusExpiryJob = ScheduledJobBase<
   FoodStatusExpiryJobPayload
 >;
 
-export type CraftingScheduledJob = FoodStatusExpiryJob | NpcCuisineDecisionDueJob;
+// 只列**已註冊 Handler**的 Job。`npcCuisineDecisionDue`（NPC 每日料理決策）的 Handler 未撰寫——
+// 它需要 npc-behavior 的市場意圖與 city 的餐館菜單同時就位。留在聯集裡會讓 Scheduler 排得出一筆
+// 沒有人處理的 Job，而 Job 於交易提交時就被 dequeue：那等於讓它安靜消失。型別仍匯出。
+export type CraftingScheduledJob = FoodStatusExpiryJob;
 
 // ── §5 輸出事件 payload ─────────────────────────────────────────────────
 export type CraftingCompletedEvent = Readonly<{

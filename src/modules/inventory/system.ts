@@ -23,6 +23,7 @@ import type {
 import type {
   CarryCapacitySnapshot,
   CommitCombatItemUse,
+  ConsumeCombatSequenceRetrySupply,
   ConfigureWeaponSet,
   CreateItemInstance,
   EquipItem,
@@ -488,6 +489,82 @@ export function commitCombatItemUse(
       effectRefs: def.useEffectIds ?? [],
     }),
     emit({ type: 'ItemConsumed', itemId: cmd.itemId, quantity: 1, reason: 'combatUse' }),
+  ];
+  return accept(withItem(state, next), messages);
+}
+
+// ── ConsumeCombatSequenceRetrySupply（Internal Command，來自 combat-sequence）─────
+//
+// 這是 combat-sequence「重骰資格成立 → 消耗一份補給 → 重骰」那條路的中段。它先前**沒有實作**，
+// 於是 combat-sequence 送出的命令沒有任何 Owner——registry 的「送出端 → Owner」交叉驗證因此
+// 在整合時報 `registry.internalCommand.noOwner`。
+//
+// 契約兩端本來就備齊了：命令（ConsumeCombatSequenceRetrySupply）與**收尾事件**
+// （CombatSequenceRetrySupplyConsumed，combat-sequence 已註冊訂閱者）都在 contracts/inventory
+// 裡。缺的只有中間這段消耗。補上它，整條路才閉合——不然這個能力只能整條關掉。
+//
+// 紀律要點：
+//   * 「用哪一件補給」由 combat-sequence 依 `RetrySupplyPolicyDefinition` 選好（它負責挑最低價
+//     等策略），這裡**不重做選擇**；命令帶 `itemTagId` 時只當成必須滿足的條件驗證。
+//   * 找不到符合條件的補給是 typed rejection，不是「當作沒消耗然後照樣重骰」。
+//   * 挑選候選時以 itemId 排序，讓同一份 State 永遠選到同一件（決定性重播）。
+export function consumeCombatSequenceRetrySupply(
+  state: InventoryState,
+  cmd: ConsumeCombatSequenceRetrySupply,
+  deps: InventoryDeps,
+): InventoryHandlerResult {
+  const candidates = Object.values(state.items)
+    .filter((inst): inst is ItemInstance => inst !== undefined)
+    .filter(
+      (inst) =>
+        inst.state === 'active' &&
+        inst.quantity > 0 &&
+        inst.ownerCharacterId === cmd.participantCharacterId &&
+        inst.location.kind === 'characterBag' &&
+        inst.location.characterId === cmd.participantCharacterId &&
+        !isReservedActive(inst),
+    )
+    .filter((inst) => {
+      if (cmd.itemTagId === undefined) return true;
+      // 壞內容引用不得變成「這件不符合」而靜默跳過：讀不到定義是內容問題，讓它拋出來。
+      return deps.reader.getItem(inst.definitionId).itemTagIds.includes(cmd.itemTagId);
+    })
+    // 決定性：同一份 State 必須永遠選到同一件補給。
+    .sort((a, b) => (String(a.itemId) < String(b.itemId) ? -1 : 1));
+
+  const chosen = candidates[0];
+  if (chosen === undefined) {
+    return reject('inventory/retry-supply-unavailable', {
+      participantCharacterId: String(cmd.participantCharacterId),
+      ...(cmd.itemTagId === undefined ? {} : { itemTagId: String(cmd.itemTagId) }),
+    });
+  }
+
+  const remaining = chosen.quantity - 1;
+  const next: ItemInstance =
+    remaining <= 0
+      ? {
+          ...chosen,
+          quantity: 0,
+          state: 'consumed',
+          location: { kind: 'removed', reason: 'consumed' },
+          revision: chosen.revision + 1,
+        }
+      : { ...chosen, quantity: remaining, revision: chosen.revision + 1 };
+
+  const messages: DomainEventDraft<unknown>[] = [
+    emit({
+      type: 'CombatSequenceRetrySupplyConsumed',
+      sequenceId: cmd.sequenceId,
+      challengeId: cmd.challengeId,
+      itemId: chosen.itemId,
+      // `ItemInstance.ownerCharacterId` 是選填的，事件的欄位不是。上面的篩選已要求
+      // `inst.ownerCharacterId === cmd.participantCharacterId`，所以這裡取**命令帶的**那個值：
+      // 它與 chosen 的擁有者是同一個，而且型別上非選填。不用轉型去騙過選填性。
+      ownerCharacterId: cmd.participantCharacterId,
+      quantity: 1,
+    }),
+    emit({ type: 'ItemConsumed', itemId: chosen.itemId, quantity: 1, reason: 'combatUse' }),
   ];
   return accept(withItem(state, next), messages);
 }

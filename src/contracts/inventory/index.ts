@@ -490,8 +490,13 @@ export type EvaluateTeamEncumbrance = Readonly<{
 
 // 只列**已實作**的接收能力。宣告接收卻沒有 Handler，會讓啟動驗證與 Router 都認為它可用。
 // 尚未註冊：ApplyQuestItemLifecycle、ReleaseExpiredQuestCargo、ConsumeBookForLearning、
-// TransformCraftingItems、ConsumeCuisineIngredients、ConsumeCombatSequenceRetrySupply。
+// TransformCraftingItems、ConsumeCuisineIngredients。
+//
+// `ConsumeCombatSequenceRetrySupply` 已於 Wave D 整合時實作：combat-sequence 會送出它，而
+// 收尾事件 CombatSequenceRetrySupplyConsumed 的訂閱者也已註冊——中段缺了消耗，整條重骰路
+// 就是未閉合的 Capability，只能整條關掉。補上它才讓那條路真的走得完。
 export type InventoryInternalCommand =
+  | ConsumeCombatSequenceRetrySupply
   | CreateItemInstance
   | RemoveItemInstance
   | TransferItem

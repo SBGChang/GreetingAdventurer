@@ -15,6 +15,11 @@ import type {
   FreeActionDueJob,
   NonPlayerMemberCityFreeDayTickJob,
 } from '../../contracts/team';
+import type { CityScheduledJob } from '../../contracts/city';
+import type { QuestScheduledJob } from '../../contracts/quest';
+import type { WorldScheduledJob } from '../../contracts/world';
+import type { CraftingScheduledJob } from '../../contracts/crafting';
+import type { NpcBehaviorScheduledJob } from '../../contracts/npc-behavior';
 
 import type { CharacterState } from '../../modules/character/public';
 import type { InventoryState } from '../../modules/inventory/public';
@@ -23,6 +28,15 @@ import type { MapState } from '../../modules/map/public';
 import type { DungeonModuleState } from '../../modules/dungeon/public';
 import type { CombatState } from '../../modules/combat/public';
 import type { TeamState } from '../../modules/team/public';
+import type { CityState } from '../../modules/city/public';
+import type { QuestState } from '../../modules/quest/public';
+import type { SocialState } from '../../modules/social/public';
+import type { EconomyState } from '../../modules/economy/public';
+import type { WorldState } from '../../modules/world/public';
+import type { CraftingState } from '../../modules/crafting/public';
+import type { AssetDistributionModuleState } from '../../modules/distribution/public';
+import type { CombatSequenceModuleState } from '../../modules/combat-sequence/public';
+import type { NpcBehaviorState } from '../../modules/npc-behavior/public';
 
 import { emptyCharacterState } from '../../modules/character/public';
 import { createInitialInventoryState } from '../../modules/inventory/public';
@@ -30,19 +44,34 @@ import { createInitialProgressionState } from '../../modules/progression/public'
 import { emptyMapState } from '../../modules/map/public';
 import { createInitialDungeonState } from '../../modules/dungeon/public';
 import { createInitialCombatState } from '../../modules/combat/public';
+import { emptyCityState } from '../../modules/city/public';
+import { emptyQuestState } from '../../modules/quest/public';
+import { createInitialSocialState } from '../../modules/social/public';
+import { emptyEconomyState } from '../../modules/economy/public';
+import { emptyWorldState } from '../../modules/world/public';
+import { emptyCraftingState } from '../../modules/crafting/public';
+import { emptyAssetDistributionState } from '../../modules/distribution/public';
+import { createInitialCombatSequenceState } from '../../modules/combat-sequence/public';
+import { emptyNpcBehaviorState } from '../../modules/npc-behavior/public';
 
 // ──────────────────────────────────────────────────────────────────────────
 // ScheduledJob
 // ──────────────────────────────────────────────────────────────────────────
 
-// 全遊戲 Job 聯集。未實作模組（city/quest/world/npc-behavior）的 Job 於其 Wave 補入。
+// 全遊戲 Job 聯集。Wave D 併入 city / quest / world / crafting / npc-behavior 的 Job；
+// social / economy / distribution / combat-sequence 沒有宣告任何 Job（其推進由命令與事件驅動）。
 export type GameScheduledJob =
   | CharacterLifecycleJob
   | MapRefreshCheckJob
   | NpcDungeonDayJob
   | TeamPlanDueJob
   | FreeActionDueJob
-  | NonPlayerMemberCityFreeDayTickJob;
+  | NonPlayerMemberCityFreeDayTickJob
+  | CityScheduledJob
+  | QuestScheduledJob
+  | WorldScheduledJob
+  | CraftingScheduledJob
+  | NpcBehaviorScheduledJob;
 
 export type GameJobType = GameScheduledJob['type'];
 
@@ -61,6 +90,18 @@ export type GameState = Readonly<{
   dungeon: DungeonModuleState;
   combat: CombatState;
   team: TeamState;
+
+  // Wave D。Slice 名稱與各模組 ModuleContract 的 `owns` 逐字相同——registry 的啟動驗證
+  // 以此交叉比對「一個 Slice 恰好一個 owner」。
+  city: CityState;
+  quest: QuestState;
+  social: SocialState;
+  economy: EconomyState;
+  world: WorldState;
+  crafting: CraftingState;
+  distribution: AssetDistributionModuleState;
+  combatSequence: CombatSequenceModuleState;
+  npcBehavior: NpcBehaviorState;
 }>;
 
 // 已實作模組的 Slice 名稱；同時是 applyMutation 的白名單。
@@ -72,6 +113,15 @@ export const IMPLEMENTED_SLICES = [
   'dungeon',
   'combat',
   'team',
+  'city',
+  'quest',
+  'social',
+  'economy',
+  'world',
+  'crafting',
+  'distribution',
+  'combatSequence',
+  'npcBehavior',
 ] as const;
 
 export type GameSliceName = (typeof IMPLEMENTED_SLICES)[number];
@@ -85,6 +135,15 @@ export const SLICE_OWNER: Readonly<Record<GameSliceName, ModuleId>> = {
   dungeon: 'dungeon' as ModuleId,
   combat: 'combat' as ModuleId,
   team: 'team' as ModuleId,
+  city: 'city' as ModuleId,
+  quest: 'quest' as ModuleId,
+  social: 'social' as ModuleId,
+  economy: 'economy' as ModuleId,
+  world: 'world' as ModuleId,
+  crafting: 'crafting' as ModuleId,
+  distribution: 'distribution' as ModuleId,
+  combatSequence: 'combat-sequence' as ModuleId,
+  npcBehavior: 'npc-behavior' as ModuleId,
 };
 
 export function isGameSliceName(name: string): name is GameSliceName {
@@ -119,6 +178,18 @@ export function createEmptyGameState(input: CreateEmptyGameStateInput): GameStat
     combat: createInitialCombatState(),
     // team 沒有「空」狀態：它必須知道玩家隊伍，故由呼叫者建好傳入。
     team: input.team,
+
+    // Wave D 的九個 Slice 都有真正的「空」狀態：它們的內容全部來自 Content Pack 與執行期事件，
+    // 沒有任何一筆需要在建立 State 時就知道的玩家事實。
+    city: emptyCityState,
+    quest: emptyQuestState,
+    social: createInitialSocialState(),
+    economy: emptyEconomyState,
+    world: emptyWorldState,
+    crafting: emptyCraftingState,
+    distribution: emptyAssetDistributionState,
+    combatSequence: createInitialCombatSequenceState(),
+    npcBehavior: emptyNpcBehaviorState,
   };
 }
 

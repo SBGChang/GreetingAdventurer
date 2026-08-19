@@ -175,7 +175,10 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
     run: () => {
       let threw = false;
       try {
-        applyMutation(emptyState(), { sliceName: 'economy', nextSlice: {} });
+        // 這裡原本用 'economy' 當「未註冊 Slice」的例子——Wave D 之後 economy 是**已註冊**的
+        // Slice，這個案例於是變成在測「合法寫入會不會拋錯」，永遠通不過。改用一個確定不存在的
+        // 名稱；它同時也是打錯字的代表案例（applyMutation 對打錯的 sliceName 必須拋錯）。
+        applyMutation(emptyState(), { sliceName: 'notARegisteredSlice', nextSlice: {} });
       } catch {
         threw = true;
       }

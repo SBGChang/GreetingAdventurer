@@ -24,14 +24,32 @@ import type { GameJobType } from './state';
 export const JOB_TYPE_ORDER_BY_PHASE: Readonly<Record<JobPhase, readonly GameJobType[]>> = {
   // 既有行動完成：玩家旅行段落、NPC 抵達、自由活動、NPC 地牢日。
   completeAction: ['teamPlanDue'],
-  // 接受期限／實際結束期限／鎖定到期。（quest 的 questDeadline 於其 Wave 併入。）
-  closeDeadline: [],
+  // 接受期限／實際結束期限／鎖定到期。
+  //
+  // `questDeadline` 排在**最前**：委託到期會讓相關實體（保留的貨架、任務貨物、護衛角色）
+  // 失效，後面的相位若先跑，會對著已經該作廢的委託做事。
+  // `foodStatusExpiry` 緊接其後——它同樣只是「時間到了就失效」，且不產生新的排程。
+  closeDeadline: ['questDeadline', 'foodStatusExpiry', 'marketPressureExpire', 'eventWeightModifierExpire'],
   // 固定日曆批次：地圖刷新、商店、護衛候選。
-  worldCadence: ['mapRefreshCheck'],
+  //
+  // 順序有意義：`worldConflictCheck` 先跑，因為它可能改變地區控制與路線通行，而
+  // `mapRefreshCheck` 的刷新內容與 `escortGeneration` 的護衛目的地都讀那些事實。
+  // 商店刷新（shopRefresh）在護衛生成之前：護衛委託的報酬與貨物可能引用當日貨架。
+  worldCadence: [
+    'worldConflictCheck',
+    'mapRefreshCheck',
+    'shopRefresh',
+    'escortGeneration',
+    'cityPopulationReview',
+  ],
   // 必須延到當日排程、且不是交易內即時因果的反應。
-  worldReaction: ['characterLifecycleDue'],
-  // NPC 決策與下一輪行動。（npc-behavior 的 Job 於其 Wave 併入。）
-  scheduleNext: [],
+  //
+  // `worldConflictResolve` 是「當初排定的戰爭在今天結算」——它是對既有事實的反應，
+  // 不是新的日曆批次，所以與角色生命週期同相位。
+  worldReaction: ['characterLifecycleDue', 'worldConflictResolve'],
+  // NPC 決策與下一輪行動。放在最後：NPC 要看到**今天所有其他相位的結果**才決定下一步
+  // （世界局勢、刷新後的地圖、今日貨架、到期的委託）。
+  scheduleNext: ['npcDecisionDue', 'npcChainAdvance'],
 };
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -151,26 +169,38 @@ function workflowSub(eventType: GameDomainEventType, workflowId: WorkflowId): Ev
 //
 // 刻意不登記的（模組 ModuleContract 宣告了 subscriptionHandlerIds，但 Wave B 沒有實作對應
 // Handler，登記了會在啟動驗證時失敗）：
-//   - character: FacilityRestCompleted / HomeYearRestCompleted / QuestStateChanged 需 city/quest 模組
+//   - character: FacilityRestCompleted / HomeYearRestCompleted / QuestStateChanged —— 模組宣告了
+//               subscriptionHandlerIds，但 character 沒有寫對應函式（不是缺別的模組，是缺 handler）
 //   - combat: 全部 5 筆（CombatItemUseCommitted / EquipmentChanged / KnowledgeLearned /
 //             CharacterDied / CharacterAvailabilityChanged）尚無 subscriber 實作
-//   - dungeon: combat-sequence 相關 4 筆需 combat-sequence 模組
-//   - team: QuestSettled / RouteAccessChanged 需 quest/world 模組
+//   - dungeon: combat-sequence 相關 4 筆尚無 subscriber 實作
+//   - team: QuestSettled / RouteAccessChanged 尚無 subscriber 實作
+//
+// Wave D 解鎖：`CombatEncounterResolved` 與 `NpcDungeonSettlementApplied` 先前是**空陣列**，
+// 理由寫得很清楚——dungeon 的收斂路徑會送 Distribution 命令，而 Distribution 模組不存在，
+// 而訂閱者不能拒絕已發生的事實，所以只能不註冊。Distribution 落地後這兩筆可以綁回去了。
 export const EVENT_SUBSCRIPTIONS_BY_TYPE: Readonly<
   Partial<Record<GameDomainEventType, readonly EventSubscription[]>>
 > = {
   // 隊伍位置改變 → map 更新佔用。
   // dungeon 的 ModuleContract 也宣告過這筆訂閱，但 Wave B 沒有寫對應函式，故不綁定。
-  TeamLocationChanged: [sub('TeamLocationChanged', 'map')],
+  //
+  // 順序：map 先更新佔用，quest 才判斷「護衛是否抵達／救援是否離圖」——後者的判定讀的是位置事實，
+  // 而位置事實的權威在事件 payload 本身，所以順序在此不影響結果；固定它是為了決定性。
+  TeamLocationChanged: [sub('TeamLocationChanged', 'map'), sub('TeamLocationChanged', 'quest')],
 
-  // 戰鬥結束 → dungeon 收斂（回復 Session、對勝利內容發 ResolvePlayerMapContent）。
-  // dungeon 的收斂訂閱不綁定：戰敗路徑會送 FinalizeAssetDistributionCollection，而 Distribution
-  // 模組不存在。訂閱者不能拒絕已發生的事實，所以只能不註冊，直到 Distribution 落地。
-  CombatEncounterResolved: [],
+  // 戰鬥結束 → dungeon 收斂（回復 Session、對勝利內容發 ResolvePlayerMapContent）；再由 quest
+  // 記錄戰敗對護衛委託的影響。
+  //
+  // 順序：dungeon 先。它擁有探索 Session 的收斂（含戰敗轉 defeated 與資產分配屏障），quest 只是
+  // 依已發生的戰果更新委託狀態。兩者寫不同 Slice，但順序必須固定才有決定性重播。
+  CombatEncounterResolved: [
+    sub('CombatEncounterResolved', 'dungeon'),
+    sub('CombatEncounterResolved', 'quest'),
+  ],
 
   // NPC 地城結算套用完成 → dungeon 記錄三方結算之一。
-  // 同上：NPC 結算同樣送 Distribution 命令。
-  NpcDungeonSettlementApplied: [],
+  NpcDungeonSettlementApplied: [sub('NpcDungeonSettlementApplied', 'dungeon')],
 
   // 戰鬥成長事件 → progression 發放 MXP。
   CombatAttackMasteryEarned: [sub('CombatAttackMasteryEarned', 'progression')],
@@ -179,6 +209,36 @@ export const EVENT_SUBSCRIPTIONS_BY_TYPE: Readonly<
 
   // 角色出生 → progression 建立成長檔。
   CharacterBorn: [sub('CharacterBorn', 'progression')],
+
+  // ── Wave D 的其餘綁定 ────────────────────────────────────────────────────
+
+  // 地圖內容被解決 → quest 累計鎮壓／討伐目標與救援救出。
+  MapContentResolved: [sub('MapContentResolved', 'quest')],
+
+  // 角色死亡 → quest 判定護送／救援對象已死。
+  CharacterDied: [sub('CharacterDied', 'quest')],
+
+  // 角色建立 → quest 把新建的護衛／救援角色綁回 Objective（以 temporaryOrigin 反查）。
+  CharacterCreated: [sub('CharacterCreated', 'quest')],
+
+  // 世界市場壓力改變 → economy 讓相關報價失效（只遞增 Epoch，不複製 world 的 State）。
+  MarketPressureChanged: [sub('MarketPressureChanged', 'economy')],
+
+  // 角色聲望改變 → economy 讓該角色的報價失效。
+  CharacterReputationChanged: [sub('CharacterReputationChanged', 'economy')],
+
+  // 玩家好感度改變 → economy 讓家教等服務報價失效。
+  PlayerAffinityChanged: [sub('PlayerAffinityChanged', 'economy')],
+
+  // 重骰補給被 inventory 消耗 → combat-sequence 推進重骰。
+  // 這條路三段齊備才成立：combat-sequence 送命令、inventory 消耗並發事件、combat-sequence 收事件。
+  CombatSequenceRetrySupplyConsumed: [
+    sub('CombatSequenceRetrySupplyConsumed', 'combat-sequence'),
+  ],
+
+  // 隊伍計畫完成 / 成員離隊 → npc-behavior 推進或重整行動鏈。
+  TeamPlanCompleted: [sub('TeamPlanCompleted', 'npc-behavior')],
+  TeamMemberDeparted: [sub('TeamMemberDeparted', 'npc-behavior')],
 
   // 能力上限改變 → character 夾住當前 HP/MP。
   ProgressionCapacityChanged: [sub('ProgressionCapacityChanged', 'character')],

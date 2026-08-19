@@ -14,6 +14,15 @@ import { mapModuleContract } from '../../modules/map/public';
 import { dungeonModuleContract } from '../../modules/dungeon/public';
 import { combatModuleContract } from '../../modules/combat/public';
 import { teamModuleContract } from '../../modules/team/public';
+import { cityModuleContract } from '../../modules/city/public';
+import { questModuleContract } from '../../modules/quest/public';
+import { socialModuleContract } from '../../modules/social/public';
+import { economyModuleContract } from '../../modules/economy/public';
+import { worldModuleContract } from '../../modules/world/public';
+import { craftingModuleContract } from '../../modules/crafting/public';
+import { distributionModuleContract } from '../../modules/distribution/public';
+import { combatSequenceModuleContract } from '../../modules/combat-sequence/public';
+import { npcBehaviorModuleContract } from '../../modules/npc-behavior/public';
 
 import {
   GAME_COMMAND_ENTRY,
@@ -45,6 +54,18 @@ export const MODULE_CONTRACTS: readonly ModuleContract[] = [
   dungeonModuleContract,
   combatModuleContract,
   teamModuleContract,
+  // Wave D。註冊之後，`sendsInternalCommands` 的「送出端 → Owner」交叉驗證第一次有東西可比：
+  // dungeon 早就在送 StartAssetDistribution／FinalizeAssetDistributionCollection，而
+  // Distribution 模組先前根本不存在——啟動驗證看不到，要等玩家真的開始探索才在交易中失敗。
+  cityModuleContract,
+  questModuleContract,
+  socialModuleContract,
+  economyModuleContract,
+  worldModuleContract,
+  craftingModuleContract,
+  distributionModuleContract,
+  combatSequenceModuleContract,
+  npcBehaviorModuleContract,
 ];
 
 export type RegistryDiagnostic = ManifestDiagnostic;

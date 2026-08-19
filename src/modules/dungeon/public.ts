@@ -76,7 +76,15 @@ export const dungeonModuleContract: ModuleContract = {
   // 只登記**已實作**的 subscriber（原本宣告 9 筆但只寫了 4 個函式；宣告卻沒有實作會讓啟動
   // 驗證誤放行、路由時才炸）。其餘待 combat-sequence / map 刷新反應實作後再加回。
   // 命名依 12_engine_runtime.md §5.2 的 `subscription.<eventType>.<subscriber>`。
-  subscriptionHandlerIds: [] as readonly EventSubscriptionId[],
+  // 這兩筆的 Handler（handleCombatEncounterResolved / handleNpcDungeonSettlementApplied）一直都
+  // 存在，但先前**刻意不宣告**：它們的收斂路徑會送 Distribution 命令，而 Distribution 模組不存在，
+  // 訂閱者又不能拒絕已發生的事實——宣告了就是宣告一個走不完的流程。Wave D 讓 Distribution 落地，
+  // 這條路才真的閉合，於是宣告回來。（combat-sequence 相關的 4 筆仍未宣告：那是缺 subscriber
+  // 實作，不是缺別的模組。）
+  subscriptionHandlerIds: [
+    'subscription.CombatEncounterResolved.dungeon' as EventSubscriptionId,
+    'subscription.NpcDungeonSettlementApplied.dungeon' as EventSubscriptionId,
+  ] as readonly EventSubscriptionId[],
   emits: [
     'PlayerDungeonSessionStarted',
     'PlayerDungeonTimeAdvanced',

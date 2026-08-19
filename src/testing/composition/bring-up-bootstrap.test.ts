@@ -61,6 +61,17 @@ const assembler: ContextAssembler = (runtime): ModuleContexts => ({
   dungeon: unusedContext('dungeon'),
   combat: unusedContext('combat'),
   progression: unusedContext('progression'),
+  // Wave D 的九個模組不參與這個切片。用 unusedContext 而不是空物件：它是**觸發即拋錯**的
+  // 絆線，所以「這個切片其實碰到了某個沒準備好的模組」會立刻現形，而不是安靜地讀到 undefined。
+  city: unusedContext('city'),
+  quest: unusedContext('quest'),
+  social: unusedContext('social'),
+  economy: unusedContext('economy'),
+  world: unusedContext('world'),
+  crafting: unusedContext('crafting'),
+  distribution: unusedContext('distribution'),
+  combatSequence: unusedContext('combatSequence'),
+  npcBehavior: unusedContext('npcBehavior'),
 });
 
 const restRequest = (actorTeamId: TeamId): GameCommandRequest<GameCommand> => ({

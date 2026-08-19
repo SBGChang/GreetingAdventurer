@@ -5,8 +5,12 @@
 // `type` 判別欄**（規範見 contracts/core/messages.ts）。此處把已實作模組的訊息收成三個聯集，
 // 並提供型別安全的判別與 router 查表基礎。
 //
-// 未實作模組（economy/city/quest/social/crafting/distribution/world/npc-behavior）的訊息
-// 於其 Wave 併入下列聯集即可，不需改動 kernel。
+// Wave D 已把 economy/city/quest/social/crafting/distribution/world/npc-behavior/combat-sequence
+// 的訊息併入下列聯集（kernel 完全不需改動——這正是判別欄路由的目的）。
+//
+// 併入原則：**只併已註冊 Handler 的能力**。`GAME_COMMAND_ENTRY` 與 `INTERNAL_COMMAND_OWNER`
+// 都是非 Partial 的 Record，所以聯集裡多一筆沒有 Handler 的訊息，tsc 會逼你指定入口，而指了
+// 入口卻沒有 Handler 又會讓 registry 的啟動驗證失敗。兩道關卡合起來使「宣告 ≠ 實作」無處可藏。
 
 import type { ModuleId } from '../../contracts/core';
 
@@ -29,6 +33,34 @@ import type {
   TeamInboundInternalCommand,
   TeamDomainEvent,
 } from '../../contracts/team';
+import type {
+  CityGameCommand,
+  CityInternalCommand,
+  CityDomainEvent,
+} from '../../contracts/city';
+import type {
+  QuestGameCommand,
+  QuestInternalCommand,
+  QuestDomainEvent,
+} from '../../contracts/quest';
+import type {
+  SocialGameCommand,
+  SocialInternalCommand,
+  SocialDomainEvent,
+} from '../../contracts/social';
+import type { EconomyInternalCommand, EconomyDomainEvent } from '../../contracts/economy';
+import type { WorldInternalCommand, WorldDomainEvent } from '../../contracts/world';
+import type { CraftingDomainEvent } from '../../contracts/crafting';
+import type {
+  AssetDistributionGameCommand,
+  AssetDistributionInboundInternalCommand,
+  AssetDistributionDomainEvent,
+} from '../../contracts/distribution';
+import type {
+  CombatSequenceInternalCommand,
+  CombatSequenceDomainEvent,
+} from '../../contracts/combat-sequence';
+import type { NpcBehaviorDomainEvent } from '../../contracts/npc-behavior';
 
 // ──────────────────────────────────────────────────────────────────────────
 // 三種訊息的全遊戲聯集
@@ -39,19 +71,36 @@ import type {
 // Progression 與 Dungeon 目前沒有任何已註冊的 Game Command：
 //   progression —— learnFromBook / startTeaching 的 Handler 未撰寫。
 //   dungeon     —— 只註冊四筆已實作且只送有 Owner 命令者，見 contracts/dungeon 說明。
+// crafting 的三筆 Game Command（startCrafting／cookCuisine／eatRestaurantMeal）不在此聯集：
+// 它們的 Handler 未撰寫（消耗端 inventory 的 TransformCraftingItems／ConsumeCuisineIngredients
+// 也還沒有實作），所以整個能力不開放。
 export type GameCommand =
   | InventoryGameCommand
   | DungeonGameCommand
   | CombatGameCommand
-  | TeamGameCommand;
+  | TeamGameCommand
+  | CityGameCommand
+  | QuestGameCommand
+  | SocialGameCommand
+  | AssetDistributionGameCommand;
 
 export type GameInternalCommand =
   | CharacterInternalCommand
   | InventoryInternalCommand
   | MapInternalCommand
   | CombatInternalCommand
-  | TeamInboundInternalCommand;
+  | TeamInboundInternalCommand
+  | CityInternalCommand
+  | QuestInternalCommand
+  | SocialInternalCommand
+  | EconomyInternalCommand
+  | WorldInternalCommand
+  | AssetDistributionInboundInternalCommand
+  | CombatSequenceInternalCommand;
 
+// 事件聯集比命令聯集寬：一個模組即使沒有任何已註冊的訂閱者，它**發出**的事件仍然是全遊戲
+// 事實的一部分（存檔 Outbox、UI 投影、與未來的訂閱者都要看得到它）。事件的「有沒有人聽」由
+// Manifest 的訂閱表決定，不由聯集決定。
 export type GameDomainEvent =
   | CharacterDomainEvent
   | InventoryDomainEvent
@@ -59,7 +108,16 @@ export type GameDomainEvent =
   | MapDomainEvent
   | DungeonDomainEvent
   | CombatDomainEvent
-  | TeamDomainEvent;
+  | TeamDomainEvent
+  | CityDomainEvent
+  | QuestDomainEvent
+  | SocialDomainEvent
+  | EconomyDomainEvent
+  | WorldDomainEvent
+  | CraftingDomainEvent
+  | AssetDistributionDomainEvent
+  | CombatSequenceDomainEvent
+  | NpcBehaviorDomainEvent;
 
 export type GameCommandType = GameCommand['type'];
 export type GameInternalCommandType = GameInternalCommand['type'];
@@ -116,6 +174,7 @@ export const INTERNAL_COMMAND_OWNER: Readonly<Record<GameInternalCommandType, Mo
   MoveItemToTeamQuestCargo: 'inventory' as ModuleId,
   CommitCombatItemUse: 'inventory' as ModuleId,
   EvaluateTeamEncumbrance: 'inventory' as ModuleId,
+  ConsumeCombatSequenceRetrySupply: 'inventory' as ModuleId,
 
   // map
   SetMapRefreshLock: 'map' as ModuleId,
@@ -135,6 +194,52 @@ export const INTERNAL_COMMAND_OWNER: Readonly<Record<GameInternalCommandType, Mo
   StartReturnFromDungeon: 'team' as ModuleId,
   StartNpcTeamPlan: 'team' as ModuleId,
   CompletePlayerTravelSegmentWithoutEvent: 'team' as ModuleId,
+
+  // city
+  ReserveShopOfferForQuest: 'city' as ModuleId,
+  ReleaseQuestShopOffer: 'city' as ModuleId,
+  SetFacilityAvailability: 'city' as ModuleId,
+  ApplyCityMetricEffect: 'city' as ModuleId,
+  TransferHomeOwnership: 'city' as ModuleId,
+  InterruptHomeTeachingPost: 'city' as ModuleId,
+  RevealTavernIntel: 'city' as ModuleId,
+
+  // quest
+  AcceptQuestForNpcTeam: 'quest' as ModuleId,
+  ClaimQuestForNpcTeam: 'quest' as ModuleId,
+  ReleaseNpcQuestClaim: 'quest' as ModuleId,
+
+  // social
+  ProvisionPlayerAffinity: 'social' as ModuleId,
+  ConsumePlayerConversationAllowance: 'social' as ModuleId,
+
+  // economy —— 金錢是 economy 獨占的 Slice；city / distribution / quest 一律送這些命令。
+  TransferCurrency: 'economy' as ModuleId,
+  GrantCurrency: 'economy' as ModuleId,
+  RemoveCurrency: 'economy' as ModuleId,
+  CreateEconomyAccount: 'economy' as ModuleId,
+
+  // world
+  ChangeRegionControl: 'world' as ModuleId,
+  SetRouteAccess: 'world' as ModuleId,
+  ApplyMarketPressure: 'world' as ModuleId,
+  ApplyEventWeightModifier: 'world' as ModuleId,
+  SetWorldFact: 'world' as ModuleId,
+
+  // distribution —— dungeon 早就在送這三筆命令了，先前無 Owner（見 ModuleContract 的
+  // sendsInternalCommands 交叉驗證註解）。現在有了。
+  StartAssetDistribution: 'distribution' as ModuleId,
+  AppendAssetDistributionResult: 'distribution' as ModuleId,
+  FinalizeAssetDistributionCollection: 'distribution' as ModuleId,
+
+  // combat-sequence
+  StartCombatSequence: 'combat-sequence' as ModuleId,
+  ResolveNextCombatSequenceChallenge: 'combat-sequence' as ModuleId,
+  SkipNextCombatSequenceChallenge: 'combat-sequence' as ModuleId,
+  StopCombatSequence: 'combat-sequence' as ModuleId,
+  CommitCombatSequenceSourceResults: 'combat-sequence' as ModuleId,
+  InvalidateCombatSequence: 'combat-sequence' as ModuleId,
+  ReleaseCombatSequence: 'combat-sequence' as ModuleId,
 };
 
 // §5.1：每個 Game Command 必須恰好有一個入口接收者——領域 Module Handler **或**
@@ -167,6 +272,24 @@ export const GAME_COMMAND_ENTRY: Readonly<Record<GameCommandType, GameCommandEnt
   // combat
   useCombatSkill: 'combat' as ModuleId,
   combatRest: 'combat' as ModuleId,
+
+  // city
+  buyShopOffer: 'city' as ModuleId,
+  sellItemToShop: 'city' as ModuleId,
+  buyOrUpgradeHome: 'city' as ModuleId,
+  releaseHomeTeacher: 'city' as ModuleId,
+
+  // quest
+  acceptQuest: 'quest' as ModuleId,
+
+  // social
+  interactWithAdventurer: 'social' as ModuleId,
+  proposeMarriageToTeamMember: 'social' as ModuleId,
+
+  // distribution
+  submitLootBid: 'distribution' as ModuleId,
+  passLootItem: 'distribution' as ModuleId,
+  resolveLootAuctionRound: 'distribution' as ModuleId,
 
   // team
   startCityTravel: 'team' as ModuleId,
