@@ -268,7 +268,24 @@ export type DungeonState = Readonly<{
 
 export type PlayerExplorationSessionView = PlayerExplorationSession;
 export type PlayerMapKnowledgeView = PlayerMapKnowledge;
-export type NpcDungeonRunView = NpcDungeonRun;
+// doc §4 明文：「Dungeon Query 不公開其他隊伍的 RNG seed、未結算獎勵細節或可被玩家利用的
+// NPC 隱藏結果；UI 只取得需要顯示的進度摘要。」
+//
+// 這個 View 原本寫成 `= NpcDungeonRun` 的別名，於是三件該遮的東西全部公開：
+//   * `rngContext` —— 該隊的 RNG seed 與游標。拿到它就能預測那支 NPC 隊後續每一次擲骰。
+//   * `pendingResults[].outcome` —— 尚未結算的成敗，正是「可被玩家利用的 NPC 隱藏結果」。
+//   * `pendingResults[].pendingRewardRefs` —— 未結算獎勵細節。
+//
+// 別名的問題不只是「剛好多公開了幾個欄位」：它讓「投影」在型別上根本不存在，所以沒有任何東西
+// 會在有人多讀一個欄位時失敗。改成真正的投影後，要洩漏就得先改這個型別。
+//
+// 未結算成果只以**筆數**出現：UI 看得到「這隊已經嘗試過幾個目標」（進度），看不到成敗與獎勵。
+// 不要把 outcome 或 pendingRewardRefs 加回來——那是 §4 直接點名禁止的資訊。
+export type NpcDungeonRunView = Readonly<
+  Omit<NpcDungeonRun, 'rngContext' | 'pendingResults'> & {
+    pendingResultCount: number;
+  }
+>;
 export type PendingDungeonInteractionView = PendingDungeonInteraction;
 
 // [INVENTED] getNpcProgress 的摘要投影；文件未給出結構。

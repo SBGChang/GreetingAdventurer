@@ -38,6 +38,7 @@ import {
 } from './system';
 import type { DungeonHandlerResult } from './system';
 import { createFixtureState, createFixtureContext, FIXTURE } from './fixtures';
+import { makeDungeonQuery } from './queries';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -394,6 +395,44 @@ const cases: readonly Case[] = [
       const kinds = eventKinds(day.outgoingMessages);
       assert(kinds.includes('NpcDungeonRunProgressed'), 'emits NpcDungeonRunProgressed');
       assert(internalKinds(day.outgoingMessages).includes('ApplyNpcDungeonSettlement'), 'requests map settlement');
+    },
+  },
+  {
+    // doc §4 明文：「Dungeon Query 不公開其他隊伍的 RNG seed、未結算獎勵細節或可被玩家利用的
+    // NPC 隱藏結果」。NpcDungeonRunView 先前是 NpcDungeonRun 的別名，三者全部公開。
+    // 這個測試釘住投影：拿到 rngContext 就能預測那支 NPC 隊後續每一次擲骰。
+    name: 'npc run query view shields rngContext and unsettled results (doc §4)',
+    run: () => {
+      const ctx = createFixtureContext();
+      const start = ok(
+        startNpcDungeonRun(
+          createFixtureState(),
+          { type: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
+          ctx,
+        ),
+      );
+      const runId = Object.keys(start.nextSlice.npcRuns)[0] as NpcDungeonRunId;
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
+      const run = day.nextSlice.npcRuns[runId]!;
+      assert(run.pendingResults.length > 0, 'fixture produced unsettled results to shield');
+
+      const query = makeDungeonQuery(day.nextSlice, ctx.reader);
+      const view = query.getNpcRun(runId);
+      if (view === undefined) throw new Error('getNpcRun returned undefined for an existing run');
+      const keys = Object.keys(view);
+      assert(!keys.includes('rngContext'), `rngContext must not be exposed (keys: ${keys.join(',')})`);
+      assert(!keys.includes('pendingResults'), `pendingResults must not be exposed (keys: ${keys.join(',')})`);
+      assert(
+        view.pendingResultCount === run.pendingResults.length,
+        `only the count is exposed (got ${view.pendingResultCount}, run has ${run.pendingResults.length})`,
+      );
+
+      // 兩個 getter 必須共用同一份投影——先前 getNpcRunForTeam 也是直接回傳 state 的 Run。
+      const byTeam = query.getNpcRunForTeam(FIXTURE.teamId);
+      if (byTeam === undefined) throw new Error('getNpcRunForTeam returned undefined for an existing run');
+      const teamKeys = Object.keys(byTeam);
+      assert(!teamKeys.includes('rngContext'), 'getNpcRunForTeam must shield rngContext too');
+      assert(!teamKeys.includes('pendingResults'), 'getNpcRunForTeam must shield pendingResults too');
     },
   },
   {
