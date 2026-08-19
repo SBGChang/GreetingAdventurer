@@ -32,6 +32,10 @@ const IDENTITY: ContentManifestIdentity = {
   packs: [{ packId: PACK, version: '0.0.0', hash: 'test' }],
 };
 
+// `loadContent` 把**整筆作者 JSON**（含 header 欄位）放進 `data`，Registry 的 header 欄位只是它的
+// 索引副本。原本這個 helper 把 kind 只放在 header、`data` 留空，於是投影出來的 View 沒有 `kind`
+// 欄位——而 `ItemDefinition.kind` 是 inventory 真正用來判別裝備／書籍的欄位。Fixture 因此比真實
+// pack 寬鬆，遮掉了「kind 是否投影得出來」這件事。這裡改成與載入器一致：kind 同時進 data。
 function def(id: string, kind: string, data: Record<string, unknown> = {}): ContentDefinition {
   return {
     id: id as DefinitionId,
@@ -40,7 +44,7 @@ function def(id: string, kind: string, data: Record<string, unknown> = {}): Cont
     packId: PACK,
     enabled: true,
     sourcePath: `mem://${kind}/${id}`,
-    data: data as ContentDefinition['data'],
+    data: { ...data, kind } as ContentDefinition['data'],
   };
 }
 
@@ -61,13 +65,20 @@ export type ReadersTestResult = Readonly<{ name: string; pass: boolean; error?: 
 
 const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
   {
-    name: 'inventory：getItem 投影 header；未知 id 拋錯',
+    name: 'inventory：getItem 解得出全部六種 ItemKind；未知 id 拋錯',
     run: () => {
-      const reader = createItemDefinitionReader(reg([def('definition:item:sword', INVENTORY_DEFINITION_KINDS.item)]));
-      const item = reader.getItem('definition:item:sword' as never);
-      assert(String(item.id) === 'definition:item:sword', 'id 應為 registry 權威值');
-      assert(item.enabled === true, 'enabled 應取自 registry header');
-      assert(threw(() => reader.getItem('definition:item:absent' as never)), '未知 id 應拋錯');
+      // 原本這個案例 authored 一筆 `kind: 'item'` 的定義——那個 kind 不存在於 ItemKind，
+      // 真實 Content Pack 永遠不會產生它。改以真的 kind 逐一驗證：裝備、消耗品、素材、書籍
+      // 都必須經 getItem 解得出來（system.ts 以 getItem(id).kind 判別裝備，queries.ts 判別書籍）。
+      for (const kind of INVENTORY_DEFINITION_KINDS.itemKinds) {
+        const id = `definition:item:${kind}`;
+        const reader = createItemDefinitionReader(reg([def(id, kind)]));
+        const item = reader.getItem(id as never);
+        assert(String(item.id) === id, `id 應為 registry 權威值（kind=${kind}）`);
+        assert(item.kind === kind, `kind 應保留作者值（kind=${kind}）`);
+        assert(item.enabled === true, `enabled 應取自 registry header（kind=${kind}）`);
+        assert(threw(() => reader.getItem('definition:item:absent' as never)), '未知 id 應拋錯');
+      }
     },
   },
   {
@@ -143,12 +154,27 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
     },
   },
   {
-    name: '跨 kind 存取拋錯（inventory item reader 不得取到 book 定義）',
+    name: '跨 kind 存取拋錯（item reader 不得取到規則定義；equipment reader 不得取到書籍）',
     run: () => {
-      const reader = createItemDefinitionReader(
-        reg([def('definition:book:tome', INVENTORY_DEFINITION_KINDS.book)]),
+      // 書籍**是**物品，所以 getItem 取到書是正確的（queries.ts 就以此判別書籍）。
+      // 真正該擋的是拿非物品的 kind 去問物品 reader，以及拿書籍去問裝備 reader。
+      const ruleReg = reg([
+        def('definition:rule:use-delay', INVENTORY_DEFINITION_KINDS.useDelayRule),
+        def('definition:book:tome', INVENTORY_DEFINITION_KINDS.book),
+      ]);
+      const reader = createItemDefinitionReader(ruleReg);
+      assert(
+        threw(() => reader.getItem('definition:rule:use-delay' as never)),
+        'use-delay-rule 不是物品，getItem 應拋錯',
       );
-      assert(threw(() => reader.getItem('definition:book:tome' as never)), '跨 kind 存取應拋錯');
+      assert(
+        reader.getItem('definition:book:tome' as never).kind === 'book',
+        '書籍是物品，getItem 應取得且 kind 為 book',
+      );
+      assert(
+        threw(() => reader.getEquipment('definition:book:tome' as never)),
+        '書籍不是裝備，getEquipment 應拋錯',
+      );
     },
   },
 ];
