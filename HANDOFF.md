@@ -1,8 +1,109 @@
 # 實作接手文件（Implementation Handoff）
 
-> 給下一位接手者(人或 AI)。設計已定稿、地基與核心模組已實作且驗證通過;剩下的是**整合(串接)+ 補齊模組 + UI**。
+> 給下一位接手者(人或 AI)。設計已定稿;**20 個模組全部實作完成並接進正式註冊表**,Content Pack
+> 平台已運轉。剩下的是**各模組 HandlerContext 的 port 實作 + 四國內容資料化 + Bootstrap/vertical
+> slice + UI**。動 `src/` 前先讀 `.claude/skills/runtime-data-discipline/SKILL.md`。
 
-## 現況(Wave C:composition 骨架 + root 路由 + 引擎 Session;tsc 乾淨、全部測試通過)
+## 現況(Wave D:20 個模組全部實作 + 全部接進正式註冊表 + Content Pack 平台;tsc 乾淨、43 支測試通過)
+
+**一句話**:16 個模組 + 3 個純服務全部實作完成並接線,啟動驗證 0 診斷;正式 Content Pack 平台
+(作者層 TypeScript → 純資料 JSON → Runtime)已運轉,首批 36 筆真實內容端到端驅動 progression 計算。
+
+### Wave D 新增
+
+| 區塊 | 路徑 | 狀態 |
+|---|---|---|
+| 補齊 9 個模組 | `src/modules/{economy,city,quest,social,crafting,distribution,world,npc-behavior,combat-sequence}/` | ✅ 各含 state/system/queries/fixtures/public/`<name>.test`;12 個單元只依賴 `contracts/`,完全平行完成 |
+| 3 個純服務 | `src/domain-services/{statistics,combat-power,gathering}/` | ✅ 無 State Slice、無 ModuleContract、純函式 |
+| 12 個 Reader adapter | `src/app/content/<name>-reader.ts` + `.test.ts` | ✅ registry → 各模組契約的窄化 Reader |
+| **Content Pack 平台** | `content-source/**`(作者層 TS)→ `scripts/compile-content-packs.ts` → `content/**`(純 JSON)→ `src/platform/content-repository.ts` | ✅ + 端到端測試 |
+| Definition kind 登記表 | `src/app/content/definition-kinds.ts` | ✅ 60 個 kind → 擁有模組 → schemaVersion;以 import 各 reader 的常數組成,不重打字串 |
+| 全模組接線 | `src/app/composition/{state,messages,manifest,registry,router}.ts` | ✅ 9 Slice、31 Internal Command、10 Game Command、11 Job、11 Subscriber;啟動驗證 0 診斷 |
+
+**新門禁**:`verify:content-packs` —— 產物必須等於重新編譯的結果,且必須真的載得進來。
+與 `verify:content-sync` 同形狀:手改產物或改了作者層忘記重編,都不會有任何測試失敗。
+
+`npm run verify` = `typecheck` → `verify:discipline` → `verify:modules` → **`verify:content-packs`**
+→ `verify:content-sync` → `verify:content-scope`。
+
+### Content Pack 的兩層(務必分清)
+
+* **`content-source/**`** 是**作者層**,用 TypeScript 撰寫並以**真實 Definition 型別**標註,
+  因此 `tsc` 就是內容的 Schema 驗證器。這裡出現內容 ID 字面值是正常且必要的——紀律門禁把
+  `content-source/` 認定為「內容 ID 唯一合法的位置」(與 `invariants.ts` 持有結構不變量同型,
+  判斷依據是**位置**,不是逐行註解)。**不得**寫任何規則邏輯。
+* **`content/**`** 是 Compiler 的**產物**,純 JSON、零邏輯、決定性序列化(key 排序 + 固定縮排 + LF)。
+  正式 Runtime **只讀產物**;讀 `content-source/` 或 `docs/03_content/` 一律由依賴圖檢查擋下。
+* 分包:`pack:core`(文化無關,目前 36 筆熟練度相關)+ 後續 `pack:<culture>`。抽換文化不動 core。
+
+### Wave D 抓到的問題(都是「接上真資料/真接線才看得見」那一類)
+
+1. **`kind` 欄位的雙重身分**——registry 以 `kind` 判斷 Definition 家族與所有權,而
+   `ItemDefinition.kind`(六個 ItemKind)、`FacilityDefinition.kind`、`HomeUpgradeDefinition.kind`
+   也用同一個欄位名裝**領域變體**。JSON 裡只有一個 `kind`,兩者不可能同時成立;真 pack 一接上
+   `getItem` 就永遠找不到任何物品。之所以測試全綠,是因為 fixture 自己 authored 一筆
+   `kind: 'item'` 的定義——剛好長成程式期待的樣子,於是雙方一起錯。
+   **正確樣式**:`EquipmentDefinition` 同時帶 `kind: 'equipment'`(家族)與 `equipmentKind`(變體)。
+   city 已照此改為 `facilityKind` / `upgradeKind`。**新增 Definition 時不要再用 `kind` 裝變體。**
+2. **紀律門禁的行註解剝除在 CRLF checkout 上從未生效**——JS 正規表達式的 `.` 不匹配 line
+   terminator,而 `\r` 正是其中之一。後果不是漏抓而是**誤抓**:註解裡「提到」被禁樣式的說明
+   反而變成違規。已改為集中的 CRLF-safe 讀行(`codeLinesOf` / `codeOnly`)。
+3. **有 Subscriber 實作但 Manifest 未綁定,兩邊都是綠的**——先前只有正向檢查。11 個新 Subscriber
+   曾經全部未綁定:啟動驗證綠、測試綠,而它們**永遠不會被呼叫**。已補反向斷言。
+   **這是「宣告 ≠ 接線」最難察覺的方向。**
+4. **`as unknown as` 掩蓋外部輸入的形狀**——ContentRepository 原本這樣讀 JSON,缺欄位一路飄到
+   `runtimeSatisfies` 才炸,錯誤訊息與真正原因差三層。已改逐欄讀取。
+
+### 需要裁決的內容/契約問題(阻擋後續內容資料化)
+
+1. **裝備係數 Schema 表達不出設計來源**。`equipmentCatalog` 的形狀是
+   `coefficients: [{secondary, values:{muscle, coordination…}}]`(同一件裝備對物理傷害偏肌力、
+   對命中偏反應),但 `EquipmentDefinition` 拆成一個共用 `primaryAttributeCoefficients` 向量 ×
+   每通道一個純量 `coefficient`,自由度不足。**這卡住雲華裝備的資料化。**
+   要改 `SecondaryAttributeCoefficients.coefficient: number` → per-primary 向量(inventory 擁有)。
+2. **`gathering-rule` 與 `map-gathering-rule` 是同一份定義的兩個 kind 字串**——同一筆內容無法
+   同時被 map 與 dungeon/gathering 讀到。需收斂成單一 kind(建議 `gathering-rule`,與 brand tag 一致),
+   並讓 `definition-kinds.ts` 允許「同 kind、同 owner、多 Reader」。
+3. **`npcPolicy.resolverId` 兩個 ID 家族**:map 用 `NpcDungeonTargetResolverId`(DefinitionId),
+   gathering 用 `ResolverId`(Brand)。內容作者只能填一種。
+4. **`MasteryDefinition.automaticKnowledgeUnlocks` 是多餘的反向引用**。`SkillDefinition` 已有
+   `requiredMasteries` + `acquisition:{kind:'automatic'}`,而技能是文化內容——反向欄位會把文化
+   技能 ID 塞進文化無關的定義裡。core pack 目前一律填空陣列。
+5. **11 個熟練度沒有配比表**(單手盾、雙手盾、7 個任務、2 個行動)。已依「配比表只涵蓋以身體或
+   技藝反覆訓練的四類」判讀為**明確不給主屬**並有測試釘住。**這是判讀,不是文件明文,待複核。**
+6. **quest 的 `settleQuest` 無法閉合**:`QuestRewardRuleDefinition` 沒有欄位指向
+   `AssetDistributionRuleId`;且 `AppendAssetDistributionResult` 要**已解析**的 `currencyInputs`,
+   而 quest 不算錢、又不得設同步 Port。建議 ① reward rule 加 `distributionRuleId`;
+   ② economy 提供「解析 RewardRule → 發 Event」的命令,或由 distribution 自行解析 RewardRuleId。
+7. **玩家命令缺全域輸入鎖**:「沒有阻塞型 Pending / active Combat 時才可下命令」這條前置條件
+   全專案沒有擁有者(CombatQuery 只有 encounter 層 getter)。social 與 team 的玩家命令同樣缺。
+   應在 router 統一補,不要各模組自己發明一個沒人能實作的 port。
+8. **每日對話計數有兩個擁有者**:`ProgressionModuleState.dailyUsage.conversationUses` 與 social 的
+   `playerConversationUsage` 重疊。doc 把它歸給 social;接上後應移除 progression 那份。
+9. **character 的 `handleCreatePartnerFamilyLink` 對硬條件是靜默 no-op**(同性/未成年/已婚一律回
+   未變 slice)。social 求婚接受後送出命令,UI 會看到 accepted 但婚姻沒建立,且拿不到原因。
+10. **team 的 `inviteSuccessBonus` 缺口是誤歸屬**:它屬 **progression**
+    (`ProgressionQuery.getSocialMasteryBenefits(id).inviteSuccessBonus`,已實作)。team 缺的是
+    `TeamHandlerContext` 裡的一個 ProgressionQuery 窄化 port,不是 SocialQuery。
+
+### Wave D 之後的下一步(依建議順序)
+
+1. **各模組 HandlerContext 的具體 port 實作**。`ContextAssembler` 目前對 Wave D 九個模組一律注入
+   `unusedContext` 絆線(觸發即拋錯,不是空物件)。要真的跑起來,需逐模組把 Definition Reader、
+   跨模組 Query、id allocator、Resolver 接上。各模組回報的「需要注入的 Port」清單見各自
+   `system.ts` 的本地 port 型別宣告。
+2. **四國 content pack**。core 已有 36 筆;文化 pack 尚未開始(先解上面第 1、2、3 項契約問題)。
+   設計來源覆蓋度:equipment/skill/monster/consumables/crafting/map 有結構化資料;
+   world/city/quest/archetype/progression-skill/social/economy/distribution/npc-behavior/
+   dungeon-rule/content-event **只有散文設計**,需從 GDD 判讀並逐筆標示來源。
+   注意:`consumables`/`materials` 的數值嵌在中文散文字串裡(`'重量 1／價值 24'`),
+   **不要**用 regex 剖析散文當真相來源——那會在設計師改寫措辭時安靜地產生錯資料。
+3. **NewGameBootstrapper(§1.1)與 vertical slice**。骨幹(Session)早已就緒,卡在上面兩項。
+4. **UI + Electron**(Wave E)。
+
+---
+
+## 前一階段現況(Wave C:composition 骨架 + root 路由 + 引擎 Session;tsc 乾淨、全部測試通過)
 
 **已完成、且 `tsc` 乾淨 + 單元測試實跑通過:**
 
