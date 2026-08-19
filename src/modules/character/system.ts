@@ -264,9 +264,24 @@ function applyStatus(
       return [next, { statusId: def.id, change: 'refreshed', stacks }];
     }
     default:
-      // TODO: 未知 stackPolicy —— 保守略過（資料驗證層應已擋下）。
-      return [statuses, { statusId: def.id, change: 'refreshed', stacks: existing.stacks }];
+      // `stackPolicy` 是封閉聯集（'replace' | 'refresh' | 'stack'），上面三個 case 已窮盡，
+      // 所以這裡在型別上不可達。先前這個分支「保守略過」——什麼都不做，卻回報
+      // `change: 'refreshed'`。那是**謊報**：呼叫端收到「已刷新」，狀態其實沒動。
+      //
+      // 改成窮盡性檢查有兩個作用：
+      //   * 契約日後多一種 stackPolicy 時，`never` 指派會變成**編譯錯誤**，逼作者處理它，
+      //     而不是靜默走進這條假裝成功的分支。
+      //   * 內容資料帶了非法字串時（型別檢查不驗資料）明確拋錯，符合 §6「壞資料必須明確失敗」。
+      return assertUnhandledStackPolicy(def.stackPolicy, def.id);
   }
+}
+
+// 窮盡性守門。回傳型別是 never，所以它同時是「不可達」的證明與執行期的明確失敗。
+function assertUnhandledStackPolicy(policy: never, statusId: StatusDefinition['id']): never {
+  throw new Error(
+    `character: StatusDefinition "${String(statusId)}" 的 stackPolicy "${String(policy)}" ` +
+      `不在契約的封閉聯集內——內容資料非法，或契約新增了未處理的 stackPolicy`,
+  );
 }
 
 // 依上限夾住當前 HP/MP。回傳 [新 condition, 是否有變化]。
