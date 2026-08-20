@@ -284,6 +284,13 @@ export interface CombatDefinitionReader {
   getHealRule(id: CombatHealRuleId): CombatHealRuleDefinition;
   getCtbAdjustmentRule(id: CombatCtbAdjustmentRuleId): CombatCtbAdjustmentRuleDefinition;
   getCombatInterruptionRule(id: CombatInterruptionRuleId): CombatInterruptionRuleDefinition;
+  // 控制抗性（§2.6）。`MonsterDefinition.controlResistanceProfileId` 與
+  // `CombatControlResistanceProfileDefinition` 早就存在，但 Reader 沒有這個 getter，於是
+  // `resistedCtbIncrease()` 只能整個函式 `return raw`——一個看起來有抗性接縫、實際倍率恆為 1
+  // 的恆等函式（規範 §5 點名的「缺少控制抗性時使用倍率 1」）。
+  getControlResistanceProfile(
+    id: CombatControlResistanceProfileId,
+  ): CombatControlResistanceProfileDefinition;
   getEquipmentEffect(id: EquipmentEffectDefinitionId): EquipmentEffectDefinition;
   getAiPolicy(id: CombatAiPolicyId): CombatAiPolicyDefinition;
   getExperienceBudget(id: EncounterExperienceBudgetId): EncounterExperienceBudgetDefinition;

@@ -11,8 +11,10 @@
 //
 // 「真實」主路：StartCombatEncounter → 倒扣式 CTB 排程 → useCombatSkill（含 dealDamage/heal/
 //   adjustCtb/applyStatus/removeStatus）→ 反擊 → 前排補位 → 全滅判定 → 一次性結算成長事件。
-// 「stub // TODO」：戰鬥道具 workflow、commandAlly 一次性指令、Boss 重複中斷免疫細節、
-//   跨武器組切換延遲、interruptCasting 的多段技能保留。
+//   控制抗性（§2.6）也在主路上：外來正值 adjustCtb 依抗性檔折算、夾兩次自身行動間的累積上限，
+//   成功中斷後依抗性檔授予中斷免疫，並於自身行動完成時連同累積量一起清空。
+// 未完成的部分不在這裡列清單——清單會跟程式漂移。每一處都在它自己的位置留有缺口標記，
+// 權威來源是 `npm run verify:gap`。
 
 import { addToRecord, addToMap, addToRecordCapped } from '../../kernel/accumulate';
 import type {
@@ -39,6 +41,7 @@ import type {
 import { SUPPORT_USE_CAP, GRID_MIN, GRID_MAX } from '../../contracts/core';
 import type {
   CombatDefinitionReader,
+  CombatControlResistanceProfileDefinition,
   CombatEncounterSource,
   CombatSkillDefinitionView,
   CombatActionKind,
@@ -613,17 +616,48 @@ function getC(work: Working, id: CombatantId): CombatantState {
   return c;
 }
 
-function isEnemyMonster(c: CombatantState): boolean {
-  return c.source.kind === 'monster';
+// 該戰鬥員的控制抗性檔。抗性屬 Monster Definition，所以角色沒有抗性檔——回 undefined 表示
+// 「這個概念不適用」，不是「資料缺了」。
+function controlResistanceProfileOf(
+  c: CombatantState,
+  ctx: CombatHandlerContext,
+): CombatControlResistanceProfileDefinition | undefined {
+  if (c.source.kind !== 'monster') return undefined;
+  const monster = ctx.definitions.getMonster(c.source.monsterDefinitionId);
+  return ctx.definitions.getControlResistanceProfile(monster.controlResistanceProfileId);
 }
 
 // 對 Monster 的外來正值 adjustCtb 套控制抗性 + 兩次自身行動間累積上限（§2.6）。
-// TODO: CombatDefinitionReader 未提供 getControlResistanceProfile；補上 getter 後才能以
-//   ctbIncreaseMultiplier 折算並套 maxExternalCtbIncreaseBeforeOwnAction 上限。
-//   第一版主路以 multiplier=1、無累積上限處理（負值調整本就不吃抗性）。
-function resistedCtbIncrease(target: CombatantState, raw: number, _ctx: CombatHandlerContext): number {
-  if (!isEnemyMonster(target) || raw <= 0) return raw;
-  return raw;
+//
+// 這個函式先前整體 `return raw`——兩條分支同一個回傳值，看起來有抗性接縫、實際倍率恆為 1。
+// 那正是規範 §5 點名的「缺少控制抗性時使用倍率 1」。三件事現在全由資料決定，程式只有形狀：
+//   * `ctbIncreaseMultiplier` —— 折算倍率。
+//   * 折算後**向下取整** —— 設計要求「單次 CTB 增加向下取整」，故用 floor 而非四捨五入。
+//   * `maxExternalCtbIncreaseBeforeOwnAction` —— 兩次自身行動之間外來增加的合計上限。
+//
+// 上限欄位選填，未給＝「這個抗性檔沒有上限」。那是抗性檔的一種合法形狀，不是缺資料給預設值：
+// 抗性檔本身若不存在，getControlResistanceProfile 會拋錯（窄化 Reader 對未註冊定義一律拋）。
+//
+// 負值調整不吃抗性——那是對目標有利的 CTB 減少，抗性只擋外來的延遲。
+function resistedCtbIncrease(target: CombatantState, raw: number, ctx: CombatHandlerContext): number {
+  if (raw <= 0) return raw;
+  const profile = controlResistanceProfileOf(target, ctx);
+  if (profile === undefined) return raw;
+  const scaled = Math.floor(raw * profile.ctbIncreaseMultiplier);
+  const cap = profile.maxExternalCtbIncreaseBeforeOwnAction;
+  if (cap === undefined) return scaled;
+  const remaining = cap - target.externalCtbIncreaseSinceOwnAction;
+  return remaining <= 0 ? 0 : Math.min(scaled, remaining);
+}
+
+// 「自身行動已完成」時要清空的行動窗旗標：兩次自身行動之間累積的外來 CTB，以及成功被中斷後
+// 取得的中斷免疫（§2.6）。
+//
+// **兩條行動路徑（useCombatSkill／combatRest）共用這一份**，而且兩個旗標必須一起清：combatRest
+// 曾經只清 externalCtbIncreaseSinceOwnAction、漏掉 interruptionImmuneUntilOwnAction，那會讓休息
+// 過一次的 Boss 永久免疫中斷。新增第三條行動路徑時務必沿用這個函式，不要各自手寫欄位。
+function clearOwnActionWindow(c: CombatantState): CombatantState {
+  return { ...c, externalCtbIncreaseSinceOwnAction: 0, interruptionImmuneUntilOwnAction: false };
 }
 
 function applyEffect(
@@ -739,17 +773,24 @@ function applyEffect(
         const target = combatants[targetId];
         if (target === undefined || target.state === 'dead' || target.casting === undefined) continue;
         if (!rule.appliesToActionKinds.includes(target.casting.actionKind)) continue;
-        // TODO: Boss 若本次自身行動前已成功被中斷 → 後續 interruptCasting 只保留其他效果。
+        // §2.6：成功被中斷一次後，到完成下一次自身行動前免疫再次中斷。免疫只擋**中斷這一項**，
+        // 同一技能的其他效果（傷害、adjustCtb…）各走自己的 case，照常生效——這就是設計說的
+        // 「後續 interruptCasting 只保留其他效果」。
+        if (target.interruptionImmuneUntilOwnAction) continue;
         const delayRule = ctx.definitions.getActionDelayRule(rule.interruptionDelayRuleId);
         const attrs = attributesOf(target, ctx);
         const delay = Math.max(
           delayRule.minimumDelay,
           delayRule.baseDelay - ctbReduction(delayRule.reductions, attrs),
         );
+        // 是否因此取得免疫由抗性檔宣告（一般怪物為 false，只有 Boss 檔開啟）。
+        const profile = controlResistanceProfileOf(target, ctx);
         combatants[targetId] = {
           ...target,
           casting: undefined,
           currentCtb: target.currentCtb + delay,
+          interruptionImmuneUntilOwnAction:
+            profile !== undefined && profile.interruptionImmunityUntilOwnActionAfterSuccess,
           revision: bumpRevision(target.revision),
         };
         results.push({ kind: 'interruptCasting', targetId: String(targetId) });
@@ -1101,13 +1142,13 @@ export function handleUseCombatSkill(
   // 行動延遲 + 狀態倒扣 + 自身行動旗標重置。
   const acted0 = getC(work, cmd.actorId);
   const delay = actionDelayFor(acted0, skillView, ctx);
-  const acted = decrementActorStatuses({
-    ...acted0,
-    currentCtb: acted0.currentCtb + delay,
-    externalCtbIncreaseSinceOwnAction: 0,
-    interruptionImmuneUntilOwnAction: false,
-    revision: bumpRevision(acted0.revision),
-  });
+  const acted = decrementActorStatuses(
+    clearOwnActionWindow({
+      ...acted0,
+      currentCtb: acted0.currentCtb + delay,
+      revision: bumpRevision(acted0.revision),
+    }),
+  );
   work.combatants[cmd.actorId] = acted;
   work = { ...work, encounter: { ...work.encounter, supportMasteryUseCounts: supportCounts } };
 
@@ -1215,14 +1256,15 @@ export function handleCombatRest(
 
   // 回復量由 CombatRule 提供（原本是 Handler 裡的固定 5）。
   const combatants = { ...encounter.combatants };
-  const acted = decrementActorStatuses({
-    ...actor,
-    health: Math.min(actor.maxHealth, actor.health + rule.combatRestHealthRestore),
-    mana: actor.mana + rule.combatRestManaRestore,
-    currentCtb: actor.currentCtb + delay,
-    externalCtbIncreaseSinceOwnAction: 0,
-    revision: bumpRevision(actor.revision),
-  });
+  const acted = decrementActorStatuses(
+    clearOwnActionWindow({
+      ...actor,
+      health: Math.min(actor.maxHealth, actor.health + rule.combatRestHealthRestore),
+      mana: actor.mana + rule.combatRestManaRestore,
+      currentCtb: actor.currentCtb + delay,
+      revision: bumpRevision(actor.revision),
+    }),
+  );
   combatants[cmd.actorId] = acted;
   const work: Working = {
     encounter: { ...encounter, combatants },

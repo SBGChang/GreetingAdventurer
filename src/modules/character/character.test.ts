@@ -33,6 +33,7 @@ import {
   onHomeYearRestCompleted,
   onQuestStateChanged,
   onStatsCapacityChanged,
+  handleApplyContentEventStatus,
 } from './system';
 import { createCharacterQuery } from './queries';
 import { createCharacterState } from './state';
@@ -41,6 +42,7 @@ import {
   makeCharacter,
   makeEscort,
   makeContext,
+  stubDefinitionReader,
   stubResolverPort,
   stubStatsQuery,
   PLAYER_ID,
@@ -638,6 +640,58 @@ const cases: readonly Case[] = [
       const next = reqChar(res.nextSlice, PLAYER_ID);
       assert(next.condition.health === 60 && next.condition.mana === 30, '當前資源應被新上限夾住');
       assert(hasEvent(eventsOf(res.outgoingMessages), 'CharacterConditionChanged'), '應 emit CharacterConditionChanged');
+    },
+  },
+  {
+    // applyStatus 的 default 分支先前「保守略過」：什麼都不做，卻回報 change:'refreshed'。
+    // 那是謊報——呼叫端收到「已刷新」而狀態沒動。stackPolicy 是封閉聯集，三個 case 已窮盡，
+    // 所以合法資料永遠走不到 default；能走到就代表內容資料非法，必須明確失敗（§6）。
+    name: 'ApplyContentEventStatus: 非法 stackPolicy 明確拋錯，不得靜默略過並謊報已刷新',
+    run: () => {
+      const STATUS = 'definition:character-status:poison' as never;
+      const base = stubDefinitionReader();
+      const withPolicy = (policy: string) => ({
+        ...base,
+        getStatusDefinition: (id: never) => ({
+          ...base.getStatusDefinition(id),
+          id,
+          stackPolicy: policy as 'replace',
+        }),
+      });
+
+      const subject = makeCharacter({ characterId: PLAYER_ID });
+      const state0 = createCharacterState({ characters: [subject] });
+      const command = {
+        type: 'ApplyContentEventStatus' as const,
+        contentEventInstanceId: 'runtime:content-event-instance:e1' as never,
+        effectId: 'definition:effect:poison-touch' as never,
+        characterId: PLAYER_ID,
+        statusId: STATUS,
+      };
+
+      // 先以合法 policy 套一次，讓該狀態已存在——default 分支只在「已存在」時才可能被走到。
+      const first = handleApplyContentEventStatus(
+        command,
+        state0,
+        makeContext({ definitions: withPolicy('replace') }),
+      );
+      assert(
+        reqChar(first.nextSlice, PLAYER_ID).condition.statuses.length === 1,
+        '第一次套用應建立該狀態',
+      );
+
+      // 第二次改用非法 policy：必須拋錯，而不是回一個「已刷新」的假成功。
+      let threw = false;
+      try {
+        handleApplyContentEventStatus(
+          command,
+          first.nextSlice,
+          makeContext({ definitions: withPolicy('not-a-real-policy') }),
+        );
+      } catch {
+        threw = true;
+      }
+      assert(threw, '非法 stackPolicy 必須拋錯（先前是靜默略過並回報 refreshed）');
     },
   },
 ];
