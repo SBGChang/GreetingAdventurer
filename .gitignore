@@ -3,3 +3,7 @@ dist/
 build/
 *.log
 .DS_Store
+
+# git worktree 的落點。並行工作時每個 worktree 都是一份完整 checkout（含自己的 node_modules），
+# 不加這條的話一個 `git add -A` 就會把整份第二 checkout 提交進 repo。
+.claude/worktrees/
