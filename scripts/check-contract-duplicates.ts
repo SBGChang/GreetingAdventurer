@@ -23,13 +23,13 @@ const CONTRACTS = 'src/contracts';
 //                   EquipmentCoefficientChannelId / EquipmentSkillEffectRef /
 //                   ConsumeCombatSequenceRetrySupply（inventory 是 handler）
 //   economy 擁有：  MoneyValue
-//   npc-behavior 擁有：NpcStopPolicyId
 //
 // 已收斂（前輪移除）：economy 的 CreateEconomyAccountCommand / GrantCurrencyCommand /
 //   TransferCurrencyCommand、combat-sequence 的三個 *MasteryEarnedPayload、team 的
 //   PlayerInteractionOpenedEvent —— distribution / combat 的重複宣告已改為 import 擁有者型別。
 //
-// 已收斂（本輪移除，基準線 6 → 4）：`FacilityKind` 與 `ContentEventInstance`。
+// 已收斂（本輪移除，基準線 6 → 3）：`NpcStopPolicyId`（dungeon 與 npc-behavior 各一份；
+//   擁有者是 npc-behavior——NPC 何時停止探索是它的決策規則）、`FacilityKind` 與 `ContentEventInstance`。
 //   FacilityKind：city 是擁有者，team 原本放寬成 `string`（收到任何字串都算合法設施種類）、
 //     crafting 則逐字複製了十個成員（複製品不會跟著擁有者一起改）。兩處都改為 import city。
 //   ContentEventInstance：dungeon 與 team 各有一份且形狀不同（team 少了 definitionId）。
@@ -45,7 +45,6 @@ const KNOWN_DUPLICATES = new Set<string>([
   'ConsumeCombatSequenceRetrySupply',
   'EquipmentSkillEffectRef',
   'MoneyValue',
-  'NpcStopPolicyId',
 ]);
 
 const DECL = /^export (?:type|interface) ([A-Z]\w*)\s*(?:=|\{|<)/gm;
