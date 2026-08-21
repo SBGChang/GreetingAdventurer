@@ -60,10 +60,12 @@ export type MapContentKind =
   | 'control'
   | 'boss';
 
-// [INVENTED] 文件以 GridCell 表示模板格座標但未給出結構；此處採 floor/row/col。
+// 格座標（01_map_module.md §2.1）。樓層是座標的一部分，所以「上下樓梯使用相同的列、行座標」
+// 可直接以兩個 GridCell 的 row/col 相等驗證。
 export type GridCell = Readonly<{ floor: number; row: number; col: number }>;
 
-// [INVENTED] MapContentInstance.position 的結構；文件僅稱 MapPosition。
+// 內容位置（01_map_module.md §2.1）。`cell` 選填且只負責圖示與小地圖對齊，不建立房內移動節點
+// ——移動節點的粒度是房間。
 export type MapPosition = Readonly<{
   roomId: RoomId;
   cell?: GridCell;
@@ -73,14 +75,15 @@ export type MapPosition = Readonly<{
 // 2. 靜態資料契約（owned Definition）
 // ──────────────────────────────────────────────────────────────────────────
 
-// [INVENTED] MapTemplateDefinition.floors 元素；文件未給出 FloorDefinition 結構。
+// 樓層尺寸（01_map_module.md §2.1）。實際值由地圖種類決定，驗證器依 kind／nationalDungeonForm 比對。
 export type FloorDefinition = Readonly<{
   floor: number;
   rows: number;
   cols: number;
 }>;
 
-// [INVENTED] MapTemplateDefinition.rooms 元素；文件未給出 RoomDefinition 結構。
+// 房間（01_map_module.md §2.1）。一個房間是**一個移動節點**，可由多格構成（L／T／凹形）；
+// cells 必須彼此相連，否則兩塊不相連的空間會變成同一個零成本節點。
 export type RoomDefinition = Readonly<{
   roomId: RoomId;
   floor: number;
@@ -127,7 +130,7 @@ export type MapTemplateDefinition = DefinitionHeader &
     explorationExperienceRuleId: ExperienceAwardRuleId;
   }>;
 
-// [INVENTED] MapSpawnRuleDefinition.spawnBudgets 元素；文件未給出 SpawnBudgetDefinition 結構。
+// 生成數量區間（01_map_module.md §2.2）。只決定「幾個」，候選池由 culture／chest／event Rule 決定。
 export type SpawnBudgetDefinition = Readonly<{
   contentKind: MapContentKind;
   minCount: number;

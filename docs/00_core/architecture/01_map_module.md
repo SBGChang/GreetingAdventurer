@@ -58,6 +58,30 @@ type MapTemplateDefinition = DefinitionHeader & {
   explorationExperienceRuleId: ExperienceAwardRuleId;
 };
 
+// 格座標。樓層是座標的一部分（不是分開的欄位），所以「上下樓梯使用相同的列、行座標」這條規則
+// 可以直接以兩個 GridCell 的 row/col 相等來驗證。
+type GridCell = {
+  floor: number;
+  row: number;
+  col: number;
+};
+
+// 一個樓層的尺寸。實際值由地圖種類決定（見下方驗證規則：一般野外 8×8、一般內部 4×4 或 5×5、
+// 國家迷宮野外型 10×10、地牢型與建築型 6×6），驗證器依 kind／nationalDungeonForm 比對。
+type FloorDefinition = {
+  floor: number;
+  rows: number;
+  cols: number;
+};
+
+// 房間是**一個移動節點**，可由多格構成（L、T、凹形等）。`cells` 必須彼此相連——否則兩塊不相連
+// 的空間會變成同一個零成本移動節點。
+type RoomDefinition = {
+  roomId: RoomId;
+  floor: number;
+  cells: GridCell[];
+};
+
 type RoomLinkDefinition = {
   linkId: RoomLinkId;
   fromRoomId: RoomId;
@@ -110,6 +134,14 @@ type MapSpawnRuleDefinition = DefinitionHeader & {
   mapEventPoolId: MapEventPoolId;
   spawnBudgets: SpawnBudgetDefinition[];
   npcSequenceRuleId: NpcSequenceRuleId;
+};
+
+// 每種內容在本張地圖上的生成數量區間。只決定「幾個」，不決定「是什麼」——候選池由上面的
+// culture／chest／event Rule 決定，本局的實際結果屬 Runtime State。
+type SpawnBudgetDefinition = {
+  contentKind: MapContentKind;
+  minCount: number;
+  maxCount: number;
 };
 ```
 
