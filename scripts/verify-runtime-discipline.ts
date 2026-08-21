@@ -427,13 +427,51 @@ const UNFINISHED_MARKERS: readonly { pattern: RegExp; why: string }[] = [
   { pattern: /暫代/, why: '暫代' },
 ];
 
+// 比對前把**字串常值的內容**清空（註解保留——標記本來就住在註解裡）。
+//
+// 為什麼：這個檢查量的是「作者標記某段程式沒做完」。而執行期**錯誤訊息**裡出現「未實作」是相反
+// 的意思——它是已經寫好的失敗處理在對使用者說話。router.ts 有五筆就是這種：
+//
+//     throw new Error(`未實作的能力請從 contracts 的 InternalCommand union 移除…`)
+//
+// 那段程式是**完成的**（載入期斷言，正是規範 §10 要的東西），它只是恰好在描述未實作這件事。
+// 把它算成缺口，等於懲罰寫了明確失敗訊息的人，並鼓勵把訊息寫得含糊。
+//
+// 只清內容、保留引號位置，行號與其餘欄位都不受影響。逃逸字元以「跳過下一字元」處理即可——
+// 本函式不需要真的解析字串，只需要知道哪一段不算程式碼。
+function blankStringLiterals(line: string): string {
+  let out = '';
+  let quote: string | undefined;
+  for (let i = 0; i < line.length; i += 1) {
+    const ch = line[i]!;
+    if (quote === undefined) {
+      out += ch;
+      if (ch === "'" || ch === '"' || ch === '`') quote = ch;
+      continue;
+    }
+    if (ch === '\\') {
+      out += '  ';
+      i += 1;
+      continue;
+    }
+    if (ch === quote) {
+      out += ch;
+      quote = undefined;
+      continue;
+    }
+    out += ' ';
+  }
+  return out;
+}
+
 export function checkNoUnfinishedMarkers(productionFiles: readonly string[]): Failure[] {
   const failures: Failure[] = [];
   for (const file of productionFiles) {
     const lines = codeLinesOf(file);
     lines.forEach((line, i) => {
       const lineNo = i + 1;
-      const hit = UNFINISHED_MARKERS.find((m) => m.pattern.test(line));
+      const scanned = blankStringLiterals(line);
+      const hit = UNFINISHED_MARKERS.find((m) => m.pattern.test(scanned));
       if (hit === undefined) return;
       failures.push({
         check: 'unfinished-marker',
