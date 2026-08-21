@@ -252,6 +252,35 @@ DefinitionRegistry
 
 ## 6. Condition 與 Effect DSL
 
+> **命名釐清**：本節叫「DSL」，但它**不是** expression DSL——慣例明文禁止的是後者。這裡是
+> **封閉的 tagged variant**：資料只能從已註冊的有限 `kind` 中選一個並填它的欄位，不能表達任意
+> 運算式；要有新行為就必須改程式。兩者的差別是「新行為能否只靠改資料造出來」。
+
+### 6.0 治理原則：一個 kind 一張表
+
+本節所有判別聯集都遵守同一條規則，新增任何 Condition／Effect／類似的行為資料時一併適用：
+
+1. **功能不同的東西不得共用一張表。** 一個 `kind` = 一張表 = 一份 Schema = 一個窄化 Reader =
+   一個 View 型別。每個 kind 只帶自己的欄位，欄位全部必填且語意明確。
+   下方 `EffectDefinition` 就是標準形狀：`grantItem` 只有 `itemDefinitionId / amount`，
+   `applyStatus` 只有 `statusId / duration`，**兩者不共用任何欄位**。
+2. **禁止把多個 kind 的欄位合併成一張寬表。** 合併的結果必然是「所有欄位的聯集、絕大多數為
+   optional」：欄位語意要看 `kind` 才知道（`value` 是傷害還是秒數？）、無法加必填約束、
+   Validator 寫不出來、內容作者分不出「不適用」與「忘了填」。那不是解耦，是把耦合藏進
+   nullable 欄位裡。**`params: Record<string, unknown>` 是這個病的末期症狀，一律視為 Schema 未補齊。**
+3. **若確實需要一張跨 kind 的共用表**（本節目前不需要，因為 Effect 就是它自己那一列）：
+   共用表只能放**所有 kind 都必填且語意完全相同**的欄位；一出現「只有某個 kind 用得到」的欄位，
+   就必須下推到該 kind 自己的表。
+4. **字串 kind → 程式聯集的轉換發生在載入／驗證階段**，不是執行期。未登記的 kind 是
+   **Content Pack 驗證失敗**，不得啟動；執行期不得對未知 kind 給預設行為、跳過該筆或 catch 後繼續。
+5. **kind → 執行者的派發表必須由編譯器保證完整**：用非 Partial 的 `Record<Kind, …>` 宣告
+   （樣板見 `app/composition/messages.ts` 的 `GAME_COMMAND_ENTRY`），少一個 kind 就是編譯錯誤。
+
+判斷流程與反樣式清單見 `.claude/skills/runtime-data-discipline/SKILL.md` 的
+「行為的資料化：一個 Func 一張表」。
+
+### 6.1 型別
+
 資料只能選擇已註冊的有限種類：
 
 ```ts

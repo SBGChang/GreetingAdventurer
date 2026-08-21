@@ -225,3 +225,40 @@
 
 A1 改型別時發現：全 `src/` 沒有任何地方建構 `ApplyFoodStatusEffects`（Crafting 未實作），
 所以這個 Handler 已註冊、可路由，但從未被執行過。屬上面「負向測試」那一項的具體案例。
+
+---
+
+## G. 行為資料化的形狀未補齊（一個 Func 一張表）
+
+規則見 `SKILL.md` 的「行為的資料化：一個 Func 一張表」與 `13_data_runtime.md` §6.0。
+以下是 2026-08-21 實地 grep 的結果：**設計已在 §6 寫好判別聯集，但契約側尚未落實。**
+
+### G1. `EffectDefinition` 只有一個 id，判別聯集完全沒實作　`未開始`
+
+- 位置：`src/contracts/character/index.ts:44`
+  —— `export type EffectDefinition = Readonly<{ id: EffectDefinitionId }>;`
+- `13_data_runtime.md` §6 已明列 8 個 kind（`grantItem` / `consumeActorItem` /
+  `removeActorCurrency` / `applyStatus` / `grantMasteryExperience` / `startDetailedCombat` /
+  `setWorldFact` / `changeCityMetric`），各自帶自己的欄位。程式側**一個都沒有**。
+- 連帶後果（都是實測回報，不是推測）：
+  - world 模組的戰爭後果 Effect 完全沒接：`ConflictRuleDefinition` 的
+    `marketPressureEffectIds` / `eventWeightEffectIds` / `passageEffectIds` 是 `EffectDefinitionId`，
+    但沒有任何可解讀的 Schema，所以 world 刻意不讀它們（改由一條尚不存在的編排 Workflow 展開）。
+  - crafting 的 Effect→Status 對照（清理清單 A1）也卡在同一個缺口。
+  - dungeon 的事件選項（B1）「合法選項一律回報 success」——選項的結果就是 EffectPlan，缺這層就無法解析。
+- 需要：依 §6 補齊 `EffectDefinition` / `ConditionDefinition` 判別聯集、每個 kind 一個 Validator、
+  kind → 執行模組的非 Partial 派發表、以及 `EffectPlan` 的產生與提交路徑。
+- **這是目前擋住最多下游功能的單一缺口。**
+
+### G2. 四個 `Record<string, …>` 袋子欄位　`未開始`
+
+| 位置 | 欄位 | 缺的是什麼 |
+|---|---|---|
+| `src/contracts/combat/index.ts:421` | `CommandAllyCommand.directive: Record<string, JsonValue>` | 指揮隊友的指令種類判別聯集（HANDOFF 已記一筆） |
+| `src/contracts/combat/index.ts:445` | `CombatContentResolution = Record<string, JsonValue>` | 戰鬥內容解析結果的具型別形狀 |
+| `src/contracts/combat/index.ts:447` | `CombatActionResult = Record<string, JsonValue>` | 戰鬥行動結果的具型別形狀 |
+| `src/contracts/crafting/index.ts:53` | `EquipmentSkillEffectRef = Record<string, unknown>` | 裝備技能效果引用（應指向 G1 的 Effect kind） |
+
+`src/contracts/map/index.ts:294`／`:305` 的 `details?: Record<string, JsonValue>` **不在此列**：
+它們是 diagnostics 的附帶說明欄位，不承載玩法行為——但若哪天有 Handler 開始依 `details` 的內容
+分支，它就變成同一個病，必須立刻補成判別聯集。
