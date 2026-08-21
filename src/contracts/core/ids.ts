@@ -41,6 +41,8 @@ export type EquipmentDefinitionId = ItemDefinitionId; // Item Registry 的 kind=
 export type BookDefinitionId = ItemDefinitionId; // Item Registry 的 kind='book' 窄化別名
 export type ContentEventDefinitionId = DefinitionId<'content-event'>;
 export type PlayerTravelEventDefinitionId = ContentEventDefinitionId;
+// 旅行事件與護衛委託的綁定規則（13_data_runtime.md §6.1 的 ContentEventDefinition.bindingRuleId）。
+export type PlayerTravelEventBindingRuleId = DefinitionId<'player-travel-event-binding-rule'>;
 export type ConditionDefinitionId = DefinitionId<'condition'>;
 export type EffectDefinitionId = DefinitionId<'effect'>;
 export type MonsterDefinitionId = DefinitionId<'monster'>;

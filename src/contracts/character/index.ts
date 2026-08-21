@@ -40,8 +40,12 @@ import type {
 // 由 organization/social 模組擁有（core 尚無此 ID）。
 export type OrganizationId = DefinitionId<'organization'>;
 
-// 由效果／定義子系統擁有的效果定義結構（本文件僅引用，未提供 schema）。
-export type EffectDefinition = Readonly<{ id: EffectDefinitionId }>;
+// EffectDefinition 住在 contracts/core（沒有模組擁有它——character 的 StatusDefinition、內容事件
+// 選項、crafting 都只是消費者）。這裡原本是 `Readonly<{ id: EffectDefinitionId }>` 的空殼，只有
+// 一個 ID。空殼的後果不是型別鬆而是**功能缺失**：拿到一筆 Effect 也不知道要做什麼，所以事件選項
+// 只能一律回報成功。真正的形狀是 13_data_runtime.md §6.1 的封閉 tagged variant。
+import type { EffectDefinition } from '../core';
+export type { EffectDefinition };
 
 // 本模組擁有但來源文件未列舉的分類鍵。
 export type CharacterRoleTag = string;
