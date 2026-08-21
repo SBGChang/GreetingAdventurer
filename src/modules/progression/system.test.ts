@@ -71,6 +71,63 @@ const cases: readonly Case[] = [
     },
   },
   {
+    // 先前這裡是「信任 payload.creditedUseCount 已由 Combat/Sequence 收斂」。信任的代價是上游算錯
+    // 時 MXP 直接超發，而且沒有任何地方會失敗。doc §8.6：encounter 來源每場每技能上限 3（結構
+    // 不變量 SUPPORT_USE_CAP），combatSequence 來源可等於成功場次。
+    name: '支援 MXP：encounter 來源超過每場上限即拋錯；combatSequence 來源不受該上限',
+    run: () => {
+      const base = makeFixtureReader();
+      const reader: ProgressionDefinitionReader = {
+        ...base,
+        getSupportMasteryAwardRule: () =>
+          ({ fixedExperiencePerUse: 10, masterySplits: [{ masteryId: SWORD_MASTERY, ratio: 1 }] }) as never,
+      };
+      const payload = (source: unknown, creditedUseCount: number) =>
+        ({
+          source,
+          characterId: HERO,
+          skillId: 'skill-heal' as never,
+          supportMasteryAwardRuleId: 'rule-support' as never,
+          creditedUseCount,
+        }) as never;
+      const encounter = { kind: 'encounter' as const, encounterId: 'enc-cap' as EncounterId };
+      const sequence = { kind: 'combatSequence' as const, sequenceId: 'seq-cap' as never };
+      const s0 = createInitialProgressionState();
+
+      // 上限內：照常入帳（3 × 10 = 30）。
+      const ok3 = handleCombatSupportMasteryEarned(s0, payload(encounter, 3), reader);
+      assert(
+        ok3.nextSlice.characterProgress[HERO]?.masteries[SWORD_MASTERY]?.experience === 30,
+        '每場 3 次仍在上限內，應入帳 30',
+      );
+
+      // 超過上限：拋錯（不夾值、不靜默略過）。
+      let threwOverCap = false;
+      try {
+        handleCombatSupportMasteryEarned(s0, payload(encounter, 4), reader);
+      } catch {
+        threwOverCap = true;
+      }
+      assert(threwOverCap, 'encounter 來源超過每場上限 3 必須拋錯');
+
+      // 非整數／負數同樣是程式錯誤。
+      let threwNegative = false;
+      try {
+        handleCombatSupportMasteryEarned(s0, payload(encounter, -1), reader);
+      } catch {
+        threwNegative = true;
+      }
+      assert(threwNegative, '負數計次必須拋錯');
+
+      // combatSequence 來源：計次等於成功場次，不受每場上限限制。
+      const seq = handleCombatSupportMasteryEarned(s0, payload(sequence, 10), reader);
+      assert(
+        seq.nextSlice.characterProgress[HERO]?.masteries[SWORD_MASTERY]?.experience === 100,
+        'combatSequence 來源不受每場上限，10 次應入帳 100',
+      );
+    },
+  },
+  {
     name: '#2：同場多名支援者各自入帳（key 含 characterId:skillId，不誤擋他人）',
     run: () => {
       const base = makeFixtureReader();

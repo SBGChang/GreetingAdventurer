@@ -16,7 +16,7 @@ import type {
   TransactionMessageDraft,
   DomainEventDraft,
 } from '../../contracts/core';
-import { MAX_MASTERY_LEVEL, MAX_PRIMARY_ATTRIBUTE } from '../../contracts/core';
+import { MAX_MASTERY_LEVEL, MAX_PRIMARY_ATTRIBUTE, SUPPORT_USE_CAP } from '../../contracts/core';
 import type {
   ProgressionDefinitionReader,
   MasteryDefinition,
@@ -416,14 +416,38 @@ export function handleCombatDefenseMasteryEarned(
   return applyMasteryOnce(state, 'combat:defense', payload.source, payload.characterAwards, reader);
 }
 
+// 支援技能計次的合法範圍守門。見 handleCombatSupportMasteryEarned 的說明。
+function assertCreditedUseCountInRange(payload: CombatSupportMasteryEarnedPayload): void {
+  const count = payload.creditedUseCount;
+  const where = `character=${String(payload.characterId)} skill=${String(payload.skillId)}`;
+  if (!Number.isInteger(count) || count < 0) {
+    throw new Error(
+      `progression: creditedUseCount 必須是非負整數（${where}，實得 ${String(count)}）`,
+    );
+  }
+  if (payload.source.kind === 'encounter' && count > SUPPORT_USE_CAP) {
+    throw new Error(
+      `progression: 單場戰鬥的支援技能計次上限為 ${SUPPORT_USE_CAP}（${where}，實得 ${count}）——` +
+        `送出端未依 doc §8.6 收斂`,
+    );
+  }
+}
+
 // 支援技能：固定 MXP 依 masterySplits 分配（ratio 總和恰為 1）。
 export function handleCombatSupportMasteryEarned(
   state: ProgressionModuleState,
   payload: CombatSupportMasteryEarnedPayload,
   reader: ProgressionDefinitionReader,
 ): ModuleResult<ProgressionModuleState> {
-  // TODO: encounter 來源 creditedUseCount 必須為 0..3；combat-sequence 來源可等於成功場次。
-  // 此處信任 payload.creditedUseCount 已由 Combat/Sequence 依規則收斂。
+  // 支援技能的計次上限依**來源種類**不同（doc §8.6）：
+  //   * encounter      —— 同角色同技能每場戰鬥最多 SUPPORT_USE_CAP 次（結構不變量）。
+  //   * combatSequence —— 一整串簡易戰鬥，計次可等於成功場次，沒有固定上限。
+  // 先前這裡是「信任 payload 已由 Combat/Sequence 收斂」。信任的代價是：上游算錯時 MXP 會超發，
+  // 而且沒有任何地方會失敗——超發的經驗直接進帳本，之後無從分辨是規則變更還是 bug。
+  // 來源是 sibling 模組送來的事件（已發生的事實，Subscriber 不得拒絕），所以違規是**程式錯誤**
+  // 而不是玩家輸入：明確拋錯，不夾值、不靜默略過。
+  assertCreditedUseCountInRange(payload);
+
   const rule = reader.getSupportMasteryAwardRule(payload.supportMasteryAwardRuleId);
   const totalFixed = rule.fixedExperiencePerUse * payload.creditedUseCount;
   const awards = rule.masterySplits.map((split) => ({
