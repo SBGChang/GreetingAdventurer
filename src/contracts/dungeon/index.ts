@@ -66,12 +66,10 @@ export type NpcStopPolicyId = DefinitionId<'npc-stop-policy'>;
 // [INVENTED] core 未提供；NpcDungeonTargetResolverDefinition.outcomeRuleId 使用。
 export type OutcomeRuleId = DefinitionId<'outcome-rule'>;
 
-// [EXTERNAL PLACEHOLDER] 由內容/事件模組擁有；此處給出最小可編譯結構。
-export type ContentEventInstance = Readonly<{
-  instanceId: ContentEventInstanceId;
-  definitionId: ContentEventDefinitionId;
-  rngStreamId: RngStreamId;
-}>;
+// ContentEventInstance 住在 contracts/core（沒有模組擁有它——dungeon 與 team 都只是消費者）。
+// 這裡曾經有一份本地宣告，team 也有一份形狀不同的，跨模組傳遞時編譯器看不出不匹配。
+import type { ContentEventInstance } from '../core';
+export type { ContentEventInstance };
 
 // 由 Gathering Service（module 19）擁有。原本此處只保留 3 個欄位的影子版，
 // 與擁有者的完整結構（contributorCharacterId / masteryId / yields …）不同。

@@ -36,19 +36,11 @@ import type { MasteryRequirement } from '../progression';
 // CraftQuality 屬共用核心契約（00_shared_contracts.md §2），core .ts 尚未匯出。
 export type CraftQuality = 'plain' | 'fine' | 'excellent' | 'perfect' | 'peerless' | 'demonGod';
 
-// ── 跨模組占位型別（owning module 契約尚未建立；見交接報告）──────────────
-// FacilityKind 由 city 擁有（09_city_module.md）。
-export type FacilityKind =
-  | 'inn'
-  | 'tavern'
-  | 'adventurerGuild'
-  | 'itemShop'
-  | 'equipmentShop'
-  | 'trainingGround'
-  | 'bookstore'
-  | 'adventureCheckpoint'
-  | 'cityGate'
-  | 'home';
+// ── 跨模組型別：一律引用擁有者，不在此複寫 ────────────────────────────────
+// FacilityKind 的擁有者是 city（09_city_module.md）。這裡曾經逐字複製它的十個成員——
+// 複製品不會跟著擁有者一起改，city 新增一種設施時 crafting 這份會靜靜地變成舊值集。
+import type { FacilityKind } from '../city';
+export type { FacilityKind };
 // EquipmentSkillEffectRef 由 inventory 擁有（05_inventory_module.md §2.3）。
 export type EquipmentSkillEffectRef = Readonly<Record<string, unknown>>;
 

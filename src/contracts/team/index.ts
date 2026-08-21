@@ -43,7 +43,7 @@ import type {
 } from '../core';
 import type { DefinitionHeader, ScheduledJobBase } from '../core';
 
-// 跨模組：GridCell 由 map 擁有（未實作，屬預期 unresolved import）。
+// 跨模組：GridCell 的擁有者是 map，自它的契約引用（不在此複寫欄位）。
 import type { GridCell } from '../map';
 // 外送 Internal Command 引用接收模組契約的真實型別（見下方 TeamOutboundInternalCommand）。
 import type { StartNpcDungeonRun } from '../dungeon';
@@ -53,14 +53,15 @@ export type FreeActionRuleId = DefinitionId<'free-action-rule'>;
 export type RecentActivityRuleId = DefinitionId<'recent-activity-rule'>;
 export type PlayerTravelEventWeightProfileId = DefinitionId<'player-travel-event-weight-profile'>;
 
-// FacilityKind：城市設施種類（擁有者為 city，值集由內容資料決定；此處佔位）。
-export type FacilityKind = string;
+// FacilityKind 的擁有者是 city，值集是它的封閉聯集。這裡曾經是 `= string` 的影子型別——
+// 於是 team 收到任何字串都算合法設施種類，而 city 那邊的聯集一點保護力都沒有。
+import type { FacilityKind } from '../city';
+export type { FacilityKind };
 
-// ContentEventInstance：內容事件實例基底（擁有者待定，此處以佔位定義；見交接報告）。
-export type ContentEventInstance = Readonly<{
-  instanceId: ContentEventInstanceId;
-  rngStreamId: RngStreamId;
-}>;
+// ContentEventInstance 住在 contracts/core（沒有模組擁有它：dungeon 用它表示事件房的 Pending
+// 互動、team 用它表示旅行事件，兩邊都是消費者）。本地那份還少了 definitionId。
+import type { ContentEventInstance } from '../core';
+export type { ContentEventInstance };
 
 // ── Definition Reader ───────────────────────────────────────────────────
 export interface TeamDefinitionReader {
@@ -80,8 +81,8 @@ export interface TeamDefinitionReader {
 // TeamPlanRuleDefinition（doc 於 Reader 引用但未定義；此處推導，見交接報告）。
 export type TeamPlanRuleDefinition = DefinitionHeader & {
   kind: TeamPlanKind;
-  // 該計畫佔用的天數。原本寫死在 Handler（家中年度休息 365、城內設施休息 1），
-  // 而 Handler 自己的註解就標著「[DATA] 休息天數屬 TeamPlanRule」。365 是遊戲節奏，不是結構。
+  // 該計畫佔用的天數。這是**內容**：改它會改變遊戲節奏，不是結構規則。所以它住在規則資料裡，
+  // Handler 只讀不寫；事件回報的經過天數也一律由 dueOnDay − startedOnDay 導出，不重述這個量。
   durationDays: number;
 };
 

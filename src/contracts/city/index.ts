@@ -101,7 +101,10 @@ export type CityDefinition = DefinitionHeader & {
 export type FacilityDefinition = DefinitionHeader<FacilityDefinitionId> & {
   facilityKind: FacilityKind;
   actionRuleIds: CityActionRuleId[];
-  teacherMasteryLevel?: number; // 城鎮教師第一版固定為 5
+  // 該設施常駐教師的熟練等級（有教師的設施才有此欄位；沒有就是這裡沒有教師）。
+  // 值由內容資料提供——它決定玩家能在此學到多高，是平衡量。程式不得補預設值：缺了代表
+  // 「這個設施沒有教師」，不是「教師等級未知」。
+  teacherMasteryLevel?: number;
 };
 
 export type PlayerCommerceDailyLimitDefinition = DefinitionHeader<PlayerCommerceDailyLimitId> & {
@@ -287,7 +290,8 @@ export type CityState = {
 };
 
 // ── §4 公開 Query ──────────────────────────────────────────────────────────
-// 下列 View 為 read-model 投影，模組契約未完整指定形狀；以最小可辨識欄位佔位。
+// 下列 View 是 city 的 read-model 投影。doc §4 只列出 Query 簽章與 View 名稱、未給欄位，形狀
+// 在此定案（同 §2 的 Definition：文件命名、契約定形）。
 export type CityView = Readonly<{ cityId: CityId; prosperity: number; safety: number }>;
 export type FacilityView = Readonly<{
   facilityId: FacilityDefinitionId;

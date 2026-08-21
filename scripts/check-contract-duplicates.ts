@@ -23,13 +23,18 @@ const CONTRACTS = 'src/contracts';
 //                   EquipmentCoefficientChannelId / EquipmentSkillEffectRef /
 //                   ConsumeCombatSequenceRetrySupply（inventory 是 handler）
 //   economy 擁有：  MoneyValue
-//   city 擁有：     FacilityKind（team 目前放寬成 string，最不相容）
 //   npc-behavior 擁有：NpcStopPolicyId
-//   ContentEventInstance：內容/事件模組尚不存在；暫由 dungeon 擁有（其形狀較完整）
 //
 // 已收斂（前輪移除）：economy 的 CreateEconomyAccountCommand / GrantCurrencyCommand /
 //   TransferCurrencyCommand、combat-sequence 的三個 *MasteryEarnedPayload、team 的
 //   PlayerInteractionOpenedEvent —— distribution / combat 的重複宣告已改為 import 擁有者型別。
+//
+// 已收斂（本輪移除，基準線 6 → 4）：`FacilityKind` 與 `ContentEventInstance`。
+//   FacilityKind：city 是擁有者，team 原本放寬成 `string`（收到任何字串都算合法設施種類）、
+//     crafting 則逐字複製了十個成員（複製品不會跟著擁有者一起改）。兩處都改為 import city。
+//   ContentEventInstance：dungeon 與 team 各有一份且形狀不同（team 少了 definitionId）。
+//     **沒有**模組擁有它——兩邊都只是消費者（事件房的 Pending 互動 / 旅行事件），所以搬進
+//     contracts/core，與它本來就住在 core 的 ID 家族放在一起。
 //
 // 已收斂（Wave D 移除，基準線 9 → 6）：`CharacterEquipmentLoadoutView`、`EquipmentDefinition`、
 //   `EquipmentCoefficientChannelId`。三者原本是 contracts/statistics 為了不相依 inventory 而
@@ -38,9 +43,7 @@ const CONTRACTS = 'src/contracts';
 //   `as unknown as`，那正是規範 §7 點名的「用轉型掩蓋契約缺口」。
 const KNOWN_DUPLICATES = new Set<string>([
   'ConsumeCombatSequenceRetrySupply',
-  'ContentEventInstance',
   'EquipmentSkillEffectRef',
-  'FacilityKind',
   'MoneyValue',
   'NpcStopPolicyId',
 ]);
