@@ -238,6 +238,9 @@ export function stubDefinitionReader(): CharacterDefinitionReader {
     getTemporaryCharacterRule: (id: TemporaryCharacterRuleId): TemporaryCharacterRuleDefinition => ({
       ...header(id, PACK_ID),
       id,
+      kind: 'escort',
+      sexWeightResolverId: 'resolver-temp-sex-weight' as ResolverId,
+      innateTraitResolverId: 'resolver-temp-innate' as ResolverId,
     }),
     getWorldAdventurerGenerationRule: (
       id,
@@ -267,6 +270,8 @@ export function stubResolverPort(
       birthDay: 0 as WorldDay,
       innateTraitIds: [],
     }),
+    // 預設回 male：刻意**不同於**先前寫死的 'female'，這樣任何仍寫死性別的路徑都會在測試裡露出來。
+    resolveQuestTemporaryCharacter: () => ({ sex: 'male', innateTraitIds: [] }),
     resolveReputationDelta: () => 0,
   };
   return { ...base, ...overrides };

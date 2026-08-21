@@ -47,10 +47,27 @@ export type EffectDefinition = Readonly<{ id: EffectDefinitionId }>;
 export type CharacterRoleTag = string;
 export type RelationshipFactKind = string;
 
-// Reader 引用但來源文件未給 schema 的暫時角色規則。
 export type TemporaryCharacterRuleId = DefinitionId<'temporary-character-rule'>;
+
+// 任務暫時角色（護衛／救援）的生成規則。
+//
+// 原本是 `DefinitionHeader & Readonly<Record<string, unknown>>`——規範 §7 明文禁止的
+// 「用 Record<string, unknown> 繞過 Schema」。後果不只是型別鬆：Handler 因此無處可讀性別，
+// 於是它自己寫死了 `sex: 'female'`，而 04_character_module.md §「Character 不得自行假設
+// 50／50 性別、固定年齡或跨文化共用原型」正是在禁止這件事。
+//
+// 形狀比照姊妹規則 `WorldAdventurerGenerationRuleDefinition`：規則本身只**指名**每一項可變
+// 決定由哪個 Resolver 負責，係數與權重由各 Resolver 自己的 params 定義帶（§7.1「形狀＝程式、
+// 調校＝資料」）。這裡不放 params 袋子，否則又是一個繞過 Schema 的洞。
+//
+// 原型不在此列：設計 §7.1「護衛資料在任務生成時只有身分原型」——archetypeId 由 Quest 於
+// CreateQuestTemporaryCharacter 指定，不由本規則挑選。
 export type TemporaryCharacterRuleDefinition = DefinitionHeader<TemporaryCharacterRuleId> &
-  Readonly<Record<string, unknown>>;
+  Readonly<{
+    kind: 'escort' | 'rescue';
+    sexWeightResolverId: ResolverId;
+    innateTraitResolverId: ResolverId;
+  }>;
 
 // ──────────────────────────────────────────────────────────────────────────
 // 共用列舉（來源文件為 inline union，抽名以利事件／查詢重用）。

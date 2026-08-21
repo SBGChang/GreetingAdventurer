@@ -124,6 +124,15 @@ export type WorldAdventurerDraft = Readonly<{
   innateTraitIds: readonly CharacterTraitDefinitionId[];
 }>;
 
+// 任務暫時角色（護衛／救援）的可變身分。
+//
+// 不含 archetypeId：設計 §7.1「護衛資料在任務生成時只有身分原型」——原型由 Quest 在命令裡指定。
+// 也不含 birthDay：暫時角色 availability='temporary'、不排生命週期 Job，年齡不參與任何判定。
+export type QuestTemporaryCharacterDraft = Readonly<{
+  sex: Sex;
+  innateTraitIds: readonly CharacterTraitDefinitionId[];
+}>;
+
 // 由資料 Resolver 決定的規則結果。Handler 不含公式，只消費結果。
 export interface CharacterResolverPort {
   resolveNaturalDeath(
@@ -142,6 +151,12 @@ export interface CharacterResolverPort {
   resolveWorldAdventurer(
     input: Readonly<{ index: number; command: CreateWorldAdventurerBatch; onDay: WorldDay }>,
   ): WorldAdventurerDraft;
+  // 任務暫時角色的性別與初始天賦。與 resolveWorldAdventurer 同一個樣板：Handler 不含公式，
+  // Resolver 依 TemporaryCharacterRuleDefinition 指名的 sexWeightResolverId /
+  // innateTraitResolverId 決定，Handler 只消費結果。
+  resolveQuestTemporaryCharacter(
+    input: Readonly<{ command: CreateQuestTemporaryCharacter; onDay: WorldDay }>,
+  ): QuestTemporaryCharacterDraft;
   // 已驗證 Effect → 聲望增量。
   resolveReputationDelta(
     input: Readonly<{ character: Character; effectId: EffectDefinitionId }>,
@@ -598,26 +613,27 @@ export function handleCreateQuestTemporaryCharacter(
   ctx: CharacterHandlerContext,
 ): ModuleResult<CharacterState> {
   const characterId = ctx.ids.nextCharacterId();
-  const archetype = ctx.definitions.getArchetype(command.archetypeId);
+  // 設計 §5.3 要求本命令「驗證任務類型、原型與 Quest ID」。這一行就是原型驗證：窄化 Reader 對
+  // 未註冊的 Definition 會拋，所以 Quest 送來不存在的 archetypeId 會在這裡明確失敗。
+  // （先前這個結果被 `void archetype` 丟掉——定義讀出來只為了讓程式看起來是資料驅動的。）
+  ctx.definitions.getArchetype(command.archetypeId);
   const temporaryOrigin: TemporaryCharacterOrigin =
     command.kind === 'escort'
       ? { kind: 'escort', sourceQuestId: command.sourceQuestId, recoveryPolicy: 'escortQuestLifecycle' }
       : { kind: 'rescue', sourceQuestId: command.sourceQuestId, recoveryPolicy: 'rescueQuestLifecycle' };
 
+  const draft = ctx.resolvers.resolveQuestTemporaryCharacter({ command, onDay: ctx.worldDay });
   const character = newCharacter({
     characterId,
     archetypeId: command.archetypeId,
     origin: 'questTemporary',
-    // 暫時角色 sex 由 archetype/cultureId 決定；來源文件未給 → 先固定 'female' 佔位。
-    // TODO: 由 archetype 或 generation rule 決定性地決定 sex。
-    sex: 'female',
+    sex: draft.sex,
     birthDay: ctx.worldDay,
     availability: 'temporary',
-    innateTraitIds: [],
+    innateTraitIds: draft.innateTraitIds,
     condition: fullCondition(ctx, characterId),
     temporaryOrigin,
   });
-  void archetype;
 
   return makeResult(upsertCharacter(state, character), [
     emit({

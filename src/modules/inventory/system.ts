@@ -639,7 +639,7 @@ export function equipItem(
       nextMain = cmd.itemId;
       nextOff = cmd.itemId; // 雙手：主副手指向同一件
     } else if (goesOffHand) {
-      // 頂掉原副手（若非同一件、且不是被雙手武器共用的佔位）。
+      // 頂掉原副手（若非同一件、且不是被雙手武器共用佔用的那一件）。
       if (set.offHandItemId !== undefined && set.offHandItemId !== cmd.itemId && set.offHandItemId !== set.mainHandItemId) {
         displaced.push(set.offHandItemId);
       }
@@ -654,7 +654,7 @@ export function equipItem(
       nextOff = cmd.itemId;
     } else {
       if (set.mainHandItemId !== undefined && set.mainHandItemId !== cmd.itemId) displaced.push(set.mainHandItemId);
-      if (previousMainIsTwoHanded) nextOff = undefined; // 原雙手武器的副手佔位解除
+      if (previousMainIsTwoHanded) nextOff = undefined; // 原雙手武器對副手的佔用解除
       // 同一件從副手改裝到主手：同理清掉副手引用。
       if (nextOff === cmd.itemId) nextOff = undefined;
       nextMain = cmd.itemId;

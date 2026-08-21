@@ -395,18 +395,36 @@ function checkNoContentEmptyFallbacks(productionFiles: readonly string[]): Failu
 // 兩者混在一起還會毀掉一個更重要的訊號：紀律門禁綠燈的意思應該是「已完成的部分沒有偷工」，
 // 而不是「遊戲做完了」。分開之後兩個數字各自誠實：紀律 0，缺口 101。
 // 缺口清到 0 時，把它移進上面的 checks 陣列即可。
+// 判準：這裡收的必須是**作者用來標記「這段沒做完」的記號**，而不是「碰巧出現在領域敘述裡的
+// 普通詞彙」。兩者混在一起時，門禁會開始懲罰正確的工作——做對事情反而讓數字上升。
+//
+// 曾經收過 `暫時` 與 `暫定`，兩者都不符合上面的判準：
+//   * 「暫時角色」是設計文件的一級術語（`origin: 'questTemporary'`，04_character_module.md §7.1
+//     整節在講它）、「暫時狀態」同理（Character 的責任之一）。談到它們的每一行都會被計為缺口，
+//     於是把 TemporaryCharacterRuleDefinition 從 Record<string, unknown> 收成真 Schema 這種
+//     **清除**缺口的改動，反而讓計數上升 4 筆。
+//   * 「同交易前段的暫定變更可被觀察」是 kernel 對交易語意的正確描述（transaction.ts）。
+//   * 「角色可能暫時保留高於新上限的 HP」只是普通副詞（inventory）。
+// `暫代` 保留：它在這個 repo 裡只有一種用法——「暫時頂替的實作」，正是要抓的東西。
+//
+// 同理補上先前漏掉的**真記號**：作者確實在用 [MISMATCH]／[INFERRED]，以及「待做」「仍缺」
+// 這兩個與已收錄的「待接／待補」同義的寫法。漏收它們的代價是實際缺口被低估。
 const UNFINISHED_MARKERS: readonly { pattern: RegExp; why: string }[] = [
   { pattern: /\bTODO\b/, why: 'TODO' },
   { pattern: /\bFIXME\b/, why: 'FIXME' },
   { pattern: /\bHACK\b/, why: 'HACK' },
+  { pattern: /\bXXX\b/, why: 'XXX' },
   { pattern: /\[DATA\]/, why: '[DATA]' },
   { pattern: /\[INVENTED\]/, why: '[INVENTED]' },
+  { pattern: /\[INFERRED\]/, why: '[INFERRED]' },
+  { pattern: /\[MISMATCH\]/, why: '[MISMATCH]' },
   { pattern: /\[AMBIGUITY\]|\(AMBIGUITY\)/, why: 'AMBIGUITY' },
   { pattern: /佔位/, why: '佔位' },
-  { pattern: /待接|待補|待實作|待資料|待內容/, why: '待接／待補' },
+  { pattern: /待接|待補|待實作|待資料|待內容|待做/, why: '待接／待補' },
+  { pattern: /仍缺|尚缺/, why: '仍缺' },
   { pattern: /第一版(?:固定|僅|只|暫)/, why: '第一版固定／暫代' },
   { pattern: /尚未實作|未實作/, why: '尚未實作' },
-  { pattern: /暫代|暫時|暫定/, why: '暫代' },
+  { pattern: /暫代/, why: '暫代' },
 ];
 
 export function checkNoUnfinishedMarkers(productionFiles: readonly string[]): Failure[] {

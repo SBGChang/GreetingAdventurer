@@ -34,6 +34,7 @@ import {
   onQuestStateChanged,
   onStatsCapacityChanged,
   handleApplyContentEventStatus,
+  handleCreateQuestTemporaryCharacter,
 } from './system';
 import { createCharacterQuery } from './queries';
 import { createCharacterState } from './state';
@@ -692,6 +693,81 @@ const cases: readonly Case[] = [
         threw = true;
       }
       assert(threw, '非法 stackPolicy 必須拋錯（先前是靜默略過並回報 refreshed）');
+    },
+  },
+  {
+    // 04_character_module.md：「Character 不得自行假設 50／50 性別、固定年齡或跨文化共用原型。」
+    // Handler 先前寫死 `sex: 'female'` 與 `innateTraitIds: []`，因為
+    // TemporaryCharacterRuleDefinition 是 `Record<string, unknown>`（§7 禁止的繞過 Schema），
+    // 根本沒有欄位可讀。現在兩者都由 resolveQuestTemporaryCharacter 供給。
+    name: 'CreateQuestTemporaryCharacter: 性別與初始天賦來自 Resolver，不是寫死的 female',
+    run: () => {
+      const TRAIT = 'definition:character-trait:brave' as never;
+      const createWith = (sex: 'male' | 'female', traits: readonly never[]) => {
+        const ctx = makeContext({
+          resolvers: stubResolverPort({
+            resolveQuestTemporaryCharacter: () => ({ sex, innateTraitIds: traits }),
+          }),
+        });
+        const res = handleCreateQuestTemporaryCharacter(
+          {
+            type: 'CreateQuestTemporaryCharacter',
+            kind: 'escort',
+            archetypeId: NPC_ARCHETYPE_ID,
+            sourceQuestId: 'runtime:quest:escort-1' as never,
+          },
+          createCharacterState({ characters: [] }),
+          ctx,
+        );
+        const created = Object.values(res.nextSlice.characters);
+        assert(created.length === 1, '應恰建立一名暫時角色');
+        return created[0]!;
+      };
+
+      const male = createWith('male', []);
+      assert(male.sex === 'male', `Resolver 給 male 就該是 male（實得 ${male.sex}）`);
+      assert(male.origin === 'questTemporary', 'origin 應為 questTemporary');
+      assert(male.availability === 'temporary', 'availability 應為 temporary');
+
+      // 換一次 Resolver 結果 → 角色跟著變。這是「不是寫死」的實證。
+      const female = createWith('female', [TRAIT]);
+      assert(female.sex === 'female', 'Resolver 給 female 就該是 female');
+      assert(
+        female.innateTraitIds.length === 1 && female.innateTraitIds[0] === TRAIT,
+        '初始天賦也應來自 Resolver（先前寫死為空陣列）',
+      );
+    },
+  },
+  {
+    // 設計 §5.3：本命令必須「驗證任務類型、原型與 Quest ID」。原型驗證原本被 `void archetype`
+    // 丟掉——定義讀出來只為了讓程式看起來是資料驅動的。
+    name: 'CreateQuestTemporaryCharacter: 不存在的 archetypeId 必須明確失敗',
+    run: () => {
+      const base = stubDefinitionReader();
+      const ctx = makeContext({
+        definitions: {
+          ...base,
+          getArchetype: (id: never) => {
+            throw new Error(`unknown archetype ${String(id)}`);
+          },
+        },
+      });
+      let threw = false;
+      try {
+        handleCreateQuestTemporaryCharacter(
+          {
+            type: 'CreateQuestTemporaryCharacter',
+            kind: 'rescue',
+            archetypeId: 'definition:character-archetype:ghost' as never,
+            sourceQuestId: 'runtime:quest:rescue-1' as never,
+          },
+          createCharacterState({ characters: [] }),
+          ctx,
+        );
+      } catch {
+        threw = true;
+      }
+      assert(threw, '未註冊的 archetypeId 必須讓命令失敗，不得靜默建立角色');
     },
   },
 ];
