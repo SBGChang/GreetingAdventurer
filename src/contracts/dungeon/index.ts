@@ -121,9 +121,13 @@ export type {
 
 export type DungeonInteractionRuleDefinition = DefinitionHeader &
   Readonly<{
-    traversalMinutesPerCell: number; // 第一版為 30
+    traversalMinutesPerCell: number;
     redDoorOpenMinutes: number;
     trapResolverId: ResolverId;
+    // 一個迷宮日有多少分鐘（跨越此邊界即跨午夜）。原本這個量住在 DungeonContext 上、由組合層
+    // 傳入，於是它的真正來源是「誰組裝 Context」而不是內容——改探索節奏得改程式。它與同一條
+    // 規則裡的移動／開門分鐘是同一組可調量，所以住在一起。
+    minutesPerDungeonDay: number;
   }>;
 
 export type NpcDungeonTargetKind =

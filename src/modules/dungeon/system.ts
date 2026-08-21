@@ -42,8 +42,11 @@ import type {
   AssetDistributionId,
   EncounterGroupDefinitionId,
   ExperienceAwardRuleId,
+  NpcDungeonTargetResolverId,
 } from '../../contracts/core';
 import type {
+  NpcDungeonTargetKind,
+  OutcomeRuleId,
   DungeonDefinitionReader,
   PlayerExplorationSession,
   PlayerMapKnowledge,
@@ -151,13 +154,40 @@ export interface DungeonTeamPort {
 }
 
 // ID 產生器 + 世界時鐘 + RNG。真實 Composition 由交易 runtime-id cursor 提供；測試注入計數器。
+// NPC 目標的解析結果。由 NpcDungeonTargetResolverDefinition.outcomeRuleId 指名的資料規則決定，
+// Handler 不含公式。
+//
+// 這個 Port 原本不存在，所以 npcDungeonDay 的迴圈只能把每一筆 pendingResult 寫成
+// `outcome: 'success'`——規範 §5 點名的「寫死事件成功或失敗」。已扣掉的探索點數會被記成成功，
+// NPC 隊伍因此永遠不會在地牢裡失手。
+export interface DungeonResolverPort {
+  resolveNpcTargetOutcome(
+    input: Readonly<{
+      resolverId: NpcDungeonTargetResolverId;
+      outcomeRuleId: OutcomeRuleId;
+      target: NpcDungeonTargetRef;
+      npcOrder: number;
+      onDay: WorldDay;
+      rngContext: RngContext;
+    }>,
+  ): Readonly<{ outcome: PendingDungeonResult['outcome'] }>;
+}
+
+// NPC 目標種類是否落在該 Resolver 宣告支援的集合內。
+function supportsTarget(
+  supported: readonly NpcDungeonTargetKind[],
+  ref: NpcDungeonTargetRef,
+): boolean {
+  return supported.some((s) => s.kind === ref.kind);
+}
+
 export type DungeonContext = Readonly<{
   reader: DungeonDefinitionReader;
   map: DungeonMapPort;
   team: DungeonTeamPort;
   worldDay: WorldDay;
-  // 迷宮日長度（分鐘）；跨越此邊界即跨午夜。[INVENTED] 文件未給出常數，第一版由資料／Context 提供。
-  minutesPerDungeonDay: number;
+  // 迷宮日長度已移入 DungeonInteractionRuleDefinition.minutesPerDungeonDay：它與移動／開門分鐘
+  // 是同一組可調量，放在 Context 上會讓真正的來源變成「誰組裝 Context」而不是內容。
   // 目前生效的迷宮互動規則（traversalMinutesPerCell / redDoorOpenMinutes / trapResolverId）。
   interactionRuleId: InteractionRuleId;
   // 迷宮戰利品分配規則（distribution 契約的 StartAssetDistribution 必填 ruleId；
@@ -168,6 +198,8 @@ export type DungeonContext = Readonly<{
   npcExplorationRuleId: NpcDungeonRun['explorationRuleId'];
   // RNG context（NPC Run 快照用）。
   rng: RngContext;
+  // 資料 Resolver（RNG 藏於其內；Handler 不含機率／公式，只消費結果）。
+  resolvers: DungeonResolverPort;
   // ID 產生器。
   nextInteractionId: () => InteractionId;
   nextKnowledgeId: () => PlayerMapKnowledgeId;
@@ -252,7 +284,7 @@ function advanceSessionTime(
 }> {
   const before = session.elapsedDungeonMinutes;
   const after = (before + addMinutes) as DungeonMinute;
-  const dayLen = ctx.minutesPerDungeonDay;
+  const dayLen = ctx.reader.getDungeonInteractionRule(ctx.interactionRuleId).minutesPerDungeonDay;
   const dayBefore = Math.floor(before / dayLen);
   const dayAfter = Math.floor(after / dayLen);
   const crossed = dayAfter > dayBefore;
@@ -795,24 +827,57 @@ export function npcDungeonDay(
       // 點數不足：保留 Run（cursor / pendingResults 不動）、排明日 Job（doc §7 flow「保留」）。
       break;
     }
-    // TODO: 怪物內容需扣點並解析下一個 Combat Sequence Challenge（ResolveNextCombatSequenceChallenge）；
-    //       成功繼續、失敗立即 settling（doc §7、§7.2）。第一版路徑以非怪物 resolver 成功推進。
-    points -= entry.pointCost;
+    const resolver = ctx.reader.getNpcResolver(entry.resolverId);
     const ref = targetRefForEntry(entry);
+
+    // 這個 Resolver 支援這種目標嗎？不支援代表**內容配置錯了**（序列把一種目標指給了處理不了它的
+    // Resolver）。不能當成失敗混進結果——那會把資料錯誤偽裝成遊戲事件。整筆 Run 標為 invalid。
+    if (!supportsTarget(resolver.supportedTargetKinds, ref)) {
+      const invalid: NpcDungeonRun = {
+        ...run,
+        status: 'invalid',
+        lastProcessedOnDay: ctx.worldDay,
+        revision: bump(run.revision),
+      };
+      return accept(withNpcRun(state, invalid), [
+        event({ type: 'NpcDungeonRunClosed', runId, teamId: run.teamId, reason: 'invalid' }),
+      ]);
+    }
+
+    points -= entry.pointCost;
     processedRefs.push(ref);
+
+    // 成敗由資料規則決定（outcomeRuleId），不是寫死的 success。
+    const resolved = ctx.resolvers.resolveNpcTargetOutcome({
+      resolverId: entry.resolverId,
+      outcomeRuleId: resolver.outcomeRuleId,
+      target: ref,
+      npcOrder: entry.npcOrder,
+      onDay: ctx.worldDay,
+      rngContext: run.rngContext,
+    });
+
     newResults.push({
       target: ref,
       npcOrder: entry.npcOrder,
       attemptedOnDay: ctx.worldDay,
-      outcome: 'success',
+      outcome: resolved.outcome,
       resolverId: entry.resolverId,
+      // 只有成功才會產出獎勵；失敗／跳過不留獎勵引用，否則結算會發出不存在的戰利品。
       pendingRewardRefs:
-        ref.kind === 'mapContent'
-          ? [{ contentId: ref.contentId }]
-          : [{ nodeId: ref.nodeId }],
+        resolved.outcome !== 'success'
+          ? []
+          : ref.kind === 'mapContent'
+            ? [{ contentId: ref.contentId }]
+            : [{ nodeId: ref.nodeId }],
     });
     cursor = entry.npcOrder + 1; // 游標只可向前（不變量 §3.4.4）。
-    // TODO: resolver.successBehavior==='leave' 或目標達成時 enterSettling = true（doc §7.2）。
+
+    // doc §7.2：Resolver 宣告 successBehavior='leave' 時，成功後就結束今日探索並進入結算。
+    if (resolved.outcome === 'success' && resolver.successBehavior === 'leave') {
+      enterSettling = true;
+      break;
+    }
   }
 
   // 序列已全部走完（無下一筆可處理）→ settling（doc §7 flow）。

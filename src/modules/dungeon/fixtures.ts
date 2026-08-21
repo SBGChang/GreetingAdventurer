@@ -102,6 +102,8 @@ const interactionRule: DungeonInteractionRuleDefinition = {
   traversalMinutesPerCell: 30, // 第一版為 30。
   redDoorOpenMinutes: 20,
   trapResolverId: FIXTURE.trapResolverId,
+  // 小刻度，便於測試跨午夜（原本是 DungeonContext 上的 minutesPerDungeonDay）。
+  minutesPerDungeonDay: 100,
 };
 
 const npcExplorationRule: NpcExplorationRuleDefinition = {
@@ -251,10 +253,12 @@ export function createFixtureContext(overrides?: Partial<DungeonContext>): Dunge
     map: createFixtureMapPort(),
     team: createFixtureTeamPort(),
     worldDay: 1 as WorldDay,
-    minutesPerDungeonDay: 100, // 小刻度，便於測試跨午夜。
     interactionRuleId: FIXTURE.interactionRuleId,
     lootDistributionRuleId: FIXTURE.lootDistributionRuleId,
     npcExplorationRuleId: FIXTURE.npcExplorationRuleId,
+    // 預設全部成功、繼續探索——與先前寫死的 outcome:'success' 行為一致，讓既有測試不變；
+    // 想測失敗路徑的測試自行覆寫這個 Port。
+    resolvers: { resolveNpcTargetOutcome: () => ({ outcome: 'success' }) },
     rng,
     nextInteractionId: () =>
       `runtime:interaction:gen-${(interactionCounter += 1)}` as InteractionId,

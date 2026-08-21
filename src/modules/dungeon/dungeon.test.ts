@@ -37,7 +37,7 @@ import {
   handleCombatEncounterResolved,
 } from './system';
 import type { DungeonHandlerResult } from './system';
-import { createFixtureState, createFixtureContext, FIXTURE } from './fixtures';
+import { createFixtureState, createFixtureContext, createFixtureReader, FIXTURE } from './fixtures';
 import { makeDungeonQuery } from './queries';
 
 function assert(condition: boolean, message: string): void {
@@ -433,6 +433,91 @@ const cases: readonly Case[] = [
       const teamKeys = Object.keys(byTeam);
       assert(!teamKeys.includes('rngContext'), 'getNpcRunForTeam must shield rngContext too');
       assert(!teamKeys.includes('pendingResults'), 'getNpcRunForTeam must shield pendingResults too');
+    },
+  },
+  {
+    // npcDungeonDay 的迴圈原本把每一筆 pendingResult 寫成 `outcome: 'success'`（規範 §5
+    // 「寫死事件成功或失敗」）：已扣掉的探索點數一律記成成功，NPC 隊伍永遠不會失手。
+    // 現在成敗由 NpcDungeonTargetResolverDefinition.outcomeRuleId 指名的資料規則決定。
+    name: 'npc run: 成敗由 Resolver 決定；失敗不留獎勵引用',
+    run: () => {
+      const ctx = createFixtureContext({
+        resolvers: { resolveNpcTargetOutcome: () => ({ outcome: 'failure' }) },
+      });
+      const start = ok(
+        startNpcDungeonRun(
+          createFixtureState(),
+          { type: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
+          ctx,
+        ),
+      );
+      const runId = Object.keys(start.nextSlice.npcRuns)[0] as NpcDungeonRunId;
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
+      const run = day.nextSlice.npcRuns[runId]!;
+      assert(run.pendingResults.length > 0, '應仍記錄嘗試過的目標');
+      assert(
+        run.pendingResults.every((r) => r.outcome === 'failure'),
+        `Resolver 回 failure 就該全部是 failure（實得 ${run.pendingResults.map((r) => r.outcome).join(',')}）`,
+      );
+      assert(
+        run.pendingResults.every((r) => r.pendingRewardRefs.length === 0),
+        '失敗不得留下獎勵引用——否則結算會發出不存在的戰利品',
+      );
+    },
+  },
+  {
+    name: "npc run: successBehavior='leave' 成功後立刻進入結算",
+    run: () => {
+      const base = createFixtureReader();
+      const ctx = createFixtureContext({
+        reader: {
+          ...base,
+          getNpcResolver: (id) => ({ ...base.getNpcResolver(id), successBehavior: 'leave' as const }),
+        },
+      });
+      const start = ok(
+        startNpcDungeonRun(
+          createFixtureState(),
+          { type: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
+          ctx,
+        ),
+      );
+      const runId = Object.keys(start.nextSlice.npcRuns)[0] as NpcDungeonRunId;
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
+      const run = day.nextSlice.npcRuns[runId]!;
+      assert(run.status === 'settling', `應立刻進入 settling（實得 ${run.status}）`);
+      assert(
+        run.pendingResults.length === 1,
+        `leave 表示第一筆成功就停手，不該把整條序列走完（實得 ${run.pendingResults.length} 筆）`,
+      );
+    },
+  },
+  {
+    name: 'npc run: Resolver 不支援該目標種類 → 整筆 Run 標為 invalid（不得當成失敗混進結果）',
+    run: () => {
+      const base = createFixtureReader();
+      const ctx = createFixtureContext({
+        reader: {
+          ...base,
+          // 只支援 mapContent，但 fixture 的序列是採集點——內容配置錯誤。
+          getNpcResolver: (id) => ({
+            ...base.getNpcResolver(id),
+            supportedTargetKinds: [{ kind: 'mapContent' as const, contentKind: 'chest' as never }],
+          }),
+        },
+      });
+      const start = ok(
+        startNpcDungeonRun(
+          createFixtureState(),
+          { type: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
+          ctx,
+        ),
+      );
+      const runId = Object.keys(start.nextSlice.npcRuns)[0] as NpcDungeonRunId;
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
+      const run = day.nextSlice.npcRuns[runId]!;
+      assert(run.status === 'invalid', `資料錯誤應標 invalid（實得 ${run.status}）`);
+      assert(run.pendingResults.length === 0, '不得留下任何偽裝成遊戲事件的結果');
     },
   },
   {
