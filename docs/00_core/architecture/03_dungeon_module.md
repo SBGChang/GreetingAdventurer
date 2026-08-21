@@ -257,6 +257,28 @@ interface DungeonQuery {
 
 Dungeon Query 不公開其他隊伍的 RNG seed、未結算獎勵細節或可被玩家利用的 NPC 隱藏結果；UI 只取得需要顯示的進度摘要。
 
+「進度摘要」與「未結算成果」的具體形狀：
+
+```ts
+// getNpcProgress 的回傳。只有進度，沒有任何逐筆成敗。
+type NpcDungeonProgressView = {
+  runId: NpcDungeonRunId;
+  cursorNpcOrder: number;
+  status: NpcDungeonRun['status'];
+  remainingPoints: number;      // 探索中才有意義；其餘狀態為 0
+};
+
+// PendingDungeonResult.pendingRewardRefs 的元素：指向這筆結果會產出獎勵的來源。
+// 兩個欄位都選填且互斥——來源是地圖內容或採集點，不會同時是兩者。
+type PendingRewardRef = {
+  contentId?: ContentInstanceId;
+  nodeId?: GatheringNodeId;
+};
+```
+
+`NpcDungeonRunView`（getNpcRun / getNpcRunForTeam）是 `NpcDungeonRun` 的**投影**，不是別名：
+`rngContext` 不出現，`pendingResults` 只以筆數（`pendingResultCount`）出現。
+
 ---
 
 ## 5. 輸入契約
@@ -273,6 +295,24 @@ Dungeon Query 不公開其他隊伍的 RNG seed、未結算獎勵細節或可被
 | `interactDungeonContent` | 玩家位於合法位置且內容可用。 | 依互動類型建立 combat／內容處理 Internal Command。 |
 | `resolveDungeonInteraction` | Session 有匹配的 Pending Interaction，選項仍合法。 | 套用資料化結果、清除互動並恢復探索。 |
 
+Payload 只帶「要對哪一個目標動作」所需的 ID；操作者不入 payload，由 `GameCommandEnvelope.actorTeamId`
+提供（玩家不得指定別隊）。
+
+```ts
+type StartPlayerExploration   = { type: 'startPlayerExploration' };
+type MoveDungeonRoom          = { type: 'moveDungeonRoom'; targetRoomId: RoomId };
+type OpenDungeonDoor          = { type: 'openDungeonDoor'; linkId: RoomLinkId };
+type GatherDungeonNode        = { type: 'gatherDungeonNode'; nodeId: GatheringNodeId };
+type UseDungeonExit           = { type: 'useDungeonExit'; exitRoomId: RoomId };
+type InteractDungeonContent   = { type: 'interactDungeonContent'; contentId: ContentInstanceId };
+// interactionId 一併帶上，才擋得住「玩家送的是上一個互動的選項」這種過期輸入。
+type ResolveDungeonInteraction = {
+  type: 'resolveDungeonInteraction';
+  interactionId: InteractionId;
+  optionId: ContentEventOptionId;
+};
+```
+
 ### 5.2 ScheduledJob
 
 | Job | Dungeon 的反應 |
@@ -285,6 +325,18 @@ Dungeon Query 不公開其他隊伍的 RNG seed、未結算獎勵細節或可被
 |---|---|
 | `StartNpcDungeonRun` | 建立 NPC Run、collecting 的 NPC 地牢 Distribution，以及引用所有怪物內容的 `dungeonSweep` Combat Sequence；排入下一日 `npcDungeonDay`。 |
 | `ConsumeDungeonGatheringAction` | 重新驗證 Session、目前房間、Map Version、探索參與者快照與阻塞狀態；成功時增加 Gathering Rule 指定分鐘，失敗時不改 State。 |
+
+Payload 就是上面那句「重新驗證」需要的四項輸入——Session（teamId）、地圖與其版本、目標採集點：
+
+```ts
+type ConsumeDungeonGatheringAction = {
+  type: 'ConsumeDungeonGatheringAction';
+  teamId: TeamId;
+  mapId: MapInstanceId;
+  mapVersion: number;   // 與 Session 快照比對；刷新過就整筆回滾
+  nodeId: GatheringNodeId;
+};
+```
 
 ### 5.4 訂閱 DomainEvent
 

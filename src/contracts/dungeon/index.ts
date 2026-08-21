@@ -60,10 +60,13 @@ import type { StartReturnFromDungeonPayload, PlayerInteractionOpenedEvent } from
 // 本地 ID / 外部占位型別
 // ──────────────────────────────────────────────────────────────────────────
 
-// [INVENTED] core 未提供；NpcExplorationRuleDefinition.stopPolicyId 使用。
-export type NpcStopPolicyId = DefinitionId<'npc-stop-policy'>;
+// NpcStopPolicyId 的擁有者是 npc-behavior（NPC 何時停止探索是它的決策規則）。這裡曾經有一份
+// 同名宣告——同一個 DefinitionId 兩個來源，跨模組傳遞時編譯器看不出不匹配。
+import type { NpcStopPolicyId } from '../npc-behavior';
+export type { NpcStopPolicyId };
 
-// [INVENTED] core 未提供；NpcDungeonTargetResolverDefinition.outcomeRuleId 使用。
+// 本模組專屬的 Definition ID。它只被 dungeon 自己的 NpcDungeonTargetResolverDefinition 使用，
+// 所以 dungeon **就是**擁有者——模組專屬 ID 不需要出現在 core（同 team 的 FreeActionRuleId 等）。
 export type OutcomeRuleId = DefinitionId<'outcome-rule'>;
 
 // ContentEventInstance 住在 contracts/core（沒有模組擁有它——dungeon 與 team 都只是消費者）。
@@ -213,7 +216,8 @@ export type NpcDungeonTargetRef =
       gatheringResolution?: GatheringResolution;
     }>;
 
-// [INVENTED] PendingDungeonResult.pendingRewardRefs 元素；文件僅稱 PendingRewardRef。
+// 這筆結果會產出獎勵的來源（03_dungeon_module.md §4）。兩個欄位都選填且**互斥**——來源是地圖
+// 內容或採集點，不會同時是兩者。
 export type PendingRewardRef = Readonly<{
   contentId?: ContentInstanceId;
   nodeId?: GatheringNodeId;
@@ -286,7 +290,8 @@ export type NpcDungeonRunView = Readonly<
 >;
 export type PendingDungeonInteractionView = PendingDungeonInteraction;
 
-// [INVENTED] getNpcProgress 的摘要投影；文件未給出結構。
+// getNpcProgress 的回傳（03_dungeon_module.md §4）。只有進度，沒有任何逐筆成敗——doc 明文要求
+// 「UI 只取得需要顯示的進度摘要」。remainingPoints 只在探索中有意義，其餘狀態為 0。
 export type NpcDungeonProgressView = Readonly<{
   runId: NpcDungeonRunId;
   cursorNpcOrder: number;
@@ -310,7 +315,8 @@ export interface DungeonQuery {
 // 5.1 玩家 Command（Dungeon 為唯一 Handler）
 // ──────────────────────────────────────────────────────────────────────────
 
-// [INFERRED] 玩家 Command payload 由 §5.1 前置條件與責任描述推導；actorTeamId 由信封提供。
+// 玩家 Command payload（03_dungeon_module.md §5.1）。只帶「要對哪一個目標動作」所需的 ID；
+// 操作者不入 payload，由 GameCommandEnvelope.actorTeamId 提供（玩家不得指定別隊）。
 export type StartPlayerExploration = Readonly<{ type: 'startPlayerExploration' }>;
 export type MoveDungeonRoom = Readonly<{ type: 'moveDungeonRoom'; targetRoomId: RoomId }>;
 export type OpenDungeonDoor = Readonly<{ type: 'openDungeonDoor'; linkId: RoomLinkId }>;
@@ -374,7 +380,8 @@ export type StartNpcDungeonRun = Readonly<{
   planId: TeamPlanId;
 }>;
 
-// [INFERRED] 欄位由 §5.3 重新驗證描述推導。
+// 欄位就是 03_dungeon_module.md §5.3 那句「重新驗證 Session、目前房間、Map Version、探索參與者
+// 快照與阻塞狀態」需要的輸入。mapVersion 與 Session 快照比對，刷新過就整筆回滾。
 export type ConsumeDungeonGatheringAction = Readonly<{
   type: 'ConsumeDungeonGatheringAction';
   teamId: TeamId;

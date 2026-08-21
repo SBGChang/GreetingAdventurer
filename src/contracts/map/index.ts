@@ -278,7 +278,7 @@ export type MapState = Readonly<{
 // 內容處理 Resolution（Command/Event 共用）
 // ──────────────────────────────────────────────────────────────────────────
 
-// [INVENTED] 文件以 `resolution`/`resolver` 描述內容處理結果但未給出結構。
+// 內容處理結果（01_map_module.md §3.2 只以 `resolution`／`resolver` 描述、未給結構）。
 //
 // 判別鍵是「**這筆結果由什麼產生**」，因為那決定了要附哪一種身分：
 //   * contentResolver：玩家路徑。內容自己的解析 Resolver（MapContentInstance.playerResolverId）。
@@ -371,7 +371,9 @@ export type MapScheduledJob = MapRefreshCheckJob;
 // 5.2 Internal Command（Map 為唯一 Handler）
 // ──────────────────────────────────────────────────────────────────────────
 
-// [INFERRED] 欄位由 §5.2 與 §3.1 RefreshLock 推導。
+// 欄位取自 01_map_module.md §5.2 的命令語意與 §3.1 的 RefreshLock：set 需要 reason 與到期日，
+// release 只需要指名是哪一張委託在解鎖。sourceQuestId 兩種模式都必填——解鎖必須由下鎖的同一張
+// 委託執行，set 也一樣（別張委託不得覆蓋現有鎖，否則原委託連自己的鎖都解不掉）。
 export type SetMapRefreshLock = Readonly<{
   type: 'SetMapRefreshLock';
   mapId: MapInstanceId;
