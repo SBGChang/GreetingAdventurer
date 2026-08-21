@@ -155,7 +155,6 @@ function createIdPorts(worldSeed: Seed, holder: CursorHolder): EngineIdPorts {
       nextFreeActionId: next<FreeActionId>('free-action'),
       nextInteractionId: next<InteractionId>('interaction'),
       nextActivityRecordId: next<ActivityRecordId>('activity-record'),
-      nextMapInstanceId: next<MapInstanceId>('map-instance'),
     },
     dungeon: {
       nextInteractionId: next<InteractionId>('interaction'),

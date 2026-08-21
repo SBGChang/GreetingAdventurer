@@ -17,6 +17,7 @@ import type {
   InteractionId,
   ActivityRecordId,
   MapInstanceId,
+  AdventureSiteId,
   CityId,
   ModuleId,
   WorldDay,
@@ -114,8 +115,6 @@ export interface TeamIdAllocator {
   nextFreeActionId(): FreeActionId;
   nextInteractionId(): InteractionId;
   nextActivityRecordId(): ActivityRecordId;
-  // [MISMATCH] 冒險地 Map 實例 ID 的真正擁有者是 map 模組；此處為 foundation 自足所需。
-  nextMapInstanceId(): MapInstanceId;
 }
 
 // 窄化跨模組 Reader（doc §9：Map／World／City 的窄化 Reader）。
@@ -124,6 +123,16 @@ export interface TeamWorldReader {
   getAdventureSiteCity(siteId: string): CityId;
   // 由地圖實例解析離場後抵達的城市。
   getMapExitCity(mapId: MapInstanceId): CityId;
+  // 由冒險據點解析它的 MapInstance。
+  //
+  // 這個 Query 取代了 `TeamIdAllocator.nextMapInstanceId()`：Team 先前在隊伍抵達冒險地時**自己鑄**
+  // 一個 MapInstanceId，違反 §12「只鑄造自己擁有的 Runtime ID」——`MapState.instances` 的擁有者是
+  // map。後果不是型別問題而是懸空引用：隊伍會位於一個 map 模組不知道的實例上，之後每一個
+  // 以 mapId 為鍵的查詢都查不到。
+  //
+  // 回 undefined 表示「這個據點在世界裡沒有對應的 MapInstance」（世界／內容尚未建立），
+  // 呼叫端必須明確拒絕，不得自己補一個。
+  getAdventureSiteMapInstance(siteId: AdventureSiteId): MapInstanceId | undefined;
 }
 
 // 資料調諧 Resolver（RNG 藏於其內；Handler 不含機率/公式，只消費結果）。
@@ -336,6 +345,17 @@ export function handleEnterAdventureMap(
   if (team.location.kind !== 'city') return reject('team/not-in-city');
   if (hasActiveNonFreePlan(state, team)) return reject('team/busy');
 
+  // Map 實例由 map 模組擁有：在**命令時**就解析出來並存進 Plan，缺就當場拒絕。
+  // 早驗的好處是玩家立刻得到明確失敗，而不是等 1 日 Plan 到期才發現據點沒有地圖。
+  // 刷新只改 MapInstance.currentVersion、不換 mapId，所以 Plan 存的 id 到期時仍然有效
+  //（版本漂移由 dungeon 進場時的 getMapVersion 處理）。
+  const mapId = ctx.world.getAdventureSiteMapInstance(cmd.adventureSiteId);
+  if (mapId === undefined) {
+    return reject('team/adventure-site-has-no-map-instance', {
+      adventureSiteId: String(cmd.adventureSiteId),
+    });
+  }
+
   const dueDay = (ctx.worldDay + 1) as WorldDay;
   const planId = ctx.ids.nextTeamPlanId();
   const plan: TeamPlan = {
@@ -345,7 +365,7 @@ export function handleEnterAdventureMap(
     startedOnDay: ctx.worldDay,
     dueOnDay: dueDay,
     status: 'active',
-    payload: { kind: 'enterAdventureMap', adventureSiteId: cmd.adventureSiteId },
+    payload: { kind: 'enterAdventureMap', adventureSiteId: cmd.adventureSiteId, mapId },
     revision: 0 as Revision,
   };
   let next = upsertPlan(state, plan);
@@ -1076,8 +1096,9 @@ function dueEnterAdventureMap(
     return { nextSlice: state, outgoingMessages: [], scheduledJobs: [] };
   }
   const team = requireTeam(state, plan.teamId);
-  // [MISMATCH] mapId 真正由 map 模組於進入時建立；foundation 以 payload.mapId 或本地配發。
-  const mapId = plan.payload.mapId ?? ctx.ids.nextMapInstanceId();
+  // mapId 已於 handleEnterAdventureMap 經 Query 解析並存進 Plan（見該處說明）。這裡不再有
+  // 「缺了就本地配發一個」的分支——那條分支正是 §12 所有權違規的來源。
+  const mapId = plan.payload.mapId;
   const to: TeamLocation = { kind: 'adventureMap', mapId };
   const arrivalTeam: Team = { ...team, location: to, revision: bump(team.revision) };
   const locationChanged: TeamLocationChangedEvent = { type: 'TeamLocationChanged', teamId: plan.teamId, from: team.location, to };

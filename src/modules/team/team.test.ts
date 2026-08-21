@@ -48,6 +48,7 @@ import {
   fixtureTeamState,
   makeContext,
   stubDefinitionReader,
+  stubWorldReader,
   stubResolverPort,
   rngStepBool,
   PLAYER_TEAM_ID,
@@ -56,6 +57,7 @@ import {
   PLAYER_MEMBER_ID,
   NPC_LEADER_ID,
   CITY_A,
+  SITE_MAP_INSTANCE,
   CITY_B,
   ROUTE_AB,
   TRAVEL_MODE_3,
@@ -664,6 +666,62 @@ const cases: readonly Case[] = [
 
       assert(elapsedDaysFromPack(365) === 365, '365 天的 Pack → elapsedDays 365');
       assert(elapsedDaysFromPack(180) === 180, '180 天的 Pack → elapsedDays 180（不得仍回 365）');
+    },
+  },
+  {
+    // §12「只鑄造自己擁有的 Runtime ID」。Team 先前在抵達冒險地時自己鑄一個 MapInstanceId
+    // （`plan.payload.mapId ?? ctx.ids.nextMapInstanceId()`），於是隊伍會位於一個 map 模組
+    // 不知道的實例上——懸空引用，而且是從**已註冊**的 enterAdventureMap 走得到的。
+    name: 'enterAdventureMap: mapId 來自 map 的既存實例，Team 不自鑄',
+    run: () => {
+      const worldDay = 20000 as WorldDay;
+      const ctx = makeContext({ worldDay });
+      const enter = ok(
+        handleEnterAdventureMap(
+          fixtureTeamState(worldDay),
+          { type: 'enterAdventureMap', adventureSiteId: 'site-1' as never },
+          ctx,
+        ),
+      );
+      // Plan 在**命令時**就存好已解析的 mapId（不是等到期才決定）。
+      const plan = Object.values(enter.result.nextSlice.plans).find((p) => p.kind === 'enterAdventureMap');
+      if (plan === undefined) throw new Error('應建立 enterAdventureMap Plan');
+      assert(
+        plan.payload.kind === 'enterAdventureMap' && plan.payload.mapId === SITE_MAP_INSTANCE,
+        'Plan 應帶 Query 解析出的既存 MapInstanceId',
+      );
+
+      const job = materializeJob(enter.result.scheduledJobs[0], 1);
+      const arrived = handleTeamPlanDueJob(
+        enter.result.nextSlice,
+        job,
+        makeContext({ worldDay: job.dueDay }),
+      );
+      const team = arrived.nextSlice.teams[PLAYER_TEAM_ID]!;
+      assert(
+        team.location.kind === 'adventureMap' && team.location.mapId === SITE_MAP_INSTANCE,
+        `抵達後的位置必須指向同一個既存實例（實得 ${JSON.stringify(team.location)}）`,
+      );
+    },
+  },
+  {
+    name: 'enterAdventureMap: 據點在世界裡沒有 MapInstance → 明確拒絕，不自己補一個',
+    run: () => {
+      const worldDay = 20000 as WorldDay;
+      const ctx = makeContext({
+        worldDay,
+        world: stubWorldReader({ getAdventureSiteMapInstance: () => undefined }),
+      });
+      const res = handleEnterAdventureMap(
+        fixtureTeamState(worldDay),
+        { type: 'enterAdventureMap', adventureSiteId: 'site-without-map' as never },
+        ctx,
+      );
+      assert(!res.ok, '缺 MapInstance 必須拒絕');
+      assert(
+        res.ok === false && res.rejection.code === 'team/adventure-site-has-no-map-instance',
+        `拒絕碼應為 team/adventure-site-has-no-map-instance（實得 ${res.ok ? 'accepted' : res.rejection.code}）`,
+      );
     },
   },
   {

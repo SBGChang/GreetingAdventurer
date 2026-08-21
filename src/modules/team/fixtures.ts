@@ -66,6 +66,8 @@ export const PLAYER_MEMBER_ID = 'char-companion' as CharacterId;
 export const NPC_LEADER_ID = 'char-npc' as CharacterId;
 
 export const CITY_A = 'city-a' as CityId;
+// 冒險據點對應的 MapInstance——由 map 模組擁有、世界建立時就存在。Team 只查它。
+export const SITE_MAP_INSTANCE = 'runtime:map-instance:site-1' as MapInstanceId;
 export const CITY_B = 'city-b' as CityId;
 export const ROUTE_AB = 'route-ab' as RouteId;
 
@@ -235,10 +237,13 @@ export function stubDefinitionReader(): TeamDefinitionReader {
 
 // ── Stub World Reader ───────────────────────────────────────────────────────
 
-export function stubWorldReader(): TeamWorldReader {
+export function stubWorldReader(overrides: Partial<TeamWorldReader> = {}): TeamWorldReader {
   return {
     getAdventureSiteCity: () => CITY_A,
     getMapExitCity: () => CITY_A,
+    // 世界裡本來就存在的 MapInstance（由 map 模組擁有）。Team 只查、不鑄。
+    getAdventureSiteMapInstance: () => SITE_MAP_INSTANCE,
+    ...overrides,
   };
 }
 
@@ -280,7 +285,6 @@ export function makeIdAllocator(prefix = 'gen'): TeamIdAllocator {
     nextFreeActionId: () => next('free') as FreeActionId,
     nextInteractionId: () => next('interaction') as InteractionId,
     nextActivityRecordId: () => next('activity') as ActivityRecordId,
-    nextMapInstanceId: () => next('map') as MapInstanceId,
   };
 }
 

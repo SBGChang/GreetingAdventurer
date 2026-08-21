@@ -207,7 +207,12 @@ export type TeamPlanPayload =
   | { kind: 'cityFree' }
   | { kind: 'cityFacilityAction'; facilityKind: FacilityKind }
   | { kind: 'cityTravel'; travel: CityTravelPlanPayload }
-  | { kind: 'enterAdventureMap'; adventureSiteId: AdventureSiteId; mapId?: MapInstanceId }
+  // mapId 為**必填**且由 map 模組擁有：它在 handleEnterAdventureMap 時經 Query 解析既存的
+  // MapInstance 並存進 Plan。原本是選填（`mapId?`），缺的時候 Team 自己鑄一個新的
+  // MapInstanceId——那違反 §12「只鑄造自己擁有的 Runtime ID」，且會讓隊伍位於一個 map 模組
+  // 不存在的實例上（懸空引用）。MapInstance 是常駐世界實體（帶 adventureSiteId、刷新節奏、
+  // 刷新鎖、spatialRuntime），不是每次進入才建的東西。
+  | { kind: 'enterAdventureMap'; adventureSiteId: AdventureSiteId; mapId: MapInstanceId }
   | { kind: 'returnToCity'; toCityId: CityId }
   | { kind: 'npcDungeonExploration'; mapId: MapInstanceId; runId: NpcDungeonRunId }
   | { kind: 'escortTravel'; questId: QuestId; travel: CityTravelPlanPayload }
