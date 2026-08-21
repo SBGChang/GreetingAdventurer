@@ -31,10 +31,20 @@ export type RewardRuleId = DefinitionId<'reward-rule'>;
 // pricingEpochs 的 key：某城市／地區／角色相關報價 scope 的序列化鍵。
 export type PriceScopeKey = Brand<string, 'price-scope-key'>;
 
-// 轉帳原因；doc 未列舉完整值，以字串佔位待資料規則收斂。
-export type EconomyTransferReason = string;
+// 轉帳原因（doc §3.2 的 `EconomyTransferRecord.reason`）。
+//
+// 它**是冪等鍵的一部分**（見 system.ts 的 transfer identity 比對：transferId + from + to + amount
+// + reason）。所以裸 `string` 不只是型別鬆——一個打錯字的 reason 會構成**不同的**轉帳身分，讓本該
+// 被冪等擋下的重送真的再扣一次錢。改成 branded：任意字串再也指派不進來。
+//
+// 值集刻意**不在這裡列舉**。已落地的送出端用的是 `<module>.<flow>` 命名（city 已在用
+// `city.shopPurchase` / `city.shopSale` / `city.homePurchase` / `city.homeUpgrade`），而流程屬於
+// **送出模組**。economy 若把每個模組的流程列成聯集，就變成 economy 反向依賴 city／dungeon／quest
+// ——正好是模組邊界要避免的方向。新增流程時由該模組宣告自己的 reason 常數。
+export type EconomyTransferReason = Brand<string, 'economy-transfer-reason'>;
 
-// 貨幣顯示資料為 UI 投影，契約未指定完整形狀；最小佔位。
+// 貨幣顯示資料（08_economy_module.md §2 的 `CurrencyDefinition.display`）。名稱走本地化引用，
+// 不放已翻譯字串——否則同一份 pack 沒辦法支援多語。
 export type CurrencyDisplayDefinition = Readonly<{ nameRef: LocalizedTextRef }>;
 
 // ── §2 靜態資料契約 ────────────────────────────────────────────────────────
@@ -62,7 +72,9 @@ export type PriceModifierRuleDefinition = DefinitionHeader<PriceModifierRuleId> 
   stackPolicy: 'multiply' | 'add' | 'strongest';
 };
 
-// getRewardRule 回傳；doc 未指定形狀，僅保留 Definition 標頭佔位。
+// `EconomyDefinitionReader.getRewardRule` 的回傳（doc §2 只給簽章沒給形狀）。報酬金額本身是可調
+// 內容，所以規則只指名算它的 Resolver，數值在該 Resolver 的 params——這正是 §7.1「形狀＝程式、
+// 調校＝資料」。規則不直接帶金額，否則報酬平衡會需要改契約。
 export type RewardRuleDefinition = DefinitionHeader<RewardRuleId> & {
   resolverId: ResolverId;
 };
@@ -156,7 +168,9 @@ export type SellQuoteInput = {
   sourceRevision: Revision;
 };
 
-// 報價修正明細；doc 未指定完整形狀，最小可解釋欄位佔位。
+// 報價的逐項修正明細。doc §3.3 的 PriceQuote 只說有修正，未給明細形狀；這裡定形為「哪一條修正
+// 規則、套了多少」，`label` 供 UI 顯示。有明細才能回答玩家「為什麼這個價」，也才能在平衡出錯時
+// 指認是哪一條規則造成的。
 export type PriceModifierBreakdown = {
   modifierRuleId: PriceModifierRuleId;
   label?: LocalizedTextRef;

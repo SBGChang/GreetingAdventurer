@@ -94,12 +94,13 @@ export const DISTRIBUTION_MODULE_ID = 'distribution' as ModuleId<'distribution'>
 const ECONOMY_MODULE_ID = 'economy' as ModuleId<'economy'>;
 const INVENTORY_MODULE_ID = 'inventory' as ModuleId<'inventory'>;
 
-// 轉帳／移轉原因（EconomyTransferReason 與 TransferItem.reason 都是 string；這些是本模組的
-// 語意標籤，不是可調的量）。
-const REASON_CURRENCY_INPUT: EconomyTransferReason = 'assetDistribution.currencyInput';
-const REASON_AUCTION_PAYMENT: EconomyTransferReason = 'assetDistribution.auctionPayment';
-const REASON_DIRECT_SALE: EconomyTransferReason = 'assetDistribution.directSaleProceeds';
-const REASON_EQUAL_SPLIT: EconomyTransferReason = 'assetDistribution.equalSplit';
+// 本模組的轉帳／移轉原因標籤。它們是語意標籤而不是可調的量，命名沿用 `<module>.<flow>` 慣例。
+// EconomyTransferReason 現在是 branded（它是轉帳冪等鍵的一部分），所以宣告處要明示轉型——
+// 這正是要的效果：reason 只能由擁有該流程的模組具名宣告，不能在呼叫點隨手寫一個字串。
+const REASON_CURRENCY_INPUT = 'assetDistribution.currencyInput' as EconomyTransferReason;
+const REASON_AUCTION_PAYMENT = 'assetDistribution.auctionPayment' as EconomyTransferReason;
+const REASON_DIRECT_SALE = 'assetDistribution.directSaleProceeds' as EconomyTransferReason;
+const REASON_EQUAL_SPLIT = 'assetDistribution.equalSplit' as EconomyTransferReason;
 const REASON_ITEM_AWARD = 'assetDistribution.itemAward';
 const DIRECT_SALE_REMOVAL_REASON: ItemRemovalReason = 'transferredOut';
 

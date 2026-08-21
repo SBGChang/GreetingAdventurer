@@ -201,7 +201,7 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
           transferId: 'transfer-reader-grant' as never,
           toAccountId: ACC_DISTRIBUTION,
           rewardRuleId: REWARD_DUNGEON_GOLD,
-          reason: 'dungeonGold',
+          reason: 'dungeonGold' as never,
           sourceId: BUYER,
         },
         fixtureEconomyState(),

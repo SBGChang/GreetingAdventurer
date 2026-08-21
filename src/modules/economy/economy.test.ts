@@ -13,6 +13,7 @@ import type {
   TransactionMessageDraft,
 } from '../../contracts/core';
 import type {
+  EconomyTransferReason,
   CreateEconomyAccountCommand,
   EconomyDomainEvent,
   EconomyState,
@@ -171,7 +172,7 @@ function transfer(
     toAccountId: ACC_SELLER,
     currencyId: GOLD,
     amount: 100,
-    reason: 'shopPurchase',
+    reason: 'shopPurchase' as EconomyTransferReason,
     sourceId: SOURCE_REF,
     ...overrides,
   };
@@ -183,7 +184,7 @@ function grant(overrides: Partial<GrantCurrencyCommand> = {}): GrantCurrencyComm
     transferId: GRANT_1,
     toAccountId: ACC_DISTRIBUTION,
     rewardRuleId: REWARD_DUNGEON_GOLD,
-    reason: 'dungeonGold',
+    reason: 'dungeonGold' as EconomyTransferReason,
     sourceId: SOURCE_REF,
     ...overrides,
   };
@@ -196,7 +197,7 @@ function remove(overrides: Partial<RemoveCurrencyCommand> = {}): RemoveCurrencyC
     fromAccountId: ACC_BUYER,
     currencyId: GOLD,
     amount: 60,
-    reason: 'facilityFee',
+    reason: 'facilityFee' as EconomyTransferReason,
     sourceId: SOURCE_REF,
     ...overrides,
   };

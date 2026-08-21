@@ -77,7 +77,8 @@ import type {
 
 // 跨模組（僅型別 import）。
 import type { ItemInstanceView, ItemLocationSelector } from '../../contracts/inventory';
-import type { PriceQuote, SellQuoteInput } from '../../contracts/economy';
+import type {
+  EconomyTransferReason, PriceQuote, SellQuoteInput } from '../../contracts/economy';
 
 import {
   bumpRevision,
@@ -110,6 +111,14 @@ import {
 export const CITY_MODULE_ID = 'city' as ModuleId<'city'>;
 const INVENTORY_MODULE_ID = 'inventory' as ModuleId<'inventory'>;
 const ECONOMY_MODULE_ID = 'economy' as ModuleId<'economy'>;
+
+// 本模組的轉帳原因標籤（`<module>.<flow>` 慣例）。EconomyTransferReason 是 branded，因為它是
+// 轉帳冪等鍵的一部分——同一筆 transferId 重送時 reason 也要相符才算同一筆。具名宣告在這裡，
+// 呼叫點就不會出現拼錯的行內字串（拼錯會變成另一個轉帳身分，讓重送真的再扣一次錢）。
+const REASON_SHOP_PURCHASE = 'city.shopPurchase' as EconomyTransferReason;
+const REASON_SHOP_SALE = 'city.shopSale' as EconomyTransferReason;
+const REASON_HOME_PURCHASE = 'city.homePurchase' as EconomyTransferReason;
+const REASON_HOME_UPGRADE = 'city.homeUpgrade' as EconomyTransferReason;
 
 // ──────────────────────────────────────────────────────────────────────────
 // 注入 Port（§7.1 慣例：模組宣告本地窄化 port 型別，實作由 Composition 注入）
@@ -472,7 +481,7 @@ export function handleBuyShopOffer(
       toAccountId: shopAccountId,
       currencyId: quote.currencyId,
       amount: quote.amount,
-      reason: 'city.shopPurchase',
+      reason: REASON_SHOP_PURCHASE,
       sourceId: offer.itemId,
     }),
   ];
@@ -485,7 +494,7 @@ export function handleBuyShopOffer(
         itemId: offer.itemId,
         to: { kind: 'characterBag', characterId: command.payerCharacterId },
         newOwnerCharacterId: command.payerCharacterId,
-        reason: 'city.shopPurchase',
+        reason: REASON_SHOP_PURCHASE,
       }),
     );
   } else {
@@ -623,7 +632,7 @@ export function handleSellItemToShop(
       toAccountId: sellerAccountId,
       currencyId: quote.currencyId,
       amount: quote.amount,
-      reason: 'city.shopSale',
+      reason: REASON_SHOP_SALE,
       sourceId: command.itemId,
     }),
     // 解除角色 Owner：移入城市永久庫存且不指定新 Owner（inventory 的 TransferItem 對非
@@ -632,7 +641,7 @@ export function handleSellItemToShop(
       type: 'TransferItem',
       itemId: command.itemId,
       to: { kind: 'cityPermanentStock', cityId: command.cityId },
-      reason: 'city.shopSale',
+      reason: REASON_SHOP_SALE,
     }),
     emit({
       type: 'ShopOfferCreated',
@@ -771,7 +780,7 @@ export function handleBuyOrUpgradeHome(
         toAccountId: ctx.economy.getCityShopAccount(command.cityId, quote.currencyId),
         currencyId: quote.currencyId,
         amount: quote.amount,
-        reason: 'city.homePurchase',
+        reason: REASON_HOME_PURCHASE,
         sourceId: command.cityId,
       }),
       emit({
@@ -833,7 +842,7 @@ export function handleBuyOrUpgradeHome(
         toAccountId: ctx.economy.getCityShopAccount(command.cityId, quote.currencyId),
         currencyId: quote.currencyId,
         amount: quote.amount,
-        reason: 'city.homeUpgrade',
+        reason: REASON_HOME_UPGRADE,
         // HomeId 不在 `EntitySourceRef` 聯集內（見報告：需要 contracts/core 補 ShopOfferId／HomeId），
         // 因此以城市作為來源實體——房屋升級的費用確實發生在該城市。
         sourceId: command.cityId,
