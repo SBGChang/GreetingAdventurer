@@ -65,6 +65,11 @@ type NationDefinition = DefinitionHeader & {
   display: NationDisplayDefinition;
 };
 
+// 國度的顯示資料。名稱一律走本地化引用，不放已翻譯的字串——否則同一份 pack 沒辦法多語。
+type NationDisplayDefinition = {
+  nameRef: LocalizedTextRef;
+};
+
 type CultureDefinition = DefinitionHeader & {
   itemPoolIds: ContentPoolId[];
   nonHumanMonsterPoolIds: ContentPoolId[];
@@ -136,6 +141,15 @@ type ConflictRuleDefinition = DefinitionHeader & {
 
 type PassagePolicyDefinition = DefinitionHeader & {
   requirementResolverId: ResolverId;
+};
+
+// `outcomeResolverId` 的結果形狀。§5.1 的 worldConflictResolve「依既有 Conflict 的結果資料改變
+// 控制、路線與市場壓力」，所以結果必須足以指認**誰接管了哪些地區**；勝負雙方選填，因為僵持
+// （無人接管）也是一種合法結果。實際勝負判定與力量差公式仍在 Resolver 與其 params，不在此。
+type ConflictOutcome = {
+  winnerNationId?: NationId;
+  loserNationId?: NationId;
+  affectedRegionIds: RegionId[];
 };
 ```
 

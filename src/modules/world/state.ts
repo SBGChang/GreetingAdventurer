@@ -27,6 +27,7 @@ import type {
   RegionControlState,
   RouteRuntimeState,
   RouteAccessState,
+  RouteAccessReason,
   ConflictState,
   ConflictId,
   MarketPressureState,
@@ -135,7 +136,7 @@ export function tryGetRouteState(state: WorldState, routeId: RouteId): RouteRunt
 export function effectiveRouteAccess(
   state: WorldState,
   route: RouteDefinition,
-): Readonly<{ accessState: RouteAccessState; reason?: string }> {
+): Readonly<{ accessState: RouteAccessState; reason?: RouteAccessReason }> {
   const runtime = state.routeStates[route.id];
   if (runtime === undefined) return { accessState: definitionRouteAccess(route) };
   return { accessState: runtime.accessState, reason: runtime.reason };

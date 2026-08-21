@@ -23,6 +23,7 @@ import type {
   EventWeightModifierExpireJob,
   MarketPressureExpireJob,
   SetRouteAccessCommand,
+  RouteAccessReason,
   SetWorldFactCommand,
   WorldConflictCheckJob,
   WorldConflictResolveJob,
@@ -146,7 +147,7 @@ function changeControl(
 function setRouteAccess(
   routeId: RouteId,
   accessState: SetRouteAccessCommand['accessState'],
-  reason?: string,
+  reason?: RouteAccessReason,
 ): SetRouteAccessCommand {
   return { type: 'SetRouteAccess', routeId, accessState, reason };
 }
@@ -333,7 +334,7 @@ const cases: readonly Readonly<{ name: string; run: () => void }>[] = [
     name: 'SetRouteAccess：關閉路線 → RouteRuntimeState + RouteAccessChanged；再改一次 revision 前進',
     run: () => {
       const first = expectOk(
-        handleSetRouteAccess(setRouteAccess(ROUTE_AB_1, 'closed', 'war'), fixtureWorldState(), makeContext()),
+        handleSetRouteAccess(setRouteAccess(ROUTE_AB_1, 'closed', 'war' as RouteAccessReason), fixtureWorldState(), makeContext()),
         'close',
       );
       const runtime = first.nextSlice.routeStates[ROUTE_AB_1];
@@ -345,7 +346,7 @@ const cases: readonly Readonly<{ name: string; run: () => void }>[] = [
       assert(event !== undefined && event.accessState === 'closed', '應 emit RouteAccessChanged');
 
       const second = expectOk(
-        handleSetRouteAccess(setRouteAccess(ROUTE_AB_1, 'restricted', 'treaty'), first.nextSlice, makeContext()),
+        handleSetRouteAccess(setRouteAccess(ROUTE_AB_1, 'restricted', 'treaty' as RouteAccessReason), first.nextSlice, makeContext()),
         'restrict',
       );
       assert(second.nextSlice.routeStates[ROUTE_AB_1]!.revision === 1, 'revision 應 +1');
@@ -908,7 +909,7 @@ const cases: readonly Readonly<{ name: string; run: () => void }>[] = [
       assert(q.getRouteAccess(ROUTE_AB_1).passagePolicyId === undefined, '沒有政策就是沒有');
 
       const closed = expectOk(
-        handleSetRouteAccess(setRouteAccess(ROUTE_CD, 'restricted', 'border'), fixtureWorldState(), makeContext()),
+        handleSetRouteAccess(setRouteAccess(ROUTE_CD, 'restricted', 'border' as RouteAccessReason), fixtureWorldState(), makeContext()),
         'restrict',
       ).nextSlice;
       const view = query(closed).getRouteAccess(ROUTE_CD);

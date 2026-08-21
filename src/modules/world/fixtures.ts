@@ -15,6 +15,7 @@
 //   city-a ─ route-disabled ─ city-island（Definition enabled: false → 不在城市網路內）
 
 import type {
+  ModuleId,
   AdventureSiteId,
   CityId,
   ContentPackId,
@@ -113,8 +114,9 @@ export const FACT_BORDER_SEALED = 'fact-border-sealed' as WorldFactId;
 export const FACT_TAX_LEVEL = 'fact-tax-level' as WorldFactId;
 export const FACT_OFF = 'fact-off' as WorldFactId;
 
-export const FACT_SOURCE_QUEST = 'quest';
-export const FACT_SOURCE_CITY = 'city';
+// World Fact 的來源種類＝子系統身分（ModuleId | WorkflowId），不是自由字串。
+export const FACT_SOURCE_QUEST = 'quest' as ModuleId;
+export const FACT_SOURCE_CITY = 'city' as ModuleId;
 export const QUEST_SOURCE = 'quest-1' as QuestId;
 
 export const PRICE_RULE_WAR = 'price-modifier-war' as PriceModifierRuleId;

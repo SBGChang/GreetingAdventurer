@@ -13,6 +13,7 @@ import type {
   Revision,
   RngContext,
   ModuleId,
+  WorkflowId,
   ResolverId,
   EffectDefinitionId,
   PriceModifierRuleId,
@@ -47,14 +48,29 @@ export type RouteAccessState = 'open' | 'restricted' | 'closed';
 // 事件權重修正的內容脈絡（doc §3.3 內嵌註解）。
 export type ContentEventContext = 'playerTravel' | 'dungeon' | 'city';
 
-// doc 未列舉具體值；以字串佔位並待資料規則收斂。
-export type WorldFactSourceKind = string;
-export type RouteAccessReason = string;
+// 誰有權設定某個 World Fact（`WorldFactDefinition.allowedSourceKinds` 的元素）。
+//
+// 原本是裸 `string`——規範 §7 明文禁止的「用字串欄位暫時承載未定義資料」。它不需要新的值集：
+// doc §5.2 的 SetWorldFact 送出端是**子系統**（quest、city、content-event workflow），所以這是
+// 程式身分而不是內容，直接用 core 既有的 brand。裸 string 的代價是打錯字的來源種類會靜默通不過
+// 或靜默通過 allowedSourceKinds 比對，而編譯器一句話都不會說。
+export type WorldFactSourceKind = ModuleId | WorkflowId;
 
-// 顯示資料為 UI 投影，模組契約未指定完整形狀；此處給最小佔位。
+// 路線受限／封閉的原因（doc §2.4、§5.2 SetRouteAccess）。
+//
+// 同樣原本是裸 `string`。doc 只說 accessState 是 open/restricted/closed 而「限制狀態只說明路線
+// 規則」，從未列舉原因——那是**內容**要宣告的標籤（戰爭、封鎖、季節…），不是程式該發明的列舉。
+// 所以改成 branded DefinitionId：值集由 Content Pack 宣告並受 reference 驗證，程式不再接受任意
+// 字串。這裡刻意**不**寫死任何一個原因值。
+export type RouteAccessReason = DefinitionId<'route-access-reason'>;
+
+// 國度顯示資料（07_world_module.md §2.1）。名稱一律走本地化引用，不放已翻譯字串——否則同一份
+// pack 沒辦法支援多語。
 export type NationDisplayDefinition = Readonly<{ nameRef: LocalizedTextRef }>;
 
-// 衝突結案結果由 outcomeResolver 決定，doc 未指定欄位；佔位型別。
+// `ConflictRuleDefinition.outcomeResolverId` 的結果形狀（07_world_module.md §2.4）。§5.1 的
+// worldConflictResolve 依它改變控制、路線與市場壓力，所以結果必須足以指認「誰接管了哪些地區」；
+// 勝負雙方選填，因為僵持（無人接管）也是合法結果。判定公式在 Resolver 與其 params，不在此。
 export type ConflictOutcome = Readonly<{
   winnerNationId?: NationId;
   loserNationId?: NationId;
@@ -222,7 +238,8 @@ export type WorldState = {
 };
 
 // ── §4 公開 Query ──────────────────────────────────────────────────────────
-// 下列 View 為 read-model 投影，模組契約未完整指定形狀；以最小可辨識欄位佔位。
+// 下列 View 是 World 的 read-model 投影。doc §4 只列出 Query 簽章與 View 名稱、未給欄位，形狀
+// 在此定案（同 §2 的 Definition：文件命名、契約定形）。每個欄位的存在理由寫在該欄位旁。
 export type RouteAccessView = Readonly<{
   routeId: RouteId;
   accessState: RouteAccessState;
@@ -272,7 +289,9 @@ export interface WorldQuery extends WorldDistanceQuery {
 }
 
 // ── §5.1 ScheduledJob ──────────────────────────────────────────────────────
-// payload 形狀 doc 未指定；以最小 payload 佔位，target 依語意推定。
+// 這四個 Job 的身分**全部**由 ScheduledJobBase 的 targetId 帶（ConflictRuleId / ConflictId /
+// MarketPressureId / WorldEventWeightModifierId），doc §5.1 的 Job 表也沒有任何額外輸入。所以
+// 空 payload 是**完成的設計**：多加欄位只會產生一份與 targetId 重複的真相。
 type EmptyPayload = Readonly<Record<string, never>>;
 
 export type WorldConflictCheckJob = ScheduledJobBase<'worldConflictCheck', ModuleId, ConflictRuleId, EmptyPayload>;
