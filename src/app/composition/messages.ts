@@ -256,7 +256,10 @@ export const GAME_COMMAND_ENTRY: Readonly<Record<GameCommandType, GameCommandEnt
   moveDungeonRoom: 'dungeon' as ModuleId,
   openDungeonDoor: 'dungeon' as ModuleId,
   interactDungeonContent: 'dungeon' as ModuleId,
-  resolveDungeonInteraction: 'dungeon' as ModuleId,
+  // 入口為 Workflow：選項效果會作用到 inventory／character／world 等模組，dungeon 不得同步呼叫
+  // 它們，也不該由它決定跨模組編排。Workflow 先把選項的 Effect 翻成 Internal Command 草稿，
+  // 再委派 dungeon 清除 Pending 互動並回報內容已解析（見 app/workflows/content-event-resolution.ts）。
+  resolveDungeonInteraction: WORKFLOW_ENTRY,
 
   // inventory
   equipItem: 'inventory' as ModuleId,

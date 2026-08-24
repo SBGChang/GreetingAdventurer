@@ -618,8 +618,13 @@ export function resolveDungeonInteraction(
   const pending = session.pendingInteraction;
   if (pending === undefined || pending.interactionId !== cmd.interactionId) return reject('dungeon.resolveDungeonInteraction.preconditionFailed');
 
-  // optionId 必須是本事件定義的合法選項——不得信任 UI 傳入。偽造的 optionId 先前會清掉 Pending 並固定回報
-  // 成功；現在一律拒絕（不動 Session）。TODO: 依選項解析資料化結果（分支效果／戰鬥／物品）仍待內容軌。
+  // optionId 必須是本事件定義的合法選項——不得信任 UI 傳入。偽造的 optionId 先前會清掉 Pending
+  // 並固定回報成功；現在一律拒絕（不動 Session）。
+  //
+  // 選項的**效果**不在這裡派發：入口是 content-event-resolution Workflow，它先把選項的 Effect 翻成
+  // 跨模組 Internal Command，通過後才委派本 Handler 清除 Pending 並回報內容已解析。所以本函式看到
+  // 的每一次呼叫，效果都已經在同一筆交易裡排好了——下方的 outcome 因此是實話，不是先前那個
+  // 「什麼都沒發生卻回報成功」。
   const legalOptions = ctx.reader.listContentEventOptionIds(pending.contentEventInstance.definitionId);
   if (!legalOptions.includes(cmd.optionId)) {
     return reject('dungeon.resolveDungeonInteraction.illegalOption', { optionId: String(cmd.optionId) });

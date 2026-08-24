@@ -59,14 +59,13 @@ export const dungeonModuleContract: ModuleContract = {
     'asset-distribution-query' as ReaderPortId,
     // combat-sequence 不是「讀」的 Port：改走 Internal Command（out）+ 事件訂閱（in），見 contracts/dungeon。
   ],
-  // **不註冊任何能力**：整條流程依賴不存在的 Distribution 模組（見 contracts/dungeon 的說明）。
-  // Handler 與測試都還在，這裡宣告的是「對外開放什麼」，答案目前是「沒有」。
-  handlesGameCommands: [
-    'moveDungeonRoom',
-    'openDungeonDoor',
-    'interactDungeonContent',
-    'resolveDungeonInteraction',
-  ],
+  // 這裡宣告的是「**由 dungeon 模組直接接收**什麼」。
+  //
+  // `resolveDungeonInteraction` 不在此列：它的入口是 content-event-resolution Workflow
+  //（選項效果會作用到 inventory／character／world，dungeon 不得同步呼叫它們）。Workflow 驗過並
+  // 派發效果後才委派 dungeon 寫自己的 Slice。§5.1 禁止一個 Game Command 同時有模組入口與
+  // Workflow 入口——啟動驗證會擋下，別把它加回來。
+  handlesGameCommands: ['moveDungeonRoom', 'openDungeonDoor', 'interactDungeonContent'],
   handlesInternalCommands: [],
   handlesJobs: [],
   // 只宣告**有 Owner** 的送出。Distribution 三筆無人接收，因此送出它們的流程

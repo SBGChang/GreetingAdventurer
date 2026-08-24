@@ -72,6 +72,7 @@ const assembler: ContextAssembler = (runtime): ModuleContexts => ({
   distribution: unusedContext('distribution'),
   combatSequence: unusedContext('combatSequence'),
   npcBehavior: unusedContext('npcBehavior'),
+  effects: unusedContext('effects'),
 });
 
 const restRequest = (actorTeamId: TeamId): GameCommandRequest<GameCommand> => ({

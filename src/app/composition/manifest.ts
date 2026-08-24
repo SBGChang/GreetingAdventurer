@@ -65,6 +65,7 @@ export const JOB_TYPE_ORDER_BY_PHASE: Readonly<Record<JobPhase, readonly GameJob
 export const TRAVEL_EVENT_WORKFLOW = 'workflow:travel-event' as WorkflowId;
 // 由 Game Command 啟動的 Workflow（身分宣告在其實作檔，此處引用以維持單一真相）。
 import { WEAPON_SET_CONFIGURATION_WORKFLOW } from '../workflows/weapon-set-configuration';
+import { CONTENT_EVENT_RESOLUTION_WORKFLOW } from '../workflows/content-event-resolution';
 import { GAME_COMMAND_ENTRY, WORKFLOW_ENTRY } from './messages';
 
 // 未完成的能力**不進註冊表**。
@@ -125,6 +126,15 @@ export const REGISTERED_WORKFLOWS: readonly WorkflowDefinition[] = [
         onRejected: { kind: 'complete' },
       },
     ],
+  },
+  {
+    workflowId: CONTENT_EVENT_RESOLUTION_WORKFLOW,
+    startsFrom: { kind: 'gameCommand', commandType: 'resolveDungeonInteraction' },
+    // 無宣告式 Internal Command 步驟：要送哪些命令**由選項的 Effect 資料決定**，不是固定流程。
+    // 這正是 §6 封閉 tagged variant 的用途——步驟表寫不出「看資料而定」，所以派發邏輯在
+    // app/workflows/content-event-resolution.ts 的 kind → 翻譯器表裡（非 Partial Record，
+    // 契約新增 kind 時少一個鍵就是編譯錯誤）。
+    steps: [],
   },
   {
     workflowId: WEAPON_SET_CONFIGURATION_WORKFLOW,

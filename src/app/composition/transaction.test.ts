@@ -63,6 +63,7 @@ function unusedContext(name: string): never {
 function contexts(): ModuleContexts {
   return {
     dungeon: createFixtureContext(),
+    effects: unusedContext('effects'),
     character: unusedContext('character'),
     inventory: unusedContext('inventory'),
     map: mapMakeContext(),

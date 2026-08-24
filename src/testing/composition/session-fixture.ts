@@ -133,6 +133,7 @@ export function makeAssembler(
     distribution: unusedContext('distribution'),
     combatSequence: unusedContext('combatSequence'),
     npcBehavior: unusedContext('npcBehavior'),
+    effects: unusedContext('effects'),
   });
 }
 

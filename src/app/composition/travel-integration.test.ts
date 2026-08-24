@@ -55,6 +55,7 @@ const assembler: ContextAssembler = (runtime): ModuleContexts => ({
   distribution: unusedContext('distribution'),
   combatSequence: unusedContext('combatSequence'),
   npcBehavior: unusedContext('npcBehavior'),
+  effects: unusedContext('effects'),
 });
 
 // 起始:玩家隊在城,發 startCityTravel（team 模組直呼,建立旅行 Plan + 第一段 Job）。

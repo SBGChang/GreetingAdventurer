@@ -48,10 +48,16 @@ import * as npcBehavior from '../../modules/npc-behavior/public';
 import type { ProgressionDefinitionReader } from '../../contracts/progression';
 import { KERNEL_REJECTION_SOURCE } from '../../contracts/core';
 import type { ConfigureWeaponSet } from '../../contracts/inventory';
+import type { ResolveDungeonInteraction } from '../../contracts/dungeon';
 import {
   validateWeaponSetSkills,
   WEAPON_SET_CONFIGURATION_WORKFLOW,
 } from '../workflows/weapon-set-configuration';
+import type { EffectDefinitionReader } from '../content/effect-reader';
+import {
+  CONTENT_EVENT_RESOLUTION_WORKFLOW,
+  dispatchOptionEffects,
+} from '../workflows/content-event-resolution';
 import {
   applyMutation,
   type GameJobType,
@@ -103,6 +109,11 @@ export type ModuleContexts = Readonly<{
   distribution: distribution.AssetDistributionHandlerContext;
   combatSequence: combatSequence.CombatSequenceContext;
   npcBehavior: npcBehavior.NpcBehaviorContext;
+
+  // 通用 Effect Reader。不屬於任何模組——Effect 是共用內容家族（戰鬥、內容事件選項、料理都用它），
+  // 由 Workflow 消費（見 app/workflows/content-event-resolution.ts）。放在 bag 的最外層而不是塞進
+  // 某個模組的 context，是因為把它掛在哪個模組上都會暗示錯誤的所有權。
+  effects: EffectDefinitionReader;
 }>;
 
 // 跨模組 Query 只吃 State 快照（各 createXxxQuery 都是 (state) => Query），因此 Context 必須用
@@ -408,8 +419,6 @@ const GAME_COMMAND_HANDLERS: Readonly<Partial<Record<GameCommandType, RootDispat
     fromOutcome('dungeon', dungeon.openDungeonDoor(s.dungeon, t, c as never, x.dungeon)),
   interactDungeonContent: (c, t, s, x) =>
     fromOutcome('dungeon', dungeon.interactDungeonContent(s.dungeon, t, c as never, x.dungeon)),
-  resolveDungeonInteraction: (c, t, s, x) =>
-    fromOutcome('dungeon', dungeon.resolveDungeonInteraction(s.dungeon, t, c as never, x.dungeon)),
 
   // ── combat：(state, cmd, ctx) → ModuleOutcome ──
   //    useCombatItem / commandAlly 不註冊（前者不套效果卻回成功，後者未實作）。
@@ -503,6 +512,65 @@ const WORKFLOW_GAME_COMMAND_HANDLERS: Readonly<Partial<Record<GameCommandType, R
       };
     }
     return fromOutcome('inventory', inventory.configureWeaponSet(s.inventory, cmd as never, x.inventory));
+  },
+
+  // 內容事件選項：Workflow 先把選項的 Effect 翻成跨模組命令，再委派 dungeon 寫自己的 Slice。
+  //
+  // 順序是刻意的。先派發效果、後委派 Slice 寫入，是因為效果翻不出來時要**整筆拒絕**——包含不清除
+  // Pending 互動。反過來寫的話，Pending 會先被清掉而效果沒送出，玩家的選擇就這樣消失了。
+  resolveDungeonInteraction: (c, t, s, x) => {
+    const cmd = c as ResolveDungeonInteraction;
+    const session = dungeon.makeDungeonQuery(s.dungeon, x.dungeon.reader).getPlayerSession(t);
+    const pending = session?.pendingInteraction;
+    if (pending === undefined || pending.interactionId !== cmd.interactionId) {
+      // 前置條件不符（沒有互動、或送的是上一個互動的 ID）。交給 dungeon 回報它自己的拒絕碼，
+      // 不在此另造一個——同一件事兩個碼會讓 UI 分不清。
+      return fromOutcome(
+        'dungeon',
+        dungeon.resolveDungeonInteraction(s.dungeon, t, cmd as never, x.dungeon),
+      );
+    }
+
+    const option = x.dungeon.reader.getContentEventOption(
+      pending.contentEventInstance.definitionId,
+      cmd.optionId,
+    );
+    if (option === undefined) {
+      // 這個事件定義沒有這個選項。**不得當成「沒有效果的合法選項」**——那正是舊行為（一律成功）。
+      return {
+        accepted: false,
+        rejection: {
+          code: 'workflow/content-event-unknown-option',
+          source: CONTENT_EVENT_RESOLUTION_WORKFLOW,
+          details: { optionId: String(cmd.optionId) },
+        },
+      };
+    }
+
+    const dispatched = dispatchOptionEffects(option.effectIds, x.effects, {
+      contentEventInstanceId: pending.contentEventInstance.instanceId,
+      // 行動者＝玩家操控角色（team 擁有這個事實；以當前 workingState 建 Query，不另存快照）。
+      actorCharacterId: team.createTeamQuery(s.team).getPlayerControlledCharacterId(),
+      playerTeamId: t,
+    });
+    if (!dispatched.ok) {
+      return {
+        accepted: false,
+        rejection: {
+          code: dispatched.rejection.code,
+          source: CONTENT_EVENT_RESOLUTION_WORKFLOW,
+          details: dispatched.rejection.details,
+        },
+      };
+    }
+
+    const written = fromOutcome(
+      'dungeon',
+      dungeon.resolveDungeonInteraction(s.dungeon, t, cmd as never, x.dungeon),
+    );
+    if (!written.accepted) return written;
+    // dungeon 自己的 outgoing（ResolvePlayerMapContent 等）與效果命令合併成同一交易。
+    return { ...written, outgoing: [...(written.outgoing ?? []), ...dispatched.messages] };
   },
 };
 
