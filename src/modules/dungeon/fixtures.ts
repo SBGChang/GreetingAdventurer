@@ -14,6 +14,7 @@ import type {
   ContentInstanceId,
   ContentEventDefinitionId,
   ContentEventOptionId,
+  EffectDefinitionId,
   TeamId,
   CharacterId,
   TeamPlanId,
@@ -72,6 +73,7 @@ export const FIXTURE = {
   eventContentId: 'runtime:content-instance:event-1' as ContentInstanceId,
   eventDefinitionId: 'definition:content-event:cave-shrine' as ContentEventDefinitionId,
   eventOptionId: 'template-local:content-event-option:pray' as ContentEventOptionId,
+  eventEffectId: 'definition:effect:shrine-blessing' as EffectDefinitionId,
 
   gatheringRulePlayer: 'definition:gathering-rule:herb' as GatheringRuleId,
   gatheringRuleNpc: 'definition:gathering-rule:npc' as GatheringRuleId,
@@ -144,6 +146,19 @@ export function createFixtureReader(): DungeonDefinitionReader {
     listContentEventOptionIds: (definitionId) => {
       if (definitionId === FIXTURE.eventDefinitionId) return [FIXTURE.eventOptionId];
       throw new Error(`fixture reader: unknown content event ${String(definitionId)}`);
+    },
+    getContentEventOption: (definitionId, optionId) => {
+      if (definitionId !== FIXTURE.eventDefinitionId) {
+        throw new Error(`fixture reader: unknown content event ${String(definitionId)}`);
+      }
+      if (optionId !== FIXTURE.eventOptionId) return undefined;
+      // 預設一個帶效果的選項，讓「效果真的被派發」測得出來。
+      return {
+        optionId: FIXTURE.eventOptionId,
+        visibilityConditionIds: [],
+        eligibilityConditionIds: [],
+        effectIds: [FIXTURE.eventEffectId],
+      };
     },
   };
 }

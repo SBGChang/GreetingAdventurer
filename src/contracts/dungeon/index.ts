@@ -71,8 +71,12 @@ export type OutcomeRuleId = DefinitionId<'outcome-rule'>;
 
 // ContentEventInstance 住在 contracts/core（沒有模組擁有它——dungeon 與 team 都只是消費者）。
 // 這裡曾經有一份本地宣告，team 也有一份形狀不同的，跨模組傳遞時編譯器看不出不匹配。
-import type { ContentEventInstance } from '../core';
-export type { ContentEventInstance };
+import type {
+  ContentEventDefinition,
+  ContentEventInstance,
+  ContentEventOptionDefinition,
+} from '../core';
+export type { ContentEventInstance, ContentEventDefinition, ContentEventOptionDefinition };
 
 // 由 Gathering Service（module 19）擁有。原本此處只保留 3 個欄位的影子版，
 // 與擁有者的完整結構（contributorCharacterId / masteryId / yields …）不同。
@@ -157,6 +161,12 @@ export interface DungeonDefinitionReader {
   }>;
   // 內容事件的合法選項 ID 清單（供 resolveDungeonInteraction 驗證玩家送來的 optionId，不得信任 UI）。
   listContentEventOptionIds(definitionId: ContentEventDefinitionId): readonly ContentEventOptionId[];
+  // 單一選項的完整定義（含 effectIds）。回 undefined 表示這個事件定義沒有這個選項——
+  // 呼叫端必須拒絕，不得當成「沒有效果的合法選項」。
+  getContentEventOption(
+    definitionId: ContentEventDefinitionId,
+    optionId: ContentEventOptionId,
+  ): ContentEventOptionDefinition | undefined;
 }
 
 // Combat Sequence 的互動走**交易模型**，不是同步 Host Port。

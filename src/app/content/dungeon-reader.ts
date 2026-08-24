@@ -9,6 +9,7 @@ import type {
   GatheringRuleId,
 } from '../../contracts/core';
 import type {
+  ContentEventDefinition,
   DungeonDefinitionReader,
   DungeonInteractionRuleDefinition,
   NpcDungeonTargetResolverDefinition,
@@ -29,9 +30,12 @@ export const DUNGEON_DEFINITION_KINDS = {
 // getGatheringInteractionView 只投影 gathering 定義的 dungeonInteractionMinutes（非完整定義）。
 type GatheringRuleDungeonView = Readonly<{ dungeonInteractionMinutes: number }>;
 
-// listContentEventOptionIds 同理：內容事件定義由內容軌擁有，Dungeon 只需要選項 ID 清單來驗證
-// 玩家送來的 optionId，不投影分支效果。
-type ContentEventDungeonView = Readonly<{ options: readonly Readonly<{ id: ContentEventOptionId }>[] }>;
+// 內容事件定義：直接用 contracts/core 的真型別，不再自己宣告一份投影。
+//
+// 這裡原本是 `{ options: { id: ContentEventOptionId }[] }`，而文件 §6.1 與契約用的欄位名是
+// **optionId**。內容作者照文件寫，`option.id` 就是 undefined，`listContentEventOptionIds` 會回
+// 一串 undefined——於是玩家送來的每一個 optionId 都被判為非法，事件永遠解不掉。兩邊各自「正確」
+// 且各自綠燈，只有真資料進來才會發現。改成引用擁有者的型別，欄位名不可能再對不上。
 
 export function createDungeonDefinitionReader(registry: DefinitionRegistry): DungeonDefinitionReader {
   const interaction = narrowedDomainReader<DungeonInteractionRuleDefinition>(
@@ -54,7 +58,7 @@ export function createDungeonDefinitionReader(registry: DefinitionRegistry): Dun
     'reader:dungeon.gathering-rule',
     [DUNGEON_DEFINITION_KINDS.gatheringRule],
   );
-  const contentEvent = narrowedDomainReader<ContentEventDungeonView>(
+  const contentEvent = narrowedDomainReader<ContentEventDefinition>(
     registry,
     'reader:dungeon.content-event',
     [DUNGEON_DEFINITION_KINDS.contentEvent],
@@ -69,6 +73,8 @@ export function createDungeonDefinitionReader(registry: DefinitionRegistry): Dun
       return { ruleId: id, dungeonInteractionMinutes: view.dungeonInteractionMinutes };
     },
     listContentEventOptionIds: (definitionId) =>
-      contentEvent.get(definitionId).options.map((option) => option.id),
+      contentEvent.get(definitionId).options.map((option) => option.optionId),
+    getContentEventOption: (definitionId, optionId) =>
+      contentEvent.get(definitionId).options.find((option) => option.optionId === optionId),
   };
 }
