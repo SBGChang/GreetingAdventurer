@@ -437,18 +437,22 @@ const UNFINISHED_MARKERS: readonly { pattern: RegExp; why: string }[] = [
 // 那段程式是**完成的**（載入期斷言，正是規範 §10 要的東西），它只是恰好在描述未實作這件事。
 // 把它算成缺口，等於懲罰寫了明確失敗訊息的人，並鼓勵把訊息寫得含糊。
 //
-// 只清內容、保留引號位置，行號與其餘欄位都不受影響。逃逸字元以「跳過下一字元」處理即可——
-// 本函式不需要真的解析字串，只需要知道哪一段不算程式碼。
+// **遇到 `//` 就停止字串追蹤，其後原樣保留。** 這一點是必要的而不是優化：本函式第一版沒有這條，
+// 於是註解裡的英文縮寫（`don't`、`it's`）會被當成字串開頭，把該行剩下的內容整段抹掉——真標記
+// 因此被藏起來。那是比誤報更糟的失效方向（誤報看得見，漏報看不見）。
 function blankStringLiterals(line: string): string {
   let out = '';
   let quote: string | undefined;
   for (let i = 0; i < line.length; i += 1) {
     const ch = line[i]!;
     if (quote === undefined) {
+      // 行註解起點：其後全是註解，原樣接回去。
+      if (ch === '/' && line[i + 1] === '/') return out + line.slice(i);
       out += ch;
       if (ch === "'" || ch === '"' || ch === '`') quote = ch;
       continue;
     }
+    // 逃逸字元：跳過下一個字元（本函式不需要真的解析字串，只需要知道哪一段不算程式碼）。
     if (ch === '\\') {
       out += '  ';
       i += 1;
