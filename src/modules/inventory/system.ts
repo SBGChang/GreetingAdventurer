@@ -239,8 +239,10 @@ export function createItemInstance(
     revision: 0,
   };
 
-  // TODO: 進入角色攜帶範圍的建立須在同一交易評估超載（doc §2.2）。此觸發由
-  // encumbrance-transition-workflow 及各建立來源 Workflow 負責，Inventory 不自建第二套重算。
+  // 超載重算不在這裡做：它是**隊伍層**的事實（全隊攜帶總量），而 inventory 只擁有物品實體、
+  // 不擁有隊伍組成。觸發住在 app/workflows/encumbrance-transition.ts——它訂閱下面這筆
+  // ItemInstanceCreated，把落在 characterBag 的物品換成該角色所屬隊伍的
+  // EvaluateTeamEncumbrance。**不要**在這裡加第二套重算。
   return accept(withItem(state, inst), [
     emit({ type: 'ItemInstanceCreated', itemId, definitionId: cmd.definitionId, ownerCharacterId: owner, location: cmd.location }),
   ]);

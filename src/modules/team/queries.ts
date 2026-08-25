@@ -86,6 +86,18 @@ export function createTeamQuery(state: TeamState): TeamQuery {
       return [...requireTeam(state, teamId).memberIds];
     },
 
+    findTeamForMember(characterId: CharacterId): TeamId | undefined {
+      // 正式成員與暫時成員都算：救出的救援角色會隨隊離圖，他背的東西也計入隊伍攜帶總量。
+      for (const key of Object.keys(state.teams)) {
+        const t = state.teams[key as TeamId];
+        if (t === undefined) continue;
+        if (t.memberIds.includes(characterId) || t.temporaryMemberIds.includes(characterId)) {
+          return t.teamId;
+        }
+      }
+      return undefined;
+    },
+
     getFormalMemberJoinedOnDay(teamId: TeamId, characterId: CharacterId): WorldDay | undefined {
       const team = state.teams[teamId];
       if (team === undefined || !team.memberIds.includes(characterId)) return undefined;

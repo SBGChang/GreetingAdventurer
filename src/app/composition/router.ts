@@ -82,7 +82,14 @@ import {
   type EventSubscription,
   type ExecutionOrderManifest,
 } from './manifest';
-import { WORKFLOW_SUBSCRIBERS } from '../workflows/player-travel-event';
+import { WORKFLOW_SUBSCRIBERS as TRAVEL_WORKFLOW_SUBSCRIBERS } from '../workflows/player-travel-event';
+import { WORKFLOW_SUBSCRIBERS as ENCUMBRANCE_WORKFLOW_SUBSCRIBERS } from '../workflows/encumbrance-transition';
+
+// 所有 Workflow 訂閱者共用同一個命名空間（`${eventType}::${workflowId}`），故合成一張表。
+const WORKFLOW_SUBSCRIBERS = {
+  ...TRAVEL_WORKFLOW_SUBSCRIBERS,
+  ...ENCUMBRANCE_WORKFLOW_SUBSCRIBERS,
+};
 
 // ──────────────────────────────────────────────────────────────────────────
 // 注入：各模組的 Context bag

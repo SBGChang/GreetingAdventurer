@@ -63,6 +63,17 @@ export const JOB_TYPE_ORDER_BY_PHASE: Readonly<Record<JobPhase, readonly GameJob
 
 // WorkflowId 用 core 的品牌型別（`workflow:${K}`）——不再本地重宣告一個不相容的型別。
 export const TRAVEL_EVENT_WORKFLOW = 'workflow:travel-event' as WorkflowId;
+// 超載重算的兩個觸發者。`EvaluateTeamEncumbrance` 先前有 Handler、有註冊，卻沒有任何送出端——
+// 超載從來沒有被評估過。inventory 刻意不自建重算（超載是隊伍層事實，它只擁有物品實體），
+// 所以觸發必須住在 Workflow。
+//
+// 為什麼是**兩個** Workflow 而不是一個訂兩個事件：啟動驗證要求「一個 Workflow 只訂閱自己的
+// startsFrom」，跨事件反應要走 steps。那條規則是對的——Workflow 是一條可追溯的流程，而「物品被
+// 建立」與「物品被移動」是兩個獨立觸發，只是恰好收斂到同一個命令。
+export const ENCUMBRANCE_ON_ITEM_CREATED_WORKFLOW =
+  'workflow:encumbrance-on-item-created' as WorkflowId;
+export const ENCUMBRANCE_ON_ITEM_MOVED_WORKFLOW =
+  'workflow:encumbrance-on-item-moved' as WorkflowId;
 // 由 Game Command 啟動的 Workflow（身分宣告在其實作檔，此處引用以維持單一真相）。
 import { WEAPON_SET_CONFIGURATION_WORKFLOW } from '../workflows/weapon-set-configuration';
 import { CONTENT_EVENT_RESOLUTION_WORKFLOW } from '../workflows/content-event-resolution';
@@ -126,6 +137,17 @@ export const REGISTERED_WORKFLOWS: readonly WorkflowDefinition[] = [
         onRejected: { kind: 'complete' },
       },
     ],
+  },
+  {
+    workflowId: ENCUMBRANCE_ON_ITEM_CREATED_WORKFLOW,
+    startsFrom: { kind: 'domainEvent', eventType: 'ItemInstanceCreated' },
+    // 反應事件、送 EvaluateTeamEncumbrance；沒有多步流程。
+    steps: [],
+  },
+  {
+    workflowId: ENCUMBRANCE_ON_ITEM_MOVED_WORKFLOW,
+    startsFrom: { kind: 'domainEvent', eventType: 'InventoryTransferred' },
+    steps: [],
   },
   {
     workflowId: CONTENT_EVENT_RESOLUTION_WORKFLOW,
@@ -208,6 +230,13 @@ export const EVENT_SUBSCRIPTIONS_BY_TYPE: Readonly<
     sub('CombatEncounterResolved', 'dungeon'),
     sub('CombatEncounterResolved', 'quest'),
   ],
+
+  // 物品進入／離開角色背包 → 重算該角色所屬隊伍的超載（doc §2.2、§3.3）。
+  //
+  // 兩個事件都要訂：只看 Created 會漏掉「物品被移走後隊伍不再超載」，而那筆變化只有在
+  // InventoryTransferred 的 from 側看得到。
+  ItemInstanceCreated: [sub('ItemInstanceCreated', ENCUMBRANCE_ON_ITEM_CREATED_WORKFLOW)],
+  InventoryTransferred: [sub('InventoryTransferred', ENCUMBRANCE_ON_ITEM_MOVED_WORKFLOW)],
 
   // NPC 地城結算套用完成 → dungeon 記錄三方結算之一。
   NpcDungeonSettlementApplied: [sub('NpcDungeonSettlementApplied', 'dungeon')],

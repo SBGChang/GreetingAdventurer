@@ -347,6 +347,12 @@ export interface TeamQuery {
   getActivePlan(teamId: TeamId): TeamPlanView | undefined;
   listFreeActions(teamId: TeamId): MemberFreeActionView[];
   listFormalMembers(teamId: TeamId): CharacterId[];
+  // 這名角色屬於哪一支隊伍（正式或暫時成員皆算）。不屬於任何隊伍時回 undefined——世界 NPC 與
+  // 未入隊的暫時角色本來就沒有隊伍，那不是缺資料。
+  //
+  // 為什麼需要它：超載是**隊伍層**的事實（全隊攜帶總量），而物品事件只認得角色。inventory 不擁有
+  // 隊伍組成，所以由 team 回答這個反查（見 app/workflows/encumbrance-transition.ts）。
+  findTeamForMember(characterId: CharacterId): TeamId | undefined;
   getFormalMemberJoinedOnDay(teamId: TeamId, characterId: CharacterId): WorldDay | undefined;
   getCombatFormation(teamId: TeamId): TeamCombatFormationView;
   listTavernVisitorIds(cityId: CityId): CharacterId[];

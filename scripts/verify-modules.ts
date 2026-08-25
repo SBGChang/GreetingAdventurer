@@ -19,6 +19,8 @@ import { runTests as contentPackIntegration } from '../src/app/content/content-p
 import { runTests as bootstrap } from '../src/testing/composition/bring-up-bootstrap.test';
 import { runTests as travelIntegration } from '../src/app/composition/travel-integration.test';
 import { runTests as weaponSetWorkflow } from '../src/app/workflows/weapon-set-configuration.test';
+// workflow：超載重算的觸發。EvaluateTeamEncumbrance 先前有 Handler 卻沒有任何送出端。
+import { runTests as encumbranceWorkflow } from '../src/app/workflows/encumbrance-transition.test';
 // 地基層測試自 Wave A 起就存在，但從未被這支腳本跑過。
 import { runKernelTests } from '../src/kernel/kernel.test';
 import { runKernelTests as dataKernels, allKernelTestsPass } from '../src/data-runtime/kernels.test';
@@ -124,6 +126,7 @@ const throwing: ReadonlyArray<readonly [string, () => void]> = [
   ['travel-integration', travelIntegration],
   // workflow：武器組配置的跨模組技能驗證（Definition 存在／已學會／啟動手可用）。
   ['weapon-set-workflow', weaponSetWorkflow],
+  ['encumbrance-workflow', encumbranceWorkflow],
 ];
 
 for (const [name, run] of throwing) {
