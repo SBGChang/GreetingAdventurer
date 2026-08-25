@@ -725,6 +725,79 @@ const cases: readonly Case[] = [
     },
   },
   {
+    // 建立端原本會為這些 kind 造出一個「active 但沒有 dueOnDay、也沒有排任何 Job」的 Plan。
+    // 那不是權宜——Plan 寫進 team.activePlanId 後，hasActiveNonFreePlan 會擋掉這支隊伍後續所有
+    // 大動作，而它永遠不會到期：NPC 隊伍就此永久卡死，沒有錯誤、沒有事件。
+    name: 'StartNpcTeamPlan: 到期規則未實作的 kind 明確拒絕，不建立永不到期的 Plan',
+    run: () => {
+      const worldDay = 20000 as WorldDay;
+      const s0 = fixtureTeamState(worldDay);
+      const ctx = makeContext({ worldDay });
+      const res = handleStartNpcTeamPlan(
+        s0,
+        {
+          type: 'StartNpcTeamPlan',
+          teamId: NPC_TEAM_ID,
+          kind: 'escortTravel',
+          payload: { kind: 'childStudy' },
+        } as never,
+        ctx,
+      );
+      assert(!res.ok, '未支援的 NPC Plan kind 必須拒絕');
+      assert(
+        res.ok === false && res.rejection.code === 'team/npc-plan-kind-not-supported',
+        `拒絕碼應為 team/npc-plan-kind-not-supported（實得 ${res.ok ? 'accepted' : res.rejection.code}）`,
+      );
+      // 沒有殘留的 Plan，隊伍也沒有被鎖住。
+      assert(
+        Object.keys(s0.plans).length === Object.keys(s0.plans).length,
+        '拒絕不得留下 Plan',
+      );
+    },
+  },
+  {
+    // 到期分派原本有 `default: return duePlanComplete(...)`——把一個什麼都沒做的 Plan 標成
+    // completed 並發出 TeamPlanCompleted。訂閱者（quest／progression）會依那筆事件套用結果。
+    name: 'teamPlanDue: 不該有到期 Job 的 kind 明確拋錯，不得回報為完成',
+    run: () => {
+      const worldDay = 20000 as WorldDay;
+      const s0 = fixtureTeamState(worldDay);
+      // 人為塞一個 escortTravel Plan 並為它排一筆到期 Job（模擬非法狀態）。
+      const planId = 'runtime:team-plan:illegal' as never;
+      const illegal: TeamState = {
+        ...s0,
+        plans: {
+          ...s0.plans,
+          [planId]: {
+            planId,
+            teamId: PLAYER_TEAM_ID,
+            kind: 'escortTravel',
+            startedOnDay: worldDay,
+            dueOnDay: worldDay,
+            status: 'active',
+            payload: { kind: 'childStudy' },
+            revision: 0 as Revision,
+          },
+        },
+      } as TeamState;
+      const job = {
+        jobId: 'job-illegal' as JobId,
+        type: 'teamPlanDue',
+        dueDay: worldDay,
+        expectedRevision: 0 as Revision,
+        payload: { teamId: PLAYER_TEAM_ID, planId },
+      } as unknown as TeamPlanDueJob;
+
+      let threw = false;
+      try {
+        handleTeamPlanDueJob(illegal, job, makeContext({ worldDay }));
+      } catch {
+        threw = true;
+      }
+      assert(threw, '非法狀態必須拋錯，不得靜默回報 Plan 完成');
+    },
+  },
+  {
     name: 'queries: player-controlled character = player team leaderId; presence reflects adventureMap',
     run: () => {
       const s0 = fixtureTeamState();

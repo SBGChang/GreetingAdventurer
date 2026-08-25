@@ -897,20 +897,15 @@ export function handleStartNpcTeamPlan(
     );
   }
 
-  // 其他 kind：建立即時或短期 Plan（foundation 版：無到期 Job 的通用 Plan）。
-  // TODO: enterAdventureMap / npcDungeonExploration / escortTravel 等 NPC 專屬到期規則。
-  const plan: TeamPlan = {
-    planId,
-    teamId: team.teamId,
-    kind: payload.kind,
-    startedOnDay: ctx.worldDay,
-    status: 'active',
-    payload: payload.payload,
-    revision: 0 as Revision,
-  };
-  let next = upsertPlan(state, plan);
-  next = upsertTeam(next, { ...team, activePlanId: planId, revision: bump(team.revision) });
-  return accept(next, [], []);
+  // 其餘 NPC Plan 種類（enterAdventureMap / npcDungeonExploration / escortTravel …）**明確拒絕**。
+  //
+  // 這裡原本是「建立一個無到期 Job 的通用 Plan」。那不是 foundation 版的權宜，是一個陷阱：Plan 被
+  // 建成 active 並寫進 team.activePlanId，但**沒有 dueOnDay、也沒有排任何 Job**，所以它永遠不會
+  // 到期。而 hasActiveNonFreePlan 會因為它擋掉這支隊伍後續所有大動作——NPC 隊伍就此永久卡死，
+  // 而且沒有任何錯誤、沒有任何事件，看起來只是「這隊不動了」。
+  //
+  // 到期規則沒寫就不該收下這個命令。拒絕讓 npc-behavior 當場知道，而不是讓它以為排程成功。
+  return reject('team/npc-plan-kind-not-supported', { kind: payload.kind });
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -940,10 +935,36 @@ export function handleTeamPlanDueJob(
       return dueHomeRest(state, plan);
     case 'cityFacilityAction':
       return duePlanComplete(state, plan, []);
+
+    // 下列 kind **不可能**帶著到期 Job 走到這裡：
+    //   * cityFree 是刻意開放式的（無 dueOnDay、無 Job，由玩家結束自由期）。
+    //   * 其餘四種的建立端一律拒絕（見 handleStartNpcTeamPlan），因為到期規則還沒寫。
+    //
+    // 這裡原本是 `default: return duePlanComplete(...)`——把一個**什麼都沒做**的 Plan 標成
+    // completed 並發出 TeamPlanCompleted。那是謊報：訂閱者（quest／progression）會依那筆事件
+    // 套用結果，而該 Plan 的工作從未發生。走到這裡代表 State 是被非法路徑造出來的，明確拋錯。
+    case 'cityFree':
+    case 'npcDungeonExploration':
+    case 'escortTravel':
+    case 'homeTeachingPost':
+    case 'childStudy':
+      throw new Error(
+        `team: plan ${String(plan.planId)} 的 kind "${plan.kind}" 不應帶有到期 Job——` +
+          `建立端未排 Job（或該 kind 的到期規則尚未實作），這筆 Job 是非法狀態`,
+      );
+
     default:
-      // TODO: npcDungeonExploration / escortTravel / homeTeachingPost / childStudy 到期規則。
-      return duePlanComplete(state, plan, []);
+      return assertUnhandledPlanKind(plan.kind, plan.planId);
   }
+}
+
+// 窮盡性守門。TeamPlanKind 新增一種時，上面的 switch 少一個 case 就是**編譯錯誤**——不會再有
+// 「default 分支順手回報完成」的空間。
+function assertUnhandledPlanKind(kind: never, planId: TeamPlanId): never {
+  throw new Error(
+    `team: plan ${String(planId)} 的 kind "${String(kind)}" 沒有到期處理——` +
+      `TeamPlanKind 新增種類時必須在 handleTeamPlanDueJob 明確處理`,
+  );
 }
 
 // 完成 Plan 的共通收尾：標記 completed、清空 team.activePlanId、遞增 revision，並補 TeamPlanCompleted。
