@@ -420,7 +420,9 @@ const UNFINISHED_MARKERS: readonly { pattern: RegExp; why: string }[] = [
   { pattern: /\[MISMATCH\]/, why: '[MISMATCH]' },
   { pattern: /\[AMBIGUITY\]|\(AMBIGUITY\)/, why: 'AMBIGUITY' },
   { pattern: /佔位/, why: '佔位' },
-  { pattern: /待接|待補|待實作|待資料|待內容|待做/, why: '待接／待補' },
+  // `待補` 前面不能是「等」：「等**待補**品消耗」是「等待／補品」跨字邊界的偶然組合，不是標記。
+  // 中文沒有詞邊界可用，所以這類誤判只能逐個排除；判準仍是「作者是否在標記未完成」。
+  { pattern: /待接|(?<!等)待補|待實作|待資料|待內容|待做/, why: '待接／待補' },
   { pattern: /仍缺|尚缺/, why: '仍缺' },
   { pattern: /第一版(?:固定|僅|只|暫)/, why: '第一版固定／暫代' },
   { pattern: /尚未實作|未實作/, why: '尚未實作' },
