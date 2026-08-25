@@ -43,6 +43,7 @@ import type {
   EncounterGroupDefinitionId,
   ExperienceAwardRuleId,
   NpcDungeonTargetResolverId,
+  FixedTrapId,
 } from '../../contracts/core';
 import type {
   NpcDungeonTargetKind,
@@ -64,7 +65,12 @@ import type {
   StartNpcDungeonRun,
   DungeonOutboundInternalCommand,
 } from '../../contracts/dungeon';
-import type { MapContentKind, GridCell, NpcSequenceEntryView } from '../../contracts/map';
+import type {
+  MapContentKind,
+  GridCell,
+  MapTrapResolution,
+  NpcSequenceEntryView,
+} from '../../contracts/map';
 // AssetDistributionRuleId 由 distribution 契約擁有（非 core）。
 import type { AssetDistributionRuleId } from '../../contracts/distribution';
 import type { CombatEncounterResolvedPayload } from '../../contracts/combat';
@@ -137,6 +143,9 @@ export interface DungeonMapPort {
     mapId: MapInstanceId,
     contentId: ContentInstanceId,
   ): ContentEventInstance | undefined;
+  // 該房間內**仍為 armed** 的固定陷阱（doc §8.3：進入房間即觸發判定）。陷阱狀態的擁有者是 map，
+  // 所以由它回答「還有哪些沒被觸發／解除」；已 triggered／disarmed 的不再回傳。
+  listArmedTrapsInRoom(mapId: MapInstanceId, roomId: RoomId): readonly FixedTrapId[];
   // NPC 依 npcOrder 排序的探索序列（含 pointCost / resolverId）。
   listNpcSequence(mapId: MapInstanceId): readonly NpcSequenceEntryView[];
   // 全清後的探索完成投影（experienceRuleId + explorationKey）。
@@ -161,6 +170,17 @@ export interface DungeonTeamPort {
 // `outcome: 'success'`——規範 §5 點名的「寫死事件成功或失敗」。已扣掉的探索點數會被記成成功，
 // NPC 隊伍因此永遠不會在地牢裡失手。
 export interface DungeonResolverPort {
+  // 固定陷阱的處理結果。由 DungeonInteractionRuleDefinition.trapResolverId 指名的資料規則決定
+  // （觸發或被解除），Handler 不含機率。
+  resolveTrap(
+    input: Readonly<{
+      resolverId: ResolverId;
+      trapId: FixedTrapId;
+      teamId: TeamId;
+      onDungeonMinute: DungeonMinute;
+      rngContext: RngContext;
+    }>,
+  ): MapTrapResolution;
   resolveNpcTargetOutcome(
     input: Readonly<{
       resolverId: NpcDungeonTargetResolverId;
@@ -442,9 +462,68 @@ export function moveDungeonRoom(
     entrance.roomId,
   );
 
-  // TODO: 進入 armed 固定陷阱房間時，於同一交易 required ResolveMapTrap + 陷阱效果命令，
-  //       並寫入 knownTrapIds（doc §8、§8.3）。第一版主路徑不含陷阱房。
-  return accept(revealed, timed.messages, [], timed.kernelRequests);
+  // 進入房間即判定該房仍為 armed 的固定陷阱（doc §8.3）。結果由 trapResolverId 指名的資料規則
+  // 決定。先前這裡只有一行標記，於是陷阱房永遠不會觸發任何事——玩家走過去什麼都不會發生。
+  const trapOutcome = resolveRoomTraps(revealed, ctx, teamId, session.mapId, cmd.targetRoomId, timed.session);
+  return accept(
+    trapOutcome.state,
+    [...timed.messages, ...trapOutcome.messages],
+    [],
+    timed.kernelRequests,
+  );
+}
+
+// 進入房間時解析該房所有仍 armed 的固定陷阱。
+//
+// 對每一個陷阱：由 trapResolverId 指名的 Resolver 決定 triggered 還是 disarmed，送 ResolveMapTrap
+// 讓 map 更新它擁有的陷阱狀態，並把陷阱寫進玩家的 knownTrapIds（已知陷阱屬 dungeon 的
+// PlayerMapKnowledge）。陷阱**效果**本身不在這裡套用：那是 Effect 資料，屬內容事件那條路徑。
+function resolveRoomTraps(
+  state: DungeonModuleState,
+  ctx: DungeonContext,
+  teamId: TeamId,
+  mapId: MapInstanceId,
+  roomId: RoomId,
+  session: PlayerExplorationSession,
+): Readonly<{ state: DungeonModuleState; messages: readonly TransactionMessageDraft[] }> {
+  const armed = ctx.map.listArmedTrapsInRoom(mapId, roomId);
+  if (armed.length === 0) return { state, messages: [] };
+
+  const rule = ctx.reader.getDungeonInteractionRule(ctx.interactionRuleId);
+  const messages: TransactionMessageDraft[] = [];
+  let next = state;
+
+  for (const trapId of armed) {
+    const resolution = ctx.resolvers.resolveTrap({
+      resolverId: rule.trapResolverId,
+      trapId,
+      teamId,
+      onDungeonMinute: session.elapsedDungeonMinutes,
+      rngContext: ctx.rng,
+    });
+    messages.push(
+      internal(MAP_MODULE_ID, {
+        type: 'ResolveMapTrap',
+        teamId,
+        mapId,
+        mapVersion: session.mapVersion,
+        trapId,
+        resolution,
+        resolvedOnDungeonMinute: session.elapsedDungeonMinutes,
+      }),
+    );
+    // 已知陷阱寫進玩家的 PlayerMapKnowledge（dungeon 擁有）。沒有 Knowledge 就代表玩家還沒進過
+    // 這張圖——那是不可能的（進房前必已揭露入口），所以不建立、也不靜默略過。
+    const knowledge = findKnowledge(next, teamId, mapId);
+    if (knowledge !== undefined && !knowledge.knownTrapIds.includes(trapId)) {
+      next = withKnowledge(next, {
+        ...knowledge,
+        knownTrapIds: [...knowledge.knownTrapIds, trapId],
+        revision: bump(knowledge.revision),
+      });
+    }
+  }
+  return { state: next, messages };
 }
 
 // openDungeonDoor：門連接目前房間、Map Version 相符。門仍關閉時支付一次開門分鐘並 required

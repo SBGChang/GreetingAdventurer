@@ -45,6 +45,7 @@ import type { MapContentKind, GridCell } from '../map';
 // 外送 Internal Command 一律引用接收模組契約的真實型別（見 §6.1）。
 import type {
   OpenMapDoor,
+  ResolveMapTrap,
   ResolvePlayerMapContent,
   ApplyNpcDungeonSettlement,
 } from '../map';
@@ -469,6 +470,8 @@ export type DungeonDomainEvent =
 
 export type DungeonOutboundInternalCommand =
   | OpenMapDoor
+  // 進入房間時判定該房仍 armed 的固定陷阱（doc §8.3）；陷阱狀態的擁有者是 map。
+  | ResolveMapTrap
   | ResolvePlayerMapContent
   | ApplyNpcDungeonSettlement
   | StartCombatEncounterCommand

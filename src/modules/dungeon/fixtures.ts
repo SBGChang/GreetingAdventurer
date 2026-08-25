@@ -231,6 +231,8 @@ export function createFixtureMapPort(overrides?: Partial<DungeonMapPort>): Dunge
       definitionId: FIXTURE.eventDefinitionId,
       rngStreamId: 'rng-stream:evt-1' as RngStreamId,
     }),
+    // 預設沒有陷阱房；測陷阱的案例自行覆寫這個 Port。
+    listArmedTrapsInRoom: () => [],
     listNpcSequence: () => npcSequence,
     getExplorationCompletion: () => ({
       explorationKey: `${FIXTURE.mapId}:v${FIXTURE.mapVersion}`,
@@ -273,7 +275,10 @@ export function createFixtureContext(overrides?: Partial<DungeonContext>): Dunge
     npcExplorationRuleId: FIXTURE.npcExplorationRuleId,
     // 預設全部成功、繼續探索——與先前寫死的 outcome:'success' 行為一致，讓既有測試不變；
     // 想測失敗路徑的測試自行覆寫這個 Port。
-    resolvers: { resolveNpcTargetOutcome: () => ({ outcome: 'success' }) },
+    resolvers: {
+      resolveNpcTargetOutcome: () => ({ outcome: 'success' }),
+      resolveTrap: () => ({ outcome: 'triggered' as const }),
+    },
     rng,
     nextInteractionId: () =>
       `runtime:interaction:gen-${(interactionCounter += 1)}` as InteractionId,

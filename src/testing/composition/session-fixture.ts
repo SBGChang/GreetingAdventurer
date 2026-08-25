@@ -109,7 +109,10 @@ export function makeAssembler(
       interactionRuleId: FIXTURE.interactionRuleId,
       lootDistributionRuleId: FIXTURE.lootDistributionRuleId,
       npcExplorationRuleId: FIXTURE.npcExplorationRuleId,
-      resolvers: { resolveNpcTargetOutcome: () => ({ outcome: 'success' }) },
+      resolvers: {
+        resolveNpcTargetOutcome: () => ({ outcome: 'success' }),
+        resolveTrap: () => ({ outcome: 'triggered' as const }),
+      },
       rng: runtime.rngContextFor('dungeon'),
       nextInteractionId: runtime.ids.dungeon.nextInteractionId,
       nextKnowledgeId: runtime.ids.dungeon.nextKnowledgeId,

@@ -37,7 +37,13 @@ import {
   handleCombatEncounterResolved,
 } from './system';
 import type { DungeonHandlerResult } from './system';
-import { createFixtureState, createFixtureContext, createFixtureReader, FIXTURE } from './fixtures';
+import {
+  createFixtureState,
+  createFixtureContext,
+  createFixtureReader,
+  createFixtureMapPort,
+  FIXTURE,
+} from './fixtures';
 import { makeDungeonQuery } from './queries';
 
 function assert(condition: boolean, message: string): void {
@@ -436,13 +442,83 @@ const cases: readonly Case[] = [
     },
   },
   {
+    // doc §8.3：進入房間即判定該房仍 armed 的固定陷阱。先前這裡只有一行 TODO，於是陷阱房
+    // 永遠不會觸發任何事——玩家走過去什麼都不會發生。
+    name: '進入陷阱房：required ResolveMapTrap，結果由 trapResolver 決定，並寫入 knownTrapIds',
+    run: () => {
+      const TRAP = 'template-local:fixed-trap:pit' as never;
+      const baseMap = createFixtureMapPort();
+      const ctx = createFixtureContext({
+        map: {
+          ...baseMap,
+          listArmedTrapsInRoom: (_mapId, roomId) => (roomId === FIXTURE.roomMiddle ? [TRAP] : []),
+        },
+        resolvers: {
+          resolveNpcTargetOutcome: () => ({ outcome: 'success' as const }),
+          resolveTrap: () => ({ outcome: 'disarmed' as const }),
+        },
+      });
+      const moved = ok(
+        moveDungeonRoom(
+          createFixtureState(),
+          FIXTURE.teamId,
+          { type: 'moveDungeonRoom', targetRoomId: FIXTURE.roomMiddle },
+          ctx,
+        ),
+      );
+
+      // 與同檔的 internalKinds 同一個取法：草稿的 command 欄位是 unknown，讀取端自行窄化。
+      const traps: { type: string; resolution: { outcome: string } }[] = [];
+      for (const m of moved.outgoingMessages) {
+        const cmd = (m as { command?: { type?: string; resolution?: { outcome?: string } } }).command;
+        if (cmd?.type === 'ResolveMapTrap' && cmd.resolution?.outcome !== undefined) {
+          traps.push({ type: cmd.type, resolution: { outcome: cmd.resolution.outcome } });
+        }
+      }
+      assert(traps.length === 1, `should send exactly one ResolveMapTrap, got ${traps.length}`);
+      assert(
+        traps[0]!.resolution.outcome === 'disarmed',
+        `outcome should come from trapResolver, got ${traps[0]!.resolution.outcome}`,
+      );
+
+      const knowledge = Object.values(moved.nextSlice.playerMapKnowledge).find(
+        (k) => k.teamId === FIXTURE.teamId,
+      );
+      if (knowledge === undefined) throw new Error('should have PlayerMapKnowledge');
+      assert(
+        knowledge.knownTrapIds.length === 1 && knowledge.knownTrapIds[0] === TRAP,
+        `trap should be recorded in knownTrapIds, got ${JSON.stringify(knowledge.knownTrapIds)}`,
+      );
+    },
+  },
+  {
+    name: '無陷阱房：不送 ResolveMapTrap（不得對每次移動都發一筆）',
+    run: () => {
+      const moved = ok(
+        moveDungeonRoom(
+          createFixtureState(),
+          FIXTURE.teamId,
+          { type: 'moveDungeonRoom', targetRoomId: FIXTURE.roomMiddle },
+          createFixtureContext(),
+        ),
+      );
+      assert(
+        !internalKinds(moved.outgoingMessages).includes('ResolveMapTrap'),
+        'default fixture has no trap room; must not send ResolveMapTrap',
+      );
+    },
+  },
+  {
     // npcDungeonDay 的迴圈原本把每一筆 pendingResult 寫成 `outcome: 'success'`（規範 §5
     // 「寫死事件成功或失敗」）：已扣掉的探索點數一律記成成功，NPC 隊伍永遠不會失手。
     // 現在成敗由 NpcDungeonTargetResolverDefinition.outcomeRuleId 指名的資料規則決定。
     name: 'npc run: 成敗由 Resolver 決定；失敗不留獎勵引用',
     run: () => {
       const ctx = createFixtureContext({
-        resolvers: { resolveNpcTargetOutcome: () => ({ outcome: 'failure' }) },
+        resolvers: {
+          resolveNpcTargetOutcome: () => ({ outcome: 'failure' }),
+          resolveTrap: () => ({ outcome: 'triggered' as const }),
+        },
       });
       const start = ok(
         startNpcDungeonRun(
