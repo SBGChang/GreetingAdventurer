@@ -4,7 +4,69 @@
 > 平台已運轉。剩下的是**各模組 HandlerContext 的 port 實作 + 四國內容資料化 + Bootstrap/vertical
 > slice + UI**。動 `src/` 前先讀 `.claude/skills/runtime-data-discipline/SKILL.md`。
 
-## 現況(Wave D:20 個模組全部實作 + 全部接進正式註冊表 + Content Pack 平台;tsc 乾淨、43 支測試通過)
+## 現況(Wave E:13 筆真問題結清 + 資料/程式分離補完 + 新增第 7 道紀律門禁)
+
+**驗證**:typecheck 0 錯、`verify:discipline` **七項**全過、`verify:modules` 全部通過、
+`verify:content-packs` 通過。實作缺口 108 → 53 → **40**;契約重複宣告 9 → 3 → **2**。
+(`verify:content-sync` 三國紅燈是內容軌未提交產物造成的既有狀態,與引擎無關。)
+
+### 新增門禁:Definition 的 `kind` 不得裝領域變體
+
+`kind` 在 Content Pack 裡是**家族宣告**(窄化 Reader 以它判斷所有權),所以用它裝領域變體會產生
+一筆 JSON 滿足不了的要求:設施定義既要是 `'facility'` 又要是 `'inn'`。**後果不是型別鬆,是接上
+真內容那天 Reader 一筆也讀不到**;而在那之前全綠,因為 fixture 也照程式期待寫。
+
+這個陷阱人工抓到六次(Item/Facility/HomeUpgrade/CityActionRule/TeamPlanRule/FreeActionRule)。
+門禁上線後**當場又找到三筆人工沒找到的**:`EffectDefinition`(上一輪才依 §6.0 寫的效果系統——
+tagged variant 本身正確,但判別鍵佔用了家族欄位)、`TemporaryCharacterRuleDefinition`、
+`MapTemplateDefinition`。全部改為 `effectKind` / `temporaryKind` / `templateKind`。
+
+門禁只針對**真的會單獨進 Content Pack 的 Definition**(必須帶 pack header);巢狀值物件
+(如住在房間圖裡的 `RoomLinkDefinition`)的 `kind` 是合法領域判別鍵,不受檢。
+
+### 13 筆的處置(全部結清)
+
+| # | 項目 | 結果 |
+|---|---|---|
+| 1 | dungeon 過期敘述 + 能力重新判定 | 敘述改寫;**判定為仍不開放**,四個阻塞點逐一寫明。其中「`AssetDistributionCompleted → dungeon` 未綁定」已由整合者補上——沒有它,`useDungeonExit` 轉 `leaving` 後就停住,不關閉、不返城、**且不報錯** |
+| 2 | combat 引用已刪除的 `UNAVAILABLE_CAPABILITIES` | 敘述改為「未進 contracts union,Router 查不到;此拒絕是第二道保險」 |
+| 3 | 隊形變更不驗發令者與戰鬥狀態 | `actorCharacterId` 進命令 + 比對 `leaderId`;`TeamHandlerContext.combat` 窄化 Query 驗有無進行中 Encounter |
+| 4 | 招募不驗酒館可見性 | 名單擁有者查明**是 team 自己**(成員的 `tavernVisit` 自由行動),招募路徑與 `listTavernVisitorIds` 共用同一個判準函式,不查別的模組 |
+| 5 | 任務貨物不驗負重 | 用既有的 `deps.getCarryCapacity`,沿用超載評估同一套算法(不另寫第二份) |
+| 6 | `targeting.targetResolverId` 沒被消費 | `CombatResolverPort.resolveSkillTargets` 接上;側別守門保留為最終不變量 |
+| 7 | `MapTrapResolution.details` 袋子 | 確認無消費者後刪除 |
+| 8 | `CharacterStatusChange` 缺 schema | 定形,並**拆成命令與事件兩個型別**(§6.0:功能不同的東西不共用一張表) |
+| 9 | control/kidnap 簡化成功 | 守衛內容解析接上;守衛未清即 typed rejection |
+| 10 | NPC 怪物內容不打仗就判定 | 走真的 Combat Sequence;`nextCombatSequenceId` / `nextCombatSequenceSourceCommitId` 由 dungeon 鑄造(§2.3) |
+| 11 | 武器組切換不付延遲 | `weaponSetSwitchDelayRuleId` 進契約,五處延遲全部改走 `delayFromRule` |
+| 12 | `NpcSequenceRuleDefinition` 退化 | 定形為 `groupPriority`,依真實消費者 + §2.2 裁定並回寫文件 |
+| 13 | `MapContentDefinition` 退化 | 定形為 `contentKind` + `npcPolicy`,形狀與 `getGatheringMapView().npcPolicy` 對稱 |
+
+**四個袋子型別全部清除**(combat 的 `directive` / `CombatContentResolution` / `CombatActionResult`、
+crafting 的 `EquipmentSkillEffectRef`);`src/contracts/**` 現在**零** `Record<string, unknown>`。
+
+### 對抗性複核抓到的(值得記住的樣式)
+
+新增「一側接上、卻把既有主路擋死」這個樣式:combat 接上目標 resolver 後,`requiredSideOf` 拿
+**反擊效果**推定本次行動側別,導致**每一次立守勢架勢都被拒絕**、§8.4 機制永遠建立不起來——而
+20 個既有測試全綠,因為唯一的反擊測試把 `counterStance` 直接塞進 Encounter 狀態,從未驅動過
+`handleUseCombatSkill` 的建立分支。複核者修掉並補了端到端迴歸測試(且驗證過:移除修正該測試會失敗)。
+另修掉 3 個**恆真斷言**(兩邊是同一個物件的同一個欄位)。
+
+### 已知且刻意保留的缺口
+
+- **`recruitTavernAdventurer` 目前必然拒絕**:`AssignNpcMemberFreeAction` 只有 payload 型別、
+  沒有 handler,所以沒有 NPC 會處於 `tavernVisit`。**裁定為保持註冊**——handler 與其 typed
+  rejection 都是正確的,缺的是「有沒有 NPC 去酒館」這個**內容/行為的填充**,與「還沒有 content
+  pack」同類;若因上游資料未填就反註冊,`equipItem` 也該一併反註冊。
+- **地牢入場/離場仍不開放**,阻塞點 2/3/4:`dungeon-gathering-workflow` 不存在、
+  `MapContentInstance.playerResolverId` 無資料、`DungeonMapPort` 無生產實作。
+- **combat 的 `useCombatSkill` 在正式環境仍跑不起來**:`ModuleContexts.combat` 的唯一供給者是
+  `unusedContext` 絆線,`resolveSkillTargets` 也沒有正式 Resolver 註冊。
+
+---
+
+## 前一階段(Wave D:20 個模組全部實作 + 全部接進正式註冊表 + Content Pack 平台;tsc 乾淨、43 支測試通過)
 
 **一句話**:16 個模組 + 3 個純服務全部實作完成並接線,啟動驗證 0 診斷;正式 Content Pack 平台
 (作者層 TypeScript → 純資料 JSON → Runtime)已運轉,首批 36 筆真實內容端到端驅動 progression 計算。
