@@ -60,6 +60,11 @@ import type {
   TeamId,
   TeamPlanId,
 } from '../../contracts/core';
+// 這兩個 ID 家族由 combat-sequence 擁有；dungeon 依 03_dungeon_module.md §2.3 鑄造它們。
+import type {
+  CombatSequenceId,
+  CombatSequenceSourceCommitId,
+} from '../../contracts/combat-sequence';
 import { KERNEL_REJECTION_SOURCE } from '../../contracts/core';
 import { deterministicRng, nextRuntimeId, runTransaction, type SchedulingEffects } from '../../kernel';
 
@@ -110,6 +115,8 @@ export type DungeonIdAllocator = Readonly<{
   nextKnowledgeId: () => PlayerMapKnowledgeId;
   nextRunId: () => NpcDungeonRunId;
   nextDistributionId: () => AssetDistributionId;
+  nextCombatSequenceId: () => CombatSequenceId;
+  nextCombatSequenceSourceCommitId: () => CombatSequenceSourceCommitId;
 }>;
 
 export type EngineIdPorts = Readonly<{
@@ -161,6 +168,15 @@ function createIdPorts(worldSeed: Seed, holder: CursorHolder): EngineIdPorts {
       nextKnowledgeId: next<PlayerMapKnowledgeId>('player-map-knowledge'),
       nextRunId: next<NpcDungeonRunId>('npc-dungeon-run'),
       nextDistributionId: next<AssetDistributionId>('asset-distribution'),
+      // Wave E：地牢掃蕩改為真的走 Combat Sequence。這兩枚 ID 由 **dungeon** 鑄造是刻意的
+      // （03_dungeon_module.md §2.3）：sequenceId 當成 StartCombatSequence 的輸入欄位帶進去，
+      // 所以不需要同步回傳值，也就不需要一條會繞過 Transaction Runner 的 Host Port。
+      // sourceCommitId 則是「來源正式提交」這個動作本身的身分——同 ID 重送冪等、不同 ID 重送
+      // 會被 combat-sequence 拒絕，所以必須由發動提交的宿主一次結算鑄一枚。
+      nextCombatSequenceId: next<CombatSequenceId>('combat-sequence'),
+      nextCombatSequenceSourceCommitId: next<CombatSequenceSourceCommitId>(
+        'combat-sequence-source-commit',
+      ),
     },
   };
 }

@@ -22,7 +22,16 @@ export {
 } from './state';
 
 // ── System：注入 Port/Context + 玩家 handler + NPC job/command + 結算 subscriber ──
-export type { DungeonContext, DungeonMapPort, DungeonTeamPort, DungeonHandlerResult } from './system';
+export type {
+  DungeonContext,
+  DungeonMapPort,
+  DungeonTeamPort,
+  DungeonResolverPort,
+  DungeonCombatSequencePort,
+  DungeonSweepMonsterTarget,
+  DungeonSweepSequencePlan,
+  DungeonHandlerResult,
+} from './system';
 export {
   DUNGEON_MODULE_ID,
   startPlayerExploration,
@@ -35,7 +44,10 @@ export {
   startNpcDungeonRun,
   npcDungeonDay,
   handleNpcDungeonSettlementApplied,
+  handleCombatSequenceChallengeResolved,
+  handleCombatSequenceReadyForSourceCommit,
   handleCombatSequenceSettled,
+  handleCombatSequenceInvalidated,
   handleAssetDistributionCompleted,
   handleCombatEncounterResolved,
   dungeonSubscribers,
@@ -68,10 +80,29 @@ export const dungeonModuleContract: ModuleContract = {
   handlesGameCommands: ['moveDungeonRoom', 'openDungeonDoor', 'interactDungeonContent'],
   handlesInternalCommands: [],
   handlesJobs: [],
-  // 只宣告**有 Owner** 的送出。Distribution 三筆無人接收，因此送出它們的流程
-  // （入場／離場／NPC 結算／戰敗收斂）一律不註冊——宣告送出一個沒人收的命令，
-  // 等於保證那條流程跑不完。
-  sendsInternalCommands: ['OpenMapDoor', 'ResolvePlayerMapContent'],
+  // 本模組**會送出**的全部 Internal Command。這張表的用途是啟動時的「送出端 → Owner」交叉驗證：
+  // 送出一個沒人接收的命令，等於保證那條流程跑不完。
+  //
+  // 先前這裡只有兩筆，因為 Distribution 與 Combat Sequence 都還不存在。兩者於 Wave D 落地後，
+  // 下列每一筆都有 Owner；漏報反而讓交叉驗證看不到真正的送出面——`ResolveMapTrap` 與
+  // `StartCombatEncounter` 就是例子：它們由**已註冊**的 moveDungeonRoom／interactDungeonContent
+  // 送出，卻一直不在這張表上。
+  sendsInternalCommands: [
+    'OpenMapDoor',
+    'ResolveMapTrap',
+    'ResolvePlayerMapContent',
+    'ApplyNpcDungeonSettlement',
+    'StartCombatEncounter',
+    'StartAssetDistribution',
+    'FinalizeAssetDistributionCollection',
+    'StartReturnFromDungeon',
+    'StartCombatSequence',
+    'ResolveNextCombatSequenceChallenge',
+    'SkipNextCombatSequenceChallenge',
+    'StopCombatSequence',
+    'CommitCombatSequenceSourceResults',
+    'InvalidateCombatSequence',
+  ],
   // 只登記**已實作**的 subscriber（原本宣告 9 筆但只寫了 4 個函式；宣告卻沒有實作會讓啟動
   // 驗證誤放行、路由時才炸）。其餘待 combat-sequence / map 刷新反應實作後再加回。
   // 命名依 12_engine_runtime.md §5.2 的 `subscription.<eventType>.<subscriber>`。
@@ -80,9 +111,23 @@ export const dungeonModuleContract: ModuleContract = {
   // 訂閱者又不能拒絕已發生的事實——宣告了就是宣告一個走不完的流程。Wave D 讓 Distribution 落地，
   // 這條路才真的閉合，於是宣告回來。（combat-sequence 相關的 4 筆仍未宣告：那是缺 subscriber
   // 實作，不是缺別的模組。）
+  //
+  // Wave E：四筆 Combat Sequence 訂閱與 AssetDistributionCompleted 的 Handler 現在都存在
+  //（handleCombatSequenceChallengeResolved / …ReadyForSourceCommit / …Settled / …Invalidated /
+  // handleAssetDistributionCompleted），所以一併宣告。
+  //
+  // **這五筆必須由整合者同時加進 `manifest.ts` 的 EVENT_SUBSCRIPTIONS_BY_TYPE 與 `router.ts` 的
+  // EVENT_SUBSCRIBERS。** 少了綁定，怪物內容送出的 ResolveNextCombatSequenceChallenge 會拿不到
+  // 結果，NPC Run 會停在 `awaitingCombatChallengeId` 且不再排 Job——不會有任何測試失敗，
+  // 那條 Run 只是安靜地不動了。（NPC 流程與玩家入場目前都未註冊，故沒有現行影響。）
   subscriptionHandlerIds: [
     'subscription.CombatEncounterResolved.dungeon' as EventSubscriptionId,
     'subscription.NpcDungeonSettlementApplied.dungeon' as EventSubscriptionId,
+    'subscription.AssetDistributionCompleted.dungeon' as EventSubscriptionId,
+    'subscription.CombatSequenceChallengeResolved.dungeon' as EventSubscriptionId,
+    'subscription.CombatSequenceReadyForSourceCommit.dungeon' as EventSubscriptionId,
+    'subscription.CombatSequenceSettled.dungeon' as EventSubscriptionId,
+    'subscription.CombatSequenceInvalidated.dungeon' as EventSubscriptionId,
   ] as readonly EventSubscriptionId[],
   emits: [
     'PlayerDungeonSessionStarted',

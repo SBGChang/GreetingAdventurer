@@ -41,8 +41,20 @@ export type CraftQuality = 'plain' | 'fine' | 'excellent' | 'perfect' | 'peerles
 // 複製品不會跟著擁有者一起改，city 新增一種設施時 crafting 這份會靜靜地變成舊值集。
 import type { FacilityKind } from '../city';
 export type { FacilityKind };
-// EquipmentSkillEffectRef 由 inventory 擁有（05_inventory_module.md §2.3）。
-export type EquipmentSkillEffectRef = Readonly<Record<string, unknown>>;
+// EquipmentSkillEffectRef 由 inventory 擁有（05_inventory_module.md §2.3）——這行註解一直是對的，
+// 但下面那行卻自己宣告了一份同名的 `Readonly<Record<string, unknown>>`：註解說「別人的」，型別說
+// 「我的，而且什麼都能放」。袋子型別（規範 §7 禁止）的具體代價是 `equipmentEffectRefs` 讀出來的每一筆
+// 都**沒有 effectId 這個欄位**，消費端要拿到那個 ID 只能補一個 `as unknown as`——正是規範 §7 點名的
+// 「用轉型掩蓋契約缺口」。改為引用擁有者的宣告（同 statistics 收斂 EquipmentDefinition 等三筆的
+// 做法，commit 9acf535）。
+//
+// 但別把這次收斂讀成「形狀定案了」：擁有者那一行（contracts/inventory/index.ts）自己標著
+// `// PLACEHOLDER (invented)`——`{ effectId: EquipmentEffectDefinitionId }` 是 Wave A 發包時
+// 補上的暫定形狀，doc 沒有規定它。收斂關掉的是「兩份宣告」與「袋子」這兩個問題（現在只剩一處要改、
+// 且 effectId 這個欄位在型別上存在），**沒有**關掉「一筆裝備效果引用到底長什麼樣、由誰執行」——
+// 那卡在 backlog G1（`EffectDefinition` 判別聯集）。G1 落地時這裡不必再動：改擁有者一處即可。
+import type { EquipmentSkillEffectRef } from '../inventory';
+export type { EquipmentSkillEffectRef };
 
 // ── §1 State ────────────────────────────────────────────────────────────
 export type CraftingState = {
@@ -128,7 +140,19 @@ export type CraftingIngredientSlotDefinition = {
 
 export type MaterialAffixDefinition = DefinitionHeader<MaterialAffixId> & {
   compatibleOutputKinds: Array<'equipment' | 'cuisine'>;
-  equipmentEffectRefs?: EquipmentSkillEffectRef[];
+  // 這條素材詞條帶到成品裝備上的效果引用（每筆就是 inventory 的 `{ effectId }`，與
+  // `EquipmentDefinition.skillEffectRefs` 同型別、同來源家族）。
+  // 缺席＝這條詞條**不帶任何裝備效果**（合法內容），不是「效果未知」；讀取端不得補成空陣列。
+  // 唯讀：Definition 是內容資料，Handler 只能讀。
+  //
+  // 現況（不要誤讀成已接線）：這個欄位**零消費者**。crafting 自己只在 selectInheritedAffixes
+  // （modules/crafting/system.ts）讀 `enabled` 與 `compatibleOutputKinds`，成品只帶
+  // `inheritedMaterialAffixIds` 出去；沒有任何模組把那些 affixId 展開回效果引用。型別現在是對的，
+  // 鏈路仍是斷的——閉合它要等 backlog G1 定出效果的執行者，屆時才知道該由誰讀這裡。
+  // 另注意：Reader 走 domainDefinitionView 的無檢查投影，所以「型別上必有 effectId」目前**不是**
+  // 執行期保證；內容若寫成 `[{}]`，讀出來就是 `effectId: undefined`。真正的保證要等 material-affix
+  // 的 Content Pack schema 驗證（目前正式 content/ 裡連一筆 material-affix 都還沒有）。
+  equipmentEffectRefs?: readonly EquipmentSkillEffectRef[];
   foodAffixId?: FoodAffixId;
   tier: 1 | 2 | 3 | 4 | 5;
 };

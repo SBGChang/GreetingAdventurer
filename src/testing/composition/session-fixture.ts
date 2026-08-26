@@ -118,6 +118,12 @@ export function makeAssembler(
       nextKnowledgeId: runtime.ids.dungeon.nextKnowledgeId,
       nextRunId: runtime.ids.dungeon.nextRunId,
       nextDistributionId: runtime.ids.dungeon.nextDistributionId,
+      nextCombatSequenceId: runtime.ids.dungeon.nextCombatSequenceId,
+      nextCombatSequenceSourceCommitId: runtime.ids.dungeon.nextCombatSequenceSourceCommitId,
+      // 這個切片只跑 openDungeonDoor，不會遇到怪物內容。用 unusedContext 絆線而不是回
+      // `undefined` 的 stub：後者會讓「掃蕩其實被觸發了」變成安靜的 typed rejection，
+      // 前者會當場拋錯把問題指出來。
+      combatSequence: unusedContext('dungeon.combatSequence'),
     },
     map: mapMakeContext({ worldDay: runtime.worldDay, ids: runtime.ids.map, rng: runtime.rng }),
     character: unusedContext('character'),

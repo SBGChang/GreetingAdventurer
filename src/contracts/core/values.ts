@@ -78,34 +78,38 @@ export type ContentEventInstance = Readonly<{
 //（`actorCharacterId` 與 `playerTeamId`），所以可作用對象就是這兩個。
 export type EffectTarget = 'actor' | 'playerTeam';
 
+// 領域變體放 `effectKind` 而非 `kind`：`kind` 是 Content Pack 的**家族宣告**，窄化 Reader 以它
+// 判斷所有權（本型別的 registry kind 是 `'effect'`）。一筆 JSON 只有一個 `kind`，不可能同時是
+// `'effect'` 與 `'applyStatus'`——內容一接上就一筆也讀不到。正確樣式見 EquipmentDefinition
+// （`kind: 'equipment'` + `equipmentKind`）。由 verify:discipline 的檢查 7 自動把關。
 export type EffectDefinition = DefinitionHeader<EffectDefinitionId> &
   (
-    | Readonly<{ kind: 'grantItem'; target: EffectTarget; itemDefinitionId: ItemDefinitionId; amount: number }>
-    | Readonly<{ kind: 'consumeActorItem'; itemDefinitionId: ItemDefinitionId; amount: number }>
-    | Readonly<{ kind: 'removeActorCurrency'; amount: number }>
+    | Readonly<{ effectKind: 'grantItem'; target: EffectTarget; itemDefinitionId: ItemDefinitionId; amount: number }>
+    | Readonly<{ effectKind: 'consumeActorItem'; itemDefinitionId: ItemDefinitionId; amount: number }>
+    | Readonly<{ effectKind: 'removeActorCurrency'; amount: number }>
     | Readonly<{
-        kind: 'applyStatus';
+        effectKind: 'applyStatus';
         target: EffectTarget;
         statusId: CharacterStatusDefinitionId;
         duration: number;
       }>
     | Readonly<{
-        kind: 'grantMasteryExperience';
+        effectKind: 'grantMasteryExperience';
         target: EffectTarget;
         experienceAwardRuleId: ExperienceAwardRuleId;
         multiplier?: number;
       }>
-    | Readonly<{ kind: 'startDetailedCombat'; encounterPoolId: EncounterPoolId }>
-    | Readonly<{ kind: 'setWorldFact'; factId: WorldFactId; value: JsonScalar }>
+    | Readonly<{ effectKind: 'startDetailedCombat'; encounterPoolId: EncounterPoolId }>
+    | Readonly<{ effectKind: 'setWorldFact'; factId: WorldFactId; value: JsonScalar }>
     | Readonly<{
-        kind: 'changeCityMetric';
+        effectKind: 'changeCityMetric';
         cityId: CityId;
         metric: 'prosperity' | 'safety';
         amount: number;
       }>
   );
 
-export type EffectDefinitionKind = EffectDefinition['kind'];
+export type EffectDefinitionKind = EffectDefinition['effectKind'];
 
 // ── 內容事件定義（13_data_runtime.md §6.1）──────────────────────────────────
 

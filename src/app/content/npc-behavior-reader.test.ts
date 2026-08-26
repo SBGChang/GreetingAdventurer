@@ -70,7 +70,11 @@ function commonDefinitions(packId: ContentPackId): readonly ContentDefinition[] 
       eventPolicy: 'none',
     }),
     def(packId, FIXTURE.restRule, NPC_BEHAVIOR_DEFINITION_KINDS.freeActionRule, {
-      kind: 'rest',
+      // 領域變體是 `freeActionKind`。這裡原本寫 `kind: 'rest'`——那個欄位會在投影時**蓋掉**
+      // registry 的家族 kind（`domainDefinitionView` 覆寫 id/schemaVersion/packId/enabled，
+      // 但刻意不覆寫 kind），於是 reader 窄化用的 'free-action-rule' 與作者資料互相矛盾。
+      // 先前之所以綠，是因為兩側一起錯。
+      freeActionKind: 'rest',
     }),
     def(packId, FIXTURE.marketPolicy, NPC_BEHAVIOR_DEFINITION_KINDS.marketPolicy, {
       budgetReserveRuleId: 'resolver:npc-budget-reserve',
@@ -249,7 +253,10 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
       assert(market.purchaseNeedRules.length === 1, '購買需求規則應原樣讀出');
 
       const freeAction = reader.getFreeActionRule(FIXTURE.restRule);
-      assert(freeAction.kind === 'rest', `free action kind（實得 ${freeAction.kind}）`);
+      assert(
+        freeAction.freeActionKind === 'rest',
+        `free action kind（實得 ${freeAction.freeActionKind}）`,
+      );
 
       const travel = reader.getNpcTravelRule(FIXTURE.travelRule);
       assert(travel.durationDays === 6, `NPC 旅行天數（實得 ${travel.durationDays}）`);

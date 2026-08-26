@@ -6,7 +6,6 @@
 import type {
   DefinitionHeader,
   DefinitionId,
-  JsonValue,
   ModuleId,
   Revision,
   ScheduledJobBase,
@@ -114,9 +113,13 @@ export type GatheringNodeDefinition = Readonly<{
   gatheringRuleId: GatheringRuleId;
 }>;
 
+// 領域變體放 `templateKind` 而非 `kind`：`kind` 是 Content Pack 的**家族宣告**，窄化 Reader 以它
+// 判斷所有權（本型別的 registry kind 是 `'map-template'`）。一筆 JSON 只有一個 `kind`，不可能同時是
+// `'map-template'` 與 `'outdoor'`——內容一接上就一筆也讀不到。正確樣式見 EquipmentDefinition
+// （`kind: 'equipment'` + `equipmentKind`）。由 verify:discipline 的檢查 7 自動把關。
 export type MapTemplateDefinition = DefinitionHeader &
   Readonly<{
-    kind: 'outdoor' | 'interior';
+    templateKind: 'outdoor' | 'interior';
     nationalDungeonForm?: 'outdoor' | 'subterranean' | 'building';
     refreshOffsetDays: number; // 0..13
     floors: readonly FloorDefinition[];
@@ -147,16 +150,79 @@ export type MapSpawnRuleDefinition = DefinitionHeader &
     npcSequenceRuleId: NpcSequenceRuleId;
   }>;
 
-// [INVENTED] MapDefinitionReader.getNpcSequenceRule 的回傳型別；文件未給出結構。
-export type NpcSequenceRuleDefinition = DefinitionHeader &
+// ── NPC 探索序列規則（01_map_module.md §2.2／§2.3；本輪【裁定 B】定形）───────────
+//
+// NPC 序列的「目標家族」鍵。動態 Map Content 依 `contentKind` 分家族，固定採集點自成一族——
+// 兩者共用**同一條** `npcOrder` 序列（doc §2.2 末條、§3.3 不變量 4），所以排序權重必須住在
+// 同一張表裡，否則「誰先誰後」根本無處表達。
+export type NpcSequenceGroupKey = MapContentKind | 'gatheringNode';
+
+// 【裁定 B】`NpcSequenceRuleDefinition` 原本是 `DefinitionHeader & { npcSequenceRuleId }`
+// ——唯一的欄位還與 `DefinitionHeader.id` 重複，等於一張空表。後果是：`getNpcSequenceRule`
+// 全 repo 沒有任何消費者，而 `npcOrder` 的真正決定寫在 `modules/map/system.ts` 裡（動態內容
+// 一律排在採集點之前、內容之間依 `spawnBudgets` 的宣告順序）。doc §2.2 明文
+// 「NPC 序列規則必須由資料指定，**不能由地圖檔案名稱或程式特例推論**」——那正是被禁止的程式特例。
+//
+// 逐欄位來源：
+//   * `groupPriority` —— 來自文件 §2.2 末條（序列由資料指定）＋ §3.3 不變量 4（兩種目標共用
+//     一條序列）。這是序列規則唯一還沒有擁有者的事實：**順序**。
+//     權重小者先；`Record` 是**非 Partial** 的（13_data_runtime.md §6.0 規矩五），所以未來新增一種
+//     `MapContentKind` 而內容沒給權重時，作者層（`content-source/**` 以真實型別標註）會直接編譯
+//     失敗，不會安靜地掉出序列。
+//
+// 刻意**不**放在這裡的事實（三個來源都指向別的擁有者）：
+//   * 「哪些目標可進序列」與「一筆目標值幾點」—— 由各自的 Definition 決定：
+//     `MapContentDefinition.npcPolicy`／`GatheringRuleDefinition.npcPolicy`（doc §2.3、
+//     19_gathering_service.md §2）。放在序列規則裡會讓同一份成本出現兩個擁有者。
+//   * `npcOrder` 的起點與步進 —— 1 起、步進 1 的序數是結構（改了不是換內容，是換編號制度）。
+//   * NPC 每日點數預算 —— 屬 dungeon 的 `NpcExplorationRuleDefinition.dailyPointBudget`
+//     （03_dungeon_module.md §2.2）。
+export type NpcSequenceRuleDefinition = DefinitionHeader<NpcSequenceRuleId> &
   Readonly<{
-    npcSequenceRuleId: NpcSequenceRuleId;
+    groupPriority: Readonly<Record<NpcSequenceGroupKey, number>>;
   }>;
 
-// [INVENTED] MapDefinitionReader.getContentDefinition 的回傳型別；文件僅以標頭描述。
+// ── Map Content 定義（01_map_module.md §2.3；本輪【裁定 C】定形）─────────────────
+//
+// Map Content 的 NPC 可處理政策。形狀刻意與 §2.3 `getGatheringMapView().npcPolicy` 對稱：
+// 同一條 NPC 序列的兩種目標，「可不可以被 NPC 處理／要幾點／由哪個 Resolver 處理」必須用
+// 同一種說法表達，否則 Map 在組序列時要為兩邊各寫一套判斷。
+export type MapContentNpcPolicy =
+  | Readonly<{ eligible: false }>
+  | Readonly<{ eligible: true; pointCost: number; resolverId: NpcDungeonTargetResolverId }>;
+
+// 【裁定 C】`MapContentDefinition` 原本只帶 `contentKind`，於是 `MapContentInstance` 的
+// `npcOrder`／`npcPointCost`／`npcResolverId` 只能由本地 port `MapContentResolver` 的
+// `SpawnDraft` 供給——而那三個值在 fixture 裡是**手打的玩法數值**（`kind === 'boss' ? 4 : 1`）。
+// 換一份 Content Pack 不會改變它們：那正是規範 §6 點名的「把內容搬進程式」。
+//
+// 逐欄位來源：
+//   * `contentKind` —— 來自消費者：`MapContentInstance.kind`（doc §3.2）與
+//     `ApplyNpcDungeonSettlement` 的「目標類型是否仍可被該 Resolver 處理」（doc §7.3 步驟 2，
+//     對照 03_dungeon_module.md §2.2 的 `NpcDungeonTargetKind.contentKind`）。
+//   * `npcPolicy` —— 來自消費者（`generateMapContent` 目前讀 SpawnDraft 的三個 NPC 欄位）
+//     ＋ 文件 doc §3.3 不變量 5「`npcPointCost` 必須大於 0；小怪／寶箱通常為 1、菁英為 2、
+//     大怪為 4，**事件由 Definition 明確指定**」＋ 03_dungeon_module.md §2.2「NPC 的每日點數與
+//     小怪／菁英／大怪／寶箱／事件成本**由資料決定**」。
+//
+// 一張表夠不夠？夠——六種 `contentKind` 需要的欄位**完全相同且全部必填**，符合 13_data_runtime.md
+// §6.0 規矩二對共用表的唯一要求。逐 kind 不同的資料本來就不在這裡：
+//   * 怪群／Boss 的遭遇組 → 本局 `MapContentPayload.encounterGroupId`（已是判別聯集）。
+//   * 寶箱掉落表 → `MapSpawnRuleDefinition.chestPoolId`（一張圖一份；設計來源是
+//     `firstMapConfigs[].materialPools.treasure` 的加權池），實際物品是本局
+//     `MapContentPayload.chest.itemIds`。
+//   * 事件定義引用 → `MapSpawnRuleDefinition.mapEventPoolId` 抽出後寫進
+//     `MapContentPayload.mapEvent.contentEventDefinitionId`。
+//   * 大型體型敵人的**體型需求** → 房間側，不是內容側（doc §2.1「大型敵人偏好房間至少 2×2」、
+//     `RoomLinkDefinition.guardedPreferenceKinds`）。`RoomDefinition` 目前沒有偏好欄位，
+//     這是另一個未閉合缺口，不在本裁定範圍。
+//
+// 注意 `contentKind` 與 registry 的家族 `kind: 'map-content'` 是兩個欄位（Wave D 教訓 1：
+// 不要再用 `kind` 裝領域變體）。
 export type MapContentDefinition = DefinitionHeader &
   Readonly<{
     contentKind: MapContentKind;
+    npcPolicy: MapContentNpcPolicy;
   }>;
 
 export interface MapDefinitionReader {
@@ -289,9 +355,16 @@ export type MapState = Readonly<{
 // 原本是單一形狀 `{ resolverId: ResolverId | NpcDungeonTargetResolverId }`，於是第三種情形無從表達，
 // dungeon 在戰鬥收斂時只好填一個寫死的 'resolver:dungeon-default'（規範 §5）。那不是隨手寫死：
 // 型別逼著它交出一個它沒有的東西。聯集化之後三條路徑都能說實話，寫死的那個常數也就沒有存在理由。
+//
+// 【裁定 A】原本兩個 resolution 型別各帶一個 `details?: Record<string, JsonValue>` 袋子。
+// 規範 §7 與「一個 Func 一張表」（13_data_runtime.md §6.0）都點名 `details` / `payload` 這類
+// 名字本身就在說「這裡什麼都能放」的欄位是反樣式：它讓「資料填錯」與「內容本來就是這樣」
+// 分不開，而且驗證器寫不出來。全 repo grep 的結果是**零消費者**——沒有任何 Handler、Query、
+// Subscriber 或測試讀過它。因此直接刪除，不是搬家。
+// 真的需要額外資訊時，正確作法是在**該 variant 自己**加一個具名欄位，並在同一輪把消費者接上；
+// 不得再開袋子。
 export type MapContentResolution = Readonly<{
   outcome: 'success' | 'failure';
-  details?: Readonly<Record<string, JsonValue>>;
 }> &
   (
     | Readonly<{ kind: 'contentResolver'; resolverId: ResolverId }>
@@ -299,10 +372,11 @@ export type MapContentResolution = Readonly<{
     | Readonly<{ kind: 'combatEncounter'; encounterId: EncounterId }>
   );
 
-// [INVENTED] 固定陷阱處理結果的結構；文件僅稱 `resolution`。
+// 固定陷阱處理結果（01_map_module.md §5.2 `ResolveMapTrap`／§6 `MapTrapResolved`）。
+// `outcome` 就是 doc §3.1 的陷阱終態（triggered／disarmed），Handler 直接寫進 TrapRuntimeState.state。
+// 同【裁定 A】：原有的 `details` 袋子已刪除（零生產者、零消費者）。
 export type MapTrapResolution = Readonly<{
   outcome: 'triggered' | 'disarmed';
-  details?: Readonly<Record<string, JsonValue>>;
 }>;
 
 // ──────────────────────────────────────────────────────────────────────────

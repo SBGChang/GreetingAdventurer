@@ -249,6 +249,19 @@ export type PendingDungeonResult = Readonly<{
   pendingRewardRefs: readonly PendingRewardRef[];
 }>;
 
+// 怪物內容 ↔ Combat Sequence Challenge 的對照（03_dungeon_module.md §3.4.9：「兩邊怪物游標必須
+// 指向同一個下一個 Content」）。Run 開始時依 npcOrder 一次建立，之後只讀不改。
+//
+// 為什麼宿主必須自己記住這份對照：`ResolveNextCombatSequenceChallenge` 與
+// `SkipNextCombatSequenceChallenge` 都必填 `expectedChallengeId`（那是兩邊游標一致的檢查），
+// 而 `CombatSequenceQuery` 刻意不公開 challengeId。跨模組同步查詢又是被禁止的，
+// 所以唯一正確的作法是把開始時拿到的對照留在自己的 Slice 裡。
+export type NpcDungeonCombatChallengeRef = Readonly<{
+  npcOrder: number;
+  contentId: ContentInstanceId;
+  challengeId: CombatSequenceChallengeId;
+}>;
+
 export type NpcDungeonRun = Readonly<{
   runId: NpcDungeonRunId;
   teamId: TeamId;
@@ -259,6 +272,20 @@ export type NpcDungeonRun = Readonly<{
   explorationRuleId: NpcExplorationRuleId;
   distributionId: AssetDistributionId;
   combatSequenceId?: CombatSequenceId;
+  // 依 npcOrder 遞增，與 StartCombatSequence 帶出的 challenges 同序。地圖沒有怪物內容時為空陣列
+  // ——不變量 §3.4.9 明訂「沒有怪物時不得建立空 Sequence」，所以空陣列必然伴隨
+  // `combatSequenceId === undefined` 與 `settlementProgress.combatSequenceSettled === true`。
+  combatSequenceChallenges: readonly NpcDungeonCombatChallengeRef[];
+  // 已送出 Resolve/Skip、正在等 `CombatSequenceChallengeResolved` 的那一題。
+  // 怪物內容的成敗要等事件回來才知道，所以當日剩餘流程在 Subscriber 續行；這個欄位讓續行只認
+  // 自己送出的那一題，別條 Sequence（例如單場掃蕩）的事件一律略過。
+  awaitingCombatChallengeId?: CombatSequenceChallengeId;
+  // 今日剩餘探索點數。每次 `npcDungeonDay` 重新取得，不跨日累積（不變量 §3.4.5）。
+  //
+  // 它原本只是 `npcDungeonDay` 的區域變數，因為一天的處理不會中斷。接上 Combat Sequence 後，
+  // 一天會被切成「送命令 → 收事件 → 續行」數段，區域變數活不到續行的那一刻——把剩餘點數
+  // 重新推導出來需要「哪些結果算今天的、各花幾點」兩份資料的交叉比對，而那正是這個欄位。
+  remainingDailyPoints: number;
   cursorNpcOrder: number;
   pendingResults: readonly PendingDungeonResult[];
   settlementProgress: Readonly<{
@@ -298,8 +325,15 @@ export type PlayerMapKnowledgeView = PlayerMapKnowledge;
 //
 // 未結算成果只以**筆數**出現：UI 看得到「這隊已經嘗試過幾個目標」（進度），看不到成敗與獎勵。
 // 不要把 outcome 或 pendingRewardRefs 加回來——那是 §4 直接點名禁止的資訊。
+//
+// `combatSequenceChallenges` 與 `awaitingCombatChallengeId` 同樣不公開：前者是「這張圖還剩哪幾個
+// 怪物內容沒打」的完整名單，後者是「這一刻正在打哪一個」，兩者都落在 §4 的「可被玩家利用的
+// NPC 隱藏結果」。玩家需要的進度摘要由 `cursorNpcOrder` 與 `NpcDungeonProgressView` 提供。
 export type NpcDungeonRunView = Readonly<
-  Omit<NpcDungeonRun, 'rngContext' | 'pendingResults'> & {
+  Omit<
+    NpcDungeonRun,
+    'rngContext' | 'pendingResults' | 'combatSequenceChallenges' | 'awaitingCombatChallengeId'
+  > & {
     pendingResultCount: number;
   }
 >;
@@ -347,24 +381,56 @@ export type ResolveDungeonInteraction = Readonly<{
   optionId: ContentEventOptionId;
 }>;
 
-// **Dungeon 整個模組目前不註冊任何能力。**
+// **這個 union 只列已閉合的能力**（規範 §10：沒閉合的 Capability 不進正式 Manifest、不註冊入口）。
 //
-// 原因不是個別 Handler 沒寫，而是流程收斂不了：入場、NPC 探索結算、以及戰敗路徑都會送出
-// StartAssetDistribution / FinalizeAssetDistributionCollection，而 Distribution 模組不存在
-// （沒有 Slice、沒有 Handler、沒有 Owner）。任何真的跑起來的地牢流程都會在交易中失敗。
+// ── 舊理由已經過期 ────────────────────────────────────────────────────────
+// 這段話原本寫「Distribution 模組不存在（沒有 Slice、沒有 Handler、沒有 Owner），所以送出
+// StartAssetDistribution 的流程一定跑不完」。Wave D 之後那不再成立：distribution 模組已實作並
+// 註冊，`StartAssetDistribution` / `AppendAssetDistributionResult` /
+// `FinalizeAssetDistributionCollection` 三筆都有 Owner，`StartReturnFromDungeon`（team）、
+// `StartCombatEncounter`（combat）與六筆 combat-sequence 命令也都有。**送出面已經不是阻塞理由。**
 //
-// 規範 §10：未閉合的 Capability 不進正式 Manifest、不註冊入口。移動／開門／互動／解析雖然
-// 各自已實作且有模組測試，但它們是同一個未閉合流程的一部分——單獨開放只會讓玩家進到
-// 一個結束不了的狀態。
+// ── 重新判定的結果：入場與離場仍然不加回來 ────────────────────────────────
+// 玩家進到地牢之後，地牢裡的東西必須**每一種都判定得出來**。目前還做不到，具體缺在四處：
 //
-// 已註冊的，只有下列四筆：它們已實作、有測試，且**只送出有 Owner 的命令**
-// （OpenMapDoor / ResolvePlayerMapContent，皆由 map 接收）。
+// 1. `AssetDistributionCompleted → dungeon` 這筆訂閱在 `manifest.ts` 與 `router.ts` 都還沒有綁定
+//    （模組這側的 Handler `handleAssetDistributionCompleted` 存在，也已列進
+//    `dungeonModuleContract.subscriptionHandlerIds`）。沒有那個綁定，`useDungeonExit` 把 Session
+//    轉成 `leaving` 之後就停在那裡：Session 不會關閉、不會返城，而且不會有任何錯誤——
+//    §8.2 的離場流程少了最後一段。
 //
-// 不註冊：startPlayerExploration、useDungeonExit（送 Distribution 命令）、gatherDungeonNode
-// （Workflow 未實作）、StartNpcDungeonRun 與 npcDungeonDay（NPC 流程同樣送 Distribution），
-// 以及全部 Event Subscriber（戰敗路徑會送 FinalizeAssetDistributionCollection）。
+// 2. 固定採集點沒有玩家入口。`gatherDungeonNode` 的入口依 §5.1 是
+//    `dungeon-gathering-workflow`，而 `app/workflows` 底下沒有這個 Workflow，所以它連
+//    `GameCommand` union 都進不來。採集點獨占一個房間的內容槽（01_map_module.md §2.2），
+//    玩家站在 available 節點前沒有任何合法指令可下。
 //
-// 結果是玩家目前無法進入地牢——那正是「未閉合就不開放」該有的樣子。Handler 與測試都保留。
+// 3. 玩家路徑的內容解析 Resolver 沒有資料。`MapContentInstance.playerResolverId` 是選填的，
+//    正式 Content Pack 目前沒有任何一筆填了它，於是寶箱、以及守衛清空後的控制／綁架，
+//    一律得到 `dungeon.interactDungeonContent.contentResolverMissing`。typed rejection 是合法
+//    出口，但那說的正是「這種內容現在判定不出來」。
+//
+// 4. `DungeonMapPort` 沒有生產實作（`app/content/cross-module-ports.ts` 目前只組得出
+//    `DungeonTeamPort`；房間拓樸、內容種類、守衛名單、陷阱與 NPC 序列都還沒有真實來源）。
+//
+// 第 1 點整合者補一筆綁定就好；2、3、4 是別的軌上的工作。四點沒有全部完成之前，
+// `startPlayerExploration` 與 `useDungeonExit` 不加回這個 union——**寧可不讓玩家進來，
+// 也不要讓他進到一個內容判定不完整的地牢。**
+//
+// ── NPC 側同樣不註冊 ──────────────────────────────────────────────────────
+// `StartNpcDungeonRun`（Internal Command）與 `npcDungeonDay`（Job）現在會為怪物內容開一條
+// dungeonSweep Combat Sequence，並由 `CombatSequenceChallengeResolved` 推進。兩件事還不成立：
+//   * 21_combat_sequence_module.md §3.2 指名由 `app/composition` 的
+//     `CombatSequenceSnapshotAssembler` 組出 allocation／teamPower／challenge 快照，那個
+//     Assembler 不存在，所以 `DungeonCombatSequencePort.planDungeonSweep` 沒有生產實作——
+//     任何有怪物的圖都會得到 `dungeon.startNpcDungeonRun.combatSequencePlanUnavailable`。
+//   * 四筆 combat-sequence 訂閱（ChallengeResolved / ReadyForSourceCommit / Settled /
+//     Invalidated）在 Manifest 與 Router 都還沒有綁定。少了綁定，送出去的
+//     `ResolveNextCombatSequenceChallenge` 拿不到結果，Run 會停在 `awaitingCombatChallengeId`
+//     且不再排 Job——不會有任何錯誤，那條 Run 只是安靜地不動了。
+//
+// ── 已註冊的四筆 ──────────────────────────────────────────────────────────
+// 移動、開門、互動與（經 content-event-resolution Workflow 入口的）選項解析。它們送出的
+// OpenMapDoor / ResolveMapTrap / ResolvePlayerMapContent / StartCombatEncounter 都有 Owner。
 export type DungeonGameCommand =
   | MoveDungeonRoom
   | OpenDungeonDoor
@@ -405,7 +471,8 @@ export type ConsumeDungeonGatheringAction = Readonly<{
   nodeId: GatheringNodeId;
 }>;
 
-// 同上：NPC 地牢流程也會送出 Distribution 命令，故不註冊。
+// 這兩筆（連同 `npcDungeonDay` Job）**沒有**收進任何 Internal Command / Job union：理由見上方
+// §5.1 的「NPC 側同樣不註冊」。原因已不是「Distribution 沒有 Owner」——那是舊的、過期的理由。
 
 // ──────────────────────────────────────────────────────────────────────────
 // 6. 輸出 DomainEvent（最少 payload）

@@ -10,6 +10,7 @@
 import type {
   TeamId,
   CharacterId,
+  CityId,
   TeamPlanId,
   FreeActionId,
   InteractionId,
@@ -275,6 +276,38 @@ export function setPendingSuccession(
 
 export function bump(r: Revision): Revision {
   return (r + 1) as Revision;
+}
+
+// ── 酒館可見性（doc §2.3「選擇 tavernVisit 的 NPC 正式成員會出現在同城酒館名單」、§7.6）────────
+//
+// 這份名單的擁有者是 **team 自己**：它由 team Slice 的 `freeActions` 導出，city 並不持有訪客名單
+//（`CityQuery` 只有 `canUseTavern(cityId, teamId)`＝酒館這座設施此刻開不開）。所以招募路徑不需要
+// 也不該去查別的模組——它問的是自己 Slice 上的事實。
+//
+// 判準只寫這一份，`TeamQuery.listTavernVisitorIds` 與招募的可見性驗證共用它。兩邊各寫一份的話，
+// 「UI 名單看得到卻招募不到」或「名單沒有卻招募得到」不會有任何測試發現——兩份實作各自都是綠的。
+export function listTavernVisitorsInCity(state: TeamState, cityId: CityId): CharacterId[] {
+  const out: CharacterId[] = [];
+  for (const f of Object.values(state.freeActions)) {
+    if (f.payload.kind !== 'tavernVisit') continue;
+    // 持續中的 tavernVisit 才算在場：completed／cancelled 是已經離開酒館的歷史紀錄。
+    if (f.status !== 'active' && f.status !== 'resting') continue;
+    const team = state.teams[f.teamId];
+    if (team === undefined) continue;
+    if (team.location.kind !== 'city' || team.location.cityId !== cityId) continue;
+    // 正式成員才會出現在名單上（任務暫時角色不算）。
+    if (!team.memberIds.includes(f.memberId)) continue;
+    out.push(f.memberId);
+  }
+  return out;
+}
+
+export function isTavernVisibleInCity(
+  state: TeamState,
+  characterId: CharacterId,
+  cityId: CityId,
+): boolean {
+  return listTavernVisitorsInCity(state, cityId).includes(characterId);
 }
 
 // 工作淨收益（doc §6.1）：任務 + 地牢 − 旅費 − 已消耗道具。

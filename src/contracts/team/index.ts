@@ -79,8 +79,16 @@ export interface TeamDefinitionReader {
 }
 
 // TeamPlanRuleDefinition（doc 於 Reader 引用但未定義；此處推導，見交接報告）。
+// `planKind` 而非 `kind`：`kind` 是 Content Pack 宣告 Definition 家族、窄化 Reader 判斷所有權的
+// 欄位（本型別的 registry kind 是 `'team-plan-rule'`）。一筆 JSON 只有一個 `kind`，不可能同時是
+// `'team-plan-rule'` 與 `'homeRest'`——內容一接上就讀不到。正確樣式見 EquipmentDefinition
+// （`kind: 'equipment'` + `equipmentKind`）。規則見 SKILL.md「行為的資料化：一個 Func 一張表」
+// 與 13_data_runtime.md §6.0。
+//
+// 注意與**執行期** `TeamPlan.kind` 區別：那是隊伍計畫實例自己的種類，不是 Definition 家族，
+// 不受這條規則約束。
 export type TeamPlanRuleDefinition = DefinitionHeader & {
-  kind: TeamPlanKind;
+  planKind: TeamPlanKind;
   // 該計畫佔用的天數。這是**內容**：改它會改變遊戲節奏，不是結構規則。所以它住在規則資料裡，
   // Handler 只讀不寫；事件回報的經過天數也一律由 dueOnDay − startedOnDay 導出，不重述這個量。
   durationDays: number;
@@ -112,8 +120,9 @@ export type FreeActionKind =
   | 'proposeToTeammate'
   | 'rest';
 
+// `freeActionKind` 而非 `kind`，理由同 TeamPlanRuleDefinition（registry kind 是 `'free-action-rule'`）。
 export type FreeActionRuleDefinition = DefinitionHeader & {
-  kind: FreeActionKind;
+  freeActionKind: FreeActionKind;
   requiredFreeDays?: number;
   completionResolverId?: ResolverId;
   requiresCityFacilityKind?: FacilityKind;
@@ -414,6 +423,11 @@ export type DismissMemberCommand = Readonly<{
 export type ConfigureCombatFormationCommand = Readonly<{
   type: 'configureCombatFormation';
   teamId: TeamId;
+  // 發令者。doc §5.1 的前置條件第一句就是「發令者為隊長」，而 team 自己就持有 `leaderId`——
+  // 缺的從來不是隊長是誰，是**發令者**是誰。沒有這個欄位，Handler 沒有任何辦法驗證那條前置條件
+  //（Router 的授權只驗到「這支隊伍屬於玩家」，驗不到「送這筆命令的角色是隊長」），於是任何隊員
+  // 都能改全隊站位。欄位必填：可選會讓「沒帶＝跳過檢查」變成預設路徑。
+  actorCharacterId: CharacterId;
   placements: Readonly<Record<CharacterId, GridCell>>;
 }>;
 

@@ -12,9 +12,11 @@ import type {
   QuestId,
   ResolverId,
   NpcDungeonRunId,
+  NpcDungeonTargetResolverId,
   TransactionMessageDraft,
 } from '../../contracts/core';
 import type {
+  NpcSequenceRuleDefinition,
   MapRefreshCheckJob,
   OpenMapDoor,
   ResolveMapTrap,
@@ -27,6 +29,7 @@ import type { PendingDungeonResult } from '../../contracts/dungeon';
 import type { MapHandlerResult } from './system';
 import {
   MAP_MODULE_ID,
+  MapRefreshContentDataError,
   handleMapRefreshCheck,
   handleOpenMapDoor,
   handleResolveMapTrap,
@@ -40,6 +43,13 @@ import {
   makeContext,
   stubPresence,
   stubDefinitionReader,
+  stubContentResolver,
+  stubNpcSequenceRule,
+  makeIdAllocator,
+  CONTENT_DEFINITIONS,
+  DEFAULT_GROUP_PRIORITY,
+  MONSTER_CONTENT_DEF_ID,
+  CHEST_CONTENT_DEF_ID,
   MAP_ID,
   LINK_RED,
   TRAP_ID,
@@ -78,7 +88,25 @@ function expectReject(r: MapHandlerResult, code: string, label: string) {
   assert(r.rejection.code === code, `${label}: expected code '${code}', got '${r.rejection.code}'`);
 }
 
+// 內容／Resolver 不一致是「Content Pack 驗證失敗」的執行期補位：整筆交易必須失敗，
+// 不得跳過該筆、也不得寫進違反不變量的內容。
+function expectThrow(fn: () => unknown, label: string) {
+  let thrown: unknown;
+  try {
+    fn();
+  } catch (err) {
+    thrown = err;
+  }
+  if (thrown === undefined) throw new Error(`${label}: 預期 MapRefreshContentDataError，卻順利完成`);
+  assert(
+    thrown instanceof MapRefreshContentDataError,
+    `${label}: 預期 MapRefreshContentDataError，實得 ${String(thrown)}`,
+  );
+}
+
 const TEAM_ID = 'team-1' as TeamId;
+// 只在測試裡出現的替代 Resolver ID：用來證明 resolverId 真的是從 Definition 讀出來的。
+const ALT_RESOLVER_ID = 'definition:npc-dungeon-target-resolver:alt' as NpcDungeonTargetResolverId;
 const QUEST_ID = 'quest-1' as QuestId;
 
 function regularJob(dueDay: number): MapRefreshCheckJob {
@@ -616,6 +644,234 @@ const cases: readonly Case[] = [
       const query = createMapQuery(locked, stubDefinitionReader());
       assert(query.isRefreshLocked(MAP_ID, 100 as WorldDay), 'day 100 應為鎖定中');
       assert(!query.isRefreshLocked(MAP_ID, 200 as WorldDay), 'releaseOnDay 當日應解除（>onDay 為 false）');
+    },
+  },
+
+  // ── 【裁定 B／C】NPC 序列與 Map Content 定義的資料化 ────────────────────────
+  {
+    name: '裁定 C：npcPointCost／npcResolverId 取自 MapContentDefinition.npcPolicy（換定義就換值）',
+    run: () => {
+      const definitions = stubDefinitionReader({
+        contentDefinitions: {
+          ...CONTENT_DEFINITIONS,
+          [MONSTER_CONTENT_DEF_ID]: {
+            ...CONTENT_DEFINITIONS[MONSTER_CONTENT_DEF_ID]!,
+            npcPolicy: { eligible: true, pointCost: 7, resolverId: ALT_RESOLVER_ID },
+          },
+        },
+      });
+      const res = handleMapRefreshCheck(
+        regularJob(100),
+        fixtureMapState(1),
+        makeContext({ definitions, presence: stubPresence({ teamsInside: 0 }) }),
+      );
+      const entry = createMapQuery(res.nextSlice, definitions)
+        .listNpcSequence(MAP_ID)
+        .find((e) => e.kind === 'mapContent');
+      assert(entry !== undefined, '應有一筆 mapContent 序列項');
+      assert(entry!.pointCost === 7, `pointCost 應來自 Definition（7），實得 ${entry!.pointCost}`);
+      assert(
+        entry!.resolverId === ALT_RESOLVER_ID,
+        'resolverId 應來自 Definition，而不是 SpawnDraft／程式常數',
+      );
+    },
+  },
+  {
+    name: '裁定 C：npcPolicy.eligible=false 的內容仍生成，但不進 NPC 序列',
+    run: () => {
+      const definitions = stubDefinitionReader({
+        contentDefinitions: {
+          ...CONTENT_DEFINITIONS,
+          [MONSTER_CONTENT_DEF_ID]: {
+            ...CONTENT_DEFINITIONS[MONSTER_CONTENT_DEF_ID]!,
+            npcPolicy: { eligible: false },
+          },
+        },
+      });
+      const res = handleMapRefreshCheck(
+        regularJob(100),
+        fixtureMapState(1),
+        makeContext({ definitions, presence: stubPresence({ teamsInside: 0 }) }),
+      );
+      const query = createMapQuery(res.nextSlice, definitions);
+      assert(query.listAvailableContent(MAP_ID).length === 1, '內容本身仍應生成');
+      const seq = query.listNpcSequence(MAP_ID);
+      assert(seq.length === 1, `不可處理的內容不得進序列（應只剩採集點 1 筆，實得 ${seq.length}）`);
+      assert(seq[0]!.kind === 'gatheringNode', '剩下的那筆應為採集點');
+      assert(seq[0]!.npcOrder === 1, '序列重新編號後應自 1 起');
+    },
+  },
+  {
+    name: '裁定 B：npcOrder 順序由 NpcSequenceRule.groupPriority 決定（換資料就換順序）',
+    run: () => {
+      const run = (rule: NpcSequenceRuleDefinition) => {
+        const definitions = stubDefinitionReader({ npcSequenceRule: rule });
+        const res = handleMapRefreshCheck(
+          regularJob(100),
+          fixtureMapState(1),
+          makeContext({ definitions, presence: stubPresence({ teamsInside: 0 }) }),
+        );
+        return createMapQuery(res.nextSlice, definitions).listNpcSequence(MAP_ID);
+      };
+
+      const contentFirst = run(stubNpcSequenceRule());
+      assert(contentFirst.length === 2, `序列應有 2 筆，實得 ${contentFirst.length}`);
+      assert(contentFirst[0]!.kind === 'mapContent', '預設權重：動態內容在前');
+      assert(contentFirst[1]!.kind === 'gatheringNode', '預設權重：採集點在後');
+
+      // 只換資料：把採集點的權重調到所有內容家族之前。
+      const nodeFirst = run(
+        stubNpcSequenceRule({ ...DEFAULT_GROUP_PRIORITY, gatheringNode: 0 }),
+      );
+      assert(
+        nodeFirst[0]!.kind === 'gatheringNode' && nodeFirst[0]!.npcOrder === 1,
+        '採集點權重最小時應排第一（順序必須跟著資料走，不能是程式特例）',
+      );
+      assert(
+        nodeFirst[1]!.kind === 'mapContent' && nodeFirst[1]!.npcOrder === 2,
+        '動態內容應退到第二',
+      );
+    },
+  },
+  {
+    name: '不變量：npcOrder 自 1 起、步進 1、跨動態內容與採集點全域唯一',
+    run: () => {
+      const definitions = stubDefinitionReader();
+      const res = handleMapRefreshCheck(
+        regularJob(100),
+        fixtureMapState(1),
+        makeContext({ definitions, presence: stubPresence({ teamsInside: 0 }) }),
+      );
+      const orders = createMapQuery(res.nextSlice, definitions)
+        .listNpcSequence(MAP_ID)
+        .map((e) => e.npcOrder);
+      assert(new Set(orders).size === orders.length, 'npcOrder 不可重複（doc §3.3 不變量 4）');
+      orders.forEach((o, i) => assert(o === i + 1, `npcOrder 應為 1..n 連續，第 ${i} 筆實得 ${o}`));
+    },
+  },
+  {
+    name: '拒絕：Spawn budget 要求的 kind 與 Definition 的 contentKind 不符 → 明確失敗，不寫入內容',
+    run: () => {
+      // Resolver 對 monsterGroup 的請求挑了一筆 chest 定義。
+      const ctx = makeContext({
+        presence: stubPresence({ teamsInside: 0 }),
+        resolvers: stubContentResolver({
+          monsterGroup: { definitionId: CHEST_CONTENT_DEF_ID, payload: { kind: 'chest', itemIds: [] } },
+        }),
+      });
+      expectThrow(
+        () => handleMapRefreshCheck(regularJob(100), fixtureMapState(1), ctx),
+        'budget-kind-mismatch',
+      );
+    },
+  },
+  {
+    name: '拒絕：payload.kind 與 Definition 的 contentKind 不符（doc §3.3 不變量 8）→ 明確失敗',
+    run: () => {
+      const ctx = makeContext({
+        presence: stubPresence({ teamsInside: 0 }),
+        resolvers: stubContentResolver({
+          // 定義是 monsterGroup，payload 卻是 chest。
+          monsterGroup: { definitionId: MONSTER_CONTENT_DEF_ID, payload: { kind: 'chest', itemIds: [] } },
+        }),
+      });
+      expectThrow(
+        () => handleMapRefreshCheck(regularJob(100), fixtureMapState(1), ctx),
+        'payload-kind-mismatch',
+      );
+    },
+  },
+  {
+    name: '拒絕：groupPriority 缺該目標家族 → 明確失敗（不得以預設值補、不得讓排序變 NaN）',
+    run: () => {
+      // 模擬壞內容：JSON 少了 gatheringNode 那一格。型別上是非 Partial Record，所以只能在測試裡
+      // 以 Partial 建構再交給 stub——這正是外部資料可能長成的樣子。
+      const brokenPriority = { ...DEFAULT_GROUP_PRIORITY } as Record<string, number>;
+      delete brokenPriority['gatheringNode'];
+      const definitions = stubDefinitionReader({
+        npcSequenceRule: stubNpcSequenceRule(
+          brokenPriority as NpcSequenceRuleDefinition['groupPriority'],
+        ),
+      });
+      expectThrow(
+        () =>
+          handleMapRefreshCheck(
+            regularJob(100),
+            fixtureMapState(1),
+            makeContext({ definitions, presence: stubPresence({ teamsInside: 0 }) }),
+          ),
+        'missing-group-priority',
+      );
+    },
+  },
+  {
+    name: '不變量 4 迴歸：受委託保護而跨版本留存的內容不得帶著舊 npcOrder 留在序列裡',
+    run: () => {
+      const definitions = stubDefinitionReader();
+      const first = handleMapRefreshCheck(
+        regularJob(100),
+        fixtureMapState(1),
+        makeContext({ definitions, presence: stubPresence({ teamsInside: 0 }) }),
+      );
+      const generated = Object.values(first.nextSlice.contents).find((c) => c.state === 'available');
+      assert(
+        generated !== undefined && generated.npcOrder !== undefined,
+        '前置條件：第一次刷新應產生一筆已進入 NPC 序列的內容',
+      );
+
+      // 委託保護該內容：一般刷新不得移除它（doc §3.3 不變量 7），於是它會**跨版本**留在圖上。
+      const protectedState = {
+        ...first.nextSlice,
+        contents: {
+          ...first.nextSlice.contents,
+          [generated!.contentId]: { ...generated!, protectedByQuestIds: [QUEST_ID] },
+        },
+      };
+
+      const second = handleMapRefreshCheck(
+        regularJob(114),
+        protectedState,
+        makeContext({
+          definitions,
+          worldDay: 114 as WorldDay,
+          presence: stubPresence({ teamsInside: 0 }),
+          // 新版本的內容必須拿到新 ID，否則 upsert 會直接蓋掉受保護的那一筆，測不到共存。
+          ids: makeIdAllocator('gen2'),
+        }),
+      );
+      const query = createMapQuery(second.nextSlice, definitions);
+      assert(
+        query.getContent(generated!.contentId)?.state === 'available',
+        '受保護內容應仍留在圖上（不變量 7）',
+      );
+      const seq = query.listNpcSequence(MAP_ID);
+      const orders = seq.map((e) => e.npcOrder);
+      assert(
+        new Set(orders).size === orders.length,
+        `同一張圖的 npcOrder 不得重複（doc §3.3 不變量 4），實得 ${JSON.stringify(orders)}`,
+      );
+      assert(
+        !seq.some((e) => e.kind === 'mapContent' && e.contentId === generated!.contentId),
+        '舊版本內容在 ApplyNpcDungeonSettlement 必被 skip（mapVersion 不符），不得占用 NPC 序列名額',
+      );
+    },
+  },
+  {
+    name: '決定性：同一輸入兩次刷新產生完全相同的 NPC 序列',
+    run: () => {
+      const seqOf = () => {
+        const definitions = stubDefinitionReader();
+        const res = handleMapRefreshCheck(
+          regularJob(100),
+          fixtureMapState(1),
+          makeContext({ definitions, presence: stubPresence({ teamsInside: 0 }) }),
+        );
+        return createMapQuery(res.nextSlice, definitions)
+          .listNpcSequence(MAP_ID)
+          .map((e) => `${e.kind}:${e.npcOrder}:${e.pointCost}:${String(e.resolverId)}`)
+          .join('|');
+      };
+      assert(seqOf() === seqOf(), 'NPC 序列必須是決定性的（同輸入同輸出）');
     },
   },
 ];

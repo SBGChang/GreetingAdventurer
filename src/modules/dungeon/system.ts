@@ -54,6 +54,7 @@ import type {
   PendingDungeonInteraction,
   ContentEventInstance,
   NpcDungeonRun,
+  NpcDungeonCombatChallengeRef,
   PendingDungeonResult,
   NpcDungeonTargetRef,
   MoveDungeonRoom,
@@ -70,10 +71,27 @@ import type {
   GridCell,
   MapTrapResolution,
   NpcSequenceEntryView,
+  NpcDungeonSettlementApplied,
 } from '../../contracts/map';
 // AssetDistributionRuleId 由 distribution 契約擁有（非 core）。
 import type { AssetDistributionRuleId } from '../../contracts/distribution';
 import type { CombatEncounterResolvedPayload } from '../../contracts/combat';
+// Combat Sequence（module 21）的真實型別。外送命令與訂閱 payload 一律引用擁有者的宣告：
+// 影子契約在 Host Port 還沒接線時不會被編譯器發現，接上的那天才會爆成型別衝突或被迫轉型。
+import type {
+  CombatSequenceId,
+  CombatSequenceChallengeId,
+  CombatSequenceSourceCommitId,
+  CombatSequenceRuleId,
+  CombatSequenceSource,
+  CombatSequenceAllocationSnapshot,
+  CombatSequenceChallengeSnapshot,
+  CombatSequenceChallengeResolvedPayload,
+  CombatSequenceReadyForSourceCommitPayload,
+  CombatSequenceSettledPayload,
+  CombatSequenceInvalidatedPayload,
+} from '../../contracts/combat-sequence';
+import type { TeamCombatPowerSnapshot } from '../../contracts/combat-power';
 
 import type { DungeonModuleState } from './state';
 import {
@@ -90,6 +108,7 @@ export const DUNGEON_MODULE_ID = 'dungeon' as ModuleId;
 // 目標接收模組 ID（Internal Command 送出對象）。
 const MAP_MODULE_ID = 'map' as ModuleId;
 const COMBAT_MODULE_ID = 'combat' as ModuleId;
+const COMBAT_SEQUENCE_MODULE_ID = 'combat-sequence' as ModuleId;
 const DISTRIBUTION_MODULE_ID = 'distribution' as ModuleId;
 const TEAM_MODULE_ID = 'team' as ModuleId;
 // world 模組不再是跨午夜的接收者：世界日推進改走 ModuleResult.kernelRequests（見 advanceSessionTime）。
@@ -133,6 +152,23 @@ export interface DungeonMapPort {
   // 動態內容。
   getContentKind(mapId: MapInstanceId, contentId: ContentInstanceId): MapContentKind | undefined;
   isContentAvailable(mapId: MapInstanceId, contentId: ContentInstanceId): boolean;
+  // 內容／採集點的目前 revision。`PendingDungeonResult.target` 與 Combat Sequence 的
+  // `sourceRef` 都必填它，而它是 map 的事實：結算日 map 以此判斷這筆暫存結果是否還對得上
+  // 現在的內容。先前這裡填 0——那不是「還沒接」，那是替 map 捏造了一個它從沒說過的版本號。
+  // 取不到（內容不存在）回 undefined，呼叫端必須拒絕或令 Run 失效，不得代填。
+  getContentRevision(mapId: MapInstanceId, contentId: ContentInstanceId): Revision | undefined;
+  getGatheringNodeRevision(
+    mapId: MapInstanceId,
+    nodeId: GatheringNodeId,
+  ): Revision | undefined;
+  // 控制／綁架內容的守衛內容（`MapContentPayload.controllerContentIds`，01_map_module.md §3.2）。
+  // 內容真相屬 map，所以「誰在看守這一筆」由 map 回答。
+  // 回 undefined 表示這個 contentId 不存在，或它的 payload 種類沒有守衛欄位——兩者都代表
+  // 呼叫端問錯了或內容配置壞了，必須明確拒絕，不得當成「沒有守衛」。
+  listControllerContentIds(
+    mapId: MapInstanceId,
+    contentId: ContentInstanceId,
+  ): readonly ContentInstanceId[] | undefined;
   // 內容所在房間（互動前置：玩家必須人在該房；不存在回 undefined）。
   getContentRoomId(mapId: MapInstanceId, contentId: ContentInstanceId): RoomId | undefined;
   getEncounterGroupId(
@@ -193,6 +229,49 @@ export interface DungeonResolverPort {
   ): Readonly<{ outcome: PendingDungeonResult['outcome'] }>;
 }
 
+// Combat Sequence 的開始快照 Port（21_combat_sequence_module.md §3.2）。
+//
+// 為什麼是注入的 Port 而不是 dungeon 自己組：`StartCombatSequence` 必填
+// `allocationSnapshot`（每位成員的站位、武器組、已配置技能、攻擊權重、攻/防熟練度分配）與
+// `teamPowerSnapshot`，那是 Team × Inventory × Progression × Combat Definition × Combat Power
+// 五個來源的交集。doc §3.2 明文把這份組合指定給 `app/composition` 的
+// `CombatSequenceSnapshotAssembler`——「Combat Sequence 不自行挑裝備或技能」，Dungeon 同樣不行。
+//
+// Dungeon 只提供自己擁有的事實（哪一隊、哪一張圖、依 npcOrder 排好的怪物內容），取回一份可以
+// 直接送出的計畫。`challengeId` 與 `sourceId` 由 Assembler 鑄造（那是 combat-sequence 的 ID 家族）；
+// `sequenceId` 依 doc §2.3 由 Dungeon 以自己的交易 cursor 鑄造並作為輸入欄位帶入。
+export type DungeonSweepMonsterTarget = Readonly<{
+  npcOrder: number;
+  contentId: ContentInstanceId;
+  contentRevision: Revision;
+  encounterGroupId: EncounterGroupDefinitionId;
+}>;
+
+export type DungeonSweepSequencePlan = Readonly<{
+  source: CombatSequenceSource;
+  ruleId: CombatSequenceRuleId;
+  allocationSnapshot: CombatSequenceAllocationSnapshot;
+  teamPowerSnapshot: TeamCombatPowerSnapshot;
+  // 與輸入的 monsters 同序、同筆數；Dungeon 以 `challenges[i].challengeId` 對回 `monsters[i]`。
+  challenges: readonly CombatSequenceChallengeSnapshot[];
+}>;
+
+export interface DungeonCombatSequencePort {
+  // 組不出來（隊伍不可用、戰力快照缺件、內容缺 Encounter 定義）回 undefined。
+  // 呼叫端一律 typed rejection——**不得**改成「先開一條沒有 Challenge 的 Sequence」或
+  // 「這次先不打仗」，那會讓怪物內容安靜地變成免費戰利品。
+  planDungeonSweep(
+    input: Readonly<{
+      teamId: TeamId;
+      mapId: MapInstanceId;
+      mapVersion: number;
+      participantCharacterIds: readonly CharacterId[];
+      monsters: readonly DungeonSweepMonsterTarget[];
+      capturedOnDay: WorldDay;
+    }>,
+  ): DungeonSweepSequencePlan | undefined;
+}
+
 // NPC 目標種類是否落在該 Resolver 宣告支援的集合內。
 function supportsTarget(
   supported: readonly NpcDungeonTargetKind[],
@@ -220,11 +299,19 @@ export type DungeonContext = Readonly<{
   rng: RngContext;
   // 資料 Resolver（RNG 藏於其內；Handler 不含機率／公式，只消費結果）。
   resolvers: DungeonResolverPort;
+  // Combat Sequence 開始快照（由 app/composition 的 Snapshot Assembler 供給，見上方 Port 註解）。
+  combatSequence: DungeonCombatSequencePort;
   // ID 產生器。
   nextInteractionId: () => InteractionId;
   nextKnowledgeId: () => PlayerMapKnowledgeId;
   nextRunId: () => NpcDungeonRunId;
   nextDistributionId: () => AssetDistributionId;
+  // doc §2.3：sequenceId 由 Dungeon 以自己的交易 ID cursor 鑄造，作為 StartCombatSequence 的
+  // 輸入欄位帶入（所以不需要回傳值，也就不需要同步 Host Port）。
+  nextCombatSequenceId: () => CombatSequenceId;
+  // 每一次「來源正式提交」這個動作的身分（doc §7.1 的 sourceCommitId）。同一個 ID 重送視為冪等，
+  // 不同 ID 重送會被 combat-sequence 拒絕——所以它必須由發動提交的宿主鑄造，一次結算一枚。
+  nextCombatSequenceSourceCommitId: () => CombatSequenceSourceCommitId;
 }>;
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -663,8 +750,57 @@ export function interactDungeonContent(
     return accept(withPlayerSession(state, nextSession), messages);
   }
 
-  // chest / control / kidnap 等：直接要求 Map 處理內容（doc §6.1 ResolvePlayerMapContent）。
-  // TODO: control / kidnap 需先解決守衛內容；第一版主路徑只處理直接可取的 chest。
+  if (kind === 'kidnap' || kind === 'control') {
+    // 控制／綁架內容由守衛把持（`MapContentPayload.controllerContentIds`，01_map_module.md §3.2）。
+    //
+    // 「解決守衛」不需要、也不得由 Dungeon 另發明一條流程：守衛本身就是同一張圖上各自獨立的
+    // Map Content（怪物群／Boss），玩家用**同一個** interactDungeonContent 打掉它們，走的是上面
+    // 的 StartCombatEncounter 分支，戰勝後由 handleCombatEncounterResolved 送 ResolvePlayerMapContent
+    // 讓 map 把該守衛標為 resolved。本分支要做的只有一件事：守衛還在時明確拒絕。
+    //
+    // 先前這裡沒有這道判定，於是「控制／綁架」與「寶箱」走同一條直取路徑——守衛一個沒打，
+    // 內容就被判定成功。那不是少一個功能，那是把守衛這個設計整個抹掉。
+    const controllerContentIds = ctx.map.listControllerContentIds(session.mapId, cmd.contentId);
+    if (controllerContentIds === undefined) {
+      // map 說不出這筆內容的守衛名單：內容配置壞了。不得當成「沒有守衛」放行。
+      return reject('dungeon.interactDungeonContent.controllerContentsMissing', {
+        contentId: String(cmd.contentId),
+        contentKind: kind,
+      });
+    }
+    // 「不可用」有兩種意思，而 map 對兩者回同一個 false：守衛已被打掉（state 轉 resolved），
+    // 以及**這個守衛 ID 根本不存在**（modules/map/queries.ts 的
+    // `tryGetContent(state, contentId)?.state === 'available'`，查無內容時 optional chaining
+    // 直接得到 undefined）。只用 isContentAvailable 過濾，一份指向不存在內容的壞守衛名單會被
+    // 當成「守衛都清光了」而放行——正是本分支存在的理由被同一個缺口繞過去。
+    // 名單整份取不到要拒絕，名單裡有一筆指不到內容同樣要拒絕：兩者都是內容配置壞了。
+    const unknownGuardContentId = controllerContentIds.find(
+      (guardId) => ctx.map.getContentRevision(session.mapId, guardId) === undefined,
+    );
+    if (unknownGuardContentId !== undefined) {
+      return reject('dungeon.interactDungeonContent.controllerContentsMissing', {
+        contentId: String(cmd.contentId),
+        contentKind: kind,
+        unknownGuardContentId: String(unknownGuardContentId),
+      });
+    }
+    const remainingGuards = controllerContentIds.filter((guardId) =>
+      ctx.map.isContentAvailable(session.mapId, guardId),
+    );
+    const nextGuardContentId = remainingGuards[0];
+    if (nextGuardContentId !== undefined) {
+      return reject('dungeon.interactDungeonContent.guardsUnresolved', {
+        contentId: String(cmd.contentId),
+        contentKind: kind,
+        remainingGuardCount: remainingGuards.length,
+        nextGuardContentId: String(nextGuardContentId),
+      });
+    }
+    // 守衛全數解決 → 與寶箱相同，交給內容自己的解析 Resolver（往下走）。
+  }
+
+  // chest，以及守衛已清空的 control / kidnap：直接要求 Map 處理內容
+  //（doc §6.1 ResolvePlayerMapContent）。
   const resolverId = ctx.map.getContentResolverId(session.mapId, cmd.contentId);
   if (resolverId === undefined) {
     return reject('dungeon.interactDungeonContent.contentResolverMissing', {
@@ -727,12 +863,11 @@ export function resolveDungeonInteraction(
       mapId: session.mapId,
       contentId: pending.contentId,
       distributionId: session.distributionId,
-      resolution: {
-        kind: 'contentResolver',
-        resolverId,
-        outcome: 'success',
-        details: { optionId: String(cmd.optionId) },
-      },
+      // 這裡原本另外附了 `details: { optionId }`。map 契約於本輪把 `MapContentResolution.details`
+      // 這個袋子欄位刪除了（「一個 Func 一張表」：沒有消費者的 `details` 讓驗證器寫不出來），
+      // 而 map 確實從未讀過它——選項的效果由 content-event-resolution Workflow 在同一筆交易派發，
+      // map 只需要知道「這筆內容被內容 Resolver 成功解掉了」。
+      resolution: { kind: 'contentResolver', resolverId, outcome: 'success' },
     }),
   ];
   return accept(withPlayerSession(state, restored), messages);
@@ -797,6 +932,35 @@ export function consumeDungeonGatheringAction(
 // §5.3 Internal Command：StartNpcDungeonRun
 // ──────────────────────────────────────────────────────────────────────────
 
+// 依 npcOrder 排序的 NPC 序列。排序固定在 dungeon 這一側，不依賴 Port 的回傳順序——
+// 游標、點數與 Combat Sequence 的 Challenge 順序全部建立在這個排序上。
+function sortedNpcSequence(
+  ctx: DungeonContext,
+  mapId: MapInstanceId,
+): readonly NpcSequenceEntryView[] {
+  return [...ctx.map.listNpcSequence(mapId)].sort((a, b) => a.npcOrder - b.npcOrder);
+}
+
+// 這一筆內容要不要進 Combat Sequence（21_combat_sequence_module.md §8：
+// 「寶箱、事件與採集不進 Combat Sequence」）。
+function isMonsterContentKind(kind: MapContentKind | undefined): boolean {
+  return kind === 'monsterGroup' || kind === 'boss';
+}
+
+// 這一隊目前**未收斂**的 NPC Run（不變量 dungeon/one-active-run-per-team 的判準）。
+// closed 與 invalid 都已經收斂完畢，不阻擋下一趟。
+function findActiveNpcRunForTeam(
+  state: DungeonModuleState,
+  teamId: TeamId,
+): NpcDungeonRun | undefined {
+  for (const key of Object.keys(state.npcRuns)) {
+    const run = state.npcRuns[key as NpcDungeonRunId];
+    if (run === undefined || run.teamId !== teamId) continue;
+    if (run.status === 'exploring' || run.status === 'settling') return run;
+  }
+  return undefined;
+}
+
 // 建立 NPC Run、collecting 的 NPC 地牢 Distribution，以及（有怪物內容時）引用所有怪物內容的
 // dungeonSweep Combat Sequence；排入下一日 npcDungeonDay（doc §5.3、§3.4）。
 export function startNpcDungeonRun(
@@ -804,38 +968,57 @@ export function startNpcDungeonRun(
   cmd: StartNpcDungeonRun,
   ctx: DungeonContext,
 ): DungeonHandlerResult {
+  // 不變量 dungeon/one-active-run-per-team（public.ts 的 invariants 一直宣告著它，卻沒有任何
+  // 程式擋）。重送一次 StartNpcDungeonRun 會多出一條 Run 與一份 Distribution；接上 Combat
+  // Sequence 之後還會多鑄一個 sequenceId、多送一次 StartCombatSequence，而 findNpcRunForTeam
+  // 只回得出其中一條——另一條連查都查不到，卻仍會排 Job 並繼續扣點。
+  //
+  // 不能用 findNpcRunForTeam：它回的是「這隊的第一條 Run」，closed／invalid 也算。同一隊跑過
+  // 一趟之後它永遠先撈到那條舊的，未收斂的那條就被這道守門漏掉了。要找的是**未收斂**的那條。
+  const activeRun = findActiveNpcRunForTeam(state, cmd.teamId);
+  if (activeRun !== undefined) {
+    return reject('dungeon.startNpcDungeonRun.runAlreadyActive', {
+      teamId: String(cmd.teamId),
+      runId: String(activeRun.runId),
+      status: activeRun.status,
+    });
+  }
+
   const explorationRuleId = ctx.npcExplorationRuleId;
   const mapVersion = ctx.map.getMapVersion(cmd.mapId);
-  const sequence = ctx.map.listNpcSequence(cmd.mapId);
-  const hasMonster = sequence.some((e) => e.kind === 'mapContent');
+  const sequence = sortedNpcSequence(ctx, cmd.mapId);
   const distributionId = ctx.nextDistributionId();
   const runId = ctx.nextRunId();
   const members = ctx.team.getMembers(cmd.teamId);
 
-  // 無怪物內容時不建立空 Sequence，combatSequenceSettled 從開始即 true（不變量 §3.4.9）。
-  // TODO: 有怪物內容時 required StartCombatSequence(source=dungeonSweep) 並保存 combatSequenceId；
-  //       第一版測試路徑使用無怪物序列。
-  const run: NpcDungeonRun = {
-    runId,
-    teamId: cmd.teamId,
-    teamPlanId: cmd.planId,
-    participantCharacterIds: members,
-    mapId: cmd.mapId,
-    mapVersion,
-    explorationRuleId,
-    distributionId,
-    cursorNpcOrder: 0,
-    pendingResults: [],
-    settlementProgress: {
-      mapApplied: false,
-      combatSequenceSettled: !hasMonster,
-      distributionCompleted: false,
-    },
-    status: 'exploring',
-    startedOnDay: ctx.worldDay,
-    revision: 0 as Revision,
-    rngContext: ctx.rng,
-  };
+  // 「依 Map npcOrder 取得所有怪物 Content」（21 §8）。
+  //
+  // 先前這裡是 `sequence.some((e) => e.kind === 'mapContent')`：那把寶箱、事件、控制與綁架
+  // 也算成怪物，於是一張只有寶箱的圖會被判定成「有怪物」。怪物與否是內容的 kind，不是
+  // 序列項目的 kind。
+  const monsters: DungeonSweepMonsterTarget[] = [];
+  for (const entry of sequence) {
+    if (entry.kind !== 'mapContent') continue;
+    if (!isMonsterContentKind(ctx.map.getContentKind(cmd.mapId, entry.contentId))) continue;
+    const encounterGroupId = ctx.map.getEncounterGroupId(cmd.mapId, entry.contentId);
+    if (encounterGroupId === undefined) {
+      return reject('dungeon.startNpcDungeonRun.encounterGroupMissing', {
+        contentId: String(entry.contentId),
+      });
+    }
+    const contentRevision = ctx.map.getContentRevision(cmd.mapId, entry.contentId);
+    if (contentRevision === undefined) {
+      return reject('dungeon.startNpcDungeonRun.contentRevisionMissing', {
+        contentId: String(entry.contentId),
+      });
+    }
+    monsters.push({
+      npcOrder: entry.npcOrder,
+      contentId: entry.contentId,
+      contentRevision,
+      encounterGroupId,
+    });
+  }
 
   const messages: TransactionMessageDraft[] = [
     internal(DISTRIBUTION_MODULE_ID, {
@@ -848,90 +1031,380 @@ export function startNpcDungeonRun(
     }),
   ];
 
-  // 排入下一日 npcDungeonDay（doc §5.3）。
-  const jobs: ModuleResult<DungeonModuleState>['scheduledJobs'] = [
-    {
-      type: 'npcDungeonDay',
-      dueDay: (ctx.worldDay + 1) as WorldDay,
-      ownerModule: DUNGEON_MODULE_ID as ModuleId<'dungeon'>,
-      targetId: runId,
-      expectedRevision: run.revision,
-      rngContext: ctx.rng,
-      payload: {},
-    },
-  ];
+  // 無怪物內容時不建立空 Sequence，combatSequenceSettled 從開始即 true（不變量 §3.4.9）。
+  let combatSequenceId: CombatSequenceId | undefined;
+  let combatSequenceChallenges: readonly NpcDungeonCombatChallengeRef[] = [];
+  if (monsters.length > 0) {
+    const plan = ctx.combatSequence.planDungeonSweep({
+      teamId: cmd.teamId,
+      mapId: cmd.mapId,
+      mapVersion,
+      participantCharacterIds: members,
+      monsters,
+      capturedOnDay: ctx.worldDay,
+    });
+    if (plan === undefined) {
+      // 組不出開始快照（隊伍不可用、戰力或熟練度分配缺件、怪物缺 Encounter 定義）。
+      // 這條 Run 不能開始——**不得**退成「先不打仗」，那會讓怪物內容變成免費戰利品。
+      return reject('dungeon.startNpcDungeonRun.combatSequencePlanUnavailable', {
+        mapId: String(cmd.mapId),
+        monsterCount: monsters.length,
+      });
+    }
+    if (plan.challenges.length !== monsters.length) {
+      return reject('dungeon.startNpcDungeonRun.combatSequencePlanMismatch', {
+        expected: monsters.length,
+        actual: plan.challenges.length,
+      });
+    }
+    const refs: NpcDungeonCombatChallengeRef[] = [];
+    for (let index = 0; index < monsters.length; index += 1) {
+      const monster = monsters[index];
+      const challenge = plan.challenges[index];
+      if (monster === undefined || challenge === undefined) {
+        return reject('dungeon.startNpcDungeonRun.combatSequencePlanMismatch', { index });
+      }
+      // 兩邊游標要能一直對得上（不變量 §3.4.9），前提是第 i 題**就是**第 i 個怪物內容。
+      // Assembler 若重排或漏配，這裡是唯一還看得出來的地方。
+      if (
+        challenge.sourceRef.kind !== 'mapContent' ||
+        challenge.sourceRef.contentId !== monster.contentId
+      ) {
+        return reject('dungeon.startNpcDungeonRun.combatSequencePlanMismatch', {
+          index,
+          contentId: String(monster.contentId),
+        });
+      }
+      refs.push({
+        npcOrder: monster.npcOrder,
+        contentId: monster.contentId,
+        challengeId: challenge.challengeId,
+      });
+    }
+    combatSequenceChallenges = refs;
+    combatSequenceId = ctx.nextCombatSequenceId();
+    messages.push(
+      internal(COMBAT_SEQUENCE_MODULE_ID, {
+        type: 'StartCombatSequence',
+        sequenceId: combatSequenceId,
+        teamId: cmd.teamId,
+        source: plan.source,
+        ruleId: plan.ruleId,
+        allocationSnapshot: plan.allocationSnapshot,
+        teamPowerSnapshot: plan.teamPowerSnapshot,
+        challenges: [...plan.challenges],
+        rngContext: ctx.rng,
+      }),
+    );
+  }
 
-  return accept(withNpcRun(state, run), messages, jobs);
+  const run: NpcDungeonRun = {
+    runId,
+    teamId: cmd.teamId,
+    teamPlanId: cmd.planId,
+    participantCharacterIds: members,
+    mapId: cmd.mapId,
+    mapVersion,
+    explorationRuleId,
+    distributionId,
+    combatSequenceId,
+    combatSequenceChallenges,
+    remainingDailyPoints: 0, // 第一個 npcDungeonDay 才取得當日點數（不變量 §3.4.5）。
+    cursorNpcOrder: 0,
+    pendingResults: [],
+    settlementProgress: {
+      mapApplied: false,
+      combatSequenceSettled: monsters.length === 0,
+      distributionCompleted: false,
+    },
+    status: 'exploring',
+    startedOnDay: ctx.worldDay,
+    revision: 0 as Revision,
+    rngContext: ctx.rng,
+  };
+
+  return accept(withNpcRun(state, run), messages, nextDayJob(run, ctx));
 }
 
 // ──────────────────────────────────────────────────────────────────────────
 // §5.2 ScheduledJob：npcDungeonDay（每日 N 點探索，doc §7）
 // ──────────────────────────────────────────────────────────────────────────
 
-function targetRefForEntry(entry: NpcSequenceEntryView): NpcDungeonTargetRef {
+// 序列項目 → 暫存結果的目標引用。
+//
+// revision 是 **map 的事實**：結算日 map 以它判斷這筆暫存結果是否還對得上現在的內容。
+// 先前這裡兩個 revision 都填 0——那不是「還沒接」，那是替 map 捏造了一個它從沒說過的版本號，
+// 而且會一路寫進 Combat Sequence 的 sourceRef。取不到就回 undefined，由呼叫端令 Run 失效。
+function targetRefForEntry(
+  entry: NpcSequenceEntryView,
+  mapId: MapInstanceId,
+  ctx: DungeonContext,
+): NpcDungeonTargetRef | undefined {
   if (entry.kind === 'mapContent') {
-    return { kind: 'mapContent', contentId: entry.contentId, contentRevision: 0 as Revision };
+    const contentRevision = ctx.map.getContentRevision(mapId, entry.contentId);
+    if (contentRevision === undefined) return undefined;
+    return { kind: 'mapContent', contentId: entry.contentId, contentRevision };
   }
-  return { kind: 'gatheringNode', nodeId: entry.nodeId, nodeRevision: 0 as Revision };
+  const nodeRevision = ctx.map.getGatheringNodeRevision(mapId, entry.nodeId);
+  if (nodeRevision === undefined) return undefined;
+  return { kind: 'gatheringNode', nodeId: entry.nodeId, nodeRevision };
 }
 
-// 取 1 日探索點，依 Map NPC 序列從游標往後嘗試內容（doc §7 流程）。
-export function npcDungeonDay(
-  state: DungeonModuleState,
-  runId: NpcDungeonRunId,
+// 目標是否仍可處理（doc §7 flow 的「下一筆仍可用？」）。
+function isEntryAvailable(
+  entry: NpcSequenceEntryView,
+  mapId: MapInstanceId,
   ctx: DungeonContext,
-): DungeonHandlerResult {
-  const run = state.npcRuns[runId];
-  // 失效/過期 Job（Run 不存在，或已 settling/closed）→ **接受並 no-op**（不是拒絕）：到期 Job 於交易
-  // 提交時被 Scheduler 消耗，若在此拒絕會讓交易回滾、Job 留在佇列而不斷重觸發（見 session.runDueJob）。
-  if (run === undefined || run.status !== 'exploring') return accept(state); // settling/closed 不再排（§3.4.6）。
+): boolean {
+  return entry.kind === 'mapContent'
+    ? ctx.map.isContentAvailable(mapId, entry.contentId)
+    : ctx.map.isGatheringNodeAvailable(mapId, entry.nodeId);
+}
 
-  // 驗證 Team 仍在 Map 且版本相符；否則安全失效（doc §7.2、§5.4 TeamLocationChanged/MapRefreshed）。
-  if (!ctx.team.isTeamInMap(run.teamId, run.mapId) || ctx.map.getMapVersion(run.mapId) !== run.mapVersion) {
-    const invalid: NpcDungeonRun = { ...run, status: 'invalid', lastProcessedOnDay: ctx.worldDay, revision: bump(run.revision) };
-    const messages: TransactionMessageDraft[] = [
-      event({ type: 'NpcDungeonRunClosed', runId, teamId: run.teamId, reason: 'invalid' }),
-    ];
-    return accept(withNpcRun(state, invalid), messages);
+// 這一筆序列項目對應的 Combat Sequence Challenge。
+//   none     —— 寶箱／事件／控制／綁架／採集點：不進戰鬥串（21 §8）。
+//   unmapped —— 是怪物內容，卻找不到開始時建立的對照：Run 的內容真相已與 Map 分岔，必須失效。
+type EntryChallenge =
+  | Readonly<{ kind: 'none' }>
+  | Readonly<{ kind: 'unmapped' }>
+  | Readonly<{
+      kind: 'challenge';
+      sequenceId: CombatSequenceId;
+      challengeId: CombatSequenceChallengeId;
+    }>;
+
+function challengeForEntry(
+  run: NpcDungeonRun,
+  entry: NpcSequenceEntryView,
+  ctx: DungeonContext,
+): EntryChallenge {
+  if (entry.kind !== 'mapContent') return { kind: 'none' };
+  if (!isMonsterContentKind(ctx.map.getContentKind(run.mapId, entry.contentId))) {
+    return { kind: 'none' };
+  }
+  const sequenceId = run.combatSequenceId;
+  const ref = run.combatSequenceChallenges.find((c) => c.contentId === entry.contentId);
+  if (sequenceId === undefined || ref === undefined || ref.npcOrder !== entry.npcOrder) {
+    return { kind: 'unmapped' };
+  }
+  return { kind: 'challenge', sequenceId, challengeId: ref.challengeId };
+}
+
+function nextDayJob(
+  run: NpcDungeonRun,
+  ctx: DungeonContext,
+): ModuleResult<DungeonModuleState>['scheduledJobs'] {
+  return [
+    {
+      type: 'npcDungeonDay',
+      dueDay: (ctx.worldDay + 1) as WorldDay,
+      ownerModule: DUNGEON_MODULE_ID as ModuleId<'dungeon'>,
+      targetId: run.runId,
+      expectedRevision: run.revision,
+      rngContext: run.rngContext,
+      payload: {},
+    },
+  ];
+}
+
+// Run 失效：不結算未套用的結果（doc §7.2）。有戰鬥串時一併作廢它——已消耗的重骰補品不回復
+// （doc §5.4）。已 settled 的 Sequence 不得再 invalidate，故以 combatSequenceSettled 把關。
+function invalidateRun(
+  state: DungeonModuleState,
+  run: NpcDungeonRun,
+  ctx: DungeonContext,
+): ModuleResult<DungeonModuleState> {
+  const invalid: NpcDungeonRun = {
+    ...run,
+    status: 'invalid',
+    awaitingCombatChallengeId: undefined,
+    lastProcessedOnDay: ctx.worldDay,
+    revision: bump(run.revision),
+  };
+  const messages: TransactionMessageDraft[] = [
+    event({ type: 'NpcDungeonRunClosed', runId: run.runId, teamId: run.teamId, reason: 'invalid' }),
+  ];
+  const sequenceId = run.combatSequenceId;
+  if (sequenceId !== undefined && !run.settlementProgress.combatSequenceSettled) {
+    messages.push(
+      internal(COMBAT_SEQUENCE_MODULE_ID, {
+        type: 'InvalidateCombatSequence',
+        sequenceId,
+        reason: 'sourceInvalidated',
+      }),
+    );
+  }
+  return result(withNpcRun(state, invalid), messages);
+}
+
+// 進入 settling（doc §7.1.2：「先停止 Combat Sequence，再請 Map 一次性驗證並套用結果」）。
+//
+// 非 exploring 的 Run 直接 no-op——這是**真正的冪等**（結算已經發生過），不是掩蓋缺口：
+// 挑戰失敗與 CombatSequenceReadyForSourceCommit 兩條路徑都會抵達這裡，而 ApplyNpcDungeonSettlement
+// 只該送一次。兩個呼叫端都已先確認 `status === 'exploring'`，所以這裡是結構性守門。
+function enterSettling(
+  state: DungeonModuleState,
+  run: NpcDungeonRun,
+  ctx: DungeonContext,
+  input: Readonly<{
+    processedRefs: readonly NpcDungeonTargetRef[];
+    sequenceAlreadyTerminated: boolean;
+  }>,
+): ModuleResult<DungeonModuleState> {
+  if (run.status !== 'exploring') return result(state);
+
+  const settling: NpcDungeonRun = {
+    ...run,
+    status: 'settling',
+    awaitingCombatChallengeId: undefined,
+    lastProcessedOnDay: ctx.worldDay,
+    revision: bump(run.revision),
+  };
+
+  const messages: TransactionMessageDraft[] = [
+    event({
+      type: 'NpcDungeonRunProgressed',
+      runId: run.runId,
+      processedTargetRefs: input.processedRefs,
+      nextCursor: run.cursorNpcOrder,
+      remainingPoints: run.remainingDailyPoints,
+    }),
+  ];
+
+  // StopCombatSequence 只在 Sequence 還在 active 時送。對已經 awaitingSourceCommit 的 Sequence
+  // 再送一次會撞上 reason 衝突（combat-sequence 明確拒絕），而 Internal Command 被拒是**整筆交易
+  // 回滾**——結算會整個消失。兩個判準合起來才夠：呼叫端知道「這一段是不是由 Sequence 自己終止的」，
+  // 而對照表知道「還有沒有沒解的題」。
+  const sequenceId = run.combatSequenceId;
+  const hasUnresolvedChallenges = run.combatSequenceChallenges.some(
+    (c) => c.npcOrder >= run.cursorNpcOrder,
+  );
+  if (
+    sequenceId !== undefined &&
+    !input.sequenceAlreadyTerminated &&
+    !run.settlementProgress.combatSequenceSettled &&
+    hasUnresolvedChallenges
+  ) {
+    messages.push(
+      internal(COMBAT_SEQUENCE_MODULE_ID, {
+        type: 'StopCombatSequence',
+        sequenceId,
+        reason: 'hostStopped',
+      }),
+    );
   }
 
-  const rule = ctx.reader.getNpcExplorationRule(run.explorationRuleId);
-  let points = rule.dailyPointBudget; // 每日重新取得，不跨日累積（不變量 §3.4.5）。
+  messages.push(
+    internal(MAP_MODULE_ID, {
+      type: 'ApplyNpcDungeonSettlement',
+      runId: run.runId,
+      mapId: run.mapId,
+      mapVersion: run.mapVersion,
+      distributionId: run.distributionId,
+      pendingResults: run.pendingResults,
+    }),
+  );
 
-  const sequence = [...ctx.map.listNpcSequence(run.mapId)].sort((a, b) => a.npcOrder - b.npcOrder);
+  return result(withNpcRun(state, settling), messages);
+}
 
+// ── NPC Run 的「一段」推進（doc §7 flow 的迴圈本體）──────────────────────────
+//
+// 一段而不是一日：怪物內容的成敗要等 `CombatSequenceChallengeResolved` 回來才知道，所以一日的
+// 處理會被切成數段——`npcDungeonDay` 起頭，之後每收到一題結果由 Subscriber 續行下一段。
+// 一段有三種結束方式：
+//   suspended —— 已送出 Resolve/Skip，等事件（**不排 Job**；排 Job 是續行那一段的責任）。
+//   held      —— 點數不足：保留 Run 並排明日 Job。
+//   settling  —— 序列走完、資料規則要求離場，或怪物挑戰失敗。
+type NpcSegmentInput = Readonly<{
+  // 這一段開始前剛記下的目標（Subscriber 續行時的那一筆）。只影響 NpcDungeonRunProgressed 的
+  // processedTargetRefs，讓事件說得出整段實際處理了什麼。
+  carriedRefs: readonly NpcDungeonTargetRef[];
+  // 這一段開始時，Combat Sequence 是否**已經自己終止**（挑戰失敗，或最後一題已解出）。
+  // 只用來決定進入 settling 時該不該送 StopCombatSequence，見 enterSettling。
+  sequenceAlreadyTerminated: boolean;
+}>;
+
+function advanceNpcRunSegment(
+  state: DungeonModuleState,
+  run: NpcDungeonRun,
+  ctx: DungeonContext,
+  input: NpcSegmentInput,
+): ModuleResult<DungeonModuleState> {
+  const sequence = sortedNpcSequence(ctx, run.mapId);
+  const messages: TransactionMessageDraft[] = [];
+  const processedRefs: NpcDungeonTargetRef[] = [...input.carriedRefs];
+  const results: PendingDungeonResult[] = [...run.pendingResults];
+  let points = run.remainingDailyPoints;
   let cursor = run.cursorNpcOrder;
-  const newResults: PendingDungeonResult[] = [];
-  const processedRefs: NpcDungeonTargetRef[] = [];
-  let enterSettling = false;
+  let awaiting: CombatSequenceChallengeId | undefined;
+  let leaveAfterSuccess = false;
 
   for (const entry of sequence) {
-    if (entry.npcOrder < cursor) continue; // 已處理：游標前進（doc §7 flow「已處理→游標前進」）。
-    if (points < entry.pointCost) {
-      // 點數不足：保留 Run（cursor / pendingResults 不動）、排明日 Job（doc §7 flow「保留」）。
-      break;
-    }
+    if (entry.npcOrder < cursor) continue; // 已處理：游標前進（doc §7 flow）。
+
     const resolver = ctx.reader.getNpcResolver(entry.resolverId);
-    const ref = targetRefForEntry(entry);
+    const ref = targetRefForEntry(entry, run.mapId, ctx);
+    // Map 說不出這個目標的 revision：Run 的內容真相已與 Map 分岔，不得用捏造的版本繼續。
+    if (ref === undefined) return invalidateRun(state, run, ctx);
 
     // 這個 Resolver 支援這種目標嗎？不支援代表**內容配置錯了**（序列把一種目標指給了處理不了它的
     // Resolver）。不能當成失敗混進結果——那會把資料錯誤偽裝成遊戲事件。整筆 Run 標為 invalid。
-    if (!supportsTarget(resolver.supportedTargetKinds, ref)) {
-      const invalid: NpcDungeonRun = {
-        ...run,
-        status: 'invalid',
-        lastProcessedOnDay: ctx.worldDay,
-        revision: bump(run.revision),
-      };
-      return accept(withNpcRun(state, invalid), [
-        event({ type: 'NpcDungeonRunClosed', runId, teamId: run.teamId, reason: 'invalid' }),
-      ]);
+    if (!supportsTarget(resolver.supportedTargetKinds, ref)) return invalidateRun(state, run, ctx);
+
+    const challenge = challengeForEntry(run, entry, ctx);
+    if (challenge.kind === 'unmapped') return invalidateRun(state, run, ctx);
+
+    if (!isEntryAvailable(entry, run.mapId, ctx)) {
+      // doc §7 flow：「已處理 → 游標前進，繼續」——不扣點。
+      if (challenge.kind === 'challenge') {
+        // 21 §8：嘗試前發現內容已被正式處理，必須同步 Skip，保持兩個游標一致。
+        // 結果同樣以 CombatSequenceChallengeResolved（outcome=skippedBeforeAttempt）回來，
+        // 續行走的是同一條路——skip 與 resolve 沒有兩套流程。
+        messages.push(
+          internal(COMBAT_SEQUENCE_MODULE_ID, {
+            type: 'SkipNextCombatSequenceChallenge',
+            sequenceId: challenge.sequenceId,
+            expectedChallengeId: challenge.challengeId,
+            reason: 'sourceUnavailableBeforeAttempt',
+          }),
+        );
+        awaiting = challenge.challengeId;
+        break;
+      }
+      results.push({
+        target: ref,
+        npcOrder: entry.npcOrder,
+        attemptedOnDay: ctx.worldDay,
+        outcome: 'skip',
+        resolverId: entry.resolverId,
+        pendingRewardRefs: [],
+      });
+      processedRefs.push(ref);
+      cursor = entry.npcOrder + 1;
+      continue;
     }
 
+    // 點數不足：保留 Run（cursor / pendingResults 不動）、排明日 Job（doc §7 flow「保留」）。
+    if (points < entry.pointCost) break;
     points -= entry.pointCost;
-    processedRefs.push(ref);
 
-    // 成敗由資料規則決定（outcomeRuleId），不是寫死的 success。
+    if (challenge.kind === 'challenge') {
+      // doc §7 flow 的 IC：「扣點並解析下一個 Combat Sequence Challenge」。
+      // 成敗**不在這裡決定**——送出命令後這一段就結束，等 combat-sequence 發事件回來續行。
+      messages.push(
+        internal(COMBAT_SEQUENCE_MODULE_ID, {
+          type: 'ResolveNextCombatSequenceChallenge',
+          sequenceId: challenge.sequenceId,
+          expectedChallengeId: challenge.challengeId,
+          attemptedOnDay: ctx.worldDay,
+        }),
+      );
+      awaiting = challenge.challengeId;
+      break;
+    }
+
+    // 非怪物內容：成敗由資料規則決定（outcomeRuleId），不是寫死的 success。
     const resolved = ctx.resolvers.resolveNpcTargetOutcome({
       resolverId: entry.resolverId,
       outcomeRuleId: resolver.outcomeRuleId,
@@ -940,8 +1413,7 @@ export function npcDungeonDay(
       onDay: ctx.worldDay,
       rngContext: run.rngContext,
     });
-
-    newResults.push({
+    results.push({
       target: ref,
       npcOrder: entry.npcOrder,
       attemptedOnDay: ctx.worldDay,
@@ -955,81 +1427,93 @@ export function npcDungeonDay(
             ? [{ contentId: ref.contentId }]
             : [{ nodeId: ref.nodeId }],
     });
+    processedRefs.push(ref);
     cursor = entry.npcOrder + 1; // 游標只可向前（不變量 §3.4.4）。
 
-    // doc §7.2：Resolver 宣告 successBehavior='leave' 時，成功後就結束今日探索並進入結算。
+    // doc §7.2：Resolver 宣告 successBehavior='leave' 時，成功後就結束探索並進入結算。
     if (resolved.outcome === 'success' && resolver.successBehavior === 'leave') {
-      enterSettling = true;
+      leaveAfterSuccess = true;
       break;
     }
   }
 
-  // 序列已全部走完（無下一筆可處理）→ settling（doc §7 flow）。
-  const nothingLeft = sequence.every((e) => e.npcOrder < cursor);
-  if (nothingLeft) enterSettling = true;
-
-  const mergedResults = [...run.pendingResults, ...newResults];
-  const remainingPoints = points;
-
-  if (!enterSettling) {
-    // 保留 Run 並排明日 Job（doc §7 flow「保留 Run；排明日 Job」）。
-    const progressed: NpcDungeonRun = {
-      ...run,
-      cursorNpcOrder: cursor,
-      pendingResults: mergedResults,
-      lastProcessedOnDay: ctx.worldDay,
-      revision: bump(run.revision),
-    };
-    const messages: TransactionMessageDraft[] = [
-      event({
-        type: 'NpcDungeonRunProgressed',
-        runId,
-        processedTargetRefs: processedRefs,
-        nextCursor: cursor,
-        remainingPoints,
-      }),
-    ];
-    const jobs: ModuleResult<DungeonModuleState>['scheduledJobs'] = [
-      {
-        type: 'npcDungeonDay',
-        dueDay: (ctx.worldDay + 1) as WorldDay,
-        ownerModule: DUNGEON_MODULE_ID as ModuleId<'dungeon'>,
-        targetId: runId,
-        expectedRevision: progressed.revision,
-        rngContext: run.rngContext,
-        payload: {},
-      },
-    ];
-    return accept(withNpcRun(state, progressed), messages, jobs);
-  }
-
-  // 進入 settling：停止（無）Combat Sequence 後 required ApplyNpcDungeonSettlement（doc §7、§7.1）。
-  const settling: NpcDungeonRun = {
+  const nothingLeft = awaiting === undefined && !sequence.some((e) => e.npcOrder >= cursor);
+  const staged: NpcDungeonRun = {
     ...run,
     cursorNpcOrder: cursor,
-    pendingResults: mergedResults,
-    status: 'settling',
-    lastProcessedOnDay: ctx.worldDay,
-    revision: bump(run.revision),
+    pendingResults: results,
+    remainingDailyPoints: points,
+    awaitingCombatChallengeId: awaiting,
   };
-  const messages: TransactionMessageDraft[] = [
-    event({
-      type: 'NpcDungeonRunProgressed',
-      runId,
-      processedTargetRefs: processedRefs,
-      nextCursor: cursor,
-      remainingPoints,
-    }),
-    internal(MAP_MODULE_ID, {
-      type: 'ApplyNpcDungeonSettlement',
-      runId,
-      mapId: run.mapId,
-      mapVersion: run.mapVersion,
-      distributionId: run.distributionId,
-      pendingResults: mergedResults,
-    }),
-  ];
-  return accept(withNpcRun(state, settling), messages);
+
+  // 序列已全部走完，或資料規則要求成功後離場 → settling（doc §7 flow）。
+  if (leaveAfterSuccess || nothingLeft) {
+    return enterSettling(state, staged, ctx, {
+      processedRefs,
+      sequenceAlreadyTerminated: input.sequenceAlreadyTerminated,
+    });
+  }
+
+  const written: NpcDungeonRun = { ...staged, lastProcessedOnDay: ctx.worldDay, revision: bump(run.revision) };
+  const outgoing: TransactionMessageDraft[] = [];
+  // 這一段什麼都沒處理就去等 Challenge 結果時不發空的進度事件；其餘一律回報本段的實際進度。
+  if (processedRefs.length > 0 || awaiting === undefined) {
+    outgoing.push(
+      event({
+        type: 'NpcDungeonRunProgressed',
+        runId: run.runId,
+        processedTargetRefs: processedRefs,
+        nextCursor: cursor,
+        remainingPoints: points,
+      }),
+    );
+  }
+  outgoing.push(...messages);
+
+  // 等 Challenge 結果的那一段不排 Job：今日還沒結束，排了會讓同一天出現兩筆 npcDungeonDay。
+  return awaiting !== undefined
+    ? result(withNpcRun(state, written), outgoing)
+    : result(withNpcRun(state, written), outgoing, nextDayJob(written, ctx));
+}
+
+// 取 1 日探索點，依 Map NPC 序列從游標往後嘗試內容（doc §7 流程）。
+export function npcDungeonDay(
+  state: DungeonModuleState,
+  runId: NpcDungeonRunId,
+  ctx: DungeonContext,
+): DungeonHandlerResult {
+  const run = state.npcRuns[runId];
+  // 失效/過期 Job（Run 不存在，或已 settling/closed）→ **接受並 no-op**（不是拒絕）：到期 Job 於交易
+  // 提交時被 Scheduler 消耗，若在此拒絕會讓交易回滾、Job 留在佇列而不斷重觸發（見 session.runDueJob）。
+  if (run === undefined || run.status !== 'exploring') return accept(state); // settling/closed 不再排（§3.4.6）。
+
+  // 還在等某一題 Challenge 的結果：今日的處理尚未結束，不得重新取得一天的點數。
+  if (run.awaitingCombatChallengeId !== undefined) return accept(state);
+
+  // 驗證 Team 仍在 Map 且版本相符；否則安全失效（doc §7.2、§5.4 TeamLocationChanged/MapRefreshed）。
+  if (!ctx.team.isTeamInMap(run.teamId, run.mapId) || ctx.map.getMapVersion(run.mapId) !== run.mapVersion) {
+    const invalidated = invalidateRun(state, run, ctx);
+    return accept(
+      invalidated.nextSlice,
+      invalidated.outgoingMessages,
+      invalidated.scheduledJobs,
+      invalidated.kernelRequests,
+    );
+  }
+
+  // 每日重新取得，不跨日累積（不變量 §3.4.5）。
+  const rule = ctx.reader.getNpcExplorationRule(run.explorationRuleId);
+  const dayRun: NpcDungeonRun = { ...run, remainingDailyPoints: rule.dailyPointBudget };
+  const advanced = advanceNpcRunSegment(state, dayRun, ctx, {
+    carriedRefs: [],
+    sequenceAlreadyTerminated: false,
+  });
+  return accept(
+    advanced.nextSlice,
+    advanced.outgoingMessages,
+    advanced.scheduledJobs,
+    advanced.kernelRequests,
+  );
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -1047,48 +1531,229 @@ function tryCloseRun(
     const messages: TransactionMessageDraft[] = [
       event({ type: 'NpcDungeonRunClosed', runId: run.runId, teamId: run.teamId, reason: 'completed' }),
     ];
-    // TODO: Run 關閉後才送出 ReleaseCombatSequence（doc §6.1）。
+    // doc §6.1 另有一筆「Run 關閉後才送出」的 ReleaseCombatSequence，這裡沒有送：它必填
+    // `expectedRevision`，而那是 **Combat Sequence Aggregate 的 revision**——Dungeon 沒有這個事實，
+    // CombatSequenceQuery 的 View 也不是它能同步查的東西（跨模組同步查詢正是 §2.3 移除 Host Port
+    // 的理由）。21 §8 把這一筆指名給 Dungeon **Workflow**，不是本模組。少送它的後果只是
+    // settled Aggregate 留在 State 裡，不影響 Run 的收斂。
     return result(withNpcRun(state, closed), messages);
   }
   return result(withNpcRun(state, run));
 }
 
-// NpcDungeonSettlementApplied：只將 appliedResults 追加至 Distribution、關閉收集、令 Run 等待
-// 自動分配（doc §5.4）。此處標記 mapApplied 並 required Finalize/Append。
+// NpcDungeonSettlementApplied：Map 正式套用後，把 appliedResults 中**成功的怪物 Result ID**
+// 送進 CommitCombatSequenceSourceResults（doc §7.1.4），並關閉 Distribution 收集（doc §5.4）。
+//
+// 為什麼是這裡而不是擲骰當下：doc §7.1 說得很直白——成功擲骰只是候選結果，玩家或更早結算的
+// 隊伍可能已經拿走同一個怪物內容。只有 Map 接受的子集才算數，Combat Sequence 也只對這個子集
+// 彙總攻擊／防禦預算與成功場次。
 export function handleNpcDungeonSettlementApplied(
   state: DungeonModuleState,
-  payload: Readonly<{ runId: NpcDungeonRunId; distributionId: AssetDistributionId }>,
+  payload: NpcDungeonSettlementApplied,
+  ctx: DungeonContext,
 ): ModuleResult<DungeonModuleState> {
   const run = state.npcRuns[payload.runId];
   if (run === undefined || run.status !== 'settling') return noop(state);
+  // 冪等：這一項只認第一次。status 停在 settling 直到三項齊備，所以它擋不住重送——
+  // `settlementProgress.mapApplied` 才是這一項的旗標。少了這道守門，同一筆事件再送一次會
+  // 鑄出**新的** sourceCommitId 並重送 CommitCombatSequenceSourceResults，而 combat-sequence
+  // 對已 settled 的 Sequence 收到不同的 commit ID 一律拒絕（commitIdConflict），
+  // Internal Command 被拒 = 整筆交易回滾；FinalizeAssetDistributionCollection 也會多送一次。
+  if (run.settlementProgress.mapApplied) return noop(state);
   const next: NpcDungeonRun = {
     ...run,
     settlementProgress: { ...run.settlementProgress, mapApplied: true },
     revision: bump(run.revision),
   };
-  // TODO: 依 appliedResults 逐筆 AppendAssetDistributionResult（正式 Item/Currency）；此處只關閉收集。
-  const messages: TransactionMessageDraft[] = [
+
+  const messages: TransactionMessageDraft[] = [];
+  const sequenceId = run.combatSequenceId;
+  if (sequenceId !== undefined && !run.settlementProgress.combatSequenceSettled) {
+    const acceptedSuccessfulResultIds = payload.appliedResults
+      .filter((r) => r.outcome === 'success')
+      .map((r) => r.combatSequenceResultId)
+      .filter((id): id is NonNullable<typeof id> => id !== undefined);
+    messages.push(
+      internal(COMBAT_SEQUENCE_MODULE_ID, {
+        type: 'CommitCombatSequenceSourceResults',
+        sequenceId,
+        acceptedSuccessfulResultIds: [...acceptedSuccessfulResultIds],
+        sourceCommitId: ctx.nextCombatSequenceSourceCommitId(),
+        committedOnDay: ctx.worldDay,
+      }),
+    );
+  }
+  messages.push(
     internal(DISTRIBUTION_MODULE_ID, {
       type: 'FinalizeAssetDistributionCollection',
       distributionId: run.distributionId,
     }),
-  ];
-  return { ...tryCloseRun(state, next), outgoingMessages: messages };
+  );
+
+  // 三項結算之一完成後仍要走 tryCloseRun，並**合併**它的訊息而不是覆蓋：先前這裡寫
+  // `{ ...tryCloseRun(...), outgoingMessages: messages }`，一旦其餘兩項早已完成，
+  // tryCloseRun 發出的 NpcDungeonRunClosed 就會被整個丟掉。
+  const closed = tryCloseRun(state, next);
+  return { ...closed, outgoingMessages: [...closed.outgoingMessages, ...messages] };
 }
 
 // CombatSequenceSettled：標記戰鬥串結算完成；三項都完成時才關閉 Run（doc §5.4）。
 export function handleCombatSequenceSettled(
   state: DungeonModuleState,
-  runId: NpcDungeonRunId,
+  payload: CombatSequenceSettledPayload,
 ): ModuleResult<DungeonModuleState> {
-  const run = state.npcRuns[runId];
-  if (run === undefined) return noop(state);
+  const run = findRunByCombatSequence(state, payload.sequenceId);
+  if (run === undefined || run.status !== 'settling') return noop(state);
   const next: NpcDungeonRun = {
     ...run,
     settlementProgress: { ...run.settlementProgress, combatSequenceSettled: true },
     revision: bump(run.revision),
   };
   return tryCloseRun(state, next);
+}
+
+// ── Combat Sequence 的三個訂閱（doc §5.4）─────────────────────────────────
+
+function findRunByCombatSequence(
+  state: DungeonModuleState,
+  sequenceId: CombatSequenceId,
+): NpcDungeonRun | undefined {
+  for (const key of Object.keys(state.npcRuns)) {
+    const run = state.npcRuns[key as NpcDungeonRunId];
+    if (run !== undefined && run.combatSequenceId === sequenceId) return run;
+  }
+  return undefined;
+}
+
+// CombatSequenceChallengeResolved：以 sourceRef 建立對應怪物 Pending Result；
+// success 繼續，failure 立即令 Run 進入 settling（doc §5.4）。
+//
+// 這是「一日被切成數段」的接點：npcDungeonDay 走到怪物內容時送出 Resolve/Skip 就結束那一段，
+// 由本訂閱者記下結果、把游標推過那一筆，再用**同一個** advanceNpcRunSegment 續行今日剩下的
+// 點數。單場掃蕩等別條 Sequence 的事件在 findRunByCombatSequence 就被濾掉。
+export function handleCombatSequenceChallengeResolved(
+  state: DungeonModuleState,
+  payload: CombatSequenceChallengeResolvedPayload,
+  ctx: DungeonContext,
+): ModuleResult<DungeonModuleState> {
+  const run = findRunByCombatSequence(state, payload.sequenceId);
+  if (run === undefined || run.status !== 'exploring') return noop(state);
+  // 只認自己送出的那一題。對不上就不是本 Run 推進出來的結果。
+  if (run.awaitingCombatChallengeId !== payload.challengeId) return noop(state);
+
+  const challengeRef = run.combatSequenceChallenges.find(
+    (c) => c.challengeId === payload.challengeId,
+  );
+  if (challengeRef === undefined) return noop(state);
+
+  // resolverId 與 successBehavior 仍是 Map 序列 + Definition 的事實，不在 Run 裡複製一份。
+  const entry = sortedNpcSequence(ctx, run.mapId).find((e) => e.npcOrder === challengeRef.npcOrder);
+  if (entry === undefined || entry.kind !== 'mapContent' || entry.contentId !== challengeRef.contentId) {
+    return invalidateRun(state, run, ctx);
+  }
+  const contentRevision = ctx.map.getContentRevision(run.mapId, challengeRef.contentId);
+  if (contentRevision === undefined) return invalidateRun(state, run, ctx);
+
+  const target: NpcDungeonTargetRef = {
+    kind: 'mapContent',
+    contentId: challengeRef.contentId,
+    contentRevision,
+  };
+  // combat-sequence 的 skippedBeforeAttempt 就是 Dungeon 的 skip（同一件事的兩個詞彙）。
+  const outcome: PendingDungeonResult['outcome'] =
+    payload.outcome === 'skippedBeforeAttempt' ? 'skip' : payload.outcome;
+
+  const recorded: NpcDungeonRun = {
+    ...run,
+    awaitingCombatChallengeId: undefined,
+    cursorNpcOrder: challengeRef.npcOrder + 1, // 游標只可向前（不變量 §3.4.4）。
+    pendingResults: [
+      ...run.pendingResults,
+      {
+        target,
+        npcOrder: challengeRef.npcOrder,
+        attemptedOnDay: ctx.worldDay,
+        outcome,
+        resolverId: entry.resolverId,
+        // 不變量 §3.4.10：怪物 Pending Result 必須帶 Combat Sequence 的 Result ID。
+        combatSequenceResultId: payload.resultId,
+        pendingRewardRefs: outcome === 'success' ? [{ contentId: challengeRef.contentId }] : [],
+      },
+    ],
+  };
+
+  // 這一題是不是整條 Sequence 的最後一題？失敗與最後一題都會讓 combat-sequence 自己轉入
+  // awaitingSourceCommit（21 §6.4），之後就不能再對它送 Stop。
+  const wasLastChallenge = !run.combatSequenceChallenges.some(
+    (c) => c.npcOrder > challengeRef.npcOrder,
+  );
+  const sequenceAlreadyTerminated = payload.outcome === 'failure' || wasLastChallenge;
+
+  // doc §5.4：failure 立即令 Run 進入 settling。
+  if (payload.outcome === 'failure') {
+    return enterSettling(state, recorded, ctx, {
+      processedRefs: [target],
+      sequenceAlreadyTerminated,
+    });
+  }
+
+  // doc §7.2：資料 Resolver 指定成功後離場。
+  const resolver = ctx.reader.getNpcResolver(entry.resolverId);
+  if (outcome === 'success' && resolver.successBehavior === 'leave') {
+    return enterSettling(state, recorded, ctx, {
+      processedRefs: [target],
+      sequenceAlreadyTerminated,
+    });
+  }
+
+  return advanceNpcRunSegment(state, recorded, ctx, {
+    carriedRefs: [target],
+    sequenceAlreadyTerminated,
+  });
+}
+
+// CombatSequenceReadyForSourceCommit：doc §5.4「若 Run 尚未 settling，**依 termination reason**
+// 進入 settling 並要求 Map 套用暫存結果」。
+//
+// 「依 termination reason」是有選擇的，三個理由對應三種情形：
+//   challengeFailed —— §7.2 的離場條件之一。ChallengeResolved(failure) 通常已先把 Run 帶進
+//                      settling，這裡是同一結論的第二道保險（enterSettling 對非 exploring 冪等）。
+//   hostStopped     —— 是 Dungeon 自己送的 Stop 造成的，那時 Run 早已 settling。
+//   allResolved     —— 只代表**怪物都打完了**。寶箱、事件與採集仍在序列上，doc §7 的流程要走到
+//                      「無下一筆」才結算，§7.2 的離場條件也沒有這一項。因此不在此結束探索。
+export function handleCombatSequenceReadyForSourceCommit(
+  state: DungeonModuleState,
+  payload: CombatSequenceReadyForSourceCommitPayload,
+  ctx: DungeonContext,
+): ModuleResult<DungeonModuleState> {
+  if (payload.terminationReason !== 'challengeFailed') return noop(state);
+  const run = findRunByCombatSequence(state, payload.sequenceId);
+  if (run === undefined || run.status !== 'exploring') return noop(state);
+  return enterSettling(state, { ...run, awaitingCombatChallengeId: undefined }, ctx, {
+    processedRefs: [],
+    sequenceAlreadyTerminated: true,
+  });
+}
+
+// CombatSequenceInvalidated：將對應 Run 標為 invalid；已實際消耗的重骰補品不回復（doc §5.4）。
+// 這裡**不再**回送 InvalidateCombatSequence——Sequence 已經是 invalid，再送一次只會被拒。
+export function handleCombatSequenceInvalidated(
+  state: DungeonModuleState,
+  payload: CombatSequenceInvalidatedPayload,
+  ctx: DungeonContext,
+): ModuleResult<DungeonModuleState> {
+  const run = findRunByCombatSequence(state, payload.sequenceId);
+  if (run === undefined || run.status === 'closed' || run.status === 'invalid') return noop(state);
+  const invalid: NpcDungeonRun = {
+    ...run,
+    status: 'invalid',
+    awaitingCombatChallengeId: undefined,
+    lastProcessedOnDay: ctx.worldDay,
+    revision: bump(run.revision),
+  };
+  return result(withNpcRun(state, invalid), [
+    event({ type: 'NpcDungeonRunClosed', runId: run.runId, teamId: run.teamId, reason: 'invalid' }),
+  ]);
 }
 
 // AssetDistributionCompleted：NPC Run 正在 settling → 標記 distributionCompleted 並嘗試關閉；
@@ -1225,7 +1890,12 @@ export function handleCombatEncounterResolved(
   ]);
 }
 
-// Dungeon 不自訂事件重算以外的 Subscriber；此清單供 Composition 驗證訂閱綁定。
+// doc §5.4 的訂閱清單。**這只是文件那張表的抄本，不是「有實作」的證據**——真正的證據是
+// `public.ts` 的 `subscriptionHandlerIds`（宣告）與 `app/composition` 的 Manifest 綁定（接線）。
+// 本檔目前有 Handler 的是：NpcDungeonSettlementApplied、AssetDistributionCompleted、
+// CombatSequenceChallengeResolved、CombatSequenceReadyForSourceCommit、CombatSequenceSettled、
+// CombatSequenceInvalidated、CombatEncounterResolved。TeamLocationChanged 與 MapRefreshed 沒有
+// 對應函式（npcDungeonDay 每日重驗 team 位置與 mapVersion，所以那兩筆目前只是反應更慢，不是漏判）。
 export const dungeonSubscribers = [
   'NpcDungeonSettlementApplied',
   'AssetDistributionCompleted',

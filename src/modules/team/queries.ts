@@ -26,7 +26,7 @@ import type {
 } from '../../contracts/team';
 import type { TeamPresenceQuery } from '../../contracts/map';
 import type { TeamState } from './state';
-import { requireTeam, tryGetPlan } from './state';
+import { requireTeam, tryGetPlan, listTavernVisitorsInCity } from './state';
 
 function teamsInside(state: TeamState, mapId: MapInstanceId): TeamId[] {
   const out: TeamId[] = [];
@@ -113,21 +113,8 @@ export function createTeamQuery(state: TeamState): TeamQuery {
 
     listTavernVisitorIds(cityId: CityId): CharacterId[] {
       // 同城隊伍中，正式成員的 active/resting 自由行動為 tavernVisit 者。
-      const teamsAtCity = new Set<TeamId>();
-      for (const t of Object.values(state.teams)) {
-        if (t.location.kind === 'city' && t.location.cityId === cityId) {
-          teamsAtCity.add(t.teamId);
-        }
-      }
-      const out: CharacterId[] = [];
-      for (const f of Object.values(state.freeActions)) {
-        if (f.payload.kind !== 'tavernVisit') continue;
-        if (f.status !== 'active' && f.status !== 'resting') continue;
-        if (!teamsAtCity.has(f.teamId)) continue;
-        const team = state.teams[f.teamId];
-        if (team !== undefined && team.memberIds.includes(f.memberId)) out.push(f.memberId);
-      }
-      return out;
+      // 判準住在 state.ts，與招募路徑的可見性驗證**共用同一個函式**——見該處說明。
+      return listTavernVisitorsInCity(state, cityId);
     },
 
     getRecentAdventurerActivity(characterId: CharacterId): RecentAdventurerActivityView[] {

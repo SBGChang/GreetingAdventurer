@@ -38,6 +38,8 @@ export { createMapQuery, isMapOccupied, isTeamOnMap } from './queries';
 // ── System（Handler + Job + Subscriber + Deps）──────────────────────────────
 export {
   MAP_MODULE_ID,
+  // 內容／Resolver 不一致（Content Pack 驗證缺口的執行期補位）：整筆刷新交易失敗，不寫入內容。
+  MapRefreshContentDataError,
   // Job handler
   handleMapRefreshCheck,
   // Event subscriber

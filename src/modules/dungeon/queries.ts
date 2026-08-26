@@ -38,6 +38,9 @@ function npcRunView(run: NpcDungeonRun): NpcDungeonRunView {
     explorationRuleId: run.explorationRuleId,
     distributionId: run.distributionId,
     combatSequenceId: run.combatSequenceId,
+    // combatSequenceChallenges / awaitingCombatChallengeId 不在 View 上（見契約說明）：
+    // 那是「還剩哪幾個怪物沒打、現在正在打哪一個」的完整名單，屬 §4 禁止公開的 NPC 隱藏資訊。
+    remainingDailyPoints: run.remainingDailyPoints,
     cursorNpcOrder: run.cursorNpcOrder,
     settlementProgress: run.settlementProgress,
     status: run.status,
@@ -49,6 +52,8 @@ function npcRunView(run: NpcDungeonRun): NpcDungeonRunView {
   };
 }
 
+// `reader` 保留在簽章上：Query 建構點（router／session）一律以 (slice, reader) 取得 Port，
+// 而 Definition 是 Query 的合法依賴。目前所有 getter 都只讀 slice，沒有需要查 Definition 的欄位。
 export function makeDungeonQuery(
   state: DungeonModuleState,
   reader: DungeonDefinitionReader,
@@ -81,10 +86,11 @@ export function makeDungeonQuery(
         throw new Error(`dungeon query: unknown npc run ${String(runId)}`);
       }
       // 探索中才顯示尚可用點數（每日重取，非跨日累積）；其餘狀態顯示 0。
-      const remainingPoints =
-        run.status === 'exploring'
-          ? reader.getNpcExplorationRule(run.explorationRuleId).dailyPointBudget
-          : 0;
+      //
+      // 這裡原本回傳 Definition 的 `dailyPointBudget`——那是**今天一開始**有多少點，不是還剩多少。
+      // 已經花掉 7 點的 Run 一樣顯示 10，UI 上的「剩餘點數」永遠不會動。真正的剩餘量現在住在
+      // Run 自己的 `remainingDailyPoints`（接上 Combat Sequence 後它本來就必須是狀態，見契約）。
+      const remainingPoints = run.status === 'exploring' ? run.remainingDailyPoints : 0;
       return {
         runId: run.runId,
         cursorNpcOrder: run.cursorNpcOrder,

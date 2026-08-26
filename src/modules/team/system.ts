@@ -89,6 +89,7 @@ import {
   upsertRetention,
   setPendingSuccession,
   emptyWorkSettlement,
+  isTavernVisibleInCity,
   workNetOf,
   bump,
 } from './state';
@@ -135,6 +136,19 @@ export interface TeamWorldReader {
   getAdventureSiteMapInstance(siteId: AdventureSiteId): MapInstanceId | undefined;
 }
 
+// 窄化跨模組 Query Port：這支隊伍此刻有沒有進行中的 Encounter。
+//
+// 為什麼是 Port 而不是 team 自己的旗標：「戰鬥中」的擁有者是 combat（`CombatEncounter.playerTeamId`
+// ＋ `CombatEncounterPhase`）。team 自己記一份就會出現第二個真相來源，而它一定會在某條路徑上忘記
+// 更新（戰鬥中斷、Encounter 被 resolve、存讀檔）。team 也不得直接讀 combat 的 Slice，所以只留下
+// 「窄到只回答一個布林」的 Port 這條路。
+//
+// 具體實作由 Composition 注入：掃 CombatState.encounters，取 `playerTeamId === teamId` 且
+// `state !== 'resolved'` 者是否存在。
+export interface TeamCombatStatusQuery {
+  hasActiveEncounter(teamId: TeamId): boolean;
+}
+
 // 資料調諧 Resolver（RNG 藏於其內；Handler 不含機率/公式，只消費結果）。
 // 擲骰型方法回傳 RngStep<boolean>（value=判定、nextCursor=續接游標），呼叫端須把 nextCursor 顯式串接到
 // 下一次抽取（見 12_engine_runtime.md §7.1、settleRetentionAndDepartures 的離隊迴圈）。只回 boolean 會丟失
@@ -177,6 +191,8 @@ export type TeamHandlerContext = Readonly<{
   memberRetentionRuleId: MemberRetentionRuleId;
   teamPlanRuleIdByKind: Readonly<Partial<Record<TeamPlanKind, TeamPlanRuleId>>>;
   world: TeamWorldReader;
+  // 戰鬥狀態（combat 擁有的事實）。必填：選填等於「沒注入就跳過檢查」，那正是這次要修掉的洞。
+  combat: TeamCombatStatusQuery;
   ids: TeamIdAllocator;
   resolvers: TeamResolverPort;
   rngContext?: RngContext;
@@ -450,10 +466,10 @@ export function handleRest(
     return reject('team/plan-rule-missing', { planKind: cmd.planKind });
   }
   const planRule = ctx.definitions.getTeamPlanRule(planRuleId);
-  if (planRule.kind !== cmd.planKind) {
+  if (planRule.planKind !== cmd.planKind) {
     return reject('team/plan-rule-kind-mismatch', {
       planKind: cmd.planKind,
-      ruleKind: planRule.kind,
+      ruleKind: planRule.planKind,
     });
   }
   const days = planRule.durationDays;
@@ -484,12 +500,27 @@ export function handleRest(
 export function handleConfigureCombatFormation(
   state: TeamState,
   cmd: ConfigureCombatFormationCommand,
-  _ctx: TeamHandlerContext,
+  ctx: TeamHandlerContext,
 ): TeamHandlerResult {
   const team = tryGetTeam(state, cmd.teamId);
   if (team === undefined) return reject('team/unknown-team');
   if (team.control === 'child') return reject('team/child-no-combat');
-  // TODO: 「發令者為隊長」與「無 active Combat」需 actor/combat 狀態；本模組尚未持有，暫接受。
+
+  // doc §5.1 前置條件之一：發令者為隊長。`leaderId` 一直都在本模組的 State 裡，缺的只是
+  // 「發令者是誰」——現在由 Command 的 actorCharacterId 帶入（見 contracts/team）。
+  if (cmd.actorCharacterId !== team.leaderId) {
+    return reject('team/formation-actor-not-leader', {
+      actorCharacterId: String(cmd.actorCharacterId),
+      leaderId: String(team.leaderId),
+    });
+  }
+
+  // doc §5.1 前置條件之二：沒有 active Combat。§3.1 說明了為什麼——Encounter 建立時只讀一次配置
+  // 快照，所以戰鬥中改配置**不會**影響當前戰鬥。若在此接受，玩家會得到一個看起來成功、實際上對眼前
+  // 這場戰鬥毫無作用的操作。這是 combat 擁有的事實，經窄化 Port 取得。
+  if (ctx.combat.hasActiveEncounter(cmd.teamId)) {
+    return reject('team/formation-active-combat', { teamId: String(cmd.teamId) });
+  }
 
   const validation = validatePlacements(team.memberIds, cmd.placements);
   if (!validation.ok) return reject(validation.code, validation.details);
@@ -579,11 +610,24 @@ export function handleRecruitTavernAdventurer(
     return reject('team/already-in-team');
   }
   // 硬條件：同城才可招募（酒館冒險者在玩家**目前所在城**）。旅行中或跨城一律拒絕——這是資格判定，不是
-  // 擲骰結果，故用 reject。[仍缺（見 HANDOFF）] 酒館可見性（該 NPC 是否真的在此城酒館出現）需 city/content。
+  // 擲骰結果，故用 reject。
   const playerLoc = playerTeam.location;
   const targetLoc = sourceTeam.location;
   if (playerLoc.kind !== 'city' || targetLoc.kind !== 'city' || playerLoc.cityId !== targetLoc.cityId) {
     return reject('team/not-in-same-city');
+  }
+
+  // 硬條件：目標必須真的出現在這座城的酒館名單上（doc §5.1「目標是同城酒館可見的真實 NPC 冒險者」、
+  // §7.6「驗證同城酒館可見；所有可見冒險者都可成為嘗試對象」）。同城不等於在酒館：城裡任何一名
+  // 單人 NPC 隊長此前都招募得到，酒館這一層形同虛設。
+  //
+  // 名單的擁有者就是 team 自己（成員的 tavernVisit 自由行動），與 `TeamQuery.listTavernVisitorIds`
+  // 共用 `isTavernVisibleInCity` 這一份判準——不查別的模組，也不另存一份可見性旗標。
+  if (!isTavernVisibleInCity(state, target, playerLoc.cityId)) {
+    return reject('team/target-not-tavern-visible', {
+      targetCharacterId: String(target),
+      cityId: String(playerLoc.cityId),
+    });
   }
 
   // 只有 Resolver 擲骰成功才轉移成員；失敗不得改動任何成員或資產。單次抽取，nextCursor 不需再串接

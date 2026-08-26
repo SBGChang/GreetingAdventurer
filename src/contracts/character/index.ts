@@ -66,9 +66,13 @@ export type TemporaryCharacterRuleId = DefinitionId<'temporary-character-rule'>;
 //
 // 原型不在此列：設計 §7.1「護衛資料在任務生成時只有身分原型」——archetypeId 由 Quest 於
 // CreateQuestTemporaryCharacter 指定，不由本規則挑選。
+// 領域變體放 `temporaryKind` 而非 `kind`：`kind` 是 Content Pack 的**家族宣告**，窄化 Reader 以它
+// 判斷所有權（本型別的 registry kind 是 `'temporary-character-rule'`）。一筆 JSON 只有一個 `kind`，不可能同時是
+// `'temporary-character-rule'` 與 `'escort'`——內容一接上就一筆也讀不到。正確樣式見 EquipmentDefinition
+// （`kind: 'equipment'` + `equipmentKind`）。由 verify:discipline 的檢查 7 自動把關。
 export type TemporaryCharacterRuleDefinition = DefinitionHeader<TemporaryCharacterRuleId> &
   Readonly<{
-    kind: 'escort' | 'rescue';
+    temporaryKind: 'escort' | 'rescue';
     sexWeightResolverId: ResolverId;
     innateTraitResolverId: ResolverId;
   }>;
@@ -360,7 +364,9 @@ export type ApplyCombatCondition = Readonly<{
   characterId: CharacterId;
   healthDelta?: number;
   manaDelta?: number;
-  statusChanges?: readonly CharacterStatusChange[];
+  // 選填＝本命令不動狀態（結算只回寫 HP/MP 的呼叫就是這樣）。與 healthDelta／manaDelta 的
+  // 選填語意一致：「沒帶」是「不碰這一項」，不是「帶了一個空的請求」。
+  statusChanges?: readonly CharacterStatusChangeRequest[];
 }>;
 
 // 帶的是**已解析的 StatusId**，不是 EffectId。原本宣告成 `effectIds: EffectDefinitionId[]`，
@@ -376,11 +382,49 @@ export type ApplyFoodStatusEffects = Readonly<{
   statusIds: readonly CharacterStatusDefinitionId[];
 }>;
 
-// 狀態變更描述（事件與命令共用；來源文件未給精確 schema）(AMBIGUITY)。
+// ──────────────────────────────────────────────────────────────────────────
+// 狀態變更描述：**請求**與**結果**是兩張表（04_character_module.md §5.1、§6）。
 //
-// 以 `change` 判別：層數只有在套用／刷新時才有意義，移除時沒有。原本 `stacks?: number` 對三種變更
-// 一視同仁，Handler 於是寫 `change.stacks ?? 1`——那個 1 是**玩法值**（要疊幾層是內容決定的），
-// 不是結構預設。改成聯集後，該講層數的地方必須講，不該講的地方講不出來。
+// 原本這裡只有一個 `CharacterStatusChange`，被 `ApplyCombatCondition`（命令）與
+// `CharacterConditionChanged`（事件）**共用**，並標著 (AMBIGUITY)。共用是錯的，而且不是命名問題：
+//
+//   * 命令是「請 Character 做這件事」。送出端**不知道**目標身上有沒有那個狀態，也**不擁有**
+//     `StatusDefinition.stackPolicy`（doc §2.3 說疊加完全由該定義決定）。所以它說不出、也無權說
+//     這次會是「新套用」還是「刷新」。
+//   * 事件是「Character 實際做了什麼」。applied／refreshed 的分野正是 stackPolicy 算出來的結果。
+//
+// 共用一張表的實際後果，在 handleApplyCombatCondition 裡看得見：命令若填 `change: 'refreshed'`，
+// Handler 走的仍是套用路徑、事件仍照 stackPolicy 回報——**送出端寫的那個字從頭到尾沒有人讀**。
+// 那不是多餘欄位，是一個看起來能表達其實不能表達的欄位（skill §6.0「功能不同的東西不共用一張表」）。
+// 拆開後，值集本身就在說話：命令用祈使（apply／remove），事件用完成式（applied／refreshed／removed）。
+// ──────────────────────────────────────────────────────────────────────────
+
+// 【命令側】`ApplyCombatCondition.statusChanges` 的元素。
+//
+// 逐欄位來源：
+//   statusId —— 消費者 handleApplyCombatCondition（`ctx.definitions.getStatusDefinition(...)` 與
+//               移除時的比對鍵）；doc §5.1「套用生命、魔力與暫時狀態改變」。
+//   change   —— 判讀：Handler 實際只分辨兩條路徑（套用／移除），`applied` 與 `refreshed` 對它是
+//               同一條。可表達的只有這兩個意圖，所以就只給這兩個。
+//   stacks   —— 消費者 handleApplyCombatCondition（寫進 CharacterStatusInstance.stacks；`stack`
+//               政策下再與既有層數相加）。必填：要疊幾層是送出端解析效果時就已決定的內容值，
+//               缺了它 Handler 只能寫 `?? 1`，而那個 1 是玩法值不是結構預設。
+//               移除沒有層數可談，所以那個 variant 裡講不出來。
+export type CharacterStatusChangeRequest = Readonly<{ statusId: CharacterStatusDefinitionId }> &
+  (Readonly<{ change: 'apply'; stacks: number }> | Readonly<{ change: 'remove' }>);
+
+// 【事件側】`CharacterConditionChanged.statusChanges` 的元素（doc §6 只列出欄位名，形狀在此定案）。
+//
+// 逐欄位來源：
+//   statusId —— 生產者 character/system.ts 的五個發送點；doc §6 payload 欄位 `statusChanges`。
+//   change   —— 生產者 applyStatus()：新套用回 `applied`，既有狀態依 replace／refresh／stack 三種
+//               政策回 `refreshed`；移除路徑回 `removed`。
+//   stacks   —— 生產者 applyStatus()：**套用後的實際層數**（`stack` 政策下是累加後的值，不是這次
+//               加了幾層）。applied 與 refreshed 共用同一個 variant，因為兩者都必填且語意相同
+//               （skill §6.0 規矩二）；`removed` 沒有層數。
+//
+// `removed` 是**真的移除掉了**才會出現一筆——請求移除一個身上沒有的狀態不會產生任何一筆。事件描述
+// 已發生的事實，不是把請求覆述一遍。
 export type CharacterStatusChange = Readonly<{ statusId: CharacterStatusDefinitionId }> &
   (
     | Readonly<{ change: 'applied' | 'refreshed'; stacks: number }>

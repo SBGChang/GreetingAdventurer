@@ -146,8 +146,13 @@ export type PopulationSupplyRuleDefinition = DefinitionHeader<PopulationSupplyRu
   adventurerGenerationRuleId: WorldAdventurerGenerationRuleId;
 };
 
+// `actionKind` 而非 `kind`：`kind` 是 Content Pack 宣告 Definition 家族、窄化 Reader 判斷所有權的
+// 欄位（本型別的 registry kind 是 `'city-action-rule'`），一筆 JSON 只有一個 `kind`，不可能同時是
+// `'city-action-rule'` 與 `'innRest'`。這與 FacilityDefinition／HomeUpgradeDefinition 先前踩到的是
+// 同一顆雷；正確樣式見 EquipmentDefinition（`kind: 'equipment'` + `equipmentKind`）。
+// 規則見 SKILL.md「行為的資料化：一個 Func 一張表」與 13_data_runtime.md §6.0。
 export type CityActionRuleDefinition = DefinitionHeader<CityActionRuleId> & {
-  kind: 'innRest' | 'masteryTraining' | 'homeRest' | 'homeYearRest';
+  actionKind: 'innRest' | 'masteryTraining' | 'homeRest' | 'homeYearRest';
   scope: 'member' | 'team';
   durationDays: number;
   requiredFacilityKind: FacilityKind;

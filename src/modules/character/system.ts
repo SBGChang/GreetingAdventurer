@@ -13,6 +13,7 @@ import type {
   CharacterId,
   FamilyLinkId,
   RelationshipFactId,
+  CharacterStatusDefinitionId,
   CharacterStatusInstanceId,
   CharacterTraitDefinitionId,
   CharacterArchetypeId,
@@ -291,6 +292,20 @@ function applyStatus(
   }
 }
 
+// 依 statusId 移除狀態；回傳 [新 statuses, 變更描述]。身上沒有那個狀態時第二項是 undefined。
+//
+// 契約把事件側的 `CharacterStatusChange` 定義為**已發生的事實**（見 contracts/character 的說明），
+// 所以「請求移除一個不在身上的狀態」不得回報 `removed`——那會讓訂閱者以為剛剛掉了一個狀態。
+// 這與請求側的 `remove` 是兩件事：請求照收（冪等），只是沒有任何事實可報。
+function removeStatus(
+  statuses: readonly CharacterStatusInstance[],
+  statusId: CharacterStatusDefinitionId,
+): readonly [readonly CharacterStatusInstance[], CharacterStatusChange | undefined] {
+  const next = statuses.filter((s) => s.statusId !== statusId);
+  if (next.length === statuses.length) return [statuses, undefined];
+  return [next, { statusId, change: 'removed' }];
+}
+
 // 窮盡性守門。回傳型別是 never，所以它同時是「不可達」的證明與執行期的明確失敗。
 function assertUnhandledStackPolicy(policy: never, statusId: StatusDefinition['id']): never {
   throw new Error(
@@ -400,18 +415,21 @@ export function handleApplyCombatCondition(
 
   let statuses = character.condition.statuses;
   const statusChanges: CharacterStatusChange[] = [];
-  for (const change of command.statusChanges ?? []) {
-    if (change.change === 'removed') {
-      statuses = statuses.filter((s) => s.statusId !== change.statusId);
-      statusChanges.push({ statusId: change.statusId, change: 'removed' });
+  // 收到的是**請求**（apply / remove）；`applied` 還是 `refreshed` 由本模組依 stackPolicy 決定，
+  // 送出端說不出也無權說（見契約 CharacterStatusChangeRequest 的說明）。
+  for (const request of command.statusChanges ?? []) {
+    if (request.change === 'remove') {
+      const [nextStatuses, removal] = removeStatus(statuses, request.statusId);
+      statuses = nextStatuses;
+      if (removal !== undefined) statusChanges.push(removal);
       continue;
     }
-    const def = ctx.definitions.getStatusDefinition(change.statusId);
+    const def = ctx.definitions.getStatusDefinition(request.statusId);
     const instance: CharacterStatusInstance = {
       statusInstanceId: ctx.ids.nextStatusInstanceId(),
-      statusId: change.statusId,
+      statusId: request.statusId,
       appliedOnDay: ctx.worldDay,
-      stacks: change.stacks,
+      stacks: request.stacks,
     };
     const [nextStatuses, applied] = applyStatus(statuses, def, instance);
     statuses = nextStatuses;
@@ -420,6 +438,23 @@ export function handleApplyCombatCondition(
 
   const dies = health <= 0;
   if (dies) health = 0;
+
+  // 事件側的契約是「已發生的事實」（見 contracts/character 的說明）。同一個判準必須套用在**整個
+  // 事件**上，而不只是它的 statusChanges 那一欄：HP／MP 都沒動、也沒有任何一筆狀態變更時，
+  // 「Condition 改變了」這句話是假的——先前照樣發一筆空事件並 bump 一次 revision，等於對訂閱者
+  // 與樂觀併發控制各說一次謊。
+  //
+  // 這是**真冪等**而不是偽裝的拒絕（判準：資料齊全時這裡還會 no-op 嗎）：會——「請求移除一個不在
+  // 身上的狀態」「delta 恰好把值夾回原處」本來就什麼都沒發生，不是因為缺資料才走這條路。
+  // `dies` 仍留在條件外：HP 已為 0 卻還活著是不變量已經破了的狀態，那時必須照走死亡路徑而非靜默。
+  if (
+    !dies &&
+    health === character.condition.health &&
+    mana === character.condition.mana &&
+    statusChanges.length === 0
+  ) {
+    return makeResult(state);
+  }
 
   const nextCondition: CharacterCondition = { health, mana, statuses };
   let nextCharacter: Character = {
@@ -733,8 +768,10 @@ export function handleApplyFoodStatusEffects(
   const statusChanges: CharacterStatusChange[] = [];
   for (const statusId of command.statusIds) {
     if (command.operation === 'remove') {
-      statuses = statuses.filter((s) => s.statusId !== statusId);
-      statusChanges.push({ statusId, change: 'removed' });
+      const [nextStatuses, removal] = removeStatus(statuses, statusId);
+      statuses = nextStatuses;
+      // 身上沒有該狀態＝已經是請求的結果（真冪等）：不報 removed，也不因此 bump revision。
+      if (removal !== undefined) statusChanges.push(removal);
       continue;
     }
     const def = ctx.definitions.getStatusDefinition(statusId);

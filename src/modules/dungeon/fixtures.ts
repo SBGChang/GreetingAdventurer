@@ -34,6 +34,7 @@ import type {
   RngStreamId,
   RngCursor,
   NpcDungeonTargetResolverId,
+  EncounterGroupDefinitionId,
 } from '../../contracts/core';
 import type {
   DungeonDefinitionReader,
@@ -44,10 +45,23 @@ import type {
 } from '../../contracts/dungeon';
 import type { GridCell, MapContentKind, NpcSequenceEntryView } from '../../contracts/map';
 import type { AssetDistributionRuleId } from '../../contracts/distribution';
+import type {
+  CombatSequenceId,
+  CombatSequenceChallengeId,
+  CombatSequenceSourceCommitId,
+  CombatSequenceSourceId,
+  CombatSequenceRuleId,
+} from '../../contracts/combat-sequence';
+import type { CombatPowerRuleId } from '../../contracts/combat-power';
 
 import type { DungeonModuleState } from './state';
 import { createInitialDungeonState, withPlayerSession, createKnowledge, withKnowledge } from './state';
-import type { DungeonContext, DungeonMapPort, DungeonTeamPort } from './system';
+import type {
+  DungeonContext,
+  DungeonMapPort,
+  DungeonTeamPort,
+  DungeonCombatSequencePort,
+} from './system';
 
 const PACK = 'pack:dungeon-fixture' as ContentPackId;
 
@@ -75,6 +89,17 @@ export const FIXTURE = {
   eventOptionId: 'template-local:content-event-option:pray' as ContentEventOptionId,
   eventEffectId: 'definition:effect:shrine-blessing' as EffectDefinitionId,
 
+  // 控制／綁架內容與它們的守衛（01_map_module.md §3.2 的 controllerContentIds）。
+  controlContentId: 'runtime:content-instance:control-1' as ContentInstanceId,
+  kidnapContentId: 'runtime:content-instance:kidnap-1' as ContentInstanceId,
+  guardContentId: 'runtime:content-instance:guard-1' as ContentInstanceId,
+
+  // NPC 序列用的怪物內容（dungeonSweep Combat Sequence 的來源）。
+  monsterContentA: 'runtime:content-instance:monster-a' as ContentInstanceId,
+  monsterContentB: 'runtime:content-instance:monster-b' as ContentInstanceId,
+  chestContentId: 'runtime:content-instance:chest-1' as ContentInstanceId,
+  encounterGroupId: 'definition:encounter-group:cave-bats' as EncounterGroupDefinitionId,
+
   gatheringRulePlayer: 'definition:gathering-rule:herb' as GatheringRuleId,
   gatheringRuleNpc: 'definition:gathering-rule:npc' as GatheringRuleId,
   interactionRuleId: 'definition:interaction-rule:base' as InteractionRuleId,
@@ -87,6 +112,10 @@ export const FIXTURE = {
   // fixture 一律回這一筆，好讓「有資料」與「缺資料」兩種情形都測得到。
   contentResolverId: 'resolver:map-content' as ResolverId,
   explorationExperienceRuleId: 'definition:experience-award-rule:explore' as ExperienceAwardRuleId,
+
+  combatSequenceRuleId: 'definition:combat-sequence-rule:base' as CombatSequenceRuleId,
+  combatPowerRuleId: 'definition:combat-power-rule:base' as CombatPowerRuleId,
+  combatSequenceSourceId: 'runtime:combat-sequence-source:cave' as CombatSequenceSourceId,
 } as const;
 
 const cell = (floor: number, row: number, col: number): GridCell => ({ floor, row, col });
@@ -122,7 +151,12 @@ const npcResolver: NpcDungeonTargetResolverDefinition = {
   schemaVersion: 1,
   packId: PACK,
   enabled: true,
-  supportedTargetKinds: [{ kind: 'gatheringNode' }],
+  // 預設同時支援兩種目標：怪物序列與採集序列都用得上同一個 fixture Resolver。
+  // 要測「Resolver 不支援該目標種類」的案例自行覆寫成單一種類。
+  supportedTargetKinds: [
+    { kind: 'gatheringNode' },
+    { kind: 'mapContent', contentKind: 'monsterGroup' },
+  ],
   outcomeRuleId: 'definition:outcome-rule:always-success' as never,
   successBehavior: 'continue',
 };
@@ -203,6 +237,22 @@ const npcSequence: readonly NpcSequenceEntryView[] = [
   },
 ];
 
+// fixture 的內容種類表（互動分支與「怪物才進戰鬥串」的判定都讀它）。
+const contentKinds: Readonly<Record<string, MapContentKind>> = {
+  [FIXTURE.eventContentId]: 'mapEvent',
+  [FIXTURE.controlContentId]: 'control',
+  [FIXTURE.kidnapContentId]: 'kidnap',
+  [FIXTURE.guardContentId]: 'monsterGroup',
+  [FIXTURE.monsterContentA]: 'monsterGroup',
+  [FIXTURE.monsterContentB]: 'boss',
+  [FIXTURE.chestContentId]: 'chest',
+};
+
+// fixture 內容都放在中間房 R2（互動前置：玩家須人在該房）。
+const contentRooms: Readonly<Record<string, RoomId>> = Object.fromEntries(
+  Object.keys(contentKinds).map((contentId) => [contentId, FIXTURE.roomMiddle]),
+);
+
 export function createFixtureMapPort(overrides?: Partial<DungeonMapPort>): DungeonMapPort {
   const base: DungeonMapPort = {
     getMapVersion: () => FIXTURE.mapVersion,
@@ -219,12 +269,20 @@ export function createFixtureMapPort(overrides?: Partial<DungeonMapPort>): Dunge
       nodeId === FIXTURE.gatherNodePlayer ? FIXTURE.gatheringRulePlayer : FIXTURE.gatheringRuleNpc,
     isGatheringNodeAvailable: () => true,
     getContentKind: (_mapId, contentId): MapContentKind | undefined =>
-      contentId === FIXTURE.eventContentId ? 'mapEvent' : 'chest',
+      contentKinds[contentId] ?? 'chest',
     isContentAvailable: () => true,
-    // fixture 內容都放在中間房 R2（互動前置：玩家須人在該房）。
-    getContentRoomId: (_mapId, contentId) =>
-      contentId === FIXTURE.eventContentId ? FIXTURE.roomMiddle : undefined,
-    getEncounterGroupId: () => undefined,
+    getContentRoomId: (_mapId, contentId) => contentRooms[contentId],
+    getContentRevision: () => 0 as Revision,
+    getGatheringNodeRevision: () => 0 as Revision,
+    // 控制／綁架各有一名守衛；其餘內容種類沒有守衛欄位（回 undefined，呼叫端必須拒絕）。
+    listControllerContentIds: (_mapId, contentId) =>
+      contentId === FIXTURE.controlContentId || contentId === FIXTURE.kidnapContentId
+        ? [FIXTURE.guardContentId]
+        : undefined,
+    getEncounterGroupId: (_mapId, contentId) =>
+      contentKinds[contentId] === 'monsterGroup' || contentKinds[contentId] === 'boss'
+        ? FIXTURE.encounterGroupId
+        : undefined,
     getContentEventInstance: (_mapId, _contentId) => ({
       instanceId: 'runtime:content-event-instance:evt-1' as never,
       // 必須與 createFixtureReader 的合法選項表同一筆定義，否則 resolveDungeonInteraction 會誤拒。
@@ -240,6 +298,89 @@ export function createFixtureMapPort(overrides?: Partial<DungeonMapPort>): Dunge
     }),
   };
   return { ...base, ...overrides };
+}
+
+// ── NPC 怪物序列與 Combat Sequence 開始快照 stub ─────────────────────────────
+// 含怪物內容的 NPC 序列（怪物 1 點、寶箱 1 點、Boss 4 點；doc §9.3 的成本樣式）。
+// 預設序列刻意只有採集點，好讓「無怪物 → 不建立空 Sequence」是預設路徑；要測戰鬥串的案例
+// 以 `listNpcSequence: () => monsterNpcSequence` 覆寫 Map Port。
+export const monsterNpcSequence: readonly NpcSequenceEntryView[] = [
+  {
+    kind: 'mapContent',
+    npcOrder: 0,
+    pointCost: 1,
+    resolverId: FIXTURE.resolverId,
+    contentId: FIXTURE.monsterContentA,
+  },
+  {
+    kind: 'mapContent',
+    npcOrder: 1,
+    pointCost: 1,
+    resolverId: FIXTURE.resolverId,
+    contentId: FIXTURE.chestContentId,
+  },
+  {
+    kind: 'mapContent',
+    npcOrder: 2,
+    pointCost: 4,
+    resolverId: FIXTURE.resolverId,
+    contentId: FIXTURE.monsterContentB,
+  },
+];
+
+// Combat Sequence 開始快照 Port 的 stub。正式路徑由 app/composition 的
+// CombatSequenceSnapshotAssembler 供給（21_combat_sequence_module.md §3.2）。
+export function createFixtureCombatSequencePort(
+  overrides?: Partial<DungeonCombatSequencePort>,
+): DungeonCombatSequencePort {
+  const base: DungeonCombatSequencePort = {
+    planDungeonSweep: (input) => ({
+      source: {
+        kind: 'dungeonSweep',
+        sourceId: FIXTURE.combatSequenceSourceId,
+        mapId: input.mapId,
+        mapVersion: input.mapVersion,
+      },
+      ruleId: FIXTURE.combatSequenceRuleId,
+      allocationSnapshot: {
+        capturedOnDay: input.capturedOnDay,
+        teamFormationRevision: 0 as Revision,
+        teamPowerRevisionKey: 'fixture:team-power:v1',
+        members: [],
+      },
+      teamPowerSnapshot: {
+        teamId: input.teamId,
+        participantCharacterIds: [...input.participantCharacterIds],
+        combatPowerRuleId: FIXTURE.combatPowerRuleId,
+        memberPowers: [],
+        formationModifier: 1,
+        totalPower: 120,
+        sourceRevisionKey: 'fixture:team-power:v1',
+      },
+      challenges: input.monsters.map((monster, index) => ({
+        challengeId: challengeIdFor(monster.contentId),
+        order: index,
+        encounterGroupId: monster.encounterGroupId,
+        sourceRef: {
+          kind: 'mapContent',
+          mapId: input.mapId,
+          mapVersion: input.mapVersion,
+          contentId: monster.contentId,
+          contentRevision: monster.contentRevision,
+        },
+        enemyPower: 60,
+        enemyPowerRevisionKey: 'fixture:enemy-power:v1',
+        attackExperienceBudget: 12,
+        defenseExperienceBudget: 8,
+      })),
+    }),
+  };
+  return { ...base, ...overrides };
+}
+
+// 對照用的穩定 Challenge ID：測試要能由 contentId 推回 challengeId。
+export function challengeIdFor(contentId: ContentInstanceId): CombatSequenceChallengeId {
+  return `runtime:combat-sequence-challenge:${String(contentId)}` as CombatSequenceChallengeId;
 }
 
 // ── Team 讀 Port stub ─────────────────────────────────────────────────────────
@@ -258,6 +399,8 @@ export function createFixtureContext(overrides?: Partial<DungeonContext>): Dunge
   let knowledgeCounter = 0;
   let runCounter = 0;
   let distributionCounter = 0;
+  let sequenceCounter = 0;
+  let commitCounter = 0;
 
   const rng: RngContext = {
     worldSeed: 'seed:fixture' as Seed,
@@ -279,6 +422,7 @@ export function createFixtureContext(overrides?: Partial<DungeonContext>): Dunge
       resolveNpcTargetOutcome: () => ({ outcome: 'success' }),
       resolveTrap: () => ({ outcome: 'triggered' as const }),
     },
+    combatSequence: createFixtureCombatSequencePort(),
     rng,
     nextInteractionId: () =>
       `runtime:interaction:gen-${(interactionCounter += 1)}` as InteractionId,
@@ -287,6 +431,10 @@ export function createFixtureContext(overrides?: Partial<DungeonContext>): Dunge
     nextRunId: () => `runtime:npc-dungeon-run:gen-${(runCounter += 1)}` as NpcDungeonRunId,
     nextDistributionId: () =>
       `runtime:asset-distribution:gen-${(distributionCounter += 1)}` as AssetDistributionId,
+    nextCombatSequenceId: () =>
+      `runtime:combat-sequence:gen-${(sequenceCounter += 1)}` as CombatSequenceId,
+    nextCombatSequenceSourceCommitId: () =>
+      `runtime:combat-sequence-source-commit:gen-${(commitCounter += 1)}` as CombatSequenceSourceCommitId,
   };
   return { ...base, ...overrides };
 }

@@ -31,6 +31,9 @@ const assembler: ContextAssembler = (runtime): ModuleContexts => ({
     worldDay: runtime.worldDay,
     ids: runtime.ids.team,
     definitions: teamStubReader(),
+    // Wave E：team 現在會驗「這支隊伍有沒有進行中的 Encounter」才允許改隊形（combat 擁有的事實）。
+    // 這個切片不碰隊形，用 unusedContext 絆線——觸發即拋錯，所以「這條路其實讀了它」會立刻現形。
+    combat: unusedContext('team.combat'),
     // 旅行路徑不會讀到這兩項，但 Context 是完整型別；給 fixture 值而不是空物件，
     // 讓「缺規則」是一個要刻意製造的情形，而不是預設狀態。
     memberRetentionRuleId: MEMBER_RETENTION_RULE,

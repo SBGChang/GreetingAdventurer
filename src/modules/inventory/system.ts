@@ -33,6 +33,7 @@ import type {
   ItemDefinitionReader,
   ItemLocation,
   EquipmentHand,
+  InventoryQuery,
   ItemReservation,
   MoveItemToTeamQuestCargo,
   RemoveItemInstance,
@@ -188,6 +189,26 @@ function equipLegalityRejection(
   // 任何 active reservation 都擋：任務目標物、製作素材、待轉移物都不得裝備。
   if (isReservedActive(inst)) return 'inventory/item-reserved';
   return undefined;
+}
+
+// 「這名角色超載了嗎」的**唯一**實作（doc §3.3、§5.2、不變量 13、14）。
+//
+// 兩個輸入各有明確的擁有者，這裡只做比較，不自己算任何一邊：
+//   * 目前攜帶重量 ← InventoryQuery.getCarriedWeight（Inventory 自己的權威投影：characterBag +
+//     equipped + carrierCharacterId 指向自己的 teamQuestCargo，重量一律 unitWeight × quantity）。
+//   * 上限 ← deps.getCarryCapacity(...).maximumWeight（Derived Statistics 產生的 Snapshot）。
+//
+// 為什麼要收成一個函式：evaluateTeamEncumbrance 與 moveItemToTeamQuestCargo 是同一條判準的兩個
+// 使用點，各寫一份重量計算必然分岔——分岔的那天長相會是「超載畫面說全隊沒事，任務貨物卻裝不上」
+// 這種沒人查得出來的矛盾。本 repo 已經在兩條裝備路徑上犯過同型的錯（R11–R13 連補三輪）。
+//
+// 邊界語意也因此只有一份：**等於**上限不算超載（`>` 而非 `>=`）。
+type CarryLoad = Readonly<{ carriedWeight: number; maximumWeight: number; overCapacity: boolean }>;
+
+function carryLoadOf(query: InventoryQuery, characterId: CharacterId, deps: InventoryDeps): CarryLoad {
+  const carriedWeight = query.getCarriedWeight(characterId);
+  const maximumWeight = deps.getCarryCapacity(characterId).maximumWeight;
+  return { carriedWeight, maximumWeight, overCapacity: carriedWeight > maximumWeight };
 }
 
 function sameCharacterSet(a: readonly CharacterId[], b: readonly CharacterId[]): boolean {
@@ -415,7 +436,7 @@ export function reserveCraftingInputs(
 export function moveItemToTeamQuestCargo(
   state: InventoryState,
   cmd: MoveItemToTeamQuestCargo,
-  _deps: InventoryDeps,
+  deps: InventoryDeps,
 ): InventoryHandlerResult {
   const inst = state.items[cmd.itemId];
   if (!inst) return reject('inventory/unknown-item', { itemId: String(cmd.itemId) });
@@ -431,7 +452,6 @@ export function moveItemToTeamQuestCargo(
     questId: cmd.questId,
     carrierCharacterId: cmd.carrierCharacterId,
   };
-  // TODO: 驗證攜帶者重量上限（doc §5.2）；需 CarryCapacitySnapshot，交由建立來源 Workflow 於同交易評估。
   const next: ItemInstance = {
     ...inst,
     location: to,
@@ -440,6 +460,24 @@ export function moveItemToTeamQuestCargo(
   };
   // 若原本裝備中，同步從 Loadout 卸掉，否則 Loadout 仍把它當主手/裝甲（破壞 single-location）。
   const working = clearLoadoutRefIfEquipped(withItem(state, next), from, cmd.itemId);
+
+  // 攜帶者重量上限（doc §5.2 命令表：「驗證攜帶者重量上限」；§371/§374 對超載處理中的贈與與改派
+  // 同樣要求「交易後不超載」）。所需的 Port 已經注入——`deps.getCarryCapacity` 就是超載評估在用的
+  // 那一個——所以這裡不需要外部 Workflow 代驗。
+  //
+  // 判定用**移動後**的重量：任務貨物計入 carrierCharacterId 的攜帶重量（不變量 13），移動前的
+  // 快照少算了正要指派的這一件；若攜帶者本來就帶著它（背包／身上），移動後總量不變，也照樣正確。
+  // 比較本身走 carryLoadOf，與 evaluateTeamEncumbrance 同一個實作。
+  const load = carryLoadOf(createInventoryQuery(working, deps.reader), cmd.carrierCharacterId, deps);
+  if (load.overCapacity) {
+    return reject('inventory/carrier-over-capacity', {
+      carrierCharacterId: String(cmd.carrierCharacterId),
+      itemId: String(cmd.itemId),
+      carriedWeight: load.carriedWeight,
+      maximumWeight: load.maximumWeight,
+    });
+  }
+
   const events: DomainEventDraft<unknown>[] = [
     emit({ type: 'InventoryTransferred', itemId: cmd.itemId, from, to, oldOwner, newOwner: undefined, reason: 'moveToTeamQuestCargo' }),
   ];
@@ -872,9 +910,8 @@ export function evaluateTeamEncumbrance(
 ): InventoryHandlerResult {
   const query = createInventoryQuery(state, deps.reader);
   const members = deps.getTeamMembers(cmd.teamId);
-  const overweight = members.filter(
-    (c) => query.getCarriedWeight(c) > deps.getCarryCapacity(c).maximumWeight,
-  );
+  // 與 moveItemToTeamQuestCargo 共用同一個判定（見 carryLoadOf）。
+  const overweight = members.filter((c) => carryLoadOf(query, c, deps).overCapacity);
   const existing = findResolutionByTeam(state, cmd.teamId);
 
   if (overweight.length === 0) {

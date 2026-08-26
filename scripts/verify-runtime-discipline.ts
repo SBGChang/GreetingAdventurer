@@ -14,11 +14,15 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
+import ts from 'typescript';
+
 import {
   createProgram,
   findHardcodedContentIds,
   findNamedNumericConstants,
 } from './lib/ast-gates';
+// 已登記的 definition kind：檢查 7 的合法字面值集合。
+import { ALL_DEFINITION_KINDS } from '../src/app/content/definition-kinds';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const SRC = join(ROOT, 'src');
@@ -512,6 +516,81 @@ function checkNoNamedNumericConstants(): Failure[] {
 // 主程序
 // ──────────────────────────────────────────────────────────────────────────
 
+
+// ──────────────────────────────────────────────────────────────────────────
+// 檢查 7：Definition 的 `kind` 欄位不得裝領域變體（13_data_runtime.md §6.0）
+// ──────────────────────────────────────────────────────────────────────────
+//
+// `kind` 在 Content Pack 裡是**家族宣告**：窄化 Reader 以它判斷「這筆定義是不是我的」，
+// registry 以它索引，而 `domainDefinitionView` 覆寫 id/schemaVersion/packId/enabled 卻**刻意不覆寫
+// kind**——因為 registry 的 kind 與作者資料的 kind 本來就是同一個欄位。
+//
+// 所以「用 kind 裝領域變體」會產生一個一筆 JSON 滿足不了的要求：一筆設施定義既要是 'facility'
+// （給 Reader 窄化）又要是 'inn'（給領域判斷）。後果不是型別鬆，是**接上真內容那天 Reader 一筆
+// 也讀不到**；而在那之前所有測試都是綠的，因為 fixture 也是照程式期待寫的。
+//
+// 這個陷阱在本 repo 出現過六次（ItemDefinition／FacilityDefinition／HomeUpgradeDefinition／
+// CityActionRuleDefinition／TeamPlanRuleDefinition／FreeActionRuleDefinition），六次都是人工抓到的。
+//
+// 判準：Definition 型別的 kind 若是字面值（或字面值聯集），每個字面值都必須是已登記的
+// definition kind。合法：EquipmentDefinition.kind: 'equipment'（領域變體另放 equipmentKind）、
+// ItemDefinition.kind: ItemKind（六個值全部就是已登記 kind，刻意如此）。
+// 非字面值（kind: string 等）不在範圍——那由「Schema 不夠用」那條規則處理。
+function checkNoDomainVariantInKind(): Failure[] {
+  const failures: Failure[] = [];
+  const checker = program.getTypeChecker();
+  const registered = new Set(ALL_DEFINITION_KINDS);
+
+  for (const sf of program.getSourceFiles()) {
+    if (sf.isDeclarationFile) continue;
+    const rel = relative(ROOT, sf.fileName).replace(/\\/g, '/');
+    // 只看契約：Definition 的形狀住在這裡。State／Command／Event 的 kind 是領域判別鍵，本來就該是變體。
+    if (!rel.startsWith('src/contracts/')) continue;
+    if (testOnlyReason(sf.fileName) !== undefined) continue;
+
+    ts.forEachChild(sf, (node) => {
+      if (!ts.isTypeAliasDeclaration(node) && !ts.isInterfaceDeclaration(node)) return;
+      const typeName = node.name.text;
+      if (!typeName.endsWith('Definition')) return;
+
+      const type = checker.getTypeAtLocation(node.name);
+      const kindProp = type.getProperty('kind');
+      if (kindProp === undefined) return;
+      // 只檢查**真的會單獨進 Content Pack 的 Definition**：它必須帶 pack header
+      // （schemaVersion / packId / enabled）。名字結尾是 Definition 但沒有 header 的，
+      // 是**巢狀值物件**（例如 RoomLinkDefinition 住在 MapTemplateDefinition 的房間圖裡），
+      // 它們的 `kind` 不與任何 registry 家族競爭，是合法的領域判別鍵。
+      const hasPackHeader =
+        type.getProperty('schemaVersion') !== undefined &&
+        type.getProperty('packId') !== undefined &&
+        type.getProperty('enabled') !== undefined;
+      if (!hasPackHeader) return;
+      const kindType = checker.getTypeOfSymbolAtLocation(kindProp, node.name);
+
+      const parts = kindType.isUnion() ? kindType.types : [kindType];
+      const literals: string[] = [];
+      for (const part of parts) {
+        if (!part.isStringLiteral()) return;
+        literals.push(part.value);
+      }
+      if (literals.length === 0) return;
+      const unregistered = literals.filter((v) => !registered.has(v));
+      if (unregistered.length === 0) return;
+
+      const line = sf.getLineAndCharacterOfPosition(node.name.getStart(sf)).line + 1;
+      failures.push({
+        check: 'domain-variant-in-kind',
+        detail:
+          rel + ':' + line + ' ' + typeName + ' 的 kind 裝了領域變體：' + unregistered.join(' | ') + '\n' +
+          '        這些都不是已登記的 definition kind，作者資料無法同時滿足 registry 家族與領域判別。\n' +
+          '        改法：kind 留給家族（登記在對應模組的 XXX_DEFINITION_KINDS），領域變體改名\n' +
+          '        （equipmentKind／facilityKind／planKind…），樣板見 EquipmentDefinition。',
+      });
+    });
+  }
+  return failures;
+}
+
 // 檢查 2～4 的對象：src 底下所有**非**測試／Bring-up 的檔案。
 // 用「全部非測試檔」而不是「依賴圖可達的檔案」，是為了讓還沒被任何根引用到的正式檔也受檢——
 // 否則新寫的 Handler 在接上路由之前是免檢的，那正是最容易寫進暫代行為的時候。
@@ -531,6 +610,7 @@ const checks: readonly { name: string; run: () => Failure[] }[] = [
   { name: '無玩法數值 fallback（§6）', run: () => checkNoValueFallbacks(productionFiles) },
   { name: '內容讀取不得預設成空集合（§6）', run: () => checkNoContentEmptyFallbacks(productionFiles) },
   { name: '無具名數值常數（§6）', run: checkNoNamedNumericConstants },
+  { name: 'Definition 的 kind 不得裝領域變體（§6.0）', run: checkNoDomainVariantInKind },
 ];
 
 let total = 0;

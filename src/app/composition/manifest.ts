@@ -246,6 +246,13 @@ export const EVENT_SUBSCRIPTIONS_BY_TYPE: Readonly<
   CombatDefenseMasteryEarned: [sub('CombatDefenseMasteryEarned', 'progression')],
   CombatSupportMasteryEarned: [sub('CombatSupportMasteryEarned', 'progression')],
 
+  // 資產分配完成 → dungeon 關閉 Session 並返城（§8.2 離場流程的最後一段）。
+  //
+  // 這一筆是 `startPlayerExploration` / `useDungeonExit` 能不能開放的四個阻塞點之一：
+  // 沒有它，`useDungeonExit` 把 Session 轉成 `leaving` 之後就停在那裡——不關閉、不返城，
+  // 而且**不會有任何錯誤**。dungeon 側的 Handler 一直都在，只差這個綁定。
+  AssetDistributionCompleted: [sub('AssetDistributionCompleted', 'dungeon')],
+
   // 角色出生 → progression 建立成長檔。
   CharacterBorn: [sub('CharacterBorn', 'progression')],
 

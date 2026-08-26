@@ -34,6 +34,7 @@ import {
   onQuestStateChanged,
   onStatsCapacityChanged,
   handleApplyContentEventStatus,
+  handleApplyFoodStatusEffects,
   handleCreateQuestTemporaryCharacter,
 } from './system';
 import { createCharacterQuery } from './queries';
@@ -127,6 +128,201 @@ const cases: readonly Case[] = [
       const next = reqChar(dmg.nextSlice, PLAYER_ID);
       assert(next.condition.health === 70, `HP 應為 70，實際 ${next.condition.health}`);
       assert(next.lifeState === 'alive', '未致命應仍存活');
+    },
+  },
+  {
+    // 契約裁定（04_character_module.md §5.1／§6）：命令帶的是**請求**（apply／remove），
+    // 事件帶的是**結果**（applied／refreshed／removed）。送出端只說 apply；「新套用還是刷新」
+    // 由本模組依 StatusDefinition.stackPolicy 算出來——送出端不知道目標身上有沒有那個狀態。
+    name: 'ApplyCombatCondition: apply 請求 → 模組依 stackPolicy 決定 applied／refreshed，stacks 為套用後總層數',
+    run: () => {
+      const state = fixtureCharacterState();
+      const ctx = makeContext();
+      // POISON 的 stackPolicy 是 'stack'（fixtures）。第一次：身上沒有 → applied。
+      const first = handleApplyCombatCondition(
+        {
+          type: 'ApplyCombatCondition',
+          characterId: PLAYER_ID,
+          statusChanges: [{ statusId: POISON_STATUS_ID, change: 'apply', stacks: 2 }],
+        },
+        state,
+        ctx,
+      );
+      const afterFirst = reqChar(first.nextSlice, PLAYER_ID).condition.statuses;
+      assert(afterFirst.length === 1 && afterFirst[0]!.stacks === 2, '第一次應建立 2 層');
+      const ev1 = findEvent(eventsOf(first.outgoingMessages), 'CharacterConditionChanged');
+      assert(ev1 !== undefined && ev1.statusChanges.length === 1, '應回報恰好一筆狀態變更');
+      const c1 = ev1!.statusChanges[0]!;
+      assert(c1.change === 'applied', `第一次應回報 applied，實際 ${c1.change}`);
+      assert(c1.change !== 'removed' && c1.stacks === 2, '應回報套用後層數 2');
+
+      // 第二次：同一個 apply 請求，因為狀態已存在且政策是 stack → refreshed + 累加後層數。
+      const second = handleApplyCombatCondition(
+        {
+          type: 'ApplyCombatCondition',
+          characterId: PLAYER_ID,
+          statusChanges: [{ statusId: POISON_STATUS_ID, change: 'apply', stacks: 3 }],
+        },
+        first.nextSlice,
+        ctx,
+      );
+      const afterSecond = reqChar(second.nextSlice, PLAYER_ID).condition.statuses;
+      assert(afterSecond.length === 1 && afterSecond[0]!.stacks === 5, 'stack 政策應累加成 5 層');
+      const c2 = findEvent(eventsOf(second.outgoingMessages), 'CharacterConditionChanged')!
+        .statusChanges[0]!;
+      assert(c2.change === 'refreshed', `第二次應回報 refreshed，實際 ${c2.change}`);
+      assert(c2.change !== 'removed' && c2.stacks === 5, 'stacks 應是套用後總層數 5，不是這次加的 3');
+    },
+  },
+  {
+    name: 'ApplyCombatCondition: remove 請求移除既有狀態 → 狀態消失且回報 removed',
+    run: () => {
+      const poisoned = makeCharacter({
+        characterId: PLAYER_ID,
+        condition: {
+          health: 100,
+          mana: 50,
+          statuses: [
+            {
+              statusInstanceId: 'inst-poison' as CharacterStatusInstanceId,
+              statusId: POISON_STATUS_ID,
+              appliedOnDay: 20000 as WorldDay,
+              stacks: 3,
+            },
+          ],
+        },
+      });
+      const state = createCharacterState({ characters: [poisoned] });
+      const res = handleApplyCombatCondition(
+        {
+          type: 'ApplyCombatCondition',
+          characterId: PLAYER_ID,
+          statusChanges: [{ statusId: POISON_STATUS_ID, change: 'remove' }],
+        },
+        state,
+        makeContext(),
+      );
+      assert(reqChar(res.nextSlice, PLAYER_ID).condition.statuses.length === 0, '狀態應被移除');
+      const changes = findEvent(eventsOf(res.outgoingMessages), 'CharacterConditionChanged')!
+        .statusChanges;
+      assert(changes.length === 1 && changes[0]!.change === 'removed', '應回報一筆 removed');
+    },
+  },
+  {
+    // 不變量（§6）：事件描述**已發生的事實**，不把請求覆述一遍。移除一個身上沒有的狀態什麼都沒
+    // 發生，所以不得出現 removed——否則訂閱者會以為角色剛掉了一個它根本沒有的狀態。
+    name: 'ApplyCombatCondition: remove 身上沒有的狀態 → 接受，但不得回報 removed',
+    run: () => {
+      const state = fixtureCharacterState();
+      const res = handleApplyCombatCondition(
+        {
+          type: 'ApplyCombatCondition',
+          characterId: PLAYER_ID,
+          healthDelta: -10,
+          statusChanges: [{ statusId: POISON_STATUS_ID, change: 'remove' }],
+        },
+        state,
+        makeContext(),
+      );
+      const ev = findEvent(eventsOf(res.outgoingMessages), 'CharacterConditionChanged');
+      // HP 確實變了，所以事件照發；但狀態那一欄必須是空的。
+      assert(ev !== undefined && ev.health === 90, 'HP 變化仍應回報');
+      assert(ev!.statusChanges.length === 0, `不得回報未發生的移除，實際 ${ev!.statusChanges.length} 筆`);
+    },
+  },
+  {
+    // 同一條不變量套用在**整個事件**上，不只是 statusChanges 那一欄：什麼都沒動時
+    // 「CharacterConditionChanged」本身就是假的。先前這裡照樣發一筆空事件並 bump revision。
+    name: 'ApplyCombatCondition: 什麼都沒動（無 delta + 移除不存在的狀態）→ 真冪等，不發事件、不 bump revision',
+    run: () => {
+      const state = fixtureCharacterState();
+      const res = handleApplyCombatCondition(
+        {
+          type: 'ApplyCombatCondition',
+          characterId: PLAYER_ID,
+          statusChanges: [{ statusId: POISON_STATUS_ID, change: 'remove' }],
+        },
+        state,
+        makeContext(),
+      );
+      assert(res.nextSlice === state, '什麼都沒發生時不得產生新 slice');
+      assert(reqChar(res.nextSlice, PLAYER_ID).revision === 0, '不得 bump revision');
+      assert(eventsOf(res.outgoingMessages).length === 0, '不得發出 CharacterConditionChanged');
+    },
+  },
+  {
+    // 反面：只要真的動了一格就必須照發，冪等不得吃掉真實變化。
+    name: 'ApplyCombatCondition: delta 造成實際變化 → 仍照發事件（冪等不得吃掉真實變化）',
+    run: () => {
+      const state = fixtureCharacterState();
+      const res = handleApplyCombatCondition(
+        { type: 'ApplyCombatCondition', characterId: PLAYER_ID, healthDelta: -10 },
+        state,
+        makeContext(),
+      );
+      assert(res.nextSlice !== state, '有變化時必須產生新 slice');
+      assert(reqChar(res.nextSlice, PLAYER_ID).revision === 1, '有變化時必須 bump revision');
+      const ev = findEvent(eventsOf(res.outgoingMessages), 'CharacterConditionChanged');
+      assert(ev !== undefined && ev.health === 90, '仍應回報 HP 變化');
+    },
+  },
+  {
+    // 夾住上限造成的「等於沒動」也算沒動：滿血再治療 9999 不是一次 Condition 變更。
+    name: 'ApplyCombatCondition: delta 被上限夾回原值 → 沒有變化，不發事件',
+    run: () => {
+      const state = fixtureCharacterState();
+      const res = handleApplyCombatCondition(
+        { type: 'ApplyCombatCondition', characterId: PLAYER_ID, healthDelta: 9999 },
+        state,
+        makeContext({ stats: stubStatsQuery(100, 50) }),
+      );
+      assert(reqChar(res.nextSlice, PLAYER_ID).condition.health === 100, 'HP 應仍是上限 100');
+      assert(res.nextSlice === state, '夾回原值＝沒動，不得產生新 slice');
+      assert(eventsOf(res.outgoingMessages).length === 0, '不得發出事件');
+    },
+  },
+  {
+    name: 'ApplyFoodStatusEffects: apply 已解析的 StatusId → 套用並回報 applied',
+    run: () => {
+      const state = fixtureCharacterState();
+      const res = handleApplyFoodStatusEffects(
+        {
+          type: 'ApplyFoodStatusEffects',
+          characterId: PLAYER_ID,
+          foodStatusRevision: 1 as Revision,
+          operation: 'apply',
+          statusIds: [WELLFED_STATUS_ID],
+        },
+        state,
+        makeContext(),
+      );
+      const statuses = reqChar(res.nextSlice, PLAYER_ID).condition.statuses;
+      assert(statuses.length === 1 && statuses[0]!.statusId === WELLFED_STATUS_ID, '應套用 wellfed');
+      const changes = findEvent(eventsOf(res.outgoingMessages), 'CharacterConditionChanged')!
+        .statusChanges;
+      assert(changes.length === 1 && changes[0]!.change === 'applied', '應回報一筆 applied');
+    },
+  },
+  {
+    // 真冪等（skill「冪等 no-op vs 偽裝的 fallback」）：資料齊全時這裡仍然 no-op——因為請求的
+    // 結果（該狀態不在身上）已經成立。所以不改 state、不 bump revision、不發事件。
+    name: 'ApplyFoodStatusEffects: remove 身上沒有的狀態 → 冪等，不改 state、不發事件',
+    run: () => {
+      const state = fixtureCharacterState();
+      const res = handleApplyFoodStatusEffects(
+        {
+          type: 'ApplyFoodStatusEffects',
+          characterId: PLAYER_ID,
+          foodStatusRevision: 1 as Revision,
+          operation: 'remove',
+          statusIds: [WELLFED_STATUS_ID],
+        },
+        state,
+        makeContext(),
+      );
+      assert(res.nextSlice === state, '狀態不存在時不得產生新 slice');
+      assert(reqChar(res.nextSlice, PLAYER_ID).revision === 0, '不得 bump revision');
+      assert(eventsOf(res.outgoingMessages).length === 0, '不得發出任何事件');
     },
   },
   {

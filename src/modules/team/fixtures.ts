@@ -42,6 +42,7 @@ import type {
 } from '../../contracts/team';
 import type { GridCell } from '../../contracts/map';
 import type {
+  MemberFreeAction,
   Team,
   TeamCombatFormation,
   TeamMemberRetentionState,
@@ -49,6 +50,7 @@ import type {
 } from './state';
 import { createTeamState, emptyWorkSettlement } from './state';
 import type {
+  TeamCombatStatusQuery,
   TeamHandlerContext,
   TeamIdAllocator,
   TeamResolverPort,
@@ -83,6 +85,14 @@ export const MEMBER_RETENTION_RULE = 'retention-rule-standard' as MemberRetentio
 
 const TRAVEL_XP_RULE = 'xp-travel' as ExperienceAwardRuleId;
 const TRAVEL_EVENT_PROFILE = 'travel-events' as PlayerTravelEventWeightProfileId;
+
+// 酒館可見性的資料側：NPC 正式成員的 tavernVisit 自由行動（doc §2.3）。fixture 代表「資料齊全」
+// 的那一側；缺資料那一側由測試自己把這筆行動拿掉來製造。
+export const TAVERN_VISIT_RULE = 'free-action-tavern-visit' as FreeActionRuleId;
+export const NPC_TAVERN_FREE_ACTION = 'free-action-npc-tavern' as FreeActionId;
+// NPC 隊的**暫時**成員（在 temporaryMemberIds、不在 memberIds）：用來釘住「只有正式成員上酒館名單」。
+export const NPC_TEMPORARY_ID = 'char-npc-temporary' as CharacterId;
+export const NPC_TEMPORARY_FREE_ACTION = 'free-action-npc-temporary' as FreeActionId;
 
 // ── Fixture Slice ─────────────────────────────────────────────────────────
 
@@ -131,15 +141,82 @@ export function fixtureTeamState(worldDay: WorldDay = 20000 as WorldDay): TeamSt
     revision: 0 as Revision,
   };
 
+  // NPC 隊長正在 CITY_A 的酒館裡 → 他出現在 listTavernVisitorIds(CITY_A)，因此可被嘗試招募。
+  const npcTavernVisit: MemberFreeAction = {
+    freeActionId: NPC_TAVERN_FREE_ACTION,
+    teamId: NPC_TEAM_ID,
+    memberId: NPC_LEADER_ID,
+    ruleId: TAVERN_VISIT_RULE,
+    status: 'active',
+    accumulatedFreeDays: 0,
+    payload: { kind: 'tavernVisit' },
+    revision: 0 as Revision,
+  };
+
   return createTeamState({
     playerTeamId: PLAYER_TEAM_ID,
     teams: [playerTeam, npcTeam],
+    freeActions: [npcTavernVisit],
     combatFormations: [
       makeFormation(PLAYER_TEAM_ID, playerMembers),
       makeFormation(NPC_TEAM_ID, [NPC_LEADER_ID]),
     ],
     memberRetention: [retention],
   });
+}
+
+// 改寫 NPC 隊長那筆自由行動的欄位（status / payload / memberId …），**保留這筆紀錄的存在**。
+//
+// 為什麼需要它而不是只有 withoutTavernVisitors：整筆拿掉只能證明「Slice 上沒有資料時看不到人」，
+// 證不了可見性判準真的有在讀 status 與 payload.kind。少了這個入口，判準退化成「有沒有任何一筆
+// 自由行動」也不會有任何測試變紅——已結束的酒館行程、甚至一筆 rest，都會被當成「人在酒館」。
+export function withNpcLeaderFreeAction(
+  state: TeamState,
+  overrides: Partial<MemberFreeAction>,
+): TeamState {
+  const base = state.freeActions[NPC_TAVERN_FREE_ACTION];
+  if (base === undefined) {
+    throw new Error('fixture 前提不成立：NPC 隊長的自由行動不存在');
+  }
+  return {
+    ...state,
+    freeActions: { ...state.freeActions, [NPC_TAVERN_FREE_ACTION]: { ...base, ...overrides } },
+  };
+}
+
+// 在 NPC 隊加一名**暫時**成員，並讓他也選了 tavernVisit。正式成員與暫時成員的差別只在
+// memberIds／temporaryMemberIds，其餘欄位完全一樣——所以這是唯一能釘住「名單只收正式成員」的資料形狀。
+export function withTemporaryMemberInTavern(state: TeamState): TeamState {
+  const npcTeam = state.teams[NPC_TEAM_ID];
+  if (npcTeam === undefined) throw new Error('fixture 前提不成立：NPC 隊不存在');
+  const temporaryVisit: MemberFreeAction = {
+    freeActionId: NPC_TEMPORARY_FREE_ACTION,
+    teamId: NPC_TEAM_ID,
+    memberId: NPC_TEMPORARY_ID,
+    ruleId: TAVERN_VISIT_RULE,
+    status: 'active',
+    accumulatedFreeDays: 0,
+    payload: { kind: 'tavernVisit' },
+    revision: 0 as Revision,
+  };
+  return {
+    ...state,
+    teams: {
+      ...state.teams,
+      [NPC_TEAM_ID]: { ...npcTeam, temporaryMemberIds: [...npcTeam.temporaryMemberIds, NPC_TEMPORARY_ID] },
+    },
+    freeActions: { ...state.freeActions, [NPC_TEMPORARY_FREE_ACTION]: temporaryVisit },
+  };
+}
+
+// 從 Slice 拿掉所有 tavernVisit 自由行動：代表「這座城的酒館裡沒有人」的那一側。
+export function withoutTavernVisitors(state: TeamState): TeamState {
+  const freeActions: Record<FreeActionId, MemberFreeAction> = {};
+  for (const [key, action] of Object.entries(state.freeActions)) {
+    if (action.payload.kind === 'tavernVisit') continue;
+    freeActions[key as FreeActionId] = action;
+  }
+  return { ...state, freeActions };
 }
 
 // ── Stub Definition Reader ─────────────────────────────────────────────────
@@ -193,7 +270,7 @@ export function stubDefinitionReader(): TeamDefinitionReader {
     getNpcTravelRule: (): NpcTravelRuleDefinition => NPC_TRAVEL,
     getFreeActionRule: (id: FreeActionRuleId): FreeActionRuleDefinition => ({
       ...header(id),
-      kind: 'craft',
+      freeActionKind: 'craft',
       requiredFreeDays: 3,
     }),
     // durationDays 依 fixture 的 plan rule id 給值：homeRest 365、其餘 1。
@@ -201,8 +278,8 @@ export function stubDefinitionReader(): TeamDefinitionReader {
     // 缺資料那一側由 makeContext 的 teamPlanRuleIdByKind 留空來測試。
     getTeamPlanRule: (id): TeamPlanRuleDefinition =>
       String(id) === String(HOME_REST_PLAN_RULE)
-        ? { ...header(id), kind: 'homeRest', durationDays: 365 }
-        : { ...header(id), kind: 'cityFacilityAction', durationDays: 1 },
+        ? { ...header(id), planKind: 'homeRest', durationDays: 365 }
+        : { ...header(id), planKind: 'cityFacilityAction', durationDays: 1 },
     getRecentActivityRule: (id: RecentActivityRuleId): RecentActivityRuleDefinition => ({
       ...header(id),
       maxRecordsPerCharacter: 10,
@@ -245,6 +322,15 @@ export function stubWorldReader(overrides: Partial<TeamWorldReader> = {}): TeamW
     getAdventureSiteMapInstance: () => SITE_MAP_INSTANCE,
     ...overrides,
   };
+}
+
+// ── Stub Combat Status Query ────────────────────────────────────────────────
+
+// 預設「沒有進行中的 Encounter」。要測戰鬥中的分支就覆寫 hasActiveEncounter。
+export function stubCombatStatusQuery(
+  overrides: Partial<TeamCombatStatusQuery> = {},
+): TeamCombatStatusQuery {
+  return { hasActiveEncounter: () => false, ...overrides };
 }
 
 // ── Stub Resolver Port ──────────────────────────────────────────────────────
@@ -300,6 +386,7 @@ export function makeContext(overrides: Partial<TeamHandlerContext> = {}): TeamHa
       cityFacilityAction: CITY_FACILITY_PLAN_RULE,
     },
     world: overrides.world ?? stubWorldReader(),
+    combat: overrides.combat ?? stubCombatStatusQuery(),
     ids: overrides.ids ?? makeIdAllocator(),
     resolvers: overrides.resolvers ?? stubResolverPort(),
     ...(overrides.rngContext ? { rngContext: overrides.rngContext } : {}),

@@ -35,6 +35,7 @@ import type {
   ModuleResult,
   ModuleOutcome,
   CombatRuleId,
+  ActionDelayRuleId,
   TransactionMessageDraft,
   DeterministicRng,
 } from '../../contracts/core';
@@ -139,9 +140,28 @@ export type EnemyActionChoice = Readonly<{
   skillId: SkillDefinitionId;
   targetCombatantIds: readonly CombatantId[];
 }>;
+
+// 技能目標解析（§2.4 `TargetingDefinition.targetResolverId` 的執行期入口）。
+//
+// 「這一招打得到誰」由**內容**決定：自身／單體／區域、近／中／遠、人數上限、形狀，全都寫在技能的
+// targeting 規則裡。先前這個欄位完全沒有消費者，Handler 改用「有 dealDamage → 目標須敵方、有 heal →
+// 目標須己方」推定側別並就地過濾——側別擋住了，但範圍、形狀、距離、人數上限**一項都沒驗**：
+// 一招單體技能傳九個目標一樣全部命中，而換一份 Content Pack 也不會有任何差別。
+//
+// requestedTargetIds 是玩家（或敵方 AI）指定的**錨點**，不是最終目標集合：resolver 依 targeting 規則
+// 把它解析成真正受影響的目標（可擴張成區域、可縮減、可換成自己）。回傳空陣列＝這次請求在此規則下
+// 沒有合法目標，Handler 以 typed rejection 回覆，不付資源也不空耗行動。
+export type CombatSkillTargetInput = Readonly<{
+  resolverId: ResolverId;
+  encounter: CombatEncounter;
+  actorId: CombatantId;
+  requestedTargetIds: readonly CombatantId[];
+}>;
 export interface CombatResolverPort {
   // 傷害 / 治療 / CTB 調整 / 命中的實際數值（回傳實數；adjustCtb 可為負）。
   resolvePower(input: CombatPowerInput): number;
+  // 技能的合法目標集合（範圍／形狀／距離／人數上限皆為資料）。
+  resolveSkillTargets(input: CombatSkillTargetInput): readonly CombatantId[];
   // 攻擊 MXP 路由：該次技能有效傷害計入哪個 Mastery。
   resolveAttackMastery(skillId: SkillDefinitionId): MasteryId;
   // 防禦 MXP 路由：該角色開戰防具對應的 Mastery。
@@ -702,7 +722,7 @@ function applyEffect(
           state: dead ? 'dead' : target.state,
           revision: bumpRevision(target.revision),
         };
-        results.push({ kind: 'dealDamage', targetId: String(targetId), amount, dead });
+        results.push({ kind: 'dealDamage', targetId, amount, targetDied: dead });
 
         // 攻擊 MXP 帳本：只累計角色行動者對各 Mastery 的**有效**傷害（非面板值）。
         const actor = combatants[actorId];
@@ -735,7 +755,7 @@ function applyEffect(
           health: nextHealth,
           revision: bumpRevision(target.revision),
         };
-        results.push({ kind: 'heal', targetId: String(targetId), amount });
+        results.push({ kind: 'heal', targetId, amount });
       }
       return { ...work, combatants, results };
     }
@@ -763,7 +783,7 @@ function applyEffect(
               : target.externalCtbIncreaseSinceOwnAction,
           revision: bumpRevision(target.revision),
         };
-        results.push({ kind: 'adjustCtb', targetId: String(targetId), amount: applied });
+        results.push({ kind: 'adjustCtb', targetId, appliedCtbDelta: applied });
       }
       return { ...work, combatants, results };
     }
@@ -777,12 +797,8 @@ function applyEffect(
         // 同一技能的其他效果（傷害、adjustCtb…）各走自己的 case，照常生效——這就是設計說的
         // 「後續 interruptCasting 只保留其他效果」。
         if (target.interruptionImmuneUntilOwnAction) continue;
-        const delayRule = ctx.definitions.getActionDelayRule(rule.interruptionDelayRuleId);
-        const attrs = attributesOf(target, ctx);
-        const delay = Math.max(
-          delayRule.minimumDelay,
-          delayRule.baseDelay - ctbReduction(delayRule.reductions, attrs),
-        );
+        const interruptedSkillId = target.casting.skillId;
+        const delay = delayFromRule(rule.interruptionDelayRuleId, target, ctx);
         // 是否因此取得免疫由抗性檔宣告（一般怪物為 false，只有 Boss 檔開啟）。
         const profile = controlResistanceProfileOf(target, ctx);
         combatants[targetId] = {
@@ -793,7 +809,7 @@ function applyEffect(
             profile !== undefined && profile.interruptionImmunityUntilOwnActionAfterSuccess,
           revision: bumpRevision(target.revision),
         };
-        results.push({ kind: 'interruptCasting', targetId: String(targetId) });
+        results.push({ kind: 'interruptCasting', targetId, interruptedSkillId, addedDelay: delay });
       }
       return { ...work, combatants, results };
     }
@@ -810,7 +826,18 @@ function applyEffect(
         };
         const activeStatuses = mergeStatus(target.activeStatuses, instance, op.stackPolicy);
         combatants[targetId] = { ...target, activeStatuses, revision: bumpRevision(target.revision) };
-        results.push({ kind: 'applyStatus', targetId: String(targetId), statusId: String(op.statusId) });
+        // 回報**合併後實際生效**的那一筆（strongest/refresh 可能保留既有實例），不是本次鑄出來的。
+        const effective = activeStatuses.find((s) => s.statusId === op.statusId);
+        if (effective === undefined) {
+          throw new Error(`applyStatus 合併後找不到 ${String(op.statusId)}`);
+        }
+        results.push({
+          kind: 'applyStatus',
+          targetId,
+          statusId: op.statusId,
+          statusInstanceId: effective.statusInstanceId,
+          remainingTargetActions: effective.remainingTargetActions,
+        });
       }
       return { ...work, combatants, results };
     }
@@ -820,7 +847,7 @@ function applyEffect(
         if (target === undefined || target.state === 'dead') continue;
         const activeStatuses = target.activeStatuses.filter((s) => s.statusId !== op.statusId);
         combatants[targetId] = { ...target, activeStatuses, revision: bumpRevision(target.revision) };
-        results.push({ kind: 'removeStatus', targetId: String(targetId), statusId: String(op.statusId) });
+        results.push({ kind: 'removeStatus', targetId, statusId: op.statusId });
       }
       return { ...work, combatants, results };
     }
@@ -903,14 +930,9 @@ function resolveCounters(
       const effect = ctx.definitions.getCombatEffect(effectId);
       current = applyEffect(current, effect, defenderId, stance.skillId, [attackerId], ctx);
     }
-    const counterDelayRule = ctx.definitions.getActionDelayRule(stance.counterDelayRuleId);
     const d = current.combatants[defenderId];
     if (d !== undefined) {
-      const attrs = attributesOf(d, ctx);
-      const delay = Math.max(
-        counterDelayRule.minimumDelay,
-        counterDelayRule.baseDelay - ctbReduction(counterDelayRule.reductions, attrs),
-      );
+      const delay = delayFromRule(stance.counterDelayRuleId, d, ctx);
       current.combatants[defenderId] = {
         ...d,
         counterStance: undefined,
@@ -918,7 +940,12 @@ function resolveCounters(
         revision: bumpRevision(d.revision),
       };
     }
-    current.results.push({ kind: 'counter', defenderId: String(defenderId), attackerId: String(attackerId) });
+    current.results.push({
+      kind: 'counter',
+      defenderId,
+      attackerId,
+      counterSkillId: stance.skillId,
+    });
   }
   return current;
 }
@@ -927,14 +954,25 @@ function resolveCounters(
 // 動作延遲 + 狀態倒扣 + 收尾（補位、全滅判定、下一位）
 // ──────────────────────────────────────────────────────────────────────────
 
+// 依 ActionDelayRule 折算某位戰鬥員的延遲。技能行動、切換武器組、反擊、中斷、休息全部共用這一份：
+// 「基準延遲 − 屬性折減，夾在最低延遲之上」是形狀（程式），baseDelay / reductions / minimumDelay
+// 是調校（資料）。任何新的延遲來源都必須經由這裡取得一個 ActionDelayRuleId，不得自帶數字。
+function delayFromRule(
+  ruleId: ActionDelayRuleId,
+  actor: CombatantState,
+  ctx: CombatHandlerContext,
+): number {
+  const rule = ctx.definitions.getActionDelayRule(ruleId);
+  const attrs = attributesOf(actor, ctx);
+  return Math.max(rule.minimumDelay, rule.baseDelay - ctbReduction(rule.reductions, attrs));
+}
+
 function actionDelayFor(
   actor: CombatantState,
   skillView: CombatSkillDefinitionView,
   ctx: CombatHandlerContext,
 ): number {
-  const rule = ctx.definitions.getActionDelayRule(skillView.actionDelayRuleId);
-  const attrs = attributesOf(actor, ctx);
-  return Math.max(rule.minimumDelay, rule.baseDelay - ctbReduction(rule.reductions, attrs));
+  return delayFromRule(skillView.actionDelayRuleId, actor, ctx);
 }
 
 // 對行動者「後續完成的行動」倒扣狀態剩餘次數（§2.5）；到 0 移除。
@@ -989,29 +1027,80 @@ function finishTurn(
   return result(upsertEncounter(state, encounter), messages);
 }
 
-// 解析合法目標集合（不信任 UI 傳入的 targetCombatantIds）：去重 → 存在且未死 → 依 requiredSide 篩側別。
-// requiredSide 由呼叫端從**效果**推定（dealDamage→'enemy'、heal→'ally'、其餘 undefined），不靠 actionKind，
-// 故把傷害技能標成 cast/perform 也擋得住。[限制] 資料化 targeting resolver（範圍/形狀/距離/人數上限）與
-// activationHand/weaponRequirementIds 尚未接（見 handleUseCombatSkill 註）；此處保證結構不變量（去重、存活、
-// 側別），杜絕「攻擊/施法點到我方隊友受傷」與「同一目標 ID 重複命中」。
-function legalTargetsFor(
+// 技能敵意側別：由**效果**推定，不靠 actionKind（否則把傷害技能標成 cast/perform 就能繞過側別、
+// 打到我方）。任一 dealDamage → 攻擊性（目標須敵方）；否則任一 heal → 支援性（目標須己方）；
+// 其餘（adjustCtb / interruptCasting / applyStatus…）的側別**由 targeting resolver 決定**——那是內容，
+// 不是結構：同一個「延遲目標行動」既可以是打敵人的控場，也可以是幫隊友讓位的支援。
+function requiredSideOf(
+  skillView: CombatSkillDefinitionView,
+  ctx: CombatHandlerContext,
+): 'enemy' | 'ally' | undefined {
+  // 守勢／反擊（§8.4）：effectIds 描述的是**日後反擊時打在攻擊者身上**的效果，不是本次行動的效果。
+  // 本次行動只在行動者自己身上立起架勢（見 handleUseCombatSkill 的 counterStance 分支，legalTargets
+  // 在該分支根本不參與運算），所以拿反擊效果去推定本次行動的目標側別是錯的位址：
+  // 「反擊會造成傷害」被讀成「架勢的目標必須是敵人」，而 targeting resolver 正確地回傳行動者本人，
+  // 於是每一次立架勢都被 combat/target-resolver-illegal-side 擋掉——整個守勢機制永遠無法建立。
+  // 架勢的目標側別交給 targeting resolver（自身向／護衛隊友皆為內容決定）；傷害不作用己方的最終
+  // 不變量仍由 applyEffect 的逐效果守門保證，並不因此鬆脫。
+  if (skillView.counterStance !== undefined) return undefined;
+  const opKinds = skillView.effectIds.map((id) => ctx.definitions.getCombatEffect(id).operation.kind);
+  if (opKinds.includes('dealDamage')) return 'enemy';
+  if (opKinds.includes('heal')) return 'ally';
+  return undefined;
+}
+
+// targeting resolver 的輸出檢查。
+//
+// 範圍／形狀／距離／人數上限是**內容**，由 resolver 全權決定；這裡只把守四件無論哪份 Content Pack
+// 都必須成立的結構不變量，任一不成立就是 typed rejection（resolver 或其內容資料有錯），
+// **不是**默默把違規的那一筆濾掉——濾掉會讓「內容寫錯」與「內容本來就這樣」再也分不開。
+//
+//   1. 目標必須存在於本場遭遇。
+//   2. 同一次行動不得對同一目標套用兩次（重複命中）。
+//   3. 死者不可為目標。
+//   4. 側別：傷害不作用己方、治療不作用敵方（與 applyEffect 的逐效果守門互為保險）。
+type TargetSetViolation = Readonly<{
+  code: string;
+  details: Readonly<Record<string, string | number | boolean>>;
+}>;
+
+function targetSetViolation(
   encounter: CombatEncounter,
   actorSide: 'player' | 'enemy',
   requiredSide: 'enemy' | 'ally' | undefined,
-  requested: readonly CombatantId[],
-): CombatantId[] {
+  resolverId: ResolverId,
+  targets: readonly CombatantId[],
+): TargetSetViolation | undefined {
   const seen = new Set<string>();
-  const out: CombatantId[] = [];
-  for (const id of requested) {
-    if (seen.has(id as string)) continue; // 去重：同一目標只計一次
-    seen.add(id as string);
+  for (const id of targets) {
+    const base = { resolverId: String(resolverId), targetId: String(id) };
     const c = encounter.combatants[id];
-    if (c === undefined || c.state === 'dead') continue; // 不存在／已死不可為目標
-    if (requiredSide === 'enemy' && c.side === actorSide) continue; // 攻擊性不得作用己方
-    if (requiredSide === 'ally' && c.side !== actorSide) continue; // 支援性不得作用敵方
-    out.push(id);
+    if (c === undefined) {
+      return { code: 'combat/target-resolver-unknown-target', details: base };
+    }
+    if (seen.has(id as string)) {
+      return { code: 'combat/target-resolver-duplicate-target', details: base };
+    }
+    seen.add(id as string);
+    if (c.state === 'dead') {
+      return { code: 'combat/target-resolver-dead-target', details: base };
+    }
+    // 兩條分支分開寫（而不是先算一個 wrongSide 布林），是為了讓 requiredSide 在 details 裡保有
+    // 'enemy' | 'ally' 的窄化型別，不必補一個 `as string`。
+    if (requiredSide === 'enemy' && c.side === actorSide) {
+      return {
+        code: 'combat/target-resolver-illegal-side',
+        details: { ...base, requiredSide, targetSide: c.side },
+      };
+    }
+    if (requiredSide === 'ally' && c.side !== actorSide) {
+      return {
+        code: 'combat/target-resolver-illegal-side',
+        details: { ...base, requiredSide, targetSide: c.side },
+      };
+    }
   }
-  return out;
+  return undefined;
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -1080,32 +1169,49 @@ export function handleUseCombatSkill(
     });
   }
 
-  // 依**效果**推定敵意（不靠 actionKind——否則把傷害技能標成 cast/perform 就能繞過側別、打到我方）：
-  // 任一 dealDamage → 攻擊性（目標須敵方）；否則任一 heal → 支援性（目標須己方）；其餘（adjustCtb/interrupt
-  // 等）側別待資料化 targeting resolver，此處不強制。指定了目標卻**全數不合法** → 拒絕（不付代價、不空耗）。
-  // applyEffect 另有逐效果側別守門（dealDamage 不作用己方、heal 不作用敵方），兩者互為保險。
-  const opKinds = skillView.effectIds.map((id) => ctx.definitions.getCombatEffect(id).operation.kind);
-  const requiredSide: 'enemy' | 'ally' | undefined = opKinds.includes('dealDamage')
-    ? 'enemy'
-    : opKinds.includes('heal')
-      ? 'ally'
-      : undefined;
-  const legalTargets = legalTargetsFor(encounter, actor0.side, requiredSide, cmd.targetCombatantIds);
-  if (requiredSide !== undefined && cmd.targetCombatantIds.length > 0 && legalTargets.length === 0) {
+  // §2.4 targeting：合法目標集合由**內容的 targeting resolver** 決定（範圍／形狀／距離／人數上限）。
+  // cmd.targetCombatantIds 只是玩家/AI 指定的錨點，不是最終目標——resolver 可擴張、縮減或換成自己。
+  const requiredSide = requiredSideOf(skillView, ctx);
+  const targets = ctx.resolvers.resolveSkillTargets({
+    resolverId: skillView.targeting.targetResolverId,
+    encounter,
+    actorId: cmd.actorId,
+    requestedTargetIds: cmd.targetCombatantIds,
+  });
+  // 空集合＝這次請求在該 targeting 規則下沒有合法目標（點到隊友、超出距離、目標已死…）。
+  // 拒絕而非空耗：不付資源、不加延遲。自身向技能（架勢、自我增益）由 resolver 回傳行動者本人。
+  if (targets.length === 0) {
     return reject('combat/no-legal-target', {
       skillId: String(cmd.skillId),
-      requiredSide,
+      resolverId: String(skillView.targeting.targetResolverId),
       requestedTargets: cmd.targetCombatantIds.length,
     });
   }
+  // 結構不變量（不是可調內容）：存在、不重複、未死、側別。違反＝resolver／內容錯，明確拒絕。
+  const violation = targetSetViolation(
+    encounter,
+    actor0.side,
+    requiredSide,
+    skillView.targeting.targetResolverId,
+    targets,
+  );
+  if (violation !== undefined) {
+    return reject(violation.code, { ...violation.details, skillId: String(cmd.skillId) });
+  }
+  const legalTargets = targets;
+
+  // §8.3：跨武器組施放技能，先付切換延遲再執行技能（實際加總在下方行動延遲處）。
+  // 只有「actor 目前有武器組，且指令指定了不同的一組」才算切換：怪物沒有武器組，不適用。
+  const switchedWeaponSet =
+    actor0.activeWeaponSetId !== undefined && activeWeaponSetId !== actor0.activeWeaponSetId;
 
   // 起始 Working（就地可變 combatants 副本）。
   let combatants: Record<CombatantId, CombatantState> = { ...encounter.combatants };
   let work: Working = { encounter, combatants, results: [] };
 
-  // 付資源成本（已確認足夠，直接扣，不再夾零）。切換武器組：第一版只更新 activeWeaponSetId。
-  // TODO: 跨武器組切換延遲需先加 switchDelayRule；activationHand／weaponRequirementIds 尚未驗證
-  // （需 fixture 於武器組實裝武器 + 武器→需求資料）；資料化 targeting resolver（範圍/形狀/人數）待接。
+  // 付資源成本（已確認足夠，直接扣，不再夾零）。
+  // activationHand／weaponRequirementIds 的驗證尚未實作：需要 inventory 契約先補上裝備側的
+  // requirement 標記欄位（目前只有技能側宣告需求，比對不出來）＋武器組實裝武器的內容資料。
   const actor = getC(work, cmd.actorId);
   combatants[cmd.actorId] = {
     ...actor,
@@ -1125,9 +1231,9 @@ export function handleUseCombatSkill(
     };
     const a = getC(work, cmd.actorId);
     work.combatants[cmd.actorId] = { ...a, counterStance: stance };
-    work.results.push({ kind: 'counterStanceEstablished', actorId: String(cmd.actorId) });
+    work.results.push({ kind: 'counterStanceEstablished', actorId: cmd.actorId, skillId: cmd.skillId });
   } else {
-    // 套用技能所有效果到**合法目標集合**（已去重 + 篩側別，非 UI 原樣）。
+    // 套用技能所有效果到 targeting resolver 解析出的目標集合（非 UI 原樣）。
     for (const effectId of skillView.effectIds) {
       const effect = ctx.definitions.getCombatEffect(effectId);
       work = applyEffect(work, effect, cmd.actorId, cmd.skillId, legalTargets, ctx);
@@ -1140,8 +1246,13 @@ export function handleUseCombatSkill(
   const supportCounts = tallySupportUse(work.encounter, cmd.actorId, cmd.skillId, skillView, work);
 
   // 行動延遲 + 狀態倒扣 + 自身行動旗標重置。
+  // §8.3：跨組時先付切換武器組延遲，再付技能自身的行動延遲——兩段都由資料折算，都不是常數。
   const acted0 = getC(work, cmd.actorId);
-  const delay = actionDelayFor(acted0, skillView, ctx);
+  let delay = actionDelayFor(acted0, skillView, ctx);
+  if (switchedWeaponSet) {
+    const combatRule = ctx.definitions.getCombatRule(ctx.combatRuleId);
+    delay += delayFromRule(combatRule.weaponSetSwitchDelayRuleId, acted0, ctx);
+  }
   const acted = decrementActorStatuses(
     clearOwnActionWindow({
       ...acted0,
@@ -1207,11 +1318,13 @@ export function handleEnemyTurn(
 
   const choice = ctx.resolvers.chooseEnemyAction({ encounter, actorId });
   if (choice === undefined) {
-    // 無合法行動：以固定小延遲讓出行動（近似 combatRest 的休止）。
-    const combatants = { ...encounter.combatants };
-    combatants[actorId] = { ...actor, currentCtb: actor.currentCtb + 100, revision: bumpRevision(actor.revision) };
-    const work: Working = { encounter: { ...encounter, combatants }, combatants, results: [] };
-    return acceptOf(finishTurn(state, work, actorId, ctx, []));
+    // 無合法行動：走 combatRest 主路休止。
+    //
+    // 這裡原本是 `currentCtb + 100`——一個住在 Handler 裡的可調延遲值（規範 §6 的「玩法數值寫進程式」，
+    // 與本輪修的「切換武器組延遲寫死成 0」是同一類）。休止的延遲屬 CombatRule 的 combatRestDelayRuleId，
+    // 回復量屬 combatRestHealthRestore/ManaRestore；讓敵方共用 combatRest 主路，三個量就全部來自資料，
+    // 而且與玩家休息保證同一套行動窗清理與結算流程（同 useCombatSkill 主路共用的理由）。
+    return handleCombatRest(state, { type: 'combatRest', encounterId, actorId }, ctx);
   }
   // 敵方選招同樣走 useCombatSkill 主路（保證效果 / 延遲 / 補位 / 結算一致）。
   return handleUseCombatSkill(
@@ -1250,17 +1363,17 @@ export function handleCombatRest(
   if (actor.state === 'dead') return reject('combat/actor-dead', { actorId: String(cmd.actorId) });
 
   const rule = ctx.definitions.getCombatRule(ctx.combatRuleId);
-  const delayRule = ctx.definitions.getActionDelayRule(rule.combatRestDelayRuleId);
-  const attrs = attributesOf(actor, ctx);
-  const delay = Math.max(delayRule.minimumDelay, delayRule.baseDelay - ctbReduction(delayRule.reductions, attrs));
+  const delay = delayFromRule(rule.combatRestDelayRuleId, actor, ctx);
 
   // 回復量由 CombatRule 提供（原本是 Handler 裡的固定 5）。
   const combatants = { ...encounter.combatants };
+  const health = Math.min(actor.maxHealth, actor.health + rule.combatRestHealthRestore);
+  const mana = actor.mana + rule.combatRestManaRestore;
   const acted = decrementActorStatuses(
     clearOwnActionWindow({
       ...actor,
-      health: Math.min(actor.maxHealth, actor.health + rule.combatRestHealthRestore),
-      mana: actor.mana + rule.combatRestManaRestore,
+      health,
+      mana,
       currentCtb: actor.currentCtb + delay,
       revision: bumpRevision(actor.revision),
     }),
@@ -1269,7 +1382,15 @@ export function handleCombatRest(
   const work: Working = {
     encounter: { ...encounter, combatants },
     combatants,
-    results: [{ kind: 'rest', actorId: String(cmd.actorId) }],
+    // 回報**實際**回復量（HP 受上限夾住，滿血休息回 0），不是規則的名目值。
+    results: [
+      {
+        kind: 'rest',
+        actorId: cmd.actorId,
+        healthRestored: health - actor.health,
+        manaRestored: mana - actor.mana,
+      },
+    ],
   };
   const actionEvent = emit({
     type: 'CombatActionResolved',
@@ -1316,9 +1437,15 @@ export function handleUseCombatItem(
   ]);
 }
 
-// 指揮隊友尚未實作。列於 manifest 的 UNAVAILABLE_CAPABILITIES，Router 在 dispatch **之前**就回
-// `engine/feature-not-available`，所以正常情況下走不到這裡。這個拒絕是第二道保險：萬一有人把它從
-// 清單移除卻忘了實作，會拿到明確失敗，而不是「送出成功、隊友沒反應」的假成功（規範 §10）。
+// 指揮隊友尚未實作，而且**未進 contracts 的 CombatGameCommand union**——所以它不在 GameCommand、
+// 不在 GAME_COMMAND_ENTRY、不在 Manifest，Router 根本查不到這個指令；正常情況下走不到這裡。
+//
+// （這段註解原本寫「列於 manifest 的 UNAVAILABLE_CAPABILITIES」。那份清單早已整套刪除：它讓
+// 三十幾筆未閉合能力合法地待在正式註冊表裡而啟動驗證仍是綠的，違反規範 §10。現在的作法是
+// 未實作就不進 union，沒有第三種狀態。）
+//
+// 這個拒絕是第二道保險：萬一有人把它加回 union 卻忘了實作，會拿到明確失敗，而不是
+// 「送出成功、隊友沒反應」的假成功（規範 §10）。
 export function handleCommandAlly(
   state: CombatState,
   cmd: CommandAllyCommand,

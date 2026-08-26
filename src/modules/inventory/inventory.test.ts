@@ -9,9 +9,10 @@ import type {
   EquipmentChanged,
   InventoryTransferred,
   ItemRemoved,
+  MoveItemToTeamQuestCargo,
   TransferItem,
 } from '../../contracts/inventory';
-import type { CharacterId, ItemInstanceId, WeaponSetId, WorldDay } from '../../contracts/core';
+import type { CharacterId, ItemInstanceId, QuestId, WeaponSetId, WorldDay } from '../../contracts/core';
 import { createInventoryQuery } from './queries';
 import {
   commitCombatItemUse,
@@ -52,6 +53,41 @@ function withItemPatch(
 ): InventoryState {
   const inst = state.items[itemId]!;
   return { ...state, items: { ...state.items, [itemId]: { ...inst, ...patch } } };
+}
+
+// ── 任務貨物重量上限的共用場景 ───────────────────────────────────────────────
+const CARGO_QUEST_ID = 'runtime:quest:cargo-1' as QuestId;
+
+// 待指派的任務貨物：目前在任務託管處，**不**計入任何角色的攜帶重量（不變量 13）。
+// 用它而不是背包裡的物品，才驗得出「判定用的是移動後的重量」——本來就在攜帶者身上的東西，
+// 移動前後總量相同，前判定與後判定都會過，測不出差別。
+function stagedCargoState(): InventoryState {
+  return withItemPatch(createFixtureState(), FIXTURE.chestItemId, {
+    ownerCharacterId: undefined,
+    location: { kind: 'questEscrow', questId: CARGO_QUEST_ID },
+  });
+}
+
+const CARGO_CMD: MoveItemToTeamQuestCargo = {
+  type: 'MoveItemToTeamQuestCargo',
+  itemId: FIXTURE.chestItemId,
+  questId: CARGO_QUEST_ID,
+  teamId: FIXTURE.teamId,
+  carrierCharacterId: FIXTURE.characterId,
+};
+
+// 上限由測試指定；重量本身一律取自 fixture 定義（不在測試裡重打數字，fixture 改了也不會假綠）。
+function capacityDeps(maximumWeight: number) {
+  return createFixtureDeps({
+    getCarryCapacity: (characterId) => ({ characterId, maximumWeight, sourceRevisionKey: 'cargo-capacity' }),
+  });
+}
+
+// 攜帶者在移動前的重量，以及移入這件貨物後應有的重量。
+function cargoWeights(staged: InventoryState): Readonly<{ before: number; after: number }> {
+  const q = createInventoryQuery(staged, createFixtureReader());
+  const before = q.getCarriedWeight(FIXTURE.characterId);
+  return { before, after: before + q.getItemWeight(FIXTURE.chestItemId) };
 }
 
 function assert(condition: boolean, message: string): void {
@@ -1101,6 +1137,93 @@ const cases: readonly Case[] = [
         equipItem(fresh, { type: 'equipItem', characterId: FIXTURE.characterId, itemId: FIXTURE.swordItemId, slotId: FIXTURE.mainHandSlot, weaponSetId: view.weaponSets[0]!.weaponSetId }, deps),
         'inventory/loadout-not-initialized',
         'equip before loadout init',
+      );
+    },
+  },
+  // ── MoveItemToTeamQuestCargo：攜帶者重量上限（doc §5.2 命令表「驗證攜帶者重量上限」）──────
+  {
+    name: 'moveItemToTeamQuestCargo: 攜帶者未超載 → accept，且任務貨物計入攜帶者重量',
+    run: () => {
+      const deps = createFixtureDeps(); // fixture 預設上限寬鬆
+      const staged = stagedCargoState();
+      const { before, after } = cargoWeights(staged);
+      const moved = expectOk(moveItemToTeamQuestCargo(staged, CARGO_CMD, deps), 'cargo-accept');
+      const q = createInventoryQuery(moved, deps.reader);
+      assert(q.getLocation(FIXTURE.chestItemId)?.kind === 'teamQuestCargo', 'cargo-accept: 應移入 teamQuestCargo');
+      assert(after > before, 'cargo-accept: 前提——這件貨物必須有重量，否則本組案例驗不到任何東西');
+      assert(
+        q.getCarriedWeight(FIXTURE.characterId) === after,
+        `cargo-accept: 任務貨物應計入攜帶者重量（不變量 13），期望 ${after}`,
+      );
+    },
+  },
+  {
+    name: 'moveItemToTeamQuestCargo: 移動後恰好等於上限 → accept（邊界：等於不算超載）',
+    run: () => {
+      const staged = stagedCargoState();
+      const { after } = cargoWeights(staged);
+      const deps = capacityDeps(after);
+      const moved = expectOk(moveItemToTeamQuestCargo(staged, CARGO_CMD, deps), 'cargo-boundary');
+      assert(
+        createInventoryQuery(moved, deps.reader).getCarriedWeight(FIXTURE.characterId) === after,
+        'cargo-boundary: 攜帶重量應恰好等於上限',
+      );
+    },
+  },
+  {
+    name: 'moveItemToTeamQuestCargo: 超過上限 → typed rejection（不是靜默接受後再補超載處理）',
+    run: () => {
+      const staged = stagedCargoState();
+      const { after } = cargoWeights(staged);
+      expectReject(
+        moveItemToTeamQuestCargo(staged, CARGO_CMD, capacityDeps(after - 1)),
+        'inventory/carrier-over-capacity',
+        'cargo-over',
+      );
+    },
+  },
+  {
+    name: 'moveItemToTeamQuestCargo: 判定用**移動後**的重量（上限等於移動前重量仍須拒絕）',
+    run: () => {
+      const staged = stagedCargoState();
+      const { before, after } = cargoWeights(staged);
+      assert(after > before, 'cargo-post-move: 前提——貨物需有重量，否則前後判定不可能有差別');
+      // 上限恰好等於**移動前**的攜帶重量：用移動前的重量判定會通過（等於不算超載），
+      // 只有用移動後的重量才會拒絕。這一條釘住的就是判定時機。
+      expectReject(
+        moveItemToTeamQuestCargo(staged, CARGO_CMD, capacityDeps(before)),
+        'inventory/carrier-over-capacity',
+        'cargo-post-move',
+      );
+    },
+  },
+  {
+    name: 'moveItemToTeamQuestCargo 與 evaluateTeamEncumbrance 用同一套超載判定（含邊界）',
+    run: () => {
+      const staged = stagedCargoState();
+      const { after } = cargoWeights(staged);
+      const evalCmd = { type: 'EvaluateTeamEncumbrance', teamId: FIXTURE.teamId } as const;
+
+      // 恰好等於上限：move 接受，且同一份 deps 下超載評估也判定為未超載（不開 Resolution）。
+      const exact = capacityDeps(after);
+      const moved = expectOk(moveItemToTeamQuestCargo(staged, CARGO_CMD, exact), 'cargo-agree-move');
+      const evaluated = expectOk(evaluateTeamEncumbrance(moved, evalCmd, exact), 'cargo-agree-eval');
+      assert(
+        createInventoryQuery(evaluated, exact.reader).getEncumbranceResolution(FIXTURE.teamId) === undefined,
+        'cargo-agree: 邊界值下超載評估不得開啟 Resolution（兩邊若一個用 > 一個用 >= 就會分岔）',
+      );
+
+      // 少 1：move 拒絕，而超載評估對「假設已移動」的同一份 State 判定為超載。
+      const tight = capacityDeps(after - 1);
+      expectReject(
+        moveItemToTeamQuestCargo(staged, CARGO_CMD, tight),
+        'inventory/carrier-over-capacity',
+        'cargo-agree-reject',
+      );
+      const tightEval = expectOk(evaluateTeamEncumbrance(moved, evalCmd, tight), 'cargo-agree-eval-tight');
+      assert(
+        createInventoryQuery(tightEval, tight.reader).getEncumbranceResolution(FIXTURE.teamId) !== undefined,
+        'cargo-agree: 同一份重量在超載評估側也必須算超載',
       );
     },
   },

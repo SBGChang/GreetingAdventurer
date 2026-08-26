@@ -23,6 +23,8 @@ import type {
   ResolveDungeonInteraction,
 } from '../../contracts/dungeon';
 
+import type { NpcDungeonRun } from '../../contracts/dungeon';
+
 import type { DungeonModuleState } from './state';
 import { createInitialDungeonState, getPlayerSession } from './state';
 import {
@@ -35,13 +37,20 @@ import {
   handleNpcDungeonSettlementApplied,
   handleAssetDistributionCompleted,
   handleCombatEncounterResolved,
+  handleCombatSequenceChallengeResolved,
+  handleCombatSequenceReadyForSourceCommit,
+  handleCombatSequenceSettled,
+  handleCombatSequenceInvalidated,
 } from './system';
-import type { DungeonHandlerResult } from './system';
+import type { DungeonContext, DungeonHandlerResult, DungeonMapPort } from './system';
 import {
   createFixtureState,
   createFixtureContext,
   createFixtureReader,
   createFixtureMapPort,
+  createFixtureCombatSequencePort,
+  challengeIdFor,
+  monsterNpcSequence,
   FIXTURE,
 } from './fixtures';
 import { makeDungeonQuery } from './queries';
@@ -100,6 +109,68 @@ function internalKinds(messages: readonly unknown[]): string[] {
     }
   }
   return out;
+}
+
+// 取出外送訊息中指定型別的 internal command 本體（草稿的 command 欄位是 unknown，讀取端自行窄化）。
+function commandsOfType(messages: readonly unknown[], type: string): Record<string, unknown>[] {
+  const out: Record<string, unknown>[] = [];
+  for (const m of messages) {
+    const cmd = (m as { command?: Record<string, unknown> }).command;
+    if (cmd !== undefined && cmd['type'] === type) out.push(cmd);
+  }
+  return out;
+}
+
+// ── 怪物序列（Combat Sequence）測試共用 ──────────────────────────────────────
+
+// 走 monsterNpcSequence 的 Context：怪物 A（1 點）→ 寶箱（1 點）→ Boss B（4 點）。
+function monsterContext(mapOverrides?: Partial<DungeonMapPort>, rest?: Partial<DungeonContext>): DungeonContext {
+  return createFixtureContext({
+    map: createFixtureMapPort({ listNpcSequence: () => monsterNpcSequence, ...mapOverrides }),
+    ...rest,
+  });
+}
+
+function startMonsterRun(ctx: DungeonContext) {
+  return ok(
+    startNpcDungeonRun(
+      createInitialDungeonState(),
+      { type: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
+      ctx,
+    ),
+  );
+}
+
+function onlyRun(state: DungeonModuleState): NpcDungeonRun {
+  const run = Object.values(state.npcRuns)[0];
+  if (run === undefined) throw new Error('fixture: expected exactly one npc run');
+  return run;
+}
+
+// combat-sequence 會發出的事件；challengeId 取自 Run 正在等的那一題。
+function challengeResolvedEvent(
+  run: NpcDungeonRun,
+  outcome: 'success' | 'failure' | 'skippedBeforeAttempt',
+  resultId: string,
+): never {
+  const challengeId = run.awaitingCombatChallengeId;
+  if (challengeId === undefined) throw new Error('fixture: run is not awaiting a challenge');
+  const contentId = run.combatSequenceChallenges.find((c) => c.challengeId === challengeId)?.contentId;
+  return {
+    type: 'CombatSequenceChallengeResolved',
+    sequenceId: run.combatSequenceId,
+    teamId: run.teamId,
+    challengeId,
+    resultId,
+    sourceRef: {
+      kind: 'mapContent',
+      mapId: run.mapId,
+      mapVersion: run.mapVersion,
+      contentId,
+      contentRevision: 0,
+    },
+    outcome,
+  } as never;
 }
 
 type Case = Readonly<{ name: string; run: () => void }>;
@@ -614,7 +685,17 @@ const cases: readonly Case[] = [
       assert(day.nextSlice.npcRuns[runId]!.status === 'settling', 'settling after day');
 
       // Map 套用結算 → mapApplied，但仍未關閉（distribution 未完成）。
-      const applied = handleNpcDungeonSettlementApplied(day.nextSlice, { runId, distributionId });
+      const applied = handleNpcDungeonSettlementApplied(
+        day.nextSlice,
+        {
+          type: 'NpcDungeonSettlementApplied',
+          runId,
+          distributionId,
+          appliedResults: day.nextSlice.npcRuns[runId]!.pendingResults,
+          skippedResults: [],
+        },
+        ctx,
+      );
       const afterMap = applied.nextSlice.npcRuns[runId]!;
       assert(afterMap.settlementProgress.mapApplied === true, 'mapApplied true');
       assert(afterMap.status === 'settling', 'still settling (distribution pending)');
@@ -647,6 +728,672 @@ const cases: readonly Case[] = [
         .map((m) => (m as { event?: { type?: string; reason?: string } }).event)
         .find((e) => e?.type === 'NpcDungeonRunClosed');
       assert(closed?.reason === 'invalid', 'closed with reason invalid');
+    },
+  },
+
+  // ── (A) 控制／綁架內容的守衛（01_map_module.md §3.2 controllerContentIds）────────
+  {
+    // 先前 control / kidnap 與 chest 走同一條直取路徑：守衛一個沒打，內容就被判定成功。
+    name: '控制內容：守衛未解決 → typed rejection（不得靜默成功）',
+    run: () => {
+      const ctx = createFixtureContext();
+      const inRoom = ok(
+        moveDungeonRoom(
+          createFixtureState(),
+          FIXTURE.teamId,
+          { type: 'moveDungeonRoom', targetRoomId: FIXTURE.roomMiddle },
+          ctx,
+        ),
+      ).nextSlice;
+      const r = interactDungeonContent(
+        inRoom,
+        FIXTURE.teamId,
+        { type: 'interactDungeonContent', contentId: FIXTURE.controlContentId },
+        ctx,
+      );
+      assert(!r.ok, '守衛還在時必須拒絕');
+      if (!r.ok) {
+        assert(
+          r.rejection.code === 'dungeon.interactDungeonContent.guardsUnresolved',
+          `rejection code (got ${r.rejection.code})`,
+        );
+        assert(
+          r.rejection.details?.['nextGuardContentId'] === String(FIXTURE.guardContentId),
+          '拒絕要說得出還卡在哪一個守衛',
+        );
+      }
+    },
+  },
+  {
+    name: '綁架內容：守衛全數解決後 → 走內容 Resolver（ResolvePlayerMapContent）',
+    run: () => {
+      const ctx = createFixtureContext({
+        map: createFixtureMapPort({
+          // 守衛已被打掉（map 標為 resolved）；其餘內容仍可用。
+          isContentAvailable: (_mapId, contentId) => contentId !== FIXTURE.guardContentId,
+        }),
+      });
+      const inRoom = ok(
+        moveDungeonRoom(
+          createFixtureState(),
+          FIXTURE.teamId,
+          { type: 'moveDungeonRoom', targetRoomId: FIXTURE.roomMiddle },
+          ctx,
+        ),
+      ).nextSlice;
+      const r = ok(
+        interactDungeonContent(
+          inRoom,
+          FIXTURE.teamId,
+          { type: 'interactDungeonContent', contentId: FIXTURE.kidnapContentId },
+          ctx,
+        ),
+      );
+      assert(
+        internalKinds(r.outgoingMessages).includes('ResolvePlayerMapContent'),
+        '守衛清空後才要求 map 處理內容',
+      );
+    },
+  },
+  {
+    name: '控制內容：map 說不出守衛名單 → typed rejection（不得當成「沒有守衛」放行）',
+    run: () => {
+      const ctx = createFixtureContext({
+        map: createFixtureMapPort({ listControllerContentIds: () => undefined }),
+      });
+      const inRoom = ok(
+        moveDungeonRoom(
+          createFixtureState(),
+          FIXTURE.teamId,
+          { type: 'moveDungeonRoom', targetRoomId: FIXTURE.roomMiddle },
+          ctx,
+        ),
+      ).nextSlice;
+      const r = interactDungeonContent(
+        inRoom,
+        FIXTURE.teamId,
+        { type: 'interactDungeonContent', contentId: FIXTURE.controlContentId },
+        ctx,
+      );
+      assert(!r.ok, '守衛名單缺失必須拒絕');
+      if (!r.ok) {
+        assert(
+          r.rejection.code === 'dungeon.interactDungeonContent.controllerContentsMissing',
+          `rejection code (got ${r.rejection.code})`,
+        );
+      }
+    },
+  },
+
+  // ── (B) NPC 怪物內容走 Combat Sequence ─────────────────────────────────────
+  {
+    name: 'StartNpcDungeonRun：有怪物內容 → 送 StartCombatSequence(source=dungeonSweep) 並保存對照',
+    run: () => {
+      const ctx = monsterContext();
+      const start = startMonsterRun(ctx);
+      const starts = commandsOfType(start.outgoingMessages, 'StartCombatSequence');
+      assert(starts.length === 1, `恰好開一條 Sequence（實得 ${starts.length}）`);
+      const source = starts[0]!['source'] as { kind?: string; mapId?: string; mapVersion?: number };
+      assert(source.kind === 'dungeonSweep', `source 必須是 dungeonSweep（實得 ${String(source.kind)}）`);
+      assert(source.mapId === FIXTURE.mapId && source.mapVersion === FIXTURE.mapVersion, 'source 帶本圖與版本');
+
+      const run = onlyRun(start.nextSlice);
+      assert(run.combatSequenceId !== undefined, 'Run 必須保存 combatSequenceId');
+      assert(
+        starts[0]!['sequenceId'] === run.combatSequenceId,
+        '送出的 sequenceId 必須就是 Run 保存的那一個',
+      );
+      // 只有兩筆怪物內容進戰鬥串（寶箱不進；21 §8）。
+      assert(
+        run.combatSequenceChallenges.map((c) => String(c.contentId)).join(',') ===
+          `${FIXTURE.monsterContentA},${FIXTURE.monsterContentB}`,
+        `對照表只含怪物內容且依 npcOrder 排序（實得 ${run.combatSequenceChallenges.map((c) => String(c.contentId)).join(',')}）`,
+      );
+      assert(
+        run.settlementProgress.combatSequenceSettled === false,
+        '有怪物時 combatSequenceSettled 必須從 false 開始',
+      );
+    },
+  },
+  {
+    // 先前是 `sequence.some((e) => e.kind === 'mapContent')`：寶箱也被算成怪物，
+    // 於是一張只有寶箱的圖會開一條沒有任何 Challenge 的 Sequence（違反不變量 §3.4.9）。
+    name: 'StartNpcDungeonRun：只有寶箱的 mapContent 序列不算怪物 → 不建立空 Sequence',
+    run: () => {
+      const ctx = monsterContext({
+        listNpcSequence: () => [
+          {
+            kind: 'mapContent',
+            npcOrder: 0,
+            pointCost: 1,
+            resolverId: FIXTURE.resolverId,
+            contentId: FIXTURE.chestContentId,
+          },
+        ],
+      });
+      const start = startMonsterRun(ctx);
+      assert(
+        commandsOfType(start.outgoingMessages, 'StartCombatSequence').length === 0,
+        '沒有怪物就不得開 Sequence',
+      );
+      const run = onlyRun(start.nextSlice);
+      assert(run.combatSequenceId === undefined, '沒有怪物就沒有 combatSequenceId');
+      assert(run.settlementProgress.combatSequenceSettled === true, '沒有怪物時該旗標從開始即 true');
+    },
+  },
+  {
+    name: 'StartNpcDungeonRun：組不出開始快照 → typed rejection（不得退成「先不打仗」）',
+    run: () => {
+      const ctx = monsterContext(undefined, {
+        combatSequence: createFixtureCombatSequencePort({ planDungeonSweep: () => undefined }),
+      });
+      const r = startNpcDungeonRun(
+        createInitialDungeonState(),
+        { type: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
+        ctx,
+      );
+      assert(!r.ok, '快照組不出來必須拒絕');
+      if (!r.ok) {
+        assert(
+          r.rejection.code === 'dungeon.startNpcDungeonRun.combatSequencePlanUnavailable',
+          `rejection code (got ${r.rejection.code})`,
+        );
+      }
+    },
+  },
+  {
+    name: 'npcDungeonDay：走到怪物內容 → 扣點並送 ResolveNextCombatSequenceChallenge，該段不排 Job',
+    run: () => {
+      const ctx = monsterContext();
+      const start = startMonsterRun(ctx);
+      const runId = onlyRun(start.nextSlice).runId;
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
+
+      const resolves = commandsOfType(day.outgoingMessages, 'ResolveNextCombatSequenceChallenge');
+      assert(resolves.length === 1, `恰好推進一題（實得 ${resolves.length}）`);
+      assert(
+        resolves[0]!['expectedChallengeId'] === challengeIdFor(FIXTURE.monsterContentA),
+        '推進的必須是游標指向的那一題',
+      );
+      assert(resolves[0]!['attemptedOnDay'] === ctx.worldDay, 'attemptedOnDay 是當前世界日');
+
+      const run = day.nextSlice.npcRuns[runId]!;
+      assert(
+        run.awaitingCombatChallengeId === challengeIdFor(FIXTURE.monsterContentA),
+        '送出後必須記住自己在等哪一題',
+      );
+      assert(run.cursorNpcOrder === 0, '結果還沒回來，游標不得前進');
+      assert(run.remainingDailyPoints === 9, `怪物 1 點已扣（實得 ${run.remainingDailyPoints}）`);
+      assert(run.pendingResults.length === 0, '成敗未知前不得寫入暫存結果');
+      assert(day.scheduledJobs.length === 0, '今日尚未結束，這一段不得排明日 Job');
+    },
+  },
+  {
+    name: 'CombatSequenceChallengeResolved(success) → 記下怪物結果並續行今日剩餘點數',
+    run: () => {
+      const ctx = monsterContext();
+      const start = startMonsterRun(ctx);
+      const runId = onlyRun(start.nextSlice).runId;
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
+      const awaiting = day.nextSlice.npcRuns[runId]!;
+
+      const resolved = handleCombatSequenceChallengeResolved(
+        day.nextSlice,
+        challengeResolvedEvent(awaiting, 'success', 'runtime:combat-sequence-challenge-result:r1'),
+        ctx,
+      );
+      const run = resolved.nextSlice.npcRuns[runId]!;
+      const first = run.pendingResults[0]!;
+      assert(first.outcome === 'success', `成敗來自事件（實得 ${first.outcome}）`);
+      assert(
+        first.combatSequenceResultId === 'runtime:combat-sequence-challenge-result:r1',
+        '怪物結果必須帶 Combat Sequence 的 Result ID（不變量 §3.4.10）',
+      );
+      assert(first.pendingRewardRefs.length === 1, '成功才留獎勵引用');
+
+      // 續行：寶箱（1 點）由內容 Resolver 判定，接著 Boss（4 點）再送一題。
+      assert(run.pendingResults.length === 2, `續行處理了寶箱（實得 ${run.pendingResults.length} 筆）`);
+      const resolves = commandsOfType(resolved.outgoingMessages, 'ResolveNextCombatSequenceChallenge');
+      assert(resolves.length === 1, '續行走到下一個怪物內容時再送一題');
+      assert(
+        resolves[0]!['expectedChallengeId'] === challengeIdFor(FIXTURE.monsterContentB),
+        '第二題必須是序列上的下一個怪物',
+      );
+      assert(run.remainingDailyPoints === 4, `10 - 1 - 1 - 4 = 4（實得 ${run.remainingDailyPoints}）`);
+    },
+  },
+  {
+    name: 'CombatSequenceChallengeResolved(failure) → 立即進入 settling 並要求 Map 套用結果',
+    run: () => {
+      const ctx = monsterContext();
+      const start = startMonsterRun(ctx);
+      const runId = onlyRun(start.nextSlice).runId;
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
+      const awaiting = day.nextSlice.npcRuns[runId]!;
+
+      const resolved = handleCombatSequenceChallengeResolved(
+        day.nextSlice,
+        challengeResolvedEvent(awaiting, 'failure', 'runtime:combat-sequence-challenge-result:r1'),
+        ctx,
+      );
+      const run = resolved.nextSlice.npcRuns[runId]!;
+      assert(run.status === 'settling', `失敗立刻結算（實得 ${run.status}）`);
+      assert(run.pendingResults[0]!.outcome === 'failure', '失敗仍要記錄嘗試過的目標');
+      assert(run.pendingResults[0]!.pendingRewardRefs.length === 0, '失敗不得留下獎勵引用');
+      assert(
+        internalKinds(resolved.outgoingMessages).includes('ApplyNpcDungeonSettlement'),
+        '進入 settling 就要求 Map 套用',
+      );
+      assert(
+        commandsOfType(resolved.outgoingMessages, 'ResolveNextCombatSequenceChallenge').length === 0,
+        '失敗後不得再解析後續 Challenge',
+      );
+      // Sequence 自己已轉 awaitingSourceCommit，再送 Stop 會被拒 → 整筆交易回滾。
+      assert(
+        commandsOfType(resolved.outgoingMessages, 'StopCombatSequence').length === 0,
+        '對已終止的 Sequence 不得再送 StopCombatSequence',
+      );
+    },
+  },
+  {
+    name: '怪物內容在嘗試前已被處理 → SkipNextCombatSequenceChallenge 且不扣點',
+    run: () => {
+      const ctx = monsterContext({
+        isContentAvailable: (_mapId, contentId) => contentId !== FIXTURE.monsterContentA,
+      });
+      const start = startMonsterRun(ctx);
+      const runId = onlyRun(start.nextSlice).runId;
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
+
+      const skips = commandsOfType(day.outgoingMessages, 'SkipNextCombatSequenceChallenge');
+      assert(skips.length === 1, `必須同步 Skip 保持兩邊游標一致（實得 ${skips.length}）`);
+      assert(
+        skips[0]!['expectedChallengeId'] === challengeIdFor(FIXTURE.monsterContentA),
+        'Skip 的是游標指向的那一題',
+      );
+      const run = day.nextSlice.npcRuns[runId]!;
+      assert(run.remainingDailyPoints === 10, `已處理的目標不扣點（實得 ${run.remainingDailyPoints}）`);
+
+      // Skip 同樣以 CombatSequenceChallengeResolved 回來（21 §6.4）。
+      const resolved = handleCombatSequenceChallengeResolved(
+        day.nextSlice,
+        challengeResolvedEvent(run, 'skippedBeforeAttempt', 'runtime:combat-sequence-challenge-result:s1'),
+        ctx,
+      );
+      const after = resolved.nextSlice.npcRuns[runId]!;
+      assert(after.pendingResults[0]!.outcome === 'skip', 'skippedBeforeAttempt 記為 skip');
+      assert(after.pendingResults[0]!.npcOrder === 0, 'skip 記在被跳過的那一筆上');
+      assert(after.pendingResults[0]!.pendingRewardRefs.length === 0, 'skip 不得留下獎勵引用');
+      // skip 一樣把游標推過那一筆，並續行今日剩餘點數：寶箱（order 1）處理完後停在 Boss（order 2）。
+      assert(after.cursorNpcOrder === 2, `續行後游標到 2（實得 ${after.cursorNpcOrder}）`);
+      assert(
+        after.awaitingCombatChallengeId === challengeIdFor(FIXTURE.monsterContentB),
+        'skip 之後照常續行到下一個怪物',
+      );
+      assert(after.remainingDailyPoints === 5, `skip 不扣點：10 - 1(寶箱) - 4(Boss) = 5（實得 ${after.remainingDailyPoints}）`);
+    },
+  },
+  {
+    name: 'CombatSequenceChallengeResolved：別條 Sequence 的事件一律略過',
+    run: () => {
+      const ctx = monsterContext();
+      const start = startMonsterRun(ctx);
+      const runId = onlyRun(start.nextSlice).runId;
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
+      const before = day.nextSlice.npcRuns[runId]!;
+
+      const foreign = handleCombatSequenceChallengeResolved(
+        day.nextSlice,
+        {
+          type: 'CombatSequenceChallengeResolved',
+          sequenceId: 'runtime:combat-sequence:single-battle',
+          teamId: FIXTURE.teamId,
+          challengeId: 'runtime:combat-sequence-challenge:other',
+          resultId: 'runtime:combat-sequence-challenge-result:other',
+          sourceRef: { kind: 'singleBattle', sourceId: 'runtime:combat-sequence-source:other' },
+          outcome: 'success',
+        } as never,
+        ctx,
+      );
+      const after = foreign.nextSlice.npcRuns[runId]!;
+      assert(after.revision === before.revision, '不屬本 Run 的事件不得改動 Run');
+      assert(foreign.outgoingMessages.length === 0, '不屬本 Run 的事件不得送出任何命令');
+    },
+  },
+  {
+    name: 'NpcDungeonSettlementApplied → 只把 applied 的成功怪物 Result 送進 CommitCombatSequenceSourceResults',
+    run: () => {
+      const ctx = monsterContext();
+      const start = startMonsterRun(ctx);
+      const runId = onlyRun(start.nextSlice).runId;
+
+      // 第一題成功 → 續行寶箱 → 送出第二題。
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
+      const afterFirst = handleCombatSequenceChallengeResolved(
+        day.nextSlice,
+        challengeResolvedEvent(day.nextSlice.npcRuns[runId]!, 'success', 'runtime:combat-sequence-challenge-result:r1'),
+        ctx,
+      );
+      // 第二題（最後一題）成功 → 序列走完 → settling。
+      const afterSecond = handleCombatSequenceChallengeResolved(
+        afterFirst.nextSlice,
+        challengeResolvedEvent(afterFirst.nextSlice.npcRuns[runId]!, 'success', 'runtime:combat-sequence-challenge-result:r2'),
+        ctx,
+      );
+      const settling = afterSecond.nextSlice.npcRuns[runId]!;
+      assert(settling.status === 'settling', `序列走完 → settling（實得 ${settling.status}）`);
+      // 最後一題已讓 Sequence 自己轉 awaitingSourceCommit，不得再送 Stop。
+      assert(
+        commandsOfType(afterSecond.outgoingMessages, 'StopCombatSequence').length === 0,
+        '最後一題解出後 Sequence 已終止，不得再送 Stop',
+      );
+
+      // Map 只接受第一筆（第二筆被別隊搶先）。
+      const applied = settling.pendingResults.filter(
+        (r) => r.combatSequenceResultId === 'runtime:combat-sequence-challenge-result:r1',
+      );
+      const skipped = settling.pendingResults.filter(
+        (r) => r.combatSequenceResultId === 'runtime:combat-sequence-challenge-result:r2',
+      );
+      const settled = handleNpcDungeonSettlementApplied(
+        afterSecond.nextSlice,
+        {
+          type: 'NpcDungeonSettlementApplied',
+          runId,
+          distributionId: settling.distributionId,
+          appliedResults: applied,
+          skippedResults: skipped,
+        },
+        ctx,
+      );
+      const commits = commandsOfType(settled.outgoingMessages, 'CommitCombatSequenceSourceResults');
+      assert(commits.length === 1, `恰好提交一次（實得 ${commits.length}）`);
+      assert(
+        JSON.stringify(commits[0]!['acceptedSuccessfulResultIds']) ===
+          JSON.stringify(['runtime:combat-sequence-challenge-result:r1']),
+        `只提交 Map 接受的成功 Result（實得 ${JSON.stringify(commits[0]!['acceptedSuccessfulResultIds'])}）`,
+      );
+      assert(commits[0]!['committedOnDay'] === ctx.worldDay, 'committedOnDay 是當前世界日');
+      assert(
+        settled.nextSlice.npcRuns[runId]!.settlementProgress.mapApplied === true,
+        'mapApplied 已標記',
+      );
+    },
+  },
+  {
+    name: 'CombatSequenceSettled → 標記 combatSequenceSettled（三方結算之一）',
+    run: () => {
+      const ctx = monsterContext();
+      const start = startMonsterRun(ctx);
+      const runId = onlyRun(start.nextSlice).runId;
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
+      const failed = handleCombatSequenceChallengeResolved(
+        day.nextSlice,
+        challengeResolvedEvent(day.nextSlice.npcRuns[runId]!, 'failure', 'runtime:combat-sequence-challenge-result:r1'),
+        ctx,
+      );
+      const run = failed.nextSlice.npcRuns[runId]!;
+      const settled = handleCombatSequenceSettled(failed.nextSlice, {
+        sequenceId: run.combatSequenceId!,
+        teamId: run.teamId,
+        source: { kind: 'dungeonSweep', sourceId: FIXTURE.combatSequenceSourceId, mapId: run.mapId, mapVersion: run.mapVersion },
+        terminationReason: 'challengeFailed',
+        acceptedSuccessfulCount: 0,
+        totalAttackExperienceBudget: 0,
+        totalDefenseExperienceBudget: 0,
+      });
+      assert(
+        settled.nextSlice.npcRuns[runId]!.settlementProgress.combatSequenceSettled === true,
+        'combatSequenceSettled 必須被標記',
+      );
+    },
+  },
+  {
+    name: 'CombatSequenceInvalidated → Run 標為 invalid 並發 NpcDungeonRunClosed',
+    run: () => {
+      const ctx = monsterContext();
+      const start = startMonsterRun(ctx);
+      const runId = onlyRun(start.nextSlice).runId;
+      const run = onlyRun(start.nextSlice);
+      const invalidated = handleCombatSequenceInvalidated(
+        start.nextSlice,
+        {
+          sequenceId: run.combatSequenceId!,
+          teamId: run.teamId,
+          reason: 'teamUnavailable',
+        },
+        ctx,
+      );
+      assert(invalidated.nextSlice.npcRuns[runId]!.status === 'invalid', 'Run 轉 invalid');
+      const closed = invalidated.outgoingMessages
+        .map((m) => (m as { event?: { type?: string; reason?: string } }).event)
+        .find((e) => e?.type === 'NpcDungeonRunClosed');
+      assert(closed?.reason === 'invalid', '以 invalid 原因關閉');
+      // Sequence 已經是 invalid，再送一次只會被拒 → 整筆交易回滾。
+      assert(
+        commandsOfType(invalidated.outgoingMessages, 'InvalidateCombatSequence').length === 0,
+        '不得回送 InvalidateCombatSequence',
+      );
+    },
+  },
+  {
+    // 先前 getNpcProgress 回傳的是 Definition 的 dailyPointBudget——花掉 7 點也永遠顯示 10。
+    name: 'getNpcProgress.remainingPoints 反映實際已花掉的點數',
+    run: () => {
+      const ctx = monsterContext();
+      const start = startMonsterRun(ctx);
+      const runId = onlyRun(start.nextSlice).runId;
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
+      const progress = makeDungeonQuery(day.nextSlice, ctx.reader).getNpcProgress(runId);
+      assert(progress.remainingPoints === 9, `10 - 1 = 9（實得 ${progress.remainingPoints}）`);
+    },
+  },
+  {
+    name: 'NpcDungeonRunView 不公開怪物對照表與正在解的那一題（doc §4）',
+    run: () => {
+      const ctx = monsterContext();
+      const start = startMonsterRun(ctx);
+      const runId = onlyRun(start.nextSlice).runId;
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
+      const view = makeDungeonQuery(day.nextSlice, ctx.reader).getNpcRun(runId);
+      if (view === undefined) throw new Error('getNpcRun returned undefined for an existing run');
+      const keys = Object.keys(view);
+      assert(!keys.includes('combatSequenceChallenges'), `怪物名單不得公開（keys: ${keys.join(',')}）`);
+      assert(!keys.includes('awaitingCombatChallengeId'), `正在解的那一題不得公開（keys: ${keys.join(',')}）`);
+    },
+  },
+
+  // ── 複核補洞 ───────────────────────────────────────────────────────────────
+  {
+    // map 的 isContentAvailable 對「已被打掉」與「這個 ID 根本不存在」回同一個 false，
+    // 所以只靠它過濾守衛，一份壞掉的守衛名單會被當成「守衛都清光了」而放行。
+    name: '控制內容：守衛名單指到不存在的內容 → typed rejection（不得當成守衛已清空）',
+    run: () => {
+      const ctx = createFixtureContext({
+        map: createFixtureMapPort({
+          // 守衛不存在：revision 查不到，isContentAvailable 也是 false（與「已解決」同形）。
+          getContentRevision: (_mapId, contentId) =>
+            contentId === FIXTURE.guardContentId ? undefined : (0 as never),
+          isContentAvailable: (_mapId, contentId) => contentId !== FIXTURE.guardContentId,
+        }),
+      });
+      const inRoom = ok(
+        moveDungeonRoom(
+          createFixtureState(),
+          FIXTURE.teamId,
+          { type: 'moveDungeonRoom', targetRoomId: FIXTURE.roomMiddle },
+          ctx,
+        ),
+      ).nextSlice;
+      const r = interactDungeonContent(
+        inRoom,
+        FIXTURE.teamId,
+        { type: 'interactDungeonContent', contentId: FIXTURE.controlContentId },
+        ctx,
+      );
+      assert(!r.ok, '指不到的守衛必須拒絕，不得放行內容');
+      if (!r.ok) {
+        assert(
+          r.rejection.code === 'dungeon.interactDungeonContent.controllerContentsMissing',
+          `rejection code (got ${r.rejection.code})`,
+        );
+        assert(
+          r.rejection.details?.['unknownGuardContentId'] === String(FIXTURE.guardContentId),
+          '拒絕要說得出是哪一個守衛指不到內容',
+        );
+      }
+    },
+  },
+  {
+    // 不變量 dungeon/one-active-run-per-team 一直宣告著，卻沒有任何程式擋。
+    name: 'StartNpcDungeonRun：同隊已有未收斂 Run → typed rejection（不得多開一條）',
+    run: () => {
+      const ctx = monsterContext();
+      const first = startMonsterRun(ctx);
+      const second = startNpcDungeonRun(
+        first.nextSlice,
+        { type: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
+        ctx,
+      );
+      assert(!second.ok, '同一隊不得同時有兩條 Run');
+      if (!second.ok) {
+        assert(
+          second.rejection.code === 'dungeon.startNpcDungeonRun.runAlreadyActive',
+          `rejection code (got ${second.rejection.code})`,
+        );
+      }
+      assert(
+        Object.keys(first.nextSlice.npcRuns).length === 1,
+        '被拒絕的那一次不得留下任何 Run',
+      );
+    },
+  },
+  {
+    // 反向釘住：守門只擋未收斂的 Run，跑完一趟之後必須還能再開一趟。
+    name: 'StartNpcDungeonRun：舊 Run 已 closed → 同一隊可以再開一趟',
+    run: () => {
+      const ctx = monsterContext();
+      const first = startMonsterRun(ctx);
+      const runId = onlyRun(first.nextSlice).runId;
+      const closedState: DungeonModuleState = {
+        ...first.nextSlice,
+        npcRuns: {
+          ...first.nextSlice.npcRuns,
+          [runId]: { ...first.nextSlice.npcRuns[runId]!, status: 'closed' },
+        },
+      };
+      const second = startNpcDungeonRun(
+        closedState,
+        { type: 'StartNpcDungeonRun', teamId: FIXTURE.teamId, mapId: FIXTURE.mapId, planId: FIXTURE.planId },
+        ctx,
+      );
+      assert(second.ok, `已收斂的舊 Run 不得擋住下一趟（${second.ok ? '' : second.rejection.code}）`);
+    },
+  },
+  {
+    // 同一筆事件重送會鑄出新的 sourceCommitId，combat-sequence 對已 settled 的 Sequence
+    // 收到不同的 commit ID 一律拒絕 → Internal Command 被拒 = 整筆交易回滾。
+    name: 'NpcDungeonSettlementApplied 重送 → 真正的 no-op（不得再送 Commit / Finalize）',
+    run: () => {
+      const ctx = monsterContext();
+      const start = startMonsterRun(ctx);
+      const runId = onlyRun(start.nextSlice).runId;
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
+      const failed = handleCombatSequenceChallengeResolved(
+        day.nextSlice,
+        challengeResolvedEvent(day.nextSlice.npcRuns[runId]!, 'failure', 'runtime:combat-sequence-challenge-result:r1'),
+        ctx,
+      );
+      const settling = failed.nextSlice.npcRuns[runId]!;
+      const payload = {
+        type: 'NpcDungeonSettlementApplied',
+        runId,
+        distributionId: settling.distributionId,
+        appliedResults: settling.pendingResults,
+        skippedResults: [],
+      } as const;
+
+      const once = handleNpcDungeonSettlementApplied(failed.nextSlice, payload, ctx);
+      assert(
+        once.nextSlice.npcRuns[runId]!.settlementProgress.mapApplied === true,
+        '第一次必須標記 mapApplied',
+      );
+
+      const twice = handleNpcDungeonSettlementApplied(once.nextSlice, payload, ctx);
+      assert(
+        twice.nextSlice === once.nextSlice,
+        '重送必須回傳同一個 state 參考（真 no-op，不是碰巧相等）',
+      );
+      assert(twice.outgoingMessages.length === 0, '重送不得送出任何命令');
+    },
+  },
+  {
+    // 這個 Subscriber 先前完全沒有測試。正常路徑上 ChallengeResolved 會先把 Run 帶進 settling，
+    // 所以它只在「那一筆沒對上」時才真的動作——那正是它作為第二道保險的意義。
+    name: 'CombatSequenceReadyForSourceCommit(challengeFailed)：ChallengeResolved 沒對上時仍把 Run 帶進 settling',
+    run: () => {
+      const ctx = monsterContext();
+      const start = startMonsterRun(ctx);
+      const runId = onlyRun(start.nextSlice).runId;
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
+      const run = day.nextSlice.npcRuns[runId]!;
+
+      const ready = handleCombatSequenceReadyForSourceCommit(
+        day.nextSlice,
+        {
+          sequenceId: run.combatSequenceId!,
+          teamId: run.teamId,
+          terminationReason: 'challengeFailed',
+        } as never,
+        ctx,
+      );
+      const after = ready.nextSlice.npcRuns[runId]!;
+      assert(after.status === 'settling', `必須進入 settling（實得 ${after.status}）`);
+      assert(after.awaitingCombatChallengeId === undefined, '進 settling 就不再等任何一題');
+      assert(
+        internalKinds(ready.outgoingMessages).includes('ApplyNpcDungeonSettlement'),
+        '進入 settling 就要求 Map 套用',
+      );
+      assert(
+        commandsOfType(ready.outgoingMessages, 'StopCombatSequence').length === 0,
+        'Sequence 已自行終止，不得再送 Stop',
+      );
+
+      // 冪等：Run 已 settling，第二次必須是真 no-op。
+      const again = handleCombatSequenceReadyForSourceCommit(
+        ready.nextSlice,
+        {
+          sequenceId: run.combatSequenceId!,
+          teamId: run.teamId,
+          terminationReason: 'challengeFailed',
+        } as never,
+        ctx,
+      );
+      assert(again.nextSlice === ready.nextSlice, '已 settling 的 Run 不得再被改動');
+      assert(again.outgoingMessages.length === 0, '已 settling 不得再送命令');
+    },
+  },
+  {
+    // allResolved 只代表怪物打完了；寶箱與採集仍在序列上，不得就此結束探索。
+    name: 'CombatSequenceReadyForSourceCommit(allResolved)：不得結束探索',
+    run: () => {
+      const ctx = monsterContext();
+      const start = startMonsterRun(ctx);
+      const runId = onlyRun(start.nextSlice).runId;
+      const day = ok(npcDungeonDay(start.nextSlice, runId, ctx));
+      const run = day.nextSlice.npcRuns[runId]!;
+
+      const ready = handleCombatSequenceReadyForSourceCommit(
+        day.nextSlice,
+        {
+          sequenceId: run.combatSequenceId!,
+          teamId: run.teamId,
+          terminationReason: 'allResolved',
+        } as never,
+        ctx,
+      );
+      assert(ready.nextSlice === day.nextSlice, 'allResolved 不得改動 Run');
+      assert(ready.outgoingMessages.length === 0, 'allResolved 不得送出任何命令');
     },
   },
 ];

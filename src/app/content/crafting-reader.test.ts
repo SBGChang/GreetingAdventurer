@@ -6,7 +6,12 @@
 // 這裡刻意沒有端到端案例：crafting 目前只有 foodStatusExpiry 一項能力閉合，Session 的 assembler
 // 還沒有 crafting Slice 可接（Composition 是整合者的檔）。單元層已能證明 adapter 型別與投影正確。
 
-import type { ContentPackId, DefinitionId } from '../../contracts/core';
+import type {
+  ContentPackId,
+  DefinitionId,
+  EquipmentEffectDefinitionId,
+  MaterialAffixId,
+} from '../../contracts/core';
 import {
   createDefinitionRegistry,
   type ContentDefinition,
@@ -46,6 +51,11 @@ const PACK = 'pack:crafting-bringup' as ContentPackId;
 // 壞內容用的 id（只在本檔存在，不進 fixtures）。
 const EFFECT_WITHOUT_STATUS = 'effect-no-status';
 const ITEM_WITHOUT_CULTURE = 'itemdef-no-culture';
+
+// 帶裝備效果引用的素材詞條（只在本檔存在）。模組 fixture 的三筆素材詞條都沒有 equipmentEffectRefs，
+// 所以在收斂前，這個欄位的形狀從來沒有被任何測試碰過——袋子型別也因此不會讓任何測試失敗。
+const AFFIX_KEEN_ORE = 'affix-keen-ore' as MaterialAffixId;
+const EQUIPMENT_EFFECT_KEEN = 'equipeffect-keen';
 
 function def(id: string, kind: string, data: Record<string, unknown>): ContentDefinition {
   return {
@@ -100,6 +110,11 @@ function craftingDefinitions(): readonly ContentDefinition[] {
       compatibleOutputKinds: ['cuisine'],
       foodAffixId: String(FOOD_AFFIX_ID),
       tier: 3,
+    }),
+    def(String(AFFIX_KEEN_ORE), CRAFTING_DEFINITION_KINDS.materialAffix, {
+      compatibleOutputKinds: ['equipment'],
+      equipmentEffectRefs: [{ effectId: EQUIPMENT_EFFECT_KEEN }],
+      tier: 4,
     }),
     def(String(RECIPE_STEW), CRAFTING_DEFINITION_KINDS.cuisineRecipe, {
       originCultureId: String(CULTURE_ID),
@@ -231,6 +246,37 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
         String(reader.getNpcCuisineDecisionRule(NPC_CUISINE_RULE_ID).selfCookWeightResolverId) ===
           'resolver-self-cook-weight',
         'NPC 決策規則的兩個 Resolver 應原樣帶出',
+      );
+    },
+  },
+  {
+    name: 'getMaterialAffix：equipmentEffectRefs 帶得出 effectId（引用 inventory 的真實型別，非 unknown 袋子）',
+    run: () => {
+      const reader = createCraftingDefinitionReader(registry());
+      const keen = reader.getMaterialAffix(AFFIX_KEEN_ORE);
+      const refs = keen.equipmentEffectRefs;
+      if (refs === undefined) throw new Error('帶效果引用的素材詞條不應讀成 undefined');
+      assert(refs.length === 1, `equipmentEffectRefs 應原樣帶出一筆（實得 ${refs.length}）`);
+      const first = refs[0];
+      if (first === undefined) throw new Error('第一筆效果引用不應為 undefined');
+      // 下面這行的型別註記本身就是斷言：在 `Readonly<Record<string, unknown>>` 影子型別下
+      // `first.effectId` 不存在，消費端要拿到這個 ID 只能補 `as unknown as`（規範 §7 禁止）。
+      const effectId: EquipmentEffectDefinitionId = first.effectId;
+      assert(String(effectId) === EQUIPMENT_EFFECT_KEEN, `effectId（實得 ${String(effectId)}）`);
+    },
+  },
+  {
+    name: 'getMaterialAffix：沒有裝備效果的詞條維持 undefined（不得補成空陣列）',
+    run: () => {
+      const reader = createCraftingDefinitionReader(registry());
+      // 「這條詞條不帶裝備效果」是合法內容，與「效果未知」不是同一件事；讀取端不得把它讀成 []（§6）。
+      assert(
+        reader.getMaterialAffix(AFFIX_ORE).equipmentEffectRefs === undefined,
+        'equipment 專用素材詞條未給效果引用時應維持 undefined',
+      );
+      assert(
+        reader.getMaterialAffix(AFFIX_MEAT).equipmentEffectRefs === undefined,
+        'cuisine 素材詞條不應憑空長出裝備效果引用',
       );
     },
   },

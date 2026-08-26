@@ -41,6 +41,8 @@ import type {
   GatheringNodeRuntimeState,
   MapTemplateDefinition,
   MapSpawnRuleDefinition,
+  NpcSequenceRuleDefinition,
+  NpcSequenceGroupKey,
   MapDefinitionReader,
   TeamPresenceQuery,
   RefreshLock,
@@ -87,16 +89,17 @@ export interface MapIdAllocator {
   nextMapRefreshLockId(): MapRefreshLockId;
 }
 
-// 由資料 Resolver 決定的內容 payload（encounterGroup / chest items / event def 等）與 NPC Policy。
-// Kernel 只負責決定「幾筆、放哪個房間、npcOrder 序列」；具體 payload 由資料 Resolver 供給
-// （data-tuned kernel 慣例）。
+// 由資料 Resolver 決定的**本局**內容：挑中哪一筆 Map Content 定義，以及那一筆在本次刷新的
+// payload（encounterGroup／chest items／event def 等，皆由 Spawn Rule 的候選池抽出）。
+//
+// 【裁定 C 之後】原本 draft 還帶 `kind` 與 `npcEligible`/`npcPointCost`/`npcResolverId`——
+// 那三個 NPC 欄位是**內容**（doc §3.3 不變量 5：成本由 Definition 指定），卻只存在於這個本地
+// port，於是 fixture 只能手打 `kind === 'boss' ? 4 : 1`。現在它們住在
+// `MapContentDefinition.npcPolicy`，Map 由 `definitionId` 讀回來；`kind` 同理改由 Definition 宣告，
+// 這樣 draft 也不可能與 Definition 互相矛盾。
 export type SpawnDraft = Readonly<{
-  kind: MapContentKind;
   definitionId: DefinitionId;
   payload: MapContentPayload;
-  npcEligible: boolean;
-  npcPointCost?: number;
-  npcResolverId?: NpcDungeonTargetResolverId;
 }>;
 
 export interface MapContentResolver {
@@ -183,15 +186,53 @@ function pendingCheckJobDraft(
 // 內容生成（決定性；RNG 只在此以顯式 cursor 使用）
 // ──────────────────────────────────────────────────────────────────────────
 
+// 生成階段偵測到的「Resolver 挑的定義」與「Spawn Rule／payload 說的」對不上時丟出的錯誤。
+//
+// 為什麼是 throw 而不是回傳拒絕：`mapRefreshCheck` 是 Job（`ModuleResult`，契約上不可拒絕），
+// 而這種不一致不是玩法情境，是**內容／Resolver 註冊本身壞了**。五個合法出口裡對應的是
+// 「Content Pack 驗證失敗」——正式解法是在載入階段擋下（見交接回報的未閉合項目）。在那之前，
+// 唯一不說謊的執行期反應是讓整筆交易回滾：既不能跳過該筆（那是規範 §6 點名的偽裝），
+// 也不能寫進一筆違反 doc §3.3 不變量 8 的內容。窄化 Reader 對未註冊定義本來就是 throw，
+// 這裡與它同型。
+export class MapRefreshContentDataError extends Error {
+  readonly definitionId: DefinitionId;
+
+  constructor(message: string, definitionId: DefinitionId) {
+    super(message);
+    this.name = 'MapRefreshContentDataError';
+    this.definitionId = definitionId;
+  }
+}
+
+// NPC 序列候選：動態內容與固定採集點共用一條序列（doc §3.3 不變量 4），所以兩者在排序前
+// 必須先變成同一種形狀。`groupKey` 決定排序權重來自 NpcSequenceRule 的哪一格。
+type NpcSequenceCandidate = Readonly<{
+  groupKey: NpcSequenceGroupKey;
+  pointCost: number;
+  resolverId: NpcDungeonTargetResolverId;
+  target:
+    | Readonly<{ kind: 'mapContent'; contentId: ContentInstanceId }>
+    | Readonly<{ kind: 'gatheringNode'; nodeId: GatheringNodeId }>;
+}>;
+
+// 指派完成後寫進 Runtime 的三欄。doc §3.1 空間不變量 4 要求它們**同時存在**，所以它們是一組，
+// 不是三個各自選填的欄位。
+type NpcRuntimeFields = Readonly<{
+  npcOrder: number;
+  npcPointCost: number;
+  npcResolverId: NpcDungeonTargetResolverId;
+}>;
+
 type GeneratedContent = Readonly<{
   contents: readonly MapContentInstance[];
-  nextNpcOrder: number;
+  candidates: readonly NpcSequenceCandidate[];
 }>;
 
 // 依 Spawn Rule 的 spawnBudgets 生成本版本動態內容：
 //   * 每個 budget 以注入 RNG 決定 count ∈ [minCount, maxCount]（決定性）。
 //   * 一房一內容（不變量 3）：依 eligibleContentRoomIds 順序配置，房間耗盡即停止。
-//   * NPC-可處理內容取得遞增 npcOrder（與採集點共用序列，不變量 4）。
+//   * 內容的 kind 與 NPC Policy 一律取自 `MapContentDefinition`（【裁定 C】），
+//     本函式不再決定任何玩法數值；`npcOrder` 於 assignNpcSequence 統一指派（不變量 4）。
 function generateMapContent(
   mapId: MapInstanceId,
   mapVersion: number,
@@ -201,9 +242,9 @@ function generateMapContent(
 ): GeneratedContent {
   const rooms = eligibleContentRoomIds(template);
   const contents: MapContentInstance[] = [];
+  const candidates: NpcSequenceCandidate[] = [];
   let cursor = ctx.rngContext.cursor;
   let roomIdx = 0;
-  let npcOrder = 1;
 
   for (const budget of spawnRule.spawnBudgets) {
     const draw = ctx.rng.nextInt({
@@ -232,37 +273,116 @@ function generateMapContent(
           cursor,
         },
       });
+      const definition = ctx.definitions.getContentDefinition(draft.definitionId);
+
+      // Resolver 是「依 budget 要求挑一筆定義」，挑錯家族時整份 spawnBudgets 的語意就失效了。
+      if (definition.contentKind !== budget.contentKind) {
+        throw new MapRefreshContentDataError(
+          `map: spawn budget 要求 "${budget.contentKind}"，Resolver 卻挑了 contentKind "${definition.contentKind}" 的定義 "${String(draft.definitionId)}"`,
+          draft.definitionId,
+        );
+      }
+      // doc §3.3 不變量 8：`payload.kind` 必須與外層 kind 相容。
+      if (draft.payload.kind !== definition.contentKind) {
+        throw new MapRefreshContentDataError(
+          `map: 定義 "${String(draft.definitionId)}" 的 contentKind 為 "${definition.contentKind}"，Resolver 卻給了 payload.kind "${draft.payload.kind}"`,
+          draft.definitionId,
+        );
+      }
+
       const contentId = ctx.ids.nextContentInstanceId();
-
-      const npcEligible =
-        draft.npcEligible &&
-        draft.npcPointCost !== undefined &&
-        draft.npcResolverId !== undefined;
-      const npcFields = npcEligible
-        ? {
-            npcOrder: npcOrder++,
-            npcPointCost: draft.npcPointCost,
-            npcResolverId: draft.npcResolverId,
-          }
-        : {};
-
       contents.push({
         contentId,
         mapId,
         mapVersion,
-        kind: draft.kind,
+        kind: definition.contentKind,
         definitionId: draft.definitionId,
         position: { roomId },
         payload: draft.payload,
-        ...npcFields,
         state: 'available',
         protectedByQuestIds: [],
         revision: 0 as Revision,
       });
+
+      if (definition.npcPolicy.eligible) {
+        candidates.push({
+          groupKey: definition.contentKind,
+          pointCost: definition.npcPolicy.pointCost,
+          resolverId: definition.npcPolicy.resolverId,
+          target: { kind: 'mapContent', contentId },
+        });
+      }
     }
   }
 
-  return { contents, nextNpcOrder: npcOrder };
+  return { contents, candidates };
+}
+
+// 固定採集點的 NPC 候選（doc §2.2 末條：啟用 NPC Policy 的採集點與動態內容一起取得唯一 npcOrder）。
+// 資格與成本屬 Gathering Rule（19_gathering_service.md §2），Map 只讀窄化 View。
+function gatheringNpcCandidates(
+  template: MapTemplateDefinition,
+  ctx: MapHandlerContext,
+): readonly NpcSequenceCandidate[] {
+  const candidates: NpcSequenceCandidate[] = [];
+  for (const node of template.gatheringNodes) {
+    const policy = ctx.definitions.getGatheringMapView(node.gatheringRuleId).npcPolicy;
+    if (policy === undefined || !policy.eligible) continue;
+    candidates.push({
+      groupKey: 'gatheringNode',
+      pointCost: policy.pointCost,
+      resolverId: policy.resolverId,
+      target: { kind: 'gatheringNode', nodeId: node.nodeId },
+    });
+  }
+  return candidates;
+}
+
+// 【裁定 B】依 NpcSequenceRule 的 groupPriority 指派唯一 npcOrder。
+//
+// 排序只用 `groupPriority`（權重小者先）。同權重時的先後由**建構順序**決定（動態內容依生成
+// 順序、採集點依 Template 宣告順序），而 `Array.prototype.sort` 在 ES2019 起保證穩定——
+// 所以結果仍是決定性的，且不需要再發明第二個排序依據。
+//
+// `npcOrder` 從 1 起、步進 1：那是序數本身（結構），不是可調內容。
+function assignNpcSequence(
+  rule: NpcSequenceRuleDefinition,
+  candidates: readonly NpcSequenceCandidate[],
+): readonly Readonly<{ candidate: NpcSequenceCandidate; npcOrder: number }>[] {
+  for (const candidate of candidates) {
+    const priority = rule.groupPriority[candidate.groupKey];
+    // 型別上 groupPriority 是非 Partial Record，但它來自外部 JSON：缺格時排序比較會變成 NaN，
+    // 而 NaN 比較會讓順序不再決定性。不得以 `?? 0` 補（規範 §6），只能明確失敗。
+    if (!Number.isFinite(priority)) {
+      throw new MapRefreshContentDataError(
+        `map: NPC 序列規則 "${String(rule.id)}" 缺少目標家族 "${candidate.groupKey}" 的 groupPriority`,
+        rule.id,
+      );
+    }
+  }
+  return [...candidates]
+    .sort((a, b) => rule.groupPriority[a.groupKey] - rule.groupPriority[b.groupKey])
+    .map((candidate, index) => ({ candidate, npcOrder: index + 1 }));
+}
+
+// 把一筆內容移出 NPC 序列：三欄同進同出（doc §3.1 要求 npcOrder／npcPointCost／npcResolverId
+// 同時存在，所以也必須同時消失，不能留下一個孤兒 npcOrder）。
+// 本來就不在序列上時回 undefined —— 沒變的東西不寫回，也不 bump revision。
+function withdrawnFromNpcSequence(content: MapContentInstance): MapContentInstance | undefined {
+  if (
+    content.npcOrder === undefined &&
+    content.npcPointCost === undefined &&
+    content.npcResolverId === undefined
+  ) {
+    return undefined;
+  }
+  const {
+    npcOrder: _npcOrder,
+    npcPointCost: _npcPointCost,
+    npcResolverId: _npcResolverId,
+    ...rest
+  } = content;
+  return { ...rest, revision: bump(content.revision) };
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -283,7 +403,18 @@ function refreshMapInstance(
 
   // 1. 舊內容：受 Quest 保護者保留（不變量 7）；其餘標記 removedByRefresh 作為歷史。
   for (const content of listContentsForMap(state, instance.mapId)) {
-    if (content.protectedByQuestIds.length > 0) continue;
+    if (content.protectedByQuestIds.length > 0) {
+      // 保留者跨到新版本後仍然 available，但它的 mapVersion 停在舊版本，而
+      // ApplyNpcDungeonSettlement 對 `content.mapVersion !== instance.currentVersion` 一律 skip
+      // （見 handleApplyNpcDungeonSettlement）——它已經不可能被 NPC 結算。若讓它留著舊的
+      // npcOrder，listNpcSequence 會同時吐出它與新版本的 1..n，兩者相撞，doc §3.3 不變量 4
+      // （npcOrder 不可重複）當場破掉；NPC 還會為一個必定 skip 的目標付掉每日點數。
+      // 因此受保護內容一併退出 NPC 序列。玩家路徑不受影響：handleResolvePlayerMapContent
+      // 不看版本，受保護內容仍可由玩家處理完成委託。
+      const withdrawn = withdrawnFromNpcSequence(content);
+      if (withdrawn !== undefined) nextState = upsertContent(nextState, withdrawn);
+      continue;
+    }
     if (content.state === 'removedByRefresh') continue;
     nextState = upsertContent(nextState, {
       ...content,
@@ -296,28 +427,44 @@ function refreshMapInstance(
   // 2. 空間重建：門全關、陷阱 armed、採集點 available（doc §3.1）。
   const baseSpatial = buildSpatialRuntime(template, newVersion);
 
-  // 3. 生成新內容，並為可處理內容取得 npcOrder。
+  // 3. 生成新內容（kind／NPC Policy 皆取自 MapContentDefinition，見【裁定 C】）。
   const generated = generateMapContent(instance.mapId, newVersion, template, spawnRule, ctx);
-  for (const content of generated.contents) nextState = upsertContent(nextState, content);
 
-  // 4. 為 NPC-enabled 採集點接續同一條 npcOrder 序列（不變量 4）。
-  let npcOrder = generated.nextNpcOrder;
+  // 4. 動態內容與 NPC-enabled 採集點合成**同一條**序列，依 NpcSequenceRule 指派 npcOrder
+  //    （doc §2.2 末條／§3.3 不變量 4；【裁定 B】）。
+  const sequenceRule = ctx.definitions.getNpcSequenceRule(spawnRule.npcSequenceRuleId);
+  const sequenced = assignNpcSequence(sequenceRule, [
+    ...generated.candidates,
+    ...gatheringNpcCandidates(template, ctx),
+  ]);
+
+  const npcFieldsByContentId = new Map<ContentInstanceId, NpcRuntimeFields>();
+  const npcFieldsByNodeId = new Map<GatheringNodeId, NpcRuntimeFields>();
+  for (const { candidate, npcOrder } of sequenced) {
+    const fields: NpcRuntimeFields = {
+      npcOrder,
+      npcPointCost: candidate.pointCost,
+      npcResolverId: candidate.resolverId,
+    };
+    if (candidate.target.kind === 'mapContent') {
+      npcFieldsByContentId.set(candidate.target.contentId, fields);
+    } else {
+      npcFieldsByNodeId.set(candidate.target.nodeId, fields);
+    }
+  }
+
+  for (const content of generated.contents) {
+    const fields = npcFieldsByContentId.get(content.contentId);
+    nextState = upsertContent(nextState, fields === undefined ? content : { ...content, ...fields });
+  }
+
   const gatheringNodeStates: Record<GatheringNodeId, GatheringNodeRuntimeState> = {
     ...baseSpatial.gatheringNodeStates,
   };
-  for (const node of template.gatheringNodes) {
-    const view = ctx.definitions.getGatheringMapView(node.gatheringRuleId);
-    if (view.npcPolicy !== undefined && view.npcPolicy.eligible) {
-      const base = gatheringNodeStates[node.nodeId];
-      if (base !== undefined) {
-        gatheringNodeStates[node.nodeId] = {
-          ...base,
-          npcOrder: npcOrder++,
-          npcPointCost: view.npcPolicy.pointCost,
-          npcResolverId: view.npcPolicy.resolverId,
-        };
-      }
-    }
+  for (const [nodeId, fields] of npcFieldsByNodeId) {
+    const base = gatheringNodeStates[nodeId];
+    if (base === undefined) continue; // Template 的採集點與 baseSpatial 同源，理論上必存在
+    gatheringNodeStates[nodeId] = { ...base, ...fields };
   }
   const spatialRuntime: MapSpatialRuntime = { ...baseSpatial, gatheringNodeStates };
 

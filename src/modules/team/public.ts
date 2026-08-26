@@ -30,6 +30,8 @@ export {
   removeFormation,
   upsertRetention,
   setPendingSuccession,
+  listTavernVisitorsInCity,
+  isTavernVisibleInCity,
 } from './state';
 export type {
   TeamState,
@@ -73,6 +75,8 @@ export type {
   TeamHandlerResult,
   TeamIdAllocator,
   TeamWorldReader,
+  // 窄化跨模組 Query Port：Composition 要為它提供以 CombatState 為來源的實作。
+  TeamCombatStatusQuery,
   TeamResolverPort,
   TeamDomainEvent,
   StartNpcDungeonRunCommand,

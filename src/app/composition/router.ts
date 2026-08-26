@@ -823,8 +823,21 @@ const EVENT_SUBSCRIBERS: Readonly<Record<string, SubscriberDispatch>> = {
     subscriberResult('map', map.onTeamLocationChanged(e as never, s.map, x.map)),
   'CombatEncounterResolved::dungeon': (e, s) =>
     subscriberResult('dungeon', dungeon.handleCombatEncounterResolved(s.dungeon, e as never)),
-  'NpcDungeonSettlementApplied::dungeon': (e, s) =>
-    subscriberResult('dungeon', dungeon.handleNpcDungeonSettlementApplied(s.dungeon, e as never)),
+  // Wave E：dungeon 的 NPC 結算現在會推進 Combat Sequence，所以它需要 context（先前不用）。
+  'NpcDungeonSettlementApplied::dungeon': (e, s, x) =>
+    subscriberResult(
+      'dungeon',
+      dungeon.handleNpcDungeonSettlementApplied(s.dungeon, e as never, x.dungeon),
+    ),
+  'AssetDistributionCompleted::dungeon': (e, s, x) =>
+    subscriberResult(
+      'dungeon',
+      dungeon.handleAssetDistributionCompleted(
+        s.dungeon,
+        (e as { distributionId: never }).distributionId,
+        x.dungeon,
+      ),
+    ),
   'CombatAttackMasteryEarned::progression': (e, s, x) =>
     subscriberResult(
       'progression',

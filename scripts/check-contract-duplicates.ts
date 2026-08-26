@@ -41,9 +41,13 @@ const CONTRACTS = 'src/contracts';
 //   宣告的 `Readonly<Record<string, unknown>>` 佔位型別。derived-statistics 服務實作時把它們
 //   換成 import inventory 的真實型別——用 unknown 袋子讀裝備係數，必然要在讀取端補一個
 //   `as unknown as`，那正是規範 §7 點名的「用轉型掩蓋契約缺口」。
+// 已收斂（Wave E 移除，基準線 3 → 2）：`EquipmentSkillEffectRef`。crafting 原本自己宣告
+// `Readonly<Record<string, unknown>>`，而 inventory 早就有真正的擁有者宣告
+// （`Readonly<{ effectId: EquipmentEffectDefinitionId }>`），crafting 檔案自己的註解也寫著
+// 「由 inventory 擁有」。用袋子型別讀效果引用，必然要在讀取端補 `as unknown as`——
+// 規範 §7 點名的「用轉型掩蓋契約缺口」。現已改為 import 擁有者型別。
 const KNOWN_DUPLICATES = new Set<string>([
   'ConsumeCombatSequenceRetrySupply',
-  'EquipmentSkillEffectRef',
   'MoneyValue',
 ]);
 

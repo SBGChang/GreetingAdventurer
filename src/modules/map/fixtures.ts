@@ -39,6 +39,7 @@ import type {
   RouteId,
   DeterministicRng,
   NpcDungeonTargetResolverId,
+  CharacterArchetypeId,
 } from '../../contracts/core';
 import type {
   MapState,
@@ -47,6 +48,7 @@ import type {
   MapSpawnRuleDefinition,
   NpcSequenceRuleDefinition,
   MapContentDefinition,
+  MapContentKind,
   MapDefinitionReader,
   TeamPresenceQuery,
 } from '../../contracts/map';
@@ -98,10 +100,13 @@ const CHEST_RESOLVER_ID = 'definition:npc-dungeon-target-resolver:chest' as NpcD
 const GATHER_RESOLVER_ID = 'definition:npc-dungeon-target-resolver:gather' as NpcDungeonTargetResolverId;
 const ENCOUNTER_GROUP_ID = 'enc-group-1' as EncounterGroupDefinitionId;
 const EVENT_DEF_ID = 'content-event-1' as ContentEventDefinitionId;
-const MONSTER_CONTENT_DEF_ID = 'def-monster' as DefinitionId;
-const CHEST_CONTENT_DEF_ID = 'def-chest' as DefinitionId;
-const EVENT_CONTENT_DEF_ID = 'def-event' as DefinitionId;
-const MISC_CONTENT_DEF_ID = 'def-misc' as DefinitionId;
+const CAPTIVE_ARCHETYPE_ID = 'archetype-captive' as CharacterArchetypeId;
+export const MONSTER_CONTENT_DEF_ID = 'def-monster' as DefinitionId;
+export const BOSS_CONTENT_DEF_ID = 'def-boss' as DefinitionId;
+export const CHEST_CONTENT_DEF_ID = 'def-chest' as DefinitionId;
+export const EVENT_CONTENT_DEF_ID = 'def-event' as DefinitionId;
+export const KIDNAP_CONTENT_DEF_ID = 'def-kidnap' as DefinitionId;
+export const CONTROL_CONTENT_DEF_ID = 'def-control' as DefinitionId;
 
 // ── Template / Spawn Rule ────────────────────────────────────────────────────
 
@@ -114,7 +119,7 @@ export const TEMPLATE: MapTemplateDefinition = {
   schemaVersion: 1,
   packId: PACK_ID,
   enabled: true,
-  kind: 'interior',
+  templateKind: 'interior',
   refreshOffsetDays: 3,
   floors: [{ floor: 0, rows: 3, cols: 3 }],
   rooms: [
@@ -190,22 +195,85 @@ function header<TId extends DefinitionId>(id: TId) {
   return { id, schemaVersion: 1, packId: PACK_ID, enabled: true };
 }
 
-export function stubDefinitionReader(): MapDefinitionReader {
+// ── Map Content 定義（【裁定 C】後：kind 與 NPC Policy 都是內容，不再由 SpawnDraft 供給）──
+// 成本沿用 doc §3.3 不變量 5 的示例（小怪／寶箱 1、大怪 4）；這是 fixture，不是正式 Content Pack。
+export const CONTENT_DEFINITIONS: Readonly<Record<string, MapContentDefinition>> = {
+  [MONSTER_CONTENT_DEF_ID]: {
+    ...header(MONSTER_CONTENT_DEF_ID),
+    contentKind: 'monsterGroup',
+    npcPolicy: { eligible: true, pointCost: 1, resolverId: MONSTER_RESOLVER_ID },
+  },
+  [BOSS_CONTENT_DEF_ID]: {
+    ...header(BOSS_CONTENT_DEF_ID),
+    contentKind: 'boss',
+    npcPolicy: { eligible: true, pointCost: 4, resolverId: MONSTER_RESOLVER_ID },
+  },
+  [CHEST_CONTENT_DEF_ID]: {
+    ...header(CHEST_CONTENT_DEF_ID),
+    contentKind: 'chest',
+    npcPolicy: { eligible: true, pointCost: 1, resolverId: CHEST_RESOLVER_ID },
+  },
+  [EVENT_CONTENT_DEF_ID]: {
+    ...header(EVENT_CONTENT_DEF_ID),
+    contentKind: 'mapEvent',
+    npcPolicy: { eligible: false },
+  },
+  [KIDNAP_CONTENT_DEF_ID]: {
+    ...header(KIDNAP_CONTENT_DEF_ID),
+    contentKind: 'kidnap',
+    npcPolicy: { eligible: false },
+  },
+  [CONTROL_CONTENT_DEF_ID]: {
+    ...header(CONTROL_CONTENT_DEF_ID),
+    contentKind: 'control',
+    npcPolicy: { eligible: false },
+  },
+};
+
+// 預設序列規則：動態內容各家族排在採集點之前（權重小者先）。這是**資料**——測試會以另一份
+// 權重證明順序真的跟著資料走（【裁定 B】）。
+export const DEFAULT_GROUP_PRIORITY: NpcSequenceRuleDefinition['groupPriority'] = {
+  monsterGroup: 10,
+  boss: 20,
+  chest: 30,
+  mapEvent: 40,
+  kidnap: 50,
+  control: 60,
+  gatheringNode: 70,
+};
+
+export function stubNpcSequenceRule(
+  groupPriority: NpcSequenceRuleDefinition['groupPriority'] = DEFAULT_GROUP_PRIORITY,
+): NpcSequenceRuleDefinition {
+  return { ...header(NPC_SEQ_RULE_ID), groupPriority };
+}
+
+export function stubDefinitionReader(
+  overrides: Readonly<{
+    spawnRule?: MapSpawnRuleDefinition;
+    npcSequenceRule?: NpcSequenceRuleDefinition;
+    contentDefinitions?: Readonly<Record<string, MapContentDefinition>>;
+    gatheringNpcPolicy?: ReturnType<MapDefinitionReader['getGatheringMapView']>['npcPolicy'];
+  }> = {},
+): MapDefinitionReader {
+  const definitions = overrides.contentDefinitions ?? CONTENT_DEFINITIONS;
   return {
     getMapTemplate: () => TEMPLATE,
-    getMapSpawnRule: () => SPAWN_RULE,
-    getNpcSequenceRule: (id): NpcSequenceRuleDefinition => ({
-      ...header(id),
-      id: id,
-      npcSequenceRuleId: id,
-    }),
-    getContentDefinition: (id): MapContentDefinition => ({
-      ...header(id),
-      contentKind: 'monsterGroup',
-    }),
+    getMapSpawnRule: () => overrides.spawnRule ?? SPAWN_RULE,
+    getNpcSequenceRule: () => overrides.npcSequenceRule ?? stubNpcSequenceRule(),
+    getContentDefinition: (id): MapContentDefinition => {
+      const def = definitions[id];
+      // 窄化 Reader 對未註冊定義本來就是 throw；stub 比照，才不會讓測試以為缺定義是良性的。
+      if (def === undefined) throw new Error(`stubDefinitionReader: 未註冊的 Map Content 定義 "${String(id)}"`);
+      return def;
+    },
     getGatheringMapView: (id) => ({
       ruleId: id,
-      npcPolicy: { eligible: true, pointCost: 1, resolverId: GATHER_RESOLVER_ID },
+      npcPolicy: overrides.gatheringNpcPolicy ?? {
+        eligible: true,
+        pointCost: 1,
+        resolverId: GATHER_RESOLVER_ID,
+      },
     }),
   };
 }
@@ -290,47 +358,37 @@ export function stubRngContext(): { worldSeed: Seed; streamId: RngStreamId; curs
   };
 }
 
-// 資料 Resolver stub：依 contentKind 供給 payload / definitionId / NPC Policy。
-export function stubContentResolver(): MapContentResolver {
+// 資料 Resolver stub：依 budget 要求的 contentKind 挑一筆定義並給本局 payload。
+// 【裁定 C】之後這裡**不再供給任何 NPC 欄位**——資格與成本住在 MapContentDefinition。
+const SPAWN_DRAFT_BY_KIND: Readonly<Record<MapContentKind, SpawnDraft>> = {
+  monsterGroup: {
+    definitionId: MONSTER_CONTENT_DEF_ID,
+    payload: { kind: 'monsterGroup', encounterGroupId: ENCOUNTER_GROUP_ID },
+  },
+  boss: {
+    definitionId: BOSS_CONTENT_DEF_ID,
+    payload: { kind: 'boss', encounterGroupId: ENCOUNTER_GROUP_ID },
+  },
+  chest: { definitionId: CHEST_CONTENT_DEF_ID, payload: { kind: 'chest', itemIds: [] } },
+  mapEvent: {
+    definitionId: EVENT_CONTENT_DEF_ID,
+    payload: { kind: 'mapEvent', contentEventDefinitionId: EVENT_DEF_ID },
+  },
+  kidnap: {
+    definitionId: KIDNAP_CONTENT_DEF_ID,
+    payload: { kind: 'kidnap', captiveArchetypeId: CAPTIVE_ARCHETYPE_ID, controllerContentIds: [] },
+  },
+  control: {
+    definitionId: CONTROL_CONTENT_DEF_ID,
+    payload: { kind: 'control', controllerContentIds: [] },
+  },
+};
+
+export function stubContentResolver(
+  overrides: Readonly<Partial<Record<MapContentKind, SpawnDraft>>> = {},
+): MapContentResolver {
   return {
-    resolveSpawnPayload: ({ kind }): SpawnDraft => {
-      switch (kind) {
-        case 'monsterGroup':
-        case 'boss':
-          return {
-            kind,
-            definitionId: MONSTER_CONTENT_DEF_ID,
-            payload: { kind, encounterGroupId: ENCOUNTER_GROUP_ID },
-            npcEligible: true,
-            npcPointCost: kind === 'boss' ? 4 : 1,
-            npcResolverId: MONSTER_RESOLVER_ID,
-          };
-        case 'chest':
-          return {
-            kind,
-            definitionId: CHEST_CONTENT_DEF_ID,
-            payload: { kind: 'chest', itemIds: [] },
-            npcEligible: true,
-            npcPointCost: 1,
-            npcResolverId: CHEST_RESOLVER_ID,
-          };
-        case 'mapEvent':
-          return {
-            kind,
-            definitionId: EVENT_CONTENT_DEF_ID,
-            payload: { kind: 'mapEvent', contentEventDefinitionId: EVENT_DEF_ID },
-            npcEligible: false,
-          };
-        default:
-          // TODO: kidnap / control 內容生成未實作；以空控制者 payload 佔位。
-          return {
-            kind,
-            definitionId: MISC_CONTENT_DEF_ID,
-            payload: { kind: 'control', controllerContentIds: [] },
-            npcEligible: false,
-          };
-      }
-    },
+    resolveSpawnPayload: ({ kind }): SpawnDraft => overrides[kind] ?? SPAWN_DRAFT_BY_KIND[kind],
   };
 }
 

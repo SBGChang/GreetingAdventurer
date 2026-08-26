@@ -255,7 +255,7 @@ const HOME_UPGRADES: readonly HomeUpgradeDefinition[] = [
 const CITY_ACTION_RULES: readonly CityActionRuleDefinition[] = [
   {
     ...header(CITY_ACTION_INN_REST),
-    kind: 'innRest',
+    actionKind: 'innRest',
     scope: 'team',
     durationDays: 1,
     requiredFacilityKind: 'inn',

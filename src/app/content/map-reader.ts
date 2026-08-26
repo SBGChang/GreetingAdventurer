@@ -1,6 +1,13 @@
 // app/content/map-reader.ts
 // MapDefinitionReader 的真實實作（由 data-runtime Registry 組出）。
 // 4 個單純委派 + getGatheringMapView（投影：只取 gathering 定義的 npcPolicy，回傳 { ruleId, npcPolicy }）。
+//
+// 兩個 kind 的作者層必填欄位（本輪【裁定 B／C】，見 contracts/map 與 01_map_module.md §2.2/§2.3）：
+//   * `npc-sequence-rule` → `groupPriority`：每個目標家族（六種 MapContentKind + gatheringNode）
+//     一個排序權重。**非 Partial Record**，少一格就是作者層編譯錯誤。
+//   * `map-content`      → `contentKind` + `npcPolicy`（`{eligible:false}` 或
+//     `{eligible:true, pointCost, resolverId}`）。兩欄皆必填。
+// 這兩張表在正式 Content Pack 尚未建立；未建立前 map 的刷新流程不可啟用（見交接回報）。
 
 import type { DefinitionId } from '../../contracts/core';
 import type {

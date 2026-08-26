@@ -4,7 +4,11 @@
 
 import type { CombatantId, EncounterId } from '../../contracts/core';
 import type { TransactionMessageDraft, ModuleOutcome, ModuleResult } from '../../contracts/core';
-import type { CombatDomainEvent } from '../../contracts/combat';
+import type {
+  CombatDomainEvent,
+  CombatActionResult,
+  ActionDelayRuleDefinition,
+} from '../../contracts/combat';
 
 import type { CombatState, CombatEncounter, CombatantState } from './state';
 import { createInitialCombatState, upsertEncounter } from './state';
@@ -39,6 +43,9 @@ import {
   WEAPON_SET_A,
   WEAPON_SET_B,
   WEAPON_SET_C,
+  DELAY_WEAPON_SWITCH,
+  WEAPON_SWITCH_DELAY,
+  stubResolverPort,
 } from './fixtures';
 import { makeCombatQuery } from './queries';
 import { localCell } from './state';
@@ -70,6 +77,15 @@ function eventsOf(messages: readonly TransactionMessageDraft[]): CombatDomainEve
 }
 function countEvent(events: readonly CombatDomainEvent[], type: CombatDomainEvent['type']): number {
   return events.filter((e) => e.type === type).length;
+}
+// CombatActionResolved.results 現在是**判別聯集**（一個 kind 一張表），不再是
+// Record<string, JsonValue> 袋子——測試因此可以直接讀具名欄位，而不是先自己轉型。
+function actionResultsOf(messages: readonly TransactionMessageDraft[]): readonly CombatActionResult[] {
+  const event = eventsOf(messages).find((e) => e.type === 'CombatActionResolved');
+  if (event === undefined || event.type !== 'CombatActionResolved') {
+    throw new Error('預期有一筆 CombatActionResolved');
+  }
+  return event.results;
 }
 function commandsOf(messages: readonly TransactionMessageDraft[]): unknown[] {
   return messages.filter((m) => 'command' in m).map((m) => (m as { command: unknown }).command);
@@ -529,6 +545,72 @@ const cases: readonly Case[] = [
     },
   },
   {
+    // 上一案把 counterStance 直接塞進 Encounter，因此**只測了反擊的解析、沒測架勢的建立**。
+    // 建立那一側走的是 handleUseCombatSkill 的 counterStance 分支，整支測試檔一次都沒有驅動過它，
+    // 所以當 targeting 改動讓「立架勢」永遠被 combat/target-resolver-illegal-side 擋下時，
+    // 20 個既有案例全綠。這一案把建立→解析整條鏈接起來釘住。
+    name: '反擊架勢：經由 handleUseCombatSkill 建立架勢（建立這一側先前完全沒有測試覆蓋）',
+    run: () => {
+      const ctx = makeCombatContext();
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const enc = started.nextSlice.encounters[encounterId]!;
+      const actorId = enc.currentActorId!;
+
+      // 立架勢：SKILL_COUNTER 的 effectIds 是**反擊時**打在攻擊者身上的傷害，不是本次行動的效果；
+      // 本次行動的目標是行動者自己（targeting resolver 回傳 self）。拿反擊效果推定側別會把
+      // 「反擊會造成傷害」誤讀成「架勢必須指向敵人」，於是自身向的架勢永遠不合法。
+      const established = ok(
+        handleUseCombatSkill(
+          started.nextSlice,
+          { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_COUNTER, targetCombatantIds: [actorId] },
+          ctx,
+        ),
+      );
+      const afterEstablish = established.nextSlice.encounters[encounterId]!;
+      const stanceHolder = afterEstablish.combatants[actorId]!;
+      assert(stanceHolder.counterStance !== undefined, '架勢應建立在行動者身上');
+      assert(
+        stanceHolder.counterStance!.skillId === SKILL_COUNTER,
+        '架勢應記住建立它的技能（反擊時要用它的效果）',
+      );
+      // 建立架勢消耗本次行動、不立即套用效果：敵人不得因此受傷。
+      for (const e of aliveEnemies(afterEstablish)) {
+        assert(
+          e.health === enc.combatants[e.combatantId]!.health,
+          '建立架勢不得立即造成傷害（效果要等反擊條件成立才套用）',
+        );
+      }
+      const stanceResult = actionResultsOf(established.outgoingMessages).find(
+        (r) => r.kind === 'counterStanceEstablished',
+      );
+      assert(stanceResult !== undefined, '應回報一筆 counterStanceEstablished');
+      if (stanceResult === undefined || stanceResult.kind !== 'counterStanceEstablished') return;
+      assert(stanceResult.actorId === actorId, 'counterStanceEstablished 應帶 branded actorId');
+      assert(stanceResult.skillId === SKILL_COUNTER, 'counterStanceEstablished 應帶建立架勢的技能');
+
+      // 建立→解析整條鏈：讓敵方接著行動，架勢必須真的反擊回去並解除。
+      const enemyId = aliveEnemies(afterEstablish)[0]!.combatantId;
+      const enemyTurnState: CombatState = {
+        ...established.nextSlice,
+        encounters: {
+          ...established.nextSlice.encounters,
+          [encounterId]: { ...afterEstablish, currentActorId: enemyId },
+        },
+      };
+      const countered = ok(handleEnemyTurn(enemyTurnState, encounterId, ctx));
+      const afterCounter = countered.nextSlice.encounters[encounterId]!;
+      assert(
+        afterCounter.combatants[actorId]!.counterStance === undefined,
+        '反擊解析後架勢應解除（一次性）',
+      );
+      assert(
+        afterCounter.combatants[enemyId]!.health < afterEstablish.combatants[enemyId]!.health,
+        '經由 Handler 建立的架勢必須真的能反擊——否則只是狀態欄位對，機制沒接上',
+      );
+    },
+  },
+  {
     // P1-6：這兩種情形原本合併成 `encounter === undefined || state === 'resolved'` 的同一個 no-op。
     // 合併掉的是有用資訊——「這場戰鬥不存在」與「這場戰鬥已經打完了」對呼叫端是不同的事。
     name: 'P1-6：Encounter 不存在與已結算是兩種不同的拒絕，不再是同一個 no-op',
@@ -597,7 +679,7 @@ const cases: readonly Case[] = [
       const enc = started.nextSlice.encounters[encounterId]!;
       const allyId = Object.values(enc.combatants).find((c) => c.side === 'player')!.combatantId;
       rejectedWith(
-        handleCommandAlly(started.nextSlice, { type: 'commandAlly', encounterId, allyId, directive: {} }, ctx),
+        handleCommandAlly(started.nextSlice, { type: 'commandAlly', encounterId, allyId }, ctx),
         'combat/command-ally-not-implemented',
       );
     },
@@ -820,6 +902,410 @@ const cases: readonly Case[] = [
       const afterAct = acted.nextSlice.encounters[encounterId]!.combatants[actorId]!;
       assert(afterAct.externalCtbIncreaseSinceOwnAction === 0, 'useCombatSkill 應清空累積的外來 CTB');
       assert(!afterAct.interruptionImmuneUntilOwnAction, 'useCombatSkill 也必須清掉中斷免疫');
+    },
+  },
+  // ── (A) targeting.targetResolverId 資料化（§2.4）───────────────────────────
+  // 先前這個欄位**完全沒有消費者**：合法目標靠「有 dealDamage → 敵方、有 heal → 己方」推定並就地
+  // 過濾，範圍／形狀／距離／人數上限一項都沒驗。以下六案釘住「目標集合由內容決定、結構不變量由程式守」。
+  {
+    name: 'targeting：命中誰由 targeting resolver 決定，不是由指令請求決定（換一份 targeting 內容，結果就不同）',
+    run: () => {
+      const started0 = ok(
+        handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), makeCombatContext()),
+      );
+      const encounterId = Object.keys(started0.nextSlice.encounters)[0]! as EncounterId;
+      const enc = started0.nextSlice.encounters[encounterId]!;
+      const actorId = enc.currentActorId!;
+      const [first, second] = aliveEnemies(enc);
+      assert(first !== undefined && second !== undefined, 'fixture 應有兩隻敵人');
+
+      // 同一道指令（請求 first），只換 targeting resolver 的解析結果。
+      const strike = {
+        type: 'useCombatSkill' as const,
+        encounterId,
+        actorId,
+        skillId: SKILL_STRIKE,
+        targetCombatantIds: [first!.combatantId],
+      };
+      const healthAfter = (resolved: readonly CombatantId[], id: CombatantId): number => {
+        const ctx = makeCombatContext({
+          resolvers: stubResolverPort({ resolveSkillTargets: () => resolved }),
+        });
+        return ok(handleUseCombatSkill(started0.nextSlice, strike, ctx))
+          .nextSlice.encounters[encounterId]!.combatants[id]!.health;
+      };
+
+      // resolver 說打 second → 受擊的是 second，被請求的 first 毫髮無傷。
+      assert(healthAfter([second!.combatantId], second!.combatantId) === 0, 'resolver 指定的目標應受擊');
+      assert(
+        healthAfter([second!.combatantId], first!.combatantId) === first!.health,
+        '未被 resolver 選中的請求目標不得受擊——目標集合的權威是 targeting 規則，不是 UI 傳入的清單',
+      );
+      // resolver 說打 first → 換成 first 受擊。同一支程式、同一道指令，只有內容不同。
+      assert(healthAfter([first!.combatantId], first!.combatantId) === 0, '換一份 targeting 解析結果，命中對象就改變');
+    },
+  },
+  {
+    name: 'targeting：resolver 回空集合 → no-legal-target 拒絕（不付資源、不空耗行動）',
+    run: () => {
+      const ctx = makeCombatContext({ resolvers: stubResolverPort({ resolveSkillTargets: () => [] }) });
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const enc = started.nextSlice.encounters[encounterId]!;
+      const actorId = enc.currentActorId!;
+      const enemyId = aliveEnemies(enc)[0]!.combatantId;
+
+      // SKILL_HEAL 有法力成本：拒絕後不得扣任何資源、不得推進 CTB。
+      // 快照必須取**原始值**而不是物件參考：存成參考的話，Handler 就地改寫同一個物件時
+      // before 會跟著變，斷言就永遠成立（等於什麼都沒測）。
+      const beforeMana = enc.combatants[actorId]!.mana;
+      const beforeCtb = enc.combatants[actorId]!.currentCtb;
+      const res = handleUseCombatSkill(
+        started.nextSlice,
+        { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_HEAL, targetCombatantIds: [enemyId] },
+        ctx,
+      );
+      rejectedWith(res, 'combat/no-legal-target');
+      const after = started.nextSlice.encounters[encounterId]!.combatants[actorId]!;
+      assert(after.mana === beforeMana, '拒絕不得扣法力');
+      assert(after.currentCtb === beforeCtb, '拒絕不得加行動延遲');
+    },
+  },
+  {
+    name: 'targeting：resolver 回傳不存在的目標 → typed rejection（不得靜默略過）',
+    run: () => {
+      const GHOST = 'cbt-not-in-this-encounter' as CombatantId;
+      const ctx = makeCombatContext({ resolvers: stubResolverPort({ resolveSkillTargets: () => [GHOST] }) });
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const enc = started.nextSlice.encounters[encounterId]!;
+      const actorId = enc.currentActorId!;
+      rejectedWith(
+        handleUseCombatSkill(
+          started.nextSlice,
+          {
+            type: 'useCombatSkill',
+            encounterId,
+            actorId,
+            skillId: SKILL_STRIKE,
+            targetCombatantIds: [aliveEnemies(enc)[0]!.combatantId],
+          },
+          ctx,
+        ),
+        'combat/target-resolver-unknown-target',
+      );
+    },
+  },
+  {
+    name: 'targeting：resolver 回傳已死目標 → typed rejection',
+    run: () => {
+      const base = ok(
+        handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), makeCombatContext()),
+      );
+      const encounterId = Object.keys(base.nextSlice.encounters)[0]! as EncounterId;
+      const enc = base.nextSlice.encounters[encounterId]!;
+      const actorId = enc.currentActorId!;
+      const corpseId = aliveEnemies(enc)[0]!.combatantId;
+      const withCorpse: CombatState = {
+        ...base.nextSlice,
+        encounters: {
+          ...base.nextSlice.encounters,
+          [encounterId]: {
+            ...enc,
+            combatants: {
+              ...enc.combatants,
+              [corpseId]: { ...enc.combatants[corpseId]!, health: 0, state: 'dead' },
+            },
+          },
+        },
+      };
+      const ctx = makeCombatContext({
+        resolvers: stubResolverPort({ resolveSkillTargets: () => [corpseId] }),
+      });
+      rejectedWith(
+        handleUseCombatSkill(
+          withCorpse,
+          { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_STRIKE, targetCombatantIds: [corpseId] },
+          ctx,
+        ),
+        'combat/target-resolver-dead-target',
+      );
+    },
+  },
+  {
+    name: 'targeting：resolver 回傳重複目標 → typed rejection（重複命中是結構違規，不是靜默去重）',
+    run: () => {
+      const base = ok(
+        handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), makeCombatContext()),
+      );
+      const encounterId = Object.keys(base.nextSlice.encounters)[0]! as EncounterId;
+      const enc = base.nextSlice.encounters[encounterId]!;
+      const actorId = enc.currentActorId!;
+      const enemyId = aliveEnemies(enc)[0]!.combatantId;
+      const ctx = makeCombatContext({
+        resolvers: stubResolverPort({ resolveSkillTargets: () => [enemyId, enemyId] }),
+      });
+      // 原始值快照：兩邊都寫 `...combatants[enemyId]!.health` 的話，比的是同一個物件的同一個欄位，
+      // 恆等成立，測不到任何東西。
+      const beforeHealth = enc.combatants[enemyId]!.health;
+      const res = handleUseCombatSkill(
+        base.nextSlice,
+        { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_STRIKE, targetCombatantIds: [enemyId] },
+        ctx,
+      );
+      rejectedWith(res, 'combat/target-resolver-duplicate-target');
+      assert(
+        base.nextSlice.encounters[encounterId]!.combatants[enemyId]!.health === beforeHealth,
+        '拒絕不得留下任何傷害',
+      );
+    },
+  },
+  {
+    name: 'targeting：resolver 回傳側別非法的目標 → typed rejection（側別是最終結構不變量）',
+    run: () => {
+      const base = ok(
+        handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), makeCombatContext()),
+      );
+      const encounterId = Object.keys(base.nextSlice.encounters)[0]! as EncounterId;
+      const enc = base.nextSlice.encounters[encounterId]!;
+      const actorId = enc.currentActorId!;
+      const allyId = Object.values(enc.combatants).find(
+        (c) => c.side === 'player' && c.combatantId !== actorId,
+      )!.combatantId;
+      const enemyId = aliveEnemies(enc)[0]!.combatantId;
+
+      // 壞掉的 targeting 內容：把隊友交給一招 dealDamage 技能。
+      const damageAtAlly = makeCombatContext({
+        resolvers: stubResolverPort({ resolveSkillTargets: () => [allyId] }),
+      });
+      const allyHealthBefore = enc.combatants[allyId]!.health; // 原始值快照，不是物件參考
+      rejectedWith(
+        handleUseCombatSkill(
+          base.nextSlice,
+          { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_STRIKE, targetCombatantIds: [allyId] },
+          damageAtAlly,
+        ),
+        'combat/target-resolver-illegal-side',
+      );
+      assert(
+        base.nextSlice.encounters[encounterId]!.combatants[allyId]!.health === allyHealthBefore,
+        '隊友不得因壞掉的 targeting 內容受傷',
+      );
+
+      // 反向：把敵人交給一招 heal 技能。
+      const healAtEnemy = makeCombatContext({
+        resolvers: stubResolverPort({ resolveSkillTargets: () => [enemyId] }),
+      });
+      rejectedWith(
+        handleUseCombatSkill(
+          base.nextSlice,
+          { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_HEAL, targetCombatantIds: [enemyId] },
+          healAtEnemy,
+        ),
+        'combat/target-resolver-illegal-side',
+      );
+    },
+  },
+  // ── (B) 跨武器組切換延遲（§8.3）────────────────────────────────────────────
+  {
+    name: '武器組切換：跨組施放先付切換延遲（原本恆為 0），延遲值來自 CombatRule 的規則資料',
+    run: () => {
+      // CTB 在 finishTurn 會整體倒扣同一個最小值，所以絕對值不可比；比的是行動者與另一名
+      // 玩家（未行動、同樣受倒扣）之間的**差**——倒扣對兩者相同，差值因此完整保留延遲量。
+      const gapAfterStrike = (
+        switchTo: 'same' | 'other',
+        switchDelayRule?: ActionDelayRuleDefinition,
+      ): number => {
+        const reader = stubDefinitionReader();
+        const ctx = makeCombatContext({
+          definitions:
+            switchDelayRule === undefined
+              ? reader
+              : {
+                  ...reader,
+                  getActionDelayRule: (id) =>
+                    String(id) === String(DELAY_WEAPON_SWITCH)
+                      ? switchDelayRule
+                      : reader.getActionDelayRule(id),
+                },
+        });
+        const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
+        const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+        const enc = started.nextSlice.encounters[encounterId]!;
+        const actorId = enc.currentActorId!;
+        const otherId = Object.values(enc.combatants).find(
+          (c) => c.side === 'player' && c.combatantId !== actorId,
+        )!.combatantId;
+        assert(
+          enc.combatants[actorId]!.activeWeaponSetId === WEAPON_SET_A,
+          '開場應處於武器組 A（切換的起點）',
+        );
+        const after = ok(
+          handleUseCombatSkill(
+            started.nextSlice,
+            {
+              type: 'useCombatSkill',
+              encounterId,
+              actorId,
+              skillId: SKILL_STRIKE,
+              ...(switchTo === 'other' ? { weaponSetId: WEAPON_SET_B } : {}),
+              targetCombatantIds: [aliveEnemies(enc)[0]!.combatantId],
+            },
+            ctx,
+          ),
+        ).nextSlice.encounters[encounterId]!;
+        assert(
+          after.combatants[actorId]!.activeWeaponSetId ===
+            (switchTo === 'other' ? WEAPON_SET_B : WEAPON_SET_A),
+          '生效武器組應更新為指令指定的那一組',
+        );
+        return after.combatants[actorId]!.currentCtb - after.combatants[otherId]!.currentCtb;
+      };
+
+      const same = gapAfterStrike('same');
+      const switched = gapAfterStrike('other');
+      assert(switched > same, '跨組延遲必須嚴格大於同組——恆等於 0 正是先前的缺陷');
+      assert(
+        switched - same === WEAPON_SWITCH_DELAY,
+        `跨組應額外付 ${WEAPON_SWITCH_DELAY} 切換延遲（實得 ${switched - same}）`,
+      );
+
+      // 換一份規則資料，切換成本就不同：這一段確實來自 weaponSetSwitchDelayRuleId，不是常數。
+      const cheaper: ActionDelayRuleDefinition = {
+        id: DELAY_WEAPON_SWITCH,
+        schemaVersion: 1,
+        packId: 'pack-test' as never,
+        enabled: true,
+        baseDelay: 20,
+        reductions: [],
+        minimumDelay: 5,
+      };
+      const cheapSwitched = gapAfterStrike('other', cheaper);
+      assert(
+        cheapSwitched - same === cheaper.baseDelay,
+        `換一份規則資料後切換延遲應為 ${cheaper.baseDelay}（實得 ${cheapSwitched - same}）`,
+      );
+    },
+  },
+  // ── (C) CombatActionResolved.results 具名欄位（袋子拆成判別聯集）─────────────
+  {
+    name: 'results：dealDamage 帶具名必填欄位與 branded targetId（不再是 Record<string, JsonValue>）',
+    run: () => {
+      const ctx = makeCombatContext();
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const enc = started.nextSlice.encounters[encounterId]!;
+      const actorId = enc.currentActorId!;
+      const enemyId = aliveEnemies(enc)[0]!.combatantId;
+      const res = ok(
+        handleUseCombatSkill(
+          started.nextSlice,
+          { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_STRIKE, targetCombatantIds: [enemyId] },
+          ctx,
+        ),
+      );
+      const damage = actionResultsOf(res.outgoingMessages).find((r) => r.kind === 'dealDamage');
+      assert(damage !== undefined, '應有一筆 dealDamage 結果');
+      if (damage === undefined || damage.kind !== 'dealDamage') return;
+      // targetId 是 CombatantId 本身，不是 String(id) 攤平後的裸字串。
+      assert(damage.targetId === enemyId, 'targetId 應原樣保留 branded CombatantId');
+      assert(damage.amount === 30, `面板傷害應為 30（實得 ${damage.amount}）`);
+      assert(damage.targetDied, 'HP20 受 30 傷應致死');
+    },
+  },
+  {
+    name: 'results：adjustCtb 回報的是**折算後實際套用**的量，不是 resolver 的原始值',
+    run: () => {
+      const ctx = makeCombatContext({
+        definitions: stubDefinitionReader(CTRL_ELITE),
+        loadout: stubLoadoutQuery([SKILL_CTB_DELAY, SKILL_INTERRUPT, SKILL_STRIKE]),
+      });
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const enc = started.nextSlice.encounters[encounterId]!;
+      const actorId = enc.currentActorId!;
+      const enemyId = aliveEnemies(enc)[0]!.combatantId;
+      const res = ok(
+        handleUseCombatSkill(
+          started.nextSlice,
+          { type: 'useCombatSkill', encounterId, actorId, skillId: SKILL_CTB_DELAY, targetCombatantIds: [enemyId] },
+          ctx,
+        ),
+      );
+      const adjust = actionResultsOf(res.outgoingMessages).find((r) => r.kind === 'adjustCtb');
+      assert(adjust !== undefined, '應有一筆 adjustCtb 結果');
+      if (adjust === undefined || adjust.kind !== 'adjustCtb') return;
+      // 原始 14、菁英抗性 ×0.75 → floor 10。袋子時代這個欄位叫 `amount`，看不出是哪一個。
+      assert(adjust.appliedCtbDelta === 10, `應回報折算後的 10（實得 ${adjust.appliedCtbDelta}）`);
+    },
+  },
+  {
+    name: 'results：rest 回報實際回復量（滿血休息為 0，受傷休息為規則值）',
+    run: () => {
+      const ctx = makeCombatContext();
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const enc = started.nextSlice.encounters[encounterId]!;
+      const actorId = enc.currentActorId!;
+
+      const restResultOf = (state: CombatState): CombatActionResult => {
+        const res = ok(handleCombatRest(state, { type: 'combatRest', encounterId, actorId }, ctx));
+        const rest = actionResultsOf(res.outgoingMessages).find((r) => r.kind === 'rest');
+        if (rest === undefined) throw new Error('應有一筆 rest 結果');
+        return rest;
+      };
+
+      const full = restResultOf(started.nextSlice);
+      if (full.kind !== 'rest') throw new Error('rest 結果的 kind 應為 rest');
+      assert(full.actorId === actorId, 'rest 應記錄行動者');
+      assert(full.healthRestored === 0, `滿血休息實際回復 0（實得 ${full.healthRestored}）`);
+      assert(full.manaRestored === 5, `法力應依 CombatRule 回復 5（實得 ${full.manaRestored}）`);
+
+      const wounded: CombatState = {
+        ...started.nextSlice,
+        encounters: {
+          ...started.nextSlice.encounters,
+          [encounterId]: {
+            ...enc,
+            combatants: { ...enc.combatants, [actorId]: { ...enc.combatants[actorId]!, health: 50 } },
+          },
+        },
+      };
+      const hurt = restResultOf(wounded);
+      if (hurt.kind !== 'rest') throw new Error('rest 結果的 kind 應為 rest');
+      assert(hurt.healthRestored === 5, `受傷休息應回復 CombatRule 的 5（實得 ${hurt.healthRestored}）`);
+    },
+  },
+  {
+    name: '敵方無合法行動 → 走 combatRest 主路（延遲與回復皆來自資料，不是寫死的 +100）',
+    run: () => {
+      const ctx = makeCombatContext({ resolvers: stubResolverPort({ chooseEnemyAction: () => undefined }) });
+      const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
+      const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
+      const enc0 = started.nextSlice.encounters[encounterId]!;
+      const enemyId = aliveEnemies(enc0)[0]!.combatantId;
+      // 讓該敵人成為當前行動者，且帶傷（才看得出「休息」真的回了血）。
+      const primed: CombatState = {
+        ...started.nextSlice,
+        encounters: {
+          ...started.nextSlice.encounters,
+          [encounterId]: {
+            ...enc0,
+            currentActorId: enemyId,
+            combatants: { ...enc0.combatants, [enemyId]: { ...enc0.combatants[enemyId]!, health: 10 } },
+          },
+        },
+      };
+      const res = ok(handleEnemyTurn(primed, encounterId, ctx));
+      const rest = actionResultsOf(res.outgoingMessages).find((r) => r.kind === 'rest');
+      assert(rest !== undefined, '無合法行動應走 combatRest 主路並回報 rest 結果');
+      if (rest === undefined || rest.kind !== 'rest') return;
+      assert(rest.actorId === enemyId, 'rest 的行動者應為該敵人');
+      assert(rest.healthRestored === 5, `回復量應來自 CombatRule（5），實得 ${rest.healthRestored}`);
+      assert(
+        res.nextSlice.encounters[encounterId]!.combatants[enemyId]!.health === 15,
+        '敵人休息後 HP 應實際回復',
+      );
     },
   },
 ];

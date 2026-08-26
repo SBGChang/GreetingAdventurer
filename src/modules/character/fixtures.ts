@@ -238,7 +238,7 @@ export function stubDefinitionReader(): CharacterDefinitionReader {
     getTemporaryCharacterRule: (id: TemporaryCharacterRuleId): TemporaryCharacterRuleDefinition => ({
       ...header(id, PACK_ID),
       id,
-      kind: 'escort',
+      temporaryKind: 'escort',
       sexWeightResolverId: 'resolver-temp-sex-weight' as ResolverId,
       innateTraitResolverId: 'resolver-temp-innate' as ResolverId,
     }),

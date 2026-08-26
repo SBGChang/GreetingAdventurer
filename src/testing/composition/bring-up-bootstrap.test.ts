@@ -50,6 +50,9 @@ const assembler: ContextAssembler = (runtime): ModuleContexts => ({
     worldDay: runtime.worldDay,
     ids: runtime.ids.team,
     definitions: teamStubDefinitionReader(),
+    // Wave E：team 現在會驗「這支隊伍有沒有進行中的 Encounter」才允許改隊形（combat 擁有的事實）。
+    // 這個切片不碰隊形，用 unusedContext 絆線——觸發即拋錯，所以「這條路其實讀了它」會立刻現形。
+    combat: unusedContext('team.combat'),
     memberRetentionRuleId: MEMBER_RETENTION_RULE,
     teamPlanRuleIdByKind: { homeRest: HOME_REST_PLAN_RULE, cityFacilityAction: CITY_FACILITY_PLAN_RULE },
     world: unusedContext('team.world'),

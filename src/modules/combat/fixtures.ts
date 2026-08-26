@@ -83,6 +83,7 @@ import type {
   CombatResolverPort,
   EnemyActionChoice,
   CombatPowerInput,
+  CombatSkillTargetInput,
 } from './system';
 
 // ── ID 常數 ─────────────────────────────────────────────────────────────
@@ -106,8 +107,8 @@ export const SKILL_HEAL = 'skill-heal' as SkillDefinitionId;
 export const SKILL_BITE = 'skill-bite' as SkillDefinitionId;
 // actionKind='cast' 但帶 dealDamage 效果——用來證明側別由**效果**推定，非 actionKind（不能靠標成 cast 繞過）。
 export const SKILL_CAST_DAMAGE = 'skill-cast-damage' as SkillDefinitionId;
-// 純控制技能：只帶 adjustCtb／interruptCasting，不帶傷害——側別因此不由 dealDamage 推定，
-// 正好是「其餘效果側別待資料化 targeting resolver」那條路徑上的受測對象。
+// 純控制技能：只帶 adjustCtb／interruptCasting，不帶傷害——側別因此不由 dealDamage/heal 推定，
+// 完全交給 targeting resolver 決定（fixture 給的是「單體敵方」）。
 export const SKILL_CTB_DELAY = 'skill-ctb-delay' as SkillDefinitionId;
 export const SKILL_INTERRUPT = 'skill-interrupt' as SkillDefinitionId;
 
@@ -131,7 +132,16 @@ export const RES_HEAL = 'res-heal' as ResolverId;
 
 export const OPENING_CTB_RULE = 'opening-standard' as OpeningCtbRuleId;
 export const DELAY_STANDARD = 'delay-standard' as ActionDelayRuleId;
+// 切換武器組專用的延遲規則。刻意與 DELAY_STANDARD 不同 baseDelay，測試才分得出
+// 「有沒有付切換延遲」以及「延遲是不是真的來自這筆資料」。
+export const DELAY_WEAPON_SWITCH = 'delay-weapon-switch' as ActionDelayRuleId;
 export const COMBAT_RULE_ID = 'combat-rule-standard' as CombatRuleId;
+
+// ── Targeting Resolver（§2.4 TargetingDefinition.targetResolverId）─────────
+// 三種第一版形狀，足以覆蓋 fixture 的所有技能：單體敵方／自身／單體己方。
+export const RES_TARGET_SINGLE_HOSTILE = 'res-target-single-hostile' as ResolverId;
+export const RES_TARGET_SELF = 'res-target-self' as ResolverId;
+export const RES_TARGET_SINGLE_ALLY = 'res-target-single-ally' as ResolverId;
 
 export const GOBLIN_ID = 'monster-goblin' as MonsterDefinitionId;
 export const ENCOUNTER_GROUP = 'group-goblins' as EncounterGroupDefinitionId;
@@ -172,7 +182,7 @@ function skillStrike(): CombatSkillDefinitionView {
     masteryExperienceMode: 'damage',
     attackMasteryAwardRuleId: ATTACK_AWARD_RULE,
     techniqueIds: [],
-    targeting: { targetResolverId: 'res-target-single' as ResolverId },
+    targeting: { targetResolverId: RES_TARGET_SINGLE_HOSTILE },
     actionDelayRuleId: DELAY_STANDARD,
     effectIds: [EFF_DAMAGE],
     resourceCosts: [],
@@ -186,7 +196,7 @@ function skillCounter(): CombatSkillDefinitionView {
     actionKind: 'guard',
     masteryExperienceMode: 'damage',
     techniqueIds: [],
-    targeting: { targetResolverId: 'res-target-self' as ResolverId },
+    targeting: { targetResolverId: RES_TARGET_SELF },
     actionDelayRuleId: DELAY_STANDARD,
     effectIds: [EFF_COUNTER_DAMAGE],
     counterStance: {
@@ -205,7 +215,7 @@ function skillHeal(): CombatSkillDefinitionView {
     masteryExperienceMode: 'fixedSupport',
     supportMasteryAwardRuleId: SUPPORT_AWARD_RULE,
     techniqueIds: [],
-    targeting: { targetResolverId: 'res-target-ally' as ResolverId },
+    targeting: { targetResolverId: RES_TARGET_SINGLE_ALLY },
     actionDelayRuleId: DELAY_STANDARD,
     effectIds: [EFF_HEAL],
     resourceCosts: [{ resource: 'mana', amount: 5 }],
@@ -219,7 +229,7 @@ function skillBite(): CombatSkillDefinitionView {
     actionKind: 'attack',
     masteryExperienceMode: 'damage',
     techniqueIds: [],
-    targeting: { targetResolverId: 'res-target-single' as ResolverId },
+    targeting: { targetResolverId: RES_TARGET_SINGLE_HOSTILE },
     actionDelayRuleId: DELAY_STANDARD,
     effectIds: [EFF_MONSTER_DAMAGE],
     resourceCosts: [],
@@ -234,7 +244,7 @@ function skillCastDamage(): CombatSkillDefinitionView {
     actionKind: 'cast', // 標成 cast，但效果是 dealDamage —— 側別須由效果推定
     masteryExperienceMode: 'damage',
     techniqueIds: [],
-    targeting: { targetResolverId: 'res-target-single' as ResolverId },
+    targeting: { targetResolverId: RES_TARGET_SINGLE_HOSTILE },
     actionDelayRuleId: DELAY_STANDARD,
     effectIds: [EFF_MONSTER_DAMAGE],
     resourceCosts: [],
@@ -250,7 +260,7 @@ function controlSkill(skillId: SkillDefinitionId, effectId: CombatEffectDefiniti
     actionKind: 'perform',
     masteryExperienceMode: 'fixedSupport',
     techniqueIds: [],
-    targeting: { targetResolverId: 'res-target-single' as ResolverId },
+    targeting: { targetResolverId: RES_TARGET_SINGLE_HOSTILE },
     actionDelayRuleId: DELAY_STANDARD,
     effectIds: [effectId],
     resourceCosts: [],
@@ -307,6 +317,15 @@ const DELAY_RULE: ActionDelayRuleDefinition = {
   reductions: [{ primaryAttribute: 'reaction', reductionPerPoint: 1 }],
   minimumDelay: 10,
 };
+// 切換武器組：基準 60、不吃屬性折減（角色反應 30 時，標準行動延遲是 70、切換是 60，兩者不同值，
+// 測試因此能證明「切換那一段確實來自這筆規則」而不是碰巧等於行動延遲）。
+const WEAPON_SWITCH_DELAY_RULE: ActionDelayRuleDefinition = {
+  ...header(DELAY_WEAPON_SWITCH),
+  baseDelay: 60,
+  reductions: [],
+  minimumDelay: 10,
+};
+export const WEAPON_SWITCH_DELAY = WEAPON_SWITCH_DELAY_RULE.baseDelay;
 
 // ── 控制抗性檔（§2.6）─────────────────────────────────────────────────────
 // 數值取自設計基準 balanceModel.controlResistanceRules：
@@ -360,6 +379,8 @@ export function stubDefinitionReader(
       // 原本寫死在 handleCombatRest 的 5/5，現在由規則資料供給。
       combatRestHealthRestore: 5,
       combatRestManaRestore: 5,
+      // §8.3 跨組切換延遲。原本不存在，等於切換成本恆為 0。
+      weaponSetSwitchDelayRuleId: DELAY_WEAPON_SWITCH,
     }),
     getEncounterGroup: () => encounterGroup(),
     getMonster: () => goblin(monsterControlProfileId),
@@ -370,7 +391,8 @@ export function stubDefinitionReader(
     },
     trySkillView: (id) => SKILL_VIEWS[id],
     getOpeningCtbRule: () => OPENING_RULE,
-    getActionDelayRule: () => DELAY_RULE,
+    getActionDelayRule: (id) =>
+      String(id) === String(DELAY_WEAPON_SWITCH) ? WEAPON_SWITCH_DELAY_RULE : DELAY_RULE,
     getCombatStatus: (id): CombatStatusDefinition => ({
       ...header(id),
       polarity: 'negative',
@@ -498,6 +520,22 @@ export function stubFormationQuery(): CombatFormationQuery {
 export function stubResolverPort(overrides: Partial<CombatResolverPort> = {}): CombatResolverPort {
   const base: CombatResolverPort = {
     resolvePower: (input: CombatPowerInput) => POWER_TABLE[input.resolverId] ?? 0,
+    // targeting resolver（§2.4）的決定性 stub：三種形狀，全部「單體」——取第一個符合該形狀的
+    // 請求目標。回空陣列＝這次請求在此規則下沒有合法目標（Handler 以 no-legal-target 拒絕）。
+    // 範圍／形狀／人數上限之所以能在這裡表達，正是因為它們是資料而不是 Handler 邏輯。
+    resolveSkillTargets: (input: CombatSkillTargetInput): readonly CombatantId[] => {
+      const actor = input.encounter.combatants[input.actorId];
+      if (actor === undefined) return [];
+      if (String(input.resolverId) === String(RES_TARGET_SELF)) return [input.actorId];
+      const wantAlly = String(input.resolverId) === String(RES_TARGET_SINGLE_ALLY);
+      for (const id of input.requestedTargetIds) {
+        const c = input.encounter.combatants[id];
+        if (c === undefined || c.state === 'dead') continue;
+        if (wantAlly ? c.side !== actor.side : c.side === actor.side) continue;
+        return [id];
+      }
+      return [];
+    },
     resolveAttackMastery: () => SWORD_MASTERY,
     resolveDefenseMastery: () => ARMOR_MASTERY,
     chooseEnemyAction: ({ encounter, actorId }): EnemyActionChoice | undefined => {

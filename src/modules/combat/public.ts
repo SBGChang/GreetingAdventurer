@@ -55,6 +55,7 @@ export type {
   CombatFormationMember,
   CombatResolverPort,
   CombatPowerInput,
+  CombatSkillTargetInput,
   EnemyActionChoice,
 } from './system';
 

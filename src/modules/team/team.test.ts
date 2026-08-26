@@ -46,6 +46,10 @@ import {
 import { createTeamQuery, createTeamPresenceQuery } from './queries';
 import {
   fixtureTeamState,
+  withoutTavernVisitors,
+  withNpcLeaderFreeAction,
+  withTemporaryMemberInTavern,
+  NPC_TEMPORARY_ID,
   makeContext,
   stubDefinitionReader,
   stubWorldReader,
@@ -245,7 +249,7 @@ const cases: readonly Case[] = [
         [PLAYER_LEADER_ID]: same,
         [PLAYER_MEMBER_ID]: same,
       };
-      const r = handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, placements }, ctx);
+      const r = handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, actorCharacterId: PLAYER_LEADER_ID, placements }, ctx);
       assert(!r.ok && r.rejection.code === 'team/formation-cell-overlap', `overlap rejected (got ${r.ok ? 'ok' : r.rejection.code})`);
     },
   },
@@ -259,7 +263,7 @@ const cases: readonly Case[] = [
         [PLAYER_LEADER_ID]: { floor: 0, row: 1, col: 1 },
         [PLAYER_MEMBER_ID]: { floor: 99, row: 1, col: 1 },
       };
-      const r = handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, placements }, ctx);
+      const r = handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, actorCharacterId: PLAYER_LEADER_ID, placements }, ctx);
       assert(
         !r.ok && r.rejection.code === 'team/formation-cell-out-of-range',
         `floor≠0 應被擋（got ${r.ok ? 'ok' : r.rejection.code}）`,
@@ -272,7 +276,7 @@ const cases: readonly Case[] = [
       const s0 = fixtureTeamState();
       const ctx = makeContext();
       const placements: Record<string, GridCell> = { [PLAYER_LEADER_ID]: { floor: 0, row: 0, col: 0 } };
-      const r = handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, placements }, ctx);
+      const r = handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, actorCharacterId: PLAYER_LEADER_ID, placements }, ctx);
       assert(!r.ok && r.rejection.code === 'team/formation-benched-member', `bench rejected (got ${r.ok ? 'ok' : r.rejection.code})`);
     },
   },
@@ -286,7 +290,7 @@ const cases: readonly Case[] = [
         [PLAYER_MEMBER_ID]: { floor: 0, row: 0, col: 1 },
         ['char-stranger']: { floor: 0, row: 1, col: 0 },
       };
-      const r = handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, placements }, ctx);
+      const r = handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, actorCharacterId: PLAYER_LEADER_ID, placements }, ctx);
       assert(!r.ok && r.rejection.code === 'team/formation-non-member', `non-member rejected (got ${r.ok ? 'ok' : r.rejection.code})`);
     },
   },
@@ -299,10 +303,96 @@ const cases: readonly Case[] = [
         [PLAYER_LEADER_ID]: { floor: 0, row: 2, col: 2 },
         [PLAYER_MEMBER_ID]: { floor: 0, row: 0, col: 0 },
       };
-      const r = ok(handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, placements }, ctx));
+      const r = ok(handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, actorCharacterId: PLAYER_LEADER_ID, placements }, ctx));
       const f = r.result.nextSlice.combatFormations[PLAYER_TEAM_ID]!;
       assert(f.revision === 1, `revision bumped to 1 (got ${f.revision})`);
       assert(eventTypes(r.result.outgoingMessages).includes('TeamCombatFormationChanged'), 'emits formation changed');
+    },
+  },
+  {
+    // doc §5.1「發令者為隊長」／§8 驗收 20「非隊長…被拒絕且不留下部分寫入」。
+    name: 'formation：非隊長發令 → 拒絕 actor-not-leader，配置與 revision 完全不變',
+    run: () => {
+      const s0 = fixtureTeamState();
+      const ctx = makeContext();
+      const placements: Record<string, GridCell> = {
+        [PLAYER_LEADER_ID]: { floor: 0, row: 2, col: 2 },
+        [PLAYER_MEMBER_ID]: { floor: 0, row: 0, col: 0 },
+      };
+      const r = handleConfigureCombatFormation(
+        s0,
+        { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, actorCharacterId: PLAYER_MEMBER_ID, placements },
+        ctx,
+      );
+      assert(
+        !r.ok && r.rejection.code === 'team/formation-actor-not-leader',
+        `非隊長應拒絕 actor-not-leader（實得 ${r.ok ? 'ok' : r.rejection.code}）`,
+      );
+    },
+  },
+  {
+    // doc §5.1「沒有 active Combat」／§3.1「Combat 建立 Encounter 時只讀取一次快照」。
+    name: 'formation：隊伍有進行中的 Encounter → 拒絕 active-combat（窄化 combat Port 回 true）',
+    run: () => {
+      const s0 = fixtureTeamState();
+      const asked: string[] = [];
+      const ctx = makeContext({
+        combat: {
+          hasActiveEncounter: (teamId) => {
+            asked.push(String(teamId));
+            return true;
+          },
+        },
+      });
+      const placements: Record<string, GridCell> = {
+        [PLAYER_LEADER_ID]: { floor: 0, row: 2, col: 2 },
+        [PLAYER_MEMBER_ID]: { floor: 0, row: 0, col: 0 },
+      };
+      const r = handleConfigureCombatFormation(
+        s0,
+        { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, actorCharacterId: PLAYER_LEADER_ID, placements },
+        ctx,
+      );
+      assert(
+        !r.ok && r.rejection.code === 'team/formation-active-combat',
+        `戰鬥中應拒絕 active-combat（實得 ${r.ok ? 'ok' : r.rejection.code}）`,
+      );
+      // 問的必須是**這支**隊伍，不是玩家隊或隨便一支。
+      assert(
+        asked.length === 1 && asked[0] === String(PLAYER_TEAM_ID),
+        `應以本命令的 teamId 查詢戰鬥狀態（實得 ${asked.join(',')}）`,
+      );
+    },
+  },
+  {
+    // 不變量：兩道新前置條件都不得留下部分寫入（doc §8 驗收 20）。
+    name: 'formation：兩種拒絕都不寫入任何 State（配置物件恆等於原本那一個）',
+    run: () => {
+      const s0 = fixtureTeamState();
+      const placements: Record<string, GridCell> = {
+        [PLAYER_LEADER_ID]: { floor: 0, row: 2, col: 2 },
+        [PLAYER_MEMBER_ID]: { floor: 0, row: 0, col: 0 },
+      };
+      const notLeader = handleConfigureCombatFormation(
+        s0,
+        { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, actorCharacterId: PLAYER_MEMBER_ID, placements },
+        makeContext(),
+      );
+      const inCombat = handleConfigureCombatFormation(
+        s0,
+        { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, actorCharacterId: PLAYER_LEADER_ID, placements },
+        makeContext({ combat: { hasActiveEncounter: () => true } }),
+      );
+      assert(!notLeader.ok && !inCombat.ok, '兩者都應是拒絕');
+      // 拒絕走 CommandRejection 分支，本來就拿不到 nextSlice；此處確認原 Slice 未被 mutate。
+      assert(
+        s0.combatFormations[PLAYER_TEAM_ID]!.revision === 0,
+        '拒絕不得動到原有配置的 revision',
+      );
+      const cells = Object.values(s0.combatFormations[PLAYER_TEAM_ID]!.placements).map(
+        (c) => `${c.floor}:${c.row}:${c.col}`,
+      );
+      assert(cells.join(',') === '0:0:0,0:0:1', `拒絕不得寫入新格位（實得 ${cells.join(',')}）`);
     },
   },
   {
@@ -414,6 +504,146 @@ const cases: readonly Case[] = [
       assert(
         !r.ok && r.rejection.code === 'team/not-in-same-city',
         `跨城招募應拒絕 not-in-same-city（實得 ${r.ok ? 'ok' : r.rejection.code}）`,
+      );
+    },
+  },
+  {
+    // doc §5.1「目標是同城酒館可見的真實 NPC 冒險者」／§7.6「驗證同城酒館可見」。
+    name: 'recruit：目標同城但不在酒館名單 → 拒絕 target-not-tavern-visible，來源隊完全不變',
+    run: () => {
+      // 拿掉 NPC 隊長的 tavernVisit 自由行動：他還在同一座城，只是不在酒館。
+      const s0 = withoutTavernVisitors(fixtureTeamState());
+      const r = handleRecruitTavernAdventurer(
+        s0,
+        { type: 'recruitTavernAdventurer', targetCharacterId: NPC_LEADER_ID },
+        makeContext(),
+      );
+      assert(
+        !r.ok && r.rejection.code === 'team/target-not-tavern-visible',
+        `不在酒館應拒絕 target-not-tavern-visible（實得 ${r.ok ? 'ok' : r.rejection.code}）`,
+      );
+      // 來源隊、成員與配置一概不動。
+      assert(s0.teams[NPC_TEAM_ID]!.memberIds.includes(NPC_LEADER_ID), '來源隊成員不得改動');
+      assert(!s0.teams[PLAYER_TEAM_ID]!.memberIds.includes(NPC_LEADER_ID), '目標不得轉入玩家隊');
+    },
+  },
+  {
+    // 不變量：可見性判準只有一份——Query 說得出來的人才招募得到，反之亦然。
+    name: 'recruit：酒館可見性與 TeamQuery.listTavernVisitorIds 同一判準（可見即可嘗試，不可見即拒絕）',
+    run: () => {
+      const visible = fixtureTeamState();
+      const hidden = withoutTavernVisitors(visible);
+
+      const visibleIds = createTeamQuery(visible).listTavernVisitorIds(CITY_A);
+      assert(visibleIds.includes(NPC_LEADER_ID), 'Query 應列出正在酒館的 NPC 隊長');
+      const hiddenIds = createTeamQuery(hidden).listTavernVisitorIds(CITY_A);
+      assert(hiddenIds.length === 0, `拿掉 tavernVisit 後名單應為空（實得 ${hiddenIds.join(',')}）`);
+
+      const onVisible = handleRecruitTavernAdventurer(
+        visible,
+        { type: 'recruitTavernAdventurer', targetCharacterId: NPC_LEADER_ID },
+        makeContext(),
+      );
+      assert(onVisible.ok, `名單上的人應可嘗試招募（實得 ${onVisible.ok ? 'ok' : onVisible.rejection.code}）`);
+
+      const onHidden = handleRecruitTavernAdventurer(
+        hidden,
+        { type: 'recruitTavernAdventurer', targetCharacterId: NPC_LEADER_ID },
+        makeContext(),
+      );
+      assert(
+        !onHidden.ok && onHidden.rejection.code === 'team/target-not-tavern-visible',
+        `不在名單上的人應被拒（實得 ${onHidden.ok ? 'ok' : onHidden.rejection.code}）`,
+      );
+    },
+  },
+  {
+    // 判準必須讀 status，不只是「這筆紀錄存不存在」。completed／cancelled 是**已經離開酒館**的
+    // 歷史紀錄；若判準退化成「有沒有自由行動」，昨天去過酒館的人今天仍招募得到，而整筆刪掉式的
+    // 反例測不出這件事（見 fixtures.withNpcLeaderFreeAction）。
+    name: 'recruit：tavernVisit 已 completed／cancelled → 不在名單、招募被拒（釘住 status 判準）',
+    run: () => {
+      for (const status of ['completed', 'cancelled'] as const) {
+        const s0 = withNpcLeaderFreeAction(fixtureTeamState(), { status });
+        assert(
+          createTeamQuery(s0).listTavernVisitorIds(CITY_A).length === 0,
+          `${status} 的 tavernVisit 不得出現在名單`,
+        );
+        const r = handleRecruitTavernAdventurer(
+          s0,
+          { type: 'recruitTavernAdventurer', targetCharacterId: NPC_LEADER_ID },
+          makeContext(),
+        );
+        assert(
+          !r.ok && r.rejection.code === 'team/target-not-tavern-visible',
+          `${status} 應拒絕 target-not-tavern-visible（實得 ${r.ok ? 'ok' : r.rejection.code}）`,
+        );
+      }
+    },
+  },
+  {
+    // 判準必須讀 payload.kind。同一名 NPC 同樣在城裡、同樣有一筆 active 自由行動，只是他在**休息**
+    // 而不是在酒館——他不該出現在酒館名單上，也不該招募得到。
+    name: 'recruit：自由行動是 rest 而非 tavernVisit → 不在名單、招募被拒（釘住 payload.kind 判準）',
+    run: () => {
+      const s0 = withNpcLeaderFreeAction(fixtureTeamState(), { payload: { kind: 'rest' } });
+      assert(
+        createTeamQuery(s0).listTavernVisitorIds(CITY_A).length === 0,
+        'rest 不是 tavernVisit，不得出現在酒館名單',
+      );
+      const r = handleRecruitTavernAdventurer(
+        s0,
+        { type: 'recruitTavernAdventurer', targetCharacterId: NPC_LEADER_ID },
+        makeContext(),
+      );
+      assert(
+        !r.ok && r.rejection.code === 'team/target-not-tavern-visible',
+        `休息中的 NPC 應被拒（實得 ${r.ok ? 'ok' : r.rejection.code}）`,
+      );
+    },
+  },
+  {
+    // doc §2.3：「選擇 tavernVisit 的 NPC **正式成員**會出現在同城酒館名單」。暫時成員即使選了
+    // tavernVisit 也不算——判準必須讀 memberIds，而不是「這名角色隸屬哪支隊伍」。
+    name: 'tavern 名單：暫時成員的 tavernVisit 不列入（釘住「正式成員」判準）',
+    run: () => {
+      const s0 = withTemporaryMemberInTavern(fixtureTeamState());
+      const ids = createTeamQuery(s0).listTavernVisitorIds(CITY_A);
+      assert(ids.includes(NPC_LEADER_ID), '正式成員（NPC 隊長）仍應在名單上');
+      assert(
+        !ids.includes(NPC_TEMPORARY_ID),
+        `暫時成員不得出現在酒館名單（實得 ${ids.join(',')}）`,
+      );
+    },
+  },
+  {
+    // 「同城」與「在酒館」是兩件事：隊伍離開城市（例如出發旅行）後名單上就沒有他。
+    name: 'recruit：持有 tavernVisit 但隊伍已不在該城 → 不列入名單、招募被拒',
+    run: () => {
+      const base = fixtureTeamState();
+      const s0: TeamState = {
+        ...base,
+        teams: {
+          ...base.teams,
+          [NPC_TEAM_ID]: {
+            ...base.teams[NPC_TEAM_ID]!,
+            location: { kind: 'travelling', routeId: ROUTE_AB, progress: { kind: 'npcDirect' } },
+          },
+        },
+      };
+      assert(
+        createTeamQuery(s0).listTavernVisitorIds(CITY_A).length === 0,
+        '不在城裡的隊伍不得出現在酒館名單',
+      );
+      const r = handleRecruitTavernAdventurer(
+        s0,
+        { type: 'recruitTavernAdventurer', targetCharacterId: NPC_LEADER_ID },
+        makeContext(),
+      );
+      // 同城硬條件比可見性早一步擋下（兩者都是拒絕，碼不同以利診斷）。
+      assert(
+        !r.ok && r.rejection.code === 'team/not-in-same-city',
+        `旅行中的目標應被拒（實得 ${r.ok ? 'ok' : r.rejection.code}）`,
       );
     },
   },

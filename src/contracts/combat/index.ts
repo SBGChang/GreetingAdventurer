@@ -41,7 +41,6 @@ import type {
   PlayerTravelEventInstanceId,
   RngContext,
   Revision,
-  JsonValue,
 } from '../core';
 // Cross-module: map owns GridCell (src/contracts/map).
 import type { GridCell } from '../map';
@@ -250,6 +249,16 @@ export type CombatRuleDefinition = DefinitionHeader & {
   // 回復多少是平衡，換一份 Pack 就該不同——它從來不是結構。
   combatRestHealthRestore: number;
   combatRestManaRestore: number;
+  // 跨武器組施放技能的切換延遲（§8.3「跨組技能先套用切換武器組延遲，再執行技能」）。
+  //
+  // 這個欄位先前不存在，於是 handleUseCombatSkill 只更新 activeWeaponSetId 就往下走——**等於把切換
+  // 延遲寫死成 0**。零成本切換是戰鬥系統裡最強的自由度（三組武器＝九個技能隨時可用），把它寫死成 0
+  // 不是「還沒接」，是已經替內容做了平衡決定。切換要付多少延遲是平衡、換一份 Pack 就該不同，
+  // 所以它是資料；而「延遲怎麼由屬性折算」是既有的 ActionDelayRule 形狀，直接沿用同一張表。
+  //
+  // 必填（不是選填）：選填會讓「這套規則不收切換延遲」與「作者忘了填」長得一模一樣，而前者的正確
+  // 表達是填一筆 baseDelay=0 的 ActionDelayRule——那是**內容說的**，不是實作替內容說的。
+  weaponSetSwitchDelayRuleId: ActionDelayRuleId;
 };
 
 export type OpeningCtbRuleDefinition = DefinitionHeader & {
@@ -414,11 +423,21 @@ export type UseCombatItemCommand = Readonly<{
   actorId: CombatantId;
   itemInstanceId: ItemInstanceId;
 }>;
+// 指揮隊友：**未閉合的能力**。不在 CombatGameCommand union 內，因此不會進 GameCommand、
+// GAME_COMMAND_ENTRY 或 Manifest；Router 查不到它。
+//
+// 原本此處有 `directive: Readonly<Record<string, JsonValue>>`——規範 §7 逐字點名的袋子欄位
+// （「名字本身就在說『這裡什麼都能放』」）。它之所以是袋子，正因為**指令語彙還不存在**：
+// 沒有人知道可以命令隊友做哪幾件事，於是用一個什麼都塞得下的型別把問題推遲。
+//
+// 兩條路都不能走：留著袋子＝把「Schema 不夠用」寫成型別；現在發明一套 directive schema＝在沒有
+// 任何消費者、也沒有設計來源的情況下憑空造內容形狀（§6.0：真的需要時再以具名欄位補）。
+// 因此欄位整個移除，能力維持不註冊。實作那天要補的是一個**封閉判別聯集**（一個 Func 一張表：
+// 每種指令一個 kind、自己的具名必填欄位），而不是把這個袋子接回來。
 export type CommandAllyCommand = Readonly<{
   type: 'commandAlly';
   encounterId: EncounterId;
   allyId: CombatantId;
-  directive: Readonly<Record<string, JsonValue>>;
 }>;
 export type CombatRestCommand = Readonly<{
   type: 'combatRest';
@@ -427,7 +446,8 @@ export type CombatRestCommand = Readonly<{
 }>;
 // 只列已實作的。尚未註冊：
 //   useCombatItem —— 只送出 CommitCombatItemUse，不套效果、不加延遲，卻回報成功。
-//   commandAlly   —— Handler 從未寫過。
+//   commandAlly   —— 指令語彙不存在（見上方 CommandAllyCommand 說明）；system.ts 的
+//                    handleCommandAlly 只是第二道保險的 typed rejection，不是實作。
 export type CombatGameCommand = UseCombatSkillCommand | CombatRestCommand;
 
 // combat 作為唯一 Handler 接收的 Internal Command（目前僅一筆）。
@@ -441,10 +461,70 @@ export type CombatOutboundInternalCommand =
 
 // ── 輸出事件（§7）─────────────────────────────────────────────────────
 export type CombatEncounterOutcome = 'victory' | 'defeat';
-// Derived: contentResolution shape is not specified in the doc (see report note).
-export type CombatContentResolution = Readonly<Record<string, JsonValue>>;
-// Derived: CombatActionResolved.results shape is not specified in the doc (see report note).
-export type CombatActionResult = Readonly<Record<string, JsonValue>>;
+
+// `CombatEncounterResolvedPayload.contentResolution?: Readonly<Record<string, JsonValue>>` 已移除。
+//
+// 它是規範 §7 的袋子欄位，而且**零生產者、零消費者**：resolveEncounter 從來沒有填過它，也沒有任何
+// 訂閱者讀過它。地圖內容的處理權在 B.5 就已裁定歸 dungeon（dungeon 訂閱 CombatEncounterResolved
+// 後發 ResolvePlayerMapContent，因為該命令必填的 distributionId 屬 Dungeon Session，combat 取不到）。
+// 所以 combat 這一側本來就不該帶內容處理結果。
+// §6.0：沒有消費者時優先刪除欄位，而不是替一個沒人要的欄位發明 schema；真的需要時再以具名欄位補。
+
+// 單次行動解析出的逐項結果（CombatActionResolved.results）。
+//
+// 原本是 `Readonly<Record<string, JsonValue>>`——一個袋子。後果是規範列的四件事同時發生：讀的人
+// 得先知道 `kind` 才知道 `amount` 是傷害還是 CTB、欄位加不了必填約束、驗證器寫不出來、產生端拿
+// `String(id)` 把 branded ID 攤成裸字串（型別資訊在事件邊界整個掉光）。
+//
+// 現在照「一個 Func 一張表」定形：**每個 kind 只帶自己的欄位、全部必填、不共用模糊欄位**。
+// 兩個 kind 之間沒有任何共用欄位，也不需要共用——`targetId` 與 `actorId`/`defenderId` 語意不同，
+// 就不會被壓成同一個 `id`。ID 一律用 branded 型別，訂閱者不必再自己轉回去。
+//
+// 這裡的 `kind` 是**領域模型變體**（與 CombatEncounterSource.kind、ItemLocation.kind 同類），
+// 不是 Definition 家族識別，不進 registry，也不與 definition-kinds.ts 相干。
+export type CombatActionResult =
+  | Readonly<{
+      kind: 'dealDamage';
+      targetId: CombatantId;
+      // 面板傷害（未被 HP 夾住的原始值），用於顯示與致死判定。
+      amount: number;
+      targetDied: boolean;
+    }>
+  | Readonly<{ kind: 'heal'; targetId: CombatantId; amount: number }>
+  | Readonly<{
+      kind: 'adjustCtb';
+      targetId: CombatantId;
+      // 已套控制抗性折算與行動窗上限之後、真正加到 CTB 上的量（可為負）。
+      appliedCtbDelta: number;
+    }>
+  | Readonly<{
+      kind: 'interruptCasting';
+      targetId: CombatantId;
+      interruptedSkillId: SkillDefinitionId;
+      addedDelay: number;
+    }>
+  | Readonly<{
+      kind: 'applyStatus';
+      targetId: CombatantId;
+      statusId: CombatStatusDefinitionId;
+      // 合併（replace/refresh/strongest）之後**實際生效**的那一筆，不是本次鑄出來的那一筆。
+      statusInstanceId: CombatStatusInstanceId;
+      remainingTargetActions: number;
+    }>
+  | Readonly<{ kind: 'removeStatus'; targetId: CombatantId; statusId: CombatStatusDefinitionId }>
+  | Readonly<{
+      kind: 'counter';
+      defenderId: CombatantId;
+      attackerId: CombatantId;
+      counterSkillId: SkillDefinitionId;
+    }>
+  | Readonly<{ kind: 'counterStanceEstablished'; actorId: CombatantId; skillId: SkillDefinitionId }>
+  | Readonly<{
+      kind: 'rest';
+      actorId: CombatantId;
+      healthRestored: number;
+      manaRestored: number;
+    }>;
 
 export type CombatEncounterStartedPayload = Readonly<{
   type: 'CombatEncounterStarted';
@@ -466,7 +546,6 @@ export type CombatEncounterResolvedPayload = Readonly<{
   participantCharacterIds: readonly CharacterId[];
   source: CombatEncounterSource;
   outcome: CombatEncounterOutcome;
-  contentResolution?: CombatContentResolution;
 }>;
 export type CombatTeamOutcomePayload = Readonly<{
   type: 'CombatTeamOutcome';

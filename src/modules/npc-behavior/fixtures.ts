@@ -242,7 +242,7 @@ function sharedDefinitions(packId: ContentPackId): Omit<FixtureDefinitions, 'pol
     freeActionRules: {
       [FIXTURE.restRule]: {
         ...header(FIXTURE.restRule, packId),
-        kind: 'rest',
+        freeActionKind: 'rest',
       },
     } as FixtureDefinitions['freeActionRules'],
   };
