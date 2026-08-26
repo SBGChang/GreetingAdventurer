@@ -13,6 +13,7 @@
     "verify:content-sync": "node scripts/verify-content-sync.mjs",
     "content:packs": "tsx scripts/compile-content-packs.ts",
     "verify:content-packs": "tsx scripts/verify-content-packs.ts",
+    "report:content": "tsx scripts/report-content-coverage.ts",
     "verify:content-scope": "node scripts/verify-content-scope.mjs",
     "verify": "npm run typecheck && npm run verify:discipline && npm run verify:modules && npm run verify:content-packs && npm run verify:content-sync && npm run verify:content-scope",
     "content:all": "npm run content:yunhua && npm run content:vildun && npm run content:aurelien && npm run content:safir",

@@ -23,6 +23,19 @@ import { INVENTORY_DEFINITION_KINDS } from './inventory-reader';
 import { MAP_DEFINITION_KINDS } from './map-reader';
 import { PROGRESSION_DEFINITION_KINDS } from './progression-reader';
 import { TEAM_DEFINITION_KINDS } from './team-reader';
+import { CITY_DEFINITION_KINDS } from './city-reader';
+import { QUEST_DEFINITION_KINDS } from './quest-reader';
+import { SOCIAL_DEFINITION_KINDS } from './social-reader';
+import { ECONOMY_DEFINITION_KINDS } from './economy-reader';
+import { WORLD_DEFINITION_KINDS } from './world-reader';
+import { CRAFTING_DEFINITION_KINDS } from './crafting-reader';
+import { DISTRIBUTION_DEFINITION_KINDS } from './distribution-reader';
+import { COMBAT_SEQUENCE_DEFINITION_KINDS } from './combat-sequence-reader';
+import { NPC_BEHAVIOR_DEFINITION_KINDS } from './npc-behavior-reader';
+import { STATISTICS_DEFINITION_KINDS } from './statistics-reader';
+import { COMBAT_POWER_DEFINITION_KINDS } from './combat-power-reader';
+import { GATHERING_DEFINITION_KINDS } from './gathering-reader';
+
 
 // ── kind 登記 ──────────────────────────────────────────────────────────────
 
@@ -37,17 +50,40 @@ export type DefinitionKindRegistration = Readonly<{
 // 第二個真相來源——`RUNTIME_DATA_CONTRACT.packSchemaVersion` 升版時它不會跟著動。
 const CURRENT_SCHEMA_VERSION = RUNTIME_DATA_CONTRACT.packSchemaVersion;
 
+
+// ── 「一個 kind 一個擁有者，但可以有多個 Reader」 ──────────────────────────────
+//
+// `data-runtime/readers.ts` 明確允許同一筆 Definition 被多個窄化 Reader 以**不同 View** 讀取
+// （例如 map 只投影 `npcPolicy`、dungeon 只投影 `dungeonInteractionMinutes`）。那是合法且必要的：
+// 讀取面可以多個，**擁有面只能一個**（§12：不擁有這個事實的地方不得決定它）。
+//
+// 但各模組的 `XXX_DEFINITION_KINDS` 只表達「我這個 Reader 認得哪些 kind」，表達不出「這個 kind
+// 是不是我的」。若直接把每個模組宣告的 kind 都當成它擁有的，就會出現同一個 kind 兩個 owner——
+// 實測有 5 筆。下表把「我只是讀，不擁有」明講出來，於是擁有權維持唯一，而多 Reader 關係
+// 也在這裡留下記錄，不會變成默契。
+const CONSUMED_NOT_OWNED: Readonly<Record<string, readonly string[]>> = {
+  // 戰力服務讀裝備效果與技能來評估，但兩者的定義分別屬 combat 與 progression。
+  'combat-power': ['equipment-effect', 'skill'],
+  // NPC 行為讀自由行動與旅行規則來決定下一步；兩者都是 team 的定義。
+  'npc-behavior': ['free-action-rule', 'npc-travel-rule'],
+  // 地牢讀採集規則取互動分鐘數；採集規則本身屬 gathering 服務（`GatheringRuleDefinition`）。
+  dungeon: ['gathering-rule'],
+};
+
 // 一個模組的全部 kind 一次登記。schemaVersion 逐 kind 可覆寫（某個定義單獨改形狀時只推它自己）。
 function own(
   owner: string,
   kinds: readonly string[],
   versions: Readonly<Record<string, number>> = {},
 ): readonly DefinitionKindRegistration[] {
-  return kinds.map((kind) => ({
-    kind,
-    owner: owner as ModuleId,
-    schemaVersion: versions[kind] ?? CURRENT_SCHEMA_VERSION,
-  }));
+  const consumedOnly = new Set(CONSUMED_NOT_OWNED[owner] ?? []);
+  return kinds
+    .filter((kind) => !consumedOnly.has(kind))
+    .map((kind) => ({
+      kind,
+      owner: owner as ModuleId,
+      schemaVersion: versions[kind] ?? CURRENT_SCHEMA_VERSION,
+    }));
 }
 
 // `Object.values` 對 `as const` 物件會給出字面值聯集陣列；itemKinds 是嵌套陣列，攤平處理。
@@ -63,6 +99,21 @@ export const DEFINITION_KIND_REGISTRATIONS: readonly DefinitionKindRegistration[
   ...own('map', kindsOf(MAP_DEFINITION_KINDS)),
   ...own('progression', kindsOf(PROGRESSION_DEFINITION_KINDS)),
   ...own('team', kindsOf(TEAM_DEFINITION_KINDS)),
+  // Wave D 的九個模組與三個純服務。它們的 reader adapter 早就存在，但 kind 一直沒有登記進這張表——
+  // 後果是**內容一寫就被 Compiler 拒收**（`kind 沒有登記擁有模組`），所以城市、委託、世界、製作、
+  // 分配、戰鬥串、NPC 行為的內容根本沒辦法開始寫。純服務沒有 ModuleId，以其服務名登記擁有者。
+  ...own('city', kindsOf(CITY_DEFINITION_KINDS)),
+  ...own('quest', kindsOf(QUEST_DEFINITION_KINDS)),
+  ...own('social', kindsOf(SOCIAL_DEFINITION_KINDS)),
+  ...own('economy', kindsOf(ECONOMY_DEFINITION_KINDS)),
+  ...own('world', kindsOf(WORLD_DEFINITION_KINDS)),
+  ...own('crafting', kindsOf(CRAFTING_DEFINITION_KINDS)),
+  ...own('distribution', kindsOf(DISTRIBUTION_DEFINITION_KINDS)),
+  ...own('combat-sequence', kindsOf(COMBAT_SEQUENCE_DEFINITION_KINDS)),
+  ...own('npc-behavior', kindsOf(NPC_BEHAVIOR_DEFINITION_KINDS)),
+  ...own('statistics', kindsOf(STATISTICS_DEFINITION_KINDS)),
+  ...own('combat-power', kindsOf(COMBAT_POWER_DEFINITION_KINDS)),
+  ...own('gathering', kindsOf(GATHERING_DEFINITION_KINDS)),
 ];
 
 // ── 索引與啟動驗證 ─────────────────────────────────────────────────────────
