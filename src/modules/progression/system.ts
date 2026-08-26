@@ -9,6 +9,7 @@
 
 import type {
   CharacterId,
+  WorldDay,
   MasteryId,
   DefinitionId,
   Revision,
@@ -18,6 +19,7 @@ import type {
 } from '../../contracts/core';
 import { MAX_MASTERY_LEVEL, MAX_PRIMARY_ATTRIBUTE, SUPPORT_USE_CAP } from '../../contracts/core';
 import type {
+  ExperienceAwardRuleDefinition,
   ProgressionDefinitionReader,
   MasteryDefinition,
   MasteryCurveDefinition,
@@ -287,15 +289,67 @@ export function awardMasteryExperience(
 // 年齡倍率（doc §2.4）
 // ──────────────────────────────────────────────────────────────────────────
 
-// TODO: 年齡倍率需讀 Character 年齡階段 + AgeExperienceRule stages。
-// 第一版主路徑以 1.0 計；成年前較快成長由呼叫端傳入 ageMultiplier 覆寫。
+// 讀「角色現在幾歲」需要的最小 Query。年齡＝worldDay − birthDay，兩者 progression 都不擁有。
+export interface CharacterAgeQuery {
+  // 角色出生日。不存在該角色時回 undefined——呼叫端必須明確失敗，不得當成 0 歲。
+  getBirthDay(characterId: CharacterId): WorldDay | undefined;
+}
+
+// 年齡倍率的解析輸入。
+//
+// 先前的形狀是 `resolveBaseExperience(reader, ruleId, ageMultiplier)`，倍率由呼叫端傳入且預設
+// `= 1`。結果是全 repo **沒有任何呼叫端傳過別的值**——倍率永遠是 1，而
+// `AgeExperienceRuleDefinition.stages` 與 `ExperienceAwardRuleDefinition.ageExperienceRuleId`
+// 兩份資料從未被讀過。修法不是再加一個參數（那正是當初留下 `= 1` 的原因），而是把「算倍率需要
+// 的東西」交給這個函式自己去讀。
+export type AgeExperienceInput = Readonly<{
+  definitions: ProgressionDefinitionReader;
+  worldDay: WorldDay;
+  characters: CharacterAgeQuery;
+}>;
+
+// 依角色年齡取倍率。
+//
+// `ageExperienceRuleId` 是**選填**的：沒有指名年齡規則，代表這筆獎勵不隨年齡縮放——那是規則的
+// 一種合法形狀，不是缺資料，所以此時倍率就是 1（沒有折算這回事）。
+// 指名了規則卻找不到對應年齡段，則是**壞資料**：明確拋錯，不夾到最近的一段，也不退回 1。
+function ageMultiplierFor(
+  rule: ExperienceAwardRuleDefinition,
+  characterId: CharacterId,
+  input: AgeExperienceInput,
+): number {
+  const ageRuleId = rule.ageExperienceRuleId;
+  if (ageRuleId === undefined) return 1;
+
+  const birthDay = input.characters.getBirthDay(characterId);
+  if (birthDay === undefined) {
+    throw new Error(
+      `progression: 角色 ${String(characterId)} 沒有出生日，無法套用年齡經驗規則 ` +
+        `${String(ageRuleId)}——不得當成 0 歲`,
+    );
+  }
+  const ageDays = input.worldDay - birthDay;
+  const ageRule = input.definitions.getAgeExperienceRule(ageRuleId);
+  const stage = ageRule.stages.find(
+    (s) => ageDays >= s.minAgeDays && (s.maxAgeDays === undefined || ageDays <= s.maxAgeDays),
+  );
+  if (stage === undefined) {
+    throw new Error(
+      `progression: 年齡規則 ${String(ageRuleId)} 沒有涵蓋 ${ageDays} 天的年齡段——` +
+        `內容的 stages 必須覆蓋所有可能年齡（缺口不得由程式補）`,
+    );
+  }
+  return stage.experienceMultiplier;
+}
+
 function resolveBaseExperience(
-  reader: ProgressionDefinitionReader,
   experienceAwardRuleId: Parameters<ProgressionDefinitionReader['getExperienceAwardRule']>[0],
-  ageMultiplier: number,
+  characterId: CharacterId,
+  input: AgeExperienceInput,
 ): Readonly<{ masteryId: MasteryId; amount: number }> {
-  const rule = reader.getExperienceAwardRule(experienceAwardRuleId);
-  return { masteryId: rule.masteryId, amount: rule.baseExperience * ageMultiplier };
+  const rule = input.definitions.getExperienceAwardRule(experienceAwardRuleId);
+  const multiplier = ageMultiplierFor(rule, characterId, input);
+  return { masteryId: rule.masteryId, amount: rule.baseExperience * multiplier };
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -308,7 +362,7 @@ export function handleGrantGatheringMasteryExperience(
   state: ProgressionModuleState,
   command: GrantGatheringMasteryExperience,
   reader: ProgressionDefinitionReader,
-  ageMultiplier = 1,
+  age: AgeExperienceInput,
 ): ModuleResult<ProgressionModuleState> {
   const key = gatheringGrantKey(
     command.resolutionId,
@@ -321,7 +375,11 @@ export function handleGrantGatheringMasteryExperience(
     return emptyResult(state);
   }
 
-  const base = resolveBaseExperience(reader, command.experienceAwardRuleId, ageMultiplier);
+  const base = resolveBaseExperience(
+    command.experienceAwardRuleId,
+    command.contributorCharacterId,
+    age,
+  );
   // 命令 payload 的 masteryId 為受益 Mastery（與規則一致）。
   const result = awardMasteryExperience(
     state,
@@ -475,8 +533,9 @@ export function handleCraftingCompleted(
   state: ProgressionModuleState,
   event: CraftingCompletedEvent,
   reader: ProgressionDefinitionReader,
+  age: AgeExperienceInput,
 ): ModuleResult<ProgressionModuleState> {
-  const base = resolveBaseExperience(reader, event.experienceRuleId, 1);
+  const base = resolveBaseExperience(event.experienceRuleId, event.characterId, age);
   return awardMasteryExperience(
     state,
     {

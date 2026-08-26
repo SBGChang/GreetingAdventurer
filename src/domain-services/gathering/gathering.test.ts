@@ -114,6 +114,14 @@ function progressionReader(): ProgressionDefinitionReader {
   return partial as unknown as ProgressionDefinitionReader;
 }
 
+// progression 的年齡倍率輸入。gathering fixture 的 award rule 沒指名 ageExperienceRuleId，
+// 所以倍率是 1——「這筆獎勵不隨年齡縮放」的合法形狀，不是預設值。
+const ageInput = (definitions: ReturnType<typeof progressionReader>) => ({
+  definitions,
+  worldDay: 0 as never,
+  characters: { getBirthDay: () => 0 as never },
+});
+
 const cases: readonly Readonly<{ name: string; run: () => void }>[] = [
   // ── 採集者選擇 ───────────────────────────────────────────────────────────
   {
@@ -684,6 +692,7 @@ const cases: readonly Readonly<{ name: string; run: () => void }>[] = [
         createInitialProgressionState(),
         cmd,
         reader,
+        ageInput(reader),
       );
       const progress = first.nextSlice.characterProgress[FIXTURE.charB];
       const granted = progress?.masteries[FIXTURE.masteryId]?.experience;
@@ -691,7 +700,7 @@ const cases: readonly Readonly<{ name: string; run: () => void }>[] = [
       assert(first.outgoingMessages.length > 0, '第一次應發出事件');
 
       // 重播：同一 resolutionId + contributor + mastery。
-      const second = handleGrantGatheringMasteryExperience(first.nextSlice, cmd, reader);
+      const second = handleGrantGatheringMasteryExperience(first.nextSlice, cmd, reader, ageInput(reader));
       assert(second.nextSlice === first.nextSlice, '重播應回傳同一份 slice（冪等 no-op）');
       assert(second.outgoingMessages.length === 0, '重播不應再發事件');
 
@@ -701,6 +710,7 @@ const cases: readonly Readonly<{ name: string; run: () => void }>[] = [
         first.nextSlice,
         toGrantGatheringMasteryExperience(otherResolution),
         reader,
+        ageInput(reader),
       );
       const afterThird =
         third.nextSlice.characterProgress[FIXTURE.charB]?.masteries[FIXTURE.masteryId]?.experience;

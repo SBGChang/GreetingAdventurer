@@ -15,6 +15,7 @@ import {
 } from './system';
 import {
   makeFixtureReader,
+  makeFixtureAgeInput,
   makeGatheringCommand,
   HERO,
   SWORD_MASTERY,
@@ -39,7 +40,99 @@ function eventTypes(messages: readonly unknown[]): string[] {
 
 type Case = Readonly<{ name: string; run: () => void }>;
 
+// fixture 的 award rule 沒指名 ageExperienceRuleId，所以倍率是 1（不隨年齡縮放的合法形狀）。
+const ageInput = () => makeFixtureAgeInput();
+
 const cases: readonly Case[] = [
+  {
+    // 先前 `resolveBaseExperience(reader, ruleId, ageMultiplier = 1)` 的倍率由呼叫端傳入而預設 1，
+    // 全 repo 沒有任何呼叫端傳過別的值——倍率永遠是 1，`AgeExperienceRuleDefinition.stages` 與
+    // `ExperienceAwardRuleDefinition.ageExperienceRuleId` 兩份資料從未被讀過。
+    name: '年齡經驗倍率來自資料：換一個年齡段就換一個倍率',
+    run: () => {
+      const AGE_RULE = 'definition:age-experience-rule:standard' as never;
+      const base = makeFixtureReader();
+      const baseAward = base.getExperienceAwardRule(makeGatheringCommand().experienceAwardRuleId);
+
+      // award rule 指名年齡規則；年齡規則分兩段：未成年 ×2，成年 ×1。
+      const reader = {
+        ...base,
+        getExperienceAwardRule: () => ({ ...baseAward, ageExperienceRuleId: AGE_RULE }),
+        getAgeExperienceRule: () => ({
+          id: AGE_RULE,
+          schemaVersion: 1,
+          packId: 'pack:test' as never,
+          enabled: true,
+          stages: [
+            { minAgeDays: 0, maxAgeDays: 5000, experienceMultiplier: 2 },
+            { minAgeDays: 5001, experienceMultiplier: 1 },
+          ],
+        }),
+      } as typeof base;
+
+      const grantAt = (birthDay: number): number | undefined => {
+        const age = makeFixtureAgeInput({
+          definitions: reader,
+          worldDay: 20000 as never,
+          characters: { getBirthDay: () => birthDay as never },
+        });
+        const r = handleGrantGatheringMasteryExperience(
+          createInitialProgressionState(),
+          makeGatheringCommand(),
+          reader,
+          age,
+        );
+        return r.nextSlice.characterProgress[HERO]?.masteries[SWORD_MASTERY]?.experience;
+      };
+
+      // 出生於 18000 → 年齡 2000 天 → 落在第一段 ×2。
+      const young = grantAt(18000);
+      // 出生於 0 → 年齡 20000 天 → 落在第二段 ×1。
+      const old = grantAt(0);
+      if (young === undefined || old === undefined) {
+        throw new Error(`兩次發放都應入帳（young=${String(young)} old=${String(old)}）`);
+      }
+      assert(young === old * 2, `未成年倍率應為成年的兩倍（實得 young=${young} old=${old}）`);
+    },
+  },
+  {
+    name: '年齡經驗倍率：年齡不在任何段落內 → 明確拋錯（不夾到最近的一段、不退回 1）',
+    run: () => {
+      const AGE_RULE = 'definition:age-experience-rule:gapped' as never;
+      const base = makeFixtureReader();
+      const baseAward = base.getExperienceAwardRule(makeGatheringCommand().experienceAwardRuleId);
+      const reader = {
+        ...base,
+        getExperienceAwardRule: () => ({ ...baseAward, ageExperienceRuleId: AGE_RULE }),
+        getAgeExperienceRule: () => ({
+          id: AGE_RULE,
+          schemaVersion: 1,
+          packId: 'pack:test' as never,
+          enabled: true,
+          // 刻意留缺口：只涵蓋 0..100 天。
+          stages: [{ minAgeDays: 0, maxAgeDays: 100, experienceMultiplier: 3 }],
+        }),
+      } as typeof base;
+
+      let threw = false;
+      try {
+        handleGrantGatheringMasteryExperience(
+          createInitialProgressionState(),
+          makeGatheringCommand(),
+          reader,
+          makeFixtureAgeInput({
+            definitions: reader,
+            worldDay: 20000 as never,
+            characters: { getBirthDay: () => 0 as never },
+          }),
+        );
+      } catch {
+        threw = true;
+      }
+      assert(threw, 'stages 有缺口時必須拋錯——缺口不得由程式補');
+    },
+  },
+
   {
     name: '#1：CombatAttackMasteryEarned 依 CombatMasterySource 冪等（重放不重複發放、不再 emit）',
     run: () => {
@@ -211,13 +304,13 @@ const cases: readonly Case[] = [
       const cmd = makeGatheringCommand();
       const s0 = createInitialProgressionState();
 
-      const r1 = handleGrantGatheringMasteryExperience(s0, cmd, reader);
+      const r1 = handleGrantGatheringMasteryExperience(s0, cmd, reader, ageInput());
       const exp1 = r1.nextSlice.characterProgress[HERO]?.masteries[SWORD_MASTERY]?.experience;
       assert(exp1 === 150, `first grant experience 150 (got ${exp1})`);
       assert(r1.outgoingMessages.length > 0, 'first grant emits events');
 
       // 重送同一 Resolution：state 不再變化、無事件。
-      const r2 = handleGrantGatheringMasteryExperience(r1.nextSlice, cmd, reader);
+      const r2 = handleGrantGatheringMasteryExperience(r1.nextSlice, cmd, reader, ageInput());
       const exp2 = r2.nextSlice.characterProgress[HERO]?.masteries[SWORD_MASTERY]?.experience;
       assert(exp2 === 150, `replay keeps experience 150 (got ${exp2})`);
       assert(r2.outgoingMessages.length === 0, 'replay emits no events');

@@ -2,7 +2,9 @@
 // 最小 Fixture：一個假 ProgressionDefinitionReader + 若干 Mastery/Curve/Rule，
 // 供單元測試與快速手動驗證使用。純資料，無 I/O。
 
+import type { AgeExperienceInput } from './system';
 import type {
+  WorldDay,
   ContentPackId,
   MasteryId,
   MasteryCurveId,
@@ -131,6 +133,19 @@ const awardRules: Record<string, ExperienceAwardRuleDefinition> = {
 };
 
 // ── 假 Reader：只實作測試會走到的方法；其餘拋出可定位錯誤 ─────────────────
+// 年齡倍率的輸入。fixture 的 ExperienceAwardRule **沒有**指名 ageExperienceRuleId，所以倍率是 1
+// ——那是「這筆獎勵不隨年齡縮放」的合法形狀，不是預設值。要測年齡縮放的案例自行提供帶
+// ageExperienceRuleId 的 rule 與對應的 getBirthDay。
+export function makeFixtureAgeInput(
+  overrides: Partial<AgeExperienceInput> = {},
+): AgeExperienceInput {
+  return {
+    definitions: overrides.definitions ?? makeFixtureReader(),
+    worldDay: overrides.worldDay ?? (20000 as WorldDay),
+    characters: overrides.characters ?? { getBirthDay: () => 0 as WorldDay },
+  };
+}
+
 export function makeFixtureReader(): ProgressionDefinitionReader {
   const notInFixture = (what: string): never => {
     throw new Error(`fixture reader: ${what} not provided`);
