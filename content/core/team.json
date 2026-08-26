@@ -1,0 +1,258 @@
+[
+  {
+    "durationDays": 3,
+    "enabled": true,
+    "id": "player-travel-mode.core.hurried",
+    "kind": "player-travel-mode",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "segments": [
+      1,
+      1,
+      1
+    ],
+    "sourcePath": "core/team.json#player-travel-mode.core.hurried",
+    "travelEventWeightProfileId": "player-travel-event-weight-profile.core.hurried",
+    "travelExperienceMultiplier": 0.5,
+    "travelExperienceRuleId": "experience-award-rule.core.travel-normal"
+  },
+  {
+    "durationDays": 6,
+    "enabled": true,
+    "id": "player-travel-mode.core.normal",
+    "kind": "player-travel-mode",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "segments": [
+      2,
+      2,
+      2
+    ],
+    "sourcePath": "core/team.json#player-travel-mode.core.normal",
+    "travelEventWeightProfileId": "player-travel-event-weight-profile.core.normal",
+    "travelExperienceMultiplier": 1,
+    "travelExperienceRuleId": "experience-award-rule.core.travel-normal"
+  },
+  {
+    "durationDays": 9,
+    "enabled": true,
+    "id": "player-travel-mode.core.slow",
+    "kind": "player-travel-mode",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "segments": [
+      3,
+      3,
+      3
+    ],
+    "sourcePath": "core/team.json#player-travel-mode.core.slow",
+    "travelEventWeightProfileId": "player-travel-event-weight-profile.core.slow",
+    "travelExperienceMultiplier": 2,
+    "travelExperienceRuleId": "experience-award-rule.core.travel-normal"
+  },
+  {
+    "durationDays": 6,
+    "enabled": true,
+    "eventPolicy": "none",
+    "id": "npc-travel-rule.core.standard",
+    "kind": "npc-travel-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#npc-travel-rule.core.standard",
+    "travelExperienceMultiplier": 1,
+    "travelExperienceRuleId": "experience-award-rule.core.travel-npc-team"
+  },
+  {
+    "completionResolverId": "resolver:team.free-action-craft-completion",
+    "enabled": true,
+    "freeActionKind": "craft",
+    "id": "free-action-rule.core.craft",
+    "kind": "free-action-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#free-action-rule.core.craft"
+  },
+  {
+    "completionResolverId": "resolver:team.free-action-train-completion",
+    "enabled": true,
+    "freeActionKind": "train",
+    "id": "free-action-rule.core.train",
+    "kind": "free-action-rule",
+    "packId": "pack:core",
+    "requiredFreeDays": 28,
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#free-action-rule.core.train"
+  },
+  {
+    "completionResolverId": "resolver:team.free-action-teach-completion",
+    "enabled": true,
+    "freeActionKind": "teach",
+    "id": "free-action-rule.core.teach",
+    "kind": "free-action-rule",
+    "packId": "pack:core",
+    "requiredFreeDays": 28,
+    "requiresCityFacilityKind": "home",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#free-action-rule.core.teach"
+  },
+  {
+    "enabled": true,
+    "freeActionKind": "trade",
+    "id": "free-action-rule.core.trade",
+    "kind": "free-action-rule",
+    "packId": "pack:core",
+    "requiredFreeDays": 0,
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#free-action-rule.core.trade"
+  },
+  {
+    "enabled": true,
+    "freeActionKind": "tavernVisit",
+    "id": "free-action-rule.core.tavern-visit",
+    "kind": "free-action-rule",
+    "packId": "pack:core",
+    "requiresCityFacilityKind": "tavern",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#free-action-rule.core.tavern-visit"
+  },
+  {
+    "enabled": true,
+    "freeActionKind": "proposeToTeammate",
+    "id": "free-action-rule.core.propose-to-teammate",
+    "kind": "free-action-rule",
+    "npcMarriageRuleId": "npc-marriage-rule.core.standard",
+    "packId": "pack:core",
+    "requiredFreeDays": 0,
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#free-action-rule.core.propose-to-teammate"
+  },
+  {
+    "enabled": true,
+    "freeActionKind": "rest",
+    "id": "free-action-rule.core.rest",
+    "kind": "free-action-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#free-action-rule.core.rest"
+  },
+  {
+    "durationDays": 365,
+    "enabled": true,
+    "id": "team-plan-rule.core.home-year-rest",
+    "kind": "team-plan-rule",
+    "packId": "pack:core",
+    "planKind": "homeRest",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#team-plan-rule.core.home-year-rest"
+  },
+  {
+    "durationDays": 1,
+    "enabled": true,
+    "id": "team-plan-rule.core.inn-stay",
+    "kind": "team-plan-rule",
+    "packId": "pack:core",
+    "planKind": "cityFacilityAction",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#team-plan-rule.core.inn-stay"
+  },
+  {
+    "durationDays": 1,
+    "enabled": true,
+    "id": "team-plan-rule.core.enter-adventure-map",
+    "kind": "team-plan-rule",
+    "packId": "pack:core",
+    "planKind": "enterAdventureMap",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#team-plan-rule.core.enter-adventure-map"
+  },
+  {
+    "durationDays": 1,
+    "enabled": true,
+    "id": "team-plan-rule.core.return-to-city",
+    "kind": "team-plan-rule",
+    "packId": "pack:core",
+    "planKind": "returnToCity",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#team-plan-rule.core.return-to-city"
+  },
+  {
+    "durationDays": 28,
+    "enabled": true,
+    "id": "team-plan-rule.core.home-teaching-post",
+    "kind": "team-plan-rule",
+    "packId": "pack:core",
+    "planKind": "homeTeachingPost",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#team-plan-rule.core.home-teaching-post"
+  },
+  {
+    "durationDays": 14,
+    "enabled": true,
+    "id": "team-plan-rule.core.child-study",
+    "kind": "team-plan-rule",
+    "packId": "pack:core",
+    "planKind": "childStudy",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#team-plan-rule.core.child-study"
+  },
+  {
+    "enabled": true,
+    "id": "recent-activity-rule.core.standard",
+    "kind": "recent-activity-rule",
+    "maxRecordsPerCharacter": 10,
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#recent-activity-rule.core.standard"
+  },
+  {
+    "activationDaysAfterJoin": 60,
+    "countedExpenseKinds": [
+      "travelExpense",
+      "consumableUse"
+    ],
+    "countedIncomeKinds": [
+      "questReward",
+      "dungeonReward"
+    ],
+    "departureChanceResolverId": "resolver:team.member-departure-chance",
+    "enabled": true,
+    "excludedExpenseKinds": [
+      "equipmentPurchase"
+    ],
+    "expectedNetSettlementResolverId": "resolver:team.member-expected-net-settlement",
+    "id": "member-retention-rule.core.standard",
+    "kind": "member-retention-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#member-retention-rule.core.standard"
+  },
+  {
+    "enabled": true,
+    "id": "recruitment-rule.core.standard",
+    "kind": "recruitment-rule",
+    "packId": "pack:core",
+    "retryEligibilityResolverId": "resolver:team.recruitment-retry-eligibility",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#recruitment-rule.core.standard",
+    "successChanceResolverId": "resolver:team.recruitment-success"
+  },
+  {
+    "defaultPlacementResolverId": "resolver:team.team-default-placement",
+    "enabled": true,
+    "id": "team-formation-rule.core.standard",
+    "kind": "team-formation-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#team-formation-rule.core.standard"
+  },
+  {
+    "commerceExperienceRuleId": "experience-award-rule.core.social-shopping-tier-1",
+    "conversationExperienceRuleId": "experience-award-rule.core.social-conversation-tier-1",
+    "enabled": true,
+    "id": "non-player-member-daily-social-practice-rule.core.standard",
+    "kind": "non-player-member-daily-social-practice-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#non-player-member-daily-social-practice-rule.core.standard"
+  }
+]

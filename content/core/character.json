@@ -1,0 +1,171 @@
+[
+  {
+    "adulthoodAgeDays": 5475,
+    "ageModifierRuleId": "age-modifier-rule.core.shared",
+    "enabled": true,
+    "id": "lifecycle-rule.core.standard",
+    "kind": "lifecycle-rule",
+    "naturalDeathResolverId": "resolver:character.natural-death-check",
+    "naturalLifeEndAgeDays": 29200,
+    "packId": "pack:core",
+    "playableAgeEndDays": 20075,
+    "playableAgeStartDays": 5475,
+    "retirementResolverId": "resolver:character.retirement-check",
+    "schemaVersion": 1,
+    "sourcePath": "core/character.json#lifecycle-rule.core.standard"
+  },
+  {
+    "canBecomeAdventurer": true,
+    "enabled": true,
+    "id": "character-archetype.core.player-lineage",
+    "kind": "character-archetype",
+    "lifecycleRuleId": "lifecycle-rule.core.standard",
+    "packId": "pack:core",
+    "roleTags": [
+      "adventurer"
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/character.json#character-archetype.core.player-lineage",
+    "temporaryOnly": false
+  },
+  {
+    "canBecomeAdventurer": true,
+    "enabled": true,
+    "id": "character-archetype.core.world-adventurer",
+    "kind": "character-archetype",
+    "lifecycleRuleId": "lifecycle-rule.core.standard",
+    "packId": "pack:core",
+    "roleTags": [
+      "adventurer"
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/character.json#character-archetype.core.world-adventurer",
+    "temporaryOnly": false
+  },
+  {
+    "canBecomeAdventurer": false,
+    "enabled": true,
+    "id": "character-archetype.core.escort-merchant",
+    "kind": "character-archetype",
+    "lifecycleRuleId": "lifecycle-rule.core.standard",
+    "packId": "pack:core",
+    "roleTags": [
+      "merchant"
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/character.json#character-archetype.core.escort-merchant",
+    "temporaryOnly": true
+  },
+  {
+    "canBecomeAdventurer": false,
+    "enabled": true,
+    "id": "character-archetype.core.escort-commoner",
+    "kind": "character-archetype",
+    "lifecycleRuleId": "lifecycle-rule.core.standard",
+    "packId": "pack:core",
+    "roleTags": [
+      "commoner"
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/character.json#character-archetype.core.escort-commoner",
+    "temporaryOnly": true
+  },
+  {
+    "canBecomeAdventurer": false,
+    "enabled": true,
+    "id": "character-archetype.core.rescue-captive",
+    "kind": "character-archetype",
+    "lifecycleRuleId": "lifecycle-rule.core.standard",
+    "packId": "pack:core",
+    "roleTags": [
+      "commoner"
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/character.json#character-archetype.core.rescue-captive",
+    "temporaryOnly": true
+  },
+  {
+    "category": "temporaryCondition",
+    "clearByRest": true,
+    "effects": [],
+    "enabled": true,
+    "id": "character-status.core.bleeding",
+    "kind": "character-status",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/character.json#character-status.core.bleeding",
+    "stackPolicy": "stack"
+  },
+  {
+    "category": "temporaryCondition",
+    "clearByRest": true,
+    "effects": [],
+    "enabled": true,
+    "id": "character-status.core.fear",
+    "kind": "character-status",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/character.json#character-status.core.fear",
+    "stackPolicy": "replace"
+  },
+  {
+    "category": "temporaryCondition",
+    "clearByRest": true,
+    "effects": [],
+    "enabled": true,
+    "id": "character-status.core.daze",
+    "kind": "character-status",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/character.json#character-status.core.daze",
+    "stackPolicy": "refresh"
+  },
+  {
+    "birthResolverId": "resolver:character.birth-outcome",
+    "eligibilityResolverId": "resolver:character.birth-eligibility",
+    "enabled": true,
+    "id": "birth-rule.core.home-year-rest",
+    "kind": "birth-rule",
+    "packId": "pack:core",
+    "requiredRestDays": 365,
+    "schemaVersion": 1,
+    "sourcePath": "core/character.json#birth-rule.core.home-year-rest"
+  },
+  {
+    "enabled": true,
+    "id": "temporary-character-rule.core.escort",
+    "innateTraitResolverId": "resolver:character.temporary-innate-trait",
+    "kind": "temporary-character-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sexWeightResolverId": "resolver:character.temporary-sex-weight",
+    "sourcePath": "core/character.json#temporary-character-rule.core.escort",
+    "temporaryKind": "escort"
+  },
+  {
+    "enabled": true,
+    "id": "temporary-character-rule.core.rescue",
+    "innateTraitResolverId": "resolver:character.temporary-innate-trait",
+    "kind": "temporary-character-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sexWeightResolverId": "resolver:character.temporary-sex-weight",
+    "sourcePath": "core/character.json#temporary-character-rule.core.rescue",
+    "temporaryKind": "rescue"
+  },
+  {
+    "allowedArchetypeIds": [
+      "character-archetype.core.world-adventurer"
+    ],
+    "archetypeWeightResolverId": "resolver:character.world-adventurer-archetype-weight",
+    "enabled": true,
+    "id": "world-adventurer-generation-rule.core.standard",
+    "innateTraitResolverId": "resolver:character.world-adventurer-innate-trait",
+    "kind": "world-adventurer-generation-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sexWeightResolverId": "resolver:character.world-adventurer-sex-weight",
+    "sourcePath": "core/character.json#world-adventurer-generation-rule.core.standard",
+    "startingAgeResolverId": "resolver:character.world-adventurer-starting-age"
+  }
+]

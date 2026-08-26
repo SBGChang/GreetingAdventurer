@@ -1,0 +1,1514 @@
+[
+  {
+    "adultDifferenceRate": 0.0015,
+    "childDifferenceRate": 0.00225,
+    "cityTeacherMasteryLevel": 5,
+    "durationDays": 28,
+    "enabled": true,
+    "id": "teaching-rule.core.standard",
+    "kind": "teaching-rule",
+    "maxLevelGainPerSession": 1,
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#teaching-rule.core.standard"
+  },
+  {
+    "enabled": true,
+    "id": "age-experience-rule.core.standard",
+    "kind": "age-experience-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#age-experience-rule.core.standard",
+    "stages": [
+      {
+        "experienceMultiplier": 1.5,
+        "maxAgeDays": 5474,
+        "minAgeDays": 0
+      },
+      {
+        "experienceMultiplier": 1,
+        "minAgeDays": 5475
+      }
+    ]
+  },
+  {
+    "childStudyCycleDays": 14,
+    "enabled": true,
+    "id": "child-education-rule.core.standard",
+    "kind": "child-education-rule",
+    "npcChildParentMasteryShare": 0.2,
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "selfStudyParentMasteryRate": 0.000225,
+    "sourcePath": "core/progression-rules.json#child-education-rule.core.standard",
+    "teacherMinimumPostDays": 28
+  },
+  {
+    "enabled": true,
+    "id": "defense-mastery-routing-rule.core.standard",
+    "kind": "defense-mastery-routing-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:progression.defense-mastery-routing",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#defense-mastery-routing-rule.core.standard"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.one-hand-weapon",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.one-hand-weapon",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.one-hand-weapon"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.two-hand-weapon",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.two-hand-weapon",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.two-hand-weapon"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.throwing-weapon",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.throwing-weapon",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.throwing-weapon"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.shooting-weapon",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.shooting-weapon",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.shooting-weapon"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.one-hand-staff",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.one-hand-staff",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.one-hand-staff"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.two-hand-staff",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.two-hand-staff",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.two-hand-staff"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.wind-instrument",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.wind-instrument",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.wind-instrument"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.string-instrument",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.string-instrument",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.string-instrument"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.attack-magic",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.attack-magic",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.attack-magic"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.one-hand-weapon-and-attack-magic",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.one-hand-weapon",
+        "ratio": 0.5
+      },
+      {
+        "masteryId": "mastery.core.attack-magic",
+        "ratio": 0.5
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.one-hand-weapon-and-attack-magic"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.two-hand-weapon-and-attack-magic",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.two-hand-weapon",
+        "ratio": 0.5
+      },
+      {
+        "masteryId": "mastery.core.attack-magic",
+        "ratio": 0.5
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.two-hand-weapon-and-attack-magic"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.throwing-weapon-and-attack-magic",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.throwing-weapon",
+        "ratio": 0.5
+      },
+      {
+        "masteryId": "mastery.core.attack-magic",
+        "ratio": 0.5
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.throwing-weapon-and-attack-magic"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.shooting-weapon-and-attack-magic",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.shooting-weapon",
+        "ratio": 0.5
+      },
+      {
+        "masteryId": "mastery.core.attack-magic",
+        "ratio": 0.5
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.shooting-weapon-and-attack-magic"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.one-hand-staff-and-attack-magic",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.one-hand-staff",
+        "ratio": 0.5
+      },
+      {
+        "masteryId": "mastery.core.attack-magic",
+        "ratio": 0.5
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.one-hand-staff-and-attack-magic"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.two-hand-staff-and-attack-magic",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.two-hand-staff",
+        "ratio": 0.5
+      },
+      {
+        "masteryId": "mastery.core.attack-magic",
+        "ratio": 0.5
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.two-hand-staff-and-attack-magic"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.wind-instrument-and-attack-magic",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.wind-instrument",
+        "ratio": 0.5
+      },
+      {
+        "masteryId": "mastery.core.attack-magic",
+        "ratio": 0.5
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.wind-instrument-and-attack-magic"
+  },
+  {
+    "enabled": true,
+    "id": "attack-mastery-award-rule.core.string-instrument-and-attack-magic",
+    "kind": "attack-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.string-instrument",
+        "ratio": 0.5
+      },
+      {
+        "masteryId": "mastery.core.attack-magic",
+        "ratio": 0.5
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#attack-mastery-award-rule.core.string-instrument-and-attack-magic"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 20,
+    "id": "support-mastery-award-rule.core.defense-magic-tier-i",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.defense-magic",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.defense-magic-tier-i"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 50,
+    "id": "support-mastery-award-rule.core.defense-magic-tier-ii",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.defense-magic",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.defense-magic-tier-ii"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 120,
+    "id": "support-mastery-award-rule.core.defense-magic-tier-iii",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.defense-magic",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.defense-magic-tier-iii"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 300,
+    "id": "support-mastery-award-rule.core.defense-magic-tier-iv",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.defense-magic",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.defense-magic-tier-iv"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 720,
+    "id": "support-mastery-award-rule.core.defense-magic-tier-v",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.defense-magic",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.defense-magic-tier-v"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 20,
+    "id": "support-mastery-award-rule.core.blessing-magic-tier-i",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.blessing-magic",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.blessing-magic-tier-i"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 50,
+    "id": "support-mastery-award-rule.core.blessing-magic-tier-ii",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.blessing-magic",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.blessing-magic-tier-ii"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 120,
+    "id": "support-mastery-award-rule.core.blessing-magic-tier-iii",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.blessing-magic",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.blessing-magic-tier-iii"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 300,
+    "id": "support-mastery-award-rule.core.blessing-magic-tier-iv",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.blessing-magic",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.blessing-magic-tier-iv"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 720,
+    "id": "support-mastery-award-rule.core.blessing-magic-tier-v",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.blessing-magic",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.blessing-magic-tier-v"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 20,
+    "id": "support-mastery-award-rule.core.curse-magic-tier-i",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.curse-magic",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.curse-magic-tier-i"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 50,
+    "id": "support-mastery-award-rule.core.curse-magic-tier-ii",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.curse-magic",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.curse-magic-tier-ii"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 120,
+    "id": "support-mastery-award-rule.core.curse-magic-tier-iii",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.curse-magic",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.curse-magic-tier-iii"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 300,
+    "id": "support-mastery-award-rule.core.curse-magic-tier-iv",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.curse-magic",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.curse-magic-tier-iv"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 720,
+    "id": "support-mastery-award-rule.core.curse-magic-tier-v",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.curse-magic",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.curse-magic-tier-v"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 20,
+    "id": "support-mastery-award-rule.core.wind-instrument-tier-i",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.wind-instrument",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.wind-instrument-tier-i"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 50,
+    "id": "support-mastery-award-rule.core.wind-instrument-tier-ii",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.wind-instrument",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.wind-instrument-tier-ii"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 120,
+    "id": "support-mastery-award-rule.core.wind-instrument-tier-iii",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.wind-instrument",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.wind-instrument-tier-iii"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 300,
+    "id": "support-mastery-award-rule.core.wind-instrument-tier-iv",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.wind-instrument",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.wind-instrument-tier-iv"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 720,
+    "id": "support-mastery-award-rule.core.wind-instrument-tier-v",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.wind-instrument",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.wind-instrument-tier-v"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 20,
+    "id": "support-mastery-award-rule.core.string-instrument-tier-i",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.string-instrument",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.string-instrument-tier-i"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 50,
+    "id": "support-mastery-award-rule.core.string-instrument-tier-ii",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.string-instrument",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.string-instrument-tier-ii"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 120,
+    "id": "support-mastery-award-rule.core.string-instrument-tier-iii",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.string-instrument",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.string-instrument-tier-iii"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 300,
+    "id": "support-mastery-award-rule.core.string-instrument-tier-iv",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.string-instrument",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.string-instrument-tier-iv"
+  },
+  {
+    "enabled": true,
+    "fixedExperiencePerUse": 720,
+    "id": "support-mastery-award-rule.core.string-instrument-tier-v",
+    "kind": "support-mastery-award-rule",
+    "masterySplits": [
+      {
+        "masteryId": "mastery.core.string-instrument",
+        "ratio": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#support-mastery-award-rule.core.string-instrument-tier-v"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 400,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-smithing-tier-i",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.smithing",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-smithing-tier-i"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 1000,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-smithing-tier-ii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.smithing",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-smithing-tier-ii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 2400,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-smithing-tier-iii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.smithing",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-smithing-tier-iii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 6000,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-smithing-tier-iv",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.smithing",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-smithing-tier-iv"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 14400,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-smithing-tier-v",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.smithing",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-smithing-tier-v"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 400,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-tailoring-tier-i",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.tailoring",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-tailoring-tier-i"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 1000,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-tailoring-tier-ii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.tailoring",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-tailoring-tier-ii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 2400,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-tailoring-tier-iii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.tailoring",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-tailoring-tier-iii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 6000,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-tailoring-tier-iv",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.tailoring",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-tailoring-tier-iv"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 14400,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-tailoring-tier-v",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.tailoring",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-tailoring-tier-v"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 400,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-handicraft-tier-i",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.handicraft",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-handicraft-tier-i"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 1000,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-handicraft-tier-ii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.handicraft",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-handicraft-tier-ii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 2400,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-handicraft-tier-iii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.handicraft",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-handicraft-tier-iii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 6000,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-handicraft-tier-iv",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.handicraft",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-handicraft-tier-iv"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 14400,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-handicraft-tier-v",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.handicraft",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-handicraft-tier-v"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 400,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-alchemy-tier-i",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.alchemy",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-alchemy-tier-i"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 1000,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-alchemy-tier-ii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.alchemy",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-alchemy-tier-ii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 2400,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-alchemy-tier-iii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.alchemy",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-alchemy-tier-iii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 6000,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-alchemy-tier-iv",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.alchemy",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-alchemy-tier-iv"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 14400,
+    "enabled": true,
+    "id": "experience-award-rule.core.craft-alchemy-tier-v",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.alchemy",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.craft-alchemy-tier-v"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 400,
+    "enabled": true,
+    "id": "experience-award-rule.core.cuisine-tier-i",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.cooking",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.cuisine-tier-i"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 1000,
+    "enabled": true,
+    "id": "experience-award-rule.core.cuisine-tier-ii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.cooking",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.cuisine-tier-ii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 2400,
+    "enabled": true,
+    "id": "experience-award-rule.core.cuisine-tier-iii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.cooking",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.cuisine-tier-iii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 6000,
+    "enabled": true,
+    "id": "experience-award-rule.core.cuisine-tier-iv",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.cooking",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.cuisine-tier-iv"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 14400,
+    "enabled": true,
+    "id": "experience-award-rule.core.cuisine-tier-v",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.cooking",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.cuisine-tier-v"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 160,
+    "enabled": true,
+    "id": "experience-award-rule.core.gathering-tier-i",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.gathering",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.gathering-tier-i"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 400,
+    "enabled": true,
+    "id": "experience-award-rule.core.gathering-tier-ii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.gathering",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.gathering-tier-ii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 960,
+    "enabled": true,
+    "id": "experience-award-rule.core.gathering-tier-iii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.gathering",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.gathering-tier-iii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 2400,
+    "enabled": true,
+    "id": "experience-award-rule.core.gathering-tier-iv",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.gathering",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.gathering-tier-iv"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 5760,
+    "enabled": true,
+    "id": "experience-award-rule.core.gathering-tier-v",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.gathering",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.gathering-tier-v"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 160,
+    "enabled": true,
+    "id": "experience-award-rule.core.social-conversation-tier-1",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.social",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.social-conversation-tier-1"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 160,
+    "enabled": true,
+    "id": "experience-award-rule.core.social-shopping-tier-1",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.social",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.social-shopping-tier-1"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 6000,
+    "enabled": true,
+    "id": "experience-award-rule.core.travel-normal",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.travel",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.travel-normal"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 6000,
+    "enabled": true,
+    "id": "experience-award-rule.core.travel-npc-team",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.travel",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.travel-npc-team"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 60000,
+    "enabled": true,
+    "id": "experience-award-rule.core.map-exploration-tier-i",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.map-exploration",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.map-exploration-tier-i"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 150000,
+    "enabled": true,
+    "id": "experience-award-rule.core.map-exploration-tier-ii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.map-exploration",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.map-exploration-tier-ii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 360000,
+    "enabled": true,
+    "id": "experience-award-rule.core.map-exploration-tier-iii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.map-exploration",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.map-exploration-tier-iii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 900000,
+    "enabled": true,
+    "id": "experience-award-rule.core.map-exploration-tier-iv",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.map-exploration",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.map-exploration-tier-iv"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 2160000,
+    "enabled": true,
+    "id": "experience-award-rule.core.map-exploration-tier-v",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.map-exploration",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.map-exploration-tier-v"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 160,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-purchase",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-purchase",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-purchase"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 400,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-purchase-tier-ii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-purchase",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-purchase-tier-ii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 960,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-purchase-tier-iii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-purchase",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-purchase-tier-iii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 2400,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-purchase-tier-iv",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-purchase",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-purchase-tier-iv"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 5760,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-purchase-tier-v",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-purchase",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-purchase-tier-v"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 320,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-delivery",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-delivery",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-delivery"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 800,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-delivery-tier-ii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-delivery",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-delivery-tier-ii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 1920,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-delivery-tier-iii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-delivery",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-delivery-tier-iii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 4800,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-delivery-tier-iv",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-delivery",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-delivery-tier-iv"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 11520,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-delivery-tier-v",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-delivery",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-delivery-tier-v"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 400,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-escort",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-escort",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-escort"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 1000,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-escort-tier-ii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-escort",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-escort-tier-ii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 2400,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-escort-tier-iii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-escort",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-escort-tier-iii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 6000,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-escort-tier-iv",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-escort",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-escort-tier-iv"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 14400,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-escort-tier-v",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-escort",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-escort-tier-v"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 480,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-rescue",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-rescue",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-rescue"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 1200,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-rescue-tier-ii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-rescue",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-rescue-tier-ii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 2880,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-rescue-tier-iii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-rescue",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-rescue-tier-iii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 7200,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-rescue-tier-iv",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-rescue",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-rescue-tier-iv"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 17280,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-rescue-tier-v",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-rescue",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-rescue-tier-v"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 480,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-exploration",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-exploration",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-exploration"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 1200,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-exploration-tier-ii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-exploration",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-exploration-tier-ii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 2880,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-exploration-tier-iii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-exploration",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-exploration-tier-iii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 7200,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-exploration-tier-iv",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-exploration",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-exploration-tier-iv"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 17280,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-exploration-tier-v",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-exploration",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-exploration-tier-v"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 640,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-suppression",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-suppression",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-suppression"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 1600,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-suppression-tier-ii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-suppression",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-suppression-tier-ii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 3840,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-suppression-tier-iii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-suppression",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-suppression-tier-iii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 9600,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-suppression-tier-iv",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-suppression",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-suppression-tier-iv"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 23040,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-suppression-tier-v",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-suppression",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-suppression-tier-v"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 800,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-subjugation",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-subjugation",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-subjugation"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 2000,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-subjugation-tier-ii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-subjugation",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-subjugation-tier-ii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 4800,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-subjugation-tier-iii",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-subjugation",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-subjugation-tier-iii"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 12000,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-subjugation-tier-iv",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-subjugation",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-subjugation-tier-iv"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 28800,
+    "enabled": true,
+    "id": "experience-award-rule.core.quest-subjugation-tier-v",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.quest-subjugation",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.quest-subjugation-tier-v"
+  }
+]

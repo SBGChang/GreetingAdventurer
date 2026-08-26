@@ -1,0 +1,303 @@
+[
+  {
+    "enabled": true,
+    "id": "passage-policy.core.domestic-open",
+    "kind": "passage-policy",
+    "packId": "pack:core",
+    "requirementResolverId": "resolver:world.passage.no-requirement",
+    "schemaVersion": 1,
+    "sourcePath": "core/world-map-dungeon-npc.json#passage-policy.core.domestic-open"
+  },
+  {
+    "enabled": true,
+    "id": "passage-policy.core.national-border",
+    "kind": "passage-policy",
+    "packId": "pack:core",
+    "requirementResolverId": "resolver:world.passage.passport-required",
+    "schemaVersion": 1,
+    "sourcePath": "core/world-map-dungeon-npc.json#passage-policy.core.national-border"
+  },
+  {
+    "enabled": true,
+    "groupPriority": {
+      "boss": 70,
+      "chest": 10,
+      "control": 60,
+      "gatheringNode": 20,
+      "kidnap": 50,
+      "mapEvent": 30,
+      "monsterGroup": 40
+    },
+    "id": "npc-sequence-rule.core.shared",
+    "kind": "npc-sequence-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/world-map-dungeon-npc.json#npc-sequence-rule.core.shared"
+  },
+  {
+    "enabled": true,
+    "id": "dungeon-interaction-rule.core.standard",
+    "kind": "dungeon-interaction-rule",
+    "minutesPerDungeonDay": 1440,
+    "packId": "pack:core",
+    "redDoorOpenMinutes": 30,
+    "schemaVersion": 1,
+    "sourcePath": "core/world-map-dungeon-npc.json#dungeon-interaction-rule.core.standard",
+    "trapResolverId": "resolver:dungeon.trap.standard",
+    "traversalMinutesPerCell": 30
+  },
+  {
+    "dailyPointBudget": 10,
+    "enabled": true,
+    "id": "npc-exploration-rule.core.standard",
+    "kind": "npc-exploration-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/world-map-dungeon-npc.json#npc-exploration-rule.core.standard",
+    "stopPolicyId": "npc-stop-policy.core.first-failure"
+  },
+  {
+    "enabled": true,
+    "id": "npc-dungeon-target-resolver.core.combat-target",
+    "kind": "npc-dungeon-target-resolver",
+    "outcomeRuleId": "outcome-rule.core.combat-target",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/world-map-dungeon-npc.json#npc-dungeon-target-resolver.core.combat-target",
+    "successBehavior": "continue",
+    "supportedTargetKinds": [
+      {
+        "contentKind": "monsterGroup",
+        "kind": "mapContent"
+      },
+      {
+        "contentKind": "boss",
+        "kind": "mapContent"
+      }
+    ]
+  },
+  {
+    "enabled": true,
+    "id": "npc-dungeon-target-resolver.core.chest",
+    "kind": "npc-dungeon-target-resolver",
+    "outcomeRuleId": "outcome-rule.core.chest",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/world-map-dungeon-npc.json#npc-dungeon-target-resolver.core.chest",
+    "successBehavior": "continue",
+    "supportedTargetKinds": [
+      {
+        "contentKind": "chest",
+        "kind": "mapContent"
+      }
+    ]
+  },
+  {
+    "enabled": true,
+    "id": "npc-dungeon-target-resolver.core.map-event",
+    "kind": "npc-dungeon-target-resolver",
+    "outcomeRuleId": "outcome-rule.core.map-event",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/world-map-dungeon-npc.json#npc-dungeon-target-resolver.core.map-event",
+    "successBehavior": "continue",
+    "supportedTargetKinds": [
+      {
+        "contentKind": "mapEvent",
+        "kind": "mapContent"
+      }
+    ]
+  },
+  {
+    "enabled": true,
+    "id": "npc-dungeon-target-resolver.core.guarded-objective",
+    "kind": "npc-dungeon-target-resolver",
+    "outcomeRuleId": "outcome-rule.core.guarded-objective",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/world-map-dungeon-npc.json#npc-dungeon-target-resolver.core.guarded-objective",
+    "successBehavior": "continue",
+    "supportedTargetKinds": [
+      {
+        "contentKind": "kidnap",
+        "kind": "mapContent"
+      },
+      {
+        "contentKind": "control",
+        "kind": "mapContent"
+      }
+    ]
+  },
+  {
+    "enabled": true,
+    "id": "npc-dungeon-target-resolver.core.gathering-node",
+    "kind": "npc-dungeon-target-resolver",
+    "outcomeRuleId": "outcome-rule.core.gathering-node",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/world-map-dungeon-npc.json#npc-dungeon-target-resolver.core.gathering-node",
+    "successBehavior": "continue",
+    "supportedTargetKinds": [
+      {
+        "kind": "gatheringNode"
+      }
+    ]
+  },
+  {
+    "enabled": true,
+    "id": "action-chain-template.core.travel-to-selected-city",
+    "kind": "action-chain-template",
+    "nodes": [
+      {
+        "destinationResolverId": "resolver:npc-behavior.destination.nearby-city",
+        "kind": "travelToCity"
+      },
+      {
+        "kind": "complete"
+      }
+    ],
+    "packId": "pack:core",
+    "purpose": "travel",
+    "schemaVersion": 1,
+    "sourcePath": "core/world-map-dungeon-npc.json#action-chain-template.core.travel-to-selected-city"
+  },
+  {
+    "enabled": true,
+    "id": "action-chain-template.core.enter-nearby-adventure-map",
+    "kind": "action-chain-template",
+    "nodes": [
+      {
+        "kind": "executeNearbyAdventure",
+        "mapResolverId": "resolver:npc-behavior.map.nearby-adventure-site",
+        "stopPolicyId": "npc-stop-policy.core.first-failure"
+      },
+      {
+        "kind": "complete"
+      }
+    ],
+    "packId": "pack:core",
+    "purpose": "localAdventure",
+    "schemaVersion": 1,
+    "sourcePath": "core/world-map-dungeon-npc.json#action-chain-template.core.enter-nearby-adventure-map"
+  },
+  {
+    "enabled": true,
+    "id": "action-chain-template.core.accept-nearby-quest",
+    "kind": "action-chain-template",
+    "nodes": [
+      {
+        "kind": "acceptNearbyQuest",
+        "questSelectorId": "resolver:npc-behavior.quest.feasible-nearby-posting"
+      },
+      {
+        "kind": "complete"
+      }
+    ],
+    "packId": "pack:core",
+    "purpose": "quest",
+    "schemaVersion": 1,
+    "sourcePath": "core/world-map-dungeon-npc.json#action-chain-template.core.accept-nearby-quest"
+  },
+  {
+    "budgetReserveRuleId": "resolver:npc-behavior.market.budget-reserve",
+    "enabled": true,
+    "homePurchaseRuleId": "resolver:npc-behavior.market.home-purchase",
+    "id": "npc-market-policy.core.baseline",
+    "kind": "npc-market-policy",
+    "maxTransactionsPerFreeCycle": 2,
+    "packId": "pack:core",
+    "purchaseNeedRules": [
+      {
+        "needResolverId": "resolver:npc-behavior.market.need.equipment",
+        "offerSelectorId": "resolver:npc-behavior.market.offer.equipment",
+        "target": "equipment"
+      },
+      {
+        "needResolverId": "resolver:npc-behavior.market.need.combatConsumable",
+        "offerSelectorId": "resolver:npc-behavior.market.offer.combatConsumable",
+        "target": "combatConsumable"
+      },
+      {
+        "needResolverId": "resolver:npc-behavior.market.need.nonCombatConsumable",
+        "offerSelectorId": "resolver:npc-behavior.market.offer.nonCombatConsumable",
+        "target": "nonCombatConsumable"
+      }
+    ],
+    "schemaVersion": 1,
+    "sellRules": [
+      {
+        "itemSelectorId": "resolver:npc-behavior.market.sell.surplus-item",
+        "sellWhenResolverId": "resolver:npc-behavior.market.sell.when-surplus"
+      }
+    ],
+    "sourcePath": "core/world-map-dungeon-npc.json#npc-market-policy.core.baseline"
+  },
+  {
+    "candidates": [
+      {
+        "chainTemplateId": "action-chain-template.core.travel-to-selected-city",
+        "conditionId": "condition.core.npc-can-reach-another-city",
+        "intentKind": "travelToCity",
+        "weightResolverId": "resolver:npc-behavior.intent-weight.travel"
+      },
+      {
+        "chainTemplateId": "action-chain-template.core.enter-nearby-adventure-map",
+        "conditionId": "condition.core.npc-has-eligible-nearby-adventure-site",
+        "intentKind": "enterNearbyAdventureMap",
+        "weightResolverId": "resolver:npc-behavior.intent-weight.local-adventure"
+      },
+      {
+        "chainTemplateId": "action-chain-template.core.accept-nearby-quest",
+        "conditionId": "condition.core.npc-has-claimable-nearby-posting",
+        "intentKind": "acceptNearbyQuest",
+        "weightResolverId": "resolver:npc-behavior.intent-weight.accept-quest"
+      }
+    ],
+    "enabled": true,
+    "fallbackChainTemplateId": "action-chain-template.core.travel-to-selected-city",
+    "forcedFreeDurationDays": {
+      "max": 7,
+      "min": 2
+    },
+    "id": "adventurer-decision-policy.core.baseline",
+    "kind": "adventurer-decision-policy",
+    "marketPolicyId": "npc-market-policy.core.baseline",
+    "memberFreeActionCandidates": [
+      {
+        "actionKind": "craft",
+        "conditionId": "condition.core.npc-member-can-craft",
+        "freeActionRuleId": "free-action-rule.core.craft",
+        "weightResolverId": "resolver:npc-behavior.free-action-weight.craft"
+      },
+      {
+        "actionKind": "train",
+        "conditionId": "condition.core.npc-member-can-train",
+        "freeActionRuleId": "free-action-rule.core.train",
+        "weightResolverId": "resolver:npc-behavior.free-action-weight.train"
+      },
+      {
+        "actionKind": "trade",
+        "conditionId": "condition.core.npc-member-can-trade",
+        "freeActionRuleId": "free-action-rule.core.trade",
+        "weightResolverId": "resolver:npc-behavior.free-action-weight.trade"
+      },
+      {
+        "actionKind": "proposeToTeammate",
+        "conditionId": "condition.core.npc-member-can-propose-to-teammate",
+        "freeActionRuleId": "free-action-rule.core.propose-to-teammate",
+        "weightResolverId": "resolver:npc-behavior.free-action-weight.propose-to-teammate"
+      },
+      {
+        "actionKind": "rest",
+        "conditionId": "condition.core.npc-member-can-rest",
+        "freeActionRuleId": "free-action-rule.core.rest",
+        "weightResolverId": "resolver:npc-behavior.free-action-weight.rest"
+      }
+    ],
+    "npcTravelRuleId": "npc-travel-rule.core.standard",
+    "packId": "pack:core",
+    "reviewIntervalDays": 1,
+    "schemaVersion": 1,
+    "sourcePath": "core/world-map-dungeon-npc.json#adventurer-decision-policy.core.baseline"
+  }
+]

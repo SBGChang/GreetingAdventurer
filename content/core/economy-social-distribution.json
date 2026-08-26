@@ -1,0 +1,309 @@
+[
+  {
+    "display": {
+      "nameRef": {
+        "key": "currency.standard"
+      }
+    },
+    "enabled": true,
+    "id": "currency.core.standard",
+    "kind": "currency",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "smallestUnit": 1,
+    "sourcePath": "core/economy-social-distribution.json#currency.core.standard"
+  },
+  {
+    "enabled": true,
+    "id": "price-modifier-rule.core.personal-trade-bonus-buy",
+    "kind": "price-modifier-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:economy.personal-trade-bonus.buy",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#price-modifier-rule.core.personal-trade-bonus-buy",
+    "stackPolicy": "multiply"
+  },
+  {
+    "enabled": true,
+    "id": "price-modifier-rule.core.personal-trade-bonus-sell",
+    "kind": "price-modifier-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:economy.personal-trade-bonus.sell",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#price-modifier-rule.core.personal-trade-bonus-sell",
+    "stackPolicy": "multiply"
+  },
+  {
+    "enabled": true,
+    "id": "price-modifier-rule.core.shop-buyback",
+    "kind": "price-modifier-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:economy.shop-buyback",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#price-modifier-rule.core.shop-buyback",
+    "stackPolicy": "multiply"
+  },
+  {
+    "enabled": true,
+    "id": "price-modifier-rule.core.home-tutor-affinity",
+    "kind": "price-modifier-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:economy.home-tutor-affinity",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#price-modifier-rule.core.home-tutor-affinity",
+    "stackPolicy": "multiply"
+  },
+  {
+    "baseValueSource": "itemDefinition",
+    "buyModifierIds": [
+      "price-modifier-rule.core.personal-trade-bonus-buy"
+    ],
+    "enabled": true,
+    "id": "price-rule.core.shop-item",
+    "kind": "price-rule",
+    "minimumPrice": 1,
+    "packId": "pack:core",
+    "roundingPolicy": "nearest",
+    "schemaVersion": 1,
+    "sellModifierIds": [
+      "price-modifier-rule.core.shop-buyback",
+      "price-modifier-rule.core.personal-trade-bonus-sell"
+    ],
+    "sourcePath": "core/economy-social-distribution.json#price-rule.core.shop-item"
+  },
+  {
+    "baseValueSource": "offerFixedValue",
+    "buyModifierIds": [
+      "price-modifier-rule.core.personal-trade-bonus-buy"
+    ],
+    "enabled": true,
+    "id": "price-rule.core.fixed-offer",
+    "kind": "price-rule",
+    "minimumPrice": 1,
+    "packId": "pack:core",
+    "roundingPolicy": "nearest",
+    "schemaVersion": 1,
+    "sellModifierIds": [
+      "price-modifier-rule.core.personal-trade-bonus-sell"
+    ],
+    "sourcePath": "core/economy-social-distribution.json#price-rule.core.fixed-offer"
+  },
+  {
+    "baseValueSource": "serviceDefinition",
+    "buyModifierIds": [
+      "price-modifier-rule.core.home-tutor-affinity"
+    ],
+    "enabled": true,
+    "id": "price-rule.core.home-tutor-service",
+    "kind": "price-rule",
+    "minimumPrice": 1,
+    "packId": "pack:core",
+    "roundingPolicy": "ceil",
+    "schemaVersion": 1,
+    "sellModifierIds": [],
+    "sourcePath": "core/economy-social-distribution.json#price-rule.core.home-tutor-service"
+  },
+  {
+    "enabled": true,
+    "id": "reward-rule.core.quest-purchase",
+    "kind": "reward-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:economy.reward.quest-purchase",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#reward-rule.core.quest-purchase"
+  },
+  {
+    "enabled": true,
+    "id": "reward-rule.core.quest-delivery",
+    "kind": "reward-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:economy.reward.quest-delivery",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#reward-rule.core.quest-delivery"
+  },
+  {
+    "enabled": true,
+    "id": "reward-rule.core.quest-escort",
+    "kind": "reward-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:economy.reward.quest-escort",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#reward-rule.core.quest-escort"
+  },
+  {
+    "enabled": true,
+    "id": "reward-rule.core.quest-rescue",
+    "kind": "reward-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:economy.reward.quest-rescue",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#reward-rule.core.quest-rescue"
+  },
+  {
+    "enabled": true,
+    "id": "reward-rule.core.quest-exploration",
+    "kind": "reward-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:economy.reward.quest-exploration",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#reward-rule.core.quest-exploration"
+  },
+  {
+    "enabled": true,
+    "id": "reward-rule.core.quest-suppression",
+    "kind": "reward-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:economy.reward.quest-suppression",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#reward-rule.core.quest-suppression"
+  },
+  {
+    "enabled": true,
+    "id": "reward-rule.core.quest-hunt",
+    "kind": "reward-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:economy.reward.quest-hunt",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#reward-rule.core.quest-hunt"
+  },
+  {
+    "enabled": true,
+    "id": "reward-rule.core.dungeon-gold",
+    "kind": "reward-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:economy.reward.dungeon-gold",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#reward-rule.core.dungeon-gold"
+  },
+  {
+    "enabled": true,
+    "id": "reward-rule.core.loot-direct-sale",
+    "kind": "reward-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:economy.reward.loot-direct-sale",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#reward-rule.core.loot-direct-sale"
+  },
+  {
+    "conversationDeltaResolverId": "resolver:social.affinity.conversation-delta",
+    "enabled": true,
+    "homeTutorPriceModifierResolverId": "resolver:social.affinity.home-tutor-price-modifier",
+    "id": "player-affinity-rule.core.adventurer",
+    "initialValueResolverId": "resolver:social.affinity.initial",
+    "kind": "player-affinity-rule",
+    "maxValue": 100,
+    "minValue": 0,
+    "packId": "pack:core",
+    "playerProposalAcceptanceResolverId": "resolver:social.affinity.player-proposal-acceptance",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#player-affinity-rule.core.adventurer"
+  },
+  {
+    "enabled": true,
+    "experienceAwardRuleId": "experience-award-rule.core.social-conversation-tier-1",
+    "id": "player-conversation-rule.core.player",
+    "kind": "player-conversation-rule",
+    "maxCompletedPerDay": 6,
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#player-conversation-rule.core.player"
+  },
+  {
+    "enabled": true,
+    "id": "social-system.core.default",
+    "kind": "social-system",
+    "packId": "pack:core",
+    "playerAffinityRuleId": "player-affinity-rule.core.adventurer",
+    "playerConversationRuleId": "player-conversation-rule.core.player",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#social-system.core.default"
+  },
+  {
+    "acceptanceChanceResolverId": "resolver:social.npc-marriage.acceptance",
+    "enabled": true,
+    "id": "npc-marriage-rule.core.standard",
+    "kind": "npc-marriage-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/economy-social-distribution.json#npc-marriage-rule.core.standard"
+  },
+  {
+    "auction": {
+      "companionBidResolverId": "resolver:distribution.companion-bid",
+      "minimumBid": "intrinsicValue",
+      "tieBreakPolicy": "deterministicFromDistributionId",
+      "unclaimedSaleMultiplier": 0.8
+    },
+    "controllerPolicy": "playerAuction",
+    "currencyPolicy": "equalSplit",
+    "enabled": true,
+    "id": "asset-distribution-rule.core.player-dungeon-loot",
+    "itemPolicy": "internalAuction",
+    "kind": "asset-distribution-rule",
+    "packId": "pack:core",
+    "remainderPolicy": "deterministicRotation",
+    "schemaVersion": 1,
+    "sourceKind": "dungeonLoot",
+    "sourcePath": "core/economy-social-distribution.json#asset-distribution-rule.core.player-dungeon-loot"
+  },
+  {
+    "controllerPolicy": "npcRng",
+    "currencyPolicy": "equalSplit",
+    "enabled": true,
+    "id": "asset-distribution-rule.core.npc-dungeon-loot",
+    "itemPolicy": "rngPerItem",
+    "kind": "asset-distribution-rule",
+    "npcItemRecipientResolverId": "resolver:distribution.npc-item-recipient",
+    "packId": "pack:core",
+    "remainderPolicy": "deterministicRotation",
+    "schemaVersion": 1,
+    "sourceKind": "dungeonLoot",
+    "sourcePath": "core/economy-social-distribution.json#asset-distribution-rule.core.npc-dungeon-loot"
+  },
+  {
+    "auction": {
+      "companionBidResolverId": "resolver:distribution.companion-bid",
+      "minimumBid": "intrinsicValue",
+      "tieBreakPolicy": "deterministicFromDistributionId",
+      "unclaimedSaleMultiplier": 0.8
+    },
+    "controllerPolicy": "playerAuction",
+    "currencyPolicy": "equalSplit",
+    "enabled": true,
+    "id": "asset-distribution-rule.core.player-expired-quest-cargo",
+    "itemPolicy": "internalAuction",
+    "kind": "asset-distribution-rule",
+    "packId": "pack:core",
+    "remainderPolicy": "deterministicRotation",
+    "schemaVersion": 1,
+    "sourceKind": "expiredQuestCargo",
+    "sourcePath": "core/economy-social-distribution.json#asset-distribution-rule.core.player-expired-quest-cargo"
+  },
+  {
+    "controllerPolicy": "npcRng",
+    "currencyPolicy": "equalSplit",
+    "enabled": true,
+    "id": "asset-distribution-rule.core.npc-expired-quest-cargo",
+    "itemPolicy": "rngPerItem",
+    "kind": "asset-distribution-rule",
+    "npcItemRecipientResolverId": "resolver:distribution.npc-item-recipient",
+    "packId": "pack:core",
+    "remainderPolicy": "deterministicRotation",
+    "schemaVersion": 1,
+    "sourceKind": "expiredQuestCargo",
+    "sourcePath": "core/economy-social-distribution.json#asset-distribution-rule.core.npc-expired-quest-cargo"
+  },
+  {
+    "controllerPolicy": "equalCurrencyOnly",
+    "currencyPolicy": "equalSplit",
+    "enabled": true,
+    "id": "asset-distribution-rule.core.quest-reward-currency",
+    "itemPolicy": "none",
+    "kind": "asset-distribution-rule",
+    "packId": "pack:core",
+    "remainderPolicy": "deterministicRotation",
+    "schemaVersion": 1,
+    "sourceKind": "questReward",
+    "sourcePath": "core/economy-social-distribution.json#asset-distribution-rule.core.quest-reward-currency"
+  }
+]

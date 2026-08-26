@@ -1,0 +1,663 @@
+[
+  {
+    "combatRestDelayRuleId": "action-delay-rule.core.rest",
+    "combatRestHealthRestore": 40,
+    "combatRestManaRestore": 30,
+    "defenseMasteryRoutingRuleId": "defense-mastery-routing-rule.core.standard",
+    "enabled": true,
+    "id": "combat-rule.core.standard",
+    "kind": "combat-rule",
+    "openingCtbRuleId": "opening-ctb-rule.core.standard",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-rule.core.standard",
+    "weaponSetSwitchDelayRuleId": "action-delay-rule.core.weapon-set-switch"
+  },
+  {
+    "baseCtb": 70,
+    "enabled": true,
+    "id": "opening-ctb-rule.core.standard",
+    "kind": "opening-ctb-rule",
+    "minimumCtb": 22,
+    "packId": "pack:core",
+    "reductions": [
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.35
+      },
+      {
+        "primaryAttribute": "coordination",
+        "reductionPerPoint": 0.15
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#opening-ctb-rule.core.standard"
+  },
+  {
+    "baseDelay": 28,
+    "enabled": true,
+    "id": "action-delay-rule.core.quick",
+    "kind": "action-delay-rule",
+    "minimumDelay": 14,
+    "packId": "pack:core",
+    "reductions": [
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.1
+      },
+      {
+        "primaryAttribute": "coordination",
+        "reductionPerPoint": 0.06
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#action-delay-rule.core.quick"
+  },
+  {
+    "baseDelay": 36,
+    "enabled": true,
+    "id": "action-delay-rule.core.standard",
+    "kind": "action-delay-rule",
+    "minimumDelay": 18,
+    "packId": "pack:core",
+    "reductions": [
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.1
+      },
+      {
+        "primaryAttribute": "coordination",
+        "reductionPerPoint": 0.05
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#action-delay-rule.core.standard"
+  },
+  {
+    "baseDelay": 48,
+    "enabled": true,
+    "id": "action-delay-rule.core.heavy",
+    "kind": "action-delay-rule",
+    "minimumDelay": 24,
+    "packId": "pack:core",
+    "reductions": [
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.08
+      },
+      {
+        "primaryAttribute": "coordination",
+        "reductionPerPoint": 0.04
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#action-delay-rule.core.heavy"
+  },
+  {
+    "baseDelay": 42,
+    "enabled": true,
+    "id": "action-delay-rule.core.cast",
+    "kind": "action-delay-rule",
+    "minimumDelay": 22,
+    "packId": "pack:core",
+    "reductions": [
+      {
+        "primaryAttribute": "intelligence",
+        "reductionPerPoint": 0.05
+      },
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.06
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#action-delay-rule.core.cast"
+  },
+  {
+    "baseDelay": 40,
+    "enabled": true,
+    "id": "action-delay-rule.core.perform",
+    "kind": "action-delay-rule",
+    "minimumDelay": 20,
+    "packId": "pack:core",
+    "reductions": [
+      {
+        "primaryAttribute": "charisma",
+        "reductionPerPoint": 0.06
+      },
+      {
+        "primaryAttribute": "coordination",
+        "reductionPerPoint": 0.05
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#action-delay-rule.core.perform"
+  },
+  {
+    "baseDelay": 32,
+    "enabled": true,
+    "id": "action-delay-rule.core.stance",
+    "kind": "action-delay-rule",
+    "minimumDelay": 16,
+    "packId": "pack:core",
+    "reductions": [
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.1
+      },
+      {
+        "primaryAttribute": "coordination",
+        "reductionPerPoint": 0.05
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#action-delay-rule.core.stance"
+  },
+  {
+    "baseDelay": 20,
+    "enabled": true,
+    "id": "action-delay-rule.core.counter",
+    "kind": "action-delay-rule",
+    "minimumDelay": 10,
+    "packId": "pack:core",
+    "reductions": [
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.08
+      },
+      {
+        "primaryAttribute": "coordination",
+        "reductionPerPoint": 0.04
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#action-delay-rule.core.counter"
+  },
+  {
+    "baseDelay": 12,
+    "enabled": true,
+    "id": "action-delay-rule.core.weapon-set-switch",
+    "kind": "action-delay-rule",
+    "minimumDelay": 6,
+    "packId": "pack:core",
+    "reductions": [
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.04
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#action-delay-rule.core.weapon-set-switch"
+  },
+  {
+    "baseDelay": 44,
+    "enabled": true,
+    "id": "action-delay-rule.core.rest",
+    "kind": "action-delay-rule",
+    "minimumDelay": 22,
+    "packId": "pack:core",
+    "reductions": [
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.06
+      },
+      {
+        "primaryAttribute": "coordination",
+        "reductionPerPoint": 0.03
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#action-delay-rule.core.rest"
+  },
+  {
+    "baseDelay": 16,
+    "enabled": true,
+    "id": "action-delay-rule.core.interruption",
+    "kind": "action-delay-rule",
+    "minimumDelay": 16,
+    "packId": "pack:core",
+    "reductions": [],
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#action-delay-rule.core.interruption"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.core.physical",
+    "kind": "combat-damage-rule",
+    "packId": "pack:core",
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-damage-rule.core.physical"
+  },
+  {
+    "canBeBlocked": false,
+    "damageChannel": "magic",
+    "enabled": true,
+    "id": "combat-damage-rule.core.magic",
+    "kind": "combat-damage-rule",
+    "packId": "pack:core",
+    "powerResolverId": "resolver:combat.damage-power.magic",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-damage-rule.core.magic"
+  },
+  {
+    "canBeBlocked": false,
+    "damageChannel": "instrument",
+    "enabled": true,
+    "id": "combat-damage-rule.core.instrument",
+    "kind": "combat-damage-rule",
+    "packId": "pack:core",
+    "powerResolverId": "resolver:combat.damage-power.instrument",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-damage-rule.core.instrument"
+  },
+  {
+    "enabled": true,
+    "id": "combat-heal-rule.core.standard",
+    "kind": "combat-heal-rule",
+    "packId": "pack:core",
+    "powerResolverId": "resolver:combat.heal-power.standard",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-heal-rule.core.standard"
+  },
+  {
+    "enabled": true,
+    "id": "combat-heal-rule.core.potent",
+    "kind": "combat-heal-rule",
+    "packId": "pack:core",
+    "powerResolverId": "resolver:combat.heal-power.potent",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-heal-rule.core.potent"
+  },
+  {
+    "amountResolverId": "resolver:combat.ctb-amount.light",
+    "enabled": true,
+    "id": "combat-ctb-adjustment-rule.core.light",
+    "kind": "combat-ctb-adjustment-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-ctb-adjustment-rule.core.light"
+  },
+  {
+    "amountResolverId": "resolver:combat.ctb-amount.standard",
+    "enabled": true,
+    "id": "combat-ctb-adjustment-rule.core.standard",
+    "kind": "combat-ctb-adjustment-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-ctb-adjustment-rule.core.standard"
+  },
+  {
+    "amountResolverId": "resolver:combat.ctb-amount.heavy",
+    "enabled": true,
+    "id": "combat-ctb-adjustment-rule.core.heavy",
+    "kind": "combat-ctb-adjustment-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-ctb-adjustment-rule.core.heavy"
+  },
+  {
+    "appliesToActionKinds": [
+      "cast",
+      "perform"
+    ],
+    "enabled": true,
+    "id": "combat-interruption-rule.core.casting",
+    "interruptionDelayRuleId": "action-delay-rule.core.interruption",
+    "kind": "combat-interruption-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-interruption-rule.core.casting"
+  },
+  {
+    "displayPriority": 1,
+    "enabled": true,
+    "id": "combat-status.core.accuracy-down",
+    "kind": "combat-status",
+    "modifierResolverId": "resolver:combat.status-modifier.accuracy-down",
+    "packId": "pack:core",
+    "polarity": "negative",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-status.core.accuracy-down"
+  },
+  {
+    "displayPriority": 2,
+    "enabled": true,
+    "id": "combat-status.core.guard-down",
+    "kind": "combat-status",
+    "modifierResolverId": "resolver:combat.status-modifier.guard-down",
+    "packId": "pack:core",
+    "polarity": "negative",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-status.core.guard-down"
+  },
+  {
+    "displayPriority": 3,
+    "enabled": true,
+    "id": "combat-status.core.magic-defense-down",
+    "kind": "combat-status",
+    "modifierResolverId": "resolver:combat.status-modifier.magic-defense-down",
+    "packId": "pack:core",
+    "polarity": "negative",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-status.core.magic-defense-down"
+  },
+  {
+    "displayPriority": 4,
+    "enabled": true,
+    "id": "combat-status.core.magic-defense-up",
+    "kind": "combat-status",
+    "modifierResolverId": "resolver:combat.status-modifier.magic-defense-up",
+    "packId": "pack:core",
+    "polarity": "positive",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-status.core.magic-defense-up"
+  },
+  {
+    "displayPriority": 5,
+    "enabled": true,
+    "id": "combat-status.core.accuracy-up",
+    "kind": "combat-status",
+    "modifierResolverId": "resolver:combat.status-modifier.accuracy-up",
+    "packId": "pack:core",
+    "polarity": "positive",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-status.core.accuracy-up"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.core.apply-accuracy-down",
+    "kind": "combat-effect",
+    "operation": {
+      "durationTargetActions": 2,
+      "kind": "applyStatus",
+      "stackPolicy": "refresh",
+      "statusId": "combat-status.core.accuracy-down"
+    },
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-effect.core.apply-accuracy-down"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.core.apply-guard-down",
+    "kind": "combat-effect",
+    "operation": {
+      "durationTargetActions": 2,
+      "kind": "applyStatus",
+      "stackPolicy": "refresh",
+      "statusId": "combat-status.core.guard-down"
+    },
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-effect.core.apply-guard-down"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.core.apply-magic-defense-down",
+    "kind": "combat-effect",
+    "operation": {
+      "durationTargetActions": 2,
+      "kind": "applyStatus",
+      "stackPolicy": "refresh",
+      "statusId": "combat-status.core.magic-defense-down"
+    },
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-effect.core.apply-magic-defense-down"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.core.apply-magic-defense-up",
+    "kind": "combat-effect",
+    "operation": {
+      "durationTargetActions": 2,
+      "kind": "applyStatus",
+      "stackPolicy": "strongest",
+      "statusId": "combat-status.core.magic-defense-up"
+    },
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-effect.core.apply-magic-defense-up"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.core.apply-accuracy-up",
+    "kind": "combat-effect",
+    "operation": {
+      "durationTargetActions": 2,
+      "kind": "applyStatus",
+      "stackPolicy": "strongest",
+      "statusId": "combat-status.core.accuracy-up"
+    },
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-effect.core.apply-accuracy-up"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.core.remove-accuracy-down",
+    "kind": "combat-effect",
+    "operation": {
+      "kind": "removeStatus",
+      "statusId": "combat-status.core.accuracy-down"
+    },
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-effect.core.remove-accuracy-down"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.core.remove-guard-down",
+    "kind": "combat-effect",
+    "operation": {
+      "kind": "removeStatus",
+      "statusId": "combat-status.core.guard-down"
+    },
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-effect.core.remove-guard-down"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.core.remove-magic-defense-down",
+    "kind": "combat-effect",
+    "operation": {
+      "kind": "removeStatus",
+      "statusId": "combat-status.core.magic-defense-down"
+    },
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-effect.core.remove-magic-defense-down"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.core.ctb-light",
+    "kind": "combat-effect",
+    "operation": {
+      "adjustmentRuleId": "combat-ctb-adjustment-rule.core.light",
+      "kind": "adjustCtb"
+    },
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-effect.core.ctb-light"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.core.ctb-standard",
+    "kind": "combat-effect",
+    "operation": {
+      "adjustmentRuleId": "combat-ctb-adjustment-rule.core.standard",
+      "kind": "adjustCtb"
+    },
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-effect.core.ctb-standard"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.core.ctb-heavy",
+    "kind": "combat-effect",
+    "operation": {
+      "adjustmentRuleId": "combat-ctb-adjustment-rule.core.heavy",
+      "kind": "adjustCtb"
+    },
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-effect.core.ctb-heavy"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.core.interrupt-casting",
+    "kind": "combat-effect",
+    "operation": {
+      "interruptionRuleId": "combat-interruption-rule.core.casting",
+      "kind": "interruptCasting"
+    },
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-effect.core.interrupt-casting"
+  },
+  {
+    "behaviorResolverId": "resolver:combat.ai-behavior.single-skill-aggressor",
+    "enabled": true,
+    "id": "combat-ai-policy.core.single-skill-aggressor",
+    "kind": "combat-ai-policy",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-ai-policy.core.single-skill-aggressor"
+  },
+  {
+    "behaviorResolverId": "resolver:combat.ai-behavior.elite-threat-focus",
+    "enabled": true,
+    "id": "combat-ai-policy.core.elite-threat-focus",
+    "kind": "combat-ai-policy",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-ai-policy.core.elite-threat-focus"
+  },
+  {
+    "behaviorResolverId": "resolver:combat.ai-behavior.boss-rotation",
+    "enabled": true,
+    "id": "combat-ai-policy.core.boss-rotation",
+    "kind": "combat-ai-policy",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-ai-policy.core.boss-rotation"
+  },
+  {
+    "aggregation": "sumMemberProfiles",
+    "enabled": true,
+    "groupModifier": 1,
+    "id": "encounter-experience-budget.core.standard",
+    "kind": "encounter-experience-budget",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#encounter-experience-budget.core.standard"
+  },
+  {
+    "attackAwardRuleId": "experience-award-rule.core.combat-attack",
+    "attackExperience": 40,
+    "defenseAwardRuleId": "experience-award-rule.core.combat-defense",
+    "defenseExperience": 10,
+    "enabled": true,
+    "id": "monster-experience-profile.core.tier1-normal",
+    "kind": "monster-experience-profile",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#monster-experience-profile.core.tier1-normal"
+  },
+  {
+    "attackAwardRuleId": "experience-award-rule.core.combat-attack",
+    "attackExperience": 960,
+    "defenseAwardRuleId": "experience-award-rule.core.combat-defense",
+    "defenseExperience": 240,
+    "enabled": true,
+    "id": "monster-experience-profile.core.tier1-elite",
+    "kind": "monster-experience-profile",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#monster-experience-profile.core.tier1-elite"
+  },
+  {
+    "attackAwardRuleId": "experience-award-rule.core.combat-attack",
+    "attackExperience": 2880,
+    "defenseAwardRuleId": "experience-award-rule.core.combat-defense",
+    "defenseExperience": 720,
+    "enabled": true,
+    "id": "monster-experience-profile.core.tier1-boss",
+    "kind": "monster-experience-profile",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#monster-experience-profile.core.tier1-boss"
+  },
+  {
+    "attackAwardRuleId": "experience-award-rule.core.combat-attack",
+    "attackExperience": 100,
+    "defenseAwardRuleId": "experience-award-rule.core.combat-defense",
+    "defenseExperience": 25,
+    "enabled": true,
+    "id": "monster-experience-profile.core.tier2-normal",
+    "kind": "monster-experience-profile",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#monster-experience-profile.core.tier2-normal"
+  },
+  {
+    "attackAwardRuleId": "experience-award-rule.core.combat-attack",
+    "attackExperience": 2400,
+    "defenseAwardRuleId": "experience-award-rule.core.combat-defense",
+    "defenseExperience": 600,
+    "enabled": true,
+    "id": "monster-experience-profile.core.tier2-elite",
+    "kind": "monster-experience-profile",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#monster-experience-profile.core.tier2-elite"
+  },
+  {
+    "attackAwardRuleId": "experience-award-rule.core.combat-attack",
+    "attackExperience": 7200,
+    "defenseAwardRuleId": "experience-award-rule.core.combat-defense",
+    "defenseExperience": 1800,
+    "enabled": true,
+    "id": "monster-experience-profile.core.tier2-boss",
+    "kind": "monster-experience-profile",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#monster-experience-profile.core.tier2-boss"
+  },
+  {
+    "ctbIncreaseMultiplier": 1,
+    "enabled": true,
+    "id": "combat-control-resistance-profile.core.normal",
+    "interruptionImmunityUntilOwnActionAfterSuccess": false,
+    "kind": "combat-control-resistance-profile",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-control-resistance-profile.core.normal"
+  },
+  {
+    "ctbIncreaseMultiplier": 0.75,
+    "enabled": true,
+    "id": "combat-control-resistance-profile.core.elite",
+    "interruptionImmunityUntilOwnActionAfterSuccess": false,
+    "kind": "combat-control-resistance-profile",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-control-resistance-profile.core.elite"
+  },
+  {
+    "ctbIncreaseMultiplier": 0.5,
+    "enabled": true,
+    "id": "combat-control-resistance-profile.core.boss",
+    "interruptionImmunityUntilOwnActionAfterSuccess": true,
+    "kind": "combat-control-resistance-profile",
+    "maxExternalCtbIncreaseBeforeOwnAction": 18,
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-control-resistance-profile.core.boss"
+  }
+]

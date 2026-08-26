@@ -1,0 +1,680 @@
+[
+  {
+    "ageModifierRuleId": "age-modifier-rule.core.shared",
+    "carryCapacityRuleId": "carry-capacity-rule.core.shared",
+    "enabled": true,
+    "gripRuleId": "grip-rule.core.shared",
+    "id": "statistics-rule.core.shared",
+    "kind": "statistics-rule",
+    "maxHealthSecondaryId": "secondary-attribute.core.max-health",
+    "maxManaSecondaryId": "secondary-attribute.core.max-mana",
+    "packId": "pack:core",
+    "primaryAttributeCap": 100,
+    "reputationContributionRuleId": "resolver:statistics.reputation-contribution",
+    "schemaVersion": 1,
+    "secondaryRuleIds": [
+      "secondary-attribute.core.physical-damage",
+      "secondary-attribute.core.magic-damage",
+      "secondary-attribute.core.instrument-damage",
+      "secondary-attribute.core.accuracy",
+      "secondary-attribute.core.magic-accuracy",
+      "secondary-attribute.core.evasion",
+      "secondary-attribute.core.anticipation",
+      "secondary-attribute.core.block-chance",
+      "secondary-attribute.core.block-absorption",
+      "secondary-attribute.core.general-damage-reduction",
+      "secondary-attribute.core.magic-damage-reduction",
+      "secondary-attribute.core.instrument-damage-reduction",
+      "secondary-attribute.core.max-health",
+      "secondary-attribute.core.max-mana"
+    ],
+    "sourcePath": "core/services.json#statistics-rule.core.shared"
+  },
+  {
+    "enabled": true,
+    "equipmentCoefficientChannelIds": [
+      "equipment-coefficient-channel.core.physical-damage"
+    ],
+    "finalResolverId": "resolver:statistics.final.identity",
+    "id": "secondary-attribute.core.physical-damage",
+    "kind": "secondary-attribute",
+    "masteryCoefficientResolverId": "resolver:statistics.mastery-coefficient",
+    "output": "secondary-attribute.core.physical-damage",
+    "packId": "pack:core",
+    "primaryCoefficients": {
+      "coordination": 0.375,
+      "muscle": 1
+    },
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#secondary-attribute.core.physical-damage"
+  },
+  {
+    "enabled": true,
+    "equipmentCoefficientChannelIds": [
+      "equipment-coefficient-channel.core.magic-damage"
+    ],
+    "finalResolverId": "resolver:statistics.final.identity",
+    "id": "secondary-attribute.core.magic-damage",
+    "kind": "secondary-attribute",
+    "masteryCoefficientResolverId": "resolver:statistics.mastery-coefficient",
+    "output": "secondary-attribute.core.magic-damage",
+    "packId": "pack:core",
+    "primaryCoefficients": {
+      "intelligence": 1
+    },
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#secondary-attribute.core.magic-damage"
+  },
+  {
+    "enabled": true,
+    "equipmentCoefficientChannelIds": [
+      "equipment-coefficient-channel.core.instrument-damage"
+    ],
+    "finalResolverId": "resolver:statistics.final.identity",
+    "id": "secondary-attribute.core.instrument-damage",
+    "kind": "secondary-attribute",
+    "masteryCoefficientResolverId": "resolver:statistics.mastery-coefficient",
+    "output": "secondary-attribute.core.instrument-damage",
+    "packId": "pack:core",
+    "primaryCoefficients": {
+      "charisma": 1,
+      "coordination": 0.5,
+      "intelligence": 0.6
+    },
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#secondary-attribute.core.instrument-damage"
+  },
+  {
+    "enabled": true,
+    "equipmentCoefficientChannelIds": [
+      "equipment-coefficient-channel.core.accuracy"
+    ],
+    "finalResolverId": "resolver:statistics.final.identity",
+    "id": "secondary-attribute.core.accuracy",
+    "kind": "secondary-attribute",
+    "masteryCoefficientResolverId": "resolver:statistics.mastery-coefficient",
+    "output": "secondary-attribute.core.accuracy",
+    "packId": "pack:core",
+    "primaryCoefficients": {
+      "coordination": 1,
+      "intelligence": 0.18,
+      "reaction": 0.73
+    },
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#secondary-attribute.core.accuracy"
+  },
+  {
+    "enabled": true,
+    "equipmentCoefficientChannelIds": [
+      "equipment-coefficient-channel.core.magic-accuracy"
+    ],
+    "finalResolverId": "resolver:statistics.final.identity",
+    "id": "secondary-attribute.core.magic-accuracy",
+    "kind": "secondary-attribute",
+    "masteryCoefficientResolverId": "resolver:statistics.mastery-coefficient",
+    "output": "secondary-attribute.core.magic-accuracy",
+    "packId": "pack:core",
+    "primaryCoefficients": {
+      "coordination": 0.55,
+      "intelligence": 1,
+      "reaction": 0.4
+    },
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#secondary-attribute.core.magic-accuracy"
+  },
+  {
+    "enabled": true,
+    "equipmentCoefficientChannelIds": [
+      "equipment-coefficient-channel.core.evasion"
+    ],
+    "finalResolverId": "resolver:statistics.final.identity",
+    "id": "secondary-attribute.core.evasion",
+    "kind": "secondary-attribute",
+    "masteryCoefficientResolverId": "resolver:statistics.mastery-coefficient",
+    "output": "secondary-attribute.core.evasion",
+    "packId": "pack:core",
+    "primaryCoefficients": {
+      "coordination": 1,
+      "intelligence": 0.18,
+      "reaction": 0.73
+    },
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#secondary-attribute.core.evasion"
+  },
+  {
+    "enabled": true,
+    "equipmentCoefficientChannelIds": [
+      "equipment-coefficient-channel.core.anticipation"
+    ],
+    "finalResolverId": "resolver:statistics.final.identity",
+    "id": "secondary-attribute.core.anticipation",
+    "kind": "secondary-attribute",
+    "masteryCoefficientResolverId": "resolver:statistics.mastery-coefficient",
+    "output": "secondary-attribute.core.anticipation",
+    "packId": "pack:core",
+    "primaryCoefficients": {
+      "intelligence": 1,
+      "reaction": 1
+    },
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#secondary-attribute.core.anticipation"
+  },
+  {
+    "enabled": true,
+    "equipmentCoefficientChannelIds": [
+      "equipment-coefficient-channel.core.block-chance"
+    ],
+    "finalResolverId": "resolver:statistics.final.identity",
+    "id": "secondary-attribute.core.block-chance",
+    "kind": "secondary-attribute",
+    "masteryCoefficientResolverId": "resolver:statistics.mastery-coefficient",
+    "output": "secondary-attribute.core.block-chance",
+    "packId": "pack:core",
+    "primaryCoefficients": {
+      "coordination": 1,
+      "reaction": 1
+    },
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#secondary-attribute.core.block-chance"
+  },
+  {
+    "enabled": true,
+    "equipmentCoefficientChannelIds": [
+      "equipment-coefficient-channel.core.block-absorption"
+    ],
+    "finalResolverId": "resolver:statistics.final.block-absorption",
+    "id": "secondary-attribute.core.block-absorption",
+    "kind": "secondary-attribute",
+    "masteryCoefficientResolverId": "resolver:statistics.mastery-coefficient",
+    "output": "secondary-attribute.core.block-absorption",
+    "packId": "pack:core",
+    "primaryCoefficients": {
+      "muscle": 1
+    },
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#secondary-attribute.core.block-absorption"
+  },
+  {
+    "enabled": true,
+    "equipmentCoefficientChannelIds": [
+      "equipment-coefficient-channel.core.general-mitigation"
+    ],
+    "finalResolverId": "resolver:statistics.final.mitigation",
+    "id": "secondary-attribute.core.general-damage-reduction",
+    "kind": "secondary-attribute",
+    "masteryCoefficientResolverId": "resolver:statistics.mastery-coefficient",
+    "output": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:core",
+    "primaryCoefficients": {
+      "muscle": 1
+    },
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#secondary-attribute.core.general-damage-reduction"
+  },
+  {
+    "enabled": true,
+    "equipmentCoefficientChannelIds": [
+      "equipment-coefficient-channel.core.magic-mitigation"
+    ],
+    "finalResolverId": "resolver:statistics.final.mitigation",
+    "id": "secondary-attribute.core.magic-damage-reduction",
+    "kind": "secondary-attribute",
+    "masteryCoefficientResolverId": "resolver:statistics.mastery-coefficient",
+    "output": "secondary-attribute.core.magic-damage-reduction",
+    "packId": "pack:core",
+    "primaryCoefficients": {
+      "intelligence": 1
+    },
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#secondary-attribute.core.magic-damage-reduction"
+  },
+  {
+    "enabled": true,
+    "equipmentCoefficientChannelIds": [],
+    "finalResolverId": "resolver:statistics.final.instrument-mitigation",
+    "id": "secondary-attribute.core.instrument-damage-reduction",
+    "kind": "secondary-attribute",
+    "output": "secondary-attribute.core.instrument-damage-reduction",
+    "packId": "pack:core",
+    "primaryCoefficients": {},
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#secondary-attribute.core.instrument-damage-reduction"
+  },
+  {
+    "enabled": true,
+    "equipmentCoefficientChannelIds": [
+      "equipment-coefficient-channel.core.max-health"
+    ],
+    "finalResolverId": "resolver:statistics.final.max-health",
+    "id": "secondary-attribute.core.max-health",
+    "kind": "secondary-attribute",
+    "masteryCoefficientResolverId": "resolver:statistics.mastery-coefficient",
+    "output": "secondary-attribute.core.max-health",
+    "packId": "pack:core",
+    "primaryCoefficients": {
+      "muscle": 1
+    },
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#secondary-attribute.core.max-health"
+  },
+  {
+    "enabled": true,
+    "equipmentCoefficientChannelIds": [
+      "equipment-coefficient-channel.core.max-mana"
+    ],
+    "finalResolverId": "resolver:statistics.final.max-mana",
+    "id": "secondary-attribute.core.max-mana",
+    "kind": "secondary-attribute",
+    "masteryCoefficientResolverId": "resolver:statistics.mastery-coefficient",
+    "output": "secondary-attribute.core.max-mana",
+    "packId": "pack:core",
+    "primaryCoefficients": {
+      "intelligence": 1
+    },
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#secondary-attribute.core.max-mana"
+  },
+  {
+    "dualWieldMainHandMultiplier": 0.5,
+    "dualWieldOffHandMultiplier": 0.35,
+    "enabled": true,
+    "id": "grip-rule.core.shared",
+    "kind": "grip-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "singleHandMultiplier": 1,
+    "sourcePath": "core/services.json#grip-rule.core.shared",
+    "twoHandMultiplier": 1
+  },
+  {
+    "baseWeightCapacity": 30,
+    "enabled": true,
+    "id": "carry-capacity-rule.core.shared",
+    "kind": "carry-capacity-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#carry-capacity-rule.core.shared",
+    "strengthCapacityPerPoint": 1.5
+  },
+  {
+    "enabled": true,
+    "id": "age-modifier-rule.core.shared",
+    "kind": "age-modifier-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:statistics.age-modifier",
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#age-modifier-rule.core.shared"
+  },
+  {
+    "enabled": true,
+    "encounterAggregation": "sumMembersThenFormation",
+    "feasibilityRuleId": "combat-power-feasibility-rule.core.shared",
+    "featureRuleIds": [
+      "combat-power-feature-rule.core.physical-damage",
+      "combat-power-feature-rule.core.magic-damage",
+      "combat-power-feature-rule.core.instrument-damage",
+      "combat-power-feature-rule.core.accuracy",
+      "combat-power-feature-rule.core.magic-accuracy",
+      "combat-power-feature-rule.core.evasion",
+      "combat-power-feature-rule.core.anticipation",
+      "combat-power-feature-rule.core.block-chance",
+      "combat-power-feature-rule.core.block-absorption",
+      "combat-power-feature-rule.core.general-damage-reduction",
+      "combat-power-feature-rule.core.magic-damage-reduction",
+      "combat-power-feature-rule.core.instrument-damage-reduction",
+      "combat-power-feature-rule.core.maximum-health",
+      "combat-power-feature-rule.core.maximum-mana",
+      "combat-power-feature-rule.core.skill-support",
+      "combat-power-feature-rule.core.skill-control",
+      "combat-power-feature-rule.core.skill-coverage",
+      "combat-power-feature-rule.core.equipment-support",
+      "combat-power-feature-rule.core.equipment-control",
+      "combat-power-feature-rule.core.equipment-coverage"
+    ],
+    "id": "combat-power-rule.core.shared",
+    "kind": "combat-power-rule",
+    "minimumPower": 1,
+    "packId": "pack:core",
+    "rounding": "roundHalfUpAtFinalOutput",
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#combat-power-rule.core.shared",
+    "statisticsRuleId": "statistics-rule.core.shared",
+    "teamAggregation": "sumMembersThenFormation",
+    "teamFormationResolverId": "resolver:combat-power.team-formation",
+    "unitAggregationResolverId": "resolver:combat-power.unit-aggregation"
+  },
+  {
+    "coefficient": 0.05,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.physical-damage",
+    "id": "combat-power-feature-rule.core.physical-damage",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "attributeId": "secondary-attribute.core.physical-damage",
+      "kind": "secondaryAttribute"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.physical-damage"
+  },
+  {
+    "coefficient": 0.05,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.magic-damage",
+    "id": "combat-power-feature-rule.core.magic-damage",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "attributeId": "secondary-attribute.core.magic-damage",
+      "kind": "secondaryAttribute"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.magic-damage"
+  },
+  {
+    "coefficient": 0.05,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.instrument-damage",
+    "id": "combat-power-feature-rule.core.instrument-damage",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "attributeId": "secondary-attribute.core.instrument-damage",
+      "kind": "secondaryAttribute"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.instrument-damage"
+  },
+  {
+    "coefficient": 0.27,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.accuracy",
+    "id": "combat-power-feature-rule.core.accuracy",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "attributeId": "secondary-attribute.core.accuracy",
+      "kind": "secondaryAttribute"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.accuracy"
+  },
+  {
+    "coefficient": 0.13,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.magic-accuracy",
+    "id": "combat-power-feature-rule.core.magic-accuracy",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "attributeId": "secondary-attribute.core.magic-accuracy",
+      "kind": "secondaryAttribute"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.magic-accuracy"
+  },
+  {
+    "coefficient": 0.27,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.evasion",
+    "id": "combat-power-feature-rule.core.evasion",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "attributeId": "secondary-attribute.core.evasion",
+      "kind": "secondaryAttribute"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.evasion"
+  },
+  {
+    "coefficient": 0.13,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.anticipation",
+    "id": "combat-power-feature-rule.core.anticipation",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "attributeId": "secondary-attribute.core.anticipation",
+      "kind": "secondaryAttribute"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.anticipation"
+  },
+  {
+    "coefficient": 0.17,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.block-chance",
+    "id": "combat-power-feature-rule.core.block-chance",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "attributeId": "secondary-attribute.core.block-chance",
+      "kind": "secondaryAttribute"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.block-chance"
+  },
+  {
+    "coefficient": 62.5,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.block-absorption",
+    "id": "combat-power-feature-rule.core.block-absorption",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "attributeId": "secondary-attribute.core.block-absorption",
+      "kind": "secondaryAttribute"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.block-absorption"
+  },
+  {
+    "coefficient": 154,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.general-damage-reduction",
+    "id": "combat-power-feature-rule.core.general-damage-reduction",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "attributeId": "secondary-attribute.core.general-damage-reduction",
+      "kind": "secondaryAttribute"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.general-damage-reduction"
+  },
+  {
+    "coefficient": 123,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.magic-damage-reduction",
+    "id": "combat-power-feature-rule.core.magic-damage-reduction",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "attributeId": "secondary-attribute.core.magic-damage-reduction",
+      "kind": "secondaryAttribute"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.magic-damage-reduction"
+  },
+  {
+    "coefficient": 31,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.instrument-damage-reduction",
+    "id": "combat-power-feature-rule.core.instrument-damage-reduction",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "attributeId": "secondary-attribute.core.instrument-damage-reduction",
+      "kind": "secondaryAttribute"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.instrument-damage-reduction"
+  },
+  {
+    "coefficient": 0.055,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.maximum-health",
+    "id": "combat-power-feature-rule.core.maximum-health",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "kind": "maximumResource",
+      "resource": "health"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.maximum-health"
+  },
+  {
+    "coefficient": 0.026,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.maximum-mana",
+    "id": "combat-power-feature-rule.core.maximum-mana",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "kind": "maximumResource",
+      "resource": "mana"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.maximum-mana"
+  },
+  {
+    "coefficient": 40,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.skill-support",
+    "id": "combat-power-feature-rule.core.skill-support",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "capabilityId": "combat-capability.core.support",
+      "kind": "skillCapability"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.skill-support"
+  },
+  {
+    "coefficient": 40,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.skill-control",
+    "id": "combat-power-feature-rule.core.skill-control",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "capabilityId": "combat-capability.core.control",
+      "kind": "skillCapability"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.skill-control"
+  },
+  {
+    "coefficient": 20,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.skill-coverage",
+    "id": "combat-power-feature-rule.core.skill-coverage",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "capabilityId": "combat-capability.core.coverage",
+      "kind": "skillCapability"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.skill-coverage"
+  },
+  {
+    "coefficient": 20,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.equipment-support",
+    "id": "combat-power-feature-rule.core.equipment-support",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "capabilityId": "combat-capability.core.support",
+      "kind": "equipmentEffectCapability"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.equipment-support"
+  },
+  {
+    "coefficient": 20,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.equipment-control",
+    "id": "combat-power-feature-rule.core.equipment-control",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "capabilityId": "combat-capability.core.control",
+      "kind": "equipmentEffectCapability"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.equipment-control"
+  },
+  {
+    "coefficient": 10,
+    "enabled": true,
+    "featureId": "combat-power-feature.core.equipment-coverage",
+    "id": "combat-power-feature-rule.core.equipment-coverage",
+    "kind": "combat-power-feature-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": {
+      "capabilityId": "combat-capability.core.coverage",
+      "kind": "equipmentEffectCapability"
+    },
+    "sourcePath": "core/services.json#combat-power-feature-rule.core.equipment-coverage"
+  },
+  {
+    "combatPowerRuleId": "combat-power-rule.core.shared",
+    "enabled": true,
+    "expectedSuccessResolverId": "resolver:combat-power.expected-success",
+    "id": "combat-power-feasibility-rule.core.shared",
+    "kind": "combat-power-feasibility-rule",
+    "minimumAttemptExpectedSuccess": 0.45,
+    "opposingAggregation": "strongestEncounterGroup",
+    "packId": "pack:core",
+    "riskBandThresholds": [
+      {
+        "maxExpectedSuccess": 0.1,
+        "riskBand": "impossible"
+      },
+      {
+        "maxExpectedSuccess": 0.35,
+        "riskBand": "dangerous"
+      },
+      {
+        "maxExpectedSuccess": 0.65,
+        "riskBand": "even"
+      },
+      {
+        "maxExpectedSuccess": 0.9,
+        "riskBand": "favorable"
+      },
+      {
+        "maxExpectedSuccess": 1,
+        "riskBand": "trivial"
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#combat-power-feasibility-rule.core.shared"
+  },
+  {
+    "destinationKind": "assetDistribution",
+    "enabled": true,
+    "id": "gathering-destination-policy.core.shared-distribution",
+    "kind": "gathering-destination-policy",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#gathering-destination-policy.core.shared-distribution",
+    "yieldScope": "sharedResult"
+  },
+  {
+    "destinationKind": "participantCharacterBags",
+    "enabled": true,
+    "id": "gathering-destination-policy.core.participant-bags",
+    "kind": "gathering-destination-policy",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/services.json#gathering-destination-policy.core.participant-bags",
+    "yieldScope": "perParticipant"
+  }
+]

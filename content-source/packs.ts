@@ -15,8 +15,94 @@ import type { ContentPackId } from '../src/contracts/core';
 import type { AuthoredManifest, AuthoredPack } from './authoring';
 
 import { progressionDomain } from './core/progression';
+// Wave F1：八個 domain 的文化無關規則。
+import { characterDomain } from './core/character';
+import { progressionRulesDomain } from './core/progression-rules';
+import { teamDomain } from './core/team';
+import { combatRulesDomain } from './core/combat-rules';
+import { economySocialDistributionDomain } from './core/economy-social-distribution';
+import { questCraftingSequenceDomain } from './core/quest-crafting-sequence';
+import { servicesDomain } from './core/services';
+import { worldMapDungeonNpcDomain } from './core/world-map-dungeon-npc';
 
 const CORE_PACK_ID = 'pack:core' as ContentPackId;
+
+// core pack 實際內容的 kind 聯集（72 筆）。刻意手寫：Compiler 會逐筆交叉比對，
+// 多了或少了都會指名，所以改內容而忘了改這裡不會靜默通過（見 authoring.ts 的說明）。
+const DECLARED_KINDS: readonly string[] = [
+  'action-chain-template',
+  'action-delay-rule',
+  'adventurer-decision-policy',
+  'age-experience-rule',
+  'age-modifier-rule',
+  'asset-distribution-rule',
+  'attack-mastery-award-rule',
+  'birth-rule',
+  'carry-capacity-rule',
+  'character-archetype',
+  'character-status',
+  'child-education-rule',
+  'combat-ai-policy',
+  'combat-control-resistance-profile',
+  'combat-ctb-adjustment-rule',
+  'combat-damage-rule',
+  'combat-effect',
+  'combat-heal-rule',
+  'combat-interruption-rule',
+  'combat-power-feasibility-rule',
+  'combat-power-feature-rule',
+  'combat-power-rule',
+  'combat-rule',
+  'combat-sequence-rule',
+  'combat-status',
+  'craft-quality-rule',
+  'currency',
+  'defense-mastery-routing-rule',
+  'dungeon-interaction-rule',
+  'encounter-experience-budget',
+  'experience-award-rule',
+  'free-action-rule',
+  'gathering-destination-policy',
+  'grip-rule',
+  'lifecycle-rule',
+  'mastery',
+  'mastery-curve',
+  'member-retention-rule',
+  'monster-experience-profile',
+  'non-player-member-daily-social-practice-rule',
+  'npc-cuisine-decision-rule',
+  'npc-dungeon-target-resolver',
+  'npc-exploration-rule',
+  'npc-market-policy',
+  'npc-marriage-rule',
+  'npc-sequence-rule',
+  'npc-travel-rule',
+  'opening-ctb-rule',
+  'passage-policy',
+  'player-affinity-rule',
+  'player-conversation-rule',
+  'player-travel-mode',
+  'price-modifier-rule',
+  'price-rule',
+  'quest-deadline-rule',
+  'quest-objective-rule',
+  'quest-reaction-rule',
+  'quest-reward-rule',
+  'recent-activity-rule',
+  'recruitment-rule',
+  'retry-supply-policy',
+  'reward-rule',
+  'secondary-attribute',
+  'social-mastery-benefit',
+  'social-system',
+  'statistics-rule',
+  'support-mastery-award-rule',
+  'teaching-rule',
+  'team-formation-rule',
+  'team-plan-rule',
+  'temporary-character-rule',
+  'world-adventurer-generation-rule',
+];
 
 const corePack: AuthoredPack = {
   packId: CORE_PACK_ID,
@@ -25,13 +111,46 @@ const corePack: AuthoredPack = {
   requiredPacks: [],
   optional: false,
   // base pack 不綁文化：cultureIds 為空（§8）。
-  scope: { cultureIds: [], features: ['progression'] },
+  scope: {
+    cultureIds: [],
+    features: [
+      'progression',
+      'character',
+      'team',
+      'combat',
+      'economy',
+      'social',
+      'distribution',
+      'quest',
+      'crafting',
+      'combat-sequence',
+      'statistics',
+      'combat-power',
+      'gathering',
+      'world',
+      'map',
+      'dungeon',
+      'npc-behavior',
+    ],
+  },
   // 目前 core 的內容沒有任何 Resolver 引用。有了就必須在這裡列出來——
   // Bootstrap 以此確認「pack 用到的 Resolver 全部已註冊」才啟動。
   requiredResolverIds: [],
   runtimeCompatibility: { minRuntimeVersion: '0.1.0' },
-  declaredKinds: ['mastery', 'mastery-curve', 'social-mastery-benefit'],
-  domains: [progressionDomain],
+  // 由 Compiler 交叉比對（見 authoring.ts 的說明：這一欄刻意手寫，推導出來的宣告等於沒有檢查）。
+  // 下面這份清單是實際內容的 kind 聯集；改內容而忘了改這裡，編譯就會指名多了/少了哪些。
+  declaredKinds: DECLARED_KINDS,
+  domains: [
+    progressionDomain,
+    characterDomain,
+    progressionRulesDomain,
+    teamDomain,
+    combatRulesDomain,
+    economySocialDistributionDomain,
+    questCraftingSequenceDomain,
+    servicesDomain,
+    worldMapDungeonNpcDomain,
+  ],
 };
 
 // 文化 pack 一律相依 core 的同一版本；版本不合就不得啟動（§1.1）。

@@ -1,0 +1,345 @@
+[
+  {
+    "enabled": true,
+    "id": "quest-objective-rule.core.purchase",
+    "kind": "quest-objective-rule",
+    "packId": "pack:core",
+    "questKind": "purchase",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-objective-rule.core.purchase"
+  },
+  {
+    "enabled": true,
+    "id": "quest-objective-rule.core.delivery",
+    "kind": "quest-objective-rule",
+    "packId": "pack:core",
+    "questKind": "delivery",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-objective-rule.core.delivery"
+  },
+  {
+    "enabled": true,
+    "id": "quest-objective-rule.core.escort",
+    "kind": "quest-objective-rule",
+    "packId": "pack:core",
+    "questKind": "escort",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-objective-rule.core.escort"
+  },
+  {
+    "enabled": true,
+    "id": "quest-objective-rule.core.rescue",
+    "kind": "quest-objective-rule",
+    "packId": "pack:core",
+    "questKind": "rescue",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-objective-rule.core.rescue"
+  },
+  {
+    "enabled": true,
+    "id": "quest-objective-rule.core.exploration",
+    "kind": "quest-objective-rule",
+    "packId": "pack:core",
+    "questKind": "exploration",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-objective-rule.core.exploration"
+  },
+  {
+    "enabled": true,
+    "id": "quest-objective-rule.core.suppression",
+    "kind": "quest-objective-rule",
+    "packId": "pack:core",
+    "questKind": "suppression",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-objective-rule.core.suppression"
+  },
+  {
+    "enabled": true,
+    "id": "quest-objective-rule.core.hunt",
+    "kind": "quest-objective-rule",
+    "packId": "pack:core",
+    "questKind": "hunt",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-objective-rule.core.hunt"
+  },
+  {
+    "acceptDurationDays": 14,
+    "actualEndResolverId": "resolver:quest.actual-end.purchase-delivery",
+    "enabled": true,
+    "id": "quest-deadline-rule.core.purchase-delivery",
+    "kind": "quest-deadline-rule",
+    "maxCityGapCount": 2,
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-deadline-rule.core.purchase-delivery"
+  },
+  {
+    "acceptDurationDays": 7,
+    "actualEndResolverId": "resolver:quest.actual-end.rescue-exploration",
+    "enabled": true,
+    "id": "quest-deadline-rule.core.rescue-exploration",
+    "kind": "quest-deadline-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-deadline-rule.core.rescue-exploration"
+  },
+  {
+    "acceptDurationDays": 14,
+    "actualEndResolverId": "resolver:quest.actual-end.suppression-hunt",
+    "enabled": true,
+    "id": "quest-deadline-rule.core.suppression-hunt",
+    "kind": "quest-deadline-rule",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-deadline-rule.core.suppression-hunt"
+  },
+  {
+    "currencyRewardRuleId": "reward-rule.core.quest-purchase",
+    "enabled": true,
+    "id": "quest-reward-rule.core.purchase",
+    "kind": "quest-reward-rule",
+    "masteryExperienceRuleId": "experience-award-rule.core.quest-purchase",
+    "packId": "pack:core",
+    "reputationEffectIds": [
+      "effect.core.quest-reputation-minor"
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-reward-rule.core.purchase"
+  },
+  {
+    "currencyRewardRuleId": "reward-rule.core.quest-delivery",
+    "enabled": true,
+    "id": "quest-reward-rule.core.delivery",
+    "kind": "quest-reward-rule",
+    "masteryExperienceRuleId": "experience-award-rule.core.quest-delivery",
+    "packId": "pack:core",
+    "reputationEffectIds": [
+      "effect.core.quest-reputation-minor"
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-reward-rule.core.delivery"
+  },
+  {
+    "currencyRewardRuleId": "reward-rule.core.quest-escort",
+    "enabled": true,
+    "id": "quest-reward-rule.core.escort",
+    "kind": "quest-reward-rule",
+    "masteryExperienceRuleId": "experience-award-rule.core.quest-escort",
+    "packId": "pack:core",
+    "reputationEffectIds": [
+      "effect.core.quest-reputation-standard"
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-reward-rule.core.escort"
+  },
+  {
+    "currencyRewardRuleId": "reward-rule.core.quest-rescue",
+    "enabled": true,
+    "id": "quest-reward-rule.core.rescue",
+    "kind": "quest-reward-rule",
+    "masteryExperienceRuleId": "experience-award-rule.core.quest-rescue",
+    "packId": "pack:core",
+    "reputationEffectIds": [
+      "effect.core.quest-reputation-standard"
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-reward-rule.core.rescue"
+  },
+  {
+    "currencyRewardRuleId": "reward-rule.core.quest-exploration",
+    "enabled": true,
+    "id": "quest-reward-rule.core.exploration",
+    "kind": "quest-reward-rule",
+    "masteryExperienceRuleId": "experience-award-rule.core.quest-exploration",
+    "packId": "pack:core",
+    "reputationEffectIds": [
+      "effect.core.quest-reputation-standard"
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-reward-rule.core.exploration"
+  },
+  {
+    "currencyRewardRuleId": "reward-rule.core.quest-suppression",
+    "enabled": true,
+    "id": "quest-reward-rule.core.suppression",
+    "kind": "quest-reward-rule",
+    "masteryExperienceRuleId": "experience-award-rule.core.quest-suppression",
+    "packId": "pack:core",
+    "reputationEffectIds": [
+      "effect.core.quest-reputation-major"
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-reward-rule.core.suppression"
+  },
+  {
+    "currencyRewardRuleId": "reward-rule.core.quest-hunt",
+    "enabled": true,
+    "id": "quest-reward-rule.core.hunt",
+    "kind": "quest-reward-rule",
+    "masteryExperienceRuleId": "experience-award-rule.core.quest-subjugation",
+    "packId": "pack:core",
+    "reputationEffectIds": [
+      "effect.core.quest-reputation-major"
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#quest-reward-rule.core.hunt"
+  },
+  {
+    "creationChance": 1,
+    "deadlineRuleId": "quest-deadline-rule.core.suppression-hunt",
+    "enabled": true,
+    "guildResolverId": "resolver:quest.guild.local-city",
+    "id": "quest-reaction-rule.core.monster-group-suppression",
+    "kind": "quest-reaction-rule",
+    "objectiveRuleId": "quest-objective-rule.core.suppression",
+    "packId": "pack:core",
+    "questKind": "suppression",
+    "rewardRuleId": "quest-reward-rule.core.suppression",
+    "schemaVersion": 1,
+    "sourceKind": "monsterGroup",
+    "sourcePath": "core/quest-crafting-sequence.json#quest-reaction-rule.core.monster-group-suppression"
+  },
+  {
+    "creationChance": 1,
+    "deadlineRuleId": "quest-deadline-rule.core.suppression-hunt",
+    "enabled": true,
+    "guildResolverId": "resolver:quest.guild.local-city",
+    "id": "quest-reaction-rule.core.boss-hunt",
+    "kind": "quest-reaction-rule",
+    "objectiveRuleId": "quest-objective-rule.core.hunt",
+    "packId": "pack:core",
+    "questKind": "hunt",
+    "rewardRuleId": "quest-reward-rule.core.hunt",
+    "schemaVersion": 1,
+    "sourceKind": "boss",
+    "sourcePath": "core/quest-crafting-sequence.json#quest-reaction-rule.core.boss-hunt"
+  },
+  {
+    "creationChance": 1,
+    "deadlineRuleId": "quest-deadline-rule.core.rescue-exploration",
+    "enabled": true,
+    "guildResolverId": "resolver:quest.guild.random-legal-city",
+    "id": "quest-reaction-rule.core.kidnap-rescue",
+    "kind": "quest-reaction-rule",
+    "objectiveRuleId": "quest-objective-rule.core.rescue",
+    "packId": "pack:core",
+    "questKind": "rescue",
+    "rewardRuleId": "quest-reward-rule.core.rescue",
+    "schemaVersion": 1,
+    "sourceKind": "kidnap",
+    "sourcePath": "core/quest-crafting-sequence.json#quest-reaction-rule.core.kidnap-rescue"
+  },
+  {
+    "creationChance": 0.35,
+    "deadlineRuleId": "quest-deadline-rule.core.rescue-exploration",
+    "enabled": true,
+    "guildResolverId": "resolver:quest.guild.local-city",
+    "id": "quest-reaction-rule.core.map-item-exploration",
+    "kind": "quest-reaction-rule",
+    "objectiveRuleId": "quest-objective-rule.core.exploration",
+    "packId": "pack:core",
+    "questKind": "exploration",
+    "rewardRuleId": "quest-reward-rule.core.exploration",
+    "schemaVersion": 1,
+    "sourceKind": "mapItem",
+    "sourcePath": "core/quest-crafting-sequence.json#quest-reaction-rule.core.map-item-exploration"
+  },
+  {
+    "creationChance": 0.3,
+    "deadlineRuleId": "quest-deadline-rule.core.purchase-delivery",
+    "enabled": true,
+    "guildResolverId": "resolver:quest.guild.local-city",
+    "id": "quest-reaction-rule.core.city-stock-purchase",
+    "kind": "quest-reaction-rule",
+    "objectiveRuleId": "quest-objective-rule.core.purchase",
+    "packId": "pack:core",
+    "questKind": "purchase",
+    "rewardRuleId": "quest-reward-rule.core.purchase",
+    "schemaVersion": 1,
+    "sourceKind": "cityStockItem",
+    "sourcePath": "core/quest-crafting-sequence.json#quest-reaction-rule.core.city-stock-purchase"
+  },
+  {
+    "creationChance": 0.2,
+    "deadlineRuleId": "quest-deadline-rule.core.purchase-delivery",
+    "enabled": true,
+    "guildResolverId": "resolver:quest.guild.local-city",
+    "id": "quest-reaction-rule.core.city-stock-delivery",
+    "kind": "quest-reaction-rule",
+    "objectiveRuleId": "quest-objective-rule.core.delivery",
+    "packId": "pack:core",
+    "questKind": "delivery",
+    "rewardRuleId": "quest-reward-rule.core.delivery",
+    "schemaVersion": 1,
+    "sourceKind": "cityStockItem",
+    "sourcePath": "core/quest-crafting-sequence.json#quest-reaction-rule.core.city-stock-delivery"
+  },
+  {
+    "enabled": true,
+    "id": "craft-quality-rule.core.equipment",
+    "kind": "craft-quality-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:crafting.quality.equipment",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#craft-quality-rule.core.equipment"
+  },
+  {
+    "enabled": true,
+    "id": "craft-quality-rule.core.consumable",
+    "kind": "craft-quality-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:crafting.quality.consumable",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#craft-quality-rule.core.consumable"
+  },
+  {
+    "enabled": true,
+    "id": "craft-quality-rule.core.trade-good",
+    "kind": "craft-quality-rule",
+    "packId": "pack:core",
+    "resolverId": "resolver:crafting.quality.trade-good",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#craft-quality-rule.core.trade-good"
+  },
+  {
+    "enabled": true,
+    "id": "npc-cuisine-decision-rule.core.standard",
+    "kind": "npc-cuisine-decision-rule",
+    "packId": "pack:core",
+    "restaurantWeightResolverId": "resolver:crafting.npc-cuisine.restaurant-weight",
+    "schemaVersion": 1,
+    "selfCookWeightResolverId": "resolver:crafting.npc-cuisine.self-cook-weight",
+    "sourcePath": "core/quest-crafting-sequence.json#npc-cuisine-decision-rule.core.standard"
+  },
+  {
+    "eligibleItemTagIds": [
+      "item-tag.core.combat-consumable"
+    ],
+    "enabled": true,
+    "id": "retry-supply-policy.core.standard",
+    "kind": "retry-supply-policy",
+    "packId": "pack:core",
+    "quantityPerRetry": 1,
+    "schemaVersion": 1,
+    "selection": "lowestValueThenStableId",
+    "sourcePath": "core/quest-crafting-sequence.json#retry-supply-policy.core.standard"
+  },
+  {
+    "attackSkillAggregation": "equalConfiguredAttackSkills",
+    "attackWeightScale": 6,
+    "combatPowerRuleId": "combat-power-rule.core.shared",
+    "defenseMasteryRoutingRuleId": "defense-mastery-routing-rule.core.standard",
+    "distributionRounding": "largestRemainderStableId",
+    "enabled": false,
+    "id": "combat-sequence-rule.core.standard",
+    "kind": "combat-sequence-rule",
+    "maxRetryCountPerChallenge": 1,
+    "packId": "pack:core",
+    "retryRelativePowerGapMaximum": 0.15,
+    "retrySupplyPolicyId": "retry-supply-policy.core.standard",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#combat-sequence-rule.core.standard",
+    "successChanceParamsId": "combat-sequence-success-chance-params.core.standard",
+    "successChanceResolverId": "resolver:combat-sequence.success-chance"
+  }
+]
