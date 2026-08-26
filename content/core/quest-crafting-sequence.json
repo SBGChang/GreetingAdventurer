@@ -100,9 +100,6 @@
     "kind": "quest-reward-rule",
     "masteryExperienceRuleId": "experience-award-rule.core.quest-purchase",
     "packId": "pack:core",
-    "reputationEffectIds": [
-      "effect.core.quest-reputation-minor"
-    ],
     "schemaVersion": 1,
     "sourcePath": "core/quest-crafting-sequence.json#quest-reward-rule.core.purchase"
   },
@@ -113,9 +110,6 @@
     "kind": "quest-reward-rule",
     "masteryExperienceRuleId": "experience-award-rule.core.quest-delivery",
     "packId": "pack:core",
-    "reputationEffectIds": [
-      "effect.core.quest-reputation-minor"
-    ],
     "schemaVersion": 1,
     "sourcePath": "core/quest-crafting-sequence.json#quest-reward-rule.core.delivery"
   },
@@ -126,9 +120,6 @@
     "kind": "quest-reward-rule",
     "masteryExperienceRuleId": "experience-award-rule.core.quest-escort",
     "packId": "pack:core",
-    "reputationEffectIds": [
-      "effect.core.quest-reputation-standard"
-    ],
     "schemaVersion": 1,
     "sourcePath": "core/quest-crafting-sequence.json#quest-reward-rule.core.escort"
   },
@@ -139,9 +130,6 @@
     "kind": "quest-reward-rule",
     "masteryExperienceRuleId": "experience-award-rule.core.quest-rescue",
     "packId": "pack:core",
-    "reputationEffectIds": [
-      "effect.core.quest-reputation-standard"
-    ],
     "schemaVersion": 1,
     "sourcePath": "core/quest-crafting-sequence.json#quest-reward-rule.core.rescue"
   },
@@ -152,9 +140,6 @@
     "kind": "quest-reward-rule",
     "masteryExperienceRuleId": "experience-award-rule.core.quest-exploration",
     "packId": "pack:core",
-    "reputationEffectIds": [
-      "effect.core.quest-reputation-standard"
-    ],
     "schemaVersion": 1,
     "sourcePath": "core/quest-crafting-sequence.json#quest-reward-rule.core.exploration"
   },
@@ -165,9 +150,6 @@
     "kind": "quest-reward-rule",
     "masteryExperienceRuleId": "experience-award-rule.core.quest-suppression",
     "packId": "pack:core",
-    "reputationEffectIds": [
-      "effect.core.quest-reputation-major"
-    ],
     "schemaVersion": 1,
     "sourcePath": "core/quest-crafting-sequence.json#quest-reward-rule.core.suppression"
   },
@@ -178,9 +160,6 @@
     "kind": "quest-reward-rule",
     "masteryExperienceRuleId": "experience-award-rule.core.quest-subjugation",
     "packId": "pack:core",
-    "reputationEffectIds": [
-      "effect.core.quest-reputation-major"
-    ],
     "schemaVersion": 1,
     "sourcePath": "core/quest-crafting-sequence.json#quest-reward-rule.core.hunt"
   },

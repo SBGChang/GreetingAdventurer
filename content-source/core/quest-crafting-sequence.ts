@@ -186,11 +186,26 @@ const deadlineRules: readonly Authored<QuestDeadlineRuleDefinition>[] = [
 // 而不是用一個能載入成功的錯 tier 把問題藏起來。
 type ReputationTier = 'minor' | 'standard' | 'major';
 
-const REPUTATION_EFFECT_IDS: Readonly<Record<ReputationTier, EffectDefinitionId>> = {
-  minor: core.id<EffectDefinitionId>('effect', 'quest-reputation-minor'),
-  standard: core.id<EffectDefinitionId>('effect', 'quest-reputation-standard'),
-  major: core.id<EffectDefinitionId>('effect', 'quest-reputation-major'),
-};
+// ── 聲望獎勵：**本輪不啟用**，理由不是懶，是這條路現在無處可閉合 ──────────────
+//
+// 原本這裡建了三筆 `effect.core.quest-reputation-*` 的 ID 並填進 `reputationEffectIds`，但
+// 那三筆定義**不存在**——編譯期的跨引用檢查逐筆抓出來（19 筆懸空引用）。
+//
+// 追下去發現它不是打錯 local 名，而是整條路沒有著落點：
+//   1. `EffectDefinition` 的八個變體（grantItem／applyStatus／setWorldFact／changeCityMetric…）
+//      **沒有任何一個表達得出「改變角色聲望」**。
+//   2. character 的 `ApplyCharacterReputationEffect` 把 `effectId` 交給
+//      `ctx.resolvers.resolveReputationDelta({character, effectId})` —— 也就是說聲望的增減量由
+//      **Resolver** 決定，不是由某個 Definition 的欄位決定。而那個 Resolver 目前沒有註冊。
+//
+// 所以現在補一個 `effect` 定義只會把懸空引用往下移一層（變成懸空的 resolverId）。依規範
+// 「Capability 只有閉合了才開放」，這裡選擇**不填** `reputationEffectIds`（欄位本身是選填）。
+//
+// 要啟用它需要三件事一起到位（記入待討論清單）：
+//   (a) 決定聲望調校量住在哪個 Definition 家族（新 kind，或掛在 quest-reward-rule 自己身上）；
+//   (b) 註冊 `resolveReputationDelta` 的 Resolver；
+//   (c) 若走 Effect 路線，`EffectDefinition` 要加一個變體，並在 content-event-resolution 的
+//       非 Partial `TRANSLATORS` 補對應翻譯（少一個鍵就是編譯錯誤，不會靜默漏掉）。
 
 type RewardRow = Readonly<{
   // progression 的 experience-award-rule local（＝該類型任務熟練度的 local 名）。
@@ -234,7 +249,6 @@ const rewardRules: readonly Authored<QuestRewardRuleDefinition>[] = ALL_QUEST_KI
         row.experienceAwardLocal,
       ),
       currencyRewardRuleId: core.id<RewardRuleId>('reward-rule', `quest-${questKind}`),
-      reputationEffectIds: [REPUTATION_EFFECT_IDS[row.reputationTier]],
     };
   },
 );

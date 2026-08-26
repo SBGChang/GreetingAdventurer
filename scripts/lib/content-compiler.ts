@@ -54,7 +54,17 @@ function serialize(value: unknown): string {
 
 type CompileError = Readonly<{ where: string; message: string }>;
 
-function compilePack(pack: AuthoredPack, errors: CompileError[]): readonly CompiledFile[] {
+type CompiledDomain = Readonly<{
+  packId: string;
+  domain: string;
+  definitions: readonly Record<string, unknown>[];
+}>;
+
+function compilePack(
+  pack: AuthoredPack,
+  errors: CompileError[],
+  compiledOut: CompiledDomain[],
+): readonly CompiledFile[] {
   const files: CompiledFile[] = [];
   const seenDomains = new Set<string>();
   const presentKinds = new Set<string>();
@@ -140,6 +150,11 @@ function compilePack(pack: AuthoredPack, errors: CompileError[]): readonly Compi
       path: `${pack.contentRoot}/${domain.domain}.json`,
       text: serialize(compiled),
     });
+    compiledOut.push({
+      packId: String(pack.packId),
+      domain: domain.domain,
+      definitions: compiled.filter((d): d is Record<string, unknown> => d !== undefined),
+    });
   }
 
   // 作者宣告的 declaredKinds 與實際內容交叉比對。載入器也會查一次（§8），但那時只知道
@@ -179,6 +194,75 @@ function compilePack(pack: AuthoredPack, errors: CompileError[]): readonly Compi
   return files;
 }
 
+
+// ── 跨定義引用必須解析得到（Wave F1 複核建議）────────────────────────────────
+//
+// 內容 ID 是 branded string，所以 `tsc` 擋得住**家族錯誤**（把 MasteryId 填進 CurveId 欄位），
+// 但擋不住**local 名打錯**：`age-modifier-rule.core.standard` 與真正存在的
+// `age-modifier-rule.core.shared` 在型別上完全等價。實測就發生過一次——一筆 lifecycle-rule 指向
+// 一個不存在的定義，八個作者、八個複核者裡只有一個人用人工枚舉抓到。
+//
+// 到了文化 pack，這種引用會有數千筆（裝備→熟練度、技能→熟練度、怪物→技能、遭遇→怪物…），
+// 人工比對不可能可靠。這道檢查把它變成編譯期錯誤。
+//
+// 判準刻意保守，只認「一定是定義引用」的字串：三段式 `<kind>.<culture>.<local>`，
+// **而且第一段是已登記的 definition kind**。所以：
+//   * `resolver.core.xxx` 不檢查——resolver 是 registry 項目，不是 Definition。
+//   * `culture.yunhua` 不檢查——兩段式，是文化自己的 ID 形狀。
+//   * 隨手寫的說明文字不會誤中，因為第一段必須剛好是登記過的 kind。
+//
+// 檢查範圍是**全部 pack 的聯集**：文化 pack 引用 core 的 ID 是正常且必要的。
+const DEFINITION_REFERENCE_SHAPE = /^([a-z][a-z0-9-]*)\.([a-z][a-z0-9-]*)\.([a-z0-9][a-z0-9-]*)$/;
+
+function collectReferenceViolations(
+  files: readonly Readonly<{ packId: string; domain: string; definitions: readonly Record<string, unknown>[] }>[],
+  knownIds: ReadonlySet<string>,
+): readonly CompileError[] {
+  const out: CompileError[] = [];
+
+  const walk = (
+    value: unknown,
+    path: string,
+    where: string,
+    definitionId: string,
+  ): void => {
+    if (typeof value === 'string') {
+      const m = DEFINITION_REFERENCE_SHAPE.exec(value);
+      if (m === null) return;
+      const kind = m[1];
+      if (kind === undefined || !isRegisteredDefinitionKind(kind)) return;
+      if (knownIds.has(value)) return;
+      out.push({
+        where,
+        message:
+          `id="${definitionId}" 的 ${path} 引用了不存在的定義 "${value}"。` +
+          `第一段 "${kind}" 是已登記的 definition kind，所以這是一筆定義引用——` +
+          `不是打錯 local 名，就是那筆定義還沒寫。branded string 讓 tsc 看不出這種錯。`,
+      });
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach((item, i) => walk(item, `${path}[${i}]`, where, definitionId));
+      return;
+    }
+    if (value !== null && typeof value === 'object') {
+      for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+        // `id` 是這筆定義自己的身分，不是引用。
+        if (path === '' && k === 'id') continue;
+        walk(v, path === '' ? k : `${path}.${k}`, where, definitionId);
+      }
+    }
+  };
+
+  for (const file of files) {
+    for (const def of file.definitions) {
+      const id = String(def['id'] ?? '(缺 id)');
+      walk(def, '', `${file.packId}/${file.domain}`, id);
+    }
+  }
+  return out;
+}
+
 export function compileContentSource(manifest: AuthoredManifest): CompileResult {
   const errors: CompileError[] = [];
   const files: CompiledFile[] = [];
@@ -199,10 +283,21 @@ export function compileContentSource(manifest: AuthoredManifest): CompileResult 
   }
 
   let definitionCount = 0;
+  const compiledDomains: CompiledDomain[] = [];
   for (const pack of manifest.packs) {
-    const packFiles = compilePack(pack, errors);
+    const packFiles = compilePack(pack, errors, compiledDomains);
     files.push(...packFiles);
     definitionCount += pack.domains.reduce((sum, d) => sum + d.definitions.length, 0);
+  }
+
+  // 跨定義引用檢查。只有在前面沒有結構性錯誤時才跑——否則會被一堆「因為那筆定義編譯失敗
+  // 所以引用不到」的連帶錯誤淹沒，看不出真正的第一因。
+  if (errors.length === 0) {
+    const knownIds = new Set<string>();
+    for (const d of compiledDomains) {
+      for (const def of d.definitions) knownIds.add(String(def['id']));
+    }
+    errors.push(...collectReferenceViolations(compiledDomains, knownIds));
   }
 
   // Runtime manifest：與 `RawContentManifest` **逐欄相同**，Platform Port 讀進來即可直接使用。

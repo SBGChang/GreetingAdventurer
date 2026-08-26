@@ -1,5 +1,27 @@
 [
   {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 800,
+    "enabled": true,
+    "id": "experience-award-rule.core.combat-attack",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.one-hand-weapon",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.combat-attack"
+  },
+  {
+    "ageExperienceRuleId": "age-experience-rule.core.standard",
+    "baseExperience": 200,
+    "enabled": true,
+    "id": "experience-award-rule.core.combat-defense",
+    "kind": "experience-award-rule",
+    "masteryId": "mastery.core.light-armor",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/progression-rules.json#experience-award-rule.core.combat-defense"
+  },
+  {
     "adultDifferenceRate": 0.0015,
     "childDifferenceRate": 0.00225,
     "cityTeacherMasteryLevel": 5,

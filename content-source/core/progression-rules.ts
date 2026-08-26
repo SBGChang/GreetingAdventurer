@@ -480,9 +480,47 @@ const questAwardRules: readonly Authored<ExperienceAwardRuleDefinition>[] = QUES
 
 // ── 匯出 ────────────────────────────────────────────────────────────────────
 
+
+// ── 戰鬥經驗的兩筆聚合規則（combat 的 monster-experience-profile 指名它們）──────
+//
+// 為什麼需要這兩筆：`MonsterExperienceProfileDefinition.attackAwardRuleId` /
+// `defenseAwardRuleId` 是**必填**的 `ExperienceAwardRuleId`，所以 combat 只要寫一筆怪物經驗
+// 側寫就必須指到兩筆真實存在的 experience-award-rule。本輪編譯期的跨引用檢查抓到 12 筆懸空
+// 引用（tier2 的 normal／elite／boss 各 ×2 ×2），成因就是這兩筆從來沒有人寫。
+//
+// **第一版方案（待討論）——masteryId 的選擇是設計決定，不是文件明文：**
+// `ExperienceAwardRuleDefinition` 只能帶**一個** masteryId，但戰鬥攻擊 MXP 實際上要依「這一擊
+// 用的是哪種武器」路由到對應的武器熟練度（那由 `attack-mastery-award-rule` 的 17 筆負責），
+// 防禦同理依穿的甲路由。也就是說「聚合的一筆」在設計上並不存在對應的單一熟練度。
+//
+// 這裡選 `one-hand-weapon` 與 `light-armor` 作為**基準錨點**：它們是 GDD 配比表裡最中庸的一列
+// （單手武器 肌2/反1/協2、輕甲 肌1/反2/協2），所以拿它當基準時，其他武器/甲的相對倍率不會被
+// 錨點本身的偏斜放大。baseExperience 取 `mastery_experience_economy_v1.md` §四「遭遇戰基準」的
+// **階級 II 一般群體**（攻擊 800／防禦 200），與 combat 側 tier2 側寫的階級一致。
+//
+// 待討論的替代方案：把 `attackAwardRuleId` 的型別改成 `AttackMasteryAwardRuleId`，讓路由規則
+// 直接被指名，這兩筆聚合規則就不需要存在。那是契約改動，不在本輪範圍。
+const COMBAT_AGGREGATE_AWARD_RULES: readonly Authored<ExperienceAwardRuleDefinition>[] = [
+  {
+    kind: KIND_EXPERIENCE_AWARD_RULE,
+    id: core.id<ExperienceAwardRuleId>('experience-award-rule', 'combat-attack'),
+    masteryId: MASTERY_IDS['one-hand-weapon']!,
+    baseExperience: 800,
+    ageExperienceRuleId: ageExperienceRule.id,
+  },
+  {
+    kind: KIND_EXPERIENCE_AWARD_RULE,
+    id: core.id<ExperienceAwardRuleId>('experience-award-rule', 'combat-defense'),
+    masteryId: MASTERY_IDS['light-armor']!,
+    baseExperience: 200,
+    ageExperienceRuleId: ageExperienceRule.id,
+  },
+];
+
 export const progressionRulesDomain: AuthoredDomain = {
   domain: 'progression-rules',
   definitions: [
+    ...COMBAT_AGGREGATE_AWARD_RULES,
     teachingRule,
     ageExperienceRule,
     childEducationRule,
