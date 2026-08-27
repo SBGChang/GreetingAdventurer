@@ -1,0 +1,285 @@
+[
+  {
+    "context": "dungeon",
+    "enabled": true,
+    "id": "content-event.yunhua.canal-sunken-cargo",
+    "kind": "content-event",
+    "options": [
+      {
+        "effectIds": [
+          "effect.yunhua.event-grant-sober-incense",
+          "effect.yunhua.event-inflict-daze"
+        ],
+        "eligibilityConditionIds": [],
+        "optionId": "salvage",
+        "visibilityConditionIds": []
+      },
+      {
+        "effectIds": [],
+        "eligibilityConditionIds": [],
+        "optionId": "withdraw",
+        "visibilityConditionIds": []
+      }
+    ],
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/quests-events.json#content-event.yunhua.canal-sunken-cargo",
+    "triggerConditionIds": []
+  },
+  {
+    "context": "dungeon",
+    "enabled": true,
+    "id": "content-event.yunhua.canal-backflow-sluice",
+    "kind": "content-event",
+    "options": [
+      {
+        "effectIds": [
+          "effect.yunhua.event-grant-dry-salve",
+          "effect.yunhua.event-inflict-daze"
+        ],
+        "eligibilityConditionIds": [],
+        "optionId": "wade",
+        "visibilityConditionIds": []
+      },
+      {
+        "effectIds": [],
+        "eligibilityConditionIds": [],
+        "optionId": "withdraw",
+        "visibilityConditionIds": []
+      }
+    ],
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/quests-events.json#content-event.yunhua.canal-backflow-sluice",
+    "triggerConditionIds": []
+  },
+  {
+    "context": "dungeon",
+    "enabled": true,
+    "id": "content-event.yunhua.herb-valley-drying-shed",
+    "kind": "content-event",
+    "options": [
+      {
+        "effectIds": [
+          "effect.yunhua.event-grant-clear-miasma-pill",
+          "effect.yunhua.event-grant-miasma-repelling-incense",
+          "effect.yunhua.event-inflict-daze"
+        ],
+        "eligibilityConditionIds": [],
+        "optionId": "search-shed",
+        "visibilityConditionIds": []
+      },
+      {
+        "effectIds": [],
+        "eligibilityConditionIds": [],
+        "optionId": "withdraw",
+        "visibilityConditionIds": []
+      }
+    ],
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/quests-events.json#content-event.yunhua.herb-valley-drying-shed",
+    "triggerConditionIds": []
+  },
+  {
+    "context": "dungeon",
+    "enabled": true,
+    "id": "content-event.yunhua.herb-valley-picking-terrace",
+    "kind": "content-event",
+    "options": [
+      {
+        "effectIds": [
+          "effect.yunhua.event-grant-spring-ginger",
+          "effect.yunhua.event-inflict-bleeding"
+        ],
+        "eligibilityConditionIds": [],
+        "optionId": "pick",
+        "visibilityConditionIds": []
+      },
+      {
+        "effectIds": [],
+        "eligibilityConditionIds": [],
+        "optionId": "withdraw",
+        "visibilityConditionIds": []
+      }
+    ],
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/quests-events.json#content-event.yunhua.herb-valley-picking-terrace",
+    "triggerConditionIds": []
+  },
+  {
+    "context": "dungeon",
+    "enabled": true,
+    "id": "content-event.yunhua.seal-tower-scroll-stacks",
+    "kind": "content-event",
+    "options": [
+      {
+        "effectIds": [
+          "effect.yunhua.event-grant-frayed-seal-ink",
+          "effect.yunhua.event-inflict-fear"
+        ],
+        "eligibilityConditionIds": [],
+        "optionId": "handle-scrolls",
+        "visibilityConditionIds": []
+      },
+      {
+        "effectIds": [],
+        "eligibilityConditionIds": [],
+        "optionId": "withdraw",
+        "visibilityConditionIds": []
+      }
+    ],
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/quests-events.json#content-event.yunhua.seal-tower-scroll-stacks",
+    "triggerConditionIds": []
+  },
+  {
+    "context": "dungeon",
+    "enabled": true,
+    "id": "content-event.yunhua.seal-tower-ward-niche",
+    "kind": "content-event",
+    "options": [
+      {
+        "effectIds": [
+          "effect.yunhua.event-grant-ward-incense-pill",
+          "effect.yunhua.event-inflict-fear"
+        ],
+        "eligibilityConditionIds": [],
+        "optionId": "take-ward-pill",
+        "visibilityConditionIds": []
+      },
+      {
+        "effectIds": [],
+        "eligibilityConditionIds": [],
+        "optionId": "withdraw",
+        "visibilityConditionIds": []
+      }
+    ],
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/quests-events.json#content-event.yunhua.seal-tower-ward-niche",
+    "triggerConditionIds": []
+  },
+  {
+    "amount": 1,
+    "effectKind": "grantItem",
+    "enabled": true,
+    "id": "effect.yunhua.event-grant-sober-incense",
+    "itemDefinitionId": "item.yunhua.sober-incense",
+    "kind": "effect",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/quests-events.json#effect.yunhua.event-grant-sober-incense",
+    "target": "actor"
+  },
+  {
+    "amount": 1,
+    "effectKind": "grantItem",
+    "enabled": true,
+    "id": "effect.yunhua.event-grant-dry-salve",
+    "itemDefinitionId": "item.yunhua.dry-salve",
+    "kind": "effect",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/quests-events.json#effect.yunhua.event-grant-dry-salve",
+    "target": "actor"
+  },
+  {
+    "amount": 1,
+    "effectKind": "grantItem",
+    "enabled": true,
+    "id": "effect.yunhua.event-grant-clear-miasma-pill",
+    "itemDefinitionId": "item.yunhua.clear-miasma-pill",
+    "kind": "effect",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/quests-events.json#effect.yunhua.event-grant-clear-miasma-pill",
+    "target": "actor"
+  },
+  {
+    "amount": 1,
+    "effectKind": "grantItem",
+    "enabled": true,
+    "id": "effect.yunhua.event-grant-miasma-repelling-incense",
+    "itemDefinitionId": "item.yunhua.miasma-repelling-incense",
+    "kind": "effect",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/quests-events.json#effect.yunhua.event-grant-miasma-repelling-incense",
+    "target": "actor"
+  },
+  {
+    "amount": 1,
+    "effectKind": "grantItem",
+    "enabled": true,
+    "id": "effect.yunhua.event-grant-ward-incense-pill",
+    "itemDefinitionId": "item.yunhua.ward-incense-pill",
+    "kind": "effect",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/quests-events.json#effect.yunhua.event-grant-ward-incense-pill",
+    "target": "actor"
+  },
+  {
+    "amount": 1,
+    "effectKind": "grantItem",
+    "enabled": true,
+    "id": "effect.yunhua.event-grant-spring-ginger",
+    "itemDefinitionId": "material.yunhua.spring-ginger",
+    "kind": "effect",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/quests-events.json#effect.yunhua.event-grant-spring-ginger",
+    "target": "actor"
+  },
+  {
+    "amount": 1,
+    "effectKind": "grantItem",
+    "enabled": true,
+    "id": "effect.yunhua.event-grant-frayed-seal-ink",
+    "itemDefinitionId": "material.yunhua.frayed-seal-ink",
+    "kind": "effect",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/quests-events.json#effect.yunhua.event-grant-frayed-seal-ink",
+    "target": "actor"
+  },
+  {
+    "duration": 1,
+    "effectKind": "applyStatus",
+    "enabled": true,
+    "id": "effect.yunhua.event-inflict-daze",
+    "kind": "effect",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/quests-events.json#effect.yunhua.event-inflict-daze",
+    "statusId": "character-status.core.daze",
+    "target": "actor"
+  },
+  {
+    "duration": 1,
+    "effectKind": "applyStatus",
+    "enabled": true,
+    "id": "effect.yunhua.event-inflict-bleeding",
+    "kind": "effect",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/quests-events.json#effect.yunhua.event-inflict-bleeding",
+    "statusId": "character-status.core.bleeding",
+    "target": "actor"
+  },
+  {
+    "duration": 1,
+    "effectKind": "applyStatus",
+    "enabled": true,
+    "id": "effect.yunhua.event-inflict-fear",
+    "kind": "effect",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/quests-events.json#effect.yunhua.event-inflict-fear",
+    "statusId": "character-status.core.fear",
+    "target": "actor"
+  }
+]

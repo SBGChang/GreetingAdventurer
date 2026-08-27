@@ -1,0 +1,5727 @@
+[
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.ring-saber.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.ring-saber.i",
+    "intrinsicValue": {
+      "amount": 80,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.95,
+          "muscle": 1.25
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.18,
+          "intelligence": 0,
+          "reaction": 0.22
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.08,
+          "reaction": 0.1
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.ring-saber.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 6,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.ring-saber.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.ring-saber.ii",
+    "intrinsicValue": {
+      "amount": 208,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1.23,
+          "muscle": 1.63
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.23,
+          "intelligence": 0,
+          "reaction": 0.29
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.1,
+          "reaction": 0.13
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.ring-saber.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 7,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.ring-saber.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.ring-saber.iii",
+    "intrinsicValue": {
+      "amount": 560,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1.66,
+          "muscle": 2.19
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.32,
+          "intelligence": 0,
+          "reaction": 0.39
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.14,
+          "reaction": 0.18
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.ring-saber.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 8,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.ring-saber.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.ring-saber.iv",
+    "intrinsicValue": {
+      "amount": 1760,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 2.14,
+          "muscle": 2.81
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.41,
+          "intelligence": 0,
+          "reaction": 0.5
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.18,
+          "reaction": 0.23
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.ring-saber.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 9,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.ring-saber.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.ring-saber.v",
+    "intrinsicValue": {
+      "amount": 6000,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 2.8,
+          "muscle": 3.69
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.53,
+          "intelligence": 0,
+          "reaction": 0.65
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.24,
+          "reaction": 0.3
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.ring-saber.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 10,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.iron-fan.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.iron-fan.i",
+    "intrinsicValue": {
+      "amount": 70,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.72,
+          "muscle": 0.85
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.22,
+          "intelligence": 0.1,
+          "reaction": 0.25
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.14,
+          "reaction": 0.16
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.05
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.iron-fan.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 3,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.iron-fan.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.iron-fan.ii",
+    "intrinsicValue": {
+      "amount": 182,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.94,
+          "muscle": 1.11
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.29,
+          "intelligence": 0.13,
+          "reaction": 0.33
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.18,
+          "reaction": 0.21
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.07
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.iron-fan.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 3,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.iron-fan.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.iron-fan.iii",
+    "intrinsicValue": {
+      "amount": 490,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1.26,
+          "muscle": 1.49
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.39,
+          "intelligence": 0.18,
+          "reaction": 0.44
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.25,
+          "reaction": 0.28
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.09
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.iron-fan.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 4,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.iron-fan.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.iron-fan.iv",
+    "intrinsicValue": {
+      "amount": 1540,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1.62,
+          "muscle": 1.91
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.5,
+          "intelligence": 0.23,
+          "reaction": 0.56
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.32,
+          "reaction": 0.36
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.11
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.iron-fan.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 4,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.iron-fan.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.iron-fan.v",
+    "intrinsicValue": {
+      "amount": 5250,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 2.12,
+          "muscle": 2.51
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.65,
+          "intelligence": 0.3,
+          "reaction": 0.74
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.41,
+          "reaction": 0.47
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.15
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.iron-fan.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 5,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.spear.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.spear.i",
+    "intrinsicValue": {
+      "amount": 105,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1,
+          "muscle": 1.7
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.24,
+          "intelligence": 0,
+          "reaction": 0.32
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.1,
+          "reaction": 0.18
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.06,
+          "reaction": 0.08
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.spear.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 11,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.spear.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.spear.ii",
+    "intrinsicValue": {
+      "amount": 273,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1.3,
+          "muscle": 2.21
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.31,
+          "intelligence": 0,
+          "reaction": 0.42
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.13,
+          "reaction": 0.23
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.08,
+          "reaction": 0.1
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.spear.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 12,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.spear.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.spear.iii",
+    "intrinsicValue": {
+      "amount": 735,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1.75,
+          "muscle": 2.98
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.42,
+          "intelligence": 0,
+          "reaction": 0.56
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.18,
+          "reaction": 0.32
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.11,
+          "reaction": 0.14
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.spear.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 13,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.spear.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.spear.iv",
+    "intrinsicValue": {
+      "amount": 2310,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 2.25,
+          "muscle": 3.83
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.54,
+          "intelligence": 0,
+          "reaction": 0.72
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.23,
+          "reaction": 0.41
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.14,
+          "reaction": 0.18
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.spear.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 14,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.spear.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.spear.v",
+    "intrinsicValue": {
+      "amount": 7875,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 2.95,
+          "muscle": 5.02
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.71,
+          "intelligence": 0,
+          "reaction": 0.94
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.3,
+          "reaction": 0.53
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.18,
+          "reaction": 0.24
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.spear.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 15,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.glaive.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.glaive.i",
+    "intrinsicValue": {
+      "amount": 120,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1.05,
+          "muscle": 2.05
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.18,
+          "intelligence": 0,
+          "reaction": 0.16
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.06
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.05
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.glaive.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 14,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.glaive.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.glaive.ii",
+    "intrinsicValue": {
+      "amount": 312,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1.37,
+          "muscle": 2.67
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.23,
+          "intelligence": 0,
+          "reaction": 0.21
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.08
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.07
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.glaive.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 16,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.glaive.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.glaive.iii",
+    "intrinsicValue": {
+      "amount": 840,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1.84,
+          "muscle": 3.59
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.32,
+          "intelligence": 0,
+          "reaction": 0.28
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.11
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.09
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.glaive.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 18,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.glaive.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.glaive.iv",
+    "intrinsicValue": {
+      "amount": 2640,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 2.36,
+          "muscle": 4.61
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.41,
+          "intelligence": 0,
+          "reaction": 0.36
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.14
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.11
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.glaive.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 20,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.glaive.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.glaive.v",
+    "intrinsicValue": {
+      "amount": 9000,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 3.1,
+          "muscle": 6.05
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.53,
+          "intelligence": 0,
+          "reaction": 0.47
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.18
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.15
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.glaive.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 23,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.needle.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.needle.i",
+    "intrinsicValue": {
+      "amount": 68,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.throwing-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1.45,
+          "muscle": 0.55
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.28,
+          "intelligence": 0.08,
+          "reaction": 0.38
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.05,
+          "reaction": 0.16
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.needle.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 2,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.needle.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.needle.ii",
+    "intrinsicValue": {
+      "amount": 177,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.throwing-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1.89,
+          "muscle": 0.72
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.36,
+          "intelligence": 0.1,
+          "reaction": 0.49
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.07,
+          "reaction": 0.21
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.needle.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 2,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.needle.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.needle.iii",
+    "intrinsicValue": {
+      "amount": 476,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.throwing-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 2.54,
+          "muscle": 0.96
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.49,
+          "intelligence": 0.14,
+          "reaction": 0.67
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.09,
+          "reaction": 0.28
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.needle.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 3,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.needle.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.needle.iv",
+    "intrinsicValue": {
+      "amount": 1496,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.throwing-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 3.26,
+          "muscle": 1.24
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.63,
+          "intelligence": 0.18,
+          "reaction": 0.86
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.11,
+          "reaction": 0.36
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.needle.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 3,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.needle.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.needle.v",
+    "intrinsicValue": {
+      "amount": 5100,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.throwing-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 4.28,
+          "muscle": 1.62
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.83,
+          "intelligence": 0.24,
+          "reaction": 1.12
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.15,
+          "reaction": 0.47
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.needle.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 4,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.chain-weight.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.chain-weight.i",
+    "intrinsicValue": {
+      "amount": 92,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.throwing-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1.05,
+          "muscle": 1.35
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.22,
+          "intelligence": 0,
+          "reaction": 0.3
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.04
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.chain-weight.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 5,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.chain-weight.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.chain-weight.ii",
+    "intrinsicValue": {
+      "amount": 239,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.throwing-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1.37,
+          "muscle": 1.76
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.29,
+          "intelligence": 0,
+          "reaction": 0.39
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.05
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.chain-weight.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 7,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.chain-weight.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.chain-weight.iii",
+    "intrinsicValue": {
+      "amount": 644,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.throwing-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1.84,
+          "muscle": 2.36
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.39,
+          "intelligence": 0,
+          "reaction": 0.53
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.07
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.chain-weight.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 8,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.chain-weight.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.chain-weight.iv",
+    "intrinsicValue": {
+      "amount": 2024,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.throwing-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 2.36,
+          "muscle": 3.04
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.5,
+          "intelligence": 0,
+          "reaction": 0.68
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.09
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.chain-weight.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 10,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.chain-weight.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.chain-weight.v",
+    "intrinsicValue": {
+      "amount": 6900,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.throwing-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 3.1,
+          "muscle": 3.98
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.65,
+          "intelligence": 0,
+          "reaction": 0.89
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.12
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.chain-weight.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 12,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.bamboo-bow.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.bamboo-bow.i",
+    "intrinsicValue": {
+      "amount": 86,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.shooting-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1.65,
+          "muscle": 0.6
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.32,
+          "intelligence": 0.12,
+          "reaction": 0.42
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.08,
+          "reaction": 0.16
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.bamboo-bow.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 4,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.bamboo-bow.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.bamboo-bow.ii",
+    "intrinsicValue": {
+      "amount": 224,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.shooting-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 2.15,
+          "muscle": 0.78
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.42,
+          "intelligence": 0.16,
+          "reaction": 0.55
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.1,
+          "reaction": 0.21
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.bamboo-bow.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 5,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.bamboo-bow.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.bamboo-bow.iii",
+    "intrinsicValue": {
+      "amount": 602,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.shooting-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 2.89,
+          "muscle": 1.05
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.56,
+          "intelligence": 0.21,
+          "reaction": 0.74
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.14,
+          "reaction": 0.28
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.bamboo-bow.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 6,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.bamboo-bow.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.bamboo-bow.iv",
+    "intrinsicValue": {
+      "amount": 1892,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.shooting-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 3.71,
+          "muscle": 1.35
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.72,
+          "intelligence": 0.27,
+          "reaction": 0.95
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.18,
+          "reaction": 0.36
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.bamboo-bow.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 7,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.bamboo-bow.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.bamboo-bow.v",
+    "intrinsicValue": {
+      "amount": 6450,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.shooting-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 4.87,
+          "muscle": 1.77
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.94,
+          "intelligence": 0.35,
+          "reaction": 1.24
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.24,
+          "reaction": 0.47
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.bamboo-bow.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 8,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.repeating-crossbow.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.repeating-crossbow.i",
+    "intrinsicValue": {
+      "amount": 105,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.shooting-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 1.7,
+          "muscle": 0.85
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.3,
+          "intelligence": 0.08,
+          "reaction": 0.36
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.06,
+          "reaction": 0.12
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.repeating-crossbow.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 6,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.repeating-crossbow.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.repeating-crossbow.ii",
+    "intrinsicValue": {
+      "amount": 273,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.shooting-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 2.21,
+          "muscle": 1.11
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.39,
+          "intelligence": 0.1,
+          "reaction": 0.47
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.08,
+          "reaction": 0.16
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.repeating-crossbow.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 8,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.repeating-crossbow.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.repeating-crossbow.iii",
+    "intrinsicValue": {
+      "amount": 735,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.shooting-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 2.98,
+          "muscle": 1.49
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.53,
+          "intelligence": 0.14,
+          "reaction": 0.63
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.11,
+          "reaction": 0.21
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.repeating-crossbow.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 10,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.repeating-crossbow.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.repeating-crossbow.iv",
+    "intrinsicValue": {
+      "amount": 2310,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.shooting-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 3.83,
+          "muscle": 1.91
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.68,
+          "intelligence": 0.18,
+          "reaction": 0.81
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.14,
+          "reaction": 0.27
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.repeating-crossbow.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 13,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.repeating-crossbow.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.repeating-crossbow.v",
+    "intrinsicValue": {
+      "amount": 7875,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.shooting-weapon"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.physical-damage",
+        "primaryAttributeCoefficients": {
+          "coordination": 5.02,
+          "muscle": 2.51
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.89,
+          "intelligence": 0.24,
+          "reaction": 1.06
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.18,
+          "reaction": 0.35
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.repeating-crossbow.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 16,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.one-hand-staff.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.one-hand-staff.i",
+    "intrinsicValue": {
+      "amount": 84,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-staff"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-damage",
+        "primaryAttributeCoefficients": {
+          "intelligence": 2.35
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.08,
+          "intelligence": 0.25,
+          "reaction": 0.22
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.06
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.1,
+          "reaction": 0.08
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.one-hand-staff.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 3,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.one-hand-staff.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.one-hand-staff.ii",
+    "intrinsicValue": {
+      "amount": 218,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-staff"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-damage",
+        "primaryAttributeCoefficients": {
+          "intelligence": 3.06
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.1,
+          "intelligence": 0.33,
+          "reaction": 0.29
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.08
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.13,
+          "reaction": 0.1
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.one-hand-staff.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 4,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.one-hand-staff.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.one-hand-staff.iii",
+    "intrinsicValue": {
+      "amount": 588,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-staff"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-damage",
+        "primaryAttributeCoefficients": {
+          "intelligence": 4.11
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.14,
+          "intelligence": 0.44,
+          "reaction": 0.39
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.11
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.18,
+          "reaction": 0.14
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.one-hand-staff.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 4,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.one-hand-staff.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.one-hand-staff.iv",
+    "intrinsicValue": {
+      "amount": 1848,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-staff"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-damage",
+        "primaryAttributeCoefficients": {
+          "intelligence": 5.29
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.18,
+          "intelligence": 0.56,
+          "reaction": 0.5
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.14
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.23,
+          "reaction": 0.18
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.one-hand-staff.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 5,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.one-hand-staff.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.one-hand-staff.v",
+    "intrinsicValue": {
+      "amount": 6300,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-staff"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-damage",
+        "primaryAttributeCoefficients": {
+          "intelligence": 6.93
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.24,
+          "intelligence": 0.74,
+          "reaction": 0.65
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.18
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.3,
+          "reaction": 0.24
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.one-hand-staff.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 6,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.two-hand-staff.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.two-hand-staff.i",
+    "intrinsicValue": {
+      "amount": 116,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-staff"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-damage",
+        "primaryAttributeCoefficients": {
+          "intelligence": 2.9
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.1,
+          "intelligence": 0.34,
+          "reaction": 0.22
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.09
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.14,
+          "reaction": 0.1
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.two-hand-staff.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 8,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.two-hand-staff.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.two-hand-staff.ii",
+    "intrinsicValue": {
+      "amount": 302,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-staff"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-damage",
+        "primaryAttributeCoefficients": {
+          "intelligence": 3.77
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.13,
+          "intelligence": 0.44,
+          "reaction": 0.29
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.12
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.18,
+          "reaction": 0.13
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.two-hand-staff.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 10,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.two-hand-staff.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.two-hand-staff.iii",
+    "intrinsicValue": {
+      "amount": 812,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-staff"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-damage",
+        "primaryAttributeCoefficients": {
+          "intelligence": 5.08
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.18,
+          "intelligence": 0.6,
+          "reaction": 0.39
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.16
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.25,
+          "reaction": 0.18
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.two-hand-staff.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 12,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.two-hand-staff.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.two-hand-staff.iv",
+    "intrinsicValue": {
+      "amount": 2552,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-staff"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-damage",
+        "primaryAttributeCoefficients": {
+          "intelligence": 6.53
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.23,
+          "intelligence": 0.77,
+          "reaction": 0.5
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.2
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.32,
+          "reaction": 0.23
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.two-hand-staff.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 14,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.two-hand-staff.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.two-hand-staff.v",
+    "intrinsicValue": {
+      "amount": 8700,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-staff"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-damage",
+        "primaryAttributeCoefficients": {
+          "intelligence": 8.56
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.3,
+          "intelligence": 1,
+          "reaction": 0.65
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.27
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.41,
+          "reaction": 0.3
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.two-hand-staff.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 16,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.bamboo-flute.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.bamboo-flute.i",
+    "intrinsicValue": {
+      "amount": 78,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.wind-instrument"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.instrument-damage",
+        "primaryAttributeCoefficients": {
+          "charisma": 0.5,
+          "coordination": 0.24,
+          "intelligence": 0.42
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.12,
+          "intelligence": 0.1,
+          "reaction": 0.18
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.04
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.bamboo-flute.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 2,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.bamboo-flute.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.bamboo-flute.ii",
+    "intrinsicValue": {
+      "amount": 203,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.wind-instrument"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.instrument-damage",
+        "primaryAttributeCoefficients": {
+          "charisma": 0.65,
+          "coordination": 0.31,
+          "intelligence": 0.55
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.16,
+          "intelligence": 0.13,
+          "reaction": 0.23
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.05
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.bamboo-flute.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 2,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.bamboo-flute.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.bamboo-flute.iii",
+    "intrinsicValue": {
+      "amount": 546,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.wind-instrument"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.instrument-damage",
+        "primaryAttributeCoefficients": {
+          "charisma": 0.88,
+          "coordination": 0.42,
+          "intelligence": 0.74
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.21,
+          "intelligence": 0.18,
+          "reaction": 0.32
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.07
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.bamboo-flute.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 3,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.bamboo-flute.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.bamboo-flute.iv",
+    "intrinsicValue": {
+      "amount": 1716,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.wind-instrument"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.instrument-damage",
+        "primaryAttributeCoefficients": {
+          "charisma": 1.13,
+          "coordination": 0.54,
+          "intelligence": 0.95
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.27,
+          "intelligence": 0.23,
+          "reaction": 0.41
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.09
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.bamboo-flute.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 3,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.bamboo-flute.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.bamboo-flute.v",
+    "intrinsicValue": {
+      "amount": 5850,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.wind-instrument"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.instrument-damage",
+        "primaryAttributeCoefficients": {
+          "charisma": 1.48,
+          "coordination": 0.71,
+          "intelligence": 1.24
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.35,
+          "intelligence": 0.3,
+          "reaction": 0.53
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.12
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.bamboo-flute.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 4,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.seven-string.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.seven-string.i",
+    "intrinsicValue": {
+      "amount": 88,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.string-instrument"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.instrument-damage",
+        "primaryAttributeCoefficients": {
+          "charisma": 0.56,
+          "coordination": 0.3,
+          "intelligence": 0.36
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.12,
+          "reaction": 0.16
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.07
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.seven-string.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 4,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.seven-string.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.seven-string.ii",
+    "intrinsicValue": {
+      "amount": 229,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.string-instrument"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.instrument-damage",
+        "primaryAttributeCoefficients": {
+          "charisma": 0.73,
+          "coordination": 0.39,
+          "intelligence": 0.47
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.16,
+          "reaction": 0.21
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.09
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.seven-string.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 5,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.seven-string.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.seven-string.iii",
+    "intrinsicValue": {
+      "amount": 616,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.string-instrument"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.instrument-damage",
+        "primaryAttributeCoefficients": {
+          "charisma": 0.98,
+          "coordination": 0.53,
+          "intelligence": 0.63
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.21,
+          "reaction": 0.28
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.12
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.seven-string.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 6,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.seven-string.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.seven-string.iv",
+    "intrinsicValue": {
+      "amount": 1936,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.string-instrument"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.instrument-damage",
+        "primaryAttributeCoefficients": {
+          "charisma": 1.26,
+          "coordination": 0.68,
+          "intelligence": 0.81
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.27,
+          "reaction": 0.36
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.16
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.seven-string.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 7,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.seven-string.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "weapon",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.seven-string.v",
+    "intrinsicValue": {
+      "amount": 6600,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.string-instrument"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.instrument-damage",
+        "primaryAttributeCoefficients": {
+          "charisma": 1.65,
+          "coordination": 0.89,
+          "intelligence": 1.06
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.35,
+          "reaction": 0.47
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.21
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.seven-string.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 8,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.cloth.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.cloth.i",
+    "intrinsicValue": {
+      "amount": 54,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.cloth-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.12,
+          "intelligence": 0.1,
+          "reaction": 0.26
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.12
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.08,
+          "reaction": 0.12
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.cloth.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 3,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.cloth.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.cloth.ii",
+    "intrinsicValue": {
+      "amount": 140,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.cloth-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.16,
+          "intelligence": 0.13,
+          "reaction": 0.34
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.16
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.1,
+          "reaction": 0.16
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.cloth.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 4,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.cloth.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.cloth.iii",
+    "intrinsicValue": {
+      "amount": 378,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.cloth-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.21,
+          "intelligence": 0.18,
+          "reaction": 0.46
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.21
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.14,
+          "reaction": 0.21
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.cloth.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 5,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.cloth.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.cloth.iv",
+    "intrinsicValue": {
+      "amount": 1188,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.cloth-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.27,
+          "intelligence": 0.23,
+          "reaction": 0.59
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.27
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.18,
+          "reaction": 0.27
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.cloth.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 5,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.cloth.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.cloth.v",
+    "intrinsicValue": {
+      "amount": 4050,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.cloth-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.35,
+          "intelligence": 0.3,
+          "reaction": 0.77
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.35
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.anticipation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.24,
+          "reaction": 0.35
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.cloth.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 6,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.light-armor.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.light-armor.i",
+    "intrinsicValue": {
+      "amount": 68,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.light-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.28,
+          "intelligence": 0.05,
+          "reaction": 0.34
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.12,
+          "intelligence": 0,
+          "reaction": 0.1
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.06
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.light-armor.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 7,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.light-armor.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.light-armor.ii",
+    "intrinsicValue": {
+      "amount": 177,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.light-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.36,
+          "intelligence": 0.07,
+          "reaction": 0.44
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.16,
+          "intelligence": 0,
+          "reaction": 0.13
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.08
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.light-armor.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 8,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.light-armor.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.light-armor.iii",
+    "intrinsicValue": {
+      "amount": 476,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.light-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.49,
+          "intelligence": 0.09,
+          "reaction": 0.6
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.21,
+          "intelligence": 0,
+          "reaction": 0.18
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.11
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.light-armor.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 9,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.light-armor.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.light-armor.iv",
+    "intrinsicValue": {
+      "amount": 1496,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.light-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.63,
+          "intelligence": 0.11,
+          "reaction": 0.77
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.27,
+          "intelligence": 0,
+          "reaction": 0.23
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.14
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.light-armor.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 10,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.light-armor.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.light-armor.v",
+    "intrinsicValue": {
+      "amount": 5100,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.light-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.83,
+          "intelligence": 0.15,
+          "reaction": 1
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.accuracy",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.35,
+          "intelligence": 0,
+          "reaction": 0.3
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.18
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.light-armor.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 11,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.medium-armor.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.medium-armor.i",
+    "intrinsicValue": {
+      "amount": 90,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.medium-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.14
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.16
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.08,
+          "reaction": 0.1
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.08,
+          "intelligence": 0,
+          "reaction": 0.08
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.medium-armor.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 13,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.medium-armor.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.medium-armor.ii",
+    "intrinsicValue": {
+      "amount": 234,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.medium-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.18
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.21
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.1,
+          "reaction": 0.13
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.1,
+          "intelligence": 0,
+          "reaction": 0.1
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.medium-armor.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 15,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.medium-armor.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.medium-armor.iii",
+    "intrinsicValue": {
+      "amount": 630,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.medium-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.25
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.28
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.14,
+          "reaction": 0.18
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.14,
+          "intelligence": 0,
+          "reaction": 0.14
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.medium-armor.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 17,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.medium-armor.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.medium-armor.iv",
+    "intrinsicValue": {
+      "amount": 1980,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.medium-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.32
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.36
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.18,
+          "reaction": 0.23
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.18,
+          "intelligence": 0,
+          "reaction": 0.18
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.medium-armor.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 19,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.medium-armor.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.medium-armor.v",
+    "intrinsicValue": {
+      "amount": 6750,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.medium-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.41
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.47
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.24,
+          "reaction": 0.3
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.24,
+          "intelligence": 0,
+          "reaction": 0.24
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.medium-armor.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 21,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.heavy-armor.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.heavy-armor.i",
+    "intrinsicValue": {
+      "amount": 125,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.heavy-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.22
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.24
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.05
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": -0.04,
+          "intelligence": 0,
+          "reaction": -0.06
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.heavy-armor.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 21,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.heavy-armor.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.heavy-armor.ii",
+    "intrinsicValue": {
+      "amount": 325,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.heavy-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.29
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.31
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.07
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": -0.05,
+          "intelligence": 0,
+          "reaction": -0.08
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.heavy-armor.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 25,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.heavy-armor.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.heavy-armor.iii",
+    "intrinsicValue": {
+      "amount": 875,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.heavy-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.39
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.42
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.09
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": -0.07,
+          "intelligence": 0,
+          "reaction": -0.1
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.heavy-armor.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 29,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.heavy-armor.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.heavy-armor.iv",
+    "intrinsicValue": {
+      "amount": 2750,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.heavy-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.5
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.54
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.11
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": -0.09,
+          "intelligence": 0,
+          "reaction": -0.13
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.heavy-armor.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 34,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.heavy-armor.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "armor",
+    "handSlots": {},
+    "id": "equipment.yunhua.heavy-armor.v",
+    "intrinsicValue": {
+      "amount": 9375,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.body"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.heavy-armor"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.65
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.71
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.15
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.evasion",
+        "primaryAttributeCoefficients": {
+          "coordination": -0.12,
+          "intelligence": 0,
+          "reaction": -0.18
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.heavy-armor.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 40,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.one-hand-shield.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "shield",
+    "handSlots": {
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.one-hand-shield.i",
+    "intrinsicValue": {
+      "amount": 72,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-shield"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.22,
+          "reaction": 0.28
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.18
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.04
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.one-hand-shield.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 5,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.one-hand-shield.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "shield",
+    "handSlots": {
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.one-hand-shield.ii",
+    "intrinsicValue": {
+      "amount": 187,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-shield"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.29,
+          "reaction": 0.36
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.23
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.05
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.one-hand-shield.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 7,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.one-hand-shield.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "shield",
+    "handSlots": {
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.one-hand-shield.iii",
+    "intrinsicValue": {
+      "amount": 504,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-shield"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.39,
+          "reaction": 0.49
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.32
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.07
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.one-hand-shield.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 9,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.one-hand-shield.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "shield",
+    "handSlots": {
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.one-hand-shield.iv",
+    "intrinsicValue": {
+      "amount": 1584,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-shield"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.5,
+          "reaction": 0.63
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.41
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.09
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.one-hand-shield.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 11,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.one-hand-shield.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "shield",
+    "handSlots": {
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.one-hand-shield.v",
+    "intrinsicValue": {
+      "amount": 5400,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.one-hand-shield"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.65,
+          "reaction": 0.83
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.53
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.12
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.one-hand-shield.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 13,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.two-hand-shield.i.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "shield",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.two-hand-shield.i",
+    "intrinsicValue": {
+      "amount": 108,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "common",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-shield"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.28,
+          "reaction": 0.36
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.28
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.1
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.06
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.two-hand-shield.i",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 16,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.two-hand-shield.ii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "shield",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.two-hand-shield.ii",
+    "intrinsicValue": {
+      "amount": 281,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "fine",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-shield"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.36,
+          "reaction": 0.47
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.36
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.13
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.08
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.two-hand-shield.ii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 20,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.two-hand-shield.iii.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "shield",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.two-hand-shield.iii",
+    "intrinsicValue": {
+      "amount": 756,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "epic",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-shield"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.49,
+          "reaction": 0.63
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.49
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.18
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.11
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.two-hand-shield.iii",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 25,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.two-hand-shield.iv.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "shield",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.two-hand-shield.iv",
+    "intrinsicValue": {
+      "amount": 2376,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "legendary",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-shield"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.63,
+          "reaction": 0.81
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.63
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.23
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.14
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.two-hand-shield.iv",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 31,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "equipment.yunhua.two-hand-shield.v.name"
+      }
+    },
+    "enabled": true,
+    "equipmentKind": "shield",
+    "handSlots": {
+      "mainHand": "equipment-slot.core.main-hand",
+      "offHand": "equipment-slot.core.off-hand"
+    },
+    "id": "equipment.yunhua.two-hand-shield.v",
+    "intrinsicValue": {
+      "amount": 8100,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [],
+    "kind": "equipment",
+    "occupiedSlots": [
+      "equipment-slot.core.main-hand",
+      "equipment-slot.core.off-hand"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "rarity": "mythic",
+    "relatedMasteryIds": [
+      "mastery.core.two-hand-shield"
+    ],
+    "schemaVersion": 1,
+    "secondaryAttributeCoefficients": [
+      {
+        "channelId": "equipment-coefficient-channel.core.block-chance",
+        "primaryAttributeCoefficients": {
+          "coordination": 0.83,
+          "reaction": 1.06
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.block-absorption",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.83
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.general-mitigation",
+        "primaryAttributeCoefficients": {
+          "muscle": 0.3
+        }
+      },
+      {
+        "channelId": "equipment-coefficient-channel.core.magic-mitigation",
+        "primaryAttributeCoefficients": {
+          "intelligence": 0.18
+        }
+      }
+    ],
+    "skillEffectRefs": [],
+    "sourcePath": "yunhua/equipment.json#equipment.yunhua.two-hand-shield.v",
+    "stackPolicy": "single",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 38,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  }
+]

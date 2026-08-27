@@ -24,6 +24,14 @@ import { economySocialDistributionDomain } from './core/economy-social-distribut
 import { questCraftingSequenceDomain } from './core/quest-crafting-sequence';
 import { servicesDomain } from './core/services';
 import { worldMapDungeonNpcDomain } from './core/world-map-dungeon-npc';
+// Wave F2a：雲華 culture pack（設計來源 docs/03_content/yunhua 的映射）。
+import { yunhuaEquipmentDomain } from './yunhua/equipment';
+import { yunhuaSkillsDomain } from './yunhua/skills';
+import { monstersDomain as yunhuaMonstersDomain } from './yunhua/monsters';
+import { yunhuaItemsDomain } from './yunhua/items';
+import { yunhuaMapsDomain } from './yunhua/maps';
+import { yunhuaWorldCityDomain } from './yunhua/world-city';
+import { yunhuaQuestsEventsDomain } from './yunhua/quests-events';
 
 const CORE_PACK_ID = 'pack:core' as ContentPackId;
 
@@ -157,9 +165,75 @@ const corePack: AuthoredPack = {
 const CORE_DEPENDENCY = [{ packId: CORE_PACK_ID, version: corePack.version }] as const;
 export { CORE_DEPENDENCY, CORE_PACK_ID };
 
+// ── 雲華 culture pack ────────────────────────────────────────────────────────
+//
+// 雲華 pack 實際內容的 kind 聯集（38 筆）。與 core 同樣刻意手寫，Compiler 交叉比對。
+const YUNHUA_DECLARED_KINDS: readonly string[] = [
+  'adventure-site',
+  'attack-mastery-award-rule',
+  'city',
+  'city-action-rule',
+  'city-node',
+  'combat-skill',
+  'combatConsumable',
+  'content-event',
+  'crafting-recipe',
+  'cuisine-recipe',
+  'culture',
+  'effect',
+  'encounter-group',
+  'equipment',
+  'escort-generation-rule',
+  'facility',
+  'generalItem',
+  'home-rule',
+  'home-upgrade',
+  'intel-rule',
+  'map-content',
+  'map-spawn-rule',
+  'map-template',
+  'material',
+  'material-affix',
+  'monster',
+  'nation',
+  'non-combat-use-rule',
+  'nonCombatConsumable',
+  'player-commerce-daily-limit',
+  'player-commerce-practice-rule',
+  'population-supply-rule',
+  'region',
+  'route',
+  'shop-rule',
+  'skill',
+  'support-mastery-award-rule',
+  'use-delay-rule',
+];
+
+const yunhuaPack: AuthoredPack = {
+  packId: 'pack:yunhua' as ContentPackId,
+  version: '1.0.0',
+  contentRoot: 'yunhua',
+  requiredPacks: [...CORE_DEPENDENCY],
+  optional: false,
+  scope: { cultureIds: ['culture.yunhua'], features: ['culture-content'] },
+  requiredResolverIds: [],
+  runtimeCompatibility: { minRuntimeVersion: '0.1.0' },
+  declaredKinds: YUNHUA_DECLARED_KINDS,
+  domains: [
+    yunhuaEquipmentDomain,
+    yunhuaSkillsDomain,
+    yunhuaMonstersDomain,
+    yunhuaItemsDomain,
+    yunhuaMapsDomain,
+    yunhuaWorldCityDomain,
+    yunhuaQuestsEventsDomain,
+  ],
+};
+
 export const AUTHORED_MANIFEST: AuthoredManifest = {
   manifestVersion: '1.0.0',
   // core 先載入：文化 pack 引用它的熟練度、貨幣與規則 ID。
-  loadOrder: [CORE_PACK_ID],
-  packs: [corePack],
+  // core 先載入：文化 pack 引用它的熟練度、規則與貨幣 ID。
+  loadOrder: [CORE_PACK_ID, 'pack:yunhua' as ContentPackId],
+  packs: [corePack, yunhuaPack],
 };

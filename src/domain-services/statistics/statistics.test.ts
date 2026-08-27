@@ -292,8 +292,9 @@ const cases: readonly Readonly<{ name: string; run: () => void }>[] = [
     name: '防具不套持握倍率；多格甲（body + head 同一件）只計一次係數',
     run: () => {
       const snapshot = calculator().calculate(makeInput());
-      // 長袍 generalReduction 通道係數 2、主屬項 0.6 × 肌 40 = 24 → raw 48。
-      const raw = 2 * (0.6 * 40);
+      // 長袍 generalReduction 通道的主屬向量 1.2（＝舊形狀的通道純量 2 × 共用向量 0.6）；
+      // 肌 40 → raw 48。多格甲占 body + head，但係數只能算一次。
+      const raw = 1.2 * 40;
       assertClose(reduction(snapshot), raw / (raw + BALANCE.reductionHalfPoint), '一般減傷（單件多格甲）');
     },
   },

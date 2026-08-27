@@ -249,14 +249,11 @@ export const secondaryRules: readonly SecondaryAttributeRuleDefinition[] = [
 ];
 
 // ── 裝備 Definition ────────────────────────────────────────────────────────
-
-const zeroCoefficients = {
-  muscle: 0,
-  intelligence: 0,
-  reaction: 0,
-  coordination: 0,
-  charisma: 0,
-} as const;
+//
+// 每件裝備逐通道給一個主屬向量（`secondaryAttributeCoefficients[].primaryAttributeCoefficients`）。
+// 舊形狀是「共用一份主屬向量 × 每通道一個純量」；共用向量表達不出設計來源「同一把刀對物理傷害偏
+// 肌力、對命中偏反應」的資料，見 contracts/inventory 的 SecondaryAttributeCoefficients 註解。
+// 下面每一筆都是舊形狀的等值改寫（純量 × 向量 → 合成向量），所以本檔的所有期望值都沒有變。
 
 function baseItem(id: ItemDefinitionId, unitWeight: number): ItemDefinition {
   return {
@@ -283,8 +280,12 @@ export const ringSaberDef: EquipmentDefinition = {
   relatedMasteryIds: [FIXTURE.oneHandMasteryId],
   occupiedSlots: [FIXTURE.mainHandSlot],
   handSlots: { mainHand: FIXTURE.mainHandSlot, offHand: FIXTURE.offHandSlot },
-  primaryAttributeCoefficients: { ...zeroCoefficients, muscle: 1.25, coordination: 0.95 },
-  secondaryAttributeCoefficients: [{ channelId: FIXTURE.physicalDamageChannel, coefficient: 1 }],
+  secondaryAttributeCoefficients: [
+    {
+      channelId: FIXTURE.physicalDamageChannel,
+      primaryAttributeCoefficients: { muscle: 1.25, coordination: 0.95 },
+    },
+  ],
   skillEffectRefs: [],
 };
 
@@ -297,8 +298,12 @@ export const ironFanDef: EquipmentDefinition = {
   relatedMasteryIds: [FIXTURE.oneHandMasteryId],
   occupiedSlots: [FIXTURE.mainHandSlot],
   handSlots: { mainHand: FIXTURE.mainHandSlot, offHand: FIXTURE.offHandSlot },
-  primaryAttributeCoefficients: { ...zeroCoefficients, muscle: 0.85, coordination: 0.72 },
-  secondaryAttributeCoefficients: [{ channelId: FIXTURE.physicalDamageChannel, coefficient: 1 }],
+  secondaryAttributeCoefficients: [
+    {
+      channelId: FIXTURE.physicalDamageChannel,
+      primaryAttributeCoefficients: { muscle: 0.85, coordination: 0.72 },
+    },
+  ],
   skillEffectRefs: [],
 };
 
@@ -311,8 +316,12 @@ export const greatswordDef: EquipmentDefinition = {
   relatedMasteryIds: [FIXTURE.oneHandMasteryId],
   occupiedSlots: [FIXTURE.mainHandSlot, FIXTURE.offHandSlot],
   handSlots: { mainHand: FIXTURE.mainHandSlot, offHand: FIXTURE.offHandSlot },
-  primaryAttributeCoefficients: { ...zeroCoefficients, muscle: 2.5, coordination: 1.9 },
-  secondaryAttributeCoefficients: [{ channelId: FIXTURE.physicalDamageChannel, coefficient: 1 }],
+  secondaryAttributeCoefficients: [
+    {
+      channelId: FIXTURE.physicalDamageChannel,
+      primaryAttributeCoefficients: { muscle: 2.5, coordination: 1.9 },
+    },
+  ],
   skillEffectRefs: [],
 };
 
@@ -325,8 +334,9 @@ export const shieldDef: EquipmentDefinition = {
   relatedMasteryIds: [FIXTURE.lightArmorMasteryId],
   occupiedSlots: [FIXTURE.offHandSlot],
   handSlots: { offHand: FIXTURE.offHandSlot },
-  primaryAttributeCoefficients: { ...zeroCoefficients, muscle: 0.4 },
-  secondaryAttributeCoefficients: [{ channelId: FIXTURE.generalReductionChannel, coefficient: 1 }],
+  secondaryAttributeCoefficients: [
+    { channelId: FIXTURE.generalReductionChannel, primaryAttributeCoefficients: { muscle: 0.4 } },
+  ],
   skillEffectRefs: [],
 };
 
@@ -339,8 +349,9 @@ export const staffDef: EquipmentDefinition = {
   relatedMasteryIds: [FIXTURE.staffMasteryId],
   occupiedSlots: [FIXTURE.mainHandSlot],
   handSlots: { mainHand: FIXTURE.mainHandSlot, offHand: FIXTURE.offHandSlot },
-  primaryAttributeCoefficients: { ...zeroCoefficients, intelligence: 1.4 },
-  secondaryAttributeCoefficients: [{ channelId: FIXTURE.magicDamageChannel, coefficient: 1 }],
+  secondaryAttributeCoefficients: [
+    { channelId: FIXTURE.magicDamageChannel, primaryAttributeCoefficients: { intelligence: 1.4 } },
+  ],
   skillEffectRefs: [],
 };
 
@@ -353,8 +364,10 @@ export const robeDef: EquipmentDefinition = {
   relatedMasteryIds: [FIXTURE.lightArmorMasteryId],
   occupiedSlots: [FIXTURE.bodySlot, FIXTURE.headSlot],
   handSlots: {},
-  primaryAttributeCoefficients: { ...zeroCoefficients, muscle: 0.6 },
-  secondaryAttributeCoefficients: [{ channelId: FIXTURE.generalReductionChannel, coefficient: 2 }],
+  // 舊形狀是「通道純量 2 × 共用主屬向量 0.6」；合成後的逐通道向量是 1.2，數值完全相同。
+  secondaryAttributeCoefficients: [
+    { channelId: FIXTURE.generalReductionChannel, primaryAttributeCoefficients: { muscle: 1.2 } },
+  ],
   skillEffectRefs: [],
 };
 
@@ -368,8 +381,10 @@ export const cursedRobeDef: EquipmentDefinition = {
   relatedMasteryIds: [FIXTURE.lightArmorMasteryId],
   occupiedSlots: [FIXTURE.bodySlot],
   handSlots: {},
-  primaryAttributeCoefficients: { ...zeroCoefficients, muscle: 0.6 },
-  secondaryAttributeCoefficients: [{ channelId: FIXTURE.generalReductionChannel, coefficient: -1 }],
+  // 舊形狀是「通道純量 −1 × 共用主屬向量 0.6」；合成後的逐通道向量是 −0.6，數值完全相同。
+  secondaryAttributeCoefficients: [
+    { channelId: FIXTURE.generalReductionChannel, primaryAttributeCoefficients: { muscle: -0.6 } },
+  ],
   skillEffectRefs: [],
 };
 

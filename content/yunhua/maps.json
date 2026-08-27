@@ -1,0 +1,6544 @@
+[
+  {
+    "enabled": true,
+    "entranceRoomIds": [
+      "f1.水道入口"
+    ],
+    "exitRoomIds": [
+      "b1.水門出口"
+    ],
+    "explorationExperienceRuleId": "experience-award-rule.core.map-exploration-tier-i",
+    "fixedTraps": [],
+    "floors": [
+      {
+        "cols": 5,
+        "floor": 1,
+        "rows": 5
+      },
+      {
+        "cols": 5,
+        "floor": -1,
+        "rows": 5
+      }
+    ],
+    "gatheringNodes": [],
+    "id": "map-template.yunhua.old-canal-sunken-store",
+    "kind": "map-template",
+    "links": [
+      {
+        "fromCell": {
+          "col": 1,
+          "floor": 1,
+          "row": 1
+        },
+        "fromRoomId": "f1.水道入口",
+        "guardedPreferenceKinds": [
+          "chest"
+        ],
+        "kind": "redDoor",
+        "linkId": "f1.水道入口~西側倉房",
+        "toCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 1
+        },
+        "toRoomId": "f1.西側倉房"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.西側倉房",
+        "kind": "passage",
+        "linkId": "f1.西側倉房~引水走廊",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 3
+        },
+        "toRoomId": "f1.引水走廊"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.引水走廊",
+        "kind": "passage",
+        "linkId": "f1.引水走廊~西側下行梯",
+        "toCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.西側下行梯"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 1
+        },
+        "fromRoomId": "f1.東側沉倉",
+        "kind": "passage",
+        "linkId": "f1.東側沉倉~東側下行梯",
+        "toCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.東側下行梯"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": -1,
+          "row": 2
+        },
+        "fromRoomId": "b1.東側上行梯",
+        "kind": "passage",
+        "linkId": "b1.東側上行梯~東側導渠",
+        "toCell": {
+          "col": 5,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.東側導渠"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": -1,
+          "row": 3
+        },
+        "fromRoomId": "b1.東側導渠",
+        "kind": "passage",
+        "linkId": "b1.東側導渠~蓄水池",
+        "toCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.蓄水池"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 4
+        },
+        "fromRoomId": "b1.蓄水池",
+        "kind": "passage",
+        "linkId": "b1.蓄水池~西側上行梯",
+        "toCell": {
+          "col": 5,
+          "floor": -1,
+          "row": 4
+        },
+        "toRoomId": "b1.西側上行梯"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 4
+        },
+        "fromRoomId": "b1.蓄水池",
+        "kind": "passage",
+        "linkId": "b1.蓄水池~沉木陷阱",
+        "toCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 5
+        },
+        "toRoomId": "b1.沉木陷阱"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 5
+        },
+        "fromRoomId": "b1.水門出口",
+        "kind": "passage",
+        "linkId": "b1.水門出口~西側沉貨區",
+        "toCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 5
+        },
+        "toRoomId": "b1.西側沉貨區"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 3
+        },
+        "fromRoomId": "b1.西側沉貨區",
+        "kind": "passage",
+        "linkId": "b1.西側沉貨區~中段水閘",
+        "toCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 2
+        },
+        "toRoomId": "b1.中段水閘"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 2
+        },
+        "fromRoomId": "b1.中段水閘",
+        "guardedPreferenceKinds": [
+          "event",
+          "largeEnemy"
+        ],
+        "kind": "redDoor",
+        "linkId": "b1.中段水閘~蓄水池",
+        "toCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.蓄水池"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.西側下行梯",
+        "kind": "passage",
+        "linkId": "f1.西側下行梯~西側上行梯",
+        "toCell": {
+          "col": 5,
+          "floor": -1,
+          "row": 4
+        },
+        "toRoomId": "b1.西側上行梯"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.東側下行梯",
+        "kind": "passage",
+        "linkId": "f1.東側下行梯~東側上行梯",
+        "toCell": {
+          "col": 5,
+          "floor": -1,
+          "row": 2
+        },
+        "toRoomId": "b1.東側上行梯"
+      }
+    ],
+    "packId": "pack:yunhua",
+    "refreshOffsetDays": 0,
+    "rooms": [
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 1
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.水道入口"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 1
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 1
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.西側倉房"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.引水走廊"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 4
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.西側下行梯"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 1
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 1
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.東側沉倉"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 2
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.東側下行梯"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": -1,
+            "row": 2
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.東側上行梯"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": -1,
+            "row": 3
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.東側導渠"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 3
+          },
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 3
+          },
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 4
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.蓄水池"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": -1,
+            "row": 4
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.西側上行梯"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 1
+          },
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 1
+          },
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 2
+          },
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 2
+          },
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 2
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.中段水閘"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 3
+          },
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 4
+          },
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 5
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.西側沉貨區"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 5
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.水門出口"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 5
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.沉木陷阱"
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-template.yunhua.old-canal-sunken-store",
+    "spawnRuleId": "map-spawn-rule.yunhua.old-canal-sunken-store",
+    "templateKind": "interior"
+  },
+  {
+    "enabled": true,
+    "entranceRoomIds": [
+      "f1.entry"
+    ],
+    "exitRoomIds": [
+      "f1.exit"
+    ],
+    "explorationExperienceRuleId": "experience-award-rule.core.map-exploration-tier-ii",
+    "fixedTraps": [],
+    "floors": [
+      {
+        "cols": 8,
+        "floor": 1,
+        "rows": 8
+      }
+    ],
+    "gatheringNodes": [],
+    "id": "map-template.yunhua.calendar-court-ruin",
+    "kind": "map-template",
+    "links": [
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 1
+        },
+        "fromRoomId": "f1.entry",
+        "kind": "passage",
+        "linkId": "f1.entry~northRidge",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 1
+        },
+        "toRoomId": "f1.northRidge"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.northRidge",
+        "kind": "passage",
+        "linkId": "f1.northRidge~westSlope",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.westSlope"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.northRidge",
+        "kind": "passage",
+        "linkId": "f1.northRidge~northSpring",
+        "toCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.northSpring"
+      },
+      {
+        "fromCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.northSpring",
+        "kind": "passage",
+        "linkId": "f1.northSpring~eastCliff",
+        "toCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 3
+        },
+        "toRoomId": "f1.eastCliff"
+      },
+      {
+        "fromCell": {
+          "col": 1,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.westSlope",
+        "kind": "passage",
+        "linkId": "f1.westSlope~westQuarry",
+        "toCell": {
+          "col": 1,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.westQuarry"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.westSlope",
+        "guardedPreferenceKinds": [
+          "chest"
+        ],
+        "kind": "redDoor",
+        "linkId": "f1.westSlope~centralField",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.centralField"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.westQuarry",
+        "kind": "passage",
+        "linkId": "f1.westQuarry~centralField",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.centralField"
+      },
+      {
+        "fromCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.eastCliff",
+        "kind": "passage",
+        "linkId": "f1.eastCliff~beastRange",
+        "toCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.beastRange"
+      },
+      {
+        "fromCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.beastRange",
+        "kind": "passage",
+        "linkId": "f1.beastRange~centralField",
+        "toCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.centralField"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 5
+        },
+        "fromRoomId": "f1.centralField",
+        "kind": "passage",
+        "linkId": "f1.centralField~iceCrack",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 5
+        },
+        "toRoomId": "f1.iceCrack"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 5
+        },
+        "fromRoomId": "f1.centralField",
+        "kind": "passage",
+        "linkId": "f1.centralField~riteClearing",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 6
+        },
+        "toRoomId": "f1.riteClearing"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 5
+        },
+        "fromRoomId": "f1.iceCrack",
+        "kind": "passage",
+        "linkId": "f1.iceCrack~westVale",
+        "toCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 5
+        },
+        "toRoomId": "f1.westVale"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 6
+        },
+        "fromRoomId": "f1.westVale",
+        "kind": "passage",
+        "linkId": "f1.westVale~southTrailWest",
+        "toCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 7
+        },
+        "toRoomId": "f1.southTrailWest"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 6
+        },
+        "fromRoomId": "f1.riteClearing",
+        "kind": "passage",
+        "linkId": "f1.riteClearing~eastTrail",
+        "toCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 6
+        },
+        "toRoomId": "f1.eastTrail"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.southTrailWest",
+        "kind": "passage",
+        "linkId": "f1.southTrailWest~cache",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 7
+        },
+        "toRoomId": "f1.cache"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.cache",
+        "kind": "passage",
+        "linkId": "f1.cache~southTrailEast",
+        "toCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 7
+        },
+        "toRoomId": "f1.southTrailEast"
+      },
+      {
+        "fromCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.southTrailEast",
+        "kind": "passage",
+        "linkId": "f1.southTrailEast~eastTrail",
+        "toCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 7
+        },
+        "toRoomId": "f1.eastTrail"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.cache",
+        "guardedPreferenceKinds": [
+          "chest"
+        ],
+        "kind": "redDoor",
+        "linkId": "f1.cache~exitPass",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 8
+        },
+        "toRoomId": "f1.exitPass"
+      },
+      {
+        "fromCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.eastTrail",
+        "kind": "passage",
+        "linkId": "f1.eastTrail~exit",
+        "toCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 8
+        },
+        "toRoomId": "f1.exit"
+      },
+      {
+        "fromCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 8
+        },
+        "fromRoomId": "f1.exitPass",
+        "kind": "passage",
+        "linkId": "f1.exitPass~exit",
+        "toCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 8
+        },
+        "toRoomId": "f1.exit"
+      }
+    ],
+    "packId": "pack:yunhua",
+    "refreshOffsetDays": 1,
+    "rooms": [
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 1
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.entry"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 1
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 1
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 2
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.northRidge"
+      },
+      {
+        "cells": [
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 2
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.northSpring"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.westSlope"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 4
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.westQuarry"
+      },
+      {
+        "cells": [
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 8,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.eastCliff"
+      },
+      {
+        "cells": [
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 8,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 8,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.beastRange"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.centralField"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.iceCrack"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 6
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.westVale"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 6
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.riteClearing"
+      },
+      {
+        "cells": [
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 7
+          },
+          {
+            "col": 8,
+            "floor": 1,
+            "row": 7
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.eastTrail"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 7
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.cache"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 7
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 7
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.southTrailWest"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 7
+          },
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 7
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.southTrailEast"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 8
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 8
+          },
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 8
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.exitPass"
+      },
+      {
+        "cells": [
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 8
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.exit"
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-template.yunhua.calendar-court-ruin",
+    "spawnRuleId": "map-spawn-rule.yunhua.calendar-court-ruin",
+    "templateKind": "outdoor"
+  },
+  {
+    "enabled": true,
+    "entranceRoomIds": [
+      "f1.入塔入口"
+    ],
+    "exitRoomIds": [
+      "f4.塔外出口"
+    ],
+    "explorationExperienceRuleId": "experience-award-rule.core.map-exploration-tier-ii",
+    "fixedTraps": [],
+    "floors": [
+      {
+        "cols": 6,
+        "floor": 1,
+        "rows": 6
+      },
+      {
+        "cols": 6,
+        "floor": 2,
+        "rows": 6
+      },
+      {
+        "cols": 6,
+        "floor": 3,
+        "rows": 6
+      },
+      {
+        "cols": 6,
+        "floor": 4,
+        "rows": 6
+      },
+      {
+        "cols": 6,
+        "floor": -1,
+        "rows": 6
+      },
+      {
+        "cols": 6,
+        "floor": -2,
+        "rows": 6
+      }
+    ],
+    "gatheringNodes": [],
+    "id": "map-template.yunhua.seal-tower",
+    "kind": "map-template",
+    "links": [
+      {
+        "fromCell": {
+          "col": 1,
+          "floor": 1,
+          "row": 6
+        },
+        "fromRoomId": "f1.入塔入口",
+        "kind": "passage",
+        "linkId": "f1.入塔入口~入塔前室",
+        "toCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 6
+        },
+        "toRoomId": "f1.入塔前室"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 5
+        },
+        "fromRoomId": "f1.入塔前室",
+        "kind": "redDoor",
+        "linkId": "f1.入塔前室~下行封門梯",
+        "toCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.下行封門梯"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 5
+        },
+        "fromRoomId": "f1.入塔前室",
+        "kind": "passage",
+        "linkId": "f1.入塔前室~正印前庭",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 5
+        },
+        "toRoomId": "f1.正印前庭"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.正印前庭",
+        "kind": "passage",
+        "linkId": "f1.正印前庭~上行校印廳",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 3
+        },
+        "toRoomId": "f1.上行校印廳"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.上行校印廳",
+        "kind": "passage",
+        "linkId": "f1.上行校印廳~上行校印梯",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.上行校印梯"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.上行校印廳",
+        "guardedPreferenceKinds": [
+          "chest"
+        ],
+        "kind": "redDoor",
+        "linkId": "f1.上行校印廳~側庫",
+        "toCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 3
+        },
+        "toRoomId": "f1.側庫"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.上行校印梯",
+        "kind": "passage",
+        "linkId": "f1.上行校印梯~符紙火陷",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 1
+        },
+        "toRoomId": "f1.符紙火陷"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 1
+        },
+        "fromRoomId": "f1.符紙火陷",
+        "kind": "passage",
+        "linkId": "f1.符紙火陷~北側環廊",
+        "toCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 1
+        },
+        "toRoomId": "f1.北側環廊"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 2,
+          "row": 2
+        },
+        "fromRoomId": "f2.下行校印廳",
+        "kind": "passage",
+        "linkId": "f2.下行校印廳~下行校印梯",
+        "toCell": {
+          "col": 4,
+          "floor": 2,
+          "row": 2
+        },
+        "toRoomId": "f2.下行校印梯"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 2,
+          "row": 2
+        },
+        "fromRoomId": "f2.下行校印廳",
+        "kind": "passage",
+        "linkId": "f2.下行校印廳~上行校印梯",
+        "toCell": {
+          "col": 3,
+          "floor": 2,
+          "row": 3
+        },
+        "toRoomId": "f2.上行校印梯"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 2,
+          "row": 3
+        },
+        "fromRoomId": "f2.上行校印梯",
+        "kind": "passage",
+        "linkId": "f2.上行校印梯~中段校印室",
+        "toCell": {
+          "col": 3,
+          "floor": 2,
+          "row": 4
+        },
+        "toRoomId": "f2.中段校印室"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 2,
+          "row": 3
+        },
+        "fromRoomId": "f2.上行校印梯",
+        "kind": "passage",
+        "linkId": "f2.上行校印梯~東向短廊",
+        "toCell": {
+          "col": 4,
+          "floor": 2,
+          "row": 3
+        },
+        "toRoomId": "f2.東向短廊"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 2,
+          "row": 3
+        },
+        "fromRoomId": "f2.東向短廊",
+        "guardedPreferenceKinds": [
+          "chest"
+        ],
+        "kind": "redDoor",
+        "linkId": "f2.東向短廊~東側書庫",
+        "toCell": {
+          "col": 5,
+          "floor": 2,
+          "row": 3
+        },
+        "toRoomId": "f2.東側書庫"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 2,
+          "row": 4
+        },
+        "fromRoomId": "f2.中段校印室",
+        "kind": "passage",
+        "linkId": "f2.中段校印室~下層迴廊",
+        "toCell": {
+          "col": 3,
+          "floor": 2,
+          "row": 5
+        },
+        "toRoomId": "f2.下層迴廊"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 2,
+          "row": 6
+        },
+        "fromRoomId": "f2.下層迴廊",
+        "kind": "passage",
+        "linkId": "f2.下層迴廊~碎印陷阱",
+        "toCell": {
+          "col": 5,
+          "floor": 2,
+          "row": 6
+        },
+        "toRoomId": "f2.碎印陷阱"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 3,
+          "row": 4
+        },
+        "fromRoomId": "f3.下行藏卷室",
+        "kind": "passage",
+        "linkId": "f3.下行藏卷室~下行藏卷梯",
+        "toCell": {
+          "col": 3,
+          "floor": 3,
+          "row": 3
+        },
+        "toRoomId": "f3.下行藏卷梯"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 3,
+          "row": 3
+        },
+        "fromRoomId": "f3.下行藏卷梯",
+        "kind": "passage",
+        "linkId": "f3.下行藏卷梯~折角短廊",
+        "toCell": {
+          "col": 4,
+          "floor": 3,
+          "row": 3
+        },
+        "toRoomId": "f3.折角短廊"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 3,
+          "row": 3
+        },
+        "fromRoomId": "f3.折角短廊",
+        "guardedPreferenceKinds": [
+          "event"
+        ],
+        "kind": "redDoor",
+        "linkId": "f3.折角短廊~東側典藏庫",
+        "toCell": {
+          "col": 5,
+          "floor": 3,
+          "row": 3
+        },
+        "toRoomId": "f3.東側典藏庫"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 3,
+          "row": 3
+        },
+        "fromRoomId": "f3.折角短廊",
+        "kind": "passage",
+        "linkId": "f3.折角短廊~上行藏卷梯",
+        "toCell": {
+          "col": 4,
+          "floor": 3,
+          "row": 2
+        },
+        "toRoomId": "f3.上行藏卷梯"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 3,
+          "row": 2
+        },
+        "fromRoomId": "f3.上行藏卷梯",
+        "kind": "passage",
+        "linkId": "f3.上行藏卷梯~上行藏卷室",
+        "toCell": {
+          "col": 3,
+          "floor": 3,
+          "row": 2
+        },
+        "toRoomId": "f3.上行藏卷室"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 3,
+          "row": 4
+        },
+        "fromRoomId": "f3.折角短廊",
+        "kind": "passage",
+        "linkId": "f3.折角短廊~南側卷軸庫",
+        "toCell": {
+          "col": 4,
+          "floor": 3,
+          "row": 5
+        },
+        "toRoomId": "f3.南側卷軸庫"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 3,
+          "row": 5
+        },
+        "fromRoomId": "f3.南側卷軸庫",
+        "kind": "passage",
+        "linkId": "f3.南側卷軸庫~落卷陷阱",
+        "toCell": {
+          "col": 5,
+          "floor": 3,
+          "row": 5
+        },
+        "toRoomId": "f3.落卷陷阱"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 4,
+          "row": 1
+        },
+        "fromRoomId": "f4.塔外出口",
+        "kind": "passage",
+        "linkId": "f4.塔外出口~觀印前室",
+        "toCell": {
+          "col": 4,
+          "floor": 4,
+          "row": 1
+        },
+        "toRoomId": "f4.觀印前室"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 4,
+          "row": 1
+        },
+        "fromRoomId": "f4.觀印前室",
+        "kind": "passage",
+        "linkId": "f4.觀印前室~下行觀印梯",
+        "toCell": {
+          "col": 4,
+          "floor": 4,
+          "row": 2
+        },
+        "toRoomId": "f4.下行觀印梯"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 4,
+          "row": 1
+        },
+        "fromRoomId": "f4.觀印前室",
+        "kind": "passage",
+        "linkId": "f4.觀印前室~北側符銘室",
+        "toCell": {
+          "col": 5,
+          "floor": 4,
+          "row": 1
+        },
+        "toRoomId": "f4.北側符銘室"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 4,
+          "row": 2
+        },
+        "fromRoomId": "f4.下行觀印梯",
+        "guardedPreferenceKinds": [
+          "largeEnemy"
+        ],
+        "kind": "redDoor",
+        "linkId": "f4.下行觀印梯~觀印台",
+        "toCell": {
+          "col": 4,
+          "floor": 4,
+          "row": 3
+        },
+        "toRoomId": "f4.觀印台"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": 4,
+          "row": 3
+        },
+        "fromRoomId": "f4.觀印台",
+        "kind": "passage",
+        "linkId": "f4.觀印台~東側儀器庫",
+        "toCell": {
+          "col": 6,
+          "floor": 4,
+          "row": 3
+        },
+        "toRoomId": "f4.東側儀器庫"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 4
+        },
+        "fromRoomId": "b1.上行封門梯",
+        "kind": "passage",
+        "linkId": "b1.上行封門梯~封門前廳",
+        "toCell": {
+          "col": 1,
+          "floor": -1,
+          "row": 4
+        },
+        "toRoomId": "b1.封門前廳"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 5
+        },
+        "fromRoomId": "b1.封門前廳",
+        "guardedPreferenceKinds": [
+          "event"
+        ],
+        "kind": "redDoor",
+        "linkId": "b1.封門前廳~中段封印室",
+        "toCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 4
+        },
+        "toRoomId": "b1.中段封印室"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 3
+        },
+        "fromRoomId": "b1.中段封印室",
+        "kind": "passage",
+        "linkId": "b1.中段封印室~地脈短廊",
+        "toCell": {
+          "col": 5,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.地脈短廊"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": -1,
+          "row": 3
+        },
+        "fromRoomId": "b1.地脈短廊",
+        "kind": "passage",
+        "linkId": "b1.地脈短廊~下行地脈梯",
+        "toCell": {
+          "col": 5,
+          "floor": -1,
+          "row": 2
+        },
+        "toRoomId": "b1.下行地脈梯"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": -1,
+          "row": 2
+        },
+        "fromRoomId": "b1.下行地脈梯",
+        "kind": "passage",
+        "linkId": "b1.下行地脈梯~地脈前廳",
+        "toCell": {
+          "col": 6,
+          "floor": -1,
+          "row": 2
+        },
+        "toRoomId": "b1.地脈前廳"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 4
+        },
+        "fromRoomId": "b1.中段封印室",
+        "kind": "passage",
+        "linkId": "b1.中段封印室~封存架",
+        "toCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 5
+        },
+        "toRoomId": "b1.封存架"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": -2,
+          "row": 2
+        },
+        "fromRoomId": "b2.上行地脈梯",
+        "kind": "passage",
+        "linkId": "b2.上行地脈梯~地脈前廳",
+        "toCell": {
+          "col": 6,
+          "floor": -2,
+          "row": 2
+        },
+        "toRoomId": "b2.地脈前廳"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": -2,
+          "row": 2
+        },
+        "fromRoomId": "b2.上行地脈梯",
+        "guardedPreferenceKinds": [
+          "event"
+        ],
+        "kind": "redDoor",
+        "linkId": "b2.上行地脈梯~地脈主室",
+        "toCell": {
+          "col": 5,
+          "floor": -2,
+          "row": 3
+        },
+        "toRoomId": "b2.地脈主室"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": -2,
+          "row": 5
+        },
+        "fromRoomId": "b2.地脈主室",
+        "kind": "passage",
+        "linkId": "b2.地脈主室~地脈側庫",
+        "toCell": {
+          "col": 2,
+          "floor": -2,
+          "row": 6
+        },
+        "toRoomId": "b2.地脈側庫"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 2,
+          "row": 2
+        },
+        "fromRoomId": "f2.下行校印梯",
+        "kind": "passage",
+        "linkId": "f2.下行校印梯~上行校印梯",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.上行校印梯"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 3,
+          "row": 3
+        },
+        "fromRoomId": "f3.下行藏卷梯",
+        "kind": "passage",
+        "linkId": "f3.下行藏卷梯~上行校印梯",
+        "toCell": {
+          "col": 3,
+          "floor": 2,
+          "row": 3
+        },
+        "toRoomId": "f2.上行校印梯"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 4,
+          "row": 2
+        },
+        "fromRoomId": "f4.下行觀印梯",
+        "kind": "passage",
+        "linkId": "f4.下行觀印梯~上行藏卷梯",
+        "toCell": {
+          "col": 4,
+          "floor": 3,
+          "row": 2
+        },
+        "toRoomId": "f3.上行藏卷梯"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.下行封門梯",
+        "kind": "passage",
+        "linkId": "f1.下行封門梯~上行封門梯",
+        "toCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 4
+        },
+        "toRoomId": "b1.上行封門梯"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": -1,
+          "row": 2
+        },
+        "fromRoomId": "b1.下行地脈梯",
+        "kind": "passage",
+        "linkId": "b1.下行地脈梯~上行地脈梯",
+        "toCell": {
+          "col": 5,
+          "floor": -2,
+          "row": 2
+        },
+        "toRoomId": "b2.上行地脈梯"
+      }
+    ],
+    "nationalDungeonForm": "building",
+    "packId": "pack:yunhua",
+    "refreshOffsetDays": 2,
+    "rooms": [
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 6
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.入塔入口"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 6
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.入塔前室"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 4
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.下行封門梯"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.正印前庭"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.上行校印廳"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 2
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.上行校印梯"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.側庫"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 1
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.符紙火陷"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 1
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.北側環廊"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 2,
+            "row": 1
+          },
+          {
+            "col": 4,
+            "floor": 2,
+            "row": 1
+          },
+          {
+            "col": 3,
+            "floor": 2,
+            "row": 2
+          }
+        ],
+        "floor": 2,
+        "roomId": "f2.下行校印廳"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 2,
+            "row": 2
+          }
+        ],
+        "floor": 2,
+        "roomId": "f2.下行校印梯"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 2,
+            "row": 3
+          },
+          {
+            "col": 2,
+            "floor": 2,
+            "row": 4
+          },
+          {
+            "col": 3,
+            "floor": 2,
+            "row": 4
+          }
+        ],
+        "floor": 2,
+        "roomId": "f2.中段校印室"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 2,
+            "row": 3
+          }
+        ],
+        "floor": 2,
+        "roomId": "f2.上行校印梯"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 2,
+            "row": 3
+          },
+          {
+            "col": 6,
+            "floor": 2,
+            "row": 3
+          },
+          {
+            "col": 5,
+            "floor": 2,
+            "row": 4
+          },
+          {
+            "col": 6,
+            "floor": 2,
+            "row": 4
+          }
+        ],
+        "floor": 2,
+        "roomId": "f2.東側書庫"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 2,
+            "row": 5
+          },
+          {
+            "col": 4,
+            "floor": 2,
+            "row": 5
+          },
+          {
+            "col": 3,
+            "floor": 2,
+            "row": 6
+          },
+          {
+            "col": 4,
+            "floor": 2,
+            "row": 6
+          }
+        ],
+        "floor": 2,
+        "roomId": "f2.下層迴廊"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 2,
+            "row": 6
+          }
+        ],
+        "floor": 2,
+        "roomId": "f2.碎印陷阱"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 2,
+            "row": 3
+          }
+        ],
+        "floor": 2,
+        "roomId": "f2.東向短廊"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 3,
+            "row": 3
+          },
+          {
+            "col": 2,
+            "floor": 3,
+            "row": 4
+          },
+          {
+            "col": 3,
+            "floor": 3,
+            "row": 4
+          }
+        ],
+        "floor": 3,
+        "roomId": "f3.下行藏卷室"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 3,
+            "row": 3
+          }
+        ],
+        "floor": 3,
+        "roomId": "f3.下行藏卷梯"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 3,
+            "row": 1
+          },
+          {
+            "col": 4,
+            "floor": 3,
+            "row": 1
+          },
+          {
+            "col": 3,
+            "floor": 3,
+            "row": 2
+          }
+        ],
+        "floor": 3,
+        "roomId": "f3.上行藏卷室"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 3,
+            "row": 2
+          }
+        ],
+        "floor": 3,
+        "roomId": "f3.上行藏卷梯"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 3,
+            "row": 3
+          },
+          {
+            "col": 6,
+            "floor": 3,
+            "row": 3
+          },
+          {
+            "col": 5,
+            "floor": 3,
+            "row": 4
+          },
+          {
+            "col": 6,
+            "floor": 3,
+            "row": 4
+          }
+        ],
+        "floor": 3,
+        "roomId": "f3.東側典藏庫"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 3,
+            "row": 5
+          },
+          {
+            "col": 4,
+            "floor": 3,
+            "row": 6
+          }
+        ],
+        "floor": 3,
+        "roomId": "f3.南側卷軸庫"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 3,
+            "row": 3
+          },
+          {
+            "col": 4,
+            "floor": 3,
+            "row": 4
+          }
+        ],
+        "floor": 3,
+        "roomId": "f3.折角短廊"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 3,
+            "row": 5
+          }
+        ],
+        "floor": 3,
+        "roomId": "f3.落卷陷阱"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 4,
+            "row": 1
+          }
+        ],
+        "floor": 4,
+        "roomId": "f4.塔外出口"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 4,
+            "row": 1
+          }
+        ],
+        "floor": 4,
+        "roomId": "f4.觀印前室"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 4,
+            "row": 2
+          }
+        ],
+        "floor": 4,
+        "roomId": "f4.下行觀印梯"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 4,
+            "row": 1
+          },
+          {
+            "col": 6,
+            "floor": 4,
+            "row": 1
+          },
+          {
+            "col": 5,
+            "floor": 4,
+            "row": 2
+          }
+        ],
+        "floor": 4,
+        "roomId": "f4.北側符銘室"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 4,
+            "row": 3
+          },
+          {
+            "col": 3,
+            "floor": 4,
+            "row": 3
+          },
+          {
+            "col": 4,
+            "floor": 4,
+            "row": 3
+          },
+          {
+            "col": 5,
+            "floor": 4,
+            "row": 3
+          },
+          {
+            "col": 2,
+            "floor": 4,
+            "row": 4
+          },
+          {
+            "col": 3,
+            "floor": 4,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": 4,
+            "row": 4
+          },
+          {
+            "col": 5,
+            "floor": 4,
+            "row": 4
+          }
+        ],
+        "floor": 4,
+        "roomId": "f4.觀印台"
+      },
+      {
+        "cells": [
+          {
+            "col": 6,
+            "floor": 4,
+            "row": 3
+          },
+          {
+            "col": 6,
+            "floor": 4,
+            "row": 4
+          }
+        ],
+        "floor": 4,
+        "roomId": "f4.東側儀器庫"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 4
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.上行封門梯"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": -1,
+            "row": 4
+          },
+          {
+            "col": 1,
+            "floor": -1,
+            "row": 5
+          },
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 5
+          },
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 5
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.封門前廳"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 3
+          },
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 3
+          },
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 4
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.中段封印室"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": -1,
+            "row": 2
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.下行地脈梯"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": -1,
+            "row": 1
+          },
+          {
+            "col": 6,
+            "floor": -1,
+            "row": 1
+          },
+          {
+            "col": 6,
+            "floor": -1,
+            "row": 2
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.地脈前廳"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 5
+          },
+          {
+            "col": 5,
+            "floor": -1,
+            "row": 5
+          },
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 6
+          },
+          {
+            "col": 5,
+            "floor": -1,
+            "row": 6
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.封存架"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": -1,
+            "row": 3
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.地脈短廊"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": -2,
+            "row": 2
+          }
+        ],
+        "floor": -2,
+        "roomId": "b2.上行地脈梯"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": -2,
+            "row": 1
+          },
+          {
+            "col": 6,
+            "floor": -2,
+            "row": 1
+          },
+          {
+            "col": 6,
+            "floor": -2,
+            "row": 2
+          }
+        ],
+        "floor": -2,
+        "roomId": "b2.地脈前廳"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": -2,
+            "row": 3
+          },
+          {
+            "col": 3,
+            "floor": -2,
+            "row": 3
+          },
+          {
+            "col": 4,
+            "floor": -2,
+            "row": 3
+          },
+          {
+            "col": 5,
+            "floor": -2,
+            "row": 3
+          },
+          {
+            "col": 2,
+            "floor": -2,
+            "row": 4
+          },
+          {
+            "col": 3,
+            "floor": -2,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": -2,
+            "row": 4
+          },
+          {
+            "col": 5,
+            "floor": -2,
+            "row": 4
+          },
+          {
+            "col": 2,
+            "floor": -2,
+            "row": 5
+          },
+          {
+            "col": 3,
+            "floor": -2,
+            "row": 5
+          },
+          {
+            "col": 4,
+            "floor": -2,
+            "row": 5
+          },
+          {
+            "col": 5,
+            "floor": -2,
+            "row": 5
+          }
+        ],
+        "floor": -2,
+        "roomId": "b2.地脈主室"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": -2,
+            "row": 6
+          },
+          {
+            "col": 3,
+            "floor": -2,
+            "row": 6
+          }
+        ],
+        "floor": -2,
+        "roomId": "b2.地脈側庫"
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-template.yunhua.seal-tower",
+    "spawnRuleId": "map-spawn-rule.yunhua.seal-tower",
+    "templateKind": "interior"
+  },
+  {
+    "enabled": true,
+    "entranceRoomIds": [
+      "f1.入口竹徑"
+    ],
+    "exitRoomIds": [
+      "f1.北口"
+    ],
+    "explorationExperienceRuleId": "experience-award-rule.core.map-exploration-tier-i",
+    "fixedTraps": [],
+    "floors": [
+      {
+        "cols": 8,
+        "floor": 1,
+        "rows": 8
+      }
+    ],
+    "gatheringNodes": [],
+    "id": "map-template.yunhua.mist-bamboo-valley",
+    "kind": "map-template",
+    "links": [
+      {
+        "fromCell": {
+          "col": 1,
+          "floor": 1,
+          "row": 8
+        },
+        "fromRoomId": "f1.入口竹徑",
+        "kind": "passage",
+        "linkId": "f1.入口竹徑~南側山徑",
+        "toCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 8
+        },
+        "toRoomId": "f1.南側山徑"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.南側山徑",
+        "kind": "passage",
+        "linkId": "f1.南側山徑~西側竹叢",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 6
+        },
+        "toRoomId": "f1.西側竹叢"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.南側山徑",
+        "kind": "passage",
+        "linkId": "f1.南側山徑~瘴氣裂縫",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 7
+        },
+        "toRoomId": "f1.瘴氣裂縫"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 5
+        },
+        "fromRoomId": "f1.西側竹叢",
+        "kind": "passage",
+        "linkId": "f1.西側竹叢~採藥台地",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.採藥台地"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.採藥台地",
+        "kind": "passage",
+        "linkId": "f1.採藥台地~中央空地",
+        "toCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.中央空地"
+      },
+      {
+        "fromCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.中央空地",
+        "guardedPreferenceKinds": [
+          "largeEnemy"
+        ],
+        "kind": "redDoor",
+        "linkId": "f1.中央空地~東側棧道",
+        "toCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.東側棧道"
+      },
+      {
+        "fromCell": {
+          "col": 8,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.東側棧道",
+        "kind": "passage",
+        "linkId": "f1.東側棧道~崩裂棧板",
+        "toCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.崩裂棧板"
+      },
+      {
+        "fromCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.崩裂棧板",
+        "kind": "passage",
+        "linkId": "f1.崩裂棧板~北側藥棚",
+        "toCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.北側藥棚"
+      },
+      {
+        "fromCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 1
+        },
+        "fromRoomId": "f1.北側藥棚",
+        "kind": "passage",
+        "linkId": "f1.北側藥棚~北口",
+        "toCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 1
+        },
+        "toRoomId": "f1.北口"
+      }
+    ],
+    "packId": "pack:yunhua",
+    "refreshOffsetDays": 3,
+    "rooms": [
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 8
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.入口竹徑"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 8
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 8
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 7
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 7
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.南側山徑"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 7
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.瘴氣裂縫"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.西側竹叢"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.採藥台地"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.中央空地"
+      },
+      {
+        "cells": [
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 8,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 8,
+            "floor": 1,
+            "row": 2
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.東側棧道"
+      },
+      {
+        "cells": [
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 2
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.崩裂棧板"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 1
+          },
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 1
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.北側藥棚"
+      },
+      {
+        "cells": [
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 1
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.北口"
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-template.yunhua.mist-bamboo-valley",
+    "spawnRuleId": "map-spawn-rule.yunhua.mist-bamboo-valley",
+    "templateKind": "outdoor"
+  },
+  {
+    "enabled": true,
+    "entranceRoomIds": [
+      "f1.entry"
+    ],
+    "exitRoomIds": [
+      "f1.exit"
+    ],
+    "explorationExperienceRuleId": "experience-award-rule.core.map-exploration-tier-ii",
+    "fixedTraps": [],
+    "floors": [
+      {
+        "cols": 5,
+        "floor": 1,
+        "rows": 5
+      },
+      {
+        "cols": 5,
+        "floor": -1,
+        "rows": 5
+      }
+    ],
+    "gatheringNodes": [],
+    "id": "map-template.yunhua.hanging-spring-grotto",
+    "kind": "map-template",
+    "links": [
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 1
+        },
+        "fromRoomId": "f1.entry",
+        "kind": "passage",
+        "linkId": "f1.entry~foreHall",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 1
+        },
+        "toRoomId": "f1.foreHall"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.foreHall",
+        "kind": "passage",
+        "linkId": "f1.foreHall~westHold",
+        "toCell": {
+          "col": 1,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.westHold"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.foreHall",
+        "kind": "passage",
+        "linkId": "f1.foreHall~surfaceVein",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.surfaceVein"
+      },
+      {
+        "fromCell": {
+          "col": 1,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.westHold",
+        "kind": "passage",
+        "linkId": "f1.westHold~collapsedDeck",
+        "toCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 3
+        },
+        "toRoomId": "f1.collapsedDeck"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.collapsedDeck",
+        "kind": "passage",
+        "linkId": "f1.collapsedDeck~stairDown",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 3
+        },
+        "toRoomId": "f1.stairDown"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.stairDown",
+        "kind": "passage",
+        "linkId": "f1.stairDown~eastGangway",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 3
+        },
+        "toRoomId": "f1.eastGangway"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.eastGangway",
+        "guardedPreferenceKinds": [
+          "chest"
+        ],
+        "kind": "redDoor",
+        "linkId": "f1.eastGangway~holdChamber",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.holdChamber"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.holdChamber",
+        "kind": "passage",
+        "linkId": "f1.holdChamber~westStep",
+        "toCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.westStep"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.holdChamber",
+        "kind": "passage",
+        "linkId": "f1.holdChamber~southWalk",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 5
+        },
+        "toRoomId": "f1.southWalk"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 5
+        },
+        "fromRoomId": "f1.southWalk",
+        "kind": "passage",
+        "linkId": "f1.southWalk~exit",
+        "toCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 5
+        },
+        "toRoomId": "f1.exit"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 2
+        },
+        "fromRoomId": "b1.upperCave",
+        "kind": "passage",
+        "linkId": "b1.upperCave~deepVein",
+        "toCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.deepVein"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 2
+        },
+        "fromRoomId": "b1.upperCave",
+        "kind": "passage",
+        "linkId": "b1.upperCave~stairUp",
+        "toCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.stairUp"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 2
+        },
+        "fromRoomId": "b1.upperCave",
+        "kind": "passage",
+        "linkId": "b1.upperCave~eastDrift",
+        "toCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.eastDrift"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 3
+        },
+        "fromRoomId": "b1.stairUp",
+        "kind": "passage",
+        "linkId": "b1.stairUp~eastDrift",
+        "toCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.eastDrift"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 3
+        },
+        "fromRoomId": "b1.deepVein",
+        "kind": "passage",
+        "linkId": "b1.deepVein~westDrift",
+        "toCell": {
+          "col": 1,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.westDrift"
+      },
+      {
+        "fromCell": {
+          "col": 1,
+          "floor": -1,
+          "row": 3
+        },
+        "fromRoomId": "b1.westDrift",
+        "kind": "passage",
+        "linkId": "b1.westDrift~beastDen",
+        "toCell": {
+          "col": 1,
+          "floor": -1,
+          "row": 4
+        },
+        "toRoomId": "b1.beastDen"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 4
+        },
+        "fromRoomId": "b1.beastDen",
+        "guardedPreferenceKinds": [
+          "largeEnemy",
+          "event"
+        ],
+        "kind": "redDoor",
+        "linkId": "b1.beastDen~sunkenCargo",
+        "toCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 4
+        },
+        "toRoomId": "b1.sunkenCargo"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 3
+        },
+        "fromRoomId": "b1.eastDrift",
+        "kind": "passage",
+        "linkId": "b1.eastDrift~sunkenCargo",
+        "toCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 4
+        },
+        "toRoomId": "b1.sunkenCargo"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.stairDown",
+        "kind": "passage",
+        "linkId": "f1.stairDown~stairUp",
+        "toCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.stairUp"
+      }
+    ],
+    "packId": "pack:yunhua",
+    "refreshOffsetDays": 4,
+    "rooms": [
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 1
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.entry"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 1
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 2
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.foreHall"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.westHold"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 2
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.surfaceVein"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.collapsedDeck"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.stairDown"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 4
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.eastGangway"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 4
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.holdChamber"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 4
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.westStep"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.southWalk"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.exit"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 1
+          },
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 2
+          },
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 2
+          },
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 2
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.upperCave"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": -1,
+            "row": 3
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.westDrift"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 3
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.deepVein"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 3
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.stairUp"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 3
+          },
+          {
+            "col": 5,
+            "floor": -1,
+            "row": 3
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.eastDrift"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": -1,
+            "row": 4
+          },
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 4
+          },
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 5
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.beastDen"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 4
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.sunkenCargo"
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-template.yunhua.hanging-spring-grotto",
+    "spawnRuleId": "map-spawn-rule.yunhua.hanging-spring-grotto",
+    "templateKind": "interior"
+  },
+  {
+    "enabled": true,
+    "entranceRoomIds": [
+      "f1.entry"
+    ],
+    "exitRoomIds": [
+      "f1.exit"
+    ],
+    "explorationExperienceRuleId": "experience-award-rule.core.map-exploration-tier-i",
+    "fixedTraps": [],
+    "floors": [
+      {
+        "cols": 8,
+        "floor": 1,
+        "rows": 8
+      }
+    ],
+    "gatheringNodes": [],
+    "id": "map-template.yunhua.tidal-reed-isle",
+    "kind": "map-template",
+    "links": [
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 1
+        },
+        "fromRoomId": "f1.entry",
+        "kind": "passage",
+        "linkId": "f1.entry~northRidge",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 1
+        },
+        "toRoomId": "f1.northRidge"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.northRidge",
+        "kind": "passage",
+        "linkId": "f1.northRidge~westSlope",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.westSlope"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.northRidge",
+        "kind": "passage",
+        "linkId": "f1.northRidge~northSpring",
+        "toCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.northSpring"
+      },
+      {
+        "fromCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.northSpring",
+        "kind": "passage",
+        "linkId": "f1.northSpring~eastCliff",
+        "toCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 3
+        },
+        "toRoomId": "f1.eastCliff"
+      },
+      {
+        "fromCell": {
+          "col": 1,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.westSlope",
+        "kind": "passage",
+        "linkId": "f1.westSlope~westQuarry",
+        "toCell": {
+          "col": 1,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.westQuarry"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.westSlope",
+        "guardedPreferenceKinds": [
+          "chest"
+        ],
+        "kind": "redDoor",
+        "linkId": "f1.westSlope~centralField",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.centralField"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.westQuarry",
+        "kind": "passage",
+        "linkId": "f1.westQuarry~centralField",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.centralField"
+      },
+      {
+        "fromCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.eastCliff",
+        "kind": "passage",
+        "linkId": "f1.eastCliff~beastRange",
+        "toCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.beastRange"
+      },
+      {
+        "fromCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.beastRange",
+        "kind": "passage",
+        "linkId": "f1.beastRange~centralField",
+        "toCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.centralField"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 5
+        },
+        "fromRoomId": "f1.centralField",
+        "kind": "passage",
+        "linkId": "f1.centralField~iceCrack",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 5
+        },
+        "toRoomId": "f1.iceCrack"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 5
+        },
+        "fromRoomId": "f1.centralField",
+        "kind": "passage",
+        "linkId": "f1.centralField~riteClearing",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 6
+        },
+        "toRoomId": "f1.riteClearing"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 5
+        },
+        "fromRoomId": "f1.iceCrack",
+        "kind": "passage",
+        "linkId": "f1.iceCrack~westVale",
+        "toCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 5
+        },
+        "toRoomId": "f1.westVale"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 6
+        },
+        "fromRoomId": "f1.westVale",
+        "kind": "passage",
+        "linkId": "f1.westVale~southTrailWest",
+        "toCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 7
+        },
+        "toRoomId": "f1.southTrailWest"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 6
+        },
+        "fromRoomId": "f1.riteClearing",
+        "kind": "passage",
+        "linkId": "f1.riteClearing~eastTrail",
+        "toCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 6
+        },
+        "toRoomId": "f1.eastTrail"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.southTrailWest",
+        "kind": "passage",
+        "linkId": "f1.southTrailWest~cache",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 7
+        },
+        "toRoomId": "f1.cache"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.cache",
+        "kind": "passage",
+        "linkId": "f1.cache~southTrailEast",
+        "toCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 7
+        },
+        "toRoomId": "f1.southTrailEast"
+      },
+      {
+        "fromCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.southTrailEast",
+        "kind": "passage",
+        "linkId": "f1.southTrailEast~eastTrail",
+        "toCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 7
+        },
+        "toRoomId": "f1.eastTrail"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.cache",
+        "guardedPreferenceKinds": [
+          "chest"
+        ],
+        "kind": "redDoor",
+        "linkId": "f1.cache~exitPass",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 8
+        },
+        "toRoomId": "f1.exitPass"
+      },
+      {
+        "fromCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.eastTrail",
+        "kind": "passage",
+        "linkId": "f1.eastTrail~exit",
+        "toCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 8
+        },
+        "toRoomId": "f1.exit"
+      },
+      {
+        "fromCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 8
+        },
+        "fromRoomId": "f1.exitPass",
+        "kind": "passage",
+        "linkId": "f1.exitPass~exit",
+        "toCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 8
+        },
+        "toRoomId": "f1.exit"
+      }
+    ],
+    "packId": "pack:yunhua",
+    "refreshOffsetDays": 5,
+    "rooms": [
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 1
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.entry"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 1
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 1
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 2
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.northRidge"
+      },
+      {
+        "cells": [
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 2
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.northSpring"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.westSlope"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 4
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.westQuarry"
+      },
+      {
+        "cells": [
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 8,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.eastCliff"
+      },
+      {
+        "cells": [
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 8,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 8,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.beastRange"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.centralField"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.iceCrack"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 6
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.westVale"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 6
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.riteClearing"
+      },
+      {
+        "cells": [
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 7
+          },
+          {
+            "col": 8,
+            "floor": 1,
+            "row": 7
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.eastTrail"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 7
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.cache"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 7
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 7
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.southTrailWest"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 7
+          },
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 7
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.southTrailEast"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 8
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 8
+          },
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 8
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.exitPass"
+      },
+      {
+        "cells": [
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 8
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.exit"
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-template.yunhua.tidal-reed-isle",
+    "spawnRuleId": "map-spawn-rule.yunhua.tidal-reed-isle",
+    "templateKind": "outdoor"
+  },
+  {
+    "enabled": true,
+    "entranceRoomIds": [
+      "f1.entry"
+    ],
+    "exitRoomIds": [
+      "f1.exit"
+    ],
+    "explorationExperienceRuleId": "experience-award-rule.core.map-exploration-tier-ii",
+    "fixedTraps": [],
+    "floors": [
+      {
+        "cols": 5,
+        "floor": 1,
+        "rows": 5
+      },
+      {
+        "cols": 5,
+        "floor": -1,
+        "rows": 5
+      }
+    ],
+    "gatheringNodes": [],
+    "id": "map-template.yunhua.salt-well-cellar",
+    "kind": "map-template",
+    "links": [
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 1
+        },
+        "fromRoomId": "f1.entry",
+        "kind": "passage",
+        "linkId": "f1.entry~foreHall",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 1
+        },
+        "toRoomId": "f1.foreHall"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.foreHall",
+        "kind": "passage",
+        "linkId": "f1.foreHall~westHold",
+        "toCell": {
+          "col": 1,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.westHold"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.foreHall",
+        "kind": "passage",
+        "linkId": "f1.foreHall~surfaceVein",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.surfaceVein"
+      },
+      {
+        "fromCell": {
+          "col": 1,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.westHold",
+        "kind": "passage",
+        "linkId": "f1.westHold~collapsedDeck",
+        "toCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 3
+        },
+        "toRoomId": "f1.collapsedDeck"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.collapsedDeck",
+        "kind": "passage",
+        "linkId": "f1.collapsedDeck~stairDown",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 3
+        },
+        "toRoomId": "f1.stairDown"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.stairDown",
+        "kind": "passage",
+        "linkId": "f1.stairDown~eastGangway",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 3
+        },
+        "toRoomId": "f1.eastGangway"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.eastGangway",
+        "guardedPreferenceKinds": [
+          "chest"
+        ],
+        "kind": "redDoor",
+        "linkId": "f1.eastGangway~holdChamber",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.holdChamber"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.holdChamber",
+        "kind": "passage",
+        "linkId": "f1.holdChamber~westStep",
+        "toCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.westStep"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.holdChamber",
+        "kind": "passage",
+        "linkId": "f1.holdChamber~southWalk",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 5
+        },
+        "toRoomId": "f1.southWalk"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 5
+        },
+        "fromRoomId": "f1.southWalk",
+        "kind": "passage",
+        "linkId": "f1.southWalk~exit",
+        "toCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 5
+        },
+        "toRoomId": "f1.exit"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 2
+        },
+        "fromRoomId": "b1.upperCave",
+        "kind": "passage",
+        "linkId": "b1.upperCave~deepVein",
+        "toCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.deepVein"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 2
+        },
+        "fromRoomId": "b1.upperCave",
+        "kind": "passage",
+        "linkId": "b1.upperCave~stairUp",
+        "toCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.stairUp"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 2
+        },
+        "fromRoomId": "b1.upperCave",
+        "kind": "passage",
+        "linkId": "b1.upperCave~eastDrift",
+        "toCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.eastDrift"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 3
+        },
+        "fromRoomId": "b1.stairUp",
+        "kind": "passage",
+        "linkId": "b1.stairUp~eastDrift",
+        "toCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.eastDrift"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 3
+        },
+        "fromRoomId": "b1.deepVein",
+        "kind": "passage",
+        "linkId": "b1.deepVein~westDrift",
+        "toCell": {
+          "col": 1,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.westDrift"
+      },
+      {
+        "fromCell": {
+          "col": 1,
+          "floor": -1,
+          "row": 3
+        },
+        "fromRoomId": "b1.westDrift",
+        "kind": "passage",
+        "linkId": "b1.westDrift~beastDen",
+        "toCell": {
+          "col": 1,
+          "floor": -1,
+          "row": 4
+        },
+        "toRoomId": "b1.beastDen"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 4
+        },
+        "fromRoomId": "b1.beastDen",
+        "guardedPreferenceKinds": [
+          "largeEnemy",
+          "event"
+        ],
+        "kind": "redDoor",
+        "linkId": "b1.beastDen~sunkenCargo",
+        "toCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 4
+        },
+        "toRoomId": "b1.sunkenCargo"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 3
+        },
+        "fromRoomId": "b1.eastDrift",
+        "kind": "passage",
+        "linkId": "b1.eastDrift~sunkenCargo",
+        "toCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 4
+        },
+        "toRoomId": "b1.sunkenCargo"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.stairDown",
+        "kind": "passage",
+        "linkId": "f1.stairDown~stairUp",
+        "toCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.stairUp"
+      }
+    ],
+    "packId": "pack:yunhua",
+    "refreshOffsetDays": 6,
+    "rooms": [
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 1
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.entry"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 1
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 2
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.foreHall"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.westHold"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 2
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.surfaceVein"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.collapsedDeck"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.stairDown"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 4
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.eastGangway"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 4
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.holdChamber"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 4
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.westStep"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.southWalk"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.exit"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 1
+          },
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 2
+          },
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 2
+          },
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 2
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.upperCave"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": -1,
+            "row": 3
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.westDrift"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 3
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.deepVein"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 3
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.stairUp"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 3
+          },
+          {
+            "col": 5,
+            "floor": -1,
+            "row": 3
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.eastDrift"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": -1,
+            "row": 4
+          },
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 4
+          },
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 5
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.beastDen"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 4
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.sunkenCargo"
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-template.yunhua.salt-well-cellar",
+    "spawnRuleId": "map-spawn-rule.yunhua.salt-well-cellar",
+    "templateKind": "interior"
+  },
+  {
+    "enabled": true,
+    "entranceRoomIds": [
+      "f1.entry"
+    ],
+    "exitRoomIds": [
+      "f1.exit"
+    ],
+    "explorationExperienceRuleId": "experience-award-rule.core.map-exploration-tier-i",
+    "fixedTraps": [],
+    "floors": [
+      {
+        "cols": 8,
+        "floor": 1,
+        "rows": 8
+      }
+    ],
+    "gatheringNodes": [],
+    "id": "map-template.yunhua.cinnabar-ridge",
+    "kind": "map-template",
+    "links": [
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 1
+        },
+        "fromRoomId": "f1.entry",
+        "kind": "passage",
+        "linkId": "f1.entry~northRidge",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 1
+        },
+        "toRoomId": "f1.northRidge"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.northRidge",
+        "kind": "passage",
+        "linkId": "f1.northRidge~westSlope",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.westSlope"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.northRidge",
+        "kind": "passage",
+        "linkId": "f1.northRidge~northSpring",
+        "toCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.northSpring"
+      },
+      {
+        "fromCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.northSpring",
+        "kind": "passage",
+        "linkId": "f1.northSpring~eastCliff",
+        "toCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 3
+        },
+        "toRoomId": "f1.eastCliff"
+      },
+      {
+        "fromCell": {
+          "col": 1,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.westSlope",
+        "kind": "passage",
+        "linkId": "f1.westSlope~westQuarry",
+        "toCell": {
+          "col": 1,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.westQuarry"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.westSlope",
+        "guardedPreferenceKinds": [
+          "chest"
+        ],
+        "kind": "redDoor",
+        "linkId": "f1.westSlope~centralField",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.centralField"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.westQuarry",
+        "kind": "passage",
+        "linkId": "f1.westQuarry~centralField",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.centralField"
+      },
+      {
+        "fromCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.eastCliff",
+        "kind": "passage",
+        "linkId": "f1.eastCliff~beastRange",
+        "toCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.beastRange"
+      },
+      {
+        "fromCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.beastRange",
+        "kind": "passage",
+        "linkId": "f1.beastRange~centralField",
+        "toCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.centralField"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 5
+        },
+        "fromRoomId": "f1.centralField",
+        "kind": "passage",
+        "linkId": "f1.centralField~iceCrack",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 5
+        },
+        "toRoomId": "f1.iceCrack"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 5
+        },
+        "fromRoomId": "f1.centralField",
+        "kind": "passage",
+        "linkId": "f1.centralField~riteClearing",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 6
+        },
+        "toRoomId": "f1.riteClearing"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 5
+        },
+        "fromRoomId": "f1.iceCrack",
+        "kind": "passage",
+        "linkId": "f1.iceCrack~westVale",
+        "toCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 5
+        },
+        "toRoomId": "f1.westVale"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 6
+        },
+        "fromRoomId": "f1.westVale",
+        "kind": "passage",
+        "linkId": "f1.westVale~southTrailWest",
+        "toCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 7
+        },
+        "toRoomId": "f1.southTrailWest"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 6
+        },
+        "fromRoomId": "f1.riteClearing",
+        "kind": "passage",
+        "linkId": "f1.riteClearing~eastTrail",
+        "toCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 6
+        },
+        "toRoomId": "f1.eastTrail"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.southTrailWest",
+        "kind": "passage",
+        "linkId": "f1.southTrailWest~cache",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 7
+        },
+        "toRoomId": "f1.cache"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.cache",
+        "kind": "passage",
+        "linkId": "f1.cache~southTrailEast",
+        "toCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 7
+        },
+        "toRoomId": "f1.southTrailEast"
+      },
+      {
+        "fromCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.southTrailEast",
+        "kind": "passage",
+        "linkId": "f1.southTrailEast~eastTrail",
+        "toCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 7
+        },
+        "toRoomId": "f1.eastTrail"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.cache",
+        "guardedPreferenceKinds": [
+          "chest"
+        ],
+        "kind": "redDoor",
+        "linkId": "f1.cache~exitPass",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 8
+        },
+        "toRoomId": "f1.exitPass"
+      },
+      {
+        "fromCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 7
+        },
+        "fromRoomId": "f1.eastTrail",
+        "kind": "passage",
+        "linkId": "f1.eastTrail~exit",
+        "toCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 8
+        },
+        "toRoomId": "f1.exit"
+      },
+      {
+        "fromCell": {
+          "col": 6,
+          "floor": 1,
+          "row": 8
+        },
+        "fromRoomId": "f1.exitPass",
+        "kind": "passage",
+        "linkId": "f1.exitPass~exit",
+        "toCell": {
+          "col": 7,
+          "floor": 1,
+          "row": 8
+        },
+        "toRoomId": "f1.exit"
+      }
+    ],
+    "packId": "pack:yunhua",
+    "refreshOffsetDays": 7,
+    "rooms": [
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 1
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.entry"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 1
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 1
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 2
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.northRidge"
+      },
+      {
+        "cells": [
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 2
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.northSpring"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.westSlope"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 4
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.westQuarry"
+      },
+      {
+        "cells": [
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 8,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.eastCliff"
+      },
+      {
+        "cells": [
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 8,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 8,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.beastRange"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.centralField"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.iceCrack"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 6
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.westVale"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 6
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.riteClearing"
+      },
+      {
+        "cells": [
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 6
+          },
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 7
+          },
+          {
+            "col": 8,
+            "floor": 1,
+            "row": 7
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.eastTrail"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 7
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.cache"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 7
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 7
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.southTrailWest"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 7
+          },
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 7
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.southTrailEast"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 8
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 8
+          },
+          {
+            "col": 6,
+            "floor": 1,
+            "row": 8
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.exitPass"
+      },
+      {
+        "cells": [
+          {
+            "col": 7,
+            "floor": 1,
+            "row": 8
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.exit"
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-template.yunhua.cinnabar-ridge",
+    "spawnRuleId": "map-spawn-rule.yunhua.cinnabar-ridge",
+    "templateKind": "outdoor"
+  },
+  {
+    "enabled": true,
+    "entranceRoomIds": [
+      "f1.entry"
+    ],
+    "exitRoomIds": [
+      "f1.exit"
+    ],
+    "explorationExperienceRuleId": "experience-award-rule.core.map-exploration-tier-ii",
+    "fixedTraps": [],
+    "floors": [
+      {
+        "cols": 5,
+        "floor": 1,
+        "rows": 5
+      },
+      {
+        "cols": 5,
+        "floor": -1,
+        "rows": 5
+      }
+    ],
+    "gatheringNodes": [],
+    "id": "map-template.yunhua.old-kiln-flue",
+    "kind": "map-template",
+    "links": [
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 1
+        },
+        "fromRoomId": "f1.entry",
+        "kind": "passage",
+        "linkId": "f1.entry~foreHall",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 1
+        },
+        "toRoomId": "f1.foreHall"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.foreHall",
+        "kind": "passage",
+        "linkId": "f1.foreHall~westHold",
+        "toCell": {
+          "col": 1,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.westHold"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 2
+        },
+        "fromRoomId": "f1.foreHall",
+        "kind": "passage",
+        "linkId": "f1.foreHall~surfaceVein",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 2
+        },
+        "toRoomId": "f1.surfaceVein"
+      },
+      {
+        "fromCell": {
+          "col": 1,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.westHold",
+        "kind": "passage",
+        "linkId": "f1.westHold~collapsedDeck",
+        "toCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 3
+        },
+        "toRoomId": "f1.collapsedDeck"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.collapsedDeck",
+        "kind": "passage",
+        "linkId": "f1.collapsedDeck~stairDown",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 3
+        },
+        "toRoomId": "f1.stairDown"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.stairDown",
+        "kind": "passage",
+        "linkId": "f1.stairDown~eastGangway",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 3
+        },
+        "toRoomId": "f1.eastGangway"
+      },
+      {
+        "fromCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.eastGangway",
+        "guardedPreferenceKinds": [
+          "chest"
+        ],
+        "kind": "redDoor",
+        "linkId": "f1.eastGangway~holdChamber",
+        "toCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.holdChamber"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.holdChamber",
+        "kind": "passage",
+        "linkId": "f1.holdChamber~westStep",
+        "toCell": {
+          "col": 2,
+          "floor": 1,
+          "row": 4
+        },
+        "toRoomId": "f1.westStep"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 4
+        },
+        "fromRoomId": "f1.holdChamber",
+        "kind": "passage",
+        "linkId": "f1.holdChamber~southWalk",
+        "toCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 5
+        },
+        "toRoomId": "f1.southWalk"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": 1,
+          "row": 5
+        },
+        "fromRoomId": "f1.southWalk",
+        "kind": "passage",
+        "linkId": "f1.southWalk~exit",
+        "toCell": {
+          "col": 5,
+          "floor": 1,
+          "row": 5
+        },
+        "toRoomId": "f1.exit"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 2
+        },
+        "fromRoomId": "b1.upperCave",
+        "kind": "passage",
+        "linkId": "b1.upperCave~deepVein",
+        "toCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.deepVein"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 2
+        },
+        "fromRoomId": "b1.upperCave",
+        "kind": "passage",
+        "linkId": "b1.upperCave~stairUp",
+        "toCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.stairUp"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 2
+        },
+        "fromRoomId": "b1.upperCave",
+        "kind": "passage",
+        "linkId": "b1.upperCave~eastDrift",
+        "toCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.eastDrift"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 3
+        },
+        "fromRoomId": "b1.stairUp",
+        "kind": "passage",
+        "linkId": "b1.stairUp~eastDrift",
+        "toCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.eastDrift"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 3
+        },
+        "fromRoomId": "b1.deepVein",
+        "kind": "passage",
+        "linkId": "b1.deepVein~westDrift",
+        "toCell": {
+          "col": 1,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.westDrift"
+      },
+      {
+        "fromCell": {
+          "col": 1,
+          "floor": -1,
+          "row": 3
+        },
+        "fromRoomId": "b1.westDrift",
+        "kind": "passage",
+        "linkId": "b1.westDrift~beastDen",
+        "toCell": {
+          "col": 1,
+          "floor": -1,
+          "row": 4
+        },
+        "toRoomId": "b1.beastDen"
+      },
+      {
+        "fromCell": {
+          "col": 2,
+          "floor": -1,
+          "row": 4
+        },
+        "fromRoomId": "b1.beastDen",
+        "guardedPreferenceKinds": [
+          "largeEnemy",
+          "event"
+        ],
+        "kind": "redDoor",
+        "linkId": "b1.beastDen~sunkenCargo",
+        "toCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 4
+        },
+        "toRoomId": "b1.sunkenCargo"
+      },
+      {
+        "fromCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 3
+        },
+        "fromRoomId": "b1.eastDrift",
+        "kind": "passage",
+        "linkId": "b1.eastDrift~sunkenCargo",
+        "toCell": {
+          "col": 4,
+          "floor": -1,
+          "row": 4
+        },
+        "toRoomId": "b1.sunkenCargo"
+      },
+      {
+        "fromCell": {
+          "col": 3,
+          "floor": 1,
+          "row": 3
+        },
+        "fromRoomId": "f1.stairDown",
+        "kind": "passage",
+        "linkId": "f1.stairDown~stairUp",
+        "toCell": {
+          "col": 3,
+          "floor": -1,
+          "row": 3
+        },
+        "toRoomId": "b1.stairUp"
+      }
+    ],
+    "packId": "pack:yunhua",
+    "refreshOffsetDays": 8,
+    "rooms": [
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 1
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.entry"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 1
+          },
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 2
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.foreHall"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 2
+          },
+          {
+            "col": 1,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.westHold"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 2
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.surfaceVein"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.collapsedDeck"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 3
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.stairDown"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 3
+          },
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 4
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.eastGangway"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 4
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.holdChamber"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": 1,
+            "row": 4
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.westStep"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": 1,
+            "row": 5
+          },
+          {
+            "col": 4,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.southWalk"
+      },
+      {
+        "cells": [
+          {
+            "col": 5,
+            "floor": 1,
+            "row": 5
+          }
+        ],
+        "floor": 1,
+        "roomId": "f1.exit"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 1
+          },
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 2
+          },
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 2
+          },
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 2
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.upperCave"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": -1,
+            "row": 3
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.westDrift"
+      },
+      {
+        "cells": [
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 3
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.deepVein"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 3
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.stairUp"
+      },
+      {
+        "cells": [
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 3
+          },
+          {
+            "col": 5,
+            "floor": -1,
+            "row": 3
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.eastDrift"
+      },
+      {
+        "cells": [
+          {
+            "col": 1,
+            "floor": -1,
+            "row": 4
+          },
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 4
+          },
+          {
+            "col": 2,
+            "floor": -1,
+            "row": 5
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.beastDen"
+      },
+      {
+        "cells": [
+          {
+            "col": 3,
+            "floor": -1,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "floor": -1,
+            "row": 4
+          }
+        ],
+        "floor": -1,
+        "roomId": "b1.sunkenCargo"
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-template.yunhua.old-kiln-flue",
+    "spawnRuleId": "map-spawn-rule.yunhua.old-kiln-flue",
+    "templateKind": "interior"
+  },
+  {
+    "chestPoolId": "chest-pool.yunhua.old-canal-sunken-store",
+    "enabled": true,
+    "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
+    "id": "map-spawn-rule.yunhua.old-canal-sunken-store",
+    "kind": "map-spawn-rule",
+    "localCultureContentRuleId": "culture-content-rule.yunhua.nonhuman",
+    "mapEventPoolId": "map-event-pool.yunhua.old-canal-sunken-store",
+    "npcSequenceRuleId": "npc-sequence-rule.core.shared",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-spawn-rule.yunhua.old-canal-sunken-store",
+    "spawnBudgets": [
+      {
+        "contentKind": "monsterGroup",
+        "maxCount": 3,
+        "minCount": 3
+      }
+    ]
+  },
+  {
+    "chestPoolId": "chest-pool.yunhua.calendar-court-ruin",
+    "enabled": true,
+    "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
+    "id": "map-spawn-rule.yunhua.calendar-court-ruin",
+    "kind": "map-spawn-rule",
+    "localCultureContentRuleId": "culture-content-rule.yunhua.nonhuman",
+    "mapEventPoolId": "map-event-pool.yunhua.calendar-court-ruin",
+    "npcSequenceRuleId": "npc-sequence-rule.core.shared",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-spawn-rule.yunhua.calendar-court-ruin",
+    "spawnBudgets": []
+  },
+  {
+    "chestPoolId": "chest-pool.yunhua.seal-tower",
+    "enabled": true,
+    "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
+    "id": "map-spawn-rule.yunhua.seal-tower",
+    "kind": "map-spawn-rule",
+    "localCultureContentRuleId": "culture-content-rule.yunhua.nonhuman",
+    "mapEventPoolId": "map-event-pool.yunhua.seal-tower",
+    "npcSequenceRuleId": "npc-sequence-rule.core.shared",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-spawn-rule.yunhua.seal-tower",
+    "spawnBudgets": [
+      {
+        "contentKind": "monsterGroup",
+        "maxCount": 5,
+        "minCount": 5
+      },
+      {
+        "contentKind": "boss",
+        "maxCount": 1,
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "chestPoolId": "chest-pool.yunhua.mist-bamboo-valley",
+    "enabled": true,
+    "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
+    "id": "map-spawn-rule.yunhua.mist-bamboo-valley",
+    "kind": "map-spawn-rule",
+    "localCultureContentRuleId": "culture-content-rule.yunhua.nonhuman",
+    "mapEventPoolId": "map-event-pool.yunhua.mist-bamboo-valley",
+    "npcSequenceRuleId": "npc-sequence-rule.core.shared",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-spawn-rule.yunhua.mist-bamboo-valley",
+    "spawnBudgets": [
+      {
+        "contentKind": "monsterGroup",
+        "maxCount": 3,
+        "minCount": 3
+      },
+      {
+        "contentKind": "boss",
+        "maxCount": 1,
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "chestPoolId": "chest-pool.yunhua.hanging-spring-grotto",
+    "enabled": true,
+    "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
+    "id": "map-spawn-rule.yunhua.hanging-spring-grotto",
+    "kind": "map-spawn-rule",
+    "localCultureContentRuleId": "culture-content-rule.yunhua.nonhuman",
+    "mapEventPoolId": "map-event-pool.yunhua.hanging-spring-grotto",
+    "npcSequenceRuleId": "npc-sequence-rule.core.shared",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-spawn-rule.yunhua.hanging-spring-grotto",
+    "spawnBudgets": []
+  },
+  {
+    "chestPoolId": "chest-pool.yunhua.tidal-reed-isle",
+    "enabled": true,
+    "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
+    "id": "map-spawn-rule.yunhua.tidal-reed-isle",
+    "kind": "map-spawn-rule",
+    "localCultureContentRuleId": "culture-content-rule.yunhua.nonhuman",
+    "mapEventPoolId": "map-event-pool.yunhua.tidal-reed-isle",
+    "npcSequenceRuleId": "npc-sequence-rule.core.shared",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-spawn-rule.yunhua.tidal-reed-isle",
+    "spawnBudgets": []
+  },
+  {
+    "chestPoolId": "chest-pool.yunhua.salt-well-cellar",
+    "enabled": true,
+    "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
+    "id": "map-spawn-rule.yunhua.salt-well-cellar",
+    "kind": "map-spawn-rule",
+    "localCultureContentRuleId": "culture-content-rule.yunhua.nonhuman",
+    "mapEventPoolId": "map-event-pool.yunhua.salt-well-cellar",
+    "npcSequenceRuleId": "npc-sequence-rule.core.shared",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-spawn-rule.yunhua.salt-well-cellar",
+    "spawnBudgets": []
+  },
+  {
+    "chestPoolId": "chest-pool.yunhua.cinnabar-ridge",
+    "enabled": true,
+    "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
+    "id": "map-spawn-rule.yunhua.cinnabar-ridge",
+    "kind": "map-spawn-rule",
+    "localCultureContentRuleId": "culture-content-rule.yunhua.nonhuman",
+    "mapEventPoolId": "map-event-pool.yunhua.cinnabar-ridge",
+    "npcSequenceRuleId": "npc-sequence-rule.core.shared",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-spawn-rule.yunhua.cinnabar-ridge",
+    "spawnBudgets": []
+  },
+  {
+    "chestPoolId": "chest-pool.yunhua.old-kiln-flue",
+    "enabled": true,
+    "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
+    "id": "map-spawn-rule.yunhua.old-kiln-flue",
+    "kind": "map-spawn-rule",
+    "localCultureContentRuleId": "culture-content-rule.yunhua.nonhuman",
+    "mapEventPoolId": "map-event-pool.yunhua.old-kiln-flue",
+    "npcSequenceRuleId": "npc-sequence-rule.core.shared",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-spawn-rule.yunhua.old-kiln-flue",
+    "spawnBudgets": []
+  },
+  {
+    "contentKind": "monsterGroup",
+    "enabled": true,
+    "id": "map-content.yunhua.monster-group-common",
+    "kind": "map-content",
+    "npcPolicy": {
+      "eligible": true,
+      "pointCost": 1,
+      "resolverId": "npc-dungeon-target-resolver.core.combat-target"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-content.yunhua.monster-group-common"
+  },
+  {
+    "contentKind": "monsterGroup",
+    "enabled": true,
+    "id": "map-content.yunhua.monster-group-elite",
+    "kind": "map-content",
+    "npcPolicy": {
+      "eligible": true,
+      "pointCost": 2,
+      "resolverId": "npc-dungeon-target-resolver.core.combat-target"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-content.yunhua.monster-group-elite"
+  },
+  {
+    "contentKind": "boss",
+    "enabled": true,
+    "id": "map-content.yunhua.boss",
+    "kind": "map-content",
+    "npcPolicy": {
+      "eligible": true,
+      "pointCost": 4,
+      "resolverId": "npc-dungeon-target-resolver.core.combat-target"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-content.yunhua.boss"
+  },
+  {
+    "contentKind": "chest",
+    "enabled": true,
+    "id": "map-content.yunhua.chest",
+    "kind": "map-content",
+    "npcPolicy": {
+      "eligible": true,
+      "pointCost": 1,
+      "resolverId": "npc-dungeon-target-resolver.core.chest"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-content.yunhua.chest"
+  },
+  {
+    "contentKind": "mapEvent",
+    "enabled": true,
+    "id": "map-content.yunhua.map-event",
+    "kind": "map-content",
+    "npcPolicy": {
+      "eligible": true,
+      "pointCost": 1,
+      "resolverId": "npc-dungeon-target-resolver.core.map-event"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-content.yunhua.map-event"
+  }
+]

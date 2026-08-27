@@ -1,0 +1,57 @@
+{
+  "declaredKinds": [
+    "adventure-site",
+    "attack-mastery-award-rule",
+    "city",
+    "city-action-rule",
+    "city-node",
+    "combat-skill",
+    "combatConsumable",
+    "content-event",
+    "crafting-recipe",
+    "cuisine-recipe",
+    "culture",
+    "effect",
+    "encounter-group",
+    "equipment",
+    "escort-generation-rule",
+    "facility",
+    "generalItem",
+    "home-rule",
+    "home-upgrade",
+    "intel-rule",
+    "map-content",
+    "map-spawn-rule",
+    "map-template",
+    "material",
+    "material-affix",
+    "monster",
+    "nation",
+    "non-combat-use-rule",
+    "nonCombatConsumable",
+    "player-commerce-daily-limit",
+    "player-commerce-practice-rule",
+    "population-supply-rule",
+    "region",
+    "route",
+    "shop-rule",
+    "skill",
+    "support-mastery-award-rule",
+    "use-delay-rule"
+  ],
+  "packId": "pack:yunhua",
+  "requiredResolverIds": [],
+  "runtimeCompatibility": {
+    "minRuntimeVersion": "0.1.0"
+  },
+  "schemaVersion": 1,
+  "scope": {
+    "cultureIds": [
+      "culture.yunhua"
+    ],
+    "features": [
+      "culture-content"
+    ]
+  },
+  "version": "1.0.0"
+}

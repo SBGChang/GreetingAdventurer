@@ -1,0 +1,3607 @@
+[
+  {
+    "baseDelay": 34,
+    "enabled": true,
+    "id": "use-delay-rule.yunhua.gold-wound-powder",
+    "kind": "use-delay-rule",
+    "minimumDelay": 18,
+    "packId": "pack:yunhua",
+    "reductions": [
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.1
+      },
+      {
+        "primaryAttribute": "coordination",
+        "reductionPerPoint": 0.06
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#use-delay-rule.yunhua.gold-wound-powder"
+  },
+  {
+    "baseDelay": 30,
+    "enabled": true,
+    "id": "use-delay-rule.yunhua.clear-miasma-pill",
+    "kind": "use-delay-rule",
+    "minimumDelay": 16,
+    "packId": "pack:yunhua",
+    "reductions": [
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.1
+      },
+      {
+        "primaryAttribute": "coordination",
+        "reductionPerPoint": 0.06
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#use-delay-rule.yunhua.clear-miasma-pill"
+  },
+  {
+    "baseDelay": 38,
+    "enabled": true,
+    "id": "use-delay-rule.yunhua.sober-incense",
+    "kind": "use-delay-rule",
+    "minimumDelay": 20,
+    "packId": "pack:yunhua",
+    "reductions": [
+      {
+        "primaryAttribute": "intelligence",
+        "reductionPerPoint": 0.05
+      },
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.08
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#use-delay-rule.yunhua.sober-incense"
+  },
+  {
+    "baseDelay": 42,
+    "enabled": true,
+    "id": "use-delay-rule.yunhua.returning-origin-paste",
+    "kind": "use-delay-rule",
+    "minimumDelay": 24,
+    "packId": "pack:yunhua",
+    "reductions": [
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.08
+      },
+      {
+        "primaryAttribute": "coordination",
+        "reductionPerPoint": 0.05
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#use-delay-rule.yunhua.returning-origin-paste"
+  },
+  {
+    "baseDelay": 44,
+    "enabled": true,
+    "id": "use-delay-rule.yunhua.ward-incense-pill",
+    "kind": "use-delay-rule",
+    "minimumDelay": 26,
+    "packId": "pack:yunhua",
+    "reductions": [
+      {
+        "primaryAttribute": "intelligence",
+        "reductionPerPoint": 0.06
+      },
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.05
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#use-delay-rule.yunhua.ward-incense-pill"
+  },
+  {
+    "baseDelay": 48,
+    "enabled": true,
+    "id": "use-delay-rule.yunhua.five-herbs-decoction",
+    "kind": "use-delay-rule",
+    "minimumDelay": 28,
+    "packId": "pack:yunhua",
+    "reductions": [
+      {
+        "primaryAttribute": "intelligence",
+        "reductionPerPoint": 0.06
+      },
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.06
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#use-delay-rule.yunhua.five-herbs-decoction"
+  },
+  {
+    "baseDelay": 42,
+    "enabled": true,
+    "id": "use-delay-rule.yunhua.towerheart-elixir",
+    "kind": "use-delay-rule",
+    "minimumDelay": 24,
+    "packId": "pack:yunhua",
+    "reductions": [
+      {
+        "primaryAttribute": "intelligence",
+        "reductionPerPoint": 0.07
+      },
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.06
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#use-delay-rule.yunhua.towerheart-elixir"
+  },
+  {
+    "baseDelay": 52,
+    "enabled": true,
+    "id": "use-delay-rule.yunhua.returning-heaven-paste",
+    "kind": "use-delay-rule",
+    "minimumDelay": 30,
+    "packId": "pack:yunhua",
+    "reductions": [
+      {
+        "primaryAttribute": "intelligence",
+        "reductionPerPoint": 0.07
+      },
+      {
+        "primaryAttribute": "reaction",
+        "reductionPerPoint": 0.06
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#use-delay-rule.yunhua.returning-heaven-paste"
+  },
+  {
+    "allowedContextIds": [
+      "item-use-context.yunhua.dungeon-non-combat"
+    ],
+    "enabled": true,
+    "id": "non-combat-use-rule.yunhua.zero-time-dungeon-non-combat",
+    "kind": "non-combat-use-rule",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#non-combat-use-rule.yunhua.zero-time-dungeon-non-combat",
+    "timing": {
+      "kind": "zeroTime"
+    }
+  },
+  {
+    "combatUseDelayRuleId": "use-delay-rule.yunhua.gold-wound-powder",
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.gold-wound-powder.name"
+      }
+    },
+    "enabled": false,
+    "id": "item.yunhua.gold-wound-powder",
+    "intrinsicValue": {
+      "amount": 24,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.combat-consumable",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "combatConsumable",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.gold-wound-powder",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "combatUseDelayRuleId": "use-delay-rule.yunhua.clear-miasma-pill",
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.clear-miasma-pill.name"
+      }
+    },
+    "enabled": false,
+    "id": "item.yunhua.clear-miasma-pill",
+    "intrinsicValue": {
+      "amount": 28,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.combat-consumable",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "combatConsumable",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.clear-miasma-pill",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "combatUseDelayRuleId": "use-delay-rule.yunhua.sober-incense",
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.sober-incense.name"
+      }
+    },
+    "enabled": false,
+    "id": "item.yunhua.sober-incense",
+    "intrinsicValue": {
+      "amount": 36,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.combat-consumable",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "combatConsumable",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.sober-incense",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "combatUseDelayRuleId": "use-delay-rule.yunhua.returning-origin-paste",
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.returning-origin-paste.name"
+      }
+    },
+    "enabled": false,
+    "id": "item.yunhua.returning-origin-paste",
+    "intrinsicValue": {
+      "amount": 110,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.combat-consumable",
+      "item-tag.core.tier-ii"
+    ],
+    "kind": "combatConsumable",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.returning-origin-paste",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "combatUseDelayRuleId": "use-delay-rule.yunhua.ward-incense-pill",
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.ward-incense-pill.name"
+      }
+    },
+    "enabled": false,
+    "id": "item.yunhua.ward-incense-pill",
+    "intrinsicValue": {
+      "amount": 135,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.combat-consumable",
+      "item-tag.core.tier-ii"
+    ],
+    "kind": "combatConsumable",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.ward-incense-pill",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "combatUseDelayRuleId": "use-delay-rule.yunhua.five-herbs-decoction",
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.five-herbs-decoction.name"
+      }
+    },
+    "enabled": false,
+    "id": "item.yunhua.five-herbs-decoction",
+    "intrinsicValue": {
+      "amount": 420,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.combat-consumable",
+      "item-tag.core.tier-iii"
+    ],
+    "kind": "combatConsumable",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.five-herbs-decoction",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "combatUseDelayRuleId": "use-delay-rule.yunhua.towerheart-elixir",
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.towerheart-elixir.name"
+      }
+    },
+    "enabled": false,
+    "id": "item.yunhua.towerheart-elixir",
+    "intrinsicValue": {
+      "amount": 1320,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.combat-consumable",
+      "item-tag.core.tier-iv"
+    ],
+    "kind": "combatConsumable",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.towerheart-elixir",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "combatUseDelayRuleId": "use-delay-rule.yunhua.returning-heaven-paste",
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.returning-heaven-paste.name"
+      }
+    },
+    "enabled": false,
+    "id": "item.yunhua.returning-heaven-paste",
+    "intrinsicValue": {
+      "amount": 4600,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.combat-consumable",
+      "item-tag.core.tier-v"
+    ],
+    "kind": "combatConsumable",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.returning-heaven-paste",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.miasma-repelling-incense.name"
+      }
+    },
+    "enabled": false,
+    "id": "item.yunhua.miasma-repelling-incense",
+    "intrinsicValue": {
+      "amount": 22,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.non-combat-consumable",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "nonCombatConsumable",
+    "nonCombatUseRuleId": "non-combat-use-rule.yunhua.zero-time-dungeon-non-combat",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.miasma-repelling-incense",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.dry-salve.name"
+      }
+    },
+    "enabled": false,
+    "id": "item.yunhua.dry-salve",
+    "intrinsicValue": {
+      "amount": 20,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.non-combat-consumable",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "nonCombatConsumable",
+    "nonCombatUseRuleId": "non-combat-use-rule.yunhua.zero-time-dungeon-non-combat",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.dry-salve",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.red-ginseng-root.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.herbs-and-goods",
+    "id": "item.yunhua.red-ginseng-root",
+    "intrinsicValue": {
+      "amount": 28,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.red-ginseng-root",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.mist-bamboo-tea-brick.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.herbs-and-goods",
+    "id": "item.yunhua.mist-bamboo-tea-brick",
+    "intrinsicValue": {
+      "amount": 46,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.mist-bamboo-tea-brick",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 4,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.sinking-reed-bundle.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.herbs-and-goods",
+    "id": "item.yunhua.sinking-reed-bundle",
+    "intrinsicValue": {
+      "amount": 20,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.sinking-reed-bundle",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.medicine-bamboo-tube.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.herbs-and-goods",
+    "id": "item.yunhua.medicine-bamboo-tube",
+    "intrinsicValue": {
+      "amount": 34,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.medicine-bamboo-tube",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 2,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.canal-manifest.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.canal-cargo",
+    "id": "item.yunhua.canal-manifest",
+    "intrinsicValue": {
+      "amount": 38,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.canal-manifest",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.wax-sealed-casket.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.canal-cargo",
+    "id": "item.yunhua.wax-sealed-casket",
+    "intrinsicValue": {
+      "amount": 120,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.wax-sealed-casket",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 8,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.bronze-scale-weight.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.canal-cargo",
+    "id": "item.yunhua.bronze-scale-weight",
+    "intrinsicValue": {
+      "amount": 75,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.bronze-scale-weight",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 5,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.water-damaged-cloth-roll.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.canal-cargo",
+    "id": "item.yunhua.water-damaged-cloth-roll",
+    "intrinsicValue": {
+      "amount": 90,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.water-damaged-cloth-roll",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 6,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.attendant-figurine.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.ceramics-and-relics",
+    "id": "item.yunhua.attendant-figurine",
+    "intrinsicValue": {
+      "amount": 720,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-ii"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.attendant-figurine",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 12,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.jade-wine-pot.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.ceramics-and-relics",
+    "id": "item.yunhua.jade-wine-pot",
+    "intrinsicValue": {
+      "amount": 360,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-ii"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.jade-wine-pot",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 4,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.kiln-marked-shard.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.ceramics-and-relics",
+    "id": "item.yunhua.kiln-marked-shard",
+    "intrinsicValue": {
+      "amount": 85,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.kiln-marked-shard",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 2,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.bronze-lamp-stand.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.ceramics-and-relics",
+    "id": "item.yunhua.bronze-lamp-stand",
+    "intrinsicValue": {
+      "amount": 130,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.bronze-lamp-stand",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 7,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.lacquered-bookshelf.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.furniture",
+    "id": "item.yunhua.lacquered-bookshelf",
+    "intrinsicValue": {
+      "amount": 220,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.lacquered-bookshelf",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 18,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.herb-cabinet.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.furniture",
+    "id": "item.yunhua.herb-cabinet",
+    "intrinsicValue": {
+      "amount": 460,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-ii"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.herb-cabinet",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 22,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.woven-bamboo-screen.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.furniture",
+    "id": "item.yunhua.woven-bamboo-screen",
+    "intrinsicValue": {
+      "amount": 250,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.woven-bamboo-screen",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 12,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.low-table.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.furniture",
+    "id": "item.yunhua.low-table",
+    "intrinsicValue": {
+      "amount": 310,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.low-table",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 14,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.cloud-pattern-paper.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.paper-and-documents",
+    "id": "item.yunhua.cloud-pattern-paper",
+    "intrinsicValue": {
+      "amount": 18,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.cloud-pattern-paper",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.ancient-edict-fragment.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.paper-and-documents",
+    "id": "item.yunhua.ancient-edict-fragment",
+    "intrinsicValue": {
+      "amount": 150,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-ii"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.ancient-edict-fragment",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.seal-tower-transcript.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.paper-and-documents",
+    "id": "item.yunhua.seal-tower-transcript",
+    "intrinsicValue": {
+      "amount": 240,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-ii"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.seal-tower-transcript",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 2,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "item.yunhua.academy-ledger.name"
+      }
+    },
+    "enabled": true,
+    "generalItemCategoryId": "general-item-category.yunhua.paper-and-documents",
+    "id": "item.yunhua.academy-ledger",
+    "intrinsicValue": {
+      "amount": 180,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.general-item",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "generalItem",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#item.yunhua.academy-ledger",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 3,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.green-iron-ingot.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.green-iron-ingot",
+    "intrinsicValue": {
+      "amount": 34,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.straight-force",
+    "materialTagIds": [
+      "material-tag.yunhua.green-iron-ingot"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.green-iron-ingot",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 2,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.mist-bamboo.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.mist-bamboo",
+    "intrinsicValue": {
+      "amount": 26,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.quick-hand",
+    "materialTagIds": [
+      "material-tag.yunhua.mist-bamboo"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.mist-bamboo",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.bamboo-back-hide.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.bamboo-back-hide",
+    "intrinsicValue": {
+      "amount": 32,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.light-step",
+    "materialTagIds": [
+      "material-tag.yunhua.bamboo-back-hide"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.bamboo-back-hide",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 2,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.tide-shell.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.tide-shell",
+    "intrinsicValue": {
+      "amount": 30,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.steady-guard",
+    "materialTagIds": [
+      "material-tag.yunhua.tide-shell"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.tide-shell",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 2,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.seal-ceramic-core.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.seal-ceramic-core",
+    "intrinsicValue": {
+      "amount": 135,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-ii"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.unyielding",
+    "materialTagIds": [
+      "material-tag.yunhua.seal-ceramic-core"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.seal-ceramic-core",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 3,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.seal-stone.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.seal-stone",
+    "intrinsicValue": {
+      "amount": 90,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-ii"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.inscribed",
+    "materialTagIds": [
+      "material-tag.yunhua.seal-stone"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.seal-stone",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 3,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.official-cinnabar.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.official-cinnabar",
+    "intrinsicValue": {
+      "amount": 110,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-ii"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.warding",
+    "materialTagIds": [
+      "material-tag.yunhua.official-cinnabar"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.official-cinnabar",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.frayed-seal-ink.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.frayed-seal-ink",
+    "intrinsicValue": {
+      "amount": 96,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-ii"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.break-mark",
+    "materialTagIds": [
+      "material-tag.yunhua.frayed-seal-ink"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.frayed-seal-ink",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.bell-shell.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.bell-shell",
+    "intrinsicValue": {
+      "amount": 100,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-ii"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.clear-tone",
+    "materialTagIds": [
+      "material-tag.yunhua.bell-shell"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.bell-shell",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 2,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.mist-wing-powder.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.mist-wing-powder",
+    "intrinsicValue": {
+      "amount": 18,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "material",
+    "materialTagIds": [
+      "material-tag.yunhua.mist-wing-powder"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.mist-wing-powder",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.common-herb.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.common-herb",
+    "intrinsicValue": {
+      "amount": 12,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "material",
+    "materialTagIds": [
+      "material-tag.yunhua.common-herb"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.common-herb",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.red-ginseng-root.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.red-ginseng-root",
+    "intrinsicValue": {
+      "amount": 28,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.warming-meal",
+    "materialTagIds": [
+      "material-tag.yunhua.red-ginseng-root"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.red-ginseng-root",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.sinking-reed.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.sinking-reed",
+    "intrinsicValue": {
+      "amount": 20,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.cooling-meal",
+    "materialTagIds": [
+      "material-tag.yunhua.sinking-reed"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.sinking-reed",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.badger-meat.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.badger-meat",
+    "intrinsicValue": {
+      "amount": 24,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.warming-meal",
+    "materialTagIds": [
+      "material-tag.yunhua.badger-meat"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.badger-meat",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 2,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.grain.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.grain",
+    "intrinsicValue": {
+      "amount": 8,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.satiety",
+    "materialTagIds": [
+      "material-tag.yunhua.grain"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.grain",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.fish.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.fish",
+    "intrinsicValue": {
+      "amount": 16,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.freshness",
+    "materialTagIds": [
+      "material-tag.yunhua.fish"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.fish",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 2,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.aromatic-herb.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.aromatic-herb",
+    "intrinsicValue": {
+      "amount": 14,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-i"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.aroma",
+    "materialTagIds": [
+      "material-tag.yunhua.aromatic-herb"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.aromatic-herb",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.spring-ginger.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.spring-ginger",
+    "intrinsicValue": {
+      "amount": 74,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-ii"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.warding-meal",
+    "materialTagIds": [
+      "material-tag.yunhua.spring-ginger"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.spring-ginger",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 1,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "display": {
+      "nameRef": {
+        "key": "material.yunhua.badger-king-meat.name"
+      }
+    },
+    "enabled": true,
+    "id": "material.yunhua.badger-king-meat",
+    "intrinsicValue": {
+      "amount": 110,
+      "currencyId": "currency.core.standard"
+    },
+    "itemTagIds": [
+      "item-tag.core.material",
+      "item-tag.core.tier-ii"
+    ],
+    "kind": "material",
+    "materialAffixId": "material-affix.yunhua.vigor",
+    "materialTagIds": [
+      "material-tag.yunhua.badger-king-meat"
+    ],
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material.yunhua.badger-king-meat",
+    "stackPolicy": "stackable",
+    "tradePolicy": {
+      "tradable": true
+    },
+    "unitWeight": 4,
+    "unresolvedMapDisposition": "toCityPermanentStock"
+  },
+  {
+    "compatibleOutputKinds": [
+      "equipment"
+    ],
+    "enabled": true,
+    "id": "material-affix.yunhua.straight-force",
+    "kind": "material-affix",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material-affix.yunhua.straight-force",
+    "tier": 1
+  },
+  {
+    "compatibleOutputKinds": [
+      "equipment"
+    ],
+    "enabled": true,
+    "id": "material-affix.yunhua.quick-hand",
+    "kind": "material-affix",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material-affix.yunhua.quick-hand",
+    "tier": 1
+  },
+  {
+    "compatibleOutputKinds": [
+      "equipment"
+    ],
+    "enabled": true,
+    "id": "material-affix.yunhua.light-step",
+    "kind": "material-affix",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material-affix.yunhua.light-step",
+    "tier": 1
+  },
+  {
+    "compatibleOutputKinds": [
+      "equipment"
+    ],
+    "enabled": true,
+    "id": "material-affix.yunhua.steady-guard",
+    "kind": "material-affix",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material-affix.yunhua.steady-guard",
+    "tier": 1
+  },
+  {
+    "compatibleOutputKinds": [
+      "equipment"
+    ],
+    "enabled": true,
+    "id": "material-affix.yunhua.unyielding",
+    "kind": "material-affix",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material-affix.yunhua.unyielding",
+    "tier": 2
+  },
+  {
+    "compatibleOutputKinds": [
+      "equipment"
+    ],
+    "enabled": true,
+    "id": "material-affix.yunhua.inscribed",
+    "kind": "material-affix",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material-affix.yunhua.inscribed",
+    "tier": 2
+  },
+  {
+    "compatibleOutputKinds": [
+      "equipment"
+    ],
+    "enabled": true,
+    "id": "material-affix.yunhua.warding",
+    "kind": "material-affix",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material-affix.yunhua.warding",
+    "tier": 2
+  },
+  {
+    "compatibleOutputKinds": [
+      "equipment"
+    ],
+    "enabled": true,
+    "id": "material-affix.yunhua.break-mark",
+    "kind": "material-affix",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material-affix.yunhua.break-mark",
+    "tier": 2
+  },
+  {
+    "compatibleOutputKinds": [
+      "equipment"
+    ],
+    "enabled": true,
+    "id": "material-affix.yunhua.clear-tone",
+    "kind": "material-affix",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material-affix.yunhua.clear-tone",
+    "tier": 2
+  },
+  {
+    "compatibleOutputKinds": [
+      "cuisine"
+    ],
+    "enabled": true,
+    "id": "material-affix.yunhua.warming-meal",
+    "kind": "material-affix",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material-affix.yunhua.warming-meal",
+    "tier": 1
+  },
+  {
+    "compatibleOutputKinds": [
+      "cuisine"
+    ],
+    "enabled": true,
+    "id": "material-affix.yunhua.satiety",
+    "kind": "material-affix",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material-affix.yunhua.satiety",
+    "tier": 1
+  },
+  {
+    "compatibleOutputKinds": [
+      "cuisine"
+    ],
+    "enabled": true,
+    "id": "material-affix.yunhua.freshness",
+    "kind": "material-affix",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material-affix.yunhua.freshness",
+    "tier": 1
+  },
+  {
+    "compatibleOutputKinds": [
+      "cuisine"
+    ],
+    "enabled": true,
+    "id": "material-affix.yunhua.aroma",
+    "kind": "material-affix",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material-affix.yunhua.aroma",
+    "tier": 1
+  },
+  {
+    "compatibleOutputKinds": [
+      "cuisine"
+    ],
+    "enabled": true,
+    "id": "material-affix.yunhua.cooling-meal",
+    "kind": "material-affix",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material-affix.yunhua.cooling-meal",
+    "tier": 1
+  },
+  {
+    "compatibleOutputKinds": [
+      "cuisine"
+    ],
+    "enabled": true,
+    "id": "material-affix.yunhua.warding-meal",
+    "kind": "material-affix",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material-affix.yunhua.warding-meal",
+    "tier": 2
+  },
+  {
+    "compatibleOutputKinds": [
+      "cuisine"
+    ],
+    "enabled": true,
+    "id": "material-affix.yunhua.vigor",
+    "kind": "material-affix",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#material-affix.yunhua.vigor",
+    "tier": 2
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.ring-saber-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.green-iron-ingot"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.ring-saber.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.ring-saber-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.iron-fan-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.green-iron-ingot"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.iron-fan.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.iron-fan-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.spear-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.spear.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.spear-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.glaive-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.green-iron-ingot"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.glaive.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.glaive-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.needle-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.green-iron-ingot"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.needle.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.needle-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.chain-weight-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.green-iron-ingot"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.chain-weight.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.chain-weight-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.bamboo-bow-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.bamboo-bow.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.bamboo-bow-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.repeating-crossbow-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.repeating-crossbow.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.repeating-crossbow-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.one-hand-staff-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.one-hand-staff.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.one-hand-staff-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.two-hand-staff-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.two-hand-staff.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.two-hand-staff-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.bamboo-flute-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.bamboo-flute.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.bamboo-flute-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.seven-string-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.seven-string.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.seven-string-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-tailoring-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.cloth-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.bamboo-back-hide"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.cloth.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.tailoring",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.cloth-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-tailoring-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.light-armor-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.bamboo-back-hide"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.light-armor.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.tailoring",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.light-armor-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.medium-armor-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.tide-shell"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.medium-armor.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.medium-armor-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.heavy-armor-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.green-iron-ingot"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.heavy-armor.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.heavy-armor-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.one-hand-shield-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.one-hand-shield.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.one-hand-shield-i"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.two-hand-shield-i",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.two-hand-shield.i",
+    "outputKind": "equipment",
+    "outputRarity": "common",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.two-hand-shield-i"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.ring-saber-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.green-iron-ingot"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.tide-shell"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.ring-saber.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.ring-saber-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.iron-fan-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.green-iron-ingot"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.frayed-seal-ink"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.iron-fan.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.iron-fan-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.spear-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.green-iron-ingot"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.spear.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.spear-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.glaive-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.green-iron-ingot"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.seal-stone"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.glaive.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.glaive-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.needle-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.green-iron-ingot"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.frayed-seal-ink"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.needle.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.needle-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.chain-weight-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.green-iron-ingot"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.tide-shell"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.chain-weight.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.chain-weight-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.bamboo-bow-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.bamboo-back-hide"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.bamboo-bow.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.bamboo-bow-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.repeating-crossbow-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.green-iron-ingot"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.repeating-crossbow.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.repeating-crossbow-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.one-hand-staff-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.official-cinnabar"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.one-hand-staff.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.one-hand-staff-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.two-hand-staff-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.bell-shell"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.two-hand-staff.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.two-hand-staff-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.bamboo-flute-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.bell-shell"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.bamboo-flute.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.bamboo-flute-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.seven-string-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.bell-shell"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.seven-string.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.seven-string-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-tailoring-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.cloth-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.bamboo-back-hide"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.official-cinnabar"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.cloth.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.tailoring",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.cloth-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-tailoring-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.light-armor-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.bamboo-back-hide"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.tide-shell"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.light-armor.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.tailoring",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.light-armor-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.medium-armor-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.green-iron-ingot"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.bamboo-back-hide"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.medium-armor.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.medium-armor-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.heavy-armor-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.green-iron-ingot"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.seal-ceramic-core"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.heavy-armor.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.heavy-armor-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.one-hand-shield-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.green-iron-ingot"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.one-hand-shield.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.one-hand-shield-ii"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-smithing-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.two-hand-shield-ii",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.tide-shell"
+        ],
+        "contributesEquipmentAffix": true,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.equipment",
+    "outputDefinitionId": "equipment.yunhua.two-hand-shield.ii",
+    "outputKind": "equipment",
+    "outputRarity": "fine",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.equipment",
+    "requiredFacilityKind": "equipmentShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.smithing",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.two-hand-shield-ii"
+  },
+  {
+    "consumableYieldResolverId": "resolver:crafting.consumable-yield.standard",
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-alchemy-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.gold-wound-powder",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.red-ginseng-root"
+        ],
+        "contributesEquipmentAffix": false,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.common-herb"
+        ],
+        "contributesEquipmentAffix": false,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.consumable",
+    "outputDefinitionId": "item.yunhua.gold-wound-powder",
+    "outputKind": "consumable",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.consumable",
+    "requiredFacilityKind": "itemShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.alchemy",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.gold-wound-powder"
+  },
+  {
+    "consumableYieldResolverId": "resolver:crafting.consumable-yield.standard",
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-alchemy-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.clear-miasma-pill",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-wing-powder"
+        ],
+        "contributesEquipmentAffix": false,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.common-herb"
+        ],
+        "contributesEquipmentAffix": false,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.consumable",
+    "outputDefinitionId": "item.yunhua.clear-miasma-pill",
+    "outputKind": "consumable",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.consumable",
+    "requiredFacilityKind": "itemShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.alchemy",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.clear-miasma-pill"
+  },
+  {
+    "consumableYieldResolverId": "resolver:crafting.consumable-yield.standard",
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-alchemy-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.returning-origin-paste",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.red-ginseng-root"
+        ],
+        "contributesEquipmentAffix": false,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.sinking-reed"
+        ],
+        "contributesEquipmentAffix": false,
+        "quantity": 1,
+        "slotId": "slot-2"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.spring-ginger"
+        ],
+        "contributesEquipmentAffix": false,
+        "quantity": 1,
+        "slotId": "slot-3"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.consumable",
+    "outputDefinitionId": "item.yunhua.returning-origin-paste",
+    "outputKind": "consumable",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.consumable",
+    "requiredFacilityKind": "itemShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.alchemy",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.returning-origin-paste"
+  },
+  {
+    "craftingDurationDays": 1,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-handicraft-tier-i",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.lacquered-bookshelf",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "contributesEquipmentAffix": false,
+        "quantity": 2,
+        "slotId": "slot-1"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.trade-good",
+    "outputDefinitionId": "item.yunhua.lacquered-bookshelf",
+    "outputKind": "tradeGood",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.trade-good",
+    "requiredFacilityKind": "itemShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.handicraft",
+        "minLevel": 3
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.lacquered-bookshelf",
+    "tradeGoodSaleMultiplierResolverId": "resolver:crafting.trade-good-sale-multiplier.standard"
+  },
+  {
+    "craftingDurationDays": 2,
+    "craftingExperienceRuleId": "experience-award-rule.core.craft-handicraft-tier-ii",
+    "enabled": true,
+    "id": "crafting-recipe.yunhua.attendant-figurine",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.seal-ceramic-core"
+        ],
+        "contributesEquipmentAffix": false,
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.seal-stone"
+        ],
+        "contributesEquipmentAffix": false,
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "crafting-recipe",
+    "originCultureId": "culture.yunhua",
+    "outcomeResolverId": "resolver:crafting.outcome.trade-good",
+    "outputDefinitionId": "item.yunhua.attendant-figurine",
+    "outputKind": "tradeGood",
+    "packId": "pack:yunhua",
+    "qualityRuleId": "craft-quality-rule.core.trade-good",
+    "requiredFacilityKind": "itemShop",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.handicraft",
+        "minLevel": 6
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#crafting-recipe.yunhua.attendant-figurine",
+    "tradeGoodSaleMultiplierResolverId": "resolver:crafting.trade-good-sale-multiplier.standard"
+  },
+  {
+    "baseFoodEffectIds": [],
+    "cookingExperienceRuleId": "experience-award-rule.core.cuisine-tier-i",
+    "enabled": false,
+    "foodAffixTierResolverId": "resolver:crafting.food-affix-tier.standard",
+    "foodStatusDurationDays": 3,
+    "id": "cuisine-recipe.yunhua.bamboo-shoot-pork-soup",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.mist-bamboo"
+        ],
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.badger-meat"
+        ],
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "cuisine-recipe",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.cooking",
+        "minLevel": 3
+      }
+    ],
+    "restaurantBaseVariantId": "restaurant-meal-variant.yunhua.qingcen-bamboo-shoot-pork-soup",
+    "restaurantExperienceMultiplier": 0.3333333333333333,
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#cuisine-recipe.yunhua.bamboo-shoot-pork-soup"
+  },
+  {
+    "baseFoodEffectIds": [],
+    "cookingExperienceRuleId": "experience-award-rule.core.cuisine-tier-i",
+    "enabled": false,
+    "foodAffixTierResolverId": "resolver:crafting.food-affix-tier.standard",
+    "foodStatusDurationDays": 3,
+    "id": "cuisine-recipe.yunhua.red-ginseng-congee",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.red-ginseng-root"
+        ],
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.grain"
+        ],
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "cuisine-recipe",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.cooking",
+        "minLevel": 3
+      }
+    ],
+    "restaurantBaseVariantId": "restaurant-meal-variant.yunhua.qingcen-red-ginseng-congee",
+    "restaurantExperienceMultiplier": 0.3333333333333333,
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#cuisine-recipe.yunhua.red-ginseng-congee"
+  },
+  {
+    "baseFoodEffectIds": [],
+    "cookingExperienceRuleId": "experience-award-rule.core.cuisine-tier-i",
+    "enabled": false,
+    "foodAffixTierResolverId": "resolver:crafting.food-affix-tier.standard",
+    "foodStatusDurationDays": 3,
+    "id": "cuisine-recipe.yunhua.canal-fish-stew",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.sinking-reed"
+        ],
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.fish"
+        ],
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "cuisine-recipe",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.cooking",
+        "minLevel": 3
+      }
+    ],
+    "restaurantBaseVariantId": "restaurant-meal-variant.yunhua.yunjing-canal-fish-stew",
+    "restaurantExperienceMultiplier": 0.3333333333333333,
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#cuisine-recipe.yunhua.canal-fish-stew"
+  },
+  {
+    "baseFoodEffectIds": [],
+    "cookingExperienceRuleId": "experience-award-rule.core.cuisine-tier-ii",
+    "enabled": false,
+    "foodAffixTierResolverId": "resolver:crafting.food-affix-tier.standard",
+    "foodStatusDurationDays": 6,
+    "id": "cuisine-recipe.yunhua.spring-braised-meat",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.badger-king-meat"
+        ],
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.red-ginseng-root"
+        ],
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "cuisine-recipe",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.cooking",
+        "minLevel": 6
+      }
+    ],
+    "restaurantExperienceMultiplier": 0.3333333333333333,
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#cuisine-recipe.yunhua.spring-braised-meat"
+  },
+  {
+    "baseFoodEffectIds": [],
+    "cookingExperienceRuleId": "experience-award-rule.core.cuisine-tier-ii",
+    "enabled": false,
+    "foodAffixTierResolverId": "resolver:crafting.food-affix-tier.standard",
+    "foodStatusDurationDays": 6,
+    "id": "cuisine-recipe.yunhua.spring-ginger-broth",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.spring-ginger"
+        ],
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.aromatic-herb"
+        ],
+        "quantity": 1,
+        "slotId": "slot-2"
+      }
+    ],
+    "kind": "cuisine-recipe",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.cooking",
+        "minLevel": 6
+      }
+    ],
+    "restaurantExperienceMultiplier": 0.3333333333333333,
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#cuisine-recipe.yunhua.spring-ginger-broth"
+  },
+  {
+    "baseFoodEffectIds": [],
+    "cookingExperienceRuleId": "experience-award-rule.core.cuisine-tier-ii",
+    "enabled": false,
+    "foodAffixTierResolverId": "resolver:crafting.food-affix-tier.standard",
+    "foodStatusDurationDays": 6,
+    "id": "cuisine-recipe.yunhua.clear-tone-steamed-fish",
+    "ingredientSlots": [
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.aromatic-herb"
+        ],
+        "quantity": 1,
+        "slotId": "slot-1"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.fish"
+        ],
+        "quantity": 1,
+        "slotId": "slot-2"
+      },
+      {
+        "acceptedMaterialTagIds": [
+          "material-tag.yunhua.spring-ginger"
+        ],
+        "quantity": 1,
+        "slotId": "slot-3"
+      }
+    ],
+    "kind": "cuisine-recipe",
+    "originCultureId": "culture.yunhua",
+    "packId": "pack:yunhua",
+    "requiredMasteries": [
+      {
+        "masteryId": "mastery.core.cooking",
+        "minLevel": 6
+      }
+    ],
+    "restaurantExperienceMultiplier": 0.3333333333333333,
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/items.json#cuisine-recipe.yunhua.clear-tone-steamed-fish"
+  }
+]

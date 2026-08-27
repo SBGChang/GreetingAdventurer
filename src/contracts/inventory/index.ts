@@ -63,9 +63,34 @@ export type TradePolicy = Readonly<{ tradable: boolean }>; // PLACEHOLDER (inven
 export type ItemDisplayDefinition = Readonly<{ nameRef: LocalizedTextRef }>; // PLACEHOLDER (invented)
 export type EquipmentKind = 'weapon' | 'armor' | 'shield' | 'accessory'; // PLACEHOLDER (invented)
 export type PrimaryAttributeCoefficients = Readonly<Record<PrimaryAttributeId, number>>; // PLACEHOLDER (invented)
+
+// 一列裝備係數 = **這條通道自己的主屬方向向量**。
+//
+// 這個型別原本是 `{ channelId; coefficient: number }`：每通道一個純量，乘上 EquipmentDefinition
+// 上**一份共用**的 `primaryAttributeCoefficients`。那個形狀表達不出設計來源的實際資料。
+//
+// 設計來源（`docs/03_content/yunhua/yunhua_content.data.mjs` 的 `equipmentCatalog`）逐通道各給一個
+// 向量，環首刀是：
+//   [{ secondary: '物理傷害', values: { muscle: 1.25, coordination: 0.95 } },
+//    { secondary: '命中',     values: { reaction: 0.22, coordination: 0.18 } },
+//    { secondary: '預判',     values: { intelligence: 0.08, reaction: 0.10 } }]
+// ——同一把刀「對物理傷害偏肌力、對命中偏反應」。共用向量 × 每通道純量**湊不出**兩個方向不同的
+// 向量（純量只能縮放，不能轉向），所以舊形狀不是「不夠精細」，是**算錯**：無論共用向量怎麼填，
+// 至少有一個通道的方向是錯的。這是規範 §7 的「Schema 不夠用」，正解是補形狀而不是在資料側湊。
+//
+// `content-source/core/services.ts` 的副屬段已經把這件事記成契約缺口，並以
+// `SecondaryAttributeRuleDefinition.primaryCoefficients` 暫代方向（那條註解逐字寫「裝備契約只有
+// **一份** primaryAttributeCoefficients…只能由副屬規則的方向向量表達。（這也是一個契約缺口）」）。
+// 形狀補上以後，方向與量級都由裝備自己提供；副屬規則那條方向向量成為**第二份真相**，兩份相乘會把
+// 設計來源的係數再縮放一次（例：物理傷害規則 { muscle: 1, coordination: 0.375 } × 環首刀
+// { muscle: 1.25, coordination: 0.95 } = { muscle: 1.25, coordination: 0.356 }）。哪一側保留方向
+// 是跨模組裁決，不在本檔——見 content-source/yunhua/equipment.ts 檔頭與交接回報。
+//
+// Partial 的語意與 `SecondaryAttributeRuleDefinition.primaryCoefficients` 一致：**未列出的主屬不成項**
+// （加總的單位元 0），不是「係數預設 1」。
 export type SecondaryAttributeCoefficients = Readonly<{
   channelId: EquipmentCoefficientChannelId;
-  coefficient: number;
+  primaryAttributeCoefficients: Partial<Record<PrimaryAttributeId, number>>;
 }>; // PLACEHOLDER (invented)
 export type EquipmentSkillEffectRef = Readonly<{ effectId: EquipmentEffectDefinitionId }>; // PLACEHOLDER (invented)
 export type ItemRemovalReason =
@@ -127,7 +152,17 @@ export type EquipmentDefinition = ItemDefinition & Readonly<{
   relatedMasteryIds: readonly MasteryId[];
   occupiedSlots: readonly EquipmentSlotId[];
   handSlots: EquipmentHandSlots;
-  primaryAttributeCoefficients: PrimaryAttributeCoefficients;
+  // ⚠ **已被 `secondaryAttributeCoefficients[].primaryAttributeCoefficients` 取代，不再有任何消費者。**
+  //
+  // 它的原始角色是「這件裝備的主屬方向與量級（所有通道共用）」。共用一份向量表達不出設計來源
+  // 「同一件裝備逐通道各有方向」的資料（理由見 SecondaryAttributeCoefficients 的註解），因此
+  // `domain-services/statistics` 已改為逐通道讀向量，不再讀這個欄位。
+  //
+  // 保留成選填、而不是直接刪除，只因為刪除會動到 `src/modules/inventory/fixtures.ts`（六筆裝備
+  // fixture 都填了它，物件字面值的 excess property check 會失敗），那不在補這個形狀的工作範圍內。
+  // **正解是刪掉它**：留著一個沒人讀的選填欄位，下一個作者會以為填了有效果。清除步驟＝改那六筆
+  // fixture（它們填的都是全 0，刪掉不改變任何測試數字）＋刪這一行。
+  primaryAttributeCoefficients?: PrimaryAttributeCoefficients;
   secondaryAttributeCoefficients: readonly SecondaryAttributeCoefficients[];
   skillEffectRefs: readonly EquipmentSkillEffectRef[];
 }>;

@@ -1,0 +1,1529 @@
+[
+  {
+    "aiPolicyId": "combat-ai-policy.core.single-skill-aggressor",
+    "attributes": {
+      "charisma": 0,
+      "coordination": 13,
+      "health": 130,
+      "intelligence": 22,
+      "muscle": 3,
+      "reaction": 29
+    },
+    "bodySize": "small",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier1-normal",
+    "id": "monster.yunhua.mistwing-moth",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.normal",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.mistwing-moth",
+    "speciesKind": "nonHuman",
+    "threatRank": "normal"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.single-skill-aggressor",
+    "attributes": {
+      "charisma": 0,
+      "coordination": 19,
+      "health": 170,
+      "intelligence": 3,
+      "muscle": 29,
+      "reaction": 18
+    },
+    "bodySize": "small",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier1-normal",
+    "id": "monster.yunhua.bamboo-back-badger",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.normal",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.bamboo-back-badger",
+    "speciesKind": "nonHuman",
+    "threatRank": "normal"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.single-skill-aggressor",
+    "attributes": {
+      "charisma": 0,
+      "coordination": 17,
+      "health": 160,
+      "intelligence": 2,
+      "muscle": 27,
+      "reaction": 12
+    },
+    "bodySize": "small",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier1-normal",
+    "id": "monster.yunhua.tide-shell-crab",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.normal",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.tide-shell-crab",
+    "speciesKind": "nonHuman",
+    "threatRank": "normal"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.single-skill-aggressor",
+    "attributes": {
+      "charisma": 0,
+      "coordination": 15,
+      "health": 125,
+      "intelligence": 31,
+      "muscle": 4,
+      "reaction": 19
+    },
+    "bodySize": "small",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier1-normal",
+    "id": "monster.yunhua.scrap-sigil-doll",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.normal",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.scrap-sigil-doll",
+    "speciesKind": "nonHuman",
+    "threatRank": "normal"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.elite-threat-focus",
+    "attributes": {
+      "charisma": 0,
+      "coordination": 27,
+      "health": 460,
+      "intelligence": 19,
+      "muscle": 50,
+      "reaction": 24
+    },
+    "bodySize": "medium",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.elite",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier1-elite",
+    "id": "monster.yunhua.miasma-pouch-badger",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.elite",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.miasma-pouch-badger",
+    "speciesKind": "nonHuman",
+    "threatRank": "elite"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.elite-threat-focus",
+    "attributes": {
+      "charisma": 0,
+      "coordination": 24,
+      "health": 430,
+      "intelligence": 25,
+      "muscle": 38,
+      "reaction": 32
+    },
+    "bodySize": "medium",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.elite",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier1-elite",
+    "id": "monster.yunhua.gatewater-salamander",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.elite",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.gatewater-salamander",
+    "speciesKind": "nonHuman",
+    "threatRank": "elite"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.elite-threat-focus",
+    "attributes": {
+      "charisma": 0,
+      "coordination": 26,
+      "health": 500,
+      "intelligence": 15,
+      "muscle": 55,
+      "reaction": 18
+    },
+    "bodySize": "small",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.elite",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier1-elite",
+    "id": "monster.yunhua.armored-pottery-guard",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.elite",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.armored-pottery-guard",
+    "speciesKind": "nonHuman",
+    "threatRank": "elite"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.boss-rotation",
+    "attributes": {
+      "charisma": 0,
+      "coordination": 36,
+      "health": 2400,
+      "intelligence": 20,
+      "muscle": 78,
+      "reaction": 70
+    },
+    "bodySize": "large",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.boss",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier1-boss",
+    "id": "monster.yunhua.mist-bamboo-king",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.boss",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.mist-bamboo-king",
+    "speciesKind": "nonHuman",
+    "threatRank": "boss"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.boss-rotation",
+    "attributes": {
+      "charisma": 0,
+      "coordination": 39,
+      "health": 2600,
+      "intelligence": 28,
+      "muscle": 72,
+      "reaction": 66
+    },
+    "bodySize": "large",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.boss",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier1-boss",
+    "id": "monster.yunhua.sunken-weir-beast",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.boss",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.sunken-weir-beast",
+    "speciesKind": "nonHuman",
+    "threatRank": "boss"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.single-skill-aggressor",
+    "attributes": {
+      "charisma": 0,
+      "coordination": 22,
+      "health": 270,
+      "intelligence": 49,
+      "muscle": 2,
+      "reaction": 35
+    },
+    "bodySize": "small",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier2-normal",
+    "id": "monster.yunhua.frayed-seal-wisp",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.normal",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.frayed-seal-wisp",
+    "speciesKind": "nonHuman",
+    "threatRank": "normal"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.single-skill-aggressor",
+    "attributes": {
+      "charisma": 0,
+      "coordination": 26,
+      "health": 340,
+      "intelligence": 7,
+      "muscle": 50,
+      "reaction": 20
+    },
+    "bodySize": "small",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier2-normal",
+    "id": "monster.yunhua.bell-mandible-beetle",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.normal",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.bell-mandible-beetle",
+    "speciesKind": "nonHuman",
+    "threatRank": "normal"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.single-skill-aggressor",
+    "attributes": {
+      "charisma": 0,
+      "coordination": 29,
+      "health": 350,
+      "intelligence": 12,
+      "muscle": 52,
+      "reaction": 17
+    },
+    "bodySize": "medium",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier2-normal",
+    "id": "monster.yunhua.tower-stone-lizard",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.normal",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.tower-stone-lizard",
+    "speciesKind": "nonHuman",
+    "threatRank": "normal"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.elite-threat-focus",
+    "attributes": {
+      "charisma": 0,
+      "coordination": 43,
+      "health": 820,
+      "intelligence": 31,
+      "muscle": 74,
+      "reaction": 26
+    },
+    "bodySize": "medium",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.elite",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier2-elite",
+    "id": "monster.yunhua.seal-halberd-warden",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.elite",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.seal-halberd-warden",
+    "speciesKind": "nonHuman",
+    "threatRank": "elite"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.elite-threat-focus",
+    "attributes": {
+      "charisma": 0,
+      "coordination": 34,
+      "health": 740,
+      "intelligence": 76,
+      "muscle": 13,
+      "reaction": 38
+    },
+    "bodySize": "small",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.elite",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier2-elite",
+    "id": "monster.yunhua.broken-edict-scribe",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.elite",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.broken-edict-scribe",
+    "speciesKind": "nonHuman",
+    "threatRank": "elite"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.boss-rotation",
+    "attributes": {
+      "charisma": 0,
+      "coordination": 55,
+      "health": 5200,
+      "intelligence": 68,
+      "muscle": 95,
+      "reaction": 74
+    },
+    "bodySize": "large",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.boss",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier2-boss",
+    "id": "monster.yunhua.balance-seal-colossus",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.boss",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.balance-seal-colossus",
+    "speciesKind": "nonHuman",
+    "threatRank": "boss"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.single-skill-aggressor",
+    "attributes": {
+      "charisma": 10,
+      "coordination": 21,
+      "health": 145,
+      "intelligence": 7,
+      "muscle": 27,
+      "reaction": 22
+    },
+    "bodySize": "small",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier1-normal",
+    "id": "monster.yunhua.river-cutthroat",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.normal",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.river-cutthroat",
+    "speciesKind": "human",
+    "threatRank": "normal"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.single-skill-aggressor",
+    "attributes": {
+      "charisma": 8,
+      "coordination": 28,
+      "health": 125,
+      "intelligence": 10,
+      "muscle": 10,
+      "reaction": 27
+    },
+    "bodySize": "small",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier1-normal",
+    "id": "monster.yunhua.privateer-crossbow",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.normal",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.privateer-crossbow",
+    "speciesKind": "human",
+    "threatRank": "normal"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.elite-threat-focus",
+    "attributes": {
+      "charisma": 20,
+      "coordination": 30,
+      "health": 470,
+      "intelligence": 16,
+      "muscle": 45,
+      "reaction": 28
+    },
+    "bodySize": "small",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.elite",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier1-elite",
+    "id": "monster.yunhua.salt-route-leader",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.elite",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.salt-route-leader",
+    "speciesKind": "human",
+    "threatRank": "elite"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.single-skill-aggressor",
+    "attributes": {
+      "charisma": 10,
+      "coordination": 30,
+      "health": 300,
+      "intelligence": 18,
+      "muscle": 52,
+      "reaction": 25
+    },
+    "bodySize": "small",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier2-normal",
+    "id": "monster.yunhua.seal-tower-deserter",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.normal",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.seal-tower-deserter",
+    "speciesKind": "human",
+    "threatRank": "normal"
+  },
+  {
+    "aiPolicyId": "combat-ai-policy.core.elite-threat-focus",
+    "attributes": {
+      "charisma": 24,
+      "coordination": 40,
+      "health": 800,
+      "intelligence": 36,
+      "muscle": 68,
+      "reaction": 31
+    },
+    "bodySize": "small",
+    "controlResistanceProfileId": "combat-control-resistance-profile.core.elite",
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "experienceProfileId": "monster-experience-profile.core.tier2-elite",
+    "id": "monster.yunhua.false-seal-officer",
+    "kind": "monster",
+    "naturalAttackProfileId": "monster-natural-attack-profile.core.elite",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "skillIds": [],
+    "sourcePath": "yunhua/monsters.json#monster.yunhua.false-seal-officer",
+    "speciesKind": "human",
+    "threatRank": "elite"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.mistwing-moth-swarm",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.mistwing-moth"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.mistwing-moth"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.mistwing-moth"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.mistwing-moth"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.mistwing-moth"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.mistwing-moth"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.mistwing-moth"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.mistwing-moth"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.mistwing-moth",
+      "monster.yunhua.mistwing-moth",
+      "monster.yunhua.mistwing-moth",
+      "monster.yunhua.mistwing-moth",
+      "monster.yunhua.mistwing-moth",
+      "monster.yunhua.mistwing-moth",
+      "monster.yunhua.mistwing-moth",
+      "monster.yunhua.mistwing-moth"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.normal",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.mistwing-moth-swarm"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.bamboo-back-badger-swarm",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.bamboo-back-badger"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.bamboo-back-badger"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.bamboo-back-badger"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.bamboo-back-badger"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.bamboo-back-badger"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.bamboo-back-badger"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.bamboo-back-badger"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.bamboo-back-badger"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.bamboo-back-badger",
+      "monster.yunhua.bamboo-back-badger",
+      "monster.yunhua.bamboo-back-badger",
+      "monster.yunhua.bamboo-back-badger",
+      "monster.yunhua.bamboo-back-badger",
+      "monster.yunhua.bamboo-back-badger",
+      "monster.yunhua.bamboo-back-badger",
+      "monster.yunhua.bamboo-back-badger"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.normal",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.bamboo-back-badger-swarm"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.tide-shell-crab-swarm",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.tide-shell-crab"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.tide-shell-crab"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.tide-shell-crab"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.tide-shell-crab"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.tide-shell-crab"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.tide-shell-crab"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.tide-shell-crab"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.tide-shell-crab"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.tide-shell-crab",
+      "monster.yunhua.tide-shell-crab",
+      "monster.yunhua.tide-shell-crab",
+      "monster.yunhua.tide-shell-crab",
+      "monster.yunhua.tide-shell-crab",
+      "monster.yunhua.tide-shell-crab",
+      "monster.yunhua.tide-shell-crab",
+      "monster.yunhua.tide-shell-crab"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.normal",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.tide-shell-crab-swarm"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.scrap-sigil-doll-swarm",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.scrap-sigil-doll"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.scrap-sigil-doll"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.scrap-sigil-doll"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.scrap-sigil-doll"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.scrap-sigil-doll"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.scrap-sigil-doll"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.scrap-sigil-doll"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.scrap-sigil-doll"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.scrap-sigil-doll",
+      "monster.yunhua.scrap-sigil-doll",
+      "monster.yunhua.scrap-sigil-doll",
+      "monster.yunhua.scrap-sigil-doll",
+      "monster.yunhua.scrap-sigil-doll",
+      "monster.yunhua.scrap-sigil-doll",
+      "monster.yunhua.scrap-sigil-doll",
+      "monster.yunhua.scrap-sigil-doll"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.normal",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.scrap-sigil-doll-swarm"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.miasma-pouch-badger-lone",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.miasma-pouch-badger"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.miasma-pouch-badger"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.elite",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.miasma-pouch-badger-lone"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.gatewater-salamander-lone",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.gatewater-salamander"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.gatewater-salamander"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.elite",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.gatewater-salamander-lone"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.armored-pottery-guard-lone",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.armored-pottery-guard"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.armored-pottery-guard"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.elite",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.armored-pottery-guard-lone"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.mist-bamboo-king-lone",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.mist-bamboo-king"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.mist-bamboo-king"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.boss",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.mist-bamboo-king-lone"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.sunken-weir-beast-lone",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.sunken-weir-beast"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.sunken-weir-beast"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.boss",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.sunken-weir-beast-lone"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.frayed-seal-wisp-swarm",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.frayed-seal-wisp"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.frayed-seal-wisp"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.frayed-seal-wisp"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.frayed-seal-wisp"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.frayed-seal-wisp"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.frayed-seal-wisp"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.frayed-seal-wisp"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.frayed-seal-wisp"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.frayed-seal-wisp",
+      "monster.yunhua.frayed-seal-wisp",
+      "monster.yunhua.frayed-seal-wisp",
+      "monster.yunhua.frayed-seal-wisp",
+      "monster.yunhua.frayed-seal-wisp",
+      "monster.yunhua.frayed-seal-wisp",
+      "monster.yunhua.frayed-seal-wisp",
+      "monster.yunhua.frayed-seal-wisp"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.normal",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.frayed-seal-wisp-swarm"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.bell-mandible-beetle-swarm",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.bell-mandible-beetle"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.bell-mandible-beetle"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.bell-mandible-beetle"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.bell-mandible-beetle"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.bell-mandible-beetle"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.bell-mandible-beetle"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.bell-mandible-beetle"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.bell-mandible-beetle"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.bell-mandible-beetle",
+      "monster.yunhua.bell-mandible-beetle",
+      "monster.yunhua.bell-mandible-beetle",
+      "monster.yunhua.bell-mandible-beetle",
+      "monster.yunhua.bell-mandible-beetle",
+      "monster.yunhua.bell-mandible-beetle",
+      "monster.yunhua.bell-mandible-beetle",
+      "monster.yunhua.bell-mandible-beetle"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.normal",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.bell-mandible-beetle-swarm"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.tower-stone-lizard-lone",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.tower-stone-lizard"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.tower-stone-lizard"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.normal",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.tower-stone-lizard-lone"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.seal-halberd-warden-lone",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.seal-halberd-warden"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.seal-halberd-warden"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.elite",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.seal-halberd-warden-lone"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.broken-edict-scribe-lone",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.broken-edict-scribe"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.broken-edict-scribe"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.elite",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.broken-edict-scribe-lone"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.balance-seal-colossus-lone",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.balance-seal-colossus"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.balance-seal-colossus"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.boss",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.balance-seal-colossus-lone"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.river-cutthroat-swarm",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.river-cutthroat"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.river-cutthroat"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.river-cutthroat"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.river-cutthroat"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.river-cutthroat"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.river-cutthroat"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.river-cutthroat"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.river-cutthroat"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.river-cutthroat",
+      "monster.yunhua.river-cutthroat",
+      "monster.yunhua.river-cutthroat",
+      "monster.yunhua.river-cutthroat",
+      "monster.yunhua.river-cutthroat",
+      "monster.yunhua.river-cutthroat",
+      "monster.yunhua.river-cutthroat",
+      "monster.yunhua.river-cutthroat"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.normal",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.river-cutthroat-swarm"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.privateer-crossbow-swarm",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.privateer-crossbow"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.privateer-crossbow"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.privateer-crossbow"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.privateer-crossbow"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.privateer-crossbow"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.privateer-crossbow"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.privateer-crossbow"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.privateer-crossbow"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.privateer-crossbow",
+      "monster.yunhua.privateer-crossbow",
+      "monster.yunhua.privateer-crossbow",
+      "monster.yunhua.privateer-crossbow",
+      "monster.yunhua.privateer-crossbow",
+      "monster.yunhua.privateer-crossbow",
+      "monster.yunhua.privateer-crossbow",
+      "monster.yunhua.privateer-crossbow"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.normal",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.privateer-crossbow-swarm"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.salt-route-leader-lone",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.salt-route-leader"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.salt-route-leader"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.elite",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.salt-route-leader-lone"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.seal-tower-deserter-swarm",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.seal-tower-deserter"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.seal-tower-deserter"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.seal-tower-deserter"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.seal-tower-deserter"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.seal-tower-deserter"
+      },
+      {
+        "anchorCell": {
+          "col": 3,
+          "floor": 0,
+          "row": 2
+        },
+        "monsterDefinitionId": "monster.yunhua.seal-tower-deserter"
+      },
+      {
+        "anchorCell": {
+          "col": 1,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.seal-tower-deserter"
+      },
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 3
+        },
+        "monsterDefinitionId": "monster.yunhua.seal-tower-deserter"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.seal-tower-deserter",
+      "monster.yunhua.seal-tower-deserter",
+      "monster.yunhua.seal-tower-deserter",
+      "monster.yunhua.seal-tower-deserter",
+      "monster.yunhua.seal-tower-deserter",
+      "monster.yunhua.seal-tower-deserter",
+      "monster.yunhua.seal-tower-deserter",
+      "monster.yunhua.seal-tower-deserter"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.normal",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.seal-tower-deserter-swarm"
+  },
+  {
+    "enabled": true,
+    "experienceBudgetId": "encounter-experience-budget.core.standard",
+    "id": "encounter-group.yunhua.false-seal-officer-lone",
+    "initialPlacements": [
+      {
+        "anchorCell": {
+          "col": 2,
+          "floor": 0,
+          "row": 1
+        },
+        "monsterDefinitionId": "monster.yunhua.false-seal-officer"
+      }
+    ],
+    "kind": "encounter-group",
+    "memberDefinitionIds": [
+      "monster.yunhua.false-seal-officer"
+    ],
+    "packId": "pack:yunhua",
+    "rewardResolverId": "resolver:combat.encounter-reward.elite",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.false-seal-officer-lone"
+  }
+]

@@ -351,30 +351,51 @@ function armorPieces(
 // 副屬（doc §4 步驟 4～7）
 // ──────────────────────────────────────────────────────────────────────────
 
-function channelScalar(
+// 這件裝備在「這個副屬所吃的通道」上的主屬係數向量。
+//
+// 一件裝備可以在同一個副屬的多條通道上都有係數（副屬規則的 `equipmentCoefficientChannelIds`
+// 是陣列），所以同一項主屬要**逐通道相加**。裝備沒宣告任何一條該副屬的通道 = 不成項
+// （回傳空 map，呼叫端跳過）—— 劍對魔法減傷本來就不該有貢獻，那不是「通道值預設 1」。
+//
+// 舊形狀是「每通道一個純量 × 裝備共用的一份主屬向量」。共用向量表達不出設計來源
+// 「同一把刀對物理傷害偏肌力、對命中偏反應」的資料（見 contracts/inventory 的
+// SecondaryAttributeCoefficients 註解），所以方向與量級都改由通道自己那一列提供。
+function channelPrimaryWeights(
   definition: EquipmentDefinition,
   channelIds: readonly EquipmentCoefficientChannelId[],
-): number {
-  // 這件裝備在「這個副屬所吃的通道」上的係數總和。裝備沒宣告該通道 = 不成項（加總單位元 0），
-  // 不是「通道值預設 1」—— 劍對魔法減傷本來就不該有貢獻。
-  let sum = 0;
+): ReadonlyMap<PrimaryAttributeId, number> {
+  const merged = new Map<PrimaryAttributeId, number>();
   for (const entry of definition.secondaryAttributeCoefficients) {
-    if (channelIds.includes(entry.channelId)) sum += entry.coefficient;
+    if (!channelIds.includes(entry.channelId)) continue;
+    for (const id of PRIMARY_ATTRIBUTE_IDS) {
+      const weight = entry.primaryAttributeCoefficients[id];
+      if (weight === undefined) continue; // 這條通道不走這一項主屬
+      // 「這一項還沒出現過」與「已累積的值」是兩件事：前者放進去，後者相加。
+      // 刻意不寫 `?? 0`——那會讓「缺資料補預設」與「加總的起始值」長得一樣。
+      const accumulated = merged.get(id);
+      merged.set(id, accumulated === undefined ? weight : accumulated + weight);
+    }
   }
-  return sum;
+  return merged;
 }
 
-// 這件裝備把「副屬規則的主屬方向」× 「裝備自己的主屬係數」合成後，餵給 weightedLinearProduct。
+// 這件裝備把「副屬規則的主屬方向」× 「裝備該通道的主屬係數」合成後，餵給 weightedLinearProduct。
 // 兩個因子都是資料；相乘是形狀。
+//
+// ⚠ 兩份方向向量相乘是**已知的重複真相**：補完裝備側的逐通道向量以後，設計來源的係數會再被
+// 副屬規則的方向向量縮放一次。裁決屬跨模組（見 contracts/inventory 的
+// SecondaryAttributeCoefficients 註解），本檔維持既有的合成順序不自行改變語意。
 function equipmentPrimaryTerms(
   rule: SecondaryAttributeRuleDefinition,
-  definition: EquipmentDefinition,
+  equipmentWeights: ReadonlyMap<PrimaryAttributeId, number>,
 ): readonly LinearTerm[] {
   const terms: LinearTerm[] = [];
   for (const id of PRIMARY_ATTRIBUTE_IDS) {
     const ruleWeight = rule.primaryCoefficients[id];
     if (ruleWeight === undefined) continue; // 這個副屬不走這一項主屬
-    terms.push({ inputKey: id, weight: ruleWeight * definition.primaryAttributeCoefficients[id] });
+    const equipmentWeight = equipmentWeights.get(id);
+    if (equipmentWeight === undefined) continue; // 這件裝備的該通道不走這一項主屬
+    terms.push({ inputKey: id, weight: ruleWeight * equipmentWeight });
   }
   return terms;
 }
@@ -413,17 +434,22 @@ function secondaryRawValue(
   const inputs = primaryInputs(effective);
   let raw = 0;
   for (const piece of pieces) {
-    const scalar = channelScalar(piece.definition, rule.equipmentCoefficientChannelIds);
+    const equipmentWeights = channelPrimaryWeights(
+      piece.definition,
+      rule.equipmentCoefficientChannelIds,
+    );
     // 這件裝備不供給這個副屬的任何通道 → 不成項。也因此不會為它解析熟練度係數。
-    if (scalar === 0) continue;
+    if (equipmentWeights.size === 0) continue;
 
-    const terms = equipmentPrimaryTerms(rule, piece.definition);
+    const terms = equipmentPrimaryTerms(rule, equipmentWeights);
     const attributeTerm = weightedLinearProduct({ mode: 'linear', terms }, inputs);
 
     const gripMultiplier = piece.gripMultiplier;
     // 防具不持握：少一個乘項，不是「持握倍率預設 1」。
+    // 通道係數已經併進 attributeTerm 的每一項（每項 = 副屬方向 × 裝備該通道係數 × 主屬），
+    // 所以這裡不再有獨立的通道純量乘項。
     let contribution =
-      gripMultiplier === undefined ? scalar * attributeTerm : scalar * gripMultiplier * attributeTerm;
+      gripMultiplier === undefined ? attributeTerm : gripMultiplier * attributeTerm;
 
     // masteryCoefficientResolverId 是選填的：這條副屬規則有熟練度階段才多一個乘項。
     // 這裡刻意不寫「沒有就當 1」——沒有就是沒有這一步，不是有一個預設係數。

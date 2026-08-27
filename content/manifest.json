@@ -1,6 +1,7 @@
 {
   "loadOrder": [
-    "pack:core"
+    "pack:core",
+    "pack:yunhua"
   ],
   "localizationBundles": [],
   "manifestVersion": "1.0.0",
@@ -10,6 +11,18 @@
       "optional": false,
       "packId": "pack:core",
       "requiredPacks": [],
+      "version": "1.0.0"
+    },
+    {
+      "contentRoot": "yunhua",
+      "optional": false,
+      "packId": "pack:yunhua",
+      "requiredPacks": [
+        {
+          "packId": "pack:core",
+          "version": "1.0.0"
+        }
+      ],
       "version": "1.0.0"
     }
   ]

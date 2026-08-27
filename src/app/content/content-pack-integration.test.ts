@@ -46,7 +46,13 @@ const CASES: readonly Case[] = [
       // manifest identity 是存檔相容比對的基礎（§9）；它必須真的算出 hash，不是空字串。
       const identity = loaded.registry.getManifestIdentity();
       assert(identity.manifestHash.length === 8, `manifestHash 應為 8 位 hex，實得 "${identity.manifestHash}"`);
-      assert(identity.packs.length === 1, `應有 1 個 pack，實得 ${identity.packs.length}`);
+      // 這裡原本斷言「恰好 1 個 pack」。那在只有 core 的時候是對的，但它釘住的是**當時的內容規模**，
+      // 不是這個測試要證明的事——雲華 pack 一落地它就失敗，而失敗的原因與這支測試無關。
+      // 改成斷言它真正在乎的：core pack 有載入（下面每一筆斷言都讀 core 的定義）。
+      assert(
+        identity.packs.some((p) => String(p.packId) === 'pack:core'),
+        `identity 應包含 pack:core，實得 ${identity.packs.map((p) => String(p.packId)).join(', ')}`,
+      );
     },
   },
   {
