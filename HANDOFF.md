@@ -5,7 +5,41 @@
 > ContextAssembler 正式 port + NewGameBootstrapper + React/Electron UI**。
 > 動 `src/` 前先讀 `.claude/skills/runtime-data-discipline/SKILL.md`。
 
-## 現況(Wave F:內容資料化——覆蓋率 3% → 91%;下一步是讓它跑起來)
+## 現況(Wave F3 進行中:引擎已能在真實內容上開新遊戲並跑指令)
+
+**已可運作(全部有測試、全綠)**:
+```
+真實 core+雲華 pack → NewGameBootstrapper → GameSession → Router → team.handleRest / handleStartCityTravel
+```
+開一個新遊戲(隊長掛 player-lineage、在雲京)、下 rest / startCityTravel,引擎用作者寫的
+team-plan-rule / player-travel-mode 排出計畫(到期日由內容 durationDays 推導,不是寫死)。
+
+**F3 已接的 context(在 `src/app/content/context-assembler.ts`)**:team(足夠跑只讀 plan/mode 的指令)、
+progression、effects。**其餘模組與 team 的 world/combat/resolvers 子 port 以 `pending()` proxy 佔位**
+——一被存取就明確拋錯並指名是誰。每個增量把一個 pending 換成真實 context。
+
+**F3 剩下(依建議順序)**:
+1. 逐模組把 pending 換真:character / map / dungeon / combat 的 context(需接跨模組 Query 與 Resolver)。
+2. **~20 個領域 Resolver 工廠**(見 `docs/00_core/architecture/F3_runtime_activation.md` 的分組;
+   combat 數值 Resolver 是真實戰鬥數學,不是套 kernel 樣板)。`npm run report:content` 追蹤缺口。
+3. 走完整條「進城→接委託→下地城→一場戰鬥→結算→成長」slice + golden 重播測試。
+
+檔案:`new-game-bootstrap.ts`(+test)、`content-assembler.ts`、`vertical-slice.test.ts`;
+入口 `createNewGame(config, registry)` 與 `createProductionContextAssembler(registry, resolvers)`。
+
+### F4 架構決定(動手前先定,避免走錯路)
+
+**renderer(瀏覽器)不能用 `content-repository` 的 node:fs**。兩條路:
+* (建議) **Electron main(node)跑引擎 + 載內容,renderer 純 UI 走 IPC**——最貼合「ContentRepository
+  是唯一 I/O」的架構,引擎留在 main。
+* 或 renderer 直接 `import` 編譯好的 `content/*.json`(Vite 可 import JSON),對 parsed 物件呼叫
+  `loadContent`(它是純函式,不綁 node:fs)——這條可先做純網頁版 slice,Electron 之後再包。
+
+目前**完全沒有產品進入點**(無 Vite/React/Electron,package.json 無 main)。F4 要新增這些。
+
+---
+
+## 前一階段(Wave F:內容資料化——覆蓋率 3% → 91%;下一步是讓它跑起來)
 
 **驗證**:`npm run verify` 全綠(紀律七項、全部測試、939 筆 Definition 載入)。
 `verify:content-sync` 三國紅燈是**內容軌未提交產物**造成的既有狀態,與引擎無關。
