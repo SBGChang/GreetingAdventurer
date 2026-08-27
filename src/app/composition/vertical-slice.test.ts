@@ -80,6 +80,32 @@ const CASES: readonly Case[] = [
     },
   },
   {
+    name: '第二個指令：startCityTravel 也用真實 travel-mode 排出旅行計畫',
+    run: () => {
+      const loaded = loadContentFromDisk(CONTENT_ROOT);
+      if (!loaded.success) throw new Error('內容載入失敗');
+      const game = createNewGame(CONFIG, loaded.registry);
+      if (!game.success) throw new Error('開新遊戲失敗');
+      const assembler = createProductionContextAssembler(loaded.registry, createResolverRegistry());
+
+      // 取一個真實的 player-travel-mode 與一條從雲京出發的路線／目的城。用內容裡真的有的。
+      const modes = loaded.registry.list({ kinds: ['player-travel-mode'] });
+      assert(modes.length > 0, '應至少有一個 player-travel-mode');
+      // routeId / toCityId 只要是合法城市即可（handleStartCityTravel 不驗路線存在，那屬 world 層）。
+      const request: GameCommandRequest<GameCommand> = {
+        actorTeamId: game.playerTeamId,
+        command: {
+          type: 'startCityTravel',
+          toCityId: 'city-node.yunhua.qingcen' as CityId,
+          routeId: 'route.yunhua.yunjing-qingcen' as never,
+          modeId: modes[0]!.id as never,
+        },
+      };
+      const result = runGameCommand(game.state, request, assembler);
+      assert(result.accepted, `startCityTravel 應被接受，實得 ${result.accepted ? '' : result.rejection.code}`);
+    },
+  },
+  {
     name: '未接線的模組被觸及時明確拋錯（pending proxy 不靜默）',
     run: () => {
       const loaded = loadContentFromDisk(CONTENT_ROOT);

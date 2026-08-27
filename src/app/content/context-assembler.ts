@@ -26,6 +26,8 @@ import type { ModuleContexts } from '../composition/router';
 import type { GameState } from '../composition/state';
 import { narrowedDomainReader } from './reader-adapter';
 import { createTeamDefinitionReader, TEAM_DEFINITION_KINDS } from './team-reader';
+import { createProgressionDefinitionReader } from './progression-reader';
+import { createEffectDefinitionReader } from './effect-reader';
 
 // 一被存取就拋錯的 Proxy，代表「這個 port／context 在本次建置尚未接線」。回傳 never 以便賦值給
 // 任何欄位型別（never 可賦值給一切）。不是 `as unknown as`——單一轉型，且語意是「觸發即錯」。
@@ -85,6 +87,9 @@ export function createProductionContextAssembler(
   const teamPlanRuleIdByKind = buildTeamPlanRuleIdByKind(registry);
   const memberRetentionRuleId = requireMemberRetentionRuleId(registry);
   const teamDefinitions = createTeamDefinitionReader(registry);
+  // progression 與 effects 是純 Definition Reader（前者無 context bag，見 router），直接接真實的。
+  const progressionReader = createProgressionDefinitionReader(registry);
+  const effectsReader = createEffectDefinitionReader(registry);
 
   return (runtime: EngineRuntime, _state: GameState): ModuleContexts => ({
     // ── 已接：team（rest / startCityTravel 等只讀 plan 規則的指令）─────────────
@@ -106,7 +111,7 @@ export function createProductionContextAssembler(
     map: pending('map'),
     dungeon: pending('dungeon'),
     combat: pending('combat'),
-    progression: pending('progression'),
+    progression: progressionReader,
     city: pending('city'),
     quest: pending('quest'),
     social: pending('social'),
@@ -116,6 +121,6 @@ export function createProductionContextAssembler(
     distribution: pending('distribution'),
     combatSequence: pending('combatSequence'),
     npcBehavior: pending('npcBehavior'),
-    effects: pending('effects'),
+    effects: effectsReader,
   });
 }
