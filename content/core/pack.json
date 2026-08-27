@@ -75,6 +75,48 @@
   ],
   "packId": "pack:core",
   "requiredResolverIds": [],
+  "resolverBindings": [
+    {
+      "ownerModule": "combat",
+      "resolverId": "resolver:combat.target-own-front-row",
+      "shape": "combat-target:own-front-row"
+    },
+    {
+      "ownerModule": "combat",
+      "resolverId": "resolver:combat.target-same-column-hostiles",
+      "shape": "combat-target:same-column-hostiles"
+    },
+    {
+      "ownerModule": "combat",
+      "resolverId": "resolver:combat.target-self",
+      "shape": "combat-target:self"
+    },
+    {
+      "ownerModule": "combat",
+      "resolverId": "resolver:combat.target-self-or-single-ally",
+      "shape": "combat-target:self-or-single-ally"
+    },
+    {
+      "ownerModule": "combat",
+      "resolverId": "resolver:combat.target-single-ally",
+      "shape": "combat-target:single-ally"
+    },
+    {
+      "ownerModule": "combat",
+      "resolverId": "resolver:combat.target-single-hostile",
+      "shape": "combat-target:single-hostile"
+    },
+    {
+      "ownerModule": "combat",
+      "resolverId": "resolver:combat.target-single-hostile-casting",
+      "shape": "combat-target:single-hostile-casting"
+    },
+    {
+      "ownerModule": "combat",
+      "resolverId": "resolver:combat.target-whole-party",
+      "shape": "combat-target:whole-party"
+    }
+  ],
   "runtimeCompatibility": {
     "minRuntimeVersion": "0.1.0"
   },

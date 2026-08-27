@@ -9,6 +9,7 @@ import type {
   ContentPackId,
   DefinitionId,
   JsonValue,
+  ResolverBinding,
   ResolverId,
 } from '../contracts/core';
 import type { DataDiagnostic } from './validation';
@@ -91,6 +92,8 @@ export type RawContentPack = Readonly<{
   declaredKinds: readonly string[];
   // 本 pack 的資料引用到的 Resolver。Bootstrap 必須確認它們都已註冊才能啟動。
   requiredResolverIds: readonly ResolverId[];
+  // 本 pack 宣告並提供的 Resolver shape 綁定（§11）。組裝 ResolverRegistry 時據此註冊實作。
+  resolverBindings: readonly ResolverBinding[];
   definitions: readonly RawContentDefinition[];
 }>;
 
@@ -146,7 +149,14 @@ export type CompileReport = Readonly<{
 }>;
 
 export type CompileContentResult =
-  | Readonly<{ success: true; registry: DefinitionRegistry; report: CompileReport }>
+  | Readonly<{
+      success: true;
+      registry: DefinitionRegistry;
+      // 全 pack 依載入順序匯總的 Resolver shape 綁定。組裝 ResolverRegistry 的唯一輸入
+      // （見 app/content/resolver-registrations.ts）——與 Definition Registry 並列的姊妹產物。
+      resolverBindings: readonly ResolverBinding[];
+      report: CompileReport;
+    }>
   | Readonly<{ success: false; diagnostics: readonly DataDiagnostic[] }>;
 
 export type LoadContentInput = Readonly<{
@@ -672,9 +682,16 @@ export function loadContent(input: LoadContentInput): CompileContentResult {
   };
 
   const registry = new DefinitionRegistryImpl(ordered, byId, identity);
+  // Resolver 綁定依載入順序匯總（core 先，文化後）。重複 resolverId 的偵測留給 ResolverRegistry
+  // 註冊時明確拋錯（比照 Definition ID：不得默默後蓋前）。
+  const resolverBindings: ResolverBinding[] = manifest.loadOrder.flatMap((packId) => {
+    const pack = packById.get(packId);
+    return pack === undefined ? [] : [...pack.resolverBindings];
+  });
   return {
     success: true,
     registry,
+    resolverBindings,
     report: {
       definitionCount: ordered.length,
       packCount: identity.packs.length,

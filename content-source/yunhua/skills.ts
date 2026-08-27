@@ -60,6 +60,7 @@ import type {
   TechniqueId,
   WeaponRequirementId,
 } from '../../src/contracts/core';
+import { combatCounterConditionResolverId, combatTargetResolverId } from '../core/resolver-ids';
 import type {
   AttackMasteryAwardRuleDefinition,
   MasterySplit,
@@ -151,9 +152,9 @@ type TechniqueLocal =
 // 這是人工判讀，不是字串剖析：新增一種寫法必須在這裡新增一列，不會有「措辭改了就悄悄變成另一種
 // 目標」的可能。合併過的兩組（`single-hostile` 與 `blocked-melee-attacker`）在下方註記理由。
 //
-// ⚠ ID 形狀依本輪指派採 `resolver.yunhua.<local>`。`content-source/core/**` 既有的 Resolver ID 是
-// `resolver:<模組>.<用途>`（例如 `resolver:combat.damage-power.physical`），且 core 的註解明講
-// 「Resolver 由模組擁有，不由文化擁有」。兩種形狀的取捨列入回報。
+// ✔ ID 形狀定案：採**模組擁有**的 `resolver:combat.target-<local>`（建構子在
+// `content-source/core/resolver-ids.ts`，與 core 標頭的 shape 綁定共用同一組字面值）。原 F2a 作者
+// 列入回報的「文化擁有 vs 模組擁有」已定為後者——目標邏輯是純格陣規則、四國共用、與文化無關。
 const TARGET_SHAPES = {
   self: ['自身。'],
   // 卸勢：條件是「自身，但只有在舉盾成功格擋之後」。目標是自己，可用性條件在 Resolver 內。
@@ -186,8 +187,8 @@ const TARGET_SHAPES = {
 
 type TargetLocal = keyof typeof TARGET_SHAPES;
 
-const targetResolverId = (local: TargetLocal): ResolverId =>
-  `resolver.yunhua.target-${local}` as ResolverId;
+// 委派到 core 的共用建構子（模組擁有）；本地保留型別安全包裝，讓 TargetLocal 的窮舉性不流失。
+const targetResolverId = (local: TargetLocal): ResolverId => combatTargetResolverId(local);
 
 // ── 反擊架勢的條件 Resolver ──────────────────────────────────────────────────
 //
@@ -205,7 +206,7 @@ const COUNTER_CONDITIONS = {
 type CounterConditionLocal = keyof typeof COUNTER_CONDITIONS;
 
 const counterConditionResolverId = (local: CounterConditionLocal): ResolverId =>
-  `resolver.yunhua.counter-condition-${local}` as ResolverId;
+  combatCounterConditionResolverId(local);
 
 // ── 取得階層（§8.1 / acquisitionStages）─────────────────────────────────────
 type StageLocal = 'l0' | 'l3' | 'basic' | 'advanced' | 'supreme';

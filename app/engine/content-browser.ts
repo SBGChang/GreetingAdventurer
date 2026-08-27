@@ -72,6 +72,7 @@ export function loadBundledContent(): CompileContentResult {
       scope: header.scope,
       declaredKinds: header.declaredKinds,
       requiredResolverIds: header.requiredResolverIds,
+      resolverBindings: header.resolverBindings,
       definitions,
     });
   }

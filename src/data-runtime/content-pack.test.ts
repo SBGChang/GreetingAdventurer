@@ -57,6 +57,7 @@ function pack(overrides: Partial<RawContentPack> = {}): RawContentPack {
     scope: { cultureIds: [], features: ['core'] },
     declaredKinds: ['team-plan-rule'],
     requiredResolverIds: [],
+    resolverBindings: [],
     definitions: [def('definition:team-plan-rule.home-rest', 'team-plan-rule')],
     ...overrides,
   };

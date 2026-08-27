@@ -14,7 +14,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.ring-saber-l0",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-melee"
+      "targetResolverId": "resolver:combat.target-single-hostile-melee"
     },
     "techniqueIds": [
       "technique.yunhua.slash"
@@ -40,7 +40,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.ring-saber-l3",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-melee"
+      "targetResolverId": "resolver:combat.target-single-hostile-melee"
     },
     "techniqueIds": [
       "technique.yunhua.slash"
@@ -55,7 +55,7 @@
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.one-hand-weapon",
     "counterStance": {
-      "conditionResolverId": "resolver.yunhua.counter-condition-melee-block",
+      "conditionResolverId": "resolver:combat.counter-condition-melee-block",
       "counterDelayRuleId": "action-delay-rule.core.counter"
     },
     "effectIds": [],
@@ -68,7 +68,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.ring-saber-basic",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-self"
+      "targetResolverId": "resolver:combat.target-self"
     },
     "techniqueIds": [
       "technique.yunhua.guard",
@@ -95,7 +95,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.ring-saber-advanced",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-with-guard-down"
+      "targetResolverId": "resolver:combat.target-single-hostile-with-guard-down"
     },
     "techniqueIds": [
       "technique.yunhua.slash"
@@ -110,7 +110,7 @@
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.one-hand-weapon",
     "counterStance": {
-      "conditionResolverId": "resolver.yunhua.counter-condition-block",
+      "conditionResolverId": "resolver:combat.counter-condition-block",
       "counterDelayRuleId": "action-delay-rule.core.counter"
     },
     "effectIds": [],
@@ -123,7 +123,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.ring-saber-supreme",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-self"
+      "targetResolverId": "resolver:combat.target-self"
     },
     "techniqueIds": [
       "technique.yunhua.guard",
@@ -148,7 +148,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.iron-fan-l0",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-melee"
+      "targetResolverId": "resolver:combat.target-single-hostile-melee"
     },
     "techniqueIds": [
       "technique.yunhua.slash"
@@ -174,7 +174,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.iron-fan-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.iron-fan-l3",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-self"
+      "targetResolverId": "resolver:combat.target-self"
     },
     "techniqueIds": [
       "technique.yunhua.guard"
@@ -198,7 +198,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.iron-fan-basic",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-melee"
+      "targetResolverId": "resolver:combat.target-single-hostile-melee"
     },
     "techniqueIds": [
       "technique.yunhua.slash"
@@ -224,7 +224,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.iron-fan-advanced",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.iron-fan-advanced",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-self-or-single-ally"
+      "targetResolverId": "resolver:combat.target-self-or-single-ally"
     },
     "techniqueIds": [],
     "weaponRequirementIds": [
@@ -237,7 +237,7 @@
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.one-hand-weapon",
     "counterStance": {
-      "conditionResolverId": "resolver.yunhua.counter-condition-melee-block",
+      "conditionResolverId": "resolver:combat.counter-condition-melee-block",
       "counterDelayRuleId": "action-delay-rule.core.counter"
     },
     "effectIds": [],
@@ -250,7 +250,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.iron-fan-supreme",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-self"
+      "targetResolverId": "resolver:combat.target-self"
     },
     "techniqueIds": [
       "technique.yunhua.guard",
@@ -277,7 +277,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.spear-l0",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-mid"
+      "targetResolverId": "resolver:combat.target-single-hostile-mid"
     },
     "techniqueIds": [
       "technique.yunhua.thrust"
@@ -292,7 +292,7 @@
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.two-hand-weapon",
     "counterStance": {
-      "conditionResolverId": "resolver.yunhua.counter-condition-melee-block",
+      "conditionResolverId": "resolver:combat.counter-condition-melee-block",
       "counterDelayRuleId": "action-delay-rule.core.counter"
     },
     "effectIds": [],
@@ -305,7 +305,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.spear-l3",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-self"
+      "targetResolverId": "resolver:combat.target-self"
     },
     "techniqueIds": [
       "technique.yunhua.guard",
@@ -332,7 +332,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.spear-basic",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-guarding"
+      "targetResolverId": "resolver:combat.target-single-hostile-guarding"
     },
     "techniqueIds": [
       "technique.yunhua.thrust"
@@ -356,7 +356,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.spear-advanced",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-same-column-hostiles"
+      "targetResolverId": "resolver:combat.target-same-column-hostiles"
     },
     "techniqueIds": [
       "technique.yunhua.thrust",
@@ -372,7 +372,7 @@
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.two-hand-weapon",
     "counterStance": {
-      "conditionResolverId": "resolver.yunhua.counter-condition-block",
+      "conditionResolverId": "resolver:combat.counter-condition-block",
       "counterDelayRuleId": "action-delay-rule.core.counter"
     },
     "effectIds": [],
@@ -385,7 +385,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.spear-supreme",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-self"
+      "targetResolverId": "resolver:combat.target-self"
     },
     "techniqueIds": [
       "technique.yunhua.guard",
@@ -410,7 +410,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.glaive-l0",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-melee"
+      "targetResolverId": "resolver:combat.target-single-hostile-melee"
     },
     "techniqueIds": [
       "technique.yunhua.slash"
@@ -434,7 +434,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.glaive-l3",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-up-to-three-hostiles-melee"
+      "targetResolverId": "resolver:combat.target-up-to-three-hostiles-melee"
     },
     "techniqueIds": [
       "technique.yunhua.sweep"
@@ -460,7 +460,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.glaive-basic",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-melee"
+      "targetResolverId": "resolver:combat.target-single-hostile-melee"
     },
     "techniqueIds": [
       "technique.yunhua.slash"
@@ -486,7 +486,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.glaive-advanced",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-up-to-three-hostiles-melee"
+      "targetResolverId": "resolver:combat.target-up-to-three-hostiles-melee"
     },
     "techniqueIds": [
       "technique.yunhua.sweep"
@@ -501,7 +501,7 @@
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.two-hand-weapon",
     "counterStance": {
-      "conditionResolverId": "resolver.yunhua.counter-condition-block",
+      "conditionResolverId": "resolver:combat.counter-condition-block",
       "counterDelayRuleId": "action-delay-rule.core.counter"
     },
     "effectIds": [],
@@ -514,7 +514,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.glaive-supreme",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-self"
+      "targetResolverId": "resolver:combat.target-self"
     },
     "techniqueIds": [
       "technique.yunhua.guard",
@@ -539,7 +539,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.needle-l0",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-ranged"
+      "targetResolverId": "resolver:combat.target-single-hostile-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.throw"
@@ -565,7 +565,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.needle-l3",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-ranged"
+      "targetResolverId": "resolver:combat.target-single-hostile-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.throw"
@@ -589,7 +589,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.needle-basic",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-with-negative-status"
+      "targetResolverId": "resolver:combat.target-single-hostile-with-negative-status"
     },
     "techniqueIds": [
       "technique.yunhua.throw"
@@ -615,7 +615,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.needle-advanced",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-ranged"
+      "targetResolverId": "resolver:combat.target-single-hostile-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.throw"
@@ -639,7 +639,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.needle-supreme",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-up-to-three-hostiles-ranged"
+      "targetResolverId": "resolver:combat.target-up-to-three-hostiles-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.throw"
@@ -663,7 +663,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.chain-weight-l0",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-ranged"
+      "targetResolverId": "resolver:combat.target-single-hostile-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.throw"
@@ -687,7 +687,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.chain-weight-l3",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-ranged"
+      "targetResolverId": "resolver:combat.target-single-hostile-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.throw"
@@ -713,7 +713,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.chain-weight-basic",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.chain-weight-basic",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-casting-ranged"
+      "targetResolverId": "resolver:combat.target-single-hostile-casting-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.throw"
@@ -739,7 +739,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.chain-weight-advanced",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-ranged"
+      "targetResolverId": "resolver:combat.target-single-hostile-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.throw"
@@ -765,7 +765,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.chain-weight-supreme",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-ranged"
+      "targetResolverId": "resolver:combat.target-single-hostile-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.throw"
@@ -789,7 +789,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-bow-l0",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-ranged"
+      "targetResolverId": "resolver:combat.target-single-hostile-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.shot"
@@ -815,7 +815,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-bow-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.bamboo-bow-l3",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-self"
+      "targetResolverId": "resolver:combat.target-self"
     },
     "techniqueIds": [],
     "weaponRequirementIds": [
@@ -839,7 +839,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-bow-basic",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-ranged"
+      "targetResolverId": "resolver:combat.target-single-hostile-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.shot"
@@ -863,7 +863,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-bow-advanced",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-ranged"
+      "targetResolverId": "resolver:combat.target-single-hostile-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.shot"
@@ -887,7 +887,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-bow-supreme",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-ranged"
+      "targetResolverId": "resolver:combat.target-single-hostile-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.shot"
@@ -911,7 +911,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.repeating-crossbow-l0",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-ranged"
+      "targetResolverId": "resolver:combat.target-single-hostile-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.shot"
@@ -935,7 +935,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.repeating-crossbow-l3",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-ranged"
+      "targetResolverId": "resolver:combat.target-single-hostile-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.shot"
@@ -961,7 +961,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.repeating-crossbow-basic",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-ranged"
+      "targetResolverId": "resolver:combat.target-single-hostile-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.shot"
@@ -987,7 +987,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.repeating-crossbow-advanced",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-ranged"
+      "targetResolverId": "resolver:combat.target-single-hostile-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.shot"
@@ -1011,7 +1011,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.repeating-crossbow-supreme",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-up-to-three-hostiles-ranged"
+      "targetResolverId": "resolver:combat.target-up-to-three-hostiles-ranged"
     },
     "techniqueIds": [
       "technique.yunhua.shot"
@@ -1035,7 +1035,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.one-hand-shield-l0",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.one-hand-shield-l0",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-self"
+      "targetResolverId": "resolver:combat.target-self"
     },
     "techniqueIds": [
       "technique.yunhua.guard"
@@ -1059,7 +1059,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.one-hand-shield-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.one-hand-shield-l3",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-self-after-block"
+      "targetResolverId": "resolver:combat.target-self-after-block"
     },
     "techniqueIds": [
       "technique.yunhua.guard"
@@ -1083,7 +1083,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.one-hand-shield-basic",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-blocked-melee-attacker"
+      "targetResolverId": "resolver:combat.target-blocked-melee-attacker"
     },
     "techniqueIds": [
       "technique.yunhua.guard"
@@ -1109,7 +1109,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.one-hand-shield-advanced",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.one-hand-shield-advanced",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-ally"
+      "targetResolverId": "resolver:combat.target-single-ally"
     },
     "techniqueIds": [
       "technique.yunhua.guard"
@@ -1124,7 +1124,7 @@
     "activationHand": "offHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.yunhua.one-hand-shield",
     "counterStance": {
-      "conditionResolverId": "resolver.yunhua.counter-condition-block",
+      "conditionResolverId": "resolver:combat.counter-condition-block",
       "counterDelayRuleId": "action-delay-rule.core.counter"
     },
     "effectIds": [],
@@ -1137,7 +1137,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.one-hand-shield-supreme",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-self"
+      "targetResolverId": "resolver:combat.target-self"
     },
     "techniqueIds": [
       "technique.yunhua.guard",
@@ -1162,7 +1162,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.two-hand-shield-l0",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.two-hand-shield-l0",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-self"
+      "targetResolverId": "resolver:combat.target-self"
     },
     "techniqueIds": [
       "technique.yunhua.guard"
@@ -1188,7 +1188,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.two-hand-shield-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.two-hand-shield-l3",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-self"
+      "targetResolverId": "resolver:combat.target-self"
     },
     "techniqueIds": [
       "technique.yunhua.guard"
@@ -1214,7 +1214,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.two-hand-shield-basic",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.two-hand-shield-basic",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-own-front-row"
+      "targetResolverId": "resolver:combat.target-own-front-row"
     },
     "techniqueIds": [
       "technique.yunhua.guard"
@@ -1240,7 +1240,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.two-hand-shield-advanced",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-blocked-melee-attacker"
+      "targetResolverId": "resolver:combat.target-blocked-melee-attacker"
     },
     "techniqueIds": [
       "technique.yunhua.guard"
@@ -1266,7 +1266,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.two-hand-shield-supreme",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.two-hand-shield-supreme",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-whole-party"
+      "targetResolverId": "resolver:combat.target-whole-party"
     },
     "techniqueIds": [
       "technique.yunhua.guard"
@@ -1292,7 +1292,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-flute-l0",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.bamboo-flute-l0",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-ally"
+      "targetResolverId": "resolver:combat.target-single-ally"
     },
     "techniqueIds": [
       "technique.yunhua.perform"
@@ -1318,7 +1318,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-flute-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.bamboo-flute-l3",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-ally"
+      "targetResolverId": "resolver:combat.target-single-ally"
     },
     "techniqueIds": [
       "technique.yunhua.perform"
@@ -1344,7 +1344,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-flute-basic",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.bamboo-flute-basic",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-two-allies"
+      "targetResolverId": "resolver:combat.target-two-allies"
     },
     "techniqueIds": [
       "technique.yunhua.perform"
@@ -1370,7 +1370,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-flute-advanced",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile-casting"
+      "targetResolverId": "resolver:combat.target-single-hostile-casting"
     },
     "techniqueIds": [
       "technique.yunhua.perform",
@@ -1395,7 +1395,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-flute-supreme",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.bamboo-flute-supreme",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-up-to-three-allies"
+      "targetResolverId": "resolver:combat.target-up-to-three-allies"
     },
     "techniqueIds": [
       "technique.yunhua.perform"
@@ -1421,7 +1421,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.seven-string-l0",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.seven-string-l0",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-ally"
+      "targetResolverId": "resolver:combat.target-single-ally"
     },
     "techniqueIds": [
       "technique.yunhua.perform"
@@ -1447,7 +1447,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.seven-string-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.seven-string-l3",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-ally"
+      "targetResolverId": "resolver:combat.target-single-ally"
     },
     "techniqueIds": [
       "technique.yunhua.perform"
@@ -1474,7 +1474,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.seven-string-basic",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.seven-string-basic",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-ally"
+      "targetResolverId": "resolver:combat.target-single-ally"
     },
     "techniqueIds": [
       "technique.yunhua.perform"
@@ -1500,7 +1500,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.seven-string-advanced",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile"
+      "targetResolverId": "resolver:combat.target-single-hostile"
     },
     "techniqueIds": [
       "technique.yunhua.perform",
@@ -1527,7 +1527,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.seven-string-supreme",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.seven-string-supreme",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-whole-party"
+      "targetResolverId": "resolver:combat.target-whole-party"
     },
     "techniqueIds": [
       "technique.yunhua.perform"
@@ -1551,7 +1551,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.attack-magic-l0",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile"
+      "targetResolverId": "resolver:combat.target-single-hostile"
     },
     "techniqueIds": [
       "technique.yunhua.talisman"
@@ -1578,7 +1578,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.attack-magic-l3",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile"
+      "targetResolverId": "resolver:combat.target-single-hostile"
     },
     "techniqueIds": [
       "technique.yunhua.talisman"
@@ -1605,7 +1605,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.attack-magic-basic",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile"
+      "targetResolverId": "resolver:combat.target-single-hostile"
     },
     "techniqueIds": [
       "technique.yunhua.talisman"
@@ -1630,7 +1630,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.attack-magic-advanced",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-up-to-three-hostiles"
+      "targetResolverId": "resolver:combat.target-up-to-three-hostiles"
     },
     "techniqueIds": [
       "technique.yunhua.talisman"
@@ -1654,7 +1654,7 @@
     "schemaVersion": 1,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.attack-magic-supreme",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-up-to-three-hostiles"
+      "targetResolverId": "resolver:combat.target-up-to-three-hostiles"
     },
     "techniqueIds": [
       "technique.yunhua.talisman"
@@ -1680,7 +1680,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.defense-magic-l0",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.defense-magic-l0",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-self"
+      "targetResolverId": "resolver:combat.target-self"
     },
     "techniqueIds": [
       "technique.yunhua.ward"
@@ -1707,7 +1707,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.defense-magic-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.defense-magic-l3",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-ally"
+      "targetResolverId": "resolver:combat.target-single-ally"
     },
     "techniqueIds": [
       "technique.yunhua.ward"
@@ -1732,7 +1732,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.defense-magic-basic",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.defense-magic-basic",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-ally"
+      "targetResolverId": "resolver:combat.target-single-ally"
     },
     "techniqueIds": [
       "technique.yunhua.ward"
@@ -1759,7 +1759,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.defense-magic-advanced",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.defense-magic-advanced",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-up-to-three-allies"
+      "targetResolverId": "resolver:combat.target-up-to-three-allies"
     },
     "techniqueIds": [
       "technique.yunhua.ward"
@@ -1786,7 +1786,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.defense-magic-supreme",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.defense-magic-supreme",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-whole-party"
+      "targetResolverId": "resolver:combat.target-whole-party"
     },
     "techniqueIds": [
       "technique.yunhua.ward"
@@ -1812,7 +1812,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.blessing-magic-l0",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.blessing-magic-l0",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-ally"
+      "targetResolverId": "resolver:combat.target-single-ally"
     },
     "techniqueIds": [
       "technique.yunhua.ward"
@@ -1839,7 +1839,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.blessing-magic-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.blessing-magic-l3",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-ally"
+      "targetResolverId": "resolver:combat.target-single-ally"
     },
     "techniqueIds": [
       "technique.yunhua.ward"
@@ -1866,7 +1866,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.blessing-magic-basic",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.blessing-magic-basic",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-ally"
+      "targetResolverId": "resolver:combat.target-single-ally"
     },
     "techniqueIds": [
       "technique.yunhua.ward"
@@ -1893,7 +1893,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.blessing-magic-advanced",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.blessing-magic-advanced",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-up-to-three-allies"
+      "targetResolverId": "resolver:combat.target-up-to-three-allies"
     },
     "techniqueIds": [
       "technique.yunhua.ward"
@@ -1920,7 +1920,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.blessing-magic-supreme",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.blessing-magic-supreme",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-whole-party"
+      "targetResolverId": "resolver:combat.target-whole-party"
     },
     "techniqueIds": [
       "technique.yunhua.ward"
@@ -1947,7 +1947,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.curse-magic-l0",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.curse-magic-l0",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile"
+      "targetResolverId": "resolver:combat.target-single-hostile"
     },
     "techniqueIds": [
       "technique.yunhua.talisman"
@@ -1974,7 +1974,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.curse-magic-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.curse-magic-l3",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile"
+      "targetResolverId": "resolver:combat.target-single-hostile"
     },
     "techniqueIds": [
       "technique.yunhua.talisman"
@@ -2001,7 +2001,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.curse-magic-basic",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.curse-magic-basic",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile"
+      "targetResolverId": "resolver:combat.target-single-hostile"
     },
     "techniqueIds": [
       "technique.yunhua.talisman"
@@ -2029,7 +2029,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.curse-magic-advanced",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.curse-magic-advanced",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-single-hostile"
+      "targetResolverId": "resolver:combat.target-single-hostile"
     },
     "techniqueIds": [
       "technique.yunhua.talisman"
@@ -2057,7 +2057,7 @@
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.curse-magic-supreme",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.curse-magic-supreme",
     "targeting": {
-      "targetResolverId": "resolver.yunhua.target-up-to-three-hostiles"
+      "targetResolverId": "resolver:combat.target-up-to-three-hostiles"
     },
     "techniqueIds": [
       "technique.yunhua.talisman"

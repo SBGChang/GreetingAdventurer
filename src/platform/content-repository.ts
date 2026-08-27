@@ -18,7 +18,7 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, posix, relative, sep } from 'node:path';
 
-import type { ContentPackId, JsonValue, ResolverId } from '../contracts/core';
+import type { ContentPackId, JsonValue, ModuleId, ResolverId } from '../contracts/core';
 import type {
   CompileContentResult,
   ContentPackDependency,
@@ -160,6 +160,14 @@ function readPackHeader(value: JsonValue, path: string): PackHeader {
     },
     declaredKinds: strArray(root, 'declaredKinds', path),
     requiredResolverIds: strArray(root, 'requiredResolverIds', path).map((id) => id as ResolverId),
+    resolverBindings: arr(root, 'resolverBindings', path).map((item, i) => {
+      const b = asRecord(item, path, `resolverBindings[${i}]`);
+      return {
+        resolverId: str(b, 'resolverId', path) as ResolverId,
+        ownerModule: str(b, 'ownerModule', path) as ModuleId,
+        shape: str(b, 'shape', path),
+      };
+    }),
   };
 }
 
@@ -250,6 +258,7 @@ export function readContentFromDisk(contentRoot: string): Readonly<{
       scope: header.scope,
       declaredKinds: header.declaredKinds,
       requiredResolverIds: header.requiredResolverIds,
+      resolverBindings: header.resolverBindings,
       definitions,
     });
   }

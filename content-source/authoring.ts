@@ -23,7 +23,7 @@
 //   * 反之，本目錄**不得**出現任何遊戲規則邏輯。只能有資料、ID 常數，以及為了避免逐筆重打而存在的
 //     純資料展開工具（例如「同一條武器線的五個品級」）。判準：這裡寫的每一行，換一份 Pack 都會改。
 
-import type { ContentPackId, CultureId, DefinitionId, ResolverId } from '../src/contracts/core';
+import type { ContentPackId, CultureId, DefinitionId, ResolverBinding, ResolverId } from '../src/contracts/core';
 import type { DefinitionHeader } from '../src/contracts/core';
 
 // ── 作者層的一筆定義 ────────────────────────────────────────────────────────
@@ -61,6 +61,10 @@ export type AuthoredPack = Readonly<{
   // 本 pack 的資料引用到的 Resolver。Bootstrap 必須確認它們都已註冊才能啟動（§11）。
   // 作者必須明講：漏了會讓「用到未註冊 Resolver」的 pack 一路載入成功，直到玩家觸發它。
   requiredResolverIds: readonly ResolverId[];
+  // 本 pack **宣告並提供** shape 綁定的 Resolver（§11）：每筆把一個 Resolver ID 對到一個程式側
+  // shape 代碼鍵。組裝 ResolverRegistry 時據此註冊實作。Resolver 由模組擁有、不由文化擁有，所以
+  // 通常宣告在 core（例 combat 的目標形狀），文化 pack 只在自己的規則裡**引用**這些 ID。
+  resolverBindings: readonly ResolverBinding[];
   // 這一版 Runtime 相容性宣告（§8）。
   runtimeCompatibility: Readonly<{ minRuntimeVersion: string; maxRuntimeVersion?: string }>;
   // 本 pack 允許出現的 Definition kind。

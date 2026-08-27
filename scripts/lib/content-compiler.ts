@@ -188,6 +188,10 @@ function compilePack(
       scope: pack.scope,
       declaredKinds: [...pack.declaredKinds].sort(),
       requiredResolverIds: [...pack.requiredResolverIds].sort(),
+      // Resolver shape 綁定，依 resolverId 決定性排序（產物穩定、diff 乾淨）。
+      resolverBindings: [...pack.resolverBindings].sort((a, b) =>
+        String(a.resolverId) < String(b.resolverId) ? -1 : String(a.resolverId) > String(b.resolverId) ? 1 : 0,
+      ),
     }),
   });
 

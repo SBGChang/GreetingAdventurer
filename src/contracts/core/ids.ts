@@ -7,6 +7,16 @@ import type { Brand, DefinitionId, RuntimeId, EphemeralId, TemplateLocalId } fro
 export type ModuleId<K extends string = string> = Brand<string, `module:${K}`>;
 export type WorkflowId<K extends string = string> = Brand<string, `workflow:${K}`>;
 export type ResolverId = Brand<string, 'resolver'>;
+// Pack 標頭宣告的一筆 Resolver 綁定（§11）：把一個 registry Resolver ID 對到一個**程式側 shape
+// 代碼鍵**。shape 不是內容 ID，而是「這個 Resolver 用哪個實作形狀」的純代碼識別子（例
+// `combat-target:single-hostile`）。組裝 ResolverRegistry 時 iterate 這些綁定、以 shape 查 src/ 的
+// 實作表註冊——於是 Resolver ID 只住內容側（content-source），src/ 只認 shape，永不出現 Resolver
+// ID 字面值（避開「硬編碼內容 ID」門禁，同時保留「換一份 Pack 就換一組 Resolver 綁定」）。
+export type ResolverBinding = Readonly<{
+  resolverId: ResolverId;
+  ownerModule: ModuleId;
+  shape: string;
+}>;
 // NpcDungeonTargetResolverDefinition **是內容 Definition**（帶 DefinitionHeader），因此以 DefinitionId
 // 定址，不是 ResolverId。兩者混用會讓 Definition Reader 收到一個根本不屬於 definition 家族的 ID——
 // 先前靠 `as unknown as DefinitionId` 蓋住，移除該轉型後型別檢查立刻抓到（規範 §7）。

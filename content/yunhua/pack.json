@@ -41,6 +41,7 @@
   ],
   "packId": "pack:yunhua",
   "requiredResolverIds": [],
+  "resolverBindings": [],
   "runtimeCompatibility": {
     "minRuntimeVersion": "0.1.0"
   },
