@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "greeting-adventurer-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--no-open", "--host", "127.0.0.1"],
+      "port": 5473,
+      "url": "http://127.0.0.1:5473"
+    }
+  ]
+}

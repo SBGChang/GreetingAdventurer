@@ -1,0 +1,19 @@
+{
+  "//": "UI 專用 tsconfig：jsx + DOM lib。與根 tsconfig（引擎，lib 只有 ES2022、不含 DOM）分開，讓引擎的紀律不被 DOM 全域污染。Vite 用 esbuild 編譯，本檔供 typecheck:ui 與編輯器用。",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "types": ["node", "vite/client"]
+  },
+  "include": ["../app", "../src"]
+}
