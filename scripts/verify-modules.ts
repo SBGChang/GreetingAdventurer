@@ -6,6 +6,8 @@ import { runTests as progression, allTestsPass as progressionPass } from '../src
 import { runTests as map } from '../src/modules/map/map.test';
 import { runTests as dungeon } from '../src/modules/dungeon/dungeon.test';
 import { runTests as combat } from '../src/modules/combat/combat.test';
+// F3：§2.4 純目標形狀（grid/side/casting-only）——資料選定的 targeting resolver 的可離線驗證核心。
+import { runTests as combatTargetShapes } from '../src/modules/combat/target-shapes.test';
 import { runTests as team } from '../src/modules/team/team.test';
 import { runTests as composition } from '../src/app/composition/composition.test';
 import { runTests as transactionWiring } from '../src/app/composition/transaction.test';
@@ -78,6 +80,7 @@ const throwing: ReadonlyArray<readonly [string, () => void]> = [
   ['map', map],
   ['dungeon', dungeon],
   ['combat', combat],
+  ['combat-target-shapes', combatTargetShapes],
   ['team', team],
   // composition：跨模組註冊面驗證（重複/缺少 Handler、Slice owner、Manifest 綁定）。
   ['composition', composition],
