@@ -1,10 +1,105 @@
 # 實作接手文件（Implementation Handoff）
 
-> 給下一位接手者(人或 AI)。設計已定稿;**20 個模組全部實作完成並接進正式註冊表**,Content Pack
-> 平台已運轉。剩下的是**各模組 HandlerContext 的 port 實作 + 四國內容資料化 + Bootstrap/vertical
-> slice + UI**。動 `src/` 前先讀 `.claude/skills/runtime-data-discipline/SKILL.md`。
+> 給下一位接手者(人或 AI)。設計已定稿;20 個模組全部實作並接線;**內容覆蓋率 91%(939 筆
+> Definition,core + 雲華兩個 pack)**。剩下的是**其餘三國內容 + 142 個 Resolver 註冊 +
+> ContextAssembler 正式 port + NewGameBootstrapper + React/Electron UI**。
+> 動 `src/` 前先讀 `.claude/skills/runtime-data-discipline/SKILL.md`。
 
-## 現況(Wave E:13 筆真問題結清 + 資料/程式分離補完 + 新增第 7 道紀律門禁)
+## 現況(Wave F:內容資料化——覆蓋率 3% → 91%;下一步是讓它跑起來)
+
+**驗證**:`npm run verify` 全綠(紀律七項、全部測試、939 筆 Definition 載入)。
+`verify:content-sync` 三國紅燈是**內容軌未提交產物**造成的既有狀態,與引擎無關。
+
+### 使用者已定案的方向(不要再問一次)
+
+| 項目 | 決定 |
+|---|---|
+| 介面 | **React + Electron**(不是 CLI) |
+| 內容範圍 | **四國全做** |
+| 數值授權 | 我可以設計,但 **(a) 一律進資料不得 HardCode、(b) 逐筆記錄成「第一版方案(待討論)」**。公式沒有的也可以先設計形狀(用 §7.1 kernel + params),記錄下來之後討論 |
+| 結束條件 | 可遊玩的第一版 + **Start.bat** |
+
+### 已完成
+
+**Wave F1(commit `d9a384a`)——core pack 文化無關規則**,八個 domain 平行撰寫 + 八個複核者。
+Definition 36 → 356 筆;有資料 kind 3/119 → 72/119。複核重點放在**來源標示誠實性**
+(把設計值謊稱為文件出處是最嚴重的問題),character domain 抽 14 筆 14/14 屬實。
+
+**Wave F2a(commit `6984571`)——雲華 culture pack**,七個 domain 映射 `docs/03_content/yunhua`
+的設計來源。Definition → **939 筆**(2 個 pack);有資料 kind → **108/119(91%)**。
+性質是**映射不是發明**:設計來源早就有 `equipmentCatalog`/`skillCatalog`/`monsterCatalog`/
+`consumables`/`craftingCatalog`/`firstMapConfigs`/`firstMapLayouts`。
+
+**⚠ F2a 完全沒有經過人工複核**:七個複核 agent **全部因 session 限額中斷**(11 個 agent 只跑完 4 個)。
+目前只有編譯期檢查把關(型別、kind 登記、kind 變體、跨引用、產物同步)。
+**下一輪必須補跑**,重點:① 宣稱來自設計來源的值是否真的在設計來源裡;
+② 有沒有用 regex 剖析中文散文當真相來源(設計來源有些數值嵌在
+`'重量 1／價值 24'`、`'基礎 34;反 −0.10／點;最低 18'` 這類字串裡)。
+
+### 兩個新門禁(都在上線當天抓到人工漏掉的東西)
+
+1. **`verify:discipline` 檢查 7:Definition 的 `kind` 不得裝領域變體**(commit `07598dd`)。
+   人工抓過六次,門禁上線**當場又找到三筆**——其中一筆是上一輪才依 §6.0 寫的 `EffectDefinition`。
+   只檢查帶 pack header 的真 Definition;巢狀值物件(如 `RoomLinkDefinition`)不受檢。
+2. **Content Compiler 的跨引用檢查**(commit `6865b60`)。branded string 擋得住家族錯誤,
+   **擋不住 local 名打錯**。上線當場 19 筆,F2a 又 7 筆(world-city 與 maps 為同九座迷宮
+   取了不同 local 名)。判準保守:三段式 `<已登記kind>.<culture>.<local>` 才檢查。
+
+### 下一步(依序,F3 是決定「能不能跑」的一波)
+
+**F2b——其餘三國 + 補跑 F2a 複核**
+- vildun(607 行)/aurelien(166 行)/safir(171 行)的設計來源都在,結構與雲華同
+  (aurelien/safir 用 `createCultureData` 工廠,行數少但涵蓋同樣的域)。
+- 同一套映射邏輯;雲華的七個 domain 檔就是樣板。
+
+**F3——讓它跑起來(最關鍵,而且是工程不是內容,適合自己寫不必發包)**
+1. **142 個 Resolver 未註冊**。`npm run report:content` 的「── Resolver ──」段會列出來。
+   內容已經指名,`src/app/content/resolvers.ts` 的註冊面基本是空的。Resolver 沒註冊時
+   內容照樣載入成功(它只是字串),但那條路一跑到就失敗——**這是「內容齊了但還跑不起來」
+   最常見的原因**,也是 Bootstrap Gate(§11)真正該擋的。
+2. **`ContextAssembler` 的正式 port**。目前 combat 與 Wave D 九個模組的唯一供給者是
+   `unusedContext` 絆線(觸發即拋錯)。要真的跑,得逐模組把 Definition Reader、跨模組 Query、
+   id allocator、Resolver 接上。
+3. **NewGameBootstrapper(§1.1)不存在**於正式路徑,只有 `src/testing/` 的 bring-up fixture。
+   注意 bring-up 用的 ID 形狀是 `definition:<kind>:<local>`,與 content-source 的
+   `<kind>.<culture>.<local>` **規約不同**,兩邊要統一。
+
+**F4——React + Electron + Start.bat**。目前**完全沒有產品進入點**
+(沒有 Vite/React/Electron,`package.json` 沒有 `main`)。
+
+### 待你裁決(累積中,不阻擋 F3)
+
+1. **裝備係數的方向有兩份真相**。F2a 把 `SecondaryAttributeCoefficients` 改成逐通道帶主屬向量
+   (舊形狀是「共用向量 × 每通道純量」,純量只能縮放不能轉向,所以**算錯**而非不精細)。
+   但 `SecondaryAttributeRuleDefinition.primaryCoefficients` 也帶方向,兩份相乘會把係數再縮放
+   一次(例:物理傷害規則 `{muscle:1, coordination:0.375}` × 環首刀 `{muscle:1.25, coordination:0.95}`)。
+   **哪一側保留方向是跨模組裁決。**
+2. **聲望獎勵整條路沒有著落點**。`EffectDefinition` 八個變體沒一個表達得出「改變聲望」,
+   而 character 是把 effectId 交給**未註冊的** `resolveReputationDelta`。已依「Capability 只有
+   閉合了才開放」不填 `reputationEffectIds`。啟用需要:定義家族歸屬 + Resolver 註冊 +
+   (若走 Effect 路線)加變體並補 `TRANSLATORS` 鍵。
+3. **戰鬥聚合經驗規則的 masteryId 是判讀**。`ExperienceAwardRuleDefinition` 只能帶一個
+   masteryId,但戰鬥攻擊 MXP 實際依武器路由。已選 one-hand-weapon / light-armor 當基準錨點
+   並標為第一版方案;替代方案是把 `attackAwardRuleId` 型別改成 `AttackMasteryAwardRuleId`。
+4. **`recruitTavernAdventurer` 目前必然拒絕**(`AssignNpcMemberFreeAction` 只有 payload 沒有
+   handler,沒有 NPC 會處於 `tavernVisit`)。已裁定**保持註冊**(理由見 Wave E 段)。
+
+### 剩餘 11 個零資料 kind
+
+`equipment-effect`、`simplified-combat-challenge`、`simplified-combat-skill`、`food-affix`、
+`item`、`restaurant-menu`、`gathering-rule`、`book`、`map-gathering-rule`、`conflict-rule`、`world-fact`。
+
+### ⚠ 這個 repo 有第二個 AI session 在同時工作
+
+實測到一個 **OpenAI Codex** 行程,`--working-dir` 正是本專案,從 2026/8/21 起持續開著。
+那批英文 commit(`fix(gate)`、`docs(map)`、`fix(team)`、`feat(character)`…)與工作樹裡
+未提交的內容軌改動來自它。**已造成過實際問題**:一次 push 是 46 個 commit 而不是預期的 45,
+因為 `git status` 快照與實際提交之間它又 commit 了一筆。
+**提交前務必 `git status`,且用明確路徑 `git add`,不要 `git add -A`。**
+
+---
+
+## 前一階段(Wave E:13 筆真問題結清 + 資料/程式分離補完 + 新增第 7 道紀律門禁)
 
 **驗證**:typecheck 0 錯、`verify:discipline` **七項**全過、`verify:modules` 全部通過、
 `verify:content-packs` 通過。實作缺口 108 → 53 → **40**;契約重複宣告 9 → 3 → **2**。
