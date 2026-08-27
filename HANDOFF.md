@@ -5,7 +5,31 @@
 > ContextAssembler 正式 port + NewGameBootstrapper + React/Electron UI**。
 > 動 `src/` 前先讀 `.claude/skills/runtime-data-discipline/SKILL.md`。
 
-## 現況(Wave F3 進行中:引擎已能在真實內容上開新遊戲並跑指令)
+## 現況(Wave F4:**有 Start.bat 可試玩了**——React 城市畫面跑在真實雲華 pack 上)
+
+**雙擊 `Start.bat`**（第一次自動 `npm install`）→ 瀏覽器開出「問候冒險者」城市畫面：隊長、雲京、
+世界日、生命/魔力;可「在城裡休息」「推進時間」。每個動作真的經過
+NewGameBootstrapper → GameSession → 模組 Handler,用作者寫的內容算出結果。已在瀏覽器實測:
+休息→排定事件 0→1、推進時間→世界日+1 事件 1→0(teamPlanDue 完成)。
+
+也可 `npm run dev`(開發)／`npm run build:ui`(產物)／`npm run typecheck:ui`。
+
+**F4 架構(已落地)**:UI 在 `app/`（**src/ 之外**,避開門禁）;renderer 純 React,只用引擎純函式;
+內容用 `app/engine/content-browser.ts` 的 `import.meta.glob` 打包後餵 loadContent（**不碰 node:fs**）;
+`app/engine/game-facade.ts` 是 UI↔引擎窄門面。獨立 `app/tsconfig.json`(jsx+DOM)。
+
+**目前可玩範圍 = 已接線的 team 層**(休息/旅行/推進時間)。要讓更多畫面(地城/戰鬥/委託)亮起來,
+就是把 F3 的 ContextAssembler pending 逐一換成真實 context——UI 的 `availableCommands` 與畫面
+會跟著長出來。
+
+**剩下**:
+* **F4b Electron 外殼**（可選,把 renderer 包成原生視窗;目前是瀏覽器分頁,遊戲體驗相同）。
+  最小做法:Electron main 開一個 BrowserWindow 載入 renderer——現行 renderer 已自帶引擎+內容,
+  連 IPC 都還不需要。之後內容變大或要存檔時再把引擎移進 main 走 IPC。
+* **F3 收尾**:把 character/map/dungeon/combat 的 pending 換真 + ~20 個領域 Resolver(見
+  `docs/00_core/architecture/F3_runtime_activation.md`)→ 走通進城→委託→地城→戰鬥→結算→成長。
+
+## 前一階段(Wave F3 進行中:引擎已能在真實內容上開新遊戲並跑指令)
 
 **已可運作(全部有測試、全綠)**:
 ```
