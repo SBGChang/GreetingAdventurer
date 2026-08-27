@@ -66,6 +66,38 @@ for (const owner of [...byOwner.keys()].sort()) {
   console.log('');
 }
 
+
+// ── Resolver 引用 vs 註冊 ────────────────────────────────────────────────────
+//
+// 內容用 `resolverId` 指名「這個量由哪個 Resolver 算」。Resolver 沒有註冊時，內容照樣載入成功
+// （它只是一個字串），但那條路一跑到就會失敗。這一段量的就是這個缺口：**內容已經指名、
+// 但 ResolverRegistry 還沒有的**。它是 Bootstrap Gate（§11「未註冊 Resolver 無法啟動」）
+// 真正該擋的東西，也是「內容齊了但還跑不起來」最常見的原因。
+
+const resolverIds = new Set<string>();
+const collectResolvers = (value: unknown): void => {
+  if (typeof value === 'string') {
+    // Resolver ID 的兩種既有形狀：`resolver:xxx`（brand 慣例）與 `resolver.<culture>.<local>`。
+    if (/^resolver[.:]/.test(value)) resolverIds.add(value);
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach(collectResolvers);
+    return;
+  }
+  if (value !== null && typeof value === 'object') {
+    Object.values(value as Record<string, unknown>).forEach(collectResolvers);
+  }
+};
+for (const def of definitions) collectResolvers(def.data);
+
+console.log('');
+console.log('── Resolver ──');
+console.log(`內容指名的 Resolver：${resolverIds.size} 個`);
+console.log('（註冊面在 src/app/content/resolvers.ts；未註冊者一跑到那條路就會失敗）');
+for (const id of [...resolverIds].sort().slice(0, 12)) console.log(`   · ${id}`);
+if (resolverIds.size > 12) console.log(`   …其餘 ${resolverIds.size - 12} 個`);
+
 const total = withData + withoutData;
 const pct = total === 0 ? 0 : Math.round((withData / total) * 100);
 console.log('='.repeat(64));
