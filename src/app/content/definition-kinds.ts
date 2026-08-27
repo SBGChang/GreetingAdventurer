@@ -35,6 +35,8 @@ import { NPC_BEHAVIOR_DEFINITION_KINDS } from './npc-behavior-reader';
 import { STATISTICS_DEFINITION_KINDS } from './statistics-reader';
 import { COMBAT_POWER_DEFINITION_KINDS } from './combat-power-reader';
 import { GATHERING_DEFINITION_KINDS } from './gathering-reader';
+// 通用 kernel resolver 的 params 家族（§7.1「形狀＝程式、調校＝資料」的資料側）。
+import { RESOLVER_PARAMS_KINDS } from './resolvers';
 
 
 // ── kind 登記 ──────────────────────────────────────────────────────────────
@@ -114,6 +116,19 @@ export const DEFINITION_KIND_REGISTRATIONS: readonly DefinitionKindRegistration[
   ...own('statistics', kindsOf(STATISTICS_DEFINITION_KINDS)),
   ...own('combat-power', kindsOf(COMBAT_POWER_DEFINITION_KINDS)),
   ...own('gathering', kindsOf(GATHERING_DEFINITION_KINDS)),
+
+  // ── 通用 kernel resolver 的 params ────────────────────────────────────────
+  //
+  // `resolvers.ts` 的 `logisticRollResolver` / `weightedProductResolver` 是**形狀**：它們從
+  // `input.paramsDefId` 指名的定義讀出 params，再餵給 §7.1 的 kernel。也就是說調校量住在
+  // Content Pack 裡——這正是「換一份 Pack 就換一套平衡」的落實點。
+  //
+  // 但這兩個 kind **從來沒有登記**，所以任何 params 定義都會被 Compiler 以「kind 沒有登記擁有
+  // 模組」拒收：曲線調校在資料側根本寫不下去。（F1 的 character 複核者實地確認過這個卡點。）
+  //
+  // 擁有者記為 `data-runtime`：它們不屬任何領域模組，是 kernel 的參數形狀，跨模組共用。
+  // 這與「一個 kind 一個擁有者」不衝突——擁有者就是提供那個 kernel 的那一層。
+  ...own('data-runtime', kindsOf(RESOLVER_PARAMS_KINDS)),
 ];
 
 // ── 索引與啟動驗證 ─────────────────────────────────────────────────────────
