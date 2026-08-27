@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "version": "0.0.0",
+  "main": "electron/main.cjs",
   "description": "Greeting Adventurer — React/TypeScript/Electron implementation of the archived design blueprint.",
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
@@ -16,6 +17,8 @@
     "dev": "vite --open",
     "build:ui": "vite build",
     "preview": "vite preview --port 5473",
+    "app": "vite build && electron .",
+    "electron": "electron .",
     "typecheck:ui": "tsc --noEmit -p app/tsconfig.json",
     "report:content": "tsx scripts/report-content-coverage.ts",
     "verify:content-scope": "node scripts/verify-content-scope.mjs",
@@ -31,6 +34,7 @@
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.7.0",
+    "electron": "^31.7.7",
     "tsx": "^4.23.11",
     "typescript": "^5.6.3",
     "vite": "^5.4.21"

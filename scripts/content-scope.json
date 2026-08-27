@@ -66,6 +66,7 @@
         "tsconfig.json",
         "app/**",
         "vite.config.ts",
+        "electron/**",
         "Start.bat",
         "HANDOFF.md",
         "README.md",

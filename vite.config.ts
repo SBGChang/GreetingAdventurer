@@ -9,6 +9,8 @@ import { resolve } from 'node:path';
 
 export default defineConfig({
   root: resolve(import.meta.dirname, 'app'),
+  // 相對 base：讓打包後的 index.html 在 Electron 的 file:// 下也能載到 assets（絕對 /assets 在 file:// 會失效）。
+  base: './',
   plugins: [react()],
   build: {
     // 產物放 repo 根的 dist/renderer（Electron 之後從這裡載）。
