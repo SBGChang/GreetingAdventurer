@@ -5,8 +5,9 @@
 // 這一層跑在 renderer（瀏覽器），所以只用**純函式**引擎面（loadBundledContent / createNewGame /
 // runGameCommand / createProductionContextAssembler）——不碰 node:fs。
 
-import { createResolverRegistry, type DefinitionRegistry } from '../../src/data-runtime';
+import type { DefinitionRegistry } from '../../src/data-runtime';
 import { createProductionContextAssembler } from '../../src/app/content/context-assembler';
+import { createProductionResolverRegistry } from '../../src/app/content/resolver-registrations';
 import { createNewGame, type NewGameConfig } from '../../src/app/composition/new-game-bootstrap';
 import { runGameCommand, runDueJob, type ContextAssembler } from '../../src/app/composition/session';
 import type { GameState } from '../../src/app/composition/state';
@@ -84,7 +85,12 @@ export function createGame(config: NewGameConfig): GameHandle {
     throw new Error(`內容載入失敗：${loaded.diagnostics.map((d) => d.code).join(', ')}`);
   }
   const registry: DefinitionRegistry = loaded.registry;
-  const assembler: ContextAssembler = createProductionContextAssembler(registry, createResolverRegistry());
+  // 用**正式** ResolverRegistry（依內容標頭的 resolverBindings 組裝），而非空 registry：spine 正式上線。
+  // 目前的指令（rest/startCityTravel）不觸及 Resolver，所以行為不變；但接下來任何用 Resolver 的
+  // context 一接上就能直接運作。內容綁了 src 沒實作的 shape 會在這裡（開新遊戲時）明確拋錯——
+  // 那正是 Bootstrap 期該擋下的「用到未實作 Resolver」。
+  const resolvers = createProductionResolverRegistry(loaded.resolverBindings);
+  const assembler: ContextAssembler = createProductionContextAssembler(registry, resolvers);
 
   const started = createNewGame(config, registry);
   if (!started.success) {
