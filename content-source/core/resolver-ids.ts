@@ -15,6 +15,7 @@
 import type { ModuleId, ResolverBinding, ResolverId } from '../../src/contracts/core';
 
 const COMBAT_MODULE = 'combat' as ModuleId;
+const TEAM_MODULE = 'team' as ModuleId;
 
 // ── Resolver ID 建構子（字串形狀＝既有落地慣例 `resolver:<module>.<用途>`）──────────
 export function combatTargetResolverId(local: string): ResolverId {
@@ -49,4 +50,22 @@ export function combatTargetBindings(): readonly ResolverBinding[] {
     ownerModule: COMBAT_MODULE,
     shape: `combat-target:${local}`,
   }));
+}
+
+// team 的 Resolver ID 建構子（模組擁有，形狀同 content-source/core/team.ts 的 `resolver:team.<local>`）。
+export function teamResolverId(local: string): ResolverId {
+  return `resolver:team.${local}` as ResolverId;
+}
+
+// team 的**純演算法** Resolver 綁定（免發明平衡量）：目前只有預設戰鬥站位。
+// team-formation-rule.defaultPlacementResolverId = resolver:team.team-default-placement（見 core/team.ts）。
+// 招募/離隊的擲骰型 Resolver 需要曲線 params（第一版方案待討論），另行增量，不在此。
+export function teamPureBindings(): readonly ResolverBinding[] {
+  return [
+    {
+      resolverId: teamResolverId('team-default-placement'),
+      ownerModule: TEAM_MODULE,
+      shape: 'team:default-placement',
+    },
+  ];
 }

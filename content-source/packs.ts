@@ -13,7 +13,7 @@
 
 import type { ContentPackId } from '../src/contracts/core';
 import type { AuthoredManifest, AuthoredPack } from './authoring';
-import { combatTargetBindings } from './core/resolver-ids';
+import { combatTargetBindings, teamPureBindings } from './core/resolver-ids';
 
 import { progressionDomain } from './core/progression';
 // Wave F1：八個 domain 的文化無關規則。
@@ -145,9 +145,9 @@ const corePack: AuthoredPack = {
   // 目前 core 的內容沒有任何 Resolver 引用。有了就必須在這裡列出來——
   // Bootstrap 以此確認「pack 用到的 Resolver 全部已註冊」才啟動。
   requiredResolverIds: [],
-  // core **宣告並提供** combat 目標 shape 的 Resolver 綁定（模組擁有、四國共用；文化 pack 的技能
-  // 只引用這些 ID）。目前為 target-shapes.ts 已實作的 8 種；隨實作增加逐筆補上。
-  resolverBindings: [...combatTargetBindings()],
+  // core **宣告並提供** Resolver 綁定（模組擁有、四國共用；文化 pack 只引用這些 ID）。
+  // 目前：combat 目標 8 種（target-shapes.ts）＋ team 預設站位（純演算法）。隨實作增加逐筆補上。
+  resolverBindings: [...combatTargetBindings(), ...teamPureBindings()],
   runtimeCompatibility: { minRuntimeVersion: '0.1.0' },
   // 由 Compiler 交叉比對（見 authoring.ts 的說明：這一欄刻意手寫，推導出來的宣告等於沒有檢查）。
   // 下面這份清單是實際內容的 kind 聯集；改內容而忘了改這裡，編譯就會指名多了/少了哪些。

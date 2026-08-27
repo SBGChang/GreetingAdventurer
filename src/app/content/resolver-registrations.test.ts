@@ -10,7 +10,8 @@
 
 import { resolve } from 'node:path';
 
-import type { CombatantId, ResolverBinding, ResolverId, ModuleId } from '../../contracts/core';
+import type { CharacterId, CombatantId, ResolverBinding, ResolverId, ModuleId, TeamId } from '../../contracts/core';
+import type { GridCell } from '../../contracts/map';
 import type { CombatSkillTargetInput } from '../../modules/combat/system';
 import { makeEncounter } from '../../modules/combat/fixtures';
 import { loadContentFromDisk } from '../../platform/content-repository';
@@ -19,6 +20,7 @@ import { resolverContext } from './resolver-adapter';
 
 const CONTENT_ROOT = resolve(import.meta.dirname, '../../../content');
 const COMBAT = 'combat' as ModuleId;
+const TEAM = 'team' as ModuleId;
 
 function assert(cond: boolean, msg: string): void {
   if (!cond) throw new Error(msg);
@@ -99,6 +101,31 @@ const cases: readonly Case[] = [
         ]),
       '重複 resolverId 應拋',
     );
+  }],
+
+  // team 純演算法：預設站位以 row-major 0-based 逐格填九宮格（不同 shape 家族走同一 spine）。
+  ['機制：team 預設站位 resolver', () => {
+    const rid = 'resolver:team.team-default-placement' as ResolverId;
+    const registry = createProductionResolverRegistry([
+      { resolverId: rid, ownerModule: TEAM, shape: 'team:default-placement' },
+    ]);
+    const input = {
+      teamId: 'team-1' as TeamId,
+      memberIds: ['c1', 'c2', 'c3', 'c4'] as CharacterId[],
+      current: {} as Record<CharacterId, GridCell>,
+    };
+    const placement = registry.require(rid).resolve(input, resolverContext({})).value as Record<
+      CharacterId,
+      GridCell
+    >;
+    const at = (id: string): string => {
+      const c = placement[id as CharacterId];
+      return c === undefined ? 'none' : `${c.row},${c.col}`;
+    };
+    assert(at('c1') === '0,0', `c1 應在 0,0，實得 ${at('c1')}`);
+    assert(at('c2') === '0,1', `c2 應在 0,1，實得 ${at('c2')}`);
+    assert(at('c3') === '0,2', `c3 應在 0,2，實得 ${at('c3')}`);
+    assert(at('c4') === '1,0', `c4 應換行到 1,0，實得 ${at('c4')}`);
   }],
 
   // 真實資料路徑：content/** 的綁定匯總 → 全部 shape 都有實作（組裝不拋）→ 真 ID 可解析。

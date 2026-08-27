@@ -115,6 +115,11 @@
       "ownerModule": "combat",
       "resolverId": "resolver:combat.target-whole-party",
       "shape": "combat-target:whole-party"
+    },
+    {
+      "ownerModule": "team",
+      "resolverId": "resolver:team.team-default-placement",
+      "shape": "team:default-placement"
     }
   ],
   "runtimeCompatibility": {
