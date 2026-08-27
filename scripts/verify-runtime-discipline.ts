@@ -66,6 +66,7 @@ const PRODUCTION_ROOTS: readonly string[] = [
   'src/app/composition/manifest.ts',
   'src/app/composition/messages.ts',
   'src/app/composition/state.ts',
+  'src/app/composition/new-game-bootstrap.ts',
   'src/modules/character/public.ts',
   'src/modules/inventory/public.ts',
   'src/modules/progression/public.ts',
