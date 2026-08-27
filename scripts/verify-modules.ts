@@ -18,6 +18,7 @@ import { runTests as crossModulePorts } from '../src/app/content/cross-module-po
 import { runTests as contentPackIntegration } from '../src/app/content/content-pack-integration.test';
 // F3：NewGameBootstrapper 從真實 pack 開新遊戲的端到端證據。
 import { runTests as newGameBootstrap } from '../src/app/composition/new-game-bootstrap.test';
+import { runTests as verticalSlice } from '../src/app/composition/vertical-slice.test';
 import { runTests as bootstrap } from '../src/testing/composition/bring-up-bootstrap.test';
 import { runTests as travelIntegration } from '../src/app/composition/travel-integration.test';
 import { runTests as weaponSetWorkflow } from '../src/app/workflows/weapon-set-configuration.test';
@@ -123,6 +124,7 @@ const throwing: ReadonlyArray<readonly [string, () => void]> = [
   // 只有這一支證明「作者寫下的數字真的算出了遊戲結果」。
   ['content-pack-integration', contentPackIntegration],
   ['new-game-bootstrap', newGameBootstrap],
+  ['vertical-slice', verticalSlice],
   // bootstrap：開機骨架端到端——NewGameBootstrapper → 玩家命令 → 提交 → golden 重播。
   ['bootstrap', bootstrap],
   // travel：玩家旅行端到端——引擎自驅（旅行事件 Workflow 訂閱者送 CompleteSegment），非手動扮演。
