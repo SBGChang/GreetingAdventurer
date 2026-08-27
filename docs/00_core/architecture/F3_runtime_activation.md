@@ -92,3 +92,39 @@ statistics / combat-power 服務在做的事。
 6. 交棒 F4。
 
 每一步都能獨立提交並被 `npm run report:content` / `verify` 量測——不要憋成一個大 commit。
+
+## 動手 combat 核心前必須先解的架構子題（本輪實查確認）
+
+**resolver 註冊不能在 `src/` 硬編碼 resolver ID。** `ResolverId = Brand<string,'resolver'>`，而紀律
+門禁的 `CONTENT_BRAND_EXACT` 含 `'resolver'`——所以任何 `'resolver.yunhua.target-self' as ResolverId`
+寫在 `src/` 都會被「硬編碼內容 ID」擋下（實查 `scripts/lib/ast-gates.ts:63`）。resolvers.ts 現有的
+`logisticRollResolver(resolverId, ownerModule)` 樣板正是因此把 resolverId 收成**參數**——呼叫端才帶入。
+
+但呼叫端若也在 `src/`，literal 一樣被擋。所以 registry 組裝必須讓 **resolver ID 住在內容側**，
+`src/` 只認**與內容無關的 shape/kind 代碼識別子**。這一層目前**不存在**，是 combat 核心的真正前置。
+
+**建議機制（下一次動手先做這個）**：
+1. 新增一個 **resolver 定義 kind**（例 `combat-target-resolver` / `combat-power-resolver`…，或通用
+   `resolver-binding`），內容欄位 `{ shape: string; params?: … }`；作者層（content-source）替每個
+   resolver ID 寫一筆，指定它是哪個 shape。resolver ID 出現在 content-source（合法）。
+2. `src/` 提供一張 `Record<shapeKey, ResolverImpl>`（shapeKey 是純代碼字串,非內容 ID）：
+   `combat.target.single-hostile`、`combat.target.same-column`、`combat.power.weighted`… 每個 shape
+   一個純函式實作（grid 邏輯／kernel 公式）。
+3. 組裝：iterate 內容的 resolver 定義 → 依 `shape` 查 impl → `registry.register({ resolverId: def.id, resolve: impl(def.params) })`。
+   `src/` 全程只碰 shapeKey，碰不到 resolver ID literal → 門禁綠。
+4. pack 標頭的 `requiredResolverIds` 已存在，Bootstrap Gate 可據此確認「內容指名的 resolver 都註冊了」。
+
+**combat target resolver 的 shape 盤點（25 筆）**：
+- 純 grid/side/status（~15,可直接實作）：self、single-hostile、single-ally、self-or-single-ally、
+  same-column-hostiles、own-front-row、whole-party、two-allies、up-to-three-{allies,hostiles}、
+  single-hostile-casting（讀 combatant.casting）、single-hostile-with-negative-status（讀 activeStatuses）。
+- 需武器 reach／guard 語意（~10,要 loadout 或 status 佐料）：single-hostile-{melee,ranged,mid,
+  guarding,with-guard-down}、up-to-three-hostiles-{melee,ranged}、blocked-melee-attacker、
+  self-after-block、counter-condition-{block,melee-block}。
+
+**combat power resolver**（damage/heal/ctb）：讀 actor 裝備係數 × 技能倍率 × 主屬 × 目標防禦，
+形狀近似 statistics/combat-power 服務;調校量走 balanceModel（已是 core 內容）。這是 combat 核心
+最重的一塊,務必逐個釘測試（不同輸入→期望傷害）再接。
+
+做完上面 1–3 的機制,combat 核心就從「25 個散落的 ID」變成「一張 shape→impl 表 + 內容側的綁定」,
+可逐 shape 增量、逐個驗證。
