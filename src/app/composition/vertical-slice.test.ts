@@ -110,16 +110,19 @@ const CASES: readonly Case[] = [
     run: () => {
       const loaded = loadContentFromDisk(CONTENT_ROOT);
       if (!loaded.success) throw new Error('內容載入失敗');
+      const game = createNewGame(CONFIG, loaded.registry);
+      if (!game.success) throw new Error('開新遊戲失敗');
       const assembler = createProductionContextAssembler(loaded.registry, createResolverRegistry());
-      // 直接取一個尚未接線的模組 context，碰它應拋「尚未接線」而不是回 undefined。
+      // 已接線的 context（team/combat）建置時會讀真實 Slice，故傳真實開局狀態；dummyRuntime 只用來
+      // 佔位（combat context 只把 runtime.ids.combat/rng 當屬性引用，不在建置時計算）。
       const dummyRuntime = {
         worldSeed: 'x' as never,
         worldDay: 0 as never,
-        ids: { team: {} } as never,
+        ids: { team: {}, combat: {} } as never,
         rng: {} as never,
         rngContextFor: () => ({}) as never,
       };
-      const contexts = assembler(dummyRuntime, undefined as never);
+      const contexts = assembler(dummyRuntime, game.state);
       let threw = false;
       try {
         // city 尚未接線；存取任一屬性應拋。
