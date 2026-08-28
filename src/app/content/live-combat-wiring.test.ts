@@ -150,4 +150,15 @@ export function runTests(): void {
   const capacity = ctx.inventory.getCarryCapacity(member.characterId);
   // 負重上限 = 30 + 肌力(0)×1.5 = 30（BM carry-capacity-rule；空熟練 → 肌力 0）。
   assert(capacity.maximumWeight === 30, `隊長負重上限應 30（引擎算），實得 ${capacity.maximumWeight}`);
+
+  // ── 證據 4：quest context（acceptQuest 的 bag）——三個唯讀 Port 轉接真實 team/map/character Slice ──
+  assert(ctx.quest.teams.getLocation(playerTeamId).kind === 'city', 'quest.teams.getLocation 應回城市（開局在城市）');
+  assert(
+    ctx.quest.teams.listFormalMembers(playerTeamId).some((c) => String(c) === leaderId),
+    'quest.teams.listFormalMembers 應含隊長',
+  );
+  assert(
+    ctx.quest.characters.getTemporaryOrigin(member.characterId) === undefined,
+    'quest.characters.getTemporaryOrigin(隊長) 應為 undefined（隊長非臨時角色）',
+  );
 }

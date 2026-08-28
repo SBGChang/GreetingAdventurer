@@ -45,7 +45,10 @@ import {
   createCombatFormationQuery,
   createCombatLoadoutQuery,
   createInventoryContext,
+  createQuestContext,
 } from './cross-module-ports';
+import { createMapDefinitionReader } from './map-reader';
+import { createQuestDefinitionReader } from './quest-reader';
 import { RESOLVER_PARAMS_KINDS } from './resolvers';
 import { makeProgressionQuery } from '../../modules/progression/public';
 
@@ -129,6 +132,8 @@ export function createProductionContextAssembler(
   // ── combat 接線：建置時取好一次的 Reader / 規則 id / params 窄門（每次 dispatch 不變）──
   const combatDefinitions = createCombatDefinitionReader(registry);
   const itemReader = createItemDefinitionReader(registry);
+  const mapDefinitions = createMapDefinitionReader(registry);
+  const questDefinitions = createQuestDefinitionReader(registry);
   const statisticsDefinitions = createStatisticsDefinitionReader(registry);
   const statisticsResolvers = createStatisticsResolverPort(resolvers, registry);
   // 內容裡唯一一筆 combat-rule / statistics-rule 的具名 id（同族單一轉型；缺或重複則不啟動）。
@@ -198,6 +203,16 @@ export function createProductionContextAssembler(
       ids: runtime.ids.inventory,
     });
 
+    // quest context：acceptQuest 只讀前置與快照，三個 Port 皆唯讀轉接真實 sibling Slice。
+    const questContext = createQuestContext({
+      questDefinitions,
+      teamState: state.team,
+      mapState: state.map,
+      mapDefinitions,
+      characterState: state.character,
+      worldDay: runtime.worldDay,
+    });
+
     return {
       // ── 已接：team（rest / startCityTravel 等只讀 plan 規則的指令）─────────────
       team: {
@@ -228,12 +243,14 @@ export function createProductionContextAssembler(
       inventory: inventoryContext,
 
       // ── 待接：其餘模組與服務（F3 後續增量逐一換成真實 context）─────────────────
+      // ── 已接：quest（acceptQuest；team/map/character 唯讀投影）──
+      quest: questContext,
+
       character: pending('character'),
       map: pending('map'),
       dungeon: pending('dungeon'),
       progression: progressionReader,
       city: pending('city'),
-      quest: pending('quest'),
       social: pending('social'),
       economy: pending('economy'),
       world: pending('world'),

@@ -31,6 +31,10 @@ import {
   type InventoryState,
   type InventoryDeps,
 } from '../../modules/inventory/public';
+import { createMapQuery, type MapState } from '../../modules/map/public';
+import type { MapDefinitionReader } from '../../contracts/map';
+import type { QuestHandlerContext } from '../../modules/quest/public';
+import type { QuestDefinitionReader } from '../../contracts/quest';
 import { createCharacterStatisticsCalculator, type StatisticsResolverPort } from '../../domain-services/statistics/public';
 import type {
   CarryCapacitySnapshot,
@@ -315,5 +319,38 @@ export function createInventoryContext(deps: InventoryContextDeps): InventoryDep
       };
     },
     isTeamTravelling: (teamId) => teamQuery.getLocation(teamId).kind === 'travelling',
+  };
+}
+
+// ── QuestHandlerContext ← quest 內容 ＋ team／map／character Slice（皆唯讀投影）─────────────
+//
+// Quest 不擁有隊伍位置/成員、地圖內容、臨時角色來源（doc §1.2）：三者都經唯讀 Port 轉接真實 sibling。
+// 無 Resolver、無 RNG、無 id 配發——acceptQuest 只讀前置與快照。
+export type QuestContextDeps = Readonly<{
+  questDefinitions: QuestDefinitionReader;
+  teamState: TeamState;
+  mapState: MapState;
+  mapDefinitions: MapDefinitionReader;
+  characterState: CharacterState;
+  worldDay: WorldDay;
+}>;
+
+export function createQuestContext(deps: QuestContextDeps): QuestHandlerContext {
+  const teamQuery = createTeamQuery(deps.teamState);
+  const mapQuery = createMapQuery(deps.mapState, deps.mapDefinitions);
+  const characterQuery = createCharacterQuery(deps.characterState);
+  return {
+    worldDay: deps.worldDay,
+    definitions: deps.questDefinitions,
+    teams: {
+      getLocation: (teamId) => teamQuery.getLocation(teamId),
+      listFormalMembers: (teamId) => teamQuery.listFormalMembers(teamId),
+    },
+    mapContents: {
+      getContent: (contentId) => mapQuery.getContent(contentId),
+    },
+    characters: {
+      getTemporaryOrigin: (characterId) => characterQuery.getTemporaryOrigin(characterId),
+    },
   };
 }
