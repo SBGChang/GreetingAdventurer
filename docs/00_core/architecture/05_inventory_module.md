@@ -115,6 +115,7 @@ type EquipmentDefinition = ItemDefinition & {
   primaryAttributeCoefficients: PrimaryAttributeCoefficients;
   secondaryAttributeCoefficients: SecondaryAttributeCoefficients[];
   skillEffectRefs: EquipmentSkillEffectRef[];
+  reachCells?: number;                            // §2.4 武器射程格數（近戰1／雙手長柄2／射擊4-6／施法1）；護甲盾飾品省略
 };
 ```
 

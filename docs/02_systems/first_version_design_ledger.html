@@ -150,12 +150,36 @@
   </div>
 
   <div class="card">
-    <h3>武器射程（近/中/遠）目標形狀＋格擋反擊<span class="tag t-block">需你拍板</span></h3>
-    <p>剩下 ~7 種目標形狀（single-hostile-melee/mid/ranged、up-to-three-hostiles-melee/ranged…）與 melee-block 反擊，
-    需要「武器射程」這個概念——<b>目前 schema 完全沒有</b>。</p>
-    <p><b>我的提案（要動 schema，想先問你）：</b>裝備/武器加一個 <code>reach: 'melee'|'mid'|'ranged'</code>；
-    規則：melee 只能打敵方<b>最前一排</b>、mid 打<b>前兩排</b>、ranged 打<b>任一排</b>。</p>
-    <p class="muted">這不只是數字，是新資料概念＋戰鬥手感，所以標「需你拍板」。你點頭我就加欄位＋做這批形狀。</p>
+    <h3>射程與距離（定案；schema 已加）<span class="tag t-done">已定案</span></h3>
+    <p><b>射程＝格數</b>（非分類）：武器 <code>reachCells</code>（近戰1／雙手・長柄2／射擊4-6／施法1）＋招式
+    <code>extraReachCells</code>（多數0，魔法/治療 +6）。<b>有效射程 = 武器/怪物格數 + 招式額外</b>。</p>
+    <div class="formula">距離 = 攻方離前排 + 守方離前排 + 1（不管左右）　→　合法目標：距離 ≤ 有效射程</div>
+    <p class="muted">前對前=1、雙方後排=5、後打敵前=3。<code>combatDistance</code> 已實作（純結構函式）；schema 三欄已加。
+    「近/中/遠」招式分類收斂掉（射程來自武器，不是招式類別）。落點：contracts + <code>combat/state.ts</code>。
+    <b>下一步</b>：武器/招式 reach 內容值 → handler 算有效射程傳入 target resolver 做距離過濾。</p>
+  </div>
+
+  <div class="card">
+    <h3>命中／迴避／格擋（沿用副屬性 + BM 公式，非發明）<span class="tag t-plan">待實作</span></h3>
+    <p>命中是<b>副屬對抗</b>，不是憑空基礎值。命中/迴避/格擋副屬由 statistics 服務算出「分數」。</p>
+    <div class="formula">命中率 = clamp(15,95, 70 + (命中分數 − 迴避分數) × 0.25)
+格擋率 = clamp(0,75, 格擋分數 × 0.25)（守勢允許時）；格擋吸收 raw/(raw+80)；減傷 raw/(raw+120)</div>
+    <p class="muted">公式本體<b>照既有平衡模型，不發明</b>。目前戰鬥 dealDamage 必中——要新增命中/格擋 roll（miss 不套傷害、
+    成功格擋吃吸收）。需接 statistics 副屬查詢。這是最重一塊。</p>
+  </div>
+
+  <div class="card">
+    <h3>距離修正：傷害／命中／CD（我設計的數值，待討論）<span class="tag t-plan">待實作</span></h3>
+    <p>距離 3 = 標準；越近越有利、越遠越不利。<b>遠距代價主要是命中變差</b>（打不準），非狂砍傷害。
+    命中補正以 <b>raw 加減</b>加在攻方命中分數上（與狀態同機制），補正後才進命中率公式。</p>
+    <div class="scroll"><table>
+      <tr><th>施展距離</th><th>1</th><th>2</th><th>3 標準</th><th>4</th><th>5</th></tr>
+      <tr><td class="k">傷害 ×</td><td>1.1</td><td>1.05</td><td>1.0</td><td>0.85</td><td>0.7</td></tr>
+      <tr><td class="k">命中 raw ±</td><td>小幅 +</td><td></td><td>0</td><td></td><td>較大 −</td></tr>
+      <tr><td class="k">CTB ×</td><td>0.9</td><td>0.95</td><td>1.0</td><td>1.15</td><td>1.3</td></tr>
+    </table></div>
+    <p class="muted">命中 raw 的實際幅度我會依副屬分數量級校準（施工時填實值）。傷害本體＝
+    <code>Σ(主屬×裝備係數)×Mastery×技能威力</code>（BM），再套距離傷害×與減傷/吸收。占位傷害 resolver 會換掉。</p>
   </div>
 
   <div class="card">
@@ -175,13 +199,15 @@
     <tr><td class="k">招募</td><td>logisticRoll</td><td>bias−0.5 / cha.04 / size.25</td><td><span class="tag t-plan">待實作</span></td></tr>
     <tr><td class="k">離隊</td><td>logisticRoll</td><td>bias−2.5 / gap.02 / res.03</td><td><span class="tag t-plan">待實作</span></td></tr>
     <tr><td class="k">敵方 AI</td><td>加權抽選</td><td>視 ai-policy 內容</td><td><span class="tag t-plan">待實作</span></td></tr>
-    <tr><td class="k">武器射程目標 ×7＋反擊</td><td>純邏輯</td><td>reach 概念（新 schema）</td><td><span class="tag t-block">需你拍板</span></td></tr>
+    <tr><td class="k">射程/距離</td><td>純結構幾何</td><td>reach 格數＋距離公式（schema 已加，combatDistance 已實作）</td><td><span class="tag t-done">已定案</span></td></tr>
+    <tr><td class="k">命中/迴避/格擋</td><td>BM 公式（非發明）</td><td>命中率/格擋率/吸收/減傷 照 BM＋距離命中 raw 補正</td><td><span class="tag t-plan">待實作</span></td></tr>
+    <tr><td class="k">距離修正</td><td>依距離查表</td><td>傷害×/命中raw±/CTB×（距離3=標準）</td><td><span class="tag t-plan">待實作</span></td></tr>
     <tr><td class="k">經濟/社交/角色</td><td>混合</td><td>逐項施工時填</td><td><span class="tag t-plan">待實作</span></td></tr>
   </table></div>
 
   <div class="foot">
     <p>這是<b>活文件</b>：每落地一項，我會把數字從「提案」換成「已實作＋實際值」並更新狀態。
-    唯一需要你現在拍板的是 <span class="tag t-block">需你拍板</span> 那項（武器射程要不要加 schema、我的分排提案 OK 嗎）；
-    其餘我照本帳本的第一版數值先做，你之後隨時可改。</p>
+    射程/距離/命中模型經多輪已<b>定案</b>（見上），設計文件（GDD 九、戰鬥系統、combat_skill_effect_spec.md）已同步。
+    其餘第一版數值我照本帳本先做，你之後隨時可改；命中 raw 補正的實際幅度會在施工時依副屬分數量級校準後回填。</p>
   </div>
 </div>

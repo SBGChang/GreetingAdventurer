@@ -89,6 +89,7 @@ type MonsterNaturalAttackProfileDefinition = DefinitionHeader & {
   physicalPowerResolverId: ResolverId;
   magicPowerResolverId: ResolverId;
   hitScoreResolverId: ResolverId;
+  reachCells: number;                            // §2.4 天生攻擊射程格數（怪物無 loadout；等同角色武器格數）
 };
 
 type CombatControlResistanceProfileDefinition = DefinitionHeader & {
