@@ -91,6 +91,9 @@ export type MonsterNaturalAttackProfileDefinition = DefinitionHeader & {
   physicalPowerResolverId: ResolverId;
   magicPowerResolverId: ResolverId;
   hitScoreResolverId: ResolverId;
+  // §2.4 射程（格數）：怪物天生攻擊的觸及距離。近戰怪 1；有距離攻擊的怪更高。等同角色的武器格數，
+  // 是怪物這一側算「有效射程 = 此值 + 招式額外距離」的基底（怪物沒有武器 loadout）。
+  reachCells: number;
 };
 
 export type CombatControlResistanceProfileDefinition = DefinitionHeader & {
@@ -147,6 +150,9 @@ export type CombatMasteryExperienceMode = 'damage' | 'fixedSupport';
 // Derived: doc references these but never defines their bodies (see report note).
 export type TargetingDefinition = {
   targetResolverId: ResolverId;
+  // §2.4 射程：有效射程 = 武器格數 + 本欄「招式額外距離」。大多數招式沒有（省略＝0）；魔法/治療
+  // 招式一律 +6（全場可及）。合法目標＝施展當下真實排距 ≤ 有效射程（見 combatDistance）。
+  extraReachCells?: number;
 };
 export type CounterStanceDefinition = {
   conditionResolverId: ResolverId;

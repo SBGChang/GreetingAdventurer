@@ -165,6 +165,10 @@ export type EquipmentDefinition = ItemDefinition & Readonly<{
   primaryAttributeCoefficients?: PrimaryAttributeCoefficients;
   secondaryAttributeCoefficients: readonly SecondaryAttributeCoefficients[];
   skillEffectRefs: readonly EquipmentSkillEffectRef[];
+  // §2.4 射程（格數）：只有 `equipmentKind === 'weapon'` 才有意義——它決定用這把武器的招式能觸及
+  // 的排距（近戰 1／雙手・長柄 2／射擊 4–6；施法用具通常 1，射程靠招式的 extraReachCells +6）。
+  // 護甲／盾／飾品省略。戰鬥算「有效射程」時，武器缺此欄＝內容錯，明確拒絕（不預設）。
+  reachCells?: number;
 }>;
 
 export type UseDelayAttributeReductionRule = Readonly<{
