@@ -531,8 +531,33 @@ function nameKey(local: string, tier: TierMeta['tier']): string {
   return `equipment.yunhua.${local}.${tier}.name`;
 }
 
+// §2.4 武器射程（格數）：依武器 Mastery 類別指派（第一版方案，待討論——見設計帳本）。
+// 近戰1／雙手・長柄2／投擲3／射擊5（4-6 取中）／法杖1（魔法距離靠招式 +6）／樂器2。
+// 只有 equipmentKind==='weapon' 有射程；護甲/盾/飾品回 undefined（省略欄位）。
+// 對應不到＝內容錯（新武器類別忘了指派射程），明確拋錯、不預設。
+const WEAPON_REACH_CELLS: Readonly<Record<string, number>> = {
+  'one-hand-weapon': 1,
+  'two-hand-weapon': 2,
+  'throwing-weapon': 3,
+  'shooting-weapon': 5,
+  'one-hand-staff': 1,
+  'two-hand-staff': 1,
+  'wind-instrument': 2,
+  'string-instrument': 2,
+};
+function weaponReachCells(blueprint: Blueprint): number | undefined {
+  if (blueprint.equipmentKind !== 'weapon') return undefined;
+  const key = blueprint.masteryLocals[0];
+  const reach = key === undefined ? undefined : WEAPON_REACH_CELLS[key];
+  if (reach === undefined) {
+    throw new Error(`equipment：武器 ${blueprint.local} 的 Mastery 類別「${String(key)}」沒有射程對應`);
+  }
+  return reach;
+}
+
 function equipmentTier(blueprint: Blueprint, index: TierIndex): Authored<EquipmentDefinition> {
   const meta = TIER_META[index];
+  const reachCells = weaponReachCells(blueprint);
   return {
     kind: 'equipment',
     // 設計來源的 `equipment.yunhua.${blueprint.id}.${meta.tier.toLowerCase()}`，逐字沿用。
@@ -566,6 +591,8 @@ function equipmentTier(blueprint: Blueprint, index: TierIndex): Authored<Equipme
     secondaryAttributeCoefficients: blueprint.baseRows.map((row) => scaleRow(row, meta.scale)),
     // 見檔頭：ability 的三段散文屬 combat 的 `equipment-effect`，本檔不填懸空引用。
     skillEffectRefs: [],
+    // §2.4 武器射程；非武器省略。
+    ...(reachCells === undefined ? {} : { reachCells }),
   };
 }
 

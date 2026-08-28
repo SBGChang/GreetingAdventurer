@@ -24,6 +24,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "common",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.one-hand-weapon"
     ],
@@ -86,6 +87,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "fine",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.one-hand-weapon"
     ],
@@ -148,6 +150,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "epic",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.one-hand-weapon"
     ],
@@ -210,6 +213,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "legendary",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.one-hand-weapon"
     ],
@@ -272,6 +276,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "mythic",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.one-hand-weapon"
     ],
@@ -334,6 +339,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "common",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.one-hand-weapon"
     ],
@@ -402,6 +408,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "fine",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.one-hand-weapon"
     ],
@@ -470,6 +477,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "epic",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.one-hand-weapon"
     ],
@@ -538,6 +546,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "legendary",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.one-hand-weapon"
     ],
@@ -606,6 +615,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "mythic",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.one-hand-weapon"
     ],
@@ -675,6 +685,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "common",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.two-hand-weapon"
     ],
@@ -745,6 +756,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "fine",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.two-hand-weapon"
     ],
@@ -815,6 +827,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "epic",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.two-hand-weapon"
     ],
@@ -885,6 +898,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "legendary",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.two-hand-weapon"
     ],
@@ -955,6 +969,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "mythic",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.two-hand-weapon"
     ],
@@ -1025,6 +1040,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "common",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.two-hand-weapon"
     ],
@@ -1093,6 +1109,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "fine",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.two-hand-weapon"
     ],
@@ -1161,6 +1178,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "epic",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.two-hand-weapon"
     ],
@@ -1229,6 +1247,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "legendary",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.two-hand-weapon"
     ],
@@ -1297,6 +1316,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "mythic",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.two-hand-weapon"
     ],
@@ -1364,6 +1384,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "common",
+    "reachCells": 3,
     "relatedMasteryIds": [
       "mastery.core.throwing-weapon"
     ],
@@ -1426,6 +1447,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "fine",
+    "reachCells": 3,
     "relatedMasteryIds": [
       "mastery.core.throwing-weapon"
     ],
@@ -1488,6 +1510,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "epic",
+    "reachCells": 3,
     "relatedMasteryIds": [
       "mastery.core.throwing-weapon"
     ],
@@ -1550,6 +1573,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "legendary",
+    "reachCells": 3,
     "relatedMasteryIds": [
       "mastery.core.throwing-weapon"
     ],
@@ -1612,6 +1636,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "mythic",
+    "reachCells": 3,
     "relatedMasteryIds": [
       "mastery.core.throwing-weapon"
     ],
@@ -1674,6 +1699,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "common",
+    "reachCells": 3,
     "relatedMasteryIds": [
       "mastery.core.throwing-weapon"
     ],
@@ -1735,6 +1761,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "fine",
+    "reachCells": 3,
     "relatedMasteryIds": [
       "mastery.core.throwing-weapon"
     ],
@@ -1796,6 +1823,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "epic",
+    "reachCells": 3,
     "relatedMasteryIds": [
       "mastery.core.throwing-weapon"
     ],
@@ -1857,6 +1885,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "legendary",
+    "reachCells": 3,
     "relatedMasteryIds": [
       "mastery.core.throwing-weapon"
     ],
@@ -1918,6 +1947,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "mythic",
+    "reachCells": 3,
     "relatedMasteryIds": [
       "mastery.core.throwing-weapon"
     ],
@@ -1980,6 +2010,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "common",
+    "reachCells": 5,
     "relatedMasteryIds": [
       "mastery.core.shooting-weapon"
     ],
@@ -2043,6 +2074,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "fine",
+    "reachCells": 5,
     "relatedMasteryIds": [
       "mastery.core.shooting-weapon"
     ],
@@ -2106,6 +2138,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "epic",
+    "reachCells": 5,
     "relatedMasteryIds": [
       "mastery.core.shooting-weapon"
     ],
@@ -2169,6 +2202,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "legendary",
+    "reachCells": 5,
     "relatedMasteryIds": [
       "mastery.core.shooting-weapon"
     ],
@@ -2232,6 +2266,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "mythic",
+    "reachCells": 5,
     "relatedMasteryIds": [
       "mastery.core.shooting-weapon"
     ],
@@ -2295,6 +2330,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "common",
+    "reachCells": 5,
     "relatedMasteryIds": [
       "mastery.core.shooting-weapon"
     ],
@@ -2358,6 +2394,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "fine",
+    "reachCells": 5,
     "relatedMasteryIds": [
       "mastery.core.shooting-weapon"
     ],
@@ -2421,6 +2458,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "epic",
+    "reachCells": 5,
     "relatedMasteryIds": [
       "mastery.core.shooting-weapon"
     ],
@@ -2484,6 +2522,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "legendary",
+    "reachCells": 5,
     "relatedMasteryIds": [
       "mastery.core.shooting-weapon"
     ],
@@ -2547,6 +2586,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "mythic",
+    "reachCells": 5,
     "relatedMasteryIds": [
       "mastery.core.shooting-weapon"
     ],
@@ -2609,6 +2649,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "common",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.one-hand-staff"
     ],
@@ -2676,6 +2717,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "fine",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.one-hand-staff"
     ],
@@ -2743,6 +2785,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "epic",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.one-hand-staff"
     ],
@@ -2810,6 +2853,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "legendary",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.one-hand-staff"
     ],
@@ -2877,6 +2921,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "mythic",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.one-hand-staff"
     ],
@@ -2945,6 +2990,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "common",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.two-hand-staff"
     ],
@@ -3013,6 +3059,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "fine",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.two-hand-staff"
     ],
@@ -3081,6 +3128,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "epic",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.two-hand-staff"
     ],
@@ -3149,6 +3197,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "legendary",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.two-hand-staff"
     ],
@@ -3217,6 +3266,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "mythic",
+    "reachCells": 1,
     "relatedMasteryIds": [
       "mastery.core.two-hand-staff"
     ],
@@ -3285,6 +3335,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "common",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.wind-instrument"
     ],
@@ -3348,6 +3399,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "fine",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.wind-instrument"
     ],
@@ -3411,6 +3463,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "epic",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.wind-instrument"
     ],
@@ -3474,6 +3527,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "legendary",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.wind-instrument"
     ],
@@ -3537,6 +3591,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "mythic",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.wind-instrument"
     ],
@@ -3600,6 +3655,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "common",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.string-instrument"
     ],
@@ -3662,6 +3718,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "fine",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.string-instrument"
     ],
@@ -3724,6 +3781,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "epic",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.string-instrument"
     ],
@@ -3786,6 +3844,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "legendary",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.string-instrument"
     ],
@@ -3848,6 +3907,7 @@
     "originCultureId": "culture.yunhua",
     "packId": "pack:yunhua",
     "rarity": "mythic",
+    "reachCells": 2,
     "relatedMasteryIds": [
       "mastery.core.string-instrument"
     ],

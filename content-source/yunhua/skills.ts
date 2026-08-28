@@ -208,6 +208,13 @@ type CounterConditionLocal = keyof typeof COUNTER_CONDITIONS;
 const counterConditionResolverId = (local: CounterConditionLocal): ResolverId =>
   combatCounterConditionResolverId(local);
 
+// §2.4 招式額外距離：魔法（cast）與支援／治療（support）招式一律 +6，使其全場可及（最遠排距為 5）；
+// 攻擊／演奏／守勢不加（射程走武器格數）。第一版數值，待討論（見設計帳本）。
+const MAGIC_HEAL_EXTRA_REACH_CELLS = 6;
+function extraReachCellsFor(actionKind: CombatActionKind): number | undefined {
+  return actionKind === 'cast' || actionKind === 'support' ? MAGIC_HEAL_EXTRA_REACH_CELLS : undefined;
+}
+
 // ── 取得階層（§8.1 / acquisitionStages）─────────────────────────────────────
 type StageLocal = 'l0' | 'l3' | 'basic' | 'advanced' | 'supreme';
 
@@ -1441,7 +1448,13 @@ function combatSkill(route: RouteRow, entry: SkillRow): Authored<CombatSkillDefi
       ? { attackMasteryAwardRuleId: entry.attackAwardRuleId ?? route.attackAwardRuleId }
       : { supportMasteryAwardRuleId: supportAwardRuleId(local) }),
     techniqueIds: entry.techniques.map(techniqueId),
-    targeting: { targetResolverId: targetResolverId(entry.target) },
+    targeting: {
+      targetResolverId: targetResolverId(entry.target),
+      // 魔法/治療招式 +6 額外距離；其餘省略（走武器射程）。
+      ...(extraReachCellsFor(entry.actionKind) === undefined
+        ? {}
+        : { extraReachCells: extraReachCellsFor(entry.actionKind) }),
+    },
     actionDelayRuleId: delayRuleId(entry.delayLocal),
     effectIds: entry.effectLocals.map(effectId),
     ...(entry.counterCondition === undefined
