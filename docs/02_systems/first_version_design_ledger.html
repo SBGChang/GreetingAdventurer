@@ -1,0 +1,185 @@
+<meta charset="utf-8">
+<title>第一版數值與公式帳本</title>
+<style>
+  :root{
+    --bg:#f7f7f5; --panel:#ffffff; --ink:#1a1a18; --muted:#6b6b66; --line:#e3e3de;
+    --accent:#7a5cff; --code:#f0f0ec; --codeink:#2a2a28;
+    --done:#1a7f4b; --doneBg:#e5f5ec; --plan:#b8860b; --planBg:#fdf3d8; --block:#b23a48; --blockBg:#fbe6e9;
+  }
+  :root:not([data-theme=light]){ @media (prefers-color-scheme:dark){
+    --bg:#17171a; --panel:#1f1f24; --ink:#ececea; --muted:#9a9a96; --line:#33333a;
+    --accent:#a892ff; --code:#26262c; --codeink:#e0e0dc;
+    --done:#5fd39a; --doneBg:#12301f; --plan:#e8c063; --planBg:#332a12; --block:#f08a97; --blockBg:#341a1e;
+  }}
+  :root[data-theme=dark]{
+    --bg:#17171a; --panel:#1f1f24; --ink:#ececea; --muted:#9a9a96; --line:#33333a;
+    --accent:#a892ff; --code:#26262c; --codeink:#e0e0dc;
+    --done:#5fd39a; --doneBg:#12301f; --plan:#e8c063; --planBg:#332a12; --block:#f08a97; --blockBg:#341a1e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;}
+  .wrap{max-width:960px;margin:0 auto;padding:40px 24px 80px}
+  h1{font-size:26px;margin:0 0 4px;letter-spacing:-.01em}
+  .sub{color:var(--muted);margin:0 0 28px}
+  h2{font-size:19px;margin:38px 0 10px;padding-top:14px;border-top:1px solid var(--line)}
+  h3{font-size:15.5px;margin:22px 0 6px}
+  p{margin:8px 0}
+  code{background:var(--code);color:var(--codeink);padding:1px 6px;border-radius:5px;
+    font:13px/1.5 "SF Mono",Menlo,Consolas,monospace}
+  .lead{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:0 0 8px}
+  .lead b{color:var(--accent)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0 4px;font-size:13px}
+  .tag{display:inline-block;padding:1px 9px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+  .t-done{background:var(--doneBg);color:var(--done)}
+  .t-plan{background:var(--planBg);color:var(--plan)}
+  .t-block{background:var(--blockBg);color:var(--block)}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+  td.k{white-space:nowrap;font-weight:600}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px 20px 14px;margin:14px 0}
+  .card h3{display:flex;align-items:center;gap:10px}
+  .formula{background:var(--code);color:var(--codeink);border-radius:8px;padding:10px 14px;margin:8px 0;
+    font:13px/1.6 "SF Mono",Menlo,Consolas,monospace;overflow-x:auto}
+  .muted{color:var(--muted)}
+  .scroll{overflow-x:auto}
+  ul{margin:8px 0;padding-left:20px}
+  li{margin:3px 0}
+  .foot{margin-top:40px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+</style>
+
+<div class="wrap">
+  <h1>問候冒險者 — 第一版數值與公式帳本</h1>
+  <p class="sub">哪邊是「程式固定的公式」、哪邊是「我設計的數值（待你討論）」。更新於 F3 Resolver 層施工期。</p>
+
+  <div class="lead">
+    <p style="margin-top:14px"><b>一句話：</b>公式（formula）＝ kernel，是<b>程式</b>裡固定的數學形狀，本身<b>不含任何可調數字</b>；
+    數值（params）＝我為每個 resolver <b>設計</b>並寫進<b>內容</b>的係數／機率／門檻。換一份 Content Pack 只換數值，公式不動。</p>
+    <p>所以「哪邊有公式」＝下面〈公式清單〉；「哪邊有我設計的數值」＝〈我設計的數值〉每一張卡片。
+    每一項都標了<b>落點</b>（哪個檔案）與<b>狀態</b>。標 <span class="tag t-plan">待實作</span> 的數字是我的<b>提案</b>，
+    尚未寫進程式，正是要給你先看、可改的部分。</p>
+  </div>
+
+  <div class="legend">
+    <span><span class="tag t-done">已實作</span> 已進 code／content，測試綠</span>
+    <span><span class="tag t-plan">待實作</span> 公式已定、數值是我的第一版提案，尚未落地</span>
+    <span><span class="tag t-block">需你拍板</span> 牽涉新資料概念或 schema 變更，動手前想先跟你確認</span>
+  </div>
+
+  <h2>1. 公式清單（程式側，固定形狀，零魔數）</h2>
+  <p class="muted">這些是 <code>src/data-runtime/kernels.ts</code> 裡的 kernel。它們只吃 params＋inputs 回傳數字，
+  程式碼裡<b>沒有任何可調數值</b>（規範 §7.1）。每個 resolver 挑一個 kernel 當公式，再由內容餵它 params。</p>
+  <div class="scroll"><table>
+    <tr><th>公式（kernel）</th><th>算什麼</th><th>典型用途</th></tr>
+    <tr><td class="k">weightedLinearProduct</td><td><code>bias + Σ wᵢ·inputᵢ</code>（或乘積式）＋夾限</td><td>傷害、治療、物價微調</td></tr>
+    <tr><td class="k">logisticCurve / logisticRoll</td><td><code>p = 1/(1+e^−(bias+Σ wᵢ·inputᵢ))</code>，可夾 floor/ceil；roll 版用 RNG 擲成敗</td><td>招募成功、留隊、各種成功率</td></tr>
+    <tr><td class="k">monotonicAdjust</td><td><code>clamp(base + up·↑ − down·↓, min, max)</code></td><td>好感變化、脫隊傾向</td></tr>
+    <tr><td class="k">thresholdTable</td><td>分段查表：input ≤ 門檻 → 取值</td><td>依距離定期限、依等級定品級</td></tr>
+    <tr><td class="k">piecewiseLookup</td><td>分段線性內插</td><td>非線性曲線（產量、縮放）</td></tr>
+  </table></div>
+
+  <h2>2. 我設計的：演算法（有邏輯、無平衡數字）</h2>
+  <p class="muted">這些是我寫的<b>規則邏輯</b>，不含可調的平衡數字——換 Pack 也不會變，屬結構性。列出來讓你知道「這塊的行為是我定的」。</p>
+
+  <div class="card">
+    <h3>戰鬥目標解析（8 種形狀）<span class="tag t-done">已實作</span></h3>
+    <p>self、single-ally、self-or-single-ally、whole-party、own-front-row、single-hostile、single-hostile-casting、same-column-hostiles。</p>
+    <p class="muted">邏輯<b>逐字對應設計來源</b>（雲華技能表的 <code>condition</code> 散文），不是我發明的；純 grid/側別/讀條判定。
+    落點：<code>src/modules/combat/target-shapes.ts</code>。另 17 種需武器射程／守備狀態才能做（見 §3 反白項）。</p>
+  </div>
+
+  <div class="card">
+    <h3>隊伍預設戰鬥站位<span class="tag t-done">已實作</span></h3>
+    <p><b>我的第一版選擇：</b>依成員順序 row-major 逐格填九宮格（0-based，格數由 <code>GRID_MIN/MAX</code> 導出）。</p>
+    <p class="muted"><b>待討論：</b>目前不分前排肉盾／後排輸出——那需要「角色定位」資料才能排。
+    落點：<code>src/app/content/team-resolvers.ts</code>（shape <code>team:default-placement</code>）。</p>
+  </div>
+
+  <h2>3. 我設計的：數值（第一版方案，待討論）</h2>
+  <p class="muted">以下每張卡：<b>公式</b>＝用哪個 kernel；<b>我設計的數值</b>＝我提的第一版 params；<b>落點</b>＝數值會寫進哪。
+  標 <span class="tag t-plan">待實作</span> 的數字都還沒進程式，改起來零成本。</p>
+
+  <div class="card">
+    <h3>戰鬥傷害 combat-damage<span class="tag t-plan">待實作</span></h3>
+    <p><b>公式：</b>weightedLinearProduct（linear）。<b>輸入：</b>行動者主屬、目標主屬（依傷害管道選屬性）。</p>
+    <div class="formula">damage = clamp( bias + w_atk·行動者屬 − w_def·目標屬 , min=1 )</div>
+    <p><b>我設計的數值（提案）：</b>bias = 5、w_atk = 1.5、w_def = 1.0、clampMin = 1。</p>
+    <p><b>管道→屬性（我定的對應）：</b>physical→muscle、magic→intelligence、instrument→charisma。</p>
+    <p class="muted">主屬 0–100；早期屬 ~20–40，單擊約 20–40，對 ~100 HP 合理。落點：<code>content-source</code> 的
+    <code>weighted-product-params</code> 定義（數值）＋ <code>src/app/content/combat-power-resolvers.ts</code>（公式接線）。
+    <b>不改任何 schema</b>——只讀既有主屬。</p>
+  </div>
+
+  <div class="card">
+    <h3>戰鬥治療 combat-heal<span class="tag t-plan">待實作</span></h3>
+    <p><b>公式：</b>weightedLinearProduct（linear）。<b>輸入：</b>行動者主屬（intelligence）。</p>
+    <div class="formula">heal = clamp( bias + w·行動者intelligence , min=1 )</div>
+    <p><b>我設計的數值（提案）：</b>bias = 5、w = 1.2、clampMin = 1。</p>
+  </div>
+
+  <div class="card">
+    <h3>戰鬥 CTB 調整 combat-ctb-adjustment<span class="tag t-plan">待實作</span></h3>
+    <p><b>公式：</b>weightedLinearProduct（linear，常數項為主）。<b>輸入：</b>無（固定延遲量）。</p>
+    <div class="formula">ctbDelta = bias</div>
+    <p><b>我設計的數值（提案）：</b>bias = 20（延後目標 20 點 CTB）。<span class="muted">控制抗性折算已在 combat 主路處理。</span></p>
+  </div>
+
+  <div class="card">
+    <h3>招募成功 recruitment-success<span class="tag t-plan">待實作</span></h3>
+    <p><b>公式：</b>logisticRoll。<b>輸入：</b>玩家隊目前正式人數、招募者魅力/加成。</p>
+    <div class="formula">p = logistic( bias + w_cha·招募者charisma − w_size·目前人數 ) , floor 0.05 , ceil 0.95</div>
+    <p><b>我設計的數值（提案）：</b>bias = −0.5、w_cha = 0.04、w_size = 0.25、floor = 0.05、ceil = 0.95。</p>
+    <p class="muted">人越多越難招（w_size 減項）；落點：<code>logistic-roll-params</code> 定義。</p>
+  </div>
+
+  <div class="card">
+    <h3>成員離隊 member-departure<span class="tag t-plan">待實作</span></h3>
+    <p><b>公式：</b>logisticRoll。<b>輸入：</b>工作淨收益缺口 workNet、隊長抵抗 leaderResistance。</p>
+    <div class="formula">p = logistic( bias + w_gap·缺口 − w_res·隊長抵抗 ) , floor 0.00 , ceil 0.50</div>
+    <p><b>我設計的數值（提案）：</b>bias = −2.5、w_gap = 0.02、w_res = 0.03、floor = 0、ceil = 0.5。</p>
+    <p class="muted">預設偏低（bias 很負）：新局幾乎不會有人離隊；缺口大才升高。</p>
+  </div>
+
+  <div class="card">
+    <h3>敵方 AI 選招與目標<span class="tag t-plan">待實作</span></h3>
+    <p><b>公式：</b>加權抽選（讀 <code>combat-ai-policy</code> 定義的權重）＋ 目標挑最前排存活者。</p>
+    <p class="muted">若 ai-policy 內容已帶權重＝<b>不必發明</b>，只接線；若沒帶＝我補第一版權重。待進場查證後標定。</p>
+  </div>
+
+  <div class="card">
+    <h3>武器射程（近/中/遠）目標形狀＋格擋反擊<span class="tag t-block">需你拍板</span></h3>
+    <p>剩下 ~7 種目標形狀（single-hostile-melee/mid/ranged、up-to-three-hostiles-melee/ranged…）與 melee-block 反擊，
+    需要「武器射程」這個概念——<b>目前 schema 完全沒有</b>。</p>
+    <p><b>我的提案（要動 schema，想先問你）：</b>裝備/武器加一個 <code>reach: 'melee'|'mid'|'ranged'</code>；
+    規則：melee 只能打敵方<b>最前一排</b>、mid 打<b>前兩排</b>、ranged 打<b>任一排</b>。</p>
+    <p class="muted">這不只是數字，是新資料概念＋戰鬥手感，所以標「需你拍板」。你點頭我就加欄位＋做這批形狀。</p>
+  </div>
+
+  <div class="card">
+    <h3>經濟（報酬/物價）、社交（好感）、角色（生命週期）<span class="tag t-plan">待實作</span></h3>
+    <p class="muted">同模式：報酬/物價走 weightedLinearProduct 或 thresholdTable、好感走 monotonicAdjust、
+    生命週期（自然死亡/退休/生育）走 logisticRoll。多數讀既有規則定義；缺的曲線我補第一版並登進本帳本。逐一施工時填數字。</p>
+  </div>
+
+  <h2>4. 狀態總表</h2>
+  <div class="scroll"><table>
+    <tr><th>項目</th><th>公式（kernel）</th><th>我設計的數值</th><th>狀態</th></tr>
+    <tr><td class="k">戰鬥目標 ×8</td><td>純邏輯</td><td>無（對應設計來源）</td><td><span class="tag t-done">已實作</span></td></tr>
+    <tr><td class="k">預設站位</td><td>純演算法</td><td>row-major（無平衡數字）</td><td><span class="tag t-done">已實作</span></td></tr>
+    <tr><td class="k">傷害</td><td>weightedLinearProduct</td><td>bias5 / atk1.5 / def1.0</td><td><span class="tag t-plan">待實作</span></td></tr>
+    <tr><td class="k">治療</td><td>weightedLinearProduct</td><td>bias5 / w1.2</td><td><span class="tag t-plan">待實作</span></td></tr>
+    <tr><td class="k">CTB 調整</td><td>weightedLinearProduct</td><td>bias20</td><td><span class="tag t-plan">待實作</span></td></tr>
+    <tr><td class="k">招募</td><td>logisticRoll</td><td>bias−0.5 / cha.04 / size.25</td><td><span class="tag t-plan">待實作</span></td></tr>
+    <tr><td class="k">離隊</td><td>logisticRoll</td><td>bias−2.5 / gap.02 / res.03</td><td><span class="tag t-plan">待實作</span></td></tr>
+    <tr><td class="k">敵方 AI</td><td>加權抽選</td><td>視 ai-policy 內容</td><td><span class="tag t-plan">待實作</span></td></tr>
+    <tr><td class="k">武器射程目標 ×7＋反擊</td><td>純邏輯</td><td>reach 概念（新 schema）</td><td><span class="tag t-block">需你拍板</span></td></tr>
+    <tr><td class="k">經濟/社交/角色</td><td>混合</td><td>逐項施工時填</td><td><span class="tag t-plan">待實作</span></td></tr>
+  </table></div>
+
+  <div class="foot">
+    <p>這是<b>活文件</b>：每落地一項，我會把數字從「提案」換成「已實作＋實際值」並更新狀態。
+    唯一需要你現在拍板的是 <span class="tag t-block">需你拍板</span> 那項（武器射程要不要加 schema、我的分排提案 OK 嗎）；
+    其餘我照本帳本的第一版數值先做，你之後隨時可改。</p>
+  </div>
+</div>
