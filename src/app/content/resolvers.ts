@@ -30,6 +30,10 @@ export type KernelResolverInput = Readonly<{
 export const RESOLVER_PARAMS_KINDS = {
   logisticRoll: 'logistic-roll-params',
   weightedProduct: 'weighted-product-params',
+  // 派生統計引擎用的 params 家族（同屬 data-runtime kernel 的調校量）。
+  ratioSaturation: 'ratio-saturation-params',
+  masteryMultiplier: 'mastery-multiplier-params',
+  primaryAttributeModifier: 'primary-attribute-modifier-params',
 } as const;
 
 // 占位 Schema ID（binding 驗證用；真內容軌會給正式 schema）。

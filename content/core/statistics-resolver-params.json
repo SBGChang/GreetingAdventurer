@@ -1,0 +1,103 @@
+[
+  {
+    "bias": 200,
+    "enabled": true,
+    "id": "weighted-product-params.core.stat-max-health",
+    "kind": "weighted-product-params",
+    "mode": "linear",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/statistics-resolver-params.json#weighted-product-params.core.stat-max-health",
+    "terms": [
+      {
+        "inputKey": "safeRaw",
+        "weight": 20
+      }
+    ]
+  },
+  {
+    "bias": 120,
+    "enabled": true,
+    "id": "weighted-product-params.core.stat-max-mana",
+    "kind": "weighted-product-params",
+    "mode": "linear",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/statistics-resolver-params.json#weighted-product-params.core.stat-max-mana",
+    "terms": [
+      {
+        "inputKey": "safeRaw",
+        "weight": 14
+      }
+    ]
+  },
+  {
+    "enabled": true,
+    "halfSaturation": 120,
+    "id": "ratio-saturation-params.core.mitigation",
+    "inputKey": "safeRaw",
+    "kind": "ratio-saturation-params",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/statistics-resolver-params.json#ratio-saturation-params.core.mitigation"
+  },
+  {
+    "enabled": true,
+    "halfSaturation": 80,
+    "id": "ratio-saturation-params.core.block-absorption",
+    "inputKey": "safeRaw",
+    "kind": "ratio-saturation-params",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/statistics-resolver-params.json#ratio-saturation-params.core.block-absorption"
+  },
+  {
+    "enabled": true,
+    "halfSaturation": 100,
+    "id": "ratio-saturation-params.core.instrument-mitigation",
+    "inputKey": "equippedWeight",
+    "kind": "ratio-saturation-params",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/statistics-resolver-params.json#ratio-saturation-params.core.instrument-mitigation"
+  },
+  {
+    "enabled": true,
+    "id": "mastery-multiplier-params.core.standard",
+    "kind": "mastery-multiplier-params",
+    "multipliers": [
+      1,
+      1.03,
+      1.07,
+      1.12,
+      1.18,
+      1.25,
+      1.33,
+      1.42,
+      1.52,
+      1.63,
+      1.75
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/statistics-resolver-params.json#mastery-multiplier-params.core.standard"
+  },
+  {
+    "enabled": true,
+    "entries": [],
+    "id": "primary-attribute-modifier-params.core.age",
+    "kind": "primary-attribute-modifier-params",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/statistics-resolver-params.json#primary-attribute-modifier-params.core.age"
+  },
+  {
+    "enabled": true,
+    "entries": [],
+    "id": "primary-attribute-modifier-params.core.reputation",
+    "kind": "primary-attribute-modifier-params",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/statistics-resolver-params.json#primary-attribute-modifier-params.core.reputation"
+  }
+]

@@ -37,6 +37,7 @@
     "lifecycle-rule",
     "mastery",
     "mastery-curve",
+    "mastery-multiplier-params",
     "member-retention-rule",
     "monster-experience-profile",
     "non-player-member-daily-social-practice-rule",
@@ -54,10 +55,12 @@
     "player-travel-mode",
     "price-modifier-rule",
     "price-rule",
+    "primary-attribute-modifier-params",
     "quest-deadline-rule",
     "quest-objective-rule",
     "quest-reaction-rule",
     "quest-reward-rule",
+    "ratio-saturation-params",
     "recent-activity-rule",
     "recruitment-rule",
     "retry-supply-policy",
@@ -164,6 +167,59 @@
       "ownerModule": "combat",
       "resolverId": "resolver:combat.target-whole-party",
       "shape": "combat-target:whole-party"
+    },
+    {
+      "ownerModule": "statistics",
+      "paramsDefId": "primary-attribute-modifier-params.core.age",
+      "resolverId": "resolver:statistics.age-modifier",
+      "shape": "statistics:age-modifier"
+    },
+    {
+      "ownerModule": "statistics",
+      "paramsDefId": "ratio-saturation-params.core.block-absorption",
+      "resolverId": "resolver:statistics.final.block-absorption",
+      "shape": "statistics:final-saturation"
+    },
+    {
+      "ownerModule": "statistics",
+      "resolverId": "resolver:statistics.final.identity",
+      "shape": "statistics:final-identity"
+    },
+    {
+      "ownerModule": "statistics",
+      "paramsDefId": "ratio-saturation-params.core.instrument-mitigation",
+      "resolverId": "resolver:statistics.final.instrument-mitigation",
+      "shape": "statistics:final-instrument-mitigation"
+    },
+    {
+      "ownerModule": "statistics",
+      "paramsDefId": "weighted-product-params.core.stat-max-health",
+      "resolverId": "resolver:statistics.final.max-health",
+      "shape": "statistics:final-weighted"
+    },
+    {
+      "ownerModule": "statistics",
+      "paramsDefId": "weighted-product-params.core.stat-max-mana",
+      "resolverId": "resolver:statistics.final.max-mana",
+      "shape": "statistics:final-weighted"
+    },
+    {
+      "ownerModule": "statistics",
+      "paramsDefId": "ratio-saturation-params.core.mitigation",
+      "resolverId": "resolver:statistics.final.mitigation",
+      "shape": "statistics:final-saturation"
+    },
+    {
+      "ownerModule": "statistics",
+      "paramsDefId": "mastery-multiplier-params.core.standard",
+      "resolverId": "resolver:statistics.mastery-coefficient",
+      "shape": "statistics:mastery-coefficient"
+    },
+    {
+      "ownerModule": "statistics",
+      "paramsDefId": "primary-attribute-modifier-params.core.reputation",
+      "resolverId": "resolver:statistics.reputation-contribution",
+      "shape": "statistics:reputation-contribution"
     },
     {
       "ownerModule": "team",

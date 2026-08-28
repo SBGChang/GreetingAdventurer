@@ -22,6 +22,7 @@ import { progressionRulesDomain } from './core/progression-rules';
 import { teamDomain } from './core/team';
 import { combatRulesDomain } from './core/combat-rules';
 import { combatResolverParamsDomain, combatPowerBindings } from './core/combat-resolver-params';
+import { statisticsResolverParamsDomain, statisticsResolverBindings } from './core/statistics-resolver-params';
 import { economySocialDistributionDomain } from './core/economy-social-distribution';
 import { questCraftingSequenceDomain } from './core/quest-crafting-sequence';
 import { servicesDomain } from './core/services';
@@ -111,8 +112,11 @@ const DECLARED_KINDS: readonly string[] = [
   'team-formation-rule',
   'team-plan-rule',
   'temporary-character-rule',
-  // data-runtime 擁有的 kernel params 家族（傷害/治療/CTB 的調校量住這裡）。
+  // data-runtime 擁有的 kernel params 家族（傷害/治療/CTB＋派生統計的調校量住這裡）。
   'weighted-product-params',
+  'ratio-saturation-params',
+  'mastery-multiplier-params',
+  'primary-attribute-modifier-params',
   'world-adventurer-generation-rule',
 ];
 
@@ -149,9 +153,14 @@ const corePack: AuthoredPack = {
   // Bootstrap 以此確認「pack 用到的 Resolver 全部已註冊」才啟動。
   requiredResolverIds: [],
   // core **宣告並提供** Resolver 綁定（模組擁有、四國共用；文化 pack 只引用這些 ID）。
-  // combat 目標 8（純邏輯）＋ combat 傷害/治療/CTB 8（weighted-power，數值在 combat-resolver-params）
+  // combat 目標 8（純邏輯）＋ combat 傷害/治療/CTB 8（weighted-power）＋ 派生統計 9（statistics 引擎）
   // ＋ team 預設站位（純演算法）。隨實作增加逐筆補上。
-  resolverBindings: [...combatTargetBindings(), ...combatPowerBindings(), ...teamPureBindings()],
+  resolverBindings: [
+    ...combatTargetBindings(),
+    ...combatPowerBindings(),
+    ...statisticsResolverBindings(),
+    ...teamPureBindings(),
+  ],
   runtimeCompatibility: { minRuntimeVersion: '0.1.0' },
   // 由 Compiler 交叉比對（見 authoring.ts 的說明：這一欄刻意手寫，推導出來的宣告等於沒有檢查）。
   // 下面這份清單是實際內容的 kind 聯集；改內容而忘了改這裡，編譯就會指名多了/少了哪些。
@@ -163,6 +172,7 @@ const corePack: AuthoredPack = {
     teamDomain,
     combatRulesDomain,
     combatResolverParamsDomain,
+    statisticsResolverParamsDomain,
     economySocialDistributionDomain,
     questCraftingSequenceDomain,
     servicesDomain,
