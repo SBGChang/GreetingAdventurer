@@ -34,6 +34,7 @@ import type {
   CombatFootprint,
 } from '../../contracts/combat';
 import type { GridCell } from '../../contracts/map';
+import { GRID_MIN } from '../../contracts/core';
 
 // ── 唯一可寫 State（文件 §1.1）────────────────────────────────────────────
 export type CombatState = Readonly<{
@@ -158,6 +159,18 @@ export function coveredCells(anchor: GridCell, footprint: CombatFootprint): Grid
     }
   }
   return cells;
+}
+
+// ── §2.4 施展距離（排距；不管左右）────────────────────────────────────────
+// 攻守分屬對向的兩個 3×3。距離只看「離己方前排的排數」——左右完全不影響（右後、左後打敵左前
+// 都是同一距離）。distance = 攻方離前排 + 守方離前排 + 1（前排對前排＝1；雙方後排＝5＝最遠）。
+// 這是戰場的**結構幾何**（不是可調平衡量），所以住程式；距離帶來的傷害/命中/CD 修正才是資料。
+// 大體型目標取其**最前佔用排**：footprint 由 anchorCell 向後（row 增）延伸，故最前排＝anchorCell.row。
+export function rowsFromFront(row: number): number {
+  return row - GRID_MIN;
+}
+export function combatDistance(attackerAnchorRow: number, targetAnchorRow: number): number {
+  return rowsFromFront(attackerAnchorRow) + rowsFromFront(targetAnchorRow) + 1;
 }
 
 // 由某側目前存活單位（非 dead）重建 occupancy（dead 移出 occupancy，其餘仍占格）。

@@ -6,6 +6,7 @@
 
 import type { CombatantId } from '../../contracts/core';
 import type { CombatEncounter, CombatantState } from './state';
+import { combatDistance } from './state';
 import { makeEncounter } from './fixtures';
 import type { TargetShapeInput } from './target-shapes';
 import { PURE_TARGET_SHAPES } from './target-shapes';
@@ -146,6 +147,15 @@ const cases: readonly Case[] = [
     // 大體型敵方（width 3）覆蓋三欄：以 col2 錨點也能命中它。
     const big = patch(enc, E1, { footprint: { width: 3, height: 1 } });
     eq(f(input(big, [E2])), ['e1', 'e2'], '寬體 e1 覆蓋 col2 故被 col2 錨點納入');
+  }],
+
+  // §2.4 施展距離：排距、不管左右。0-based row(前0/中1/後2)。
+  ['combatDistance 排距幾何', () => {
+    assert(combatDistance(0, 0) === 1, `前對前應 1，實得 ${combatDistance(0, 0)}`);
+    assert(combatDistance(2, 0) === 3, `後打敵前應 3，實得 ${combatDistance(2, 0)}`); // 你的例子
+    assert(combatDistance(0, 2) === 3, `前打敵後應 3，實得 ${combatDistance(0, 2)}`);
+    assert(combatDistance(2, 2) === 5, `雙方後排應 5（最遠），實得 ${combatDistance(2, 2)}`);
+    assert(combatDistance(1, 0) === 2, `中打敵前應 2，實得 ${combatDistance(1, 0)}`);
   }],
 
   // 結構不變量：行動者不在遭遇中 → 拋錯（不得偽裝成「沒有合法目標」）。
