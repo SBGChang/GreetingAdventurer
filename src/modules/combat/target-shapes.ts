@@ -25,6 +25,7 @@
 
 import type { CombatantId } from '../../contracts/core';
 import type { CombatEncounter, CombatantState } from './state';
+import { combatDistance } from './state';
 
 // resolveSkillTargets 的輸入去掉 resolverId（那一段由 registry 查表用；形狀本身不需要）。
 // 刻意在此結構性重宣告，而不 import system.ts 的 CombatSkillTargetInput：system.ts 依賴面很大，
@@ -141,6 +142,29 @@ const sameColumnHostiles: TargetShapeFn = (input) => {
     .filter((c) => coveredCols(c).some((col) => targetCols.has(col)))
     .map((c) => c.combatantId);
 };
+
+// ── §2.4 射程過濾（通用；套在任何目標形狀的結果之上）────────────────────────────
+// 從候選中剔除**超出攻方有效射程**的敵方目標。同側目標（自身／隊友）不受射程限制——治療／支援招式
+// 靠 extraReachCells +6 覆蓋全場，實務上同側永遠在射程內，故此處直接放行，不需同側排距概念。
+// actorReachCells ＝ 武器（或怪物天生攻擊）格數 ＋ 招式額外距離，由 Handler 在呼叫前算好帶入。
+// 行動者必存在（Handler 前置已驗）；缺＝結構被破壞，拋錯（不靜默放行全部）。
+export function filterByReach(
+  encounter: CombatEncounter,
+  actorId: CombatantId,
+  actorReachCells: number,
+  targets: readonly CombatantId[],
+): readonly CombatantId[] {
+  const actor = encounter.combatants[actorId];
+  if (actor === undefined) {
+    throw new Error(`filterByReach: 行動者 ${String(actorId)} 不在遭遇中`);
+  }
+  return targets.filter((id) => {
+    const target = encounter.combatants[id];
+    if (target === undefined) return false;
+    if (target.side === actor.side) return true; // 同側不受射程限制
+    return combatDistance(actor.anchorCell.row, target.anchorCell.row) <= actorReachCells;
+  });
+}
 
 // ── 已實作形狀表（此檔涵蓋的 local；非全部 25 種，見檔頭清單）──────────────────
 export type PureTargetLocal =

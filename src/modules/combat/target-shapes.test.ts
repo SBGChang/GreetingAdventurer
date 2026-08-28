@@ -9,7 +9,7 @@ import type { CombatEncounter, CombatantState } from './state';
 import { combatDistance } from './state';
 import { makeEncounter } from './fixtures';
 import type { TargetShapeInput } from './target-shapes';
-import { PURE_TARGET_SHAPES } from './target-shapes';
+import { PURE_TARGET_SHAPES, filterByReach } from './target-shapes';
 
 // ── 迷你斷言 ────────────────────────────────────────────────────────────────
 function assert(cond: boolean, msg: string): void {
@@ -156,6 +156,23 @@ const cases: readonly Case[] = [
     assert(combatDistance(0, 2) === 3, `前打敵後應 3，實得 ${combatDistance(0, 2)}`);
     assert(combatDistance(2, 2) === 5, `雙方後排應 5（最遠），實得 ${combatDistance(2, 2)}`);
     assert(combatDistance(1, 0) === 2, `中打敵前應 2，實得 ${combatDistance(1, 0)}`);
+  }],
+
+  // §2.4 射程過濾：剔除超出有效射程的敵方；同側不受限。
+  ['filterByReach 依排距剔除超射程敵方', () => {
+    // 敵方 e1 前(dist1) e2 中(dist2) e3 後(dist3)；隊友 p2。actor p1 前排。
+    const enc = makeEncounter([
+      { combatantId: 'p1', side: 'player', row: 0, col: 0 },
+      { combatantId: 'p2', side: 'player', row: 0, col: 1 },
+      { combatantId: 'e1', side: 'enemy', row: 0, col: 0 },
+      { combatantId: 'e2', side: 'enemy', row: 1, col: 0 },
+      { combatantId: 'e3', side: 'enemy', row: 2, col: 0 },
+    ]);
+    const all = [E1, E2, E3, P2];
+    eq(filterByReach(enc, P1, 1, all), ['e1', 'p2'], 'reach1：只留 dist1 敵方＋同側');
+    eq(filterByReach(enc, P1, 2, all), ['e1', 'e2', 'p2'], 'reach2：留 dist≤2＋同側');
+    eq(filterByReach(enc, P1, 5, all), ['e1', 'e2', 'e3', 'p2'], 'reach5：全在射程內');
+    throws(() => filterByReach(enc, 'ghost' as CombatantId, 1, all), '行動者缺失應拋');
   }],
 
   // 結構不變量：行動者不在遭遇中 → 拋錯（不得偽裝成「沒有合法目標」）。
