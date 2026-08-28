@@ -14,6 +14,7 @@ import {
   logisticRoll,
   monotonicAdjust,
   piecewiseLookup,
+  ratioSaturation,
   thresholdTable,
   weightedLinearProduct,
 } from './kernels';
@@ -202,6 +203,18 @@ const cases: readonly Case[] = [
         threw = true;
       }
       assert(threw, 'missing input must throw');
+    },
+  },
+  {
+    name: 'ratioSaturation: safeRaw/(safeRaw+k), 負 raw 夾 0，達 k 時 50%',
+    run: () => {
+      const p = { inputKey: 'raw', halfSaturation: 120 };
+      assert(ratioSaturation(p, { raw: 0 }) === 0, 'raw 0 → 0');
+      assert(ratioSaturation(p, { raw: -50 }) === 0, '負 raw 夾 0 → 0');
+      assert(Math.abs(ratioSaturation(p, { raw: 120 }) - 0.5) < 1e-9, 'raw = k → 0.5');
+      const lo = ratioSaturation(p, { raw: 60 });
+      const hi = ratioSaturation(p, { raw: 240 });
+      assert(lo < 0.5 && hi > 0.5 && lo < hi, '單調遞增且以 0.5 為中點');
     },
   },
 ];

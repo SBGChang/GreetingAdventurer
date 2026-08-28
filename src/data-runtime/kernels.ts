@@ -245,6 +245,19 @@ function interpolate(a: LookupPoint, b: LookupPoint, x: number): number {
   return a.y + t * (b.y - a.y);
 }
 
+// ── ratioSaturation ──────────────────────────────────────────────────────────
+// 飽和比例 safeRaw / (safeRaw + halfSaturation)：減傷、格擋吸收（BM「一般/魔法減傷 raw/(raw+120)」、
+// 「格擋吸收 raw/(raw+80)」）。raw 先夾在 0（負 raw 以 0 計，避免負減傷與 −k 奇異點）；
+// halfSaturation 是「達 50% 的 raw」（越大越難飽和）——它是調校量（資料），故必填、不由程式補預設。
+export type RatioSaturationParams = Readonly<{ inputKey: string; halfSaturation: number }>;
+
+export function ratioSaturation(params: RatioSaturationParams, inputs: KernelInputs): number {
+  const safeRaw = Math.max(0, requireInput(inputs, params.inputKey));
+  const k = requireNonNegativeParam(params.halfSaturation, 'halfSaturation');
+  const denominator = safeRaw + k;
+  return denominator === 0 ? 0 : safeRaw / denominator;
+}
+
 // ── 機率判定（roll）：以注入的 rng／rngContext 顯式串接 cursor ─────────────────
 // 回傳 RngStep<boolean>：value=命中與否，nextCursor=顯式續接的最終 cursor。
 
