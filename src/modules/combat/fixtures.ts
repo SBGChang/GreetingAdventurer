@@ -348,6 +348,7 @@ function goblin(controlResistanceProfileId: CombatControlResistanceProfileId = C
     controlResistanceProfileId,
     aiPolicyId: 'ai-aggressive' as CombatAiPolicyId,
     experienceProfileId: XP_PROFILE,
+    reachCells: 1, // 近戰小怪：射程 1（前排對前排）
   };
 }
 function encounterGroup(): EncounterGroupDefinition {
@@ -501,7 +502,11 @@ function loadoutFor(characterId: CharacterId, skills: WeaponSetSkills): Characte
 }
 
 export function stubLoadoutQuery(skills: WeaponSetSkills = DEFAULT_WEAPON_SET_SKILLS): CombatLoadoutQuery {
-  return { getEquipmentLoadout: (characterId) => loadoutFor(characterId, skills) };
+  return {
+    getEquipmentLoadout: (characterId) => loadoutFor(characterId, skills),
+    // stub：近戰武器射程 1（前排對前排）。測試需要不同射程時覆寫此 stub。
+    getActiveWeaponReachCells: () => 1,
+  };
 }
 
 export function stubFormationQuery(): CombatFormationQuery {

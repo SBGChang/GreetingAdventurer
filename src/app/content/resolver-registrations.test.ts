@@ -59,6 +59,8 @@ function resolveTargets(
     encounter: encounter(),
     actorId: 'p1' as CombatantId,
     requestedTargetIds: requested,
+    // 目標 shape resolver 不做射程過濾（那在 bridge），此處給大值即可；本測試驗形狀本身。
+    actorReachCells: 99,
   };
   const out = registry.require(resolverId).resolve(input, resolverContext({}));
   return out.value as readonly CombatantId[];

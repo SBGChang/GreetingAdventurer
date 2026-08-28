@@ -41,5 +41,17 @@ export function createCombatLoadoutQuery(
   const query = createInventoryQuery(inventoryState, itemReader);
   return {
     getEquipmentLoadout: (characterId) => query.getEquipmentLoadout(characterId),
+    // §2.4 主手武器射程：該武器組主手 item → EquipmentDefinition.reachCells。無主手武器回 undefined
+    //（由 Handler 明確拒絕，不預設）。護甲/盾/飾品沒有 reachCells，取到＝undefined 同理。
+    getActiveWeaponReachCells: (characterId, weaponSetId) => {
+      const set = query
+        .getEquipmentLoadout(characterId)
+        .weaponSets.find((w) => w.weaponSetId === weaponSetId);
+      const itemId = set?.mainHandItemId;
+      if (itemId === undefined) return undefined;
+      const instance = inventoryState.items[itemId];
+      if (instance === undefined) return undefined;
+      return itemReader.getEquipment(instance.definitionId).reachCells;
+    },
   };
 }

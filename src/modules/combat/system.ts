@@ -108,6 +108,9 @@ export interface CombatIdAllocator {
 // Inventory Loadout Query（窄化：只需目前武器組配置）。
 export interface CombatLoadoutQuery {
   getEquipmentLoadout(characterId: CharacterId): CharacterEquipmentLoadoutView;
+  // §2.4 射程：該角色指定武器組**主手武器**的射程格數。無主手武器（徒手）回 undefined——由 Handler
+  // 明確拒絕，不預設。Composition 的 adapter 以 mainHand item → EquipmentDefinition.reachCells 解析。
+  getActiveWeaponReachCells(characterId: CharacterId, weaponSetId: WeaponSetId): number | undefined;
 }
 
 // 開戰隊伍站位快照來源（Team/Formation 擁有；Combat 開場讀一次）。
@@ -156,6 +159,9 @@ export type CombatSkillTargetInput = Readonly<{
   encounter: CombatEncounter;
   actorId: CombatantId;
   requestedTargetIds: readonly CombatantId[];
+  // §2.4 行動者的有效射程（武器/怪物天生格數 ＋ 招式額外距離），由 Handler 算好帶入。
+  // resolver 以此對敵方目標做排距過濾（距離 ≤ 有效射程）；同側目標不受限。
+  actorReachCells: number;
 }>;
 export interface CombatResolverPort {
   // 傷害 / 治療 / CTB 調整 / 命中的實際數值（回傳實數；adjustCtb 可為負）。
@@ -1172,11 +1178,29 @@ export function handleUseCombatSkill(
   // §2.4 targeting：合法目標集合由**內容的 targeting resolver** 決定（範圍／形狀／距離／人數上限）。
   // cmd.targetCombatantIds 只是玩家/AI 指定的錨點，不是最終目標——resolver 可擴張、縮減或換成自己。
   const requiredSide = requiredSideOf(skillView, ctx);
+  // §2.4 有效射程 = 武器（角色 loadout）或怪物天生（Monster 定義）的格數 ＋ 招式額外距離。
+  // 招式額外距離缺省＝ 0（加法單位元，結構性；多數招式沒有額外距離）。
+  const extraReachCells =
+    skillView.targeting.extraReachCells === undefined ? 0 : skillView.targeting.extraReachCells;
+  const baseReachCells =
+    actor0.source.kind === 'character'
+      ? activeWeaponSetId === undefined
+        ? undefined // 無生效武器組（前面技能驗證通常已擋下）→ 下方明確拒絕
+        : ctx.loadout.getActiveWeaponReachCells(actor0.source.characterId, activeWeaponSetId)
+      : ctx.definitions.getMonster(actor0.source.monsterDefinitionId).reachCells;
+  // 缺武器射程（徒手且無天生射程資料）＝無法判定觸及，明確拒絕（不預設一個射程）。
+  if (baseReachCells === undefined) {
+    return reject('combat/actor-weapon-reach-unavailable', {
+      actorId: String(cmd.actorId),
+      weaponSetId: String(activeWeaponSetId),
+    });
+  }
   const targets = ctx.resolvers.resolveSkillTargets({
     resolverId: skillView.targeting.targetResolverId,
     encounter,
     actorId: cmd.actorId,
     requestedTargetIds: cmd.targetCombatantIds,
+    actorReachCells: baseReachCells + extraReachCells,
   });
   // 空集合＝這次請求在該 targeting 規則下沒有合法目標（點到隊友、超出距離、目標已死…）。
   // 拒絕而非空耗：不付資源、不加延遲。自身向技能（架勢、自我增益）由 resolver 回傳行動者本人。

@@ -26,6 +26,7 @@ import type {
   CombatSkillTargetInput,
   EnemyActionChoice,
 } from '../../modules/combat/system';
+import { filterByReach } from '../../modules/combat/target-shapes';
 import { resolverContext, runResolver } from './resolver-adapter';
 
 // weighted-power shape 讀 params 的窄門（weighted-product-params 的 reader）。
@@ -60,10 +61,17 @@ export function createCombatResolverPort(deps: CombatResolverBridgeDeps): Combat
     resolvePower: (input: CombatPowerInput): number =>
       runResolver<number>(deps.registry, input.resolverId, input, powerContext()).value,
 
-    // 合法目標集合：純格陣 shape，無 params、無 RNG。射程過濾在下一個增量隨 Handler 算出的有效射程接上。
-    resolveSkillTargets: (input: CombatSkillTargetInput): readonly CombatantId[] =>
-      runResolver<readonly CombatantId[]>(deps.registry, input.resolverId, input, resolverContext({}))
-        .value,
+    // 合法目標集合：純格陣 shape 產候選，再以 Handler 算好的有效射程（input.actorReachCells）做排距過濾
+    //（敵方超射程剔除；同側不受限）。shape 無 params、無 RNG。
+    resolveSkillTargets: (input: CombatSkillTargetInput): readonly CombatantId[] => {
+      const candidates = runResolver<readonly CombatantId[]>(
+        deps.registry,
+        input.resolverId,
+        input,
+        resolverContext({}),
+      ).value;
+      return filterByReach(input.encounter, input.actorId, input.actorReachCells, candidates);
+    },
 
     // 攻擊 MXP 路由：讀該技能的 attack-mastery-award-rule，取占比最高的 Mastery。
     // 第一版單一路由（完整比例分配走結算，見帳本待討論）；缺規則＝內容錯，明確拋。

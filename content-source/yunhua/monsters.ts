@@ -632,6 +632,9 @@ function monster(row: MonsterRow): Authored<MonsterDefinition> {
     controlResistanceProfileId: controlResistanceProfileId(row.threat),
     aiPolicyId: aiPolicyId(row.threat),
     experienceProfileId: experienceProfileId(row.tier, row.threat),
+    // §2.4 射程（格數）：第一版一律近戰 1（待討論）。目前怪物 skillIds 為空、尚無距離攻擊資料，
+    // 故 reach 未被實戰運算；等怪物招式與遠距怪加入時，改由 row 帶入分型的射程。
+    reachCells: 1,
   };
 }
 

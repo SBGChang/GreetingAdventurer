@@ -85,6 +85,9 @@ export type MonsterDefinition = DefinitionHeader & {
   controlResistanceProfileId: CombatControlResistanceProfileId;
   aiPolicyId: CombatAiPolicyId;
   experienceProfileId: MonsterExperienceProfileId;
+  // §2.4 射程：怪物用 skillIds＋共用 resolver 攻擊，沒有武器 loadout，故射程格數（等同角色武器格數）
+  // 直接放在怪物定義上，供 Handler 算有效射程（近戰怪 1；有距離攻擊的怪更高）。
+  reachCells: number;
 };
 
 export type MonsterNaturalAttackProfileDefinition = DefinitionHeader & {
