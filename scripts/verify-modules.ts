@@ -17,6 +17,8 @@ import { runTests as moduleReaders } from '../src/app/content/readers.test';
 import { runTests as resolvers } from '../src/app/content/resolvers.test';
 // F3：Resolver 綁定 spine——內容宣告 binding → pack.json → 載入器匯總 → registry（含真實內容路徑）。
 import { runTests as resolverRegistrations } from '../src/app/content/resolver-registrations.test';
+// F3：combat resolver bridge——真實內容傷害 params 一路算成傷害數字（整合塊第一塊端到端證據）。
+import { runTests as combatResolverBridge } from '../src/app/content/combat-resolver-bridge.test';
 import { runTests as crossModulePorts } from '../src/app/content/cross-module-ports.test';
 // 正式 Content Pack 端到端：磁碟 JSON → ContentRepository → Registry → 窄化 Reader → 模組純函式。
 import { runTests as contentPackIntegration } from '../src/app/content/content-pack-integration.test';
@@ -97,6 +99,7 @@ const throwing: ReadonlyArray<readonly [string, () => void]> = [
   // content：資料調校 Resolver adapter（§7.1 kernel + params-from-definition + RNG 紀律）。
   ['resolvers', resolvers],
   ['resolver-registrations', resolverRegistrations],
+  ['combat-resolver-bridge', combatResolverBridge],
   // content：真實跨模組 Query Port adapter（讀真實 sibling Slice，取代 fixture stub）。
   ['cross-module-ports', crossModulePorts],
   // Wave D：9 個補齊的模組。每一支都在自己的目錄內完成，測試由該模組自己持有。
