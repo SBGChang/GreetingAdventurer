@@ -118,7 +118,7 @@ const COMBAT_DEFENSE_AWARD_RULE_ID = core.id<ExperienceAwardRuleId>(
 // 因此「+8 CTB」「命中 raw −18」「技能威力 ×1.2」這些調校量在目前的契約下沒有資料落點——
 // 唯一能表達差異的手段是**一個調校值一個 Resolver ID**。這不是好形狀（見回報的契約缺口），
 // 但它至少讓每一個調校量在資料裡有名字、可被計數，而不是藏在某個 Handler 的常數裡。
-const RESOLVER = {
+export const RESOLVER = {
   damagePhysical: 'resolver:combat.damage-power.physical' as ResolverId,
   damageMagic: 'resolver:combat.damage-power.magic' as ResolverId,
   damageInstrument: 'resolver:combat.damage-power.instrument' as ResolverId,

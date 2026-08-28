@@ -71,11 +71,60 @@
     "team-formation-rule",
     "team-plan-rule",
     "temporary-character-rule",
+    "weighted-product-params",
     "world-adventurer-generation-rule"
   ],
   "packId": "pack:core",
   "requiredResolverIds": [],
   "resolverBindings": [
+    {
+      "ownerModule": "combat",
+      "paramsDefId": "weighted-product-params.core.ctb-heavy",
+      "resolverId": "resolver:combat.ctb-amount.heavy",
+      "shape": "combat:weighted-power"
+    },
+    {
+      "ownerModule": "combat",
+      "paramsDefId": "weighted-product-params.core.ctb-light",
+      "resolverId": "resolver:combat.ctb-amount.light",
+      "shape": "combat:weighted-power"
+    },
+    {
+      "ownerModule": "combat",
+      "paramsDefId": "weighted-product-params.core.ctb-standard",
+      "resolverId": "resolver:combat.ctb-amount.standard",
+      "shape": "combat:weighted-power"
+    },
+    {
+      "ownerModule": "combat",
+      "paramsDefId": "weighted-product-params.core.damage-instrument",
+      "resolverId": "resolver:combat.damage-power.instrument",
+      "shape": "combat:weighted-power"
+    },
+    {
+      "ownerModule": "combat",
+      "paramsDefId": "weighted-product-params.core.damage-magic",
+      "resolverId": "resolver:combat.damage-power.magic",
+      "shape": "combat:weighted-power"
+    },
+    {
+      "ownerModule": "combat",
+      "paramsDefId": "weighted-product-params.core.damage-physical",
+      "resolverId": "resolver:combat.damage-power.physical",
+      "shape": "combat:weighted-power"
+    },
+    {
+      "ownerModule": "combat",
+      "paramsDefId": "weighted-product-params.core.heal-potent",
+      "resolverId": "resolver:combat.heal-power.potent",
+      "shape": "combat:weighted-power"
+    },
+    {
+      "ownerModule": "combat",
+      "paramsDefId": "weighted-product-params.core.heal-standard",
+      "resolverId": "resolver:combat.heal-power.standard",
+      "shape": "combat:weighted-power"
+    },
     {
       "ownerModule": "combat",
       "resolverId": "resolver:combat.target-own-front-row",

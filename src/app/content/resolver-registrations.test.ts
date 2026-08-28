@@ -10,7 +10,7 @@
 
 import { resolve } from 'node:path';
 
-import type { CharacterId, CombatantId, ResolverBinding, ResolverId, ModuleId, TeamId } from '../../contracts/core';
+import type { CharacterId, CombatantId, DefinitionId, ResolverBinding, ResolverId, ModuleId, TeamId } from '../../contracts/core';
 import type { GridCell } from '../../contracts/map';
 import type { CombatSkillTargetInput } from '../../modules/combat/system';
 import { makeEncounter } from '../../modules/combat/fixtures';
@@ -126,6 +126,57 @@ const cases: readonly Case[] = [
     assert(at('c2') === '0,1', `c2 應在 0,1，實得 ${at('c2')}`);
     assert(at('c3') === '0,2', `c3 應在 0,2，實得 ${at('c3')}`);
     assert(at('c4') === '1,0', `c4 應換行到 1,0，實得 ${at('c4')}`);
+  }],
+
+  // combat 傷害：weighted-power shape 讀 params（我設計的數值）＋攤平主屬 → 算出傷害數字。
+  ['機制：combat 傷害 resolver（公式×數值）', () => {
+    const rid = 'resolver:combat.damage-power.physical' as ResolverId;
+    const registry = createProductionResolverRegistry([
+      {
+        resolverId: rid,
+        ownerModule: COMBAT,
+        shape: 'combat:weighted-power',
+        paramsDefId: 'weighted-product-params.core.damage-physical' as DefinitionId,
+      },
+    ]);
+    // 兩名角色（都走 progression 屬性；不需 monster stub）。actor muscle 20、target muscle 10。
+    const enc = makeEncounter([
+      { combatantId: 'p1', side: 'player', row: 0, col: 0 },
+      { combatantId: 'p2', side: 'player', row: 0, col: 1 },
+    ]);
+    const muscleById: Record<string, number> = { 'char-p1': 20, 'char-p2': 10, p1: 20, p2: 10 };
+    const definitions = {
+      // 回傳與內容同值的 params（bias5 + actor.muscle×1.5 − target.muscle×1，夾下限 1）。
+      getPowerParams: () => ({
+        mode: 'linear',
+        bias: 5,
+        terms: [
+          { inputKey: 'actor.muscle', weight: 1.5 },
+          { inputKey: 'target.muscle', weight: -1 },
+        ],
+        clampMin: 1,
+      }),
+      getMonster: () => {
+        throw new Error('本測試皆為角色，不應呼叫 getMonster');
+      },
+    };
+    const queries = {
+      getPrimaryAttributes: (id: CharacterId) => ({
+        muscle: muscleById[String(id)] ?? 0,
+        intelligence: 0,
+        reaction: 0,
+        coordination: 0,
+        charisma: 0,
+      }),
+    };
+    const input = {
+      resolverId: rid,
+      encounter: enc,
+      actorId: 'p1' as CombatantId,
+      targetId: 'p2' as CombatantId,
+    };
+    const value = registry.require(rid).resolve(input, resolverContext({ definitions, queries })).value;
+    assert(value === 25, `傷害應 25（5 + 1.5·20 − 10），實得 ${String(value)}`);
   }],
 
   // 真實資料路徑：content/** 的綁定匯總 → 全部 shape 都有實作（組裝不拋）→ 真 ID 可解析。

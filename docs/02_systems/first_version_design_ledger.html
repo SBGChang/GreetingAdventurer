@@ -101,28 +101,30 @@
   標 <span class="tag t-plan">待實作</span> 的數字都還沒進程式，改起來零成本。</p>
 
   <div class="card">
-    <h3>戰鬥傷害 combat-damage<span class="tag t-plan">待實作</span></h3>
+    <h3>戰鬥傷害 combat-damage<span class="tag t-done">已實作</span></h3>
     <p><b>公式：</b>weightedLinearProduct（linear）。<b>輸入：</b>行動者主屬、目標主屬（依傷害管道選屬性）。</p>
     <div class="formula">damage = clamp( bias + w_atk·行動者屬 − w_def·目標屬 , min=1 )</div>
-    <p><b>我設計的數值（提案）：</b>bias = 5、w_atk = 1.5、w_def = 1.0、clampMin = 1。</p>
+    <p><b>我設計的數值（已落地）：</b>bias = 5、w_atk = 1.5、w_def = 1.0、clampMin = 1（三通道共用）。</p>
     <p><b>管道→屬性（我定的對應）：</b>physical→muscle、magic→intelligence、instrument→charisma。</p>
-    <p class="muted">主屬 0–100；早期屬 ~20–40，單擊約 20–40，對 ~100 HP 合理。落點：<code>content-source</code> 的
-    <code>weighted-product-params</code> 定義（數值）＋ <code>src/app/content/combat-power-resolvers.ts</code>（公式接線）。
-    <b>不改任何 schema</b>——只讀既有主屬。</p>
+    <p class="muted">數值：<code>content-source/core/combat-resolver-params.ts</code>（3 筆 weighted-product-params）；
+    公式接線：<code>src/app/content/combat-power-resolvers.ts</code>（shape <code>combat:weighted-power</code>）。
+    resolver 測試綠（20 攻 vs 10 防 → 傷害 25）。<b>未改 schema</b>。
+    <b>備註：</b>combat context 尚未接進 ContextAssembler，所以還沒能在「一整場戰鬥」裡跑——那是下一個接線增量。</p>
   </div>
 
   <div class="card">
-    <h3>戰鬥治療 combat-heal<span class="tag t-plan">待實作</span></h3>
-    <p><b>公式：</b>weightedLinearProduct（linear）。<b>輸入：</b>行動者主屬（intelligence）。</p>
+    <h3>戰鬥治療 combat-heal<span class="tag t-done">已實作</span></h3>
+    <p><b>公式：</b>weightedLinearProduct（linear）。<b>輸入：</b>行動者 intelligence。</p>
     <div class="formula">heal = clamp( bias + w·行動者intelligence , min=1 )</div>
-    <p><b>我設計的數值（提案）：</b>bias = 5、w = 1.2、clampMin = 1。</p>
+    <p><b>我設計的數值（已落地）：</b>standard = bias 5 / w 1.2；potent = bias 10 / w 1.6；clampMin = 1。</p>
   </div>
 
   <div class="card">
-    <h3>戰鬥 CTB 調整 combat-ctb-adjustment<span class="tag t-plan">待實作</span></h3>
-    <p><b>公式：</b>weightedLinearProduct（linear，常數項為主）。<b>輸入：</b>無（固定延遲量）。</p>
+    <h3>戰鬥 CTB 調整 combat-ctb-adjustment<span class="tag t-done">已實作</span></h3>
+    <p><b>公式：</b>weightedLinearProduct（linear，常數項）。<b>輸入：</b>無（固定延遲量）。</p>
     <div class="formula">ctbDelta = bias</div>
-    <p><b>我設計的數值（提案）：</b>bias = 20（延後目標 20 點 CTB）。<span class="muted">控制抗性折算已在 combat 主路處理。</span></p>
+    <p><b>我設計的數值（已落地）：</b>light = 10、standard = 20、heavy = 35（延後目標的 CTB 點數）。
+    <span class="muted">控制抗性折算已在 combat 主路處理。</span></p>
   </div>
 
   <div class="card">
@@ -167,9 +169,9 @@
     <tr><th>項目</th><th>公式（kernel）</th><th>我設計的數值</th><th>狀態</th></tr>
     <tr><td class="k">戰鬥目標 ×8</td><td>純邏輯</td><td>無（對應設計來源）</td><td><span class="tag t-done">已實作</span></td></tr>
     <tr><td class="k">預設站位</td><td>純演算法</td><td>row-major（無平衡數字）</td><td><span class="tag t-done">已實作</span></td></tr>
-    <tr><td class="k">傷害</td><td>weightedLinearProduct</td><td>bias5 / atk1.5 / def1.0</td><td><span class="tag t-plan">待實作</span></td></tr>
-    <tr><td class="k">治療</td><td>weightedLinearProduct</td><td>bias5 / w1.2</td><td><span class="tag t-plan">待實作</span></td></tr>
-    <tr><td class="k">CTB 調整</td><td>weightedLinearProduct</td><td>bias20</td><td><span class="tag t-plan">待實作</span></td></tr>
+    <tr><td class="k">傷害 ×3 通道</td><td>weightedLinearProduct</td><td>bias5 / atk1.5 / def1.0</td><td><span class="tag t-done">已實作</span></td></tr>
+    <tr><td class="k">治療 ×2</td><td>weightedLinearProduct</td><td>std bias5/w1.2 · potent bias10/w1.6</td><td><span class="tag t-done">已實作</span></td></tr>
+    <tr><td class="k">CTB 調整 ×3</td><td>weightedLinearProduct</td><td>light10 / std20 / heavy35</td><td><span class="tag t-done">已實作</span></td></tr>
     <tr><td class="k">招募</td><td>logisticRoll</td><td>bias−0.5 / cha.04 / size.25</td><td><span class="tag t-plan">待實作</span></td></tr>
     <tr><td class="k">離隊</td><td>logisticRoll</td><td>bias−2.5 / gap.02 / res.03</td><td><span class="tag t-plan">待實作</span></td></tr>
     <tr><td class="k">敵方 AI</td><td>加權抽選</td><td>視 ai-policy 內容</td><td><span class="tag t-plan">待實作</span></td></tr>

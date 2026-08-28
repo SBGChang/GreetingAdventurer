@@ -1,0 +1,135 @@
+[
+  {
+    "bias": 5,
+    "clampMin": 1,
+    "enabled": true,
+    "id": "weighted-product-params.core.damage-physical",
+    "kind": "weighted-product-params",
+    "mode": "linear",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-resolver-params.json#weighted-product-params.core.damage-physical",
+    "terms": [
+      {
+        "inputKey": "actor.muscle",
+        "weight": 1.5
+      },
+      {
+        "inputKey": "target.muscle",
+        "weight": -1
+      }
+    ]
+  },
+  {
+    "bias": 5,
+    "clampMin": 1,
+    "enabled": true,
+    "id": "weighted-product-params.core.damage-magic",
+    "kind": "weighted-product-params",
+    "mode": "linear",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-resolver-params.json#weighted-product-params.core.damage-magic",
+    "terms": [
+      {
+        "inputKey": "actor.intelligence",
+        "weight": 1.5
+      },
+      {
+        "inputKey": "target.intelligence",
+        "weight": -1
+      }
+    ]
+  },
+  {
+    "bias": 5,
+    "clampMin": 1,
+    "enabled": true,
+    "id": "weighted-product-params.core.damage-instrument",
+    "kind": "weighted-product-params",
+    "mode": "linear",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-resolver-params.json#weighted-product-params.core.damage-instrument",
+    "terms": [
+      {
+        "inputKey": "actor.charisma",
+        "weight": 1.5
+      },
+      {
+        "inputKey": "target.charisma",
+        "weight": -1
+      }
+    ]
+  },
+  {
+    "bias": 5,
+    "clampMin": 1,
+    "enabled": true,
+    "id": "weighted-product-params.core.heal-standard",
+    "kind": "weighted-product-params",
+    "mode": "linear",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-resolver-params.json#weighted-product-params.core.heal-standard",
+    "terms": [
+      {
+        "inputKey": "actor.intelligence",
+        "weight": 1.2
+      }
+    ]
+  },
+  {
+    "bias": 10,
+    "clampMin": 1,
+    "enabled": true,
+    "id": "weighted-product-params.core.heal-potent",
+    "kind": "weighted-product-params",
+    "mode": "linear",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-resolver-params.json#weighted-product-params.core.heal-potent",
+    "terms": [
+      {
+        "inputKey": "actor.intelligence",
+        "weight": 1.6
+      }
+    ]
+  },
+  {
+    "bias": 10,
+    "clampMin": 0,
+    "enabled": true,
+    "id": "weighted-product-params.core.ctb-light",
+    "kind": "weighted-product-params",
+    "mode": "linear",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-resolver-params.json#weighted-product-params.core.ctb-light",
+    "terms": []
+  },
+  {
+    "bias": 20,
+    "clampMin": 0,
+    "enabled": true,
+    "id": "weighted-product-params.core.ctb-standard",
+    "kind": "weighted-product-params",
+    "mode": "linear",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-resolver-params.json#weighted-product-params.core.ctb-standard",
+    "terms": []
+  },
+  {
+    "bias": 35,
+    "clampMin": 0,
+    "enabled": true,
+    "id": "weighted-product-params.core.ctb-heavy",
+    "kind": "weighted-product-params",
+    "mode": "linear",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-resolver-params.json#weighted-product-params.core.ctb-heavy",
+    "terms": []
+  }
+]

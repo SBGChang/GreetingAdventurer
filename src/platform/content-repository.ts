@@ -18,7 +18,7 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, posix, relative, sep } from 'node:path';
 
-import type { ContentPackId, JsonValue, ModuleId, ResolverId } from '../contracts/core';
+import type { ContentPackId, DefinitionId, JsonValue, ModuleId, ResolverId } from '../contracts/core';
 import type {
   CompileContentResult,
   ContentPackDependency,
@@ -162,10 +162,13 @@ function readPackHeader(value: JsonValue, path: string): PackHeader {
     requiredResolverIds: strArray(root, 'requiredResolverIds', path).map((id) => id as ResolverId),
     resolverBindings: arr(root, 'resolverBindings', path).map((item, i) => {
       const b = asRecord(item, path, `resolverBindings[${i}]`);
+      const paramsDefId = optionalStr(b, 'paramsDefId', path);
       return {
         resolverId: str(b, 'resolverId', path) as ResolverId,
         ownerModule: str(b, 'ownerModule', path) as ModuleId,
         shape: str(b, 'shape', path),
+        // 選填：kernel 型 shape 的 params 定義位置；純邏輯 shape 省略此欄。
+        ...(paramsDefId === undefined ? {} : { paramsDefId: paramsDefId as DefinitionId }),
       };
     }),
   };

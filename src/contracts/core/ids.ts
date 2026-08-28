@@ -16,6 +16,10 @@ export type ResolverBinding = Readonly<{
   resolverId: ResolverId;
   ownerModule: ModuleId;
   shape: string;
+  // 選填：該 resolver 的調校量（發明的數值）住在哪一筆 Definition。kernel 型 shape（傷害/治療/CTB/
+  // 招募/離隊…）以此指向自己的 params 定義（weighted-product-params / logistic-roll-params），
+  // shape 實作在執行期以此向 ctx.definitions 取回曲線／權重。純邏輯 shape（目標/站位）不需要。
+  paramsDefId?: DefinitionId;
 }>;
 // NpcDungeonTargetResolverDefinition **是內容 Definition**（帶 DefinitionHeader），因此以 DefinitionId
 // 定址，不是 ResolverId。兩者混用會讓 Definition Reader 收到一個根本不屬於 definition 家族的 ID——

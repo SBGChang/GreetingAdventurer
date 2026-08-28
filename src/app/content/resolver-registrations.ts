@@ -16,6 +16,7 @@ import {
   type ResolverRegistry,
 } from '../../data-runtime';
 import { COMBAT_TARGET_SHAPE_BUILDERS } from './combat-resolvers';
+import { COMBAT_POWER_SHAPE_BUILDERS } from './combat-power-resolvers';
 import { TEAM_RESOLVER_SHAPE_BUILDERS } from './team-resolvers';
 
 export type ResolverShapeBuilder = (binding: ResolverBinding) => AnyResolverRegistration;
@@ -25,6 +26,7 @@ export type ResolverShapeTable = Readonly<Record<string, ResolverShapeBuilder>>;
 // 新增一個 Resolver 家族（economy reward、social affinity、combat power…）就往這裡合併它的子表。
 export const PRODUCTION_RESOLVER_SHAPES: ResolverShapeTable = {
   ...COMBAT_TARGET_SHAPE_BUILDERS,
+  ...COMBAT_POWER_SHAPE_BUILDERS,
   ...TEAM_RESOLVER_SHAPE_BUILDERS,
 };
 
