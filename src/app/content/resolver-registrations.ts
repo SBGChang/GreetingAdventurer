@@ -17,6 +17,7 @@ import {
 } from '../../data-runtime';
 import { COMBAT_TARGET_SHAPE_BUILDERS } from './combat-resolvers';
 import { COMBAT_POWER_SHAPE_BUILDERS } from './combat-power-resolvers';
+import { STATISTICS_SHAPE_BUILDERS } from './statistics-resolvers';
 import { TEAM_RESOLVER_SHAPE_BUILDERS } from './team-resolvers';
 
 export type ResolverShapeBuilder = (binding: ResolverBinding) => AnyResolverRegistration;
@@ -27,6 +28,7 @@ export type ResolverShapeTable = Readonly<Record<string, ResolverShapeBuilder>>;
 export const PRODUCTION_RESOLVER_SHAPES: ResolverShapeTable = {
   ...COMBAT_TARGET_SHAPE_BUILDERS,
   ...COMBAT_POWER_SHAPE_BUILDERS,
+  ...STATISTICS_SHAPE_BUILDERS,
   ...TEAM_RESOLVER_SHAPE_BUILDERS,
 };
 
