@@ -113,12 +113,13 @@ const CASES: readonly Case[] = [
       const game = createNewGame(CONFIG, loaded.registry);
       if (!game.success) throw new Error('開新遊戲失敗');
       const assembler = createProductionContextAssembler(loaded.registry, createResolverRegistry());
-      // 已接線的 context（team/combat）建置時會讀真實 Slice，故傳真實開局狀態；dummyRuntime 只用來
-      // 佔位（combat context 只把 runtime.ids.combat/rng 當屬性引用，不在建置時計算）。
+      // 已接線的 context（team/combat/inventory）建置時會讀真實 Slice，故傳真實開局狀態；dummyRuntime
+      // 只佔位（這些 context 只把 runtime.ids.<module>/rng 當屬性引用，不在建置時呼叫）。ids 用 Proxy 對
+      // 任何模組鍵都回一個空 allocator 物件——這樣每接一個新 context 都不必回頭補這個 dummy。
       const dummyRuntime = {
         worldSeed: 'x' as never,
         worldDay: 0 as never,
-        ids: { team: {}, combat: {} } as never,
+        ids: new Proxy({}, { get: () => ({}) }) as never,
         rng: {} as never,
         rngContextFor: () => ({}) as never,
       };

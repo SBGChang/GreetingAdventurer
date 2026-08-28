@@ -44,6 +44,7 @@ import {
   createCharacterStatsQuery,
   createCombatFormationQuery,
   createCombatLoadoutQuery,
+  createInventoryContext,
 } from './cross-module-ports';
 import { RESOLVER_PARAMS_KINDS } from './resolvers';
 import { makeProgressionQuery } from '../../modules/progression/public';
@@ -182,6 +183,21 @@ export function createProductionContextAssembler(
       rngContextFor: runtime.rngContextFor,
     });
 
+    // inventory context：reader/ids/worldDay 直供；team 成員/旅行狀態與派生統計負重上限轉接真實 sibling Slice。
+    const inventoryContext = createInventoryContext({
+      inventoryState: state.inventory,
+      teamState: state.team,
+      characterState: state.character,
+      progressionState: state.progression,
+      itemReader,
+      progressionReader,
+      statisticsDefinitions,
+      statisticsResolvers,
+      statisticsRuleId,
+      worldDay: runtime.worldDay,
+      ids: runtime.ids.inventory,
+    });
+
     return {
       // ── 已接：team（rest / startCityTravel 等只讀 plan 規則的指令）─────────────
       team: {
@@ -208,9 +224,11 @@ export function createProductionContextAssembler(
         rng: runtime.rng,
       },
 
+      // ── 已接：inventory（equipItem / configureWeaponSet 及 EvaluateTeamEncumbrance 內部命令）──
+      inventory: inventoryContext,
+
       // ── 待接：其餘模組與服務（F3 後續增量逐一換成真實 context）─────────────────
       character: pending('character'),
-      inventory: pending('inventory'),
       map: pending('map'),
       dungeon: pending('dungeon'),
       progression: progressionReader,

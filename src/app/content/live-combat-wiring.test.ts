@@ -7,6 +7,8 @@
 //   2. 完整 StartCombatEncounter：以真實遭遇組建出一場遭遇，玩家戰鬥員帶著引擎算出的上限 HP，敵方戰鬥員
 //      由遭遇組的怪物產生。這是「開場主路能在真實內容上跑起來」的端到端證據（傷害數值已由
 //      combat-resolver-bridge 測試單獨證過 = 25）。
+//   3. inventory context：負重上限由派生統計 calculateCarryCapacity 算出（BM 30），team 成員/旅行狀態
+//      轉接真實 team Slice——equipItem／configureWeaponSet 的 context bag 已在真實狀態上組得出來。
 //
 // 為什麼用 bootstrap 狀態而非手搭 fixture：這條路徑要證的正是「跨模組 Query adapter 讀真實 sibling
 // Slice」——character/progression/inventory/team 都必須是真的開局 Slice，手搭 stub 會把要證的接線繞過去。
@@ -139,4 +141,13 @@ export function runTests(): void {
     combatants.every((c) => c.currentCtb >= 0),
     '所有戰鬥員應已套開場 CTB（currentCtb ≥ 0）',
   );
+
+  // ── 證據 3：inventory context（equipItem／configureWeaponSet 的 bag）——負重上限由派生統計算，
+  //    team 成員/旅行狀態轉接真實 team Slice ────────────────────────────────────────────────
+  const teamMembers = ctx.inventory.getTeamMembers(playerTeamId);
+  assert(teamMembers.some((c) => String(c) === leaderId), `inventory.getTeamMembers 應含隊長，實得 ${teamMembers.map(String).join(',')}`);
+  assert(ctx.inventory.isTeamTravelling(playerTeamId) === false, '開局在城市 → isTeamTravelling 應為 false');
+  const capacity = ctx.inventory.getCarryCapacity(member.characterId);
+  // 負重上限 = 30 + 肌力(0)×1.5 = 30（BM carry-capacity-rule；空熟練 → 肌力 0）。
+  assert(capacity.maximumWeight === 30, `隊長負重上限應 30（引擎算），實得 ${capacity.maximumWeight}`);
 }

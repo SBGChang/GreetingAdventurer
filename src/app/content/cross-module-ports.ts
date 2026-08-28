@@ -26,9 +26,14 @@ import type {
   CombatFormationQuery,
   CombatFormationMember,
 } from '../../modules/combat/public';
-import { createInventoryQuery, type InventoryState } from '../../modules/inventory/public';
+import {
+  createInventoryQuery,
+  type InventoryState,
+  type InventoryDeps,
+} from '../../modules/inventory/public';
 import { createCharacterStatisticsCalculator, type StatisticsResolverPort } from '../../domain-services/statistics/public';
 import type {
+  CarryCapacitySnapshot,
   CharacterEquipmentLoadoutView,
   ItemDefinitionReader,
 } from '../../contracts/inventory';
@@ -39,6 +44,7 @@ import type {
 } from '../../contracts/statistics';
 import type {
   CharacterId,
+  EncumbranceResolutionId,
   ItemInstanceId,
   MasteryId,
   StatisticsRuleId,
@@ -244,5 +250,70 @@ export function createCombatFormationQuery(deps: CombatFormationQueryDeps): Comb
       });
       return { teamId, formationRevision: formation.revision, members };
     },
+  };
+}
+
+// ── InventoryDeps ← inventory Slice ＋ team Slice ＋ 派生統計（負重上限）─────────────────────
+//
+// inventory Handler 的 context bag。reader/ids/worldDay 直供；三個跨模組讀取轉接真實 sibling：
+//   - getTeamMembers ← TeamQuery.listFormalMembers（team Slice）
+//   - isTeamTravelling ← TeamQuery.getLocation().kind === 'travelling'
+//   - getCarryCapacity ← 派生統計 calculateCarryCapacity（doc §7 不變量 9：只由 Carry Capacity Rule
+//     與有效肌力決定）。負重上限的窄化輸入是 CharacterStatisticsInput 的子集（不需 Loadout／裝備 View）。
+export type InventoryContextDeps = Readonly<{
+  inventoryState: InventoryState;
+  teamState: TeamState;
+  characterState: CharacterState;
+  progressionState: ProgressionModuleState;
+  itemReader: ItemDefinitionReader;
+  progressionReader: ProgressionDefinitionReader;
+  statisticsDefinitions: StatisticsDefinitionReader;
+  statisticsResolvers: StatisticsResolverPort;
+  statisticsRuleId: StatisticsRuleId;
+  worldDay: WorldDay;
+  ids: Readonly<{
+    nextItemInstanceId: () => ItemInstanceId;
+    nextEncumbranceResolutionId: () => EncumbranceResolutionId;
+    nextWeaponSetId: () => WeaponSetId;
+  }>;
+}>;
+
+export function createInventoryContext(deps: InventoryContextDeps): InventoryDeps {
+  const teamQuery = createTeamQuery(deps.teamState);
+  const characterQuery = createCharacterQuery(deps.characterState);
+  const progressionQuery = makeProgressionQuery(deps.progressionState, deps.progressionReader);
+  const calculator = createCharacterStatisticsCalculator({
+    definitions: deps.statisticsDefinitions,
+    resolvers: deps.statisticsResolvers,
+  });
+  const manifestHash = deps.statisticsDefinitions.getDefinitionManifestHash();
+
+  return {
+    reader: deps.itemReader,
+    nextItemInstanceId: deps.ids.nextItemInstanceId,
+    nextEncumbranceResolutionId: deps.ids.nextEncumbranceResolutionId,
+    nextWeaponSetId: deps.ids.nextWeaponSetId,
+    worldDay: deps.worldDay,
+    getTeamMembers: (teamId) => teamQuery.listFormalMembers(teamId),
+    getCarryCapacity: (characterId: CharacterId): CarryCapacitySnapshot => {
+      const character = characterQuery.getCharacter(characterId);
+      const maximumWeight = calculator.calculateCarryCapacity({
+        characterId,
+        ageDays: characterQuery.getAgeDays(characterId, deps.worldDay),
+        reputation: character.reputation,
+        primaryAttributesFromMastery: progressionQuery.getPrimaryAttributes(characterId),
+        // 第一版：狀態尚未接入派生統計（同 CharacterStatsQuery 的說明）。負重只吃有效肌力，目前內容
+        // 的狀態不改主屬，故傳空。一旦狀態能改主屬，這裡與 CharacterStatsQuery 一併帶入對應 refs。
+        conditionModifierRefs: [],
+        statisticsRuleId: deps.statisticsRuleId,
+      });
+      return {
+        characterId,
+        maximumWeight,
+        // 負重上限的來源身分：角色 revision ＋ 統計規則 ＋ Manifest（同輸入 → 同 key，doc §6 慣例）。
+        sourceRevisionKey: `capacity|character=${String(characterId)}@${character.revision}|rule=${String(deps.statisticsRuleId)}|manifest=${manifestHash}`,
+      };
+    },
+    isTeamTravelling: (teamId) => teamQuery.getLocation(teamId).kind === 'travelling',
   };
 }
