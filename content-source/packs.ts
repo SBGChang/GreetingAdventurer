@@ -14,6 +14,9 @@
 import type { ContentPackId } from '../src/contracts/core';
 import type { AuthoredManifest, AuthoredPack } from './authoring';
 import { combatTargetBindings, teamPureBindings } from './core/resolver-ids';
+import { teamResolverBindings } from './core/team';
+import { characterGenerationBindings } from './core/character';
+import { questGenerationBindings } from './core/quest-crafting-sequence';
 
 import { progressionDomain } from './core/progression';
 // Wave F1：八個 domain 的文化無關規則。
@@ -22,6 +25,8 @@ import { progressionRulesDomain } from './core/progression-rules';
 import { teamDomain } from './core/team';
 import { combatRulesDomain } from './core/combat-rules';
 import { combatResolverParamsDomain, combatPowerBindings } from './core/combat-resolver-params';
+import { combatAiParamsDomain, combatAiBindings } from './core/combat-ai-params';
+import { economyPriceParamsDomain, economyPriceModifierBindings } from './core/economy-price-params';
 import { statisticsResolverParamsDomain, statisticsResolverBindings } from './core/statistics-resolver-params';
 import { economySocialDistributionDomain } from './core/economy-social-distribution';
 import { questCraftingSequenceDomain } from './core/quest-crafting-sequence';
@@ -54,6 +59,8 @@ const DECLARED_KINDS: readonly string[] = [
   'character-status',
   'child-education-rule',
   'combat-ai-policy',
+  'combat-ai-params',
+  'combat-counter-condition-params',
   'combat-control-resistance-profile',
   'combat-ctb-adjustment-rule',
   'combat-damage-rule',
@@ -65,6 +72,7 @@ const DECLARED_KINDS: readonly string[] = [
   'combat-power-rule',
   'combat-rule',
   'combat-sequence-rule',
+  'combat-skill',
   'combat-status',
   'craft-quality-rule',
   'currency',
@@ -93,6 +101,7 @@ const DECLARED_KINDS: readonly string[] = [
   'player-affinity-rule',
   'player-conversation-rule',
   'player-travel-mode',
+  'price-modifier-params',
   'price-modifier-rule',
   'price-rule',
   'quest-deadline-rule',
@@ -114,6 +123,10 @@ const DECLARED_KINDS: readonly string[] = [
   'temporary-character-rule',
   // data-runtime 擁有的 kernel params 家族（傷害/治療/CTB＋派生統計的調校量住這裡）。
   'weighted-product-params',
+  'logistic-roll-params',
+  'weighted-choice-params',
+  'integer-range-params',
+  'weighted-draw-params',
   'ratio-saturation-params',
   'mastery-multiplier-params',
   'primary-attribute-modifier-params',
@@ -158,8 +171,13 @@ const corePack: AuthoredPack = {
   resolverBindings: [
     ...combatTargetBindings(),
     ...combatPowerBindings(),
+    ...combatAiBindings(),
+    ...economyPriceModifierBindings(),
     ...statisticsResolverBindings(),
     ...teamPureBindings(),
+    ...teamResolverBindings(),
+    ...characterGenerationBindings(),
+    ...questGenerationBindings(),
   ],
   runtimeCompatibility: { minRuntimeVersion: '0.1.0' },
   // 由 Compiler 交叉比對（見 authoring.ts 的說明：這一欄刻意手寫，推導出來的宣告等於沒有檢查）。
@@ -172,6 +190,8 @@ const corePack: AuthoredPack = {
     teamDomain,
     combatRulesDomain,
     combatResolverParamsDomain,
+    combatAiParamsDomain,
+    economyPriceParamsDomain,
     statisticsResolverParamsDomain,
     economySocialDistributionDomain,
     questCraftingSequenceDomain,
@@ -199,6 +219,7 @@ const YUNHUA_DECLARED_KINDS: readonly string[] = [
   'crafting-recipe',
   'cuisine-recipe',
   'culture',
+  'culture-content-rule',
   'effect',
   'encounter-group',
   'equipment',
@@ -220,6 +241,7 @@ const YUNHUA_DECLARED_KINDS: readonly string[] = [
   'player-commerce-daily-limit',
   'player-commerce-practice-rule',
   'population-supply-rule',
+  'price-rule',
   'region',
   'route',
   'shop-rule',

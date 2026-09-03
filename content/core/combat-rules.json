@@ -521,6 +521,18 @@
     "sourcePath": "core/combat-rules.json#combat-effect.core.interrupt-casting"
   },
   {
+    "enabled": true,
+    "id": "combat-effect.core.deal-physical-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.core.physical",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-effect.core.deal-physical-damage"
+  },
+  {
     "behaviorResolverId": "resolver:combat.ai-behavior.single-skill-aggressor",
     "enabled": true,
     "id": "combat-ai-policy.core.single-skill-aggressor",
@@ -546,6 +558,27 @@
     "packId": "pack:core",
     "schemaVersion": 1,
     "sourcePath": "core/combat-rules.json#combat-ai-policy.core.boss-rotation"
+  },
+  {
+    "actionDelayRuleId": "action-delay-rule.core.standard",
+    "actionKind": "attack",
+    "activationHand": "handless",
+    "effectIds": [
+      "combat-effect.core.deal-physical-damage"
+    ],
+    "enabled": true,
+    "id": "combat-skill.core.monster-slam",
+    "kind": "combat-skill",
+    "masteryExperienceMode": "damage",
+    "packId": "pack:core",
+    "resourceCosts": [],
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-rules.json#combat-skill.core.monster-slam",
+    "targeting": {
+      "targetResolverId": "resolver:combat.target-single-hostile"
+    },
+    "techniqueIds": [],
+    "weaponRequirementIds": []
   },
   {
     "aggregation": "sumMemberProfiles",

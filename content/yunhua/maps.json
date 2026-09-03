@@ -6319,6 +6319,7 @@
   },
   {
     "chestPoolId": "chest-pool.yunhua.old-canal-sunken-store",
+    "contentTier": 1,
     "enabled": true,
     "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
     "id": "map-spawn-rule.yunhua.old-canal-sunken-store",
@@ -6339,6 +6340,7 @@
   },
   {
     "chestPoolId": "chest-pool.yunhua.calendar-court-ruin",
+    "contentTier": 2,
     "enabled": true,
     "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
     "id": "map-spawn-rule.yunhua.calendar-court-ruin",
@@ -6353,6 +6355,7 @@
   },
   {
     "chestPoolId": "chest-pool.yunhua.seal-tower",
+    "contentTier": 2,
     "enabled": true,
     "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
     "id": "map-spawn-rule.yunhua.seal-tower",
@@ -6378,6 +6381,7 @@
   },
   {
     "chestPoolId": "chest-pool.yunhua.mist-bamboo-valley",
+    "contentTier": 1,
     "enabled": true,
     "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
     "id": "map-spawn-rule.yunhua.mist-bamboo-valley",
@@ -6403,6 +6407,7 @@
   },
   {
     "chestPoolId": "chest-pool.yunhua.hanging-spring-grotto",
+    "contentTier": 2,
     "enabled": true,
     "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
     "id": "map-spawn-rule.yunhua.hanging-spring-grotto",
@@ -6417,6 +6422,7 @@
   },
   {
     "chestPoolId": "chest-pool.yunhua.tidal-reed-isle",
+    "contentTier": 1,
     "enabled": true,
     "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
     "id": "map-spawn-rule.yunhua.tidal-reed-isle",
@@ -6431,6 +6437,7 @@
   },
   {
     "chestPoolId": "chest-pool.yunhua.salt-well-cellar",
+    "contentTier": 2,
     "enabled": true,
     "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
     "id": "map-spawn-rule.yunhua.salt-well-cellar",
@@ -6445,6 +6452,7 @@
   },
   {
     "chestPoolId": "chest-pool.yunhua.cinnabar-ridge",
+    "contentTier": 1,
     "enabled": true,
     "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
     "id": "map-spawn-rule.yunhua.cinnabar-ridge",
@@ -6459,6 +6467,7 @@
   },
   {
     "chestPoolId": "chest-pool.yunhua.old-kiln-flue",
+    "contentTier": 2,
     "enabled": true,
     "humanCultureContentRuleId": "culture-content-rule.yunhua.human",
     "id": "map-spawn-rule.yunhua.old-kiln-flue",
@@ -6483,7 +6492,8 @@
     },
     "packId": "pack:yunhua",
     "schemaVersion": 1,
-    "sourcePath": "yunhua/maps.json#map-content.yunhua.monster-group-common"
+    "sourcePath": "yunhua/maps.json#map-content.yunhua.monster-group-common",
+    "threatRank": "normal"
   },
   {
     "contentKind": "monsterGroup",
@@ -6497,7 +6507,8 @@
     },
     "packId": "pack:yunhua",
     "schemaVersion": 1,
-    "sourcePath": "yunhua/maps.json#map-content.yunhua.monster-group-elite"
+    "sourcePath": "yunhua/maps.json#map-content.yunhua.monster-group-elite",
+    "threatRank": "elite"
   },
   {
     "contentKind": "boss",
@@ -6511,7 +6522,8 @@
     },
     "packId": "pack:yunhua",
     "schemaVersion": 1,
-    "sourcePath": "yunhua/maps.json#map-content.yunhua.boss"
+    "sourcePath": "yunhua/maps.json#map-content.yunhua.boss",
+    "threatRank": "boss"
   },
   {
     "contentKind": "chest",
@@ -6540,5 +6552,129 @@
     "packId": "pack:yunhua",
     "schemaVersion": 1,
     "sourcePath": "yunhua/maps.json#map-content.yunhua.map-event"
+  },
+  {
+    "candidates": [
+      {
+        "encounterGroupId": "encounter-group.yunhua.mistwing-moth-swarm",
+        "threatRank": "normal",
+        "tier": 1
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.bamboo-back-badger-swarm",
+        "threatRank": "normal",
+        "tier": 1
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.tide-shell-crab-swarm",
+        "threatRank": "normal",
+        "tier": 1
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.scrap-sigil-doll-swarm",
+        "threatRank": "normal",
+        "tier": 1
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.miasma-pouch-badger-lone",
+        "threatRank": "elite",
+        "tier": 1
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.gatewater-salamander-lone",
+        "threatRank": "elite",
+        "tier": 1
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.armored-pottery-guard-lone",
+        "threatRank": "elite",
+        "tier": 1
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.mist-bamboo-king-lone",
+        "threatRank": "boss",
+        "tier": 1
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.sunken-weir-beast-lone",
+        "threatRank": "boss",
+        "tier": 1
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.frayed-seal-wisp-swarm",
+        "threatRank": "normal",
+        "tier": 2
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.bell-mandible-beetle-swarm",
+        "threatRank": "normal",
+        "tier": 2
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.tower-stone-lizard-lone",
+        "threatRank": "normal",
+        "tier": 2
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.seal-halberd-warden-lone",
+        "threatRank": "elite",
+        "tier": 2
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.broken-edict-scribe-lone",
+        "threatRank": "elite",
+        "tier": 2
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.balance-seal-colossus-lone",
+        "threatRank": "boss",
+        "tier": 2
+      }
+    ],
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "id": "culture-content-rule.yunhua.nonhuman",
+    "kind": "culture-content-rule",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#culture-content-rule.yunhua.nonhuman",
+    "speciesKind": "nonHuman"
+  },
+  {
+    "candidates": [
+      {
+        "encounterGroupId": "encounter-group.yunhua.river-cutthroat-swarm",
+        "threatRank": "normal",
+        "tier": 1
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.privateer-crossbow-swarm",
+        "threatRank": "normal",
+        "tier": 1
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.salt-route-leader-lone",
+        "threatRank": "elite",
+        "tier": 1
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.seal-tower-deserter-swarm",
+        "threatRank": "normal",
+        "tier": 2
+      },
+      {
+        "encounterGroupId": "encounter-group.yunhua.false-seal-officer-lone",
+        "threatRank": "elite",
+        "tier": 2
+      }
+    ],
+    "cultureId": "culture.yunhua",
+    "enabled": true,
+    "id": "culture-content-rule.yunhua.human",
+    "kind": "culture-content-rule",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#culture-content-rule.yunhua.human",
+    "speciesKind": "human"
   }
 ]

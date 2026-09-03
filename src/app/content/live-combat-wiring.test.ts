@@ -45,11 +45,12 @@ function assert(cond: boolean, msg: string): void {
 // 開新遊戲設定：真實 core archetype + 真實 yunhua 城市（見 new-game-bootstrap.test.ts）。
 const CONFIG: NewGameConfig = {
   worldSeed: 'f3-live-combat',
-  startDay: 8000,
+  startDay: 14600,
   startingArchetypeId: 'character-archetype.core.player-lineage' as CharacterArchetypeId,
   startCityId: 'city-node.yunhua.yunjing' as CityId,
   leaderSex: 'female',
-  leaderBirthDay: 0,
+  leaderBirthDay: 5475,
+  startingMoney: 500,
 };
 
 // 真實 yunhua 遭遇組（見 content/yunhua/monsters.json）。
@@ -60,7 +61,7 @@ export function runTests(): void {
   if (!loaded.success) throw new Error('內容載入失敗');
   const resolvers = createProductionResolverRegistry(loaded.resolverBindings);
 
-  const game = createNewGame(CONFIG, loaded.registry);
+  const game = createNewGame(CONFIG, loaded.registry, resolvers);
   assert(game.success, `開新遊戲應成功：${game.success ? '' : JSON.stringify(game.diagnostics)}`);
   if (!game.success) return;
   const { state, playerTeamId, leaderId } = game;
@@ -77,6 +78,7 @@ export function runTests(): void {
   const runtime: EngineRuntime = {
     worldSeed,
     worldDay: state.core.worldDay,
+        transactionId: 'test-transaction' as never,
     ids,
     rng: deterministicRng,
     rngContextFor,
@@ -92,9 +94,16 @@ export function runTests(): void {
   // 空熟練（主屬全 0）＋無裝備 → safeRaw 0 → BM：生命 200 + 0×20 = 200、魔力 120 + 0×14 = 120。
   assert(member.maxHealth === 200, `隊長 maxHealth 應 200（引擎算），實得 ${member.maxHealth}`);
   assert(member.maxMana === 120, `隊長 maxMana 應 120（引擎算），實得 ${member.maxMana}`);
-  // 起手 HP/MP 取自 character 條件（bootstrap 開局 100/50），非上限。
-  assert(member.startHealth === 100, `隊長 startHealth 應 100（character 條件），實得 ${member.startHealth}`);
-  assert(member.startMana === 50, `隊長 startMana 應 50（character 條件），實得 ${member.startMana}`);
+  // 起手 HP/MP 取自 character 條件。開局角色是滿的，而「滿」由同一支派生統計引擎算出來
+  // （原本 bootstrap 寫死 100/50，那是程式裡的玩法數字，已改為引擎值）。
+  assert(
+    member.startHealth === member.maxHealth,
+    `隊長開局應滿血（${member.maxHealth}），實得 ${member.startHealth}`,
+  );
+  assert(
+    member.startMana === member.maxMana,
+    `隊長開局應滿魔（${member.maxMana}），實得 ${member.startMana}`,
+  );
   // 站位取自 team 的 combatFormation（bootstrap 置於 row 1 前排）。
   assert(member.cell.row === 1, `隊長站位 row 應 1，實得 ${member.cell.row}`);
 
@@ -120,13 +129,16 @@ export function runTests(): void {
   const encounter = encounters[0]!;
   const combatants = Object.values(encounter.combatants);
 
-  // 玩家戰鬥員：隊長，帶引擎算出的上限 HP（200）與開局起手 HP（100）。
+  // 玩家戰鬥員：隊長，帶引擎算出的上限 HP（200）；開局是滿的。
   const playerCombatant = combatants.find(
     (c) => c.source.kind === 'character' && String(c.source.characterId) === leaderId,
   );
   assert(playerCombatant !== undefined, '遭遇中應有隊長的玩家戰鬥員');
   assert(playerCombatant!.maxHealth === 200, `玩家戰鬥員 maxHealth 應 200（引擎算），實得 ${playerCombatant!.maxHealth}`);
-  assert(playerCombatant!.health === 100, `玩家戰鬥員起手 health 應 100，實得 ${playerCombatant!.health}`);
+  assert(
+    playerCombatant!.health === playerCombatant!.maxHealth,
+    `玩家戰鬥員開局應滿血（${playerCombatant!.maxHealth}），實得 ${playerCombatant!.health}`,
+  );
 
   // 敵方戰鬥員：由遭遇組的怪物產生，至少一名，帶怪物定義的生命值。
   const enemyCombatants = combatants.filter((c) => c.side === 'enemy');

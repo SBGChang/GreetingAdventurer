@@ -33,6 +33,8 @@ import type {
   TeamPlanKind,
   TeamPlanRuleDefinition,
 } from '../../src/contracts/team';
+import type { FacilityKind } from '../../src/contracts/city';
+import type { LogisticCurveParams } from '../../src/data-runtime';
 import type {
   ExperienceAwardRuleId,
   MemberRetentionRuleId,
@@ -40,14 +42,30 @@ import type {
   NpcMarriageRuleId,
   NpcTravelRuleId,
   RecruitmentRuleId,
+  DefinitionHeader,
+  ModuleId,
+  ResolverBinding,
   ResolverId,
   TeamFormationRuleId,
   TeamPlanRuleId,
   TravelModeId,
 } from '../../src/contracts/core';
-import { cultureIds, type Authored, type AuthoredDomain } from '../authoring';
+import {
+  cultureIds,
+  textKeyFor,
+  type Authored,
+  type AuthoredDomain,
+  type LocalizedName,
+} from '../authoring';
+import {
+  COMBAT_MAGIC_MASTERY_LOCALS,
+  LIFE_CRAFT_MASTERY_LOCALS,
+  MASTERY_IDS,
+  SMITH_TAILOR_MASTERY_LOCALS,
+} from './progression';
 
 const core = cultureIds('core');
+const TEAM_MODULE = 'team' as ModuleId;
 
 // ── Resolver ID ─────────────────────────────────────────────────────────────
 //
@@ -152,6 +170,7 @@ const TRAVEL_EVENT_PROFILE_SLOW = core.id<PlayerTravelEventWeightProfileId>(
 // 段落長度逐筆照抄而不是由 durationDays 除三——文件把它列成三張明表，抄下來的東西改起來也是資料。
 type TravelModeRow = Readonly<{
   local: string;
+  name: LocalizedName;
   durationDays: 3 | 6 | 9;
   segments: [number, number, number];
   experienceMultiplier: number;
@@ -161,6 +180,7 @@ type TravelModeRow = Readonly<{
 const TRAVEL_MODE_ROWS: readonly TravelModeRow[] = [
   {
     local: 'hurried',
+    name: { 'zh-Hant': '趕路', en: 'Hurried' },
     durationDays: 3,
     segments: [1, 1, 1],
     experienceMultiplier: 0.5,
@@ -168,6 +188,7 @@ const TRAVEL_MODE_ROWS: readonly TravelModeRow[] = [
   },
   {
     local: 'normal',
+    name: { 'zh-Hant': '正常', en: 'Normal' },
     durationDays: 6,
     segments: [2, 2, 2],
     experienceMultiplier: 1,
@@ -175,6 +196,7 @@ const TRAVEL_MODE_ROWS: readonly TravelModeRow[] = [
   },
   {
     local: 'slow',
+    name: { 'zh-Hant': '慢行', en: 'Slow' },
     durationDays: 9,
     segments: [3, 3, 3],
     experienceMultiplier: 2,
@@ -186,6 +208,7 @@ function travelMode(row: TravelModeRow): Authored<PlayerTravelModeDefinition> {
   return {
     kind: 'player-travel-mode',
     id: core.id<TravelModeId>('player-travel-mode', row.local),
+    display: { nameRef: { key: textKeyFor(core.id<TravelModeId>('player-travel-mode', row.local)) } },
     durationDays: row.durationDays,
     segments: row.segments,
     travelExperienceRuleId: TRAVEL_EXPERIENCE_BASE_RULE,
@@ -216,9 +239,11 @@ const npcTravelRule: Authored<NpcTravelRuleDefinition> = {
 //   * `craft` 不填 `requiredFreeDays` 也不填 `requiresCityFacilityKind`——那兩件事由配方擁有
 //     （`CraftingRecipeDefinition.craftingDurationDays` / `.requiredFacilityKind`），一件物品要幾天、
 //     要在哪個店做，逐配方不同。在這裡再寫一個數字就是第二個真相，而且對絕大多數配方是錯的。
-//   * `train` 不填 `requiresCityFacilityKind`——「戰鬥與魔法在訓練所、生活技藝在道具店／裝備店」
-//     取決於受訓的熟練度，一筆規則說不出來；而設施門檻已由
-//     `CityActionRuleDefinition`（`actionKind: 'masteryTraining'`）的 `requiredFacilityKind` 擁有。
+//   * `train` 展開成**三筆**（見下面的 `TRAIN_RULES`）：「戰鬥與魔法在訓練所、生活技藝在道具店、
+//     鍛冶與裁縫在裝備店」一筆通用規則說不出來，但三筆各自說得出來——每一筆同時帶著自己的
+//     設施門檻與可鍛鍊項目清單，兩者是同一句宣告的兩半。
+//     （`CityActionRuleDefinition` 的 `actionKind: 'masteryTraining'` 是**同一件事的另一個表達**，
+//      為耗時城市行動而設；玩家入口走自由行動，見 02_team_module.md §4 的 `chooseCityFreeAction`。）
 //   * `trade` / `proposeToTeammate` 的 `requiredFreeDays` 是 **0**（文件明講「零日子步驟」），
 //     `tavernVisit` / `rest` 則**不填**（文件明講是「可持續的被動選項」，不必每天建立完成 Job）。
 //     0 與缺席在這裡是兩件不同的事；契約沒有把這個差別寫下來，見回報「契約缺口」。
@@ -240,13 +265,37 @@ const craftRule: Authored<FreeActionRuleDefinition> = {
   completionResolverId: resolverId('free-action-craft-completion'),
 };
 
-const trainRule: Authored<FreeActionRuleDefinition> = {
-  kind: 'free-action-rule',
-  id: core.id<FreeActionRuleId>('free-action-rule', 'train'),
-  freeActionKind: 'train',
-  requiredFreeDays: TRAINING_DAYS,
-  completionResolverId: resolverId('free-action-train-completion'),
-};
+// 28 日鍛鍊。**三筆**而不是一筆：GDD §建築表把訓練分給三個設施，而「在哪練」與「練得到什麼」
+// 是同一句宣告的兩半——拆成一筆通用規則就得在別處再補一張「設施→項目」表，那是第二份真相。
+//
+// `trainableMasteryIds` 讓 `chooseCityFreeAction` 當場擋掉不可鍛鍊的項目（例如委託類熟練度），
+// 不必等 28 日後才在 progression 炸開。訓練給多少 MXP 不在這裡：那是
+// `TeachingRuleDefinition`（Lv.5 教師、差額 × 0.15%），由 progression 在完成時算。
+function trainRuleFor(
+  local: string,
+  facilityKind: FacilityKind,
+  masteryLocals: readonly string[],
+): Authored<FreeActionRuleDefinition> {
+  return {
+    kind: 'free-action-rule',
+    id: core.id<FreeActionRuleId>('free-action-rule', `train-${local}`),
+    freeActionKind: 'train',
+    requiredFreeDays: TRAINING_DAYS,
+    completionResolverId: resolverId('free-action-train-completion'),
+    requiresCityFacilityKind: facilityKind,
+    trainableMasteryIds: masteryLocals.map((m) => {
+      const id = MASTERY_IDS[m];
+      if (id === undefined) throw new Error(`content-source/core/team：未知的熟練度 local "${m}"`);
+      return id;
+    }),
+  };
+}
+
+const TRAIN_RULES: readonly Authored<FreeActionRuleDefinition>[] = [
+  trainRuleFor('combat-magic', 'trainingGround', COMBAT_MAGIC_MASTERY_LOCALS),
+  trainRuleFor('life-craft', 'itemShop', LIFE_CRAFT_MASTERY_LOCALS),
+  trainRuleFor('smith-tailor', 'equipmentShop', SMITH_TAILOR_MASTERY_LOCALS),
+];
 
 // 傳授在家中進行（GDD 建築表：「家｜家族、子女教育、熟練度傳授、休息與休息一年」）。
 // `home` 是 city 的 FacilityKind 之一，所以這條設施門檻表達得出來，而且沒有別的擁有者。
@@ -298,7 +347,7 @@ const restRule: Authored<FreeActionRuleDefinition> = {
 
 const FREE_ACTION_RULES: readonly Authored<FreeActionRuleDefinition>[] = [
   craftRule,
-  trainRule,
+  ...TRAIN_RULES,
   teachRule,
   tradeRule,
   tavernVisitRule,
@@ -398,6 +447,62 @@ const recruitmentRule: Authored<RecruitmentRuleDefinition> = {
   retryEligibilityResolverId: resolverId('recruitment-retry-eligibility'),
 };
 
+// ── 擲骰曲線的 params（kernel logistic）──────────────────────────────────────
+//
+// `logistic-roll-params` 這個 kind 的擁有者是 data-runtime（見 app/content/definition-kinds.ts）：
+// 它不是任何領域的資料，是 kernel 的曲線形狀。這裡授權**兩條曲線**的係數。
+//
+// 【第一版方案（待討論）】招募成功率：p = 1 / (1 + e^-z)，z = 1.4 − 0.35 × 目前正式人數。
+//   1 人時 z=1.05 → p≈74%；5 人時 z=−0.35 → p≈41%；9 人（隊伍上限）時 z=−1.75 → p≈15%。
+//   取這組數字的理由只有一個：讓「隊伍越大越難招人」這句設計語言在整個 1～9 的區間裡都看得見，
+//   而且兩端都不極端（不會 99% 也不會 1%）。設計定案時只改這兩個數字，程式不動。
+//
+//   ⚠ 契約 §2.3 還要求納入招募者的 `inviteSuccessBonus`（交流熟練效益）。它**沒有**進這條曲線，
+//   因為 `TeamResolverPort.resolveRecruitmentSuccess` 的輸入沒有那個欄位——補它要先改 Port 形狀
+//   與 team context 的 progression 投影。缺口記在此，不用一個假的預設值蓋掉。
+//
+// 【第一版方案（待討論）】離隊機率：z = −2.2 − 0.0006 × workNet。
+//   workNet 是「任務＋地牢收入 − 旅費 − 消耗品」。收支平衡（0）時 z=−2.2 → p≈10%；
+//   淨賺 3000 時 p≈2%；淨虧 3000 時 p≈33%。負號的方向就是設計語言：賺得越多越留得住人。
+//   同樣缺隊長的 `memberDepartureResistance`（Port 輸入沒有），理由同上。
+type LogisticRollParamsDef = DefinitionHeader & LogisticCurveParams;
+
+const recruitmentSuccessParams: Authored<LogisticRollParamsDef> = {
+  kind: 'logistic-roll-params',
+  id: core.id('logistic-roll-params', 'recruitment-success'),
+  bias: 1.4,
+  terms: [{ inputKey: 'currentFormalCount', weight: -0.35 }],
+};
+
+const memberDepartureParams: Authored<LogisticRollParamsDef> = {
+  kind: 'logistic-roll-params',
+  id: core.id('logistic-roll-params', 'member-departure'),
+  bias: -2.2,
+  terms: [{ inputKey: 'workNet', weight: -0.0006 }],
+};
+
+// 兩條曲線的 Resolver 綁定。兩件刻意不在這裡的事：
+//   * `team-default-placement` 由 `core/resolver-ids.ts` 的 `teamPureBindings()` 擁有（純演算法，
+//     沒有 params）。同一個 resolverId 綁兩次會被 `createResolverRegistry` 明確拒絕。
+//   * `retryEligibilityResolverId`（重試間隔）沒有任何 Handler 讀它，綁一個沒人呼叫的 Resolver
+//     只會讓註冊表看起來比實作完整。
+export function teamResolverBindings(): readonly ResolverBinding[] {
+  return [
+    {
+      resolverId: resolverId('recruitment-success'),
+      ownerModule: TEAM_MODULE,
+      shape: 'team:logistic-roll',
+      paramsDefId: recruitmentSuccessParams.id,
+    },
+    {
+      resolverId: resolverId('member-departure-chance'),
+      ownerModule: TEAM_MODULE,
+      shape: 'team:logistic-roll',
+      paramsDefId: memberDepartureParams.id,
+    },
+  ];
+}
+
 // ── 戰鬥配置規則 ────────────────────────────────────────────────────────────
 //
 // 02_team_module.md §3.1：「新建隊伍或成功招募成員時，由 `defaultPlacementResolverId` 以目前配置
@@ -425,6 +530,10 @@ const socialPracticeRule: Authored<NonPlayerMemberDailySocialPracticeRuleDefinit
 
 export const teamDomain: AuthoredDomain = {
   domain: 'team',
+  texts: TRAVEL_MODE_ROWS.map((row) => ({
+    key: textKeyFor(core.id<TravelModeId>('player-travel-mode', row.local)),
+    name: row.name,
+  })),
   definitions: [
     ...TRAVEL_MODE_ROWS.map(travelMode),
     npcTravelRule,
@@ -433,6 +542,8 @@ export const teamDomain: AuthoredDomain = {
     recentActivityRule,
     memberRetentionRule,
     recruitmentRule,
+    recruitmentSuccessParams,
+    memberDepartureParams,
     teamFormationRule,
     socialPracticeRule,
   ],

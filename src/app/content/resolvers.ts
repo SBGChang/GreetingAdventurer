@@ -34,6 +34,10 @@ export const RESOLVER_PARAMS_KINDS = {
   ratioSaturation: 'ratio-saturation-params',
   masteryMultiplier: 'mastery-multiplier-params',
   primaryAttributeModifier: 'primary-attribute-modifier-params',
+  // 世界冒險者生成（app/content/character-resolvers.ts 的三個 shape）。
+  weightedChoice: 'weighted-choice-params',
+  integerRange: 'integer-range-params',
+  weightedDraw: 'weighted-draw-params',
 } as const;
 
 // 占位 Schema ID（binding 驗證用；真內容軌會給正式 schema）。

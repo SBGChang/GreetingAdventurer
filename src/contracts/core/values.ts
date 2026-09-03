@@ -28,6 +28,13 @@ export type LocalizedTextRef = Readonly<{
   params?: Readonly<Record<string, JsonScalar>>;
 }>;
 
+// 一筆 Definition 的顯示身分。名稱**一律**是本地化引用，不是已翻譯字串——否則同一份 Content
+// Pack 沒辦法同時支援多語（見 contracts/world 的 NationDisplayDefinition 同一段理由）。
+//
+// 這是共用型別而不是每個模組各自複製一份：顯示名稱在所有模組都是同一個概念，複製只會讓
+// 「文字要怎麼表達」出現多個互相漂移的答案（既有的 Nation／Currency／Item 三份是待收斂的重複）。
+export type DisplayDefinition = Readonly<{ nameRef: LocalizedTextRef }>;
+
 export type NotificationTone = 'info' | 'success' | 'warning' | 'error';
 
 // Core／Engine 產出的語意通知。UI 顯示模型 UiNotice 由 Application 投影，定義於 UI 契約。

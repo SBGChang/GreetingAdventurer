@@ -35,13 +35,22 @@ import type {
   BirthRuleId,
   CharacterArchetypeId,
   CharacterStatusDefinitionId,
+  DefinitionHeader,
   LifecycleRuleId,
+  ModuleId,
+  ResolverBinding,
   ResolverId,
   WorldAdventurerGenerationRuleId,
 } from '../../src/contracts/core';
+import type {
+  IntegerRangeParams,
+  WeightedChoiceParams,
+  WeightedDrawParams,
+} from '../../src/app/content/character-resolvers';
 import { cultureIds, type Authored, type AuthoredDomain } from '../authoring';
 
 const core = cultureIds('core');
+const CHARACTER_MODULE = 'character' as ModuleId;
 
 // ── Resolver ID ─────────────────────────────────────────────────────────────
 //
@@ -348,6 +357,79 @@ export const CHARACTER_RESOLVER_IDS: readonly ResolverId[] = [
   TEMPORARY_INNATE_TRAIT_RESOLVER,
 ];
 
+// ── 生成 Resolver 的 params ────────────────────────────────────────────────
+//
+// 四個 Resolver 的可調量。形狀由 `app/content/character-resolvers.ts` 的三個 shape 提供，
+// 這裡只給值——那正是「形狀＝程式、調校＝資料」。
+//
+// 【第一版方案（待討論）】性別 50／50。文件禁止**程式**假設 50／50，不禁止**內容**宣告它；
+// 差別在於這一行改得動，寫在 Handler 裡的那個 0.5 改不動。雲華沒有性別偏斜的設定，所以先等權。
+//
+// 【第一版方案（待討論）】起始年齡 18～35 歲（以日為單位，與 lifecycleRule 同一個尺度）。
+// 下界 18 而非成年門檻 15：GDD 說補進來的是「冒險者」，不是剛成年的孩子；上界 35 讓他們在
+// 可遊玩年齡上限（55）之前還有二十年的職業生涯。兩個數字都純屬取捨，改這裡即可。
+//
+// 初始天賦：`character-trait` 這個 kind **沒有任何定義**（core 與雲華都沒有授權天賦），
+// 所以 `count: 0`、選項為空——那是一句「這份內容不給天賦」的封閉宣告，不是漏填。
+// 有人授權天賦時，把它們列進 options 並把 count 調上去即可，程式不動。
+const worldAdventurerArchetypeWeights: Authored<DefinitionHeader & WeightedChoiceParams> = {
+  kind: 'weighted-choice-params',
+  id: core.id('weighted-choice-params', 'world-adventurer-archetype'),
+  options: [{ value: String(WORLD_ADVENTURER_ARCHETYPE_ID), weight: 1 }],
+};
+
+const worldAdventurerSexWeights: Authored<DefinitionHeader & WeightedChoiceParams> = {
+  kind: 'weighted-choice-params',
+  id: core.id('weighted-choice-params', 'world-adventurer-sex'),
+  options: [
+    { value: 'female', weight: 1 },
+    { value: 'male', weight: 1 },
+  ],
+};
+
+const worldAdventurerStartingAge: Authored<DefinitionHeader & IntegerRangeParams> = {
+  kind: 'integer-range-params',
+  id: core.id('integer-range-params', 'world-adventurer-starting-age'),
+  min: 18 * DAYS_PER_YEAR,
+  max: 35 * DAYS_PER_YEAR,
+};
+
+const worldAdventurerInnateTraits: Authored<DefinitionHeader & WeightedDrawParams> = {
+  kind: 'weighted-draw-params',
+  id: core.id('weighted-draw-params', 'world-adventurer-innate-trait'),
+  count: 0,
+  options: [],
+};
+
+export function characterGenerationBindings(): readonly ResolverBinding[] {
+  return [
+    {
+      resolverId: WORLD_ADVENTURER_ARCHETYPE_WEIGHT_RESOLVER,
+      ownerModule: CHARACTER_MODULE,
+      shape: 'character:weighted-choice',
+      paramsDefId: worldAdventurerArchetypeWeights.id,
+    },
+    {
+      resolverId: WORLD_ADVENTURER_SEX_WEIGHT_RESOLVER,
+      ownerModule: CHARACTER_MODULE,
+      shape: 'character:weighted-choice',
+      paramsDefId: worldAdventurerSexWeights.id,
+    },
+    {
+      resolverId: WORLD_ADVENTURER_STARTING_AGE_RESOLVER,
+      ownerModule: CHARACTER_MODULE,
+      shape: 'character:integer-range',
+      paramsDefId: worldAdventurerStartingAge.id,
+    },
+    {
+      resolverId: WORLD_ADVENTURER_INNATE_TRAIT_RESOLVER,
+      ownerModule: CHARACTER_MODULE,
+      shape: 'character:weighted-draw',
+      paramsDefId: worldAdventurerInnateTraits.id,
+    },
+  ];
+}
+
 export const characterDomain: AuthoredDomain = {
   domain: 'character',
   definitions: [
@@ -358,5 +440,9 @@ export const characterDomain: AuthoredDomain = {
     escortTemporaryRule,
     rescueTemporaryRule,
     worldAdventurerGeneration,
+    worldAdventurerArchetypeWeights,
+    worldAdventurerSexWeights,
+    worldAdventurerStartingAge,
+    worldAdventurerInnateTraits,
   ],
 };

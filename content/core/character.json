@@ -167,5 +167,57 @@
     "sexWeightResolverId": "resolver:character.world-adventurer-sex-weight",
     "sourcePath": "core/character.json#world-adventurer-generation-rule.core.standard",
     "startingAgeResolverId": "resolver:character.world-adventurer-starting-age"
+  },
+  {
+    "enabled": true,
+    "id": "weighted-choice-params.core.world-adventurer-archetype",
+    "kind": "weighted-choice-params",
+    "options": [
+      {
+        "value": "character-archetype.core.world-adventurer",
+        "weight": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/character.json#weighted-choice-params.core.world-adventurer-archetype"
+  },
+  {
+    "enabled": true,
+    "id": "weighted-choice-params.core.world-adventurer-sex",
+    "kind": "weighted-choice-params",
+    "options": [
+      {
+        "value": "female",
+        "weight": 1
+      },
+      {
+        "value": "male",
+        "weight": 1
+      }
+    ],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/character.json#weighted-choice-params.core.world-adventurer-sex"
+  },
+  {
+    "enabled": true,
+    "id": "integer-range-params.core.world-adventurer-starting-age",
+    "kind": "integer-range-params",
+    "max": 12775,
+    "min": 6570,
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/character.json#integer-range-params.core.world-adventurer-starting-age"
+  },
+  {
+    "count": 0,
+    "enabled": true,
+    "id": "weighted-draw-params.core.world-adventurer-innate-trait",
+    "kind": "weighted-draw-params",
+    "options": [],
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/character.json#weighted-draw-params.core.world-adventurer-innate-trait"
   }
 ]

@@ -23,6 +23,8 @@ export const ECONOMY_DEFINITION_KINDS = {
   currency: 'currency',
   priceRule: 'price-rule',
   priceModifierRule: 'price-modifier-rule',
+  // 價格修正係數的調校量（shape 只實作一種形狀，係數住這裡）。
+  priceModifierParams: 'price-modifier-params',
   rewardRule: 'reward-rule',
 } as const;
 

@@ -382,6 +382,15 @@ function fullCondition(
   return { health: max.maxHealth, mana: max.maxMana, statuses: [] };
 }
 
+// 同上，但對象是**還沒進 Slice** 的草稿（生成／出生路徑）。
+function fullConditionOf(
+  ctx: CharacterHandlerContext,
+  character: Character,
+): Readonly<{ health: number; mana: number }> {
+  const max = ctx.stats.getStatsForCharacter(character);
+  return { health: max.maxHealth, mana: max.maxMana };
+}
+
 // ──────────────────────────────────────────────────────────────────────────
 // §5.1 Internal Command Handlers
 // ──────────────────────────────────────────────────────────────────────────
@@ -693,7 +702,7 @@ export function handleCreateWorldAdventurerBatch(
   for (let i = 0; i < command.count; i += 1) {
     const draft = ctx.resolvers.resolveWorldAdventurer({ index: i, command, onDay: ctx.worldDay });
     const characterId = ctx.ids.nextCharacterId();
-    const character = newCharacter({
+    const created = newCharacter({
       characterId,
       archetypeId: draft.archetypeId,
       origin: 'worldAdventurer',
@@ -702,8 +711,17 @@ export function handleCreateWorldAdventurerBatch(
       // 生成規則輸出已成年起始年齡 → 直接 available。
       availability: 'available',
       innateTraitIds: draft.innateTraitIds,
-      condition: fullCondition(ctx, characterId),
+      // 先以空狀態建立，插入之後再問滿血滿魔——`CharacterStatsQuery` 的輸入包含角色的
+      // revision／年齡／聲望，也就是**角色必須先存在**才問得出上限。原本在插入前就問，
+      // 正式的統計 Port 一接上就會以「unknown characterId」拋（stub 回固定值時看不出來）。
+      condition: { health: 0, mana: 0, statuses: [] },
     });
+    // 新角色的初始 HP/MP ＝ 它自己的上限。用草稿問（見 CharacterStatsQuery 的說明）：
+    // 這時候它還沒進 Slice，用 id 查一定查不到。
+    const character: Character = {
+      ...created,
+      condition: { ...created.condition, ...fullConditionOf(ctx, created) },
+    };
     nextState = upsertCharacter(nextState, character);
     messages.push(
       emit({

@@ -17,6 +17,7 @@ import type {
   MapTemplateDefinition,
   NpcSequenceRuleDefinition,
 } from '../../contracts/map';
+import type { CultureContentRuleDefinition } from '../../contracts/map';
 import type { DefinitionRegistry } from '../../data-runtime';
 import { narrowedDomainReader } from './reader-adapter';
 
@@ -26,6 +27,9 @@ export const MAP_DEFINITION_KINDS = {
   npcSequenceRule: 'npc-sequence-rule',
   content: 'map-content',
   gatheringRule: 'map-gathering-rule',
+  // 文化內容池（§7.2／§7.3）：地圖挑遭遇時的候選目錄。擁有者是 map——它是「地圖生成要讀什麼」
+  // 的宣告，不是 combat 的戰鬥資料（combat 擁有的是 encounter-group 本身）。
+  cultureContentRule: 'culture-content-rule',
 } as const;
 
 // getGatheringMapView 的回傳型別（含 npcPolicy 聯集）直接取自介面，避免重寫。
@@ -48,10 +52,16 @@ export function createMapDefinitionReader(registry: DefinitionRegistry): MapDefi
   const gathering = narrowedDomainReader<GatheringMapData>(registry, 'reader:map.gathering-rule', [
     MAP_DEFINITION_KINDS.gatheringRule,
   ]);
+  const cultureContent = narrowedDomainReader<CultureContentRuleDefinition>(
+    registry,
+    'reader:map.culture-content-rule',
+    [MAP_DEFINITION_KINDS.cultureContentRule],
+  );
 
   return {
     getMapTemplate: (id) => template.get(id),
     getMapSpawnRule: (id) => spawn.get(id),
+    getCultureContentRule: (id) => cultureContent.get(id),
     getNpcSequenceRule: (id) => npcSequence.get(id),
     getContentDefinition: (id) => content.get(id),
     getGatheringMapView: (id) => ({

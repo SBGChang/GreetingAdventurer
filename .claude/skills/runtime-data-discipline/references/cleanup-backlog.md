@@ -262,3 +262,129 @@ A1 改型別時發現：全 `src/` 沒有任何地方建構 `ApplyFoodStatusEffe
 `src/contracts/map/index.ts:294`／`:305` 的 `details?: Record<string, JsonValue>` **不在此列**：
 它們是 diagnostics 的附帶說明欄位，不承載玩法行為——但若哪天有 Handler 開始依 `details` 的內容
 分支，它就變成同一個病，必須立刻補成判別聯集。
+
+---
+
+## L. 顯示文字（本地化）欠債　`部分完成`
+
+2026-08-30 建立本地化管線時發現並鎖住的既有缺口。
+
+### L1. 140 筆 `nameRef` 指向不存在的文字　`契約已備、待資料`
+
+- 位置：`content-source/yunhua/{equipment,items}.ts`、`content-source/core/economy-social-distribution.ts`
+- 現象：裝備 90／道具 30／素材 19／貨幣 1 筆定義都帶 `display.nameRef`，但在本地化管線
+  存在之前沒有任何地方提供文字。**這是既有欠債，不是新增的**——`YUNHUA_EQUIPMENT_DISPLAY_NAMES`
+  這個 export 早就備妥了 90 筆中文名，只是沒有管線可以送出去。
+- 目前作法：`scripts/lib/content-compiler.ts` 的 `TEXT_DEBT_RATCHET` 逐 kind 記錄欠債數，
+  **只能減少**（增加或減少都會編譯失敗，後者要求同步下修宣告值）。新的 kind 一律不得有缺字。
+- 補它需要：把既有中文名接進 `AuthoredDomain.texts`（equipment 已有現成表），
+  並補英文名。補完一個 kind 就把它從 `TEXT_DEBT_RATCHET` 刪掉。
+- 不影響目前 UI：城市／設施／冒險據點／行進方式的名稱都已備妥雙語，主城與世界地圖畫面完整。
+
+### L2. `Nation/Currency/Item DisplayDefinition` 三份重複型別　`未開始`
+
+- 位置：`src/contracts/world/index.ts`（`NationDisplayDefinition`）、
+  `src/contracts/economy/index.ts`、`src/contracts/inventory/index.ts`（後者標著 PLACEHOLDER (invented)）
+- 三者結構完全相同（`{ nameRef: LocalizedTextRef }`）。新增的欄位已改用 core 的共用
+  `DisplayDefinition`；這三份舊的待收斂到同一個型別。
+
+---
+
+## M. 地牢探索迴圈　`部分完成`（2026-08-30）
+
+### M1. DungeonMapPort ＋ 地圖實例 ＋ team.world　`已完成`
+
+- `src/app/content/dungeon-map-port.ts`：15 個方法全實作。唯一有演算法的 `getRoomTraversal`
+  走**房內 BFS**（不是曼哈頓距離）——房間可為 L／T／凹形，直線距離會穿過不屬於該房的格子。
+- `new-game-bootstrap.ts`：依 `adventure-site` 為每座據點建 MapInstance（雲華 9 座），
+  紅門全關、版本從 1 起算。
+- `dungeon-context.ts`：`TeamWorldReader`（據點↔圖↔城市三向投影）＋ `DungeonContext` 組裝，
+  規則 ID 全部從內容選出（`dungeonLoot`＋`playerAuction` 判別，不寫死 ID）。
+- `contracts/dungeon`：`startPlayerExploration` / `useDungeonExit` 已加回 GameCommand union。
+- 端到端證據：`src/app/content/dungeon-wiring.test.ts`（7 案），含「紅門未開時移動必須被拒」。
+
+### M2. `MapContentPayload.mapEvent` 補上實例身分　`已完成`
+
+- 原本只有 `contentEventDefinitionId`，但 `ContentEventInstance` 要求 `instanceId` 與
+  `rngStreamId`。少了它們，`getContentEventInstance` 只能把 ContentInstanceId 硬轉成
+  ContentEventInstanceId（§7 點名的跨語意轉型），rngStreamId 更是無中生有。
+  已加 `eventInstanceId` / `rngStreamId` 兩欄，由 map 生成內容時鑄造。
+
+### M3. 地圖內容生成（P4）　`已完成`
+
+> **兩次訂正**：本項先被記為「卡在缺內容，需要內容決策」（錯），再訂正為「卡在契約缺口」（對）。
+> 現已完成。留下這段是因為第一次的錯誤診斷差點把工作推給內容作者。
+
+- **阻塞是程式側的三個未登記 kind**，不是缺內容：`culture-content-rule` / `chest-pool` /
+  `map-event-pool` 沒有登記擁有模組，Content Compiler 對未登記 kind 直接報錯，
+  所以作者**寫不進去**。`content-source/yunhua/maps.ts` 的註解早已記載。
+- **已補**：
+  * `culture-content-rule` 登記到 map 模組 ＋ `CultureContentRuleDefinition` ＋ 窄化 Reader。
+  * `MapSpawnRuleDefinition.contentTier`、`MapContentDefinition.threatRank`——後者是「一般群與
+    菁英群的 contentKind 都是 monsterGroup，沒有欄位分得開」這個缺口的補丁（maps.ts 早有記載）。
+  * 兩筆文化池（非人類 15／人類 5），候選由 `monsters.ts` 從同一份 MONSTER_ROWS 導出，
+    Tier／威脅不可能與怪物定義漂移。
+  * `src/app/content/map-context.ts`：`MapContentResolver`（文化池 → Tier／威脅篩選 → 均勻抽取）
+    ＋ `MapHandlerContext`；已接進 ContextAssembler。
+  * Bootstrap 把實例建在版本 0，再跑**正式** `refreshMapInstance` 推到版本 1 並生成內容——
+    不另寫 bootstrap 專用生成路徑，否則「開局的圖」與「刷新後的圖」會變成兩套規則。
+- **實測**：九座據點，第一版三圖依 §7.4 生成 3／5+1／3+1 共 13 筆，其餘六張 0 筆（§7.4 未列＝無預算）。
+  同 worldSeed 決定性；Tier I 圖只出 Tier I 候選。
+- **修掉一個真缺陷**：`generateMapContent` 對同批每一格傳**同一個 cursor**，而 `SpawnDraft` 沒有
+  nextCursor 欄位，於是一張圖每格都抽到同一隻怪。Resolver 改用契約傳進來的 `index` 區分同批抽取。
+- 仍未生成：`chest` / `mapEvent` / `kidnap` / `control`——**九張圖都沒有為它們編列槽位**
+  （設計來源沒有給數量），所以不是接線缺口。`chest-pool` / `map-event-pool` 兩個 kind 同理仍未登記。
+
+### M4. 仍為 pending 的兩個子 port　`未開始`
+
+- `dungeon.resolvers`（陷阱判定）：雲華九圖 `fixedTraps` 全空，玩家路徑碰不到。
+  接它要 `dungeon:trap` shape ＋ params 內容 ＋ core pack 補上
+  `resolver:dungeon.trap.standard` 的 binding（目前 `resolverBindings` 沒有這一筆，
+  而 `dungeon-interaction-rule` 已經引用了它——既有的「宣告 ≠ 實作」）。
+- `distribution.resolvers`（競拍出價）：只在收集關閉後的拍賣輪用到；地牢開場的
+  `StartAssetDistribution` 已能正常建立 collecting。
+
+---
+
+## N. P1 敵方 AI ＋ 反擊條件　`程式已完成，卡在怪物技能未授權`
+
+### N1. AI／反擊 Resolver shape　`已完成`
+
+- `src/app/content/combat-ai-resolvers.ts`：兩個 shape，五個既有 resolverId 全部綁上。
+  * `combat-ai:policy-driven` —— 三個 AI Policy 共用（工作單要求：「若你發現需要三份不同程式，
+    先回報，那代表 shape 切錯了」）。選招／選目標策略是**封閉 tagged 值**，程式只實作有限幾種。
+  * `combat-counter:incoming-action` —— 兩個反擊條件共用的述詞。
+- 參數在 `content-source/core/combat-ai-params.ts`（內容），程式側沒有任何「if 是雜兵就…」。
+  射程過濾重用 `filterByReach`；沒有合法行動回 `undefined`，不回假招式（工作單兩個陷阱）。
+- 測試 `combat-ai-resolvers.test.ts`：真實 pack、決定性、目標全滅時回 undefined、
+  反擊述詞依動作種類與距離判定。
+
+### N2. 怪物技能　`已解決（共通招）`
+
+> **2026-08-30 專案擁有者決定**：所有怪物共用一招「撞擊」，不先授權 41 招。
+
+- `combat-skill.core.monster-slam`（core 擁有，四國共用）＋ `combat-effect.core.deal-physical-damage`。
+  20 隻怪的 `skillIds` 全部指向它，`0 → 20` 隻有技能。
+- 整條鏈都已綁定：目標 `resolver:combat.target-single-hostile`、
+  傷害威力 `resolver:combat.damage-power.physical`。所以怪物現在真的選得到行動也打得出傷害。
+- **為什麼這一筆 dealDamage 可以住 core**（`combat-rules.ts` 上方明文「此檔不寫 dealDamage」）：
+  那條的理由是「技能威力沒有欄位可放，所以每招需要自己的 damage rule」。撞擊是**基準攻擊**，
+  沒有倍率修正，威力就是通道本身的值——引用 core 既有的 physical 規則是完整的，不是少填倍率。
+  有倍率的招式仍各自需要自己的 damage rule，那條限制沒變。
+- 測試已移除接線（graft），改為直接斷言「每隻怪都有技能、技能引用的定義都存在、目標 resolver 已綁」。
+
+### N3. 41 招個別怪物技能　`未開始（不再阻塞）`
+
+- **20 隻怪的 `skillIds` 全部是空陣列**。`content-source/yunhua/monsters.ts` 自己寫著：
+  「這 20 筆怪物在 skillIds 接上之前不是可玩內容。」
+- 原因不是沒資料：設計來源有 41 招怪物技能，「每一招都已經是可解析的資料（傷害通道、數值倍率、
+  延遲檔、狀態效果、次數上限）」。但它們屬 `skill` kind、歸 skills domain，而現行 80 筆
+  `combat-skill` **全是玩家武器線**（ring-saber / repeating-crossbow …）。作者留空是因為猜 local 名
+  會讓整個 pack 編譯失敗（跨引用檢查）。
+- 後果：AI shape 本身正確，但在真實 pack 上沒有招式可選，所以工作單要求的
+  「真怪在真遭遇裡選得出招式」目前**證不到**。測試以 `combatDefsWithGraftedSkill()` 接一招真實
+  技能證明 shape，並用專門的看門狗案例斷言「目前 0 隻怪有技能」——補完後那個案例會失敗並要求
+  移除接線，不會讓缺口靜靜留著。
+- 待辦：把 41 招怪物技能授權進 skills domain。**這已經不是阻塞項**——共通招「撞擊」讓戰鬥跑得起來，
+  個別招式是把每隻怪的辨識度做出來（設計來源已有全部數值：傷害通道、倍率、延遲檔、狀態效果、
+  次數上限）。屆時把該怪的 `skillIds` 從共通招換成自己的招式即可。

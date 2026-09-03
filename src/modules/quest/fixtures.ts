@@ -147,6 +147,7 @@ export function stubDefinitionReader(): QuestDefinitionReader {
       if (id !== REACTION_RULE_ID) throw new Error(`quest fixture: unknown reaction rule ${String(id)}`);
       return stubReactionRule();
     },
+    listQuestReactionRules: () => [stubReactionRule()],
     getQuestDeadlineRule: (id) => {
       if (id !== DEADLINE_RULE_ID) throw new Error(`quest fixture: unknown deadline rule ${String(id)}`);
       return stubDeadlineRule();

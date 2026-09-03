@@ -20,7 +20,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.mistwing-moth",
     "speciesKind": "nonHuman",
     "threatRank": "normal"
@@ -46,7 +48,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.bamboo-back-badger",
     "speciesKind": "nonHuman",
     "threatRank": "normal"
@@ -72,7 +76,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.tide-shell-crab",
     "speciesKind": "nonHuman",
     "threatRank": "normal"
@@ -98,7 +104,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.scrap-sigil-doll",
     "speciesKind": "nonHuman",
     "threatRank": "normal"
@@ -124,7 +132,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.miasma-pouch-badger",
     "speciesKind": "nonHuman",
     "threatRank": "elite"
@@ -150,7 +160,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.gatewater-salamander",
     "speciesKind": "nonHuman",
     "threatRank": "elite"
@@ -176,7 +188,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.armored-pottery-guard",
     "speciesKind": "nonHuman",
     "threatRank": "elite"
@@ -202,7 +216,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.mist-bamboo-king",
     "speciesKind": "nonHuman",
     "threatRank": "boss"
@@ -228,7 +244,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.sunken-weir-beast",
     "speciesKind": "nonHuman",
     "threatRank": "boss"
@@ -254,7 +272,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.frayed-seal-wisp",
     "speciesKind": "nonHuman",
     "threatRank": "normal"
@@ -280,7 +300,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.bell-mandible-beetle",
     "speciesKind": "nonHuman",
     "threatRank": "normal"
@@ -306,7 +328,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.tower-stone-lizard",
     "speciesKind": "nonHuman",
     "threatRank": "normal"
@@ -332,7 +356,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.seal-halberd-warden",
     "speciesKind": "nonHuman",
     "threatRank": "elite"
@@ -358,7 +384,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.broken-edict-scribe",
     "speciesKind": "nonHuman",
     "threatRank": "elite"
@@ -384,7 +412,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.balance-seal-colossus",
     "speciesKind": "nonHuman",
     "threatRank": "boss"
@@ -410,7 +440,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.river-cutthroat",
     "speciesKind": "human",
     "threatRank": "normal"
@@ -436,7 +468,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.privateer-crossbow",
     "speciesKind": "human",
     "threatRank": "normal"
@@ -462,7 +496,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.salt-route-leader",
     "speciesKind": "human",
     "threatRank": "elite"
@@ -488,7 +524,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.seal-tower-deserter",
     "speciesKind": "human",
     "threatRank": "normal"
@@ -514,7 +552,9 @@
     "packId": "pack:yunhua",
     "reachCells": 1,
     "schemaVersion": 1,
-    "skillIds": [],
+    "skillIds": [
+      "combat-skill.core.monster-slam"
+    ],
     "sourcePath": "yunhua/monsters.json#monster.yunhua.false-seal-officer",
     "speciesKind": "human",
     "threatRank": "elite"

@@ -16,7 +16,12 @@ import type {
   RngContext,
   SkillDefinitionId,
 } from '../../contracts/core';
-import type { CombatDefinitionReader } from '../../contracts/combat';
+import type {
+  CombatAiParamsDefinition,
+  CombatCounterConditionParamsDefinition,
+  CombatDefinitionReader,
+} from '../../contracts/combat';
+import type { CombatAiDefinitions, MonsterSkillView } from './combat-ai-resolvers';
 import type { ProgressionDefinitionReader, ProgressionQuery } from '../../contracts/progression';
 import type { ResolverRegistry, WeightedLinearProductParams } from '../../data-runtime';
 import type {
@@ -34,11 +39,18 @@ export type CombatPowerParamsReader = Readonly<{
   getPowerParams(id: DefinitionId): WeightedLinearProductParams;
 }>;
 
+// P1：AI shape 與反擊述詞 shape 讀 params 的窄門。
+export type CombatAiParamsReader = Readonly<{
+  getAiParams(id: DefinitionId): CombatAiParamsDefinition;
+  getCounterParams(id: DefinitionId): CombatCounterConditionParamsDefinition;
+}>;
+
 export type CombatResolverBridgeDeps = Readonly<{
   registry: ResolverRegistry;
   combatDefs: CombatDefinitionReader; // getSkillView / getMonster / getAiPolicy
   progressionDefs: ProgressionDefinitionReader; // getAttackMasteryAwardRule
-  powerParams: CombatPowerParamsReader; // weighted-product-params
+  powerParams: CombatPowerParamsReader;
+  aiParams: CombatAiParamsReader; // weighted-product-params
   progression: ProgressionQuery; // getPrimaryAttributes（power kernel 的輸入）
   loadout: CombatLoadoutQuery; // 防禦 Mastery 路由用（本版尚未接）
   rng: DeterministicRng;
@@ -46,6 +58,36 @@ export type CombatResolverBridgeDeps = Readonly<{
 }>;
 
 export function createCombatResolverPort(deps: CombatResolverBridgeDeps): CombatResolverPort {
+  // P1：AI／反擊 shape 的能力受限 Context。
+  //
+  // `getMonsterSkills` 在這裡投影而不是讓 shape 自己讀 Reader，理由與 powerContext 相同：
+  // shape 只該認識「一招有多遠、付不付得起」，不該認識 MonsterDefinition／SkillView 的完整形狀。
+  // 有效射程 ＝ 怪物天生攻擊格數 ＋ 招式額外距離（§2.4，與 filterByReach 的語意同源）。
+  const aiDefinitions: CombatAiDefinitions = {
+    getAiParams: (id) => deps.aiParams.getAiParams(id),
+    getCounterParams: (id) => deps.aiParams.getCounterParams(id),
+    getMonsterSkills: (actor): readonly MonsterSkillView[] => {
+      if (actor.source.kind !== 'monster') return [];
+      const monster = deps.combatDefs.getMonster(actor.source.monsterDefinitionId);
+      return monster.skillIds.map((skillId) => {
+        const view = deps.combatDefs.getSkillView(skillId);
+        const affordable = view.resourceCosts.every((cost) =>
+          cost.resource === 'health' ? actor.health > cost.amount : actor.mana >= cost.amount,
+        );
+        // `extraReachCells` 缺席**是契約定義的 0**（contracts/combat：「大多數招式沒有（省略＝0）；
+        // 魔法/治療招式一律 +6」），不是「缺資料所以補一個值」。寫成顯式三元而非 `?? 0`，
+        // 與 `modules/combat/system.ts` 計算有效射程時的既有寫法一致。
+        const extraReachCells =
+          view.targeting.extraReachCells === undefined ? 0 : view.targeting.extraReachCells;
+        return {
+          skillId,
+          reachCells: monster.reachCells + extraReachCells,
+          affordable,
+        };
+      });
+    },
+  };
+
   // power kernel 的能力受限 Context：傷害/治療/CTB resolver 從這裡讀 params 與雙方主屬。
   const powerContext = () =>
     resolverContext({
@@ -109,7 +151,11 @@ export function createCombatResolverPort(deps: CombatResolverBridgeDeps): Combat
         deps.registry,
         policy.behaviorResolverId,
         { encounter, actorId },
-        resolverContext({ rng: deps.rng, rngContext: deps.rngContextFor('combat.ai') }),
+        resolverContext({
+          definitions: aiDefinitions,
+          rng: deps.rng,
+          rngContext: deps.rngContextFor('combat.ai'),
+        }),
       ).value;
     },
 
@@ -121,7 +167,7 @@ export function createCombatResolverPort(deps: CombatResolverBridgeDeps): Combat
         deps.registry,
         defender.counterStance.conditionResolverId,
         input,
-        resolverContext({}),
+        resolverContext({ definitions: aiDefinitions }),
       ).value;
     },
   };

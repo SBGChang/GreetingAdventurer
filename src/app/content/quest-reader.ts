@@ -47,6 +47,7 @@ export function createQuestDefinitionReader(registry: DefinitionRegistry): Quest
 
   return {
     getQuestReactionRule: (id) => reaction.get(id),
+    listQuestReactionRules: () => reaction.list(),
     getQuestDeadlineRule: (id) => deadline.get(id),
     getQuestObjectiveRule: (id) => objective.get(id),
     getQuestRewardRule: (id) => reward.get(id),

@@ -48,6 +48,15 @@ export function runTests(): void {
     combatDefs,
     progressionDefs,
     powerParams: { getPowerParams: (id) => powerParamsReader.get(id) },
+    // 本測試只驗 power／目標，不走 AI 路徑；碰到就是測試寫錯，明確拋而不是給假 params。
+    aiParams: {
+      getAiParams: () => {
+        throw new Error('combat-resolver-bridge.test：本測試不應觸及 AI params');
+      },
+      getCounterParams: () => {
+        throw new Error('combat-resolver-bridge.test：本測試不應觸及反擊 params');
+      },
+    },
     progression: { ...stubProgressionQuery(), getPrimaryAttributes: (id) => attributesById(id) },
     loadout: stubLoadoutQuery(),
     rng: deterministicRng,

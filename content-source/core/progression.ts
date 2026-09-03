@@ -128,6 +128,29 @@ const ALL_MASTERY_ROWS: readonly MasteryRow[] = [
 
 export const SOCIAL_MASTERY_ID = core.id<MasteryId>('mastery', 'social');
 
+// ── 可鍛鍊的熟練度（28 日訓練）────────────────────────────────────────────
+//
+// GDD §建築表把訓練分給三個設施：訓練所（戰鬥與魔法）、道具店（生活技藝）、裝備店（鍛冶與裁縫）。
+// 委託類 7 項與行動類 2 項沒有任何設施可練——它們的 MXP 只由實際做那件事產生，所以**不**列入。
+//
+// 這裡只匯出「哪些項目屬於哪一組」。實際的「哪個設施練哪幾項」由 team 的 `free-action-rule`
+// 宣告（見 core/team.ts）；訓練給多少 MXP 則完全不在這裡——那是
+// `TeachingRuleDefinition.cityTeacherMasteryLevel`（固定 Lv.5 教師）＋ `adultDifferenceRate`
+// 的差額公式（mastery_experience_economy_v1.md §五「城鎮生活技藝訓練（28 日）」），
+// 由 progression 在完成時計算。不再另立一組 experience-award-rule：那會是第二份真相。
+export const COMBAT_MAGIC_MASTERY_LOCALS: readonly string[] = [
+  ...WEAPON_MASTERIES.map((r) => r.local),
+  ...ARMOR_MASTERIES.map((r) => r.local),
+  ...MAGIC_MASTERIES.map((r) => r.local),
+];
+
+// 生活技藝七項扣掉鍛冶與裁縫（那兩項在裝備店）。
+export const LIFE_CRAFT_MASTERY_LOCALS: readonly string[] = LIFE_MASTERIES.map((r) => r.local).filter(
+  (local) => local !== 'smithing' && local !== 'tailoring',
+);
+
+export const SMITH_TAILOR_MASTERY_LOCALS: readonly string[] = ['smithing', 'tailoring'];
+
 function mastery(row: MasteryRow): Authored<MasteryDefinition> {
   return {
     kind: 'mastery',

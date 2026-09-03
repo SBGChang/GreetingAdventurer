@@ -34,6 +34,7 @@ const assembler: ContextAssembler = (runtime): ModuleContexts => ({
     // Wave E：team 現在會驗「這支隊伍有沒有進行中的 Encounter」才允許改隊形（combat 擁有的事實）。
     // 這個切片不碰隊形，用 unusedContext 絆線——觸發即拋錯，所以「這條路其實讀了它」會立刻現形。
     combat: unusedContext('team.combat'),
+    city: unusedContext('team.city'),
     // 旅行路徑不會讀到這兩項，但 Context 是完整型別；給 fixture 值而不是空物件，
     // 讓「缺規則」是一個要刻意製造的情形，而不是預設狀態。
     memberRetentionRuleId: MEMBER_RETENTION_RULE,
@@ -51,6 +52,7 @@ const assembler: ContextAssembler = (runtime): ModuleContexts => ({
   // 絆線，所以「這個切片其實碰到了某個沒準備好的模組」會立刻現形，而不是安靜地讀到 undefined。
   city: unusedContext('city'),
   quest: unusedContext('quest'),
+  questGeneration: unusedContext('quest'),
   social: unusedContext('social'),
   economy: unusedContext('economy'),
   world: unusedContext('world'),

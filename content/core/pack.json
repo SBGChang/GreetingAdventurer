@@ -12,8 +12,10 @@
     "character-archetype",
     "character-status",
     "child-education-rule",
+    "combat-ai-params",
     "combat-ai-policy",
     "combat-control-resistance-profile",
+    "combat-counter-condition-params",
     "combat-ctb-adjustment-rule",
     "combat-damage-rule",
     "combat-effect",
@@ -24,6 +26,7 @@
     "combat-power-rule",
     "combat-rule",
     "combat-sequence-rule",
+    "combat-skill",
     "combat-status",
     "craft-quality-rule",
     "currency",
@@ -34,7 +37,9 @@
     "free-action-rule",
     "gathering-destination-policy",
     "grip-rule",
+    "integer-range-params",
     "lifecycle-rule",
+    "logistic-roll-params",
     "mastery",
     "mastery-curve",
     "mastery-multiplier-params",
@@ -53,6 +58,7 @@
     "player-affinity-rule",
     "player-conversation-rule",
     "player-travel-mode",
+    "price-modifier-params",
     "price-modifier-rule",
     "price-rule",
     "primary-attribute-modifier-params",
@@ -74,12 +80,68 @@
     "team-formation-rule",
     "team-plan-rule",
     "temporary-character-rule",
+    "weighted-choice-params",
+    "weighted-draw-params",
     "weighted-product-params",
     "world-adventurer-generation-rule"
   ],
   "packId": "pack:core",
   "requiredResolverIds": [],
   "resolverBindings": [
+    {
+      "ownerModule": "character",
+      "paramsDefId": "weighted-choice-params.core.world-adventurer-archetype",
+      "resolverId": "resolver:character.world-adventurer-archetype-weight",
+      "shape": "character:weighted-choice"
+    },
+    {
+      "ownerModule": "character",
+      "paramsDefId": "weighted-draw-params.core.world-adventurer-innate-trait",
+      "resolverId": "resolver:character.world-adventurer-innate-trait",
+      "shape": "character:weighted-draw"
+    },
+    {
+      "ownerModule": "character",
+      "paramsDefId": "weighted-choice-params.core.world-adventurer-sex",
+      "resolverId": "resolver:character.world-adventurer-sex-weight",
+      "shape": "character:weighted-choice"
+    },
+    {
+      "ownerModule": "character",
+      "paramsDefId": "integer-range-params.core.world-adventurer-starting-age",
+      "resolverId": "resolver:character.world-adventurer-starting-age",
+      "shape": "character:integer-range"
+    },
+    {
+      "ownerModule": "combat",
+      "paramsDefId": "combat-ai-params.core.boss-rotation",
+      "resolverId": "resolver:combat.ai-behavior.boss-rotation",
+      "shape": "combat-ai:policy-driven"
+    },
+    {
+      "ownerModule": "combat",
+      "paramsDefId": "combat-ai-params.core.elite-threat-focus",
+      "resolverId": "resolver:combat.ai-behavior.elite-threat-focus",
+      "shape": "combat-ai:policy-driven"
+    },
+    {
+      "ownerModule": "combat",
+      "paramsDefId": "combat-ai-params.core.single-skill-aggressor",
+      "resolverId": "resolver:combat.ai-behavior.single-skill-aggressor",
+      "shape": "combat-ai:policy-driven"
+    },
+    {
+      "ownerModule": "combat",
+      "paramsDefId": "combat-counter-condition-params.core.counter-condition-block",
+      "resolverId": "resolver:combat.counter-condition-block",
+      "shape": "combat-counter:incoming-action"
+    },
+    {
+      "ownerModule": "combat",
+      "paramsDefId": "combat-counter-condition-params.core.counter-condition-melee-block",
+      "resolverId": "resolver:combat.counter-condition-melee-block",
+      "shape": "combat-counter:incoming-action"
+    },
     {
       "ownerModule": "combat",
       "paramsDefId": "weighted-product-params.core.ctb-heavy",
@@ -169,6 +231,58 @@
       "shape": "combat-target:whole-party"
     },
     {
+      "ownerModule": "economy",
+      "paramsDefId": "price-modifier-params.core.home-tutor-affinity",
+      "resolverId": "resolver:economy.home-tutor-affinity",
+      "shape": "economy-price-modifier:coefficient"
+    },
+    {
+      "ownerModule": "economy",
+      "paramsDefId": "price-modifier-params.core.personal-trade-bonus-buy",
+      "resolverId": "resolver:economy.personal-trade-bonus.buy",
+      "shape": "economy-price-modifier:coefficient"
+    },
+    {
+      "ownerModule": "economy",
+      "paramsDefId": "price-modifier-params.core.personal-trade-bonus-sell",
+      "resolverId": "resolver:economy.personal-trade-bonus.sell",
+      "shape": "economy-price-modifier:coefficient"
+    },
+    {
+      "ownerModule": "economy",
+      "paramsDefId": "price-modifier-params.core.shop-buyback",
+      "resolverId": "resolver:economy.shop-buyback",
+      "shape": "economy-price-modifier:coefficient"
+    },
+    {
+      "ownerModule": "quest",
+      "paramsDefId": "integer-range-params.core.quest-actual-end-purchase-delivery",
+      "resolverId": "resolver:quest.actual-end.purchase-delivery",
+      "shape": "quest-actual-end:day-range"
+    },
+    {
+      "ownerModule": "quest",
+      "paramsDefId": "integer-range-params.core.quest-actual-end-rescue-exploration",
+      "resolverId": "resolver:quest.actual-end.rescue-exploration",
+      "shape": "quest-actual-end:day-range"
+    },
+    {
+      "ownerModule": "quest",
+      "paramsDefId": "integer-range-params.core.quest-actual-end-suppression-hunt",
+      "resolverId": "resolver:quest.actual-end.suppression-hunt",
+      "shape": "quest-actual-end:day-range"
+    },
+    {
+      "ownerModule": "quest",
+      "resolverId": "resolver:quest.guild.local-city",
+      "shape": "quest-guild:local-city"
+    },
+    {
+      "ownerModule": "quest",
+      "resolverId": "resolver:quest.guild.random-legal-city",
+      "shape": "quest-guild:random-city"
+    },
+    {
       "ownerModule": "statistics",
       "paramsDefId": "primary-attribute-modifier-params.core.age",
       "resolverId": "resolver:statistics.age-modifier",
@@ -220,6 +334,18 @@
       "paramsDefId": "primary-attribute-modifier-params.core.reputation",
       "resolverId": "resolver:statistics.reputation-contribution",
       "shape": "statistics:reputation-contribution"
+    },
+    {
+      "ownerModule": "team",
+      "paramsDefId": "logistic-roll-params.core.member-departure",
+      "resolverId": "resolver:team.member-departure-chance",
+      "shape": "team:logistic-roll"
+    },
+    {
+      "ownerModule": "team",
+      "paramsDefId": "logistic-roll-params.core.recruitment-success",
+      "resolverId": "resolver:team.recruitment-success",
+      "shape": "team:logistic-roll"
     },
     {
       "ownerModule": "team",

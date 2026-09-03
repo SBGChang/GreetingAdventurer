@@ -17,6 +17,7 @@ import type {
   ModuleId,
   TeamId,
   TransactionMessageDraft,
+  TeachingRuleId,
 } from '../../contracts/core';
 import type {
   EventSubscriber,
@@ -95,6 +96,11 @@ const WORKFLOW_SUBSCRIBERS = {
 // 注入：各模組的 Context bag
 // ──────────────────────────────────────────────────────────────────────────
 
+export type ProgressionContext = Readonly<{
+  definitions: ProgressionDefinitionReader;
+  teachingRuleId: TeachingRuleId;
+}>;
+
 export type ModuleContexts = Readonly<{
   character: character.CharacterHandlerContext;
   inventory: inventory.InventoryDeps;
@@ -102,13 +108,18 @@ export type ModuleContexts = Readonly<{
   dungeon: dungeon.DungeonContext;
   combat: combat.CombatHandlerContext;
   team: team.TeamHandlerContext;
-  // progression 的 handler 直接吃 Reader（沒有 context bag）。
-  progression: ProgressionDefinitionReader;
+  // progression 的 handler 大多直接吃 Reader；但 28 日城鎮訓練還需要「目前生效的傳授規則」
+  // （Lv.5 教師與 0.15% 差額率住在那筆 Definition 上），而那是 Composition 的選擇，不是 Reader
+  // 能回答的。所以這裡是一個**只有兩格**的 bag，不是把 progression 變成大 context。
+  progression: ProgressionContext;
 
   // Wave D。各模組自行宣告本地 port 型別（§7.1 慣例），此處只負責把它們列進同一個 bag；
   // 具體實作由 GameSession 注入的 ContextAssembler 提供。
   city: city.CityHandlerContext;
   quest: quest.QuestHandlerContext;
+  // 委託生成比 acceptQuest 多需要「鑄 id ＋ 擲骰 ＋ 兩個生成 Resolver」。分成兩格而不是把
+  // 四個欄位塞進 quest：讓「只讀前置」的 Handler 保持看不到 RNG 與 id 配發（§7 的能力最小化）。
+  questGeneration: quest.QuestGenerationContext;
   social: social.SocialHandlerContext;
   economy: economy.EconomyHandlerContext;
   world: world.WorldHandlerContext;
@@ -420,6 +431,10 @@ type RootDispatch = (
 
 const GAME_COMMAND_HANDLERS: Readonly<Partial<Record<GameCommandType, RootDispatch>>> = {
   // ── dungeon：(state, teamId, cmd, ctx) → ModuleOutcome。teamId ← envelope.actorTeamId ──
+  startPlayerExploration: (_c, t, s, x) =>
+    fromOutcome('dungeon', dungeon.startPlayerExploration(s.dungeon, t, x.dungeon)),
+  useDungeonExit: (c, t, s, x) =>
+    fromOutcome('dungeon', dungeon.useDungeonExit(s.dungeon, t, c as never, x.dungeon)),
   moveDungeonRoom: (c, t, s, x) =>
     fromOutcome('dungeon', dungeon.moveDungeonRoom(s.dungeon, t, c as never, x.dungeon)),
   openDungeonDoor: (c, t, s, x) =>
@@ -454,6 +469,8 @@ const GAME_COMMAND_HANDLERS: Readonly<Partial<Record<GameCommandType, RootDispat
     fromOutcome('team', team.handleSelectPlayerSuccessor(s.team, c as never, x.team)),
   beginCityFreePeriod: (_c, _t, s, x) =>
     fromOutcome('team', team.handleBeginCityFreePeriod(s.team, x.team)),
+  chooseCityFreeAction: (c, _t, s, x) =>
+    fromOutcome('team', team.handleChooseCityFreeAction(s.team, c as never, x.team)),
 
   // ── city：(command, state, ctx) → ModuleOutcome。城市命令的對象由 payload 指名，
   //    擁有權由 router 上游的 authorizeGameCommand 以 actorTeamId 把關。──
@@ -731,6 +748,7 @@ const JOB_HANDLERS: Readonly<Partial<Record<GameJobType, JobDispatch>>> = {
     acceptResult('map', map.handleMapRefreshCheck(j as never, s.map, x.map)),
   teamPlanDue: (j, s, x) =>
     acceptResult('team', team.handleTeamPlanDueJob(s.team, j as never, x.team)),
+  freeActionDue: (j, s) => acceptResult('team', team.handleFreeActionDueJob(s.team, j as never)),
 
   // ── city：(job, state, ctx) → ModuleOutcome ──
   shopRefresh: (j, s, x) => fromOutcome('city', city.handleShopRefresh(j as never, s.city, x.city)),
@@ -841,17 +859,27 @@ const EVENT_SUBSCRIBERS: Readonly<Record<string, SubscriberDispatch>> = {
   'CombatAttackMasteryEarned::progression': (e, s, x) =>
     subscriberResult(
       'progression',
-      progression.handleCombatAttackMasteryEarned(s.progression, e as never, x.progression),
+      progression.handleCombatAttackMasteryEarned(s.progression, e as never, x.progression.definitions),
     ),
   'CombatDefenseMasteryEarned::progression': (e, s, x) =>
     subscriberResult(
       'progression',
-      progression.handleCombatDefenseMasteryEarned(s.progression, e as never, x.progression),
+      progression.handleCombatDefenseMasteryEarned(s.progression, e as never, x.progression.definitions),
     ),
   'CombatSupportMasteryEarned::progression': (e, s, x) =>
     subscriberResult(
       'progression',
-      progression.handleCombatSupportMasteryEarned(s.progression, e as never, x.progression),
+      progression.handleCombatSupportMasteryEarned(s.progression, e as never, x.progression.definitions),
+    ),
+  'FreeActionCompleted::progression': (e, s, x) =>
+    subscriberResult(
+      'progression',
+      progression.handleFreeActionCompleted(
+        s.progression,
+        e as never,
+        x.progression.definitions,
+        x.progression.teachingRuleId,
+      ),
     ),
   'CharacterBorn::progression': (e, s) =>
     subscriberResult(
@@ -864,6 +892,8 @@ const EVENT_SUBSCRIBERS: Readonly<Record<string, SubscriberDispatch>> = {
     subscriberResult('character', character.onStatsCapacityChanged(e as never, s.character, x.character)),
 
   // ── quest：目標完成一律由事件累計，quest 不查別的模組 State ──
+  'MapContentGenerated::quest': (e, s, x) =>
+    subscriberResult('quest', quest.onMapContentGenerated(e as never, s.quest, x.questGeneration)),
   'MapContentResolved::quest': (e, s, x) =>
     subscriberResult('quest', quest.onMapContentResolved(e as never, s.quest, x.quest)),
   'TeamLocationChanged::quest': (e, s, x) =>

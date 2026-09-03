@@ -255,6 +255,36 @@
   },
   {
     "enabled": true,
+    "id": "integer-range-params.core.quest-actual-end-purchase-delivery",
+    "kind": "integer-range-params",
+    "max": 28,
+    "min": 14,
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#integer-range-params.core.quest-actual-end-purchase-delivery"
+  },
+  {
+    "enabled": true,
+    "id": "integer-range-params.core.quest-actual-end-rescue-exploration",
+    "kind": "integer-range-params",
+    "max": 14,
+    "min": 7,
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#integer-range-params.core.quest-actual-end-rescue-exploration"
+  },
+  {
+    "enabled": true,
+    "id": "integer-range-params.core.quest-actual-end-suppression-hunt",
+    "kind": "integer-range-params",
+    "max": 28,
+    "min": 21,
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/quest-crafting-sequence.json#integer-range-params.core.quest-actual-end-suppression-hunt"
+  },
+  {
+    "enabled": true,
     "id": "craft-quality-rule.core.equipment",
     "kind": "craft-quality-rule",
     "packId": "pack:core",

@@ -25,6 +25,7 @@ import type {
   RawContentDefinition,
   RawContentManifest,
   RawContentPack,
+  RawLocalizationBundle,
 } from '../data-runtime';
 import { loadContent } from '../data-runtime';
 
@@ -230,6 +231,7 @@ function listDefinitionFiles(packDir: string): readonly string[] {
 export function readContentFromDisk(contentRoot: string): Readonly<{
   manifest: RawContentManifest;
   packs: readonly RawContentPack[];
+  localizationBundles: readonly RawLocalizationBundle[];
 }> {
   const manifestPath = join(contentRoot, 'manifest.json');
   const manifestFile = readManifest(readJsonFile(manifestPath), 'manifest.json');
@@ -266,11 +268,39 @@ export function readContentFromDisk(contentRoot: string): Readonly<{
     });
   }
 
-  return { manifest: manifestFile, packs };
+  // 本地化 bundle：manifest 宣告哪幾份就讀哪幾份，不列舉目錄——與 pack 同一個原則
+  //（§1.1「不得依檔案系統列舉」）。讀不到就讓它拋，由呼叫端呈現；靜默略過會變成缺字畫面。
+  const localizationBundles: RawLocalizationBundle[] = manifestFile.localizationBundles.map((ref) => {
+    const bundleDir = join(contentRoot, ref.contentRoot);
+    const files = readdirSync(bundleDir)
+      .filter((f) => f.endsWith('.json'))
+      .sort();
+    const entries: Record<string, string> = {};
+    for (const file of files) {
+      const relativePath = `${ref.contentRoot}/${file}`;
+      const raw = requireObject(readJsonFile(join(bundleDir, file)), relativePath, 0);
+      if (raw['bundleId'] !== ref.bundleId) continue;
+      const rawEntries = requireObject(raw['entries'] ?? null, relativePath, 0);
+      for (const [key, value] of Object.entries(rawEntries)) {
+        if (typeof value !== 'string') {
+          throw new Error(`ContentRepository：${relativePath} 的 "${key}" 不是字串`);
+        }
+        entries[key] = value;
+      }
+    }
+    return { bundleId: ref.bundleId, locale: ref.locale, entries };
+  });
+
+  return { manifest: manifestFile, packs, localizationBundles };
 }
 
 // 讀檔 + 編譯成 Registry。失敗時回傳 diagnostics（不 throw）——呼叫端（Bootstrap）依規範
 // 第 2 個合法出口決定「不啟動遊戲並呈現診斷」。
 export function loadContentFromDisk(contentRoot: string): CompileContentResult {
-  return loadContent(readContentFromDisk(contentRoot));
+  const read = readContentFromDisk(contentRoot);
+  return loadContent({
+    manifest: read.manifest,
+    packs: read.packs,
+    localizationBundles: read.localizationBundles,
+  });
 }

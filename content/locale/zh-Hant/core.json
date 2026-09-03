@@ -1,0 +1,9 @@
+{
+  "bundleId": "bundle.core.zh-Hant",
+  "entries": {
+    "text.player-travel-mode.core.hurried.name": "趕路",
+    "text.player-travel-mode.core.normal.name": "正常",
+    "text.player-travel-mode.core.slow.name": "慢行"
+  },
+  "locale": "zh-Hant"
+}

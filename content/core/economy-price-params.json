@@ -1,0 +1,46 @@
+[
+  {
+    "base": 1,
+    "enabled": true,
+    "id": "price-modifier-params.core.personal-trade-bonus-buy",
+    "kind": "price-modifier-params",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": "personalTradeBonus",
+    "sourcePath": "core/economy-price-params.json#price-modifier-params.core.personal-trade-bonus-buy",
+    "weight": -0.2
+  },
+  {
+    "base": 1,
+    "enabled": true,
+    "id": "price-modifier-params.core.personal-trade-bonus-sell",
+    "kind": "price-modifier-params",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": "personalTradeBonus",
+    "sourcePath": "core/economy-price-params.json#price-modifier-params.core.personal-trade-bonus-sell",
+    "weight": 0.2
+  },
+  {
+    "base": 0.5,
+    "enabled": true,
+    "id": "price-modifier-params.core.shop-buyback",
+    "kind": "price-modifier-params",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": "fixed",
+    "sourcePath": "core/economy-price-params.json#price-modifier-params.core.shop-buyback",
+    "weight": 0
+  },
+  {
+    "base": 1,
+    "enabled": true,
+    "id": "price-modifier-params.core.home-tutor-affinity",
+    "kind": "price-modifier-params",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "source": "homeTutorPriceModifier",
+    "sourcePath": "core/economy-price-params.json#price-modifier-params.core.home-tutor-affinity",
+    "weight": -1
+  }
+]

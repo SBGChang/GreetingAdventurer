@@ -46,6 +46,9 @@ export const COMBAT_DEFINITION_KINDS = {
   controlResistanceProfile: 'combat-control-resistance-profile',
   equipmentEffect: 'equipment-effect',
   aiPolicy: 'combat-ai-policy',
+  // P1：AI 行為與反擊述詞的 params（shape 只實作有限策略，選哪一種住內容）。
+  aiParams: 'combat-ai-params',
+  counterConditionParams: 'combat-counter-condition-params',
   experienceBudget: 'encounter-experience-budget',
   monsterExperienceProfile: 'monster-experience-profile',
 } as const;

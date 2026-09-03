@@ -16,6 +16,7 @@ import type {
   Revision,
   ModuleId,
   ContentInstanceId,
+  ContentEventInstanceId,
   MapInstanceId,
   GatheringNodeId,
   MapRefreshLockId,
@@ -87,6 +88,12 @@ export const MAP_MODULE_ID = 'map' as ModuleId<'map'>;
 export interface MapIdAllocator {
   nextContentInstanceId(): ContentInstanceId;
   nextMapRefreshLockId(): MapRefreshLockId;
+  // MapInstance 的擁有者是 map，所以它的 ID 也只能由 map 的配發器鑄造（§12）。
+  // 世界建立時由 Bootstrap 依 adventure-site 逐一鑄出；team 不得自己鑄
+  //（見 TeamWorldPort.getAdventureSiteMapInstance 的說明——那正是它取代的違規）。
+  nextMapInstanceId(): MapInstanceId;
+  // 事件內容實例的身分（見 MapContentPayload 的 mapEvent 分支）。
+  nextContentEventInstanceId(): ContentEventInstanceId;
 }
 
 // 由資料 Resolver 決定的**本局**內容：挑中哪一筆 Map Content 定義，以及那一筆在本次刷新的
@@ -389,7 +396,11 @@ function withdrawnFromNpcSequence(content: MapContentInstance): MapContentInstan
 // §7.1 固定刷新（核心：版本 +1、空間重建、內容生成）
 // ──────────────────────────────────────────────────────────────────────────
 
-function refreshMapInstance(
+// 匯出給 Composition：世界建立時每張圖都要跑一次，才會有第一版內容。
+// 刻意**不另寫一條 bootstrap 專用生成路徑**——那會讓「開局的圖」與「刷新後的圖」變成兩套規則，
+// 而兩套規則遲早會不一致。Bootstrap 把實例建在版本 0，跑這支就得到版本 1 ＋ 內容，
+// 與日後每一次刷新走完全相同的程式。
+export function refreshMapInstance(
   instance: MapInstance,
   state: MapState,
   ctx: MapHandlerContext,

@@ -42,6 +42,7 @@ export {
   MapRefreshContentDataError,
   // Job handler
   handleMapRefreshCheck,
+  refreshMapInstance,
   // Event subscriber
   onTeamLocationChanged,
   // Internal Command handlers

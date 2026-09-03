@@ -63,6 +63,8 @@ export {
   // Job handler
   handleQuestDeadline,
   // Event subscribers
+  onMapContentGenerated,
+
   onMapContentResolved,
   onTeamLocationChanged,
   onCombatEncounterResolved,
@@ -71,6 +73,9 @@ export {
 } from './system';
 export type {
   QuestHandlerContext,
+  QuestGenerationContext,
+  QuestIdAllocator,
+  QuestGenerationResolverPort,
   QuestHandlerResult,
   QuestTeamPort,
   QuestMapContentPort,
@@ -124,6 +129,7 @@ export const questModuleContract: ModuleContract = {
   // 只宣告**有 Owner** 的送出（registry 的「送出端 → Owner」交叉驗證）。
   sendsInternalCommands: ['ProtectMapContent', 'CreateQuestTemporaryCharacter'],
   subscriptionHandlerIds: [
+    'subscription.MapContentGenerated.quest' as EventSubscriptionId,
     'subscription.MapContentResolved.quest' as EventSubscriptionId,
     'subscription.TeamLocationChanged.quest' as EventSubscriptionId,
     'subscription.CombatEncounterResolved.quest' as EventSubscriptionId,
@@ -131,7 +137,13 @@ export const questModuleContract: ModuleContract = {
     'subscription.CharacterCreated.quest' as EventSubscriptionId,
   ],
   // QuestCreated 由生成路徑發出、QuestSettled 由結案路徑發出；兩者都未註冊，故不宣告。
-  emits: ['QuestAccepted', 'NpcQuestClaimChanged', 'QuestStateChanged', 'QuestObjectiveCompleted'],
+  emits: [
+    'QuestCreated',
+    'QuestAccepted',
+    'NpcQuestClaimChanged',
+    'QuestStateChanged',
+    'QuestObjectiveCompleted',
+  ],
   invariants: [
     'quest.statusIsOneOfFour' as InvariantId,
     'quest.deadlinesImmutableAfterCreation' as InvariantId,

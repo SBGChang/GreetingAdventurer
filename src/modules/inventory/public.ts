@@ -23,6 +23,7 @@ export type {
 
 // ── Query ─────────────────────────────────────────────────────────────────––
 export { createInventoryQuery } from './queries';
+export { createInventoryState } from './state';
 
 // ── System（Handler + Subscriber + Deps）────────────────────────────────────
 export {

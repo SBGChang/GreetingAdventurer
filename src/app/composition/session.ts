@@ -43,10 +43,19 @@ import type {
   CombatStatusInstanceId,
   CombatantId,
   ContentInstanceId,
+  ContentEventInstanceId,
   EncounterId,
   EncumbranceResolutionId,
   FamilyLinkId,
   FreeActionId,
+  ShopOfferId,
+  IntelLeadId,
+  EscortCandidateId,
+  HomeId,
+  HomeTeachingPostId,
+  PlayerCommerceUsageId,
+  EconomyAccountId,
+  EconomyTransferId,
   InteractionId,
   ItemInstanceId,
   WeaponSetId,
@@ -58,6 +67,7 @@ import type {
   RelationshipFactId,
   RuntimeEnemyId,
   TeamId,
+  QuestId,
   TeamPlanId,
 } from '../../contracts/core';
 // 這兩個 ID 家族由 combat-sequence 擁有；dungeon 依 03_dungeon_module.md §2.3 鑄造它們。
@@ -65,11 +75,12 @@ import type {
   CombatSequenceId,
   CombatSequenceSourceCommitId,
 } from '../../contracts/combat-sequence';
-import { KERNEL_REJECTION_SOURCE } from '../../contracts/core';
+import { KERNEL_REJECTION_SOURCE, MAX_SETTLE_STEPS } from '../../contracts/core';
 import { deterministicRng, nextRuntimeId, runTransaction, type SchedulingEffects } from '../../kernel';
 
 import type { CharacterIdAllocator } from '../../modules/character/public';
 import type { MapIdAllocator } from '../../modules/map/public';
+import type { CityIdAllocator } from '../../modules/city/public';
 import type { CombatIdAllocator } from '../../modules/combat/public';
 import type { TeamIdAllocator } from '../../modules/team/public';
 
@@ -126,6 +137,15 @@ export type EngineIdPorts = Readonly<{
   combat: CombatIdAllocator;
   team: TeamIdAllocator;
   dungeon: DungeonIdAllocator;
+  city: CityIdAllocator;
+  // 委託實例的身分。委託由世界生成（地圖刷新出怪群 → 貼一筆肅清委託），所以鑄造點在 quest。
+  quest: Readonly<{ nextQuestId: () => QuestId }>;
+  // economy 擁有 transfer 的身分。distribution 的 `AssetDistributionIdAllocator` 契約明文要求
+  // `nextEconomyTransferId()`——轉帳是由分配流程發動的，所以由它一次結算鑄一枚。
+  economy: Readonly<{
+    nextEconomyTransferId: () => EconomyTransferId;
+    nextEconomyAccountId: () => EconomyAccountId;
+  }>;
 }>;
 
 function createIdPorts(worldSeed: Seed, holder: CursorHolder): EngineIdPorts {
@@ -141,6 +161,7 @@ function createIdPorts(worldSeed: Seed, holder: CursorHolder): EngineIdPorts {
       nextRelationshipFactId: next<RelationshipFactId>('relationship-fact'),
       nextStatusInstanceId: next<CharacterStatusInstanceId>('character-status-instance'),
     },
+    quest: { nextQuestId: next<QuestId>('quest') },
     inventory: {
       nextItemInstanceId: next<ItemInstanceId>('item-instance'),
       nextEncumbranceResolutionId: next<EncumbranceResolutionId>('encumbrance-resolution'),
@@ -149,6 +170,8 @@ function createIdPorts(worldSeed: Seed, holder: CursorHolder): EngineIdPorts {
     map: {
       nextContentInstanceId: next<ContentInstanceId>('content-instance'),
       nextMapRefreshLockId: next<MapRefreshLockId>('map-refresh-lock'),
+      nextMapInstanceId: next<MapInstanceId>('map-instance'),
+      nextContentEventInstanceId: next<ContentEventInstanceId>('content-event-instance'),
     },
     combat: {
       nextEncounterId: next<EncounterId>('encounter'),
@@ -162,6 +185,18 @@ function createIdPorts(worldSeed: Seed, holder: CursorHolder): EngineIdPorts {
       nextFreeActionId: next<FreeActionId>('free-action'),
       nextInteractionId: next<InteractionId>('interaction'),
       nextActivityRecordId: next<ActivityRecordId>('activity-record'),
+    },
+    city: {
+      nextShopOfferId: next<ShopOfferId>('shop-offer'),
+      nextIntelLeadId: next<IntelLeadId>('intel-lead'),
+      nextEscortCandidateId: next<EscortCandidateId>('escort-candidate'),
+      nextHomeId: next<HomeId>('home'),
+      nextHomeTeachingPostId: next<HomeTeachingPostId>('home-teaching-post'),
+      nextPlayerCommerceUsageId: next<PlayerCommerceUsageId>('player-commerce-usage'),
+    },
+    economy: {
+      nextEconomyTransferId: next<EconomyTransferId>('economy-transfer'),
+      nextEconomyAccountId: next<EconomyAccountId>('economy-account'),
     },
     dungeon: {
       nextInteractionId: next<InteractionId>('interaction'),
@@ -192,6 +227,10 @@ function createIdPorts(worldSeed: Seed, holder: CursorHolder): EngineIdPorts {
 export type EngineRuntime = Readonly<{
   worldSeed: Seed;
   worldDay: WorldDay; // 當前 workingState 的世界日（每次重建 Context 時帶入）
+  // 本次交易的身分。`EconomyTransferRecord.transactionId` 是契約必填欄位（可重播的帳本要指回
+  // 開啟它的那筆交易），而它是**每筆交易**的值、不是建置期常數——所以它住在 EngineRuntime，
+  // 由 runRoot 在開交易時帶入。（f3_work_packages.md P10 把這一項列為整合者的決定。）
+  transactionId: TransactionId;
   ids: EngineIdPorts;
   rng: DeterministicRng;
   // §7.1 invocationRngContext 工廠：傳入用途 tag，回傳以「本次調用訊息 ID + tag」派生的一次性 stream。
@@ -271,7 +310,14 @@ function runRoot(
   });
   const contextFactory: ModuleContextFactory = (working) =>
     assembler(
-      { worldSeed, worldDay: working.core.worldDay, ids: idPorts, rng: deterministicRng, rngContextFor },
+      {
+        worldSeed,
+        worldDay: working.core.worldDay,
+        transactionId,
+        ids: idPorts,
+        rng: deterministicRng,
+        rngContextFor,
+      },
       working,
     );
 
@@ -386,4 +432,87 @@ export function createIdPortsForBootstrap(
 ): Readonly<{ ids: EngineIdPorts; currentCursor: () => RuntimeIdCursor }> {
   const holder: CursorHolder = { cursor: startCursor };
   return { ids: createIdPorts(worldSeed, holder), currentCursor: () => holder.cursor };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// 世界結算：把時間變成「動作的後果」而不是玩家的一個指令
+// ──────────────────────────────────────────────────────────────────────────
+//
+// `docs/02_systems/time_and_mastery_progression.md` §一 把每個動作的時長都定死了：
+// 城內免費操作 0 日、旅行 3／6／9 日、去冒險點 1 日、返城 1 日、住宿 ≥1 日、
+// 熟練度訓練 28 日、休息一年 365 日、迷宮以分鐘累積（1,440 分＝1 日）。
+// 也就是說**世界日是動作的後果**，呼叫端不該提供「推進時間」這種操作——那等於把 Scheduler
+// 掀給玩家看，而且會讓「旅行要 6 天」變成「玩家按 3 次」。
+//
+// 判斷世界該走到哪裡的依據是**該隊伍有沒有進行中的 Plan**：
+//   * 有 → 隊伍正在忙（旅行途中、前往冒險地、住宿中），世界繼續走，沿途到期的 Job 依序執行
+//     （NPC、地圖刷新、角色年齡都在這時候推進，正是文件那一段講的）。
+//   * 沒有 → 呼叫端自由了，世界停下來等下一個決定。城裡閒晃與地牢裡逐房移動都屬這一類，
+//     所以它們不會讓日期亂跑（迷宮的時間走的是分鐘，由 dungeon 在交易內推進世界日）。
+//
+// 停止條件另有兩個：Job 被拒（把原因交回，不硬推）與安全上限（Plan 若因 bug 永不結束，
+// 寧可停下來也不要無限迴圈）。
+export type SettleStep = Readonly<{ toDay: number; jobType: string }>;
+
+export type SettleResult = Readonly<{
+  state: GameState;
+  steps: readonly SettleStep[];
+  // 有值代表結算提前中止；呼叫端應呈現它，不得當成「正常走完」。
+  blocked: string | undefined;
+}>;
+
+export function settleWorld(
+  initial: GameState,
+  teamId: TeamId,
+  assembler: ContextAssembler,
+): SettleResult {
+  let state = initial;
+  const steps: SettleStep[] = [];
+  let blocked: string | undefined;
+  let guard = 0;
+
+  while (state.team.teams[teamId]?.activePlanId !== undefined) {
+    guard += 1;
+    if (guard > MAX_SETTLE_STEPS) {
+      blocked = 'engine/settle-step-limit';
+      break;
+    }
+    const jobs = Object.values(state.core.scheduler.jobsById);
+    if (jobs.length === 0) {
+      // 有 Plan 但沒有 Job：那是開放式 Plan（cityFree 由玩家自己結束）。世界不替他決定。
+      break;
+    }
+
+    // 開放式 Plan（沒有 dueOnDay，實務上就是 cityFree）不能驅動世界時鐘：世界永遠有下一批
+    // 日曆 Job（商店刷新、地圖刷新、NPC 決策…），照著跑會一路跑到步數上限，等於玩家一按
+    // 「開始自由活動」就被推走幾百天。
+    //
+    // 但也不能一律停：28 日鍛鍊正是在自由期裡完成的，停在原地就永遠練不完。
+    // 折衷是**跑到這支隊伍自己的下一個到期日為止**——世界會把中間的日曆 Job 照常結算
+    // （不跳過，順序不變），玩家自己的事情一完成就把控制權交還。沒有屬於這支隊伍的待辦時
+    // 就停在今天：那才是真正的「自由」。
+    const activePlanId = state.team.teams[teamId]?.activePlanId;
+    const activePlan = activePlanId === undefined ? undefined : state.team.plans[activePlanId];
+    if (activePlan !== undefined && activePlan.dueOnDay === undefined) {
+      const ownDueDays = jobs
+        .filter((j) => String(j.targetId) === String(teamId))
+        .map((j) => Number(j.dueDay));
+      if (ownDueDays.length === 0) break;
+    }
+
+    const earliest = jobs.reduce((a, b) => (b.dueDay < a.dueDay ? b : a));
+    // worldDay 由 Kernel 擁有；呼叫端負責把時鐘撥到到期日再 runDueJob
+    //（與 travel-integration.test 的自驅迴圈同法）。
+    const atDueDay: GameState = { ...state, core: { ...state.core, worldDay: earliest.dueDay } };
+    const result = runDueJob(atDueDay, earliest, assembler);
+    if (!result.accepted) {
+      // 被拒：不撥動時鐘（Job 留在佇列），把原因交給呼叫端。
+      blocked = result.rejection.code;
+      break;
+    }
+    state = result.state;
+    steps.push({ toDay: Number(earliest.dueDay), jobType: earliest.type });
+  }
+
+  return { state, steps, blocked };
 }

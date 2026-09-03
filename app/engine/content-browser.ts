@@ -13,6 +13,7 @@ import {
   type RawContentDefinition,
   type RawContentManifest,
   type RawContentPack,
+  type RawLocalizationBundle,
 } from '../../src/data-runtime';
 
 // 打包時把 content/ 底下所有 JSON 收成 { 相對路徑: 模組 } 的 map（eager：直接拿到內容，不是 loader）。
@@ -77,5 +78,26 @@ export function loadBundledContent(): CompileContentResult {
     });
   }
 
-  return loadContent({ manifest, packs });
+  // 本地化 bundle：依 manifest 宣告取，不列舉目錄（與 pack 同一原則）。一個 locale 目錄下可以
+  // 有多個 pack 的 bundle 檔，各自以 bundleId 認領自己那一份。
+  const localizationBundles: RawLocalizationBundle[] = manifest.localizationBundles.map((ref) => {
+    const prefix = `${ref.contentRoot}/`;
+    const paths = [...files.keys()].filter((p) => p.startsWith(prefix) && p.endsWith('.json')).sort();
+    const entries: Record<string, string> = {};
+    for (const path of paths) {
+      const raw = requireJson(files, path) as Readonly<{ bundleId?: unknown; entries?: unknown }>;
+      if (raw.bundleId !== ref.bundleId) continue;
+      const rawEntries = raw.entries;
+      if (typeof rawEntries !== 'object' || rawEntries === null) {
+        throw new Error(`content-browser："${path}" 缺 entries 物件`);
+      }
+      for (const [key, value] of Object.entries(rawEntries as Record<string, unknown>)) {
+        if (typeof value !== 'string') throw new Error(`content-browser："${path}" 的 "${key}" 不是字串`);
+        entries[key] = value;
+      }
+    }
+    return { bundleId: ref.bundleId, locale: ref.locale, entries };
+  });
+
+  return loadContent({ manifest, packs, localizationBundles });
 }

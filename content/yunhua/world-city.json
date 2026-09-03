@@ -65,6 +65,11 @@
       "adventure-site.yunhua.calendar-court-ruin",
       "adventure-site.yunhua.seal-tower"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.city-node.yunhua.yunjing.name"
+      }
+    },
     "enabled": true,
     "id": "city-node.yunhua.yunjing",
     "isCapital": true,
@@ -84,6 +89,11 @@
       "adventure-site.yunhua.mist-bamboo-valley",
       "adventure-site.yunhua.hanging-spring-grotto"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.city-node.yunhua.qingcen.name"
+      }
+    },
     "enabled": true,
     "id": "city-node.yunhua.qingcen",
     "isCapital": false,
@@ -103,6 +113,11 @@
       "adventure-site.yunhua.tidal-reed-isle",
       "adventure-site.yunhua.salt-well-cellar"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.city-node.yunhua.chengpu.name"
+      }
+    },
     "enabled": true,
     "id": "city-node.yunhua.chengpu",
     "isCapital": false,
@@ -122,6 +137,11 @@
       "adventure-site.yunhua.cinnabar-ridge",
       "adventure-site.yunhua.old-kiln-flue"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.city-node.yunhua.chiling.name"
+      }
+    },
     "enabled": true,
     "id": "city-node.yunhua.chiling",
     "isCapital": false,
@@ -211,6 +231,11 @@
   },
   {
     "accessCityId": "city-node.yunhua.yunjing",
+    "display": {
+      "nameRef": {
+        "key": "text.adventure-site.yunhua.old-canal-sunken-store.name"
+      }
+    },
     "enabled": true,
     "id": "adventure-site.yunhua.old-canal-sunken-store",
     "isNationalDungeon": false,
@@ -223,6 +248,11 @@
   },
   {
     "accessCityId": "city-node.yunhua.yunjing",
+    "display": {
+      "nameRef": {
+        "key": "text.adventure-site.yunhua.calendar-court-ruin.name"
+      }
+    },
     "enabled": true,
     "id": "adventure-site.yunhua.calendar-court-ruin",
     "isNationalDungeon": false,
@@ -235,6 +265,11 @@
   },
   {
     "accessCityId": "city-node.yunhua.yunjing",
+    "display": {
+      "nameRef": {
+        "key": "text.adventure-site.yunhua.seal-tower.name"
+      }
+    },
     "enabled": true,
     "id": "adventure-site.yunhua.seal-tower",
     "isNationalDungeon": true,
@@ -247,6 +282,11 @@
   },
   {
     "accessCityId": "city-node.yunhua.qingcen",
+    "display": {
+      "nameRef": {
+        "key": "text.adventure-site.yunhua.mist-bamboo-valley.name"
+      }
+    },
     "enabled": true,
     "id": "adventure-site.yunhua.mist-bamboo-valley",
     "isNationalDungeon": false,
@@ -259,6 +299,11 @@
   },
   {
     "accessCityId": "city-node.yunhua.qingcen",
+    "display": {
+      "nameRef": {
+        "key": "text.adventure-site.yunhua.hanging-spring-grotto.name"
+      }
+    },
     "enabled": true,
     "id": "adventure-site.yunhua.hanging-spring-grotto",
     "isNationalDungeon": false,
@@ -271,6 +316,11 @@
   },
   {
     "accessCityId": "city-node.yunhua.chengpu",
+    "display": {
+      "nameRef": {
+        "key": "text.adventure-site.yunhua.tidal-reed-isle.name"
+      }
+    },
     "enabled": true,
     "id": "adventure-site.yunhua.tidal-reed-isle",
     "isNationalDungeon": false,
@@ -283,6 +333,11 @@
   },
   {
     "accessCityId": "city-node.yunhua.chengpu",
+    "display": {
+      "nameRef": {
+        "key": "text.adventure-site.yunhua.salt-well-cellar.name"
+      }
+    },
     "enabled": true,
     "id": "adventure-site.yunhua.salt-well-cellar",
     "isNationalDungeon": false,
@@ -295,6 +350,11 @@
   },
   {
     "accessCityId": "city-node.yunhua.chiling",
+    "display": {
+      "nameRef": {
+        "key": "text.adventure-site.yunhua.cinnabar-ridge.name"
+      }
+    },
     "enabled": true,
     "id": "adventure-site.yunhua.cinnabar-ridge",
     "isNationalDungeon": false,
@@ -307,6 +367,11 @@
   },
   {
     "accessCityId": "city-node.yunhua.chiling",
+    "display": {
+      "nameRef": {
+        "key": "text.adventure-site.yunhua.old-kiln-flue.name"
+      }
+    },
     "enabled": true,
     "id": "adventure-site.yunhua.old-kiln-flue",
     "isNationalDungeon": false,
@@ -335,6 +400,8 @@
     ],
     "homeRuleId": "home-rule.yunhua.standard",
     "id": "city.yunhua.yunjing",
+    "initialProsperity": 70,
+    "initialSafety": 70,
     "intelRuleId": "intel-rule.yunhua.standard",
     "kind": "city",
     "packId": "pack:yunhua",
@@ -368,6 +435,8 @@
     ],
     "homeRuleId": "home-rule.yunhua.standard",
     "id": "city.yunhua.qingcen",
+    "initialProsperity": 50,
+    "initialSafety": 50,
     "intelRuleId": "intel-rule.yunhua.standard",
     "kind": "city",
     "packId": "pack:yunhua",
@@ -401,6 +470,8 @@
     ],
     "homeRuleId": "home-rule.yunhua.standard",
     "id": "city.yunhua.chengpu",
+    "initialProsperity": 50,
+    "initialSafety": 50,
     "intelRuleId": "intel-rule.yunhua.standard",
     "kind": "city",
     "packId": "pack:yunhua",
@@ -434,6 +505,8 @@
     ],
     "homeRuleId": "home-rule.yunhua.standard",
     "id": "city.yunhua.chiling",
+    "initialProsperity": 50,
+    "initialSafety": 50,
     "intelRuleId": "intel-rule.yunhua.standard",
     "kind": "city",
     "packId": "pack:yunhua",
@@ -453,6 +526,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.inn-rest"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.inn.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "inn",
     "id": "facility.yunhua.yunjing-inn",
@@ -463,6 +541,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.tavern.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "tavern",
     "id": "facility.yunhua.yunjing-tavern",
@@ -473,6 +556,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.adventurer-guild.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "adventurerGuild",
     "id": "facility.yunhua.yunjing-adventurer-guild",
@@ -485,6 +573,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.training-life-craft"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.item-shop.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "itemShop",
     "id": "facility.yunhua.yunjing-item-shop",
@@ -498,6 +591,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.training-smith-tailor"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.equipment-shop.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "equipmentShop",
     "id": "facility.yunhua.yunjing-equipment-shop",
@@ -511,6 +609,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.training-combat-magic"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.training-ground.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "trainingGround",
     "id": "facility.yunhua.yunjing-training-ground",
@@ -522,6 +625,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.bookstore.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "bookstore",
     "id": "facility.yunhua.yunjing-bookstore",
@@ -532,6 +640,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.adventure-checkpoint.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "adventureCheckpoint",
     "id": "facility.yunhua.yunjing-adventure-checkpoint",
@@ -542,6 +655,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.city-gate.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "cityGate",
     "id": "facility.yunhua.yunjing-city-gate",
@@ -554,6 +672,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.home-year-rest"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.home.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "home",
     "id": "facility.yunhua.yunjing-home",
@@ -566,6 +689,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.inn-rest"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.inn.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "inn",
     "id": "facility.yunhua.qingcen-inn",
@@ -576,6 +704,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.tavern.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "tavern",
     "id": "facility.yunhua.qingcen-tavern",
@@ -586,6 +719,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.adventurer-guild.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "adventurerGuild",
     "id": "facility.yunhua.qingcen-adventurer-guild",
@@ -598,6 +736,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.training-life-craft"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.item-shop.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "itemShop",
     "id": "facility.yunhua.qingcen-item-shop",
@@ -611,6 +754,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.training-smith-tailor"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.equipment-shop.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "equipmentShop",
     "id": "facility.yunhua.qingcen-equipment-shop",
@@ -624,6 +772,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.training-combat-magic"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.training-ground.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "trainingGround",
     "id": "facility.yunhua.qingcen-training-ground",
@@ -635,6 +788,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.bookstore.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "bookstore",
     "id": "facility.yunhua.qingcen-bookstore",
@@ -645,6 +803,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.adventure-checkpoint.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "adventureCheckpoint",
     "id": "facility.yunhua.qingcen-adventure-checkpoint",
@@ -655,6 +818,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.city-gate.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "cityGate",
     "id": "facility.yunhua.qingcen-city-gate",
@@ -667,6 +835,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.home-year-rest"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.home.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "home",
     "id": "facility.yunhua.qingcen-home",
@@ -679,6 +852,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.inn-rest"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.inn.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "inn",
     "id": "facility.yunhua.chengpu-inn",
@@ -689,6 +867,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.tavern.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "tavern",
     "id": "facility.yunhua.chengpu-tavern",
@@ -699,6 +882,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.adventurer-guild.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "adventurerGuild",
     "id": "facility.yunhua.chengpu-adventurer-guild",
@@ -711,6 +899,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.training-life-craft"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.item-shop.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "itemShop",
     "id": "facility.yunhua.chengpu-item-shop",
@@ -724,6 +917,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.training-smith-tailor"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.equipment-shop.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "equipmentShop",
     "id": "facility.yunhua.chengpu-equipment-shop",
@@ -737,6 +935,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.training-combat-magic"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.training-ground.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "trainingGround",
     "id": "facility.yunhua.chengpu-training-ground",
@@ -748,6 +951,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.bookstore.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "bookstore",
     "id": "facility.yunhua.chengpu-bookstore",
@@ -758,6 +966,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.adventure-checkpoint.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "adventureCheckpoint",
     "id": "facility.yunhua.chengpu-adventure-checkpoint",
@@ -768,6 +981,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.city-gate.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "cityGate",
     "id": "facility.yunhua.chengpu-city-gate",
@@ -780,6 +998,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.home-year-rest"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.home.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "home",
     "id": "facility.yunhua.chengpu-home",
@@ -792,6 +1015,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.inn-rest"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.inn.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "inn",
     "id": "facility.yunhua.chiling-inn",
@@ -802,6 +1030,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.tavern.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "tavern",
     "id": "facility.yunhua.chiling-tavern",
@@ -812,6 +1045,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.adventurer-guild.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "adventurerGuild",
     "id": "facility.yunhua.chiling-adventurer-guild",
@@ -824,6 +1062,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.training-life-craft"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.item-shop.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "itemShop",
     "id": "facility.yunhua.chiling-item-shop",
@@ -837,6 +1080,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.training-smith-tailor"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.equipment-shop.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "equipmentShop",
     "id": "facility.yunhua.chiling-equipment-shop",
@@ -850,6 +1098,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.training-combat-magic"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.training-ground.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "trainingGround",
     "id": "facility.yunhua.chiling-training-ground",
@@ -861,6 +1114,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.bookstore.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "bookstore",
     "id": "facility.yunhua.chiling-bookstore",
@@ -871,6 +1129,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.adventure-checkpoint.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "adventureCheckpoint",
     "id": "facility.yunhua.chiling-adventure-checkpoint",
@@ -881,6 +1144,11 @@
   },
   {
     "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.city-gate.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "cityGate",
     "id": "facility.yunhua.chiling-city-gate",
@@ -893,6 +1161,11 @@
     "actionRuleIds": [
       "city-action-rule.yunhua.home-year-rest"
     ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility-kind.yunhua.home.name"
+      }
+    },
     "enabled": true,
     "facilityKind": "home",
     "id": "facility.yunhua.chiling-home",
@@ -1192,10 +1465,75 @@
     ],
     "kind": "home-rule",
     "packId": "pack:yunhua",
-    "purchasableSlotCounts": [],
-    "purchasePriceRuleIds": {},
+    "purchasableSlotCounts": [
+      2,
+      4,
+      6
+    ],
+    "purchasePriceRuleIds": {
+      "2": "price-rule.yunhua.home-slot-2",
+      "4": "price-rule.yunhua.home-slot-4",
+      "6": "price-rule.yunhua.home-slot-6"
+    },
     "schemaVersion": 1,
     "sourcePath": "yunhua/world-city.json#home-rule.yunhua.standard"
+  },
+  {
+    "baseAmount": {
+      "amount": 4000,
+      "currencyId": "currency.core.standard"
+    },
+    "baseValueSource": "ruleFixedAmount",
+    "buyModifierIds": [
+      "price-modifier-rule.core.personal-trade-bonus-buy"
+    ],
+    "enabled": true,
+    "id": "price-rule.yunhua.home-slot-2",
+    "kind": "price-rule",
+    "minimumPrice": 1,
+    "packId": "pack:yunhua",
+    "roundingPolicy": "nearest",
+    "schemaVersion": 1,
+    "sellModifierIds": [],
+    "sourcePath": "yunhua/world-city.json#price-rule.yunhua.home-slot-2"
+  },
+  {
+    "baseAmount": {
+      "amount": 12000,
+      "currencyId": "currency.core.standard"
+    },
+    "baseValueSource": "ruleFixedAmount",
+    "buyModifierIds": [
+      "price-modifier-rule.core.personal-trade-bonus-buy"
+    ],
+    "enabled": true,
+    "id": "price-rule.yunhua.home-slot-4",
+    "kind": "price-rule",
+    "minimumPrice": 1,
+    "packId": "pack:yunhua",
+    "roundingPolicy": "nearest",
+    "schemaVersion": 1,
+    "sellModifierIds": [],
+    "sourcePath": "yunhua/world-city.json#price-rule.yunhua.home-slot-4"
+  },
+  {
+    "baseAmount": {
+      "amount": 28000,
+      "currencyId": "currency.core.standard"
+    },
+    "baseValueSource": "ruleFixedAmount",
+    "buyModifierIds": [
+      "price-modifier-rule.core.personal-trade-bonus-buy"
+    ],
+    "enabled": true,
+    "id": "price-rule.yunhua.home-slot-6",
+    "kind": "price-rule",
+    "minimumPrice": 1,
+    "packId": "pack:yunhua",
+    "roundingPolicy": "nearest",
+    "schemaVersion": 1,
+    "sellModifierIds": [],
+    "sourcePath": "yunhua/world-city.json#price-rule.yunhua.home-slot-6"
   },
   {
     "actionRuleIds": [

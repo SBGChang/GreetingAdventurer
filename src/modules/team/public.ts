@@ -60,6 +60,8 @@ export {
   handleRecruitTavernAdventurer,
   handleSelectPlayerSuccessor,
   handleBeginCityFreePeriod,
+  handleChooseCityFreeAction,
+  handleFreeActionDueJob,
   getPlayerControlledCharacterId,
   openPlayerSuccession,
   validatePlacements,
@@ -105,6 +107,7 @@ export const teamModuleContract: ModuleContract = {
     'enterAdventureMap',
     'returnToCity',
     'beginCityFreePeriod',
+    'chooseCityFreeAction',
     'rest',
     'selectPlayerSuccessor',
     'recruitTavernAdventurer',
@@ -115,9 +118,9 @@ export const teamModuleContract: ModuleContract = {
     'StartNpcTeamPlan',
     'CompletePlayerTravelSegmentWithoutEvent',
   ],
-  // 只宣告**已實作**的 Job。freeActionDue / nonPlayerMemberCityFreeDayTick 的 Handler 未撰寫，
-  // 宣告它們會讓 Manifest 排入相位順序、Registry 也認為可用。
-  handlesJobs: ['teamPlanDue'],
+  // 只宣告**已實作**的 Job。nonPlayerMemberCityFreeDayTick 的 Handler 未撰寫，
+  // 宣告它會讓 Manifest 排入相位順序、Registry 也認為可用。
+  handlesJobs: ['teamPlanDue', 'freeActionDue'],
   // StartNpcDungeonRun 的接收端（dungeon）目前不註冊任何能力，故此處也不宣告送出。
   sendsInternalCommands: [],
   // Wave B 未實作任何 subscriber 函式（CharacterAvailabilityChanged / CharacterRetired /

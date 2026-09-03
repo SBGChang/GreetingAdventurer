@@ -10,6 +10,7 @@
 import { requireDefinitionSchemaVersion, isRegisteredDefinitionKind } from '../../src/app/content/definition-kinds';
 import { RUNTIME_DATA_CONTRACT } from '../../src/data-runtime';
 import type { AuthoredManifest, AuthoredPack } from '../../content-source/authoring';
+import { SUPPORTED_LOCALES } from '../../content-source/authoring';
 
 // ── 產物形狀 ────────────────────────────────────────────────────────────────
 //
@@ -199,6 +200,144 @@ function compilePack(
 }
 
 
+// ── 本地化 bundle 的產出與雙向完整性檢查 ────────────────────────────────────
+//
+// 兩個方向都要檢查，因為它們漏掉的是不同的東西：
+//   * nameRef → 文字：Definition 指了一個不存在的 key ＝ 畫面上會有一個沒有名字的東西。
+//   * 文字 → nameRef：宣告了沒有人引用的文字 ＝ 改了名字卻沒有生效（或是刪定義忘了刪文字）。
+// 只做前者的話，第二種會安靜地累積成一堆騙人的翻譯。
+function collectNameRefKeys(value: unknown, out: Set<string>): void {
+  if (Array.isArray(value)) {
+    for (const item of value) collectNameRefKeys(item, out);
+    return;
+  }
+  if (typeof value !== 'object' || value === null) return;
+  const record = value as Record<string, unknown>;
+  const nameRef = record['nameRef'];
+  if (typeof nameRef === 'object' && nameRef !== null) {
+    const key = (nameRef as Record<string, unknown>)['key'];
+    if (typeof key === 'string') out.add(key);
+  }
+  for (const child of Object.values(record)) collectNameRefKeys(child, out);
+}
+
+function compileLocalization(
+  manifest: AuthoredManifest,
+  compiledDomains: readonly CompiledDomain[],
+  errors: CompileError[],
+): Readonly<{ files: readonly CompiledFile[]; bundles: readonly Record<string, unknown>[] }> {
+  const files: CompiledFile[] = [];
+  const bundles: Record<string, unknown>[] = [];
+
+  // 全部 pack 的定義實際引用到的 key。
+  const referenced = new Set<string>();
+  for (const domain of compiledDomains) collectNameRefKeys(domain.definitions, referenced);
+
+  const declared = new Set<string>();
+  for (const pack of manifest.packs) {
+    const texts = pack.domains.flatMap((d) => d.texts ?? []);
+    if (texts.length === 0) continue;
+
+    const seen = new Map<string, string>();
+    for (const text of texts) {
+      const first = seen.get(text.key);
+      if (first !== undefined) {
+        errors.push({
+          where: `${String(pack.packId)}/locale`,
+          message: `文字 key "${text.key}" 重複宣告（先前於 ${first}）——重複必須由作者消除，不得後蓋前`,
+        });
+        continue;
+      }
+      seen.set(text.key, `${String(pack.packId)}`);
+      declared.add(text.key);
+    }
+
+    for (const locale of SUPPORTED_LOCALES) {
+      const entries: Record<string, string> = {};
+      for (const text of texts) entries[text.key] = text.name[locale];
+      const bundleId = `bundle.${String(pack.packId).replace(/^pack:/, '')}.${locale}`;
+      const contentRoot = `locale/${locale}`;
+      files.push({
+        path: `${contentRoot}/${String(pack.packId).replace(/^pack:/, '')}.json`,
+        text: serialize({ bundleId, locale, entries }),
+      });
+      bundles.push({ bundleId, locale, contentRoot });
+    }
+  }
+
+  // ── 未授權文字的棘輪 ──────────────────────────────────────────────────
+  //
+  // 裝備／道具／素材／貨幣的 `nameRef` 在本地化管線存在**之前**就寫進內容了，指向的 key 從來
+  // 沒有人提供文字（equipment 的中文名甚至已經備妥在 `YUNHUA_EQUIPMENT_DISPLAY_NAMES`，
+  // 只是沒有管線可以送出去）。那是既有欠債，不是這次改動造成的。
+  //
+  // 直接放行等於讓「指向不存在的文字」變成常態；直接擋下則會讓整包內容編不出來。所以用棘輪：
+  // 每個 kind 的欠債數**只能減少**。少於宣告值也報錯——否則補完的進度會被下一筆新欠債悄悄吃掉。
+  //
+  // 這份表只能變短。補完一個 kind 的文字後，把它從表裡刪掉。
+  const TEXT_DEBT_RATCHET: Readonly<Record<string, number>> = {
+    equipment: 90,
+    item: 30,
+    material: 19,
+    currency: 1,
+  };
+
+  const danglingByKind = new Map<string, string[]>();
+  for (const key of [...referenced].sort()) {
+    if (declared.has(key)) continue;
+    const kind = key.split('.')[0] ?? key;
+    const bucket = danglingByKind.get(kind);
+    if (bucket === undefined) danglingByKind.set(kind, [key]);
+    else bucket.push(key);
+  }
+
+  for (const [kind, keys] of [...danglingByKind].sort()) {
+    const allowed = TEXT_DEBT_RATCHET[kind];
+    if (allowed === undefined) {
+      errors.push({
+        where: 'locale',
+        message:
+          `${keys.length} 筆 "${kind}" 的 nameRef 沒有對應文字（例：${keys[0]}）。` +
+          `新內容必須連同文字一起提供——不得新增沒有名字的定義。`,
+      });
+      continue;
+    }
+    if (keys.length > allowed) {
+      errors.push({
+        where: 'locale',
+        message:
+          `"${kind}" 缺文字的 nameRef 從 ${allowed} 增加到 ${keys.length} 筆——欠債只能減少。` +
+          `新增的例子：${keys[allowed] ?? keys[0]}`,
+      });
+    } else if (keys.length < allowed) {
+      errors.push({
+        where: 'locale',
+        message:
+          `"${kind}" 缺文字的 nameRef 已降到 ${keys.length} 筆（宣告值 ${allowed}）——` +
+          `請把 TEXT_DEBT_RATCHET 的 ${kind} 改成 ${keys.length}，讓進度鎖住。`,
+      });
+    }
+  }
+  for (const kind of Object.keys(TEXT_DEBT_RATCHET)) {
+    if (!danglingByKind.has(kind)) {
+      errors.push({
+        where: 'locale',
+        message: `"${kind}" 已經沒有缺文字的 nameRef——請把它從 TEXT_DEBT_RATCHET 刪掉。`,
+      });
+    }
+  }
+  for (const key of [...declared].sort()) {
+    if (!referenced.has(key)) {
+      errors.push({
+        where: 'locale',
+        message: `文字 "${key}" 沒有任何 Definition 引用——改名不會生效，或是定義已刪除而文字沒刪`,
+      });
+    }
+  }
+
+  return { files, bundles };
+}
+
 // ── 跨定義引用必須解析得到（Wave F1 複核建議）────────────────────────────────
 //
 // 內容 ID 是 branded string，所以 `tsc` 擋得住**家族錯誤**（把 MasteryId 填進 CurveId 欄位），
@@ -304,6 +443,14 @@ export function compileContentSource(manifest: AuthoredManifest): CompileResult 
     errors.push(...collectReferenceViolations(compiledDomains, knownIds));
   }
 
+  // 本地化 bundle。與定義引用同樣只在前面沒有結構性錯誤時才跑——否則「因為那筆定義沒編出來
+  // 所以 nameRef 收集不到」會製造一堆假的缺字報告。
+  const localization =
+    errors.length === 0
+      ? compileLocalization(manifest, compiledDomains, errors)
+      : { files: [], bundles: [] };
+  files.push(...localization.files);
+
   // Runtime manifest：與 `RawContentManifest` **逐欄相同**，Platform Port 讀進來即可直接使用。
   // 這裡刻意不列 domain 檔名：13_data_runtime.md §1 明定「編譯器可產生索引，不要求作者手動維護
   // 巨大總表」，pack 內的檔案由 ContentRepository 列舉該 pack 目錄取得（每筆定義自帶 sourcePath）。
@@ -318,8 +465,9 @@ export function compileContentSource(manifest: AuthoredManifest): CompileResult 
       optional: p.optional,
       contentRoot: p.contentRoot,
     })),
-    // 本地化 bundle 尚未有任何內容；宣告為空陣列而不是省略欄位，讓載入器看到的是「明確地沒有」。
-    localizationBundles: [],
+    // 每個 pack × 每個出貨語系一份 bundle；由 `compileLocalization` 產生並交叉驗證過
+    //（每個 nameRef 都有文字、每筆文字都有人引用）。
+    localizationBundles: localization.bundles,
   };
   files.push({ path: 'manifest.json', text: serialize(runtimeManifest) });
 

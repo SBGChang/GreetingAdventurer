@@ -1,21 +1,30 @@
 @echo off
-rem 問候冒險者 · Greeting Adventurer — 桌面版試玩啟動器
-rem 雙擊即可玩（第一次會自動安裝相依套件並打包，需要 Node.js）。
+rem Greeting Adventurer - desktop launcher
+rem Double-click to play. First run installs dependencies and packages. Requires Node.js.
 cd /d "%~dp0"
 where npm >nul 2>nul
 if errorlevel 1 (
-  echo [錯誤] 找不到 npm。請先安裝 Node.js: https://nodejs.org/
+  echo [ERROR] npm not found. Please install Node.js first: https://nodejs.org/
   pause
   exit /b 1
 )
-if not exist node_modules (
-  echo 第一次啟動：正在安裝相依套件，請稍候...
+set "NEED_INSTALL="
+if not exist "node_modules\.bin\vite.cmd" set "NEED_INSTALL=1"
+if not exist "node_modules\.bin\electron.cmd" set "NEED_INSTALL=1"
+if defined NEED_INSTALL (
+  echo Installing dependencies, please wait. This can take a few minutes...
   call npm install
+  if errorlevel 1 (
+    echo.
+    echo [ERROR] npm install failed. Check your network connection, then run this file again.
+    pause
+    exit /b 1
+  )
 )
-echo 正在打包並啟動問候冒險者（原生視窗）...
+echo Packaging and launching Greeting Adventurer (native window)...
 call npm run app
 if errorlevel 1 (
   echo.
-  echo [提示] 桌面版啟動失敗時，可改用瀏覽器版： npm run dev
+  echo [HINT] Desktop build failed. You can try the browser version: npm run dev
   pause
 )

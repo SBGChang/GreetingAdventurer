@@ -23,7 +23,10 @@ import type { GameJobType } from './state';
 // 每個已註冊 Job Type 必須在此恰好出現一次；缺漏或重複由 kernel createScheduler 於啟動時 throw。
 export const JOB_TYPE_ORDER_BY_PHASE: Readonly<Record<JobPhase, readonly GameJobType[]>> = {
   // 既有行動完成：玩家旅行段落、NPC 抵達、自由活動、NPC 地牢日。
-  completeAction: ['teamPlanDue'],
+  // `freeActionDue` 排在 `teamPlanDue` 之後：同一天若隊伍計畫完成（例如自由期結束）
+  // 又有自由行動到期，先讓計畫的完成結果落地，再結算個人行動——反過來會讓自由行動
+  // 在一個已經不成立的自由期裡完成。
+  completeAction: ['teamPlanDue', 'freeActionDue'],
   // 接受期限／實際結束期限／鎖定到期。
   //
   // `questDeadline` 排在**最前**：委託到期會讓相關實體（保留的貨架、任務貨物、護衛角色）
@@ -243,6 +246,10 @@ export const EVENT_SUBSCRIPTIONS_BY_TYPE: Readonly<
 
   // 戰鬥成長事件 → progression 發放 MXP。
   CombatAttackMasteryEarned: [sub('CombatAttackMasteryEarned', 'progression')],
+  // 28 日城鎮訓練完成 → progression 依傳授差額公式發 MXP（Team 只追蹤時間）。
+  FreeActionCompleted: [sub('FreeActionCompleted', 'progression')],
+  // 地圖刷新生成內容 → quest 依 QuestReactionRule 決定要不要貼一筆委託（doc §2.1）。
+  MapContentGenerated: [sub('MapContentGenerated', 'quest')],
   CombatDefenseMasteryEarned: [sub('CombatDefenseMasteryEarned', 'progression')],
   CombatSupportMasteryEarned: [sub('CombatSupportMasteryEarned', 'progression')],
 

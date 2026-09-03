@@ -431,10 +431,26 @@ export type ResolveDungeonInteraction = Readonly<{
 // ── 已註冊的四筆 ──────────────────────────────────────────────────────────
 // 移動、開門、互動與（經 content-event-resolution Workflow 入口的）選項解析。它們送出的
 // OpenMapDoor / ResolveMapTrap / ResolvePlayerMapContent / StartCombatEncounter 都有 Owner。
+// ── 2026-08-30：入場與離場加回來 ──────────────────────────────────────────
+// 上面列的四個阻塞點現況：
+//   1. `AssetDistributionCompleted → dungeon` 訂閱：**已綁**（manifest.ts 的 EVENT_SUBSCRIPTIONS
+//      與 router.ts 的 'AssetDistributionCompleted::dungeon' 都在），離場流程收得了尾。
+//   2. 固定採集點沒有玩家入口：仍然沒有，但**現行內容沒有任何採集點**
+//      （雲華九張地圖 gatheringNodes 全為空），所以它擋不到任何一格。gatherDungeonNode
+//      仍然不進 union——沒有入口就是沒有入口，等 Workflow 寫好再加。
+//   3. 玩家內容解析 Resolver 沒有資料：仍然沒有，但**現行內容沒有任何 map content**
+//      （內容生成 resolver 尚未接線），所以沒有任何一筆寶箱／控制內容可以被互動到。
+//      interactDungeonContent 早就在 union 裡，缺資料時回 typed rejection——合法出口。
+//   4. `DungeonMapPort` 沒有生產實作：**已補**（app/content/dungeon-map-port.ts）。
+//
+// 也就是說：探索迴圈本身（進場 → 移動 → 開門 → 揭露 → 走到出口 → 返城）現在每一步都有
+// 真實來源，沒有任何一步需要靠預設值走完。所以入場與離場加回來。
 export type DungeonGameCommand =
+  | StartPlayerExploration
   | MoveDungeonRoom
   | OpenDungeonDoor
   | InteractDungeonContent
+  | UseDungeonExit
   | ResolveDungeonInteraction;
 
 // ──────────────────────────────────────────────────────────────────────────

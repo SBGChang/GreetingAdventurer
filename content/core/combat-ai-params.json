@@ -1,0 +1,57 @@
+[
+  {
+    "enabled": true,
+    "id": "combat-ai-params.core.single-skill-aggressor",
+    "kind": "combat-ai-params",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "skillSelection": "onlySkill",
+    "sourcePath": "core/combat-ai-params.json#combat-ai-params.core.single-skill-aggressor",
+    "targetPreference": "randomInReach"
+  },
+  {
+    "enabled": true,
+    "id": "combat-ai-params.core.elite-threat-focus",
+    "kind": "combat-ai-params",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "skillSelection": "randomAffordable",
+    "sourcePath": "core/combat-ai-params.json#combat-ai-params.core.elite-threat-focus",
+    "targetPreference": "lowestHealthInReach"
+  },
+  {
+    "enabled": true,
+    "id": "combat-ai-params.core.boss-rotation",
+    "kind": "combat-ai-params",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "skillSelection": "rotateByEncounterRevision",
+    "sourcePath": "core/combat-ai-params.json#combat-ai-params.core.boss-rotation",
+    "targetPreference": "highestHealthInReach"
+  },
+  {
+    "enabled": true,
+    "id": "combat-counter-condition-params.core.counter-condition-block",
+    "kind": "combat-counter-condition-params",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-ai-params.json#combat-counter-condition-params.core.counter-condition-block",
+    "triggeringActionKinds": [
+      "attack",
+      "cast",
+      "perform"
+    ]
+  },
+  {
+    "enabled": true,
+    "id": "combat-counter-condition-params.core.counter-condition-melee-block",
+    "kind": "combat-counter-condition-params",
+    "maxAttackerDistanceCells": 1,
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/combat-ai-params.json#combat-counter-condition-params.core.counter-condition-melee-block",
+    "triggeringActionKinds": [
+      "attack"
+    ]
+  }
+]

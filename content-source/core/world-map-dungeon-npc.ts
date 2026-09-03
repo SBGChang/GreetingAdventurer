@@ -469,9 +469,13 @@ const INTENT_CANDIDATE_ROWS: readonly Readonly<{
 // 直接把 union 值當 local 名會產生 `free-action-rule.core.proposeToTeammate`——一個
 // **不存在的 ID**，而且載入會成功、只是永遠讀不到。所以逐筆明寫，並用非 Partial 的 Record
 // 讓「新增一種自由行動卻沒指定它的 Rule」變成本檔的編譯錯誤。
+//
+// `train` 指向三筆訓練規則中的**戰鬥與魔法**那一筆：NPC 冒險者的 `train` 是為了變強
+// （`NpcMemberFreeActionKind` 沒有「練哪一項」的欄位，所以這裡必須替它選一組），而生活技藝
+// 與鍛冶裁縫另有 craft 這條路。要讓 NPC 也練生活技藝，得先讓候選池型別帶上熟練度分組。
 const FREE_ACTION_RULE_LOCAL: Readonly<Record<NpcMemberFreeActionKind, string>> = {
   craft: 'craft',
-  train: 'train',
+  train: 'train-combat-magic',
   trade: 'trade',
   proposeToTeammate: 'propose-to-teammate',
   rest: 'rest',

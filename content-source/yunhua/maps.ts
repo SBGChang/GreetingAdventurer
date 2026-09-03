@@ -110,7 +110,9 @@ import type {
   RoomId,
   RoomLinkId,
 } from '../../src/contracts/core';
+import type { MonsterSpeciesKind, MonsterThreatRank } from '../../src/contracts/combat';
 import type {
+  CultureContentRuleDefinition,
   FloorDefinition,
   GridCell,
   MapContentDefinition,
@@ -123,6 +125,11 @@ import type {
   SpawnBudgetDefinition,
 } from '../../src/contracts/map';
 import { cultureIds, type Authored, type AuthoredDomain } from '../authoring';
+import {
+  YUNHUA_HUMAN_CANDIDATES,
+  YUNHUA_NON_HUMAN_CANDIDATES,
+  type YunhuaContentCandidate,
+} from './monsters';
 import {
   NPC_DUNGEON_TARGET_RESOLVER_IDS,
   NPC_SEQUENCE_RULE_ID,
@@ -1022,11 +1029,48 @@ const YUNHUA_NONHUMAN_CONTENT_RULE = yunhua.id<CultureContentRuleId>(
 );
 const YUNHUA_HUMAN_CONTENT_RULE = yunhua.id<CultureContentRuleId>('culture-content-rule', 'human');
 
+// ── 文化內容池（§7.2／§7.3）─────────────────────────────────────────────────
+//
+// 兩筆，九張圖共用——這是設計明文，不是省事：§4「地圖**不指定怪物種類偏好**。九張圖的非人類
+// 敵人都可由雲華文化池選取」「不建立地圖專屬怪種 Pool」；§7.4 每一列「非人類讀雲華全文化池；
+// 人類讀占領國文化池」。逐圖各一筆會與這兩句直接衝突。
+//
+// 候選清單由 `monsters.ts` 從同一份 MONSTER_ROWS 導出（見該檔 `YUNHUA_*_CANDIDATES`），
+// 所以 Tier／威脅／人類與否在怪物定義與這裡不可能講出兩種答案。
+//
+// 人類池獨立成一筆的理由在 §7.3：「此池只在該 Region 目前由雲華控制時使用；被他國佔領後
+// **整池替換**」——換池的粒度就是這一筆。
+function cultureContentRule(
+  local: 'nonhuman' | 'human',
+  speciesKind: MonsterSpeciesKind,
+  candidates: readonly YunhuaContentCandidate[],
+): Authored<CultureContentRuleDefinition> {
+  return {
+    kind: 'culture-content-rule',
+    id: yunhua.id<CultureContentRuleId>('culture-content-rule', local),
+    cultureId: yunhua.cultureId,
+    speciesKind,
+    candidates: candidates.map((c) => ({
+      encounterGroupId: c.encounterGroupId,
+      tier: c.tier,
+      threatRank: c.threatRank,
+    })),
+  };
+}
+
+const CULTURE_CONTENT_RULES: readonly Authored<CultureContentRuleDefinition>[] = [
+  cultureContentRule('nonhuman', 'nonHuman', YUNHUA_NON_HUMAN_CANDIDATES),
+  cultureContentRule('human', 'human', YUNHUA_HUMAN_CANDIDATES),
+];
+
 function mapSpawnRule(row: TopologyRow): Authored<MapSpawnRuleDefinition> {
   const profile = PROFILES[row.local];
   return {
     kind: 'map-spawn-rule',
     id: mapSpawnRuleId(row.local),
+    // §7.4 逐圖給定的 Tier；Resolver 只從 tier ≤ 此值的候選裡挑
+    //（§4「地圖只限制 Tier、威脅、體型與槽位」）。來源與 `MapProfile.tier` 同一欄，不另抄。
+    contentTier: profile.tier,
     localCultureContentRuleId: YUNHUA_NONHUMAN_CONTENT_RULE,
     humanCultureContentRuleId: YUNHUA_HUMAN_CONTENT_RULE,
     chestPoolId: yunhua.id<ChestPoolId>('chest-pool', row.local),
@@ -1066,6 +1110,8 @@ type ContentRow = Readonly<{
   contentKind: MapContentKind;
   pointCost: number;
   targetResolver: keyof typeof NPC_DUNGEON_TARGET_RESOLVER_IDS;
+  // 怪物類才有；寶箱與事件沒有威脅等級（缺席＝不適用，見契約說明）。
+  threatRank?: MonsterThreatRank;
 }>;
 
 const CONTENT_ROWS: readonly ContentRow[] = [
@@ -1073,6 +1119,7 @@ const CONTENT_ROWS: readonly ContentRow[] = [
   {
     local: 'monster-group-common',
     contentKind: 'monsterGroup',
+    threatRank: 'normal',
     pointCost: 1,
     targetResolver: 'combat-target',
   },
@@ -1080,11 +1127,12 @@ const CONTENT_ROWS: readonly ContentRow[] = [
   {
     local: 'monster-group-elite',
     contentKind: 'monsterGroup',
+    threatRank: 'elite',
     pointCost: 2,
     targetResolver: 'combat-target',
   },
   // 不變量 5：「大怪為 4」。§7.5：「Boss 一律大型 3×3」。
-  { local: 'boss', contentKind: 'boss', pointCost: 4, targetResolver: 'combat-target' },
+  { local: 'boss', contentKind: 'boss', threatRank: 'boss', pointCost: 4, targetResolver: 'combat-target' },
   // 不變量 5：「……／寶箱通常為 1」。
   { local: 'chest', contentKind: 'chest', pointCost: 1, targetResolver: 'chest' },
   // 【第一版方案（待討論）】不變量 5 只說「事件由 Definition 明確指定」，**沒有給數字**。
@@ -1108,6 +1156,8 @@ function mapContent(row: ContentRow): Authored<MapContentDefinition> {
     // `contentKind` 是領域變體欄位（Wave E 定形），`kind` 是家族宣告。
     id: yunhua.id<DefinitionId>('map-content', row.local),
     contentKind: row.contentKind,
+    // 缺席代表「這種內容沒有威脅等級」，所以不寫成 `threatRank: undefined`。
+    ...(row.threatRank === undefined ? {} : { threatRank: row.threatRank }),
     npcPolicy,
   };
 }
@@ -1120,6 +1170,7 @@ export const yunhuaMapsDomain: AuthoredDomain = {
     ...TOPOLOGY.map(mapTemplate),
     ...TOPOLOGY.map(mapSpawnRule),
     ...CONTENT_ROWS.map(mapContent),
+    ...CULTURE_CONTENT_RULES,
   ],
 };
 
@@ -1129,6 +1180,7 @@ export const YUNHUA_MAPS_DECLARED_KINDS: readonly string[] = [
   'map-template',
   'map-spawn-rule',
   'map-content',
+  'culture-content-rule',
 ];
 
 // 本 domain **不引用任何 Resolver**：`MapTemplateDefinition` / `MapSpawnRuleDefinition` /

@@ -287,6 +287,16 @@ export interface CharacterStatsQuery {
     maxHealth: number;
     maxMana: number;
   }>;
+  // 角色**還沒進 Slice** 時的上限查詢（世界冒險者生成、出生）。
+  //
+  // 為什麼需要第二個入口：新角色的初始 HP/MP 就是它的上限，而上限要算就得先有角色的
+  // revision／年齡／聲望——用 id 去查一個還沒插進去的角色必然查不到。原本的寫法是在插入前
+  // 呼叫 `getStats(id)`，只有在 stub 回固定值時才看不出來；接上正式的派生統計 Port 就會以
+  // 「unknown characterId」拋。傳入草稿本身是唯一不必說謊也不必調換插入順序的形狀。
+  getStatsForCharacter(character: Character): Readonly<{
+    maxHealth: number;
+    maxMana: number;
+  }>;
 }
 
 // ──────────────────────────────────────────────────────────────────────────

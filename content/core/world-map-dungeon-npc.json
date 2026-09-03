@@ -271,9 +271,9 @@
       },
       {
         "actionKind": "train",
-        "conditionId": "condition.core.npc-member-can-train",
-        "freeActionRuleId": "free-action-rule.core.train",
-        "weightResolverId": "resolver:npc-behavior.free-action-weight.train"
+        "conditionId": "condition.core.npc-member-can-train-combat-magic",
+        "freeActionRuleId": "free-action-rule.core.train-combat-magic",
+        "weightResolverId": "resolver:npc-behavior.free-action-weight.train-combat-magic"
       },
       {
         "actionKind": "trade",

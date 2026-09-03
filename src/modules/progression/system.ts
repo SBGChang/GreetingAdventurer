@@ -16,6 +16,7 @@ import type {
   ModuleResult,
   TransactionMessageDraft,
   DomainEventDraft,
+  TeachingRuleId,
 } from '../../contracts/core';
 import { MAX_MASTERY_LEVEL, MAX_PRIMARY_ATTRIBUTE, SUPPORT_USE_CAP } from '../../contracts/core';
 import type {
@@ -38,6 +39,7 @@ import type {
   CombatMasterySource,
 } from '../../contracts/combat-sequence';
 import type { CraftingCompletedEvent } from '../../contracts/crafting';
+import type { FreeActionCompletedEvent } from '../../contracts/team';
 
 import type { ProgressionModuleState } from './state';
 import {
@@ -576,6 +578,65 @@ export function computeTeachingResult(
     cap = thresholds[thresholds.length - 1] ?? learnerCurrentExperience;
   }
   return Math.min(learnerCurrentExperience + rawGain, cap);
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// §5.1 DomainEvent 訂閱：FreeActionCompleted（28 日城鎮訓練）
+// ──────────────────────────────────────────────────────────────────────────
+
+// mastery_experience_economy_v1.md §五「城鎮生活技藝訓練（28 日）」：
+//   （Lv.5 教師 MXP − 學生 MXP）× 0.15%，並受「單次至多到 Lv.N+2 門檻 − 1」的跨級上限。
+//
+// 也就是說訓練**共用傳授的差額公式**，只是教師換成一位固定 Lv.5 的城鎮教師。所以這裡不另立
+// experience-award-rule：那會變成同一件事的第二份真相，而且會和 TeachingRule 的率各走各的。
+// 「Lv.5」與「0.15%」兩個數字都住在 `TeachingRuleDefinition`（cityTeacherMasteryLevel /
+// adultDifferenceRate），本函式只把它們接起來。
+//
+// `train` 以外的自由行動種類在這裡**不動 state**：craft 的成品屬 crafting、tavernVisit 沒有成長。
+// 那不是「跳過錯誤」，而是這個訂閱者只認領訓練這一種。
+export function handleFreeActionCompleted(
+  state: ProgressionModuleState,
+  event: FreeActionCompletedEvent,
+  reader: ProgressionDefinitionReader,
+  teachingRuleId: TeachingRuleId,
+): ModuleResult<ProgressionModuleState> {
+  if (event.payload.kind !== 'train') return emptyResult(state);
+  const masteryId = event.payload.masteryId;
+
+  const teaching = reader.getTeachingRule(teachingRuleId);
+  const mastery = reader.getMastery(masteryId);
+  const curve = reader.getMasteryCurve(mastery.curveId);
+
+  // 城鎮教師固定 Lv.5：他的 MXP ＝ 曲線上進入 Lv.5 的累積門檻。
+  const teacherExperience = curve.cumulativeExperienceThresholds[teaching.cityTeacherMasteryLevel];
+  if (teacherExperience === undefined) {
+    throw new Error(
+      `progression：熟練度曲線 "${String(mastery.curveId)}" 沒有 Lv.${teaching.cityTeacherMasteryLevel} 的累積門檻——` +
+        `城鎮教師等級（TeachingRule.cityTeacherMasteryLevel）超出曲線範圍。`,
+    );
+  }
+
+  // 還沒有這項熟練度的進度＝一筆全新的進度（工廠說了算），不是「補兩個 0」。
+  // 與 applyOne 走同一條路：`?? createMasteryProgress(id)`。
+  const progress = state.characterProgress[event.memberId];
+  const current = progress?.masteries[masteryId] ?? createMasteryProgress(masteryId);
+  const learnerExperience = current.experience;
+  const learnerLevel = current.level;
+
+  const target = computeTeachingResult(
+    curve,
+    learnerExperience,
+    learnerLevel,
+    teacherExperience,
+    teaching.adultDifferenceRate,
+  );
+  // 學員已不低於 Lv.5 教師時差額為 0 → amount 0，awardMasteryExperience 不改變 state。
+  const amount = target - learnerExperience;
+  return awardMasteryExperience(
+    state,
+    { characterId: event.memberId, masteryId, amount, source: 'cityTraining' },
+    reader,
+  );
 }
 
 // ──────────────────────────────────────────────────────────────────────────

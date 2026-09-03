@@ -50,8 +50,10 @@ import type {
   EncounterExperienceBudgetDefinition,
   MonsterExperienceProfileDefinition,
   OpeningCtbRuleDefinition,
+  CombatSkillDefinitionView,
 } from '../../src/contracts/combat';
 import type { PrimaryAttributeId } from '../../src/contracts/progression';
+import { combatTargetResolverId } from './resolver-ids';
 import type {
   ActionDelayRuleId,
   CombatAiPolicyId,
@@ -59,6 +61,8 @@ import type {
   CombatCtbAdjustmentRuleId,
   CombatDamageRuleId,
   CombatEffectDefinitionId,
+  DefinitionHeader,
+  SkillDefinitionId,
   CombatHealRuleId,
   CombatInterruptionRuleId,
   CombatRuleId,
@@ -91,6 +95,7 @@ const KIND = {
   experienceBudget: 'encounter-experience-budget',
   monsterExperienceProfile: 'monster-experience-profile',
   controlResistanceProfile: 'combat-control-resistance-profile',
+  skill: 'combat-skill',
 };
 
 // ── 跨 domain 引用 ──────────────────────────────────────────────────────────
@@ -480,11 +485,63 @@ const interruptCastingEffect: Authored<CombatEffectDefinition> = {
   operation: { kind: 'interruptCasting', interruptionRuleId: CASTING_INTERRUPTION_RULE_ID },
 };
 
+// ── 怪物共通攻擊：撞擊 ──────────────────────────────────────────────────────
+//
+// 【設計決定】所有怪物共用這一招。20 隻怪的 `skillIds` 原本全空，設計來源的 41 招怪物技能
+// 屬 skills domain 且尚未授權——在那之前怪物在 Detailed Combat 裡選不到任何行動
+//（`content-source/yunhua/monsters.ts` 自己寫著「這 20 筆怪物在 skillIds 接上之前不是可玩內容」）。
+// 共通一招把那個缺口關掉，而且不必先發明 41 招的數值。
+//
+// ── 為什麼這一筆 dealDamage 可以住在 core（本檔上面說「此檔不寫 dealDamage」）──
+//
+// 上面那條的理由是「技能威力在契約裡沒有欄位可放，所以每一招都需要自己的 damage rule 與
+// Resolver，那是文化內容」。撞擊是**基準攻擊**——它沒有任何倍率修正，威力就是通道本身的值，
+// 所以它引用 core 既有的 `combat-damage-rule.core.physical`（其 powerResolver 已綁定且有 params）
+// 是完整的，不是「少填了倍率」。有倍率的招式仍然各自需要自己的 damage rule，那條限制沒有變。
+//
+// 怪物沒有武器也沒有熟練度成長，所以：`activationHand: 'handless'`（契約為此而設的值）、
+// `weaponRequirementIds` 空、不給 `attackMasteryAwardRuleId`（缺席＝這招不發攻擊熟練）。
+const monsterSlamEffect: Authored<CombatEffectDefinition> = {
+  kind: KIND.effect,
+  id: core.id<CombatEffectDefinitionId>(KIND.effect, 'deal-physical-damage'),
+  operation: {
+    kind: 'dealDamage',
+    damageRuleId: core.id<CombatDamageRuleId>(KIND.damageRule, 'physical'),
+  },
+};
+
+export const MONSTER_COMMON_SKILL_ID = core.id<SkillDefinitionId>(KIND.skill, 'monster-slam');
+
+// combat 契約只有 `CombatSkillDefinitionView`（以 `skillId` 為鍵、不帶 DefinitionHeader），
+// 沒有 `CombatSkillDefinition`——與 `content-source/yunhua/skills.ts` 同一個處理（見該檔說明）。
+type CombatSkillDefinition = DefinitionHeader<SkillDefinitionId> &
+  Omit<CombatSkillDefinitionView, 'skillId'>;
+
+const monsterSlamSkill: Authored<CombatSkillDefinition> = {
+  kind: KIND.skill,
+  id: MONSTER_COMMON_SKILL_ID,
+  activationHand: 'handless',
+  weaponRequirementIds: [],
+  actionKind: 'attack',
+  masteryExperienceMode: 'damage',
+  // technique 這個 kind 目前不存在任何定義（玩家技能引用的 `technique.yunhua.*` 也不存在，
+  // 只因 technique 未登記為 kind 而躲過跨引用檢查）。留空是誠實的，不是漏填。
+  techniqueIds: [],
+  targeting: {
+    // 單體敵方；`resolver:combat.target-single-hostile` 是已實作且已綁定的純格陣形狀。
+    targetResolverId: combatTargetResolverId('single-hostile'),
+  },
+  actionDelayRuleId: core.id<ActionDelayRuleId>(KIND.actionDelayRule, 'standard'),
+  effectIds: [core.id<CombatEffectDefinitionId>(KIND.effect, 'deal-physical-damage')],
+  resourceCosts: [],
+};
+
 const allEffects: readonly Authored<CombatEffectDefinition>[] = [
   ...applyStatusEffects,
   ...removeStatusEffects,
   ...adjustCtbEffects,
   interruptCastingEffect,
+  monsterSlamEffect,
 ];
 
 export const COMBAT_EFFECT_IDS: Readonly<Record<string, CombatEffectDefinitionId>> =
@@ -714,6 +771,7 @@ export const combatRulesDomain: AuthoredDomain = {
     ...STATUS_ROWS.map(combatStatus),
     ...allEffects,
     ...AI_ROWS.map(aiPolicy),
+    monsterSlamSkill,
     standardExperienceBudget,
     ...EXPERIENCE_ROWS.map(monsterExperienceProfile),
     ...CONTROL_ROWS.map(controlResistanceProfile),

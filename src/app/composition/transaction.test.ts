@@ -74,6 +74,7 @@ function contexts(): ModuleContexts {
     // 絆線，所以「這個切片其實碰到了某個沒準備好的模組」會立刻現形，而不是安靜地讀到 undefined。
     city: unusedContext('city'),
     quest: unusedContext('quest'),
+    questGeneration: unusedContext('quest'),
     social: unusedContext('social'),
     economy: unusedContext('economy'),
     world: unusedContext('world'),
@@ -344,7 +345,10 @@ const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
     run: () => {
       let message = '';
       try {
-        routeJob({ type: 'freeActionDue' } as unknown as GameScheduledJob, contexts);
+        // freeActionDue 已接線（見 team/system.ts），改用仍未撰寫 Handler 的
+        // nonPlayerMemberCityFreeDayTick 當樣本——這一行要驗的是「沒註冊就丟錯」，
+        // 不是某個特定 Job。
+        routeJob({ type: 'nonPlayerMemberCityFreeDayTick' } as unknown as GameScheduledJob, contexts);
       } catch (e) {
         message = e instanceof Error ? e.message : String(e);
       }

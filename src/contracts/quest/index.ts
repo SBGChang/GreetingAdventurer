@@ -52,7 +52,9 @@ export type QuestReactionSourceKind =
   | 'cityStockItem'
   | 'escortCandidate';
 
-export type QuestReactionRuleDefinition = DefinitionHeader & {
+// Header 帶上自己的 id 型別：沒帶的話 `definition.id` 是泛型 DefinitionId，把它填進
+// `QuestInstance.sourceRuleId` 需要一次轉型——那正是 branded id 要防的事。
+export type QuestReactionRuleDefinition = DefinitionHeader<QuestReactionRuleId> & {
   sourceKind: QuestReactionSourceKind;
   questKind: QuestKind;
   creationChance: number;
@@ -83,6 +85,9 @@ export type QuestObjectiveRuleDefinition = DefinitionHeader & {
 
 export interface QuestDefinitionReader {
   getQuestReactionRule(id: QuestReactionRuleId): QuestReactionRuleDefinition;
+  // 委託生成要**反查**：世界出現了某種來源，哪些規則會對它反應。以 id 逐筆問答不出這件事
+  // （沒有人知道有哪些 id），所以 Reader 必須能列舉這一族。
+  listQuestReactionRules(): readonly QuestReactionRuleDefinition[];
   getQuestDeadlineRule(id: QuestDeadlineRuleId): QuestDeadlineRuleDefinition;
   getQuestRewardRule(id: QuestRewardRuleId): QuestRewardRuleDefinition;
   getQuestObjectiveRule(id: QuestObjectiveRuleId): QuestObjectiveRuleDefinition;

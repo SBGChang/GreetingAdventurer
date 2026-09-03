@@ -18,7 +18,11 @@
 import type {
   CharacterArchetypeId,
   CityId,
+  ItemInstanceId,
+  CurrencyId,
   Revision,
+  RngCursor,
+  RngStreamId,
   RuntimeIdCursor,
   Seed,
   TeamId,
@@ -26,12 +30,58 @@ import type {
 } from '../../contracts/core';
 import type { DefinitionRegistry } from '../../data-runtime';
 import type { Character, Sex } from '../../modules/character/public';
-import { createCharacterState } from '../../modules/character/public';
-import { createCharacterProgression } from '../../modules/progression/public';
+import { createCharacterState, handleCreateWorldAdventurerBatch } from '../../modules/character/public';
+import type { CharacterStatsQuery } from '../../contracts/character';
+import type { StatisticsRuleId } from '../../contracts/core';
+import { createCharacterStatsQuery } from '../content/cross-module-ports';
+import { createProgressionDefinitionReader } from '../content/progression-reader';
+import { createStatisticsDefinitionReader } from '../content/statistics-reader';
+import { createStatisticsResolverPort } from '../content/statistics-resolver-bridge';
+import { emptyQuestState, onMapContentGenerated } from '../../modules/quest/public';
+import { createQuestGenerationContext } from '../content/cross-module-ports';
+import { createQuestDefinitionReader } from '../content/quest-reader';
+import type { ContentInstanceId, MapInstanceId } from '../../contracts/core';
+import type { CharacterState } from '../../modules/character/public';
+import type { CreateWorldAdventurerBatch } from '../../contracts/character';
+import type { FreeActionRuleDefinition, FreeActionRuleId } from '../../contracts/team';
+import type { MemberFreeAction } from '../../modules/team/public';
+import type { CharacterId } from '../../contracts/core';
+import { createCharacterResolverPort } from '../content/character-context';
+import type { ResolverRegistry } from '../../data-runtime';
+import { createCharacterProgression, createInitialProgressionState } from '../../modules/progression/public';
 import type { Team, TeamCombatFormation } from '../../modules/team/public';
 import { createTeamState } from '../../modules/team/public';
 import { createCharacterDefinitionReader } from '../content/character-reader';
 import { createWorldDefinitionReader } from '../content/world-reader';
+import { createMapDefinitionReader } from '../content/map-reader';
+import { createMapState, buildSpatialRuntime, refreshMapInstance } from '../../modules/map/public';
+import type { MapInstance, MapState, TeamPresenceQuery } from '../../modules/map/public';
+import { createMapContext } from '../content/map-context';
+import { createMapDefinitionReader as createMapReader } from '../content/map-reader';
+import { createCityDefinitionReader } from '../content/city-reader';
+import { createItemDefinitionReader } from '../content/inventory-reader';
+import { createInventoryQuery } from '../../modules/inventory/public';
+import { handleShopRefresh } from '../../modules/city/public';
+import type { CityDefinition, CityHandlerContext } from '../../modules/city/public';
+import type { CurrencyDefinition } from '../../contracts/economy';
+import { narrowedDomainReader } from '../content/reader-adapter';
+import { createCityState } from '../../modules/city/public';
+import type { CityRuntimeState, FacilityRuntimeState } from '../../modules/city/public';
+import { createEconomyState } from '../../modules/economy/public';
+import type { EconomyAccount } from '../../modules/economy/public';
+import { createInventoryState } from '../../modules/inventory/public';
+import type { ItemInstance } from '../../modules/inventory/public';
+
+// 會進城市永久庫存的物品家族。內容的 item kind 分六種（見 contracts/inventory 的 ItemKind），
+// 這裡列出「商店會賣的」那幾種；不是清單挑選，而是家族篩選。
+const ITEM_STOCK_KINDS: readonly string[] = [
+  'generalItem',
+  'combatConsumable',
+  'nonCombatConsumable',
+  'material',
+  'equipment',
+];
+import { deterministicRng } from '../../kernel/rng';
 
 import { createIdPortsForBootstrap } from './session';
 import { createEmptyGameState, type GameState } from './state';
@@ -48,6 +98,9 @@ export type NewGameConfig = Readonly<{
   // 隊長出生日。**必填**——隊長的起始年齡是開新遊戲的選擇，Bootstrapper 不替它發明預設
   // （原本寫 `?? 0`，被紀律門禁擋下：0 在這裡是猜的玩法值，不是結構不變量）。
   leaderBirthDay: number;
+  // 隊長的起始金錢（最小貨幣單位）。與起始城市、起始 archetype 同性質：是**開新遊戲的選擇**，
+  // 由呼叫端提供，Bootstrapper 不替它發明預設。
+  startingMoney: number;
 }>;
 
 export type NewGameDiagnostic = Readonly<{ code: string; detail: string }>;
@@ -56,11 +109,33 @@ export type NewGameResult =
   | Readonly<{ success: true; state: GameState; playerTeamId: TeamId; leaderId: string }>
   | Readonly<{ success: false; diagnostics: readonly NewGameDiagnostic[] }>;
 
+// `tavernVisit` 那一筆自由行動規則。以 `freeActionKind` 找、不寫死 ID：規則的 local 名屬內容。
+// 恰好一筆才合法——沒有代表這份 Pack 沒有酒館這回事，多筆代表沒人說得出用哪一條。
+function requireTavernVisitRuleId(registry: DefinitionRegistry): FreeActionRuleId {
+  const found = narrowedDomainReader<FreeActionRuleDefinition>(
+    registry,
+    'reader:bootstrap.free-action-rule',
+    ['free-action-rule'],
+  )
+    .list()
+    .filter((rule) => rule.freeActionKind === 'tavernVisit');
+  if (found.length !== 1) {
+    throw new Error(
+      `NewGameBootstrapper：期望恰好一筆 freeActionKind='tavernVisit' 的 free-action-rule，實得 ${found.length}`,
+    );
+  }
+  return found[0]!.id as FreeActionRuleId;
+}
+
 function fail(diagnostics: readonly NewGameDiagnostic[]): NewGameResult {
   return { success: false, diagnostics };
 }
 
-export function createNewGame(config: NewGameConfig, registry: DefinitionRegistry): NewGameResult {
+export function createNewGame(
+  config: NewGameConfig,
+  registry: DefinitionRegistry,
+  resolvers: ResolverRegistry,
+): NewGameResult {
   const diagnostics: NewGameDiagnostic[] = [];
 
   // ── 輸入結構驗證（非內容問題，是呼叫端傳錯）───────────────────────────────
@@ -150,7 +225,9 @@ export function createNewGame(config: NewGameConfig, registry: DefinitionRegistr
     innateTraitIds: [],
     reputation: 0,
     // HP/MP 上限最終由 progression capacity 決定；開局先給非零起手值，capacity 事件會夾正。
-    condition: { health: 100, mana: 50, statuses: [] },
+    // HP/MP 由派生統計引擎算（下面 `fullCondition` 那一段）；這裡先放 0，建完角色後補上。
+    // 不寫「先給 100/50」那種佔位值：那是把一個玩法數字寫進程式。
+    condition: { health: 0, mana: 0, statuses: [] },
     revision: 0 as Revision,
     lifecycleRevisions: {
       adulthood: 0 as Revision,
@@ -175,21 +252,434 @@ export function createNewGame(config: NewGameConfig, registry: DefinitionRegistr
     revision: 0 as Revision,
   };
 
+
+  // ── 冒險地圖實例 ────────────────────────────────────────────────────────
+  //
+  // 世界裡每一個 `adventure-site` 對應一個 MapInstance。它們必須在開新遊戲時就存在：
+  // `enterAdventureMap` 會在**下令當下**用 `getAdventureSiteMapInstance` 解析，缺了就當場拒絕
+  // （見 team/system.ts 的說明）。沒有這一段，任何據點都進不去。
+  //
+  // 為什麼在 Bootstrap 建而不是進場時建：MapInstance 是**世界的一部分**（NPC 隊伍也會進同一張
+  // 圖、刷新排程以它為單位），不是玩家動作的產物。進場才建會讓「玩家沒去過的圖不存在」，
+  // 而世界模擬需要它們一直在。
+  //
+  // 版本從 1 起算、門全關、陷阱 armed、採集點 available（buildSpatialRuntime 依 Template 重建）。
+  // 內容（怪物／寶箱／事件）**不在這裡生成**：那是 map 模組刷新流程的職責，需要 spawn resolver。
+  const mapReader = createMapDefinitionReader(registry);
+  const mapInstances: MapInstance[] = [];
+  for (const siteDef of registry.list({ kinds: ['adventure-site'] })) {
+    const site = world.getAdventureSite(siteDef.id as never);
+    const template = mapReader.getMapTemplate(site.mapTemplateId);
+    // 版本 0 ＝「尚未刷新過」。下面每張圖都會跑一次正式刷新流程，把它推到版本 1 並生成內容——
+    // 刻意不另寫 bootstrap 專用的生成路徑（見 map/system.ts 的 refreshMapInstance 說明）。
+    const preRefreshVersion = 0;
+    mapInstances.push({
+      mapId: ids.map.nextMapInstanceId(),
+      adventureSiteId: site.id,
+      templateId: site.mapTemplateId,
+      currentVersion: preRefreshVersion,
+      // 刷新節奏偏移由 Template 宣告（內容），不是這裡挑的。
+      refresh: { offsetDays: template.refreshOffsetDays },
+      spatialRuntime: buildSpatialRuntime(template, preRefreshVersion),
+      revision: 0 as Revision,
+    });
+  }
+
+  // 每張圖跑一次正式刷新 → 版本 1 ＋ 依 Spawn Budget 生成的動態內容（怪群／Boss）。
+  // 開局沒有任何隊伍在圖內，所以 presence 一律回 0/false；world Port 在 map 模組裡從未被讀取
+  // （已逐行確認），接上前以「一被存取就指名拋錯」的 proxy 標記。
+  const bootstrapPresence: TeamPresenceQuery = {
+    countTeamsInside: () => 0,
+    isTeamInside: () => false,
+  };
+  const mapContext = createMapContext({
+    registry,
+    definitions: createMapReader(registry),
+    world: new Proxy({}, {
+      get: (_t, prop) => {
+        throw new Error(
+          `NewGameBootstrapper：map context 的 world Port 尚未接線（存取 .${String(prop)}）——` +
+            `map 模組目前不讀它；會走到這裡代表刷新流程新增了世界查詢。`,
+        );
+      },
+    }) as never,
+    presence: bootstrapPresence,
+    ids: ids.map,
+    rng: deterministicRng,
+    rngContext: {
+      worldSeed,
+      streamId: 'map-bootstrap-spawn' as RngStreamId,
+      cursor: 0 as RngCursor,
+    },
+    worldDay: config.startDay as WorldDay,
+  });
+
+  let seededMapState: MapState = createMapState({ instances: mapInstances });
+  // 刷新同時記下每張圖生成了哪些內容——委託是**對這些內容的反應**（見下面的委託生成段）。
+  const generatedContentIdsByMap = new Map<string, readonly ContentInstanceId[]>();
+  for (const instance of mapInstances) {
+    // 生不出內容時 refreshMapInstance 會拋（候選池為空／定義對不上）。那是內容壞掉，
+    // 不該讓遊戲帶著空地圖開起來——Bootstrap 的合法反應就是不開新遊戲（§出口 2）。
+    const refreshed = refreshMapInstance(instance, seededMapState, mapContext);
+    seededMapState = refreshed.nextSlice;
+    generatedContentIdsByMap.set(
+      String(instance.mapId),
+      Object.values(seededMapState.contents)
+        .filter((c) => c.mapId === instance.mapId && c.state === 'available')
+        .map((c) => c.contentId),
+    );
+  }
+
+  // ── 城市、金錢、商店庫存 ─────────────────────────────────────────────────
+  //
+  // city / economy / inventory 三個 Slice 開局都是空的，於是主城的每一間店都沒有「城市」可掛、
+  // 沒有帳戶可付款、也沒有貨可賣。這一段把世界的這三件事建起來——全部由**內容**決定：
+  //   * 哪些城市、哪些設施 → CityDefinition.facilityIds
+  //   * 繁榮／安全起始值   → CityDefinition.initialProsperity / initialSafety
+  //   * 城裡有哪些貨       → 該文化所有「可交易」的物品定義（不是這裡挑的清單）
+  const cityReader = createCityDefinitionReader(registry);
+  const itemReader = createItemDefinitionReader(registry);
+  // 幣別由窄化 Reader 取得（`CurrencyDefinition.id` 本來就是 CurrencyId，不需要轉型）。
+  const currencies = narrowedDomainReader<CurrencyDefinition>(registry, 'reader:bootstrap.currency', [
+    'currency',
+  ]).list();
+  const currency = currencies[0];
+  if (currency === undefined) {
+    return fail([{ code: 'newGame/currency-missing', detail: 'Content Pack 沒有任何 currency 定義' }]);
+  }
+  const currencyId = currency.id;
+
+  const cityRuntimes: CityRuntimeState[] = [];
+  const accounts: EconomyAccount[] = [];
+  const stockItems: ItemInstance[] = [];
+
+  // 玩家隊長的錢包。
+  accounts.push({
+    accountId: ids.economy.nextEconomyAccountId(),
+    owner: { kind: 'character', characterId: leaderId },
+    currencyId,
+    balance: config.startingMoney,
+    revision: 0 as Revision,
+  });
+
+  // 這個文化包裡所有「可交易」的物品定義——商店貨架就從這些實體抽。
+  // 「哪些能賣」是內容的宣告（`tradePolicy.tradable`），不是這裡挑的名單。
+  const tradableItemIds = registry
+    .list({ kinds: ITEM_STOCK_KINDS })
+    .filter((def) => itemReader.getItem(def.id as never).tradePolicy.tradable)
+    .map((def) => def.id as never);
+
+  const cityDefinitions = narrowedDomainReader<CityDefinition>(registry, 'reader:bootstrap.city', [
+    'city',
+  ]).list();
+  for (const city of cityDefinitions) {
+    const facilityStates: Record<string, FacilityRuntimeState> = {};
+    for (const facilityId of city.facilityIds) {
+      // 開局所有設施都開著。關閉是 `SetFacilityAvailability` 之後的事，不是起始狀態。
+      facilityStates[String(facilityId)] = {
+        facilityId,
+        availability: 'open',
+        revision: 0 as Revision,
+      };
+    }
+    cityRuntimes.push({
+      cityId: city.worldCityId,
+      facilityStates: facilityStates as CityRuntimeState['facilityStates'],
+      prosperity: city.initialProsperity,
+      safety: city.initialSafety,
+      revision: 0 as Revision,
+    });
+
+    // 城市商店的收付款帳戶。
+    accounts.push({
+      accountId: ids.economy.nextEconomyAccountId(),
+      owner: { kind: 'city', cityId: city.worldCityId },
+      currencyId,
+      balance: 0,
+      revision: 0 as Revision,
+    });
+
+    // 城市永久庫存：每種可交易物品各一件。`shopRefresh` 會從這裡抽
+    // `permanentStockOfferCount` 件上架（數量是內容，不是這裡決定的）。
+    for (const definitionId of tradableItemIds) {
+      stockItems.push({
+        itemId: ids.inventory.nextItemInstanceId(),
+        definitionId,
+        quantity: 1,
+        location: { kind: 'cityPermanentStock', cityId: city.worldCityId },
+        state: 'active',
+        revision: 0 as Revision,
+      });
+    }
+  }
+
+  // 商店開局上架：直接跑一次**正式的** `shopRefresh`，與日後每一次刷新走同一支程式
+  //（與地圖刷新同一個理由：不另寫 bootstrap 專用路徑）。
+  //
+  // `handleShopRefresh` 只讀 definitions／inventory／rng／ids——它建立的是「貨架上有哪幾件」，
+  // 不算價格（價格是買的時候才報）。所以這裡只組它真的會碰的 port，其餘一律 pending：
+  // 碰到就拋並指名，不會有假實作讓流程看起來跑完。
+  let seededCityState = createCityState({ cities: cityRuntimes });
+  const seededInventoryState = createInventoryState({ items: stockItems });
+  const seededEconomyState = createEconomyState({ accounts });
+  {
+    const inventoryQuery = createInventoryQuery(seededInventoryState, itemReader);
+    const notNeeded = (port: string): never =>
+      new Proxy(
+        {},
+        {
+          get: (_t, prop) => {
+            throw new Error(
+              `NewGameBootstrapper：開局上架不應觸及 city context 的 "${port}"（存取 .${String(prop)}）`,
+            );
+          },
+        },
+      ) as never;
+
+    const shopCtx = {
+      worldDay: config.startDay as WorldDay,
+      definitions: cityReader,
+      inventory: {
+        getItem: inventoryQuery.getItem,
+        listAtLocation: inventoryQuery.listAtLocation,
+        characterOwnsItem: inventoryQuery.characterOwnsItem,
+        isReserved: inventoryQuery.isReserved,
+        isTradable: (itemId: ItemInstanceId) => {
+          const item = inventoryQuery.getItem(itemId);
+          return item === undefined ? false : itemReader.getItem(item.definitionId).tradePolicy.tradable;
+        },
+      },
+      ids: ids.city,
+      rng: deterministicRng,
+      rngContext: {
+        worldSeed,
+        streamId: 'city-bootstrap-shop' as RngStreamId,
+        cursor: 0 as RngCursor,
+      },
+      team: notNeeded('team'),
+      economy: notNeeded('economy'),
+      world: notNeeded('world'),
+      supply: notNeeded('supply'),
+      resolvers: notNeeded('resolvers'),
+    } as CityHandlerContext;
+
+    for (const city of cityDefinitions) {
+      for (const shopRuleId of city.shopRuleIds) {
+        const outcome = handleShopRefresh(
+          {
+            type: 'shopRefresh',
+            jobId: `bootstrap-shop-${String(shopRuleId)}` as never,
+            dueDay: config.startDay as WorldDay,
+            owner: 'city' as never,
+            targetId: shopRuleId,
+            payload: {},
+          } as never,
+          seededCityState,
+          shopCtx,
+        );
+        // 被拒＝內容配置有問題（例如商店規則不屬任何城市）。開局就該擋下，不要帶著空店開局。
+        if (!outcome.ok) {
+          return fail([
+            {
+              code: 'newGame/shop-refresh-rejected',
+              detail: `商店 "${String(shopRuleId)}" 開局上架被拒：${outcome.rejection.code}`,
+            },
+          ]);
+        }
+        seededCityState = outcome.result.nextSlice;
+      }
+    }
+  }
+
+  // ── 世界冒險者（酒館名單）─────────────────────────────────────────────────
+  //
+  // 開局每座城放一批冒險者，數量由該城的 `PopulationSupplyRuleDefinition.batchLimit` 決定
+  // ——那正是「一次補幾個」的內容宣告，不是這裡挑的數字。人長什麼樣由
+  // `WorldAdventurerGenerationRuleDefinition` 指名的四個 Resolver 決定（原型／性別／年齡／天賦）。
+  //
+  // 為什麼在 Bootstrap 建而不是等 `cityPopulationReview` 跑：那條 Job 只在**缺口**出現時補人，
+  // 而世界一開始是空的——第一批得先存在，否則玩家第 1 日走進酒館看到的是一個空房間，
+  // 而那不是「還沒接線」，是世界根本沒有人。（同一個理由，商店的開局庫存也在這裡上架。）
+  //
+  // 每個人都是自己隊伍的隊長（單人 NPC Team）＋一筆 `tavernVisit` 自由行動：
+  // `listTavernVisitorsInCity` 認的就是這兩件事（team/state.ts）。招募把人從那支一人隊伍
+  // 轉進玩家隊，所以「酒館名單」與「隊伍歸屬」始終是同一份真相，沒有第二個可見性旗標。
+  const tavernVisitRuleId = requireTavernVisitRuleId(registry);
+  // 派生統計引擎（與正式 ContextAssembler 同一支）。開局角色的 HP/MP 上限由它決定——
+  // 寫死一組起手值等於把玩法數字搬進程式，而那個數字之後永遠不會跟著內容改。
+  const statisticsRules = narrowedDomainReader<{ id: string }>(
+    registry,
+    'reader:bootstrap.statistics-rule',
+    ['statistics-rule'],
+  ).list();
+  if (statisticsRules.length !== 1) {
+    throw new Error(
+      `NewGameBootstrapper：期望恰好一筆 statistics-rule，實得 ${statisticsRules.length}`,
+    );
+  }
+  const statisticsRuleId = statisticsRules[0]!.id as StatisticsRuleId;
+  const makeStatsQuery = (characterState: CharacterState): CharacterStatsQuery =>
+    createCharacterStatsQuery({
+      characterState,
+      progressionState: createInitialProgressionState(),
+      inventoryState: seededInventoryState,
+      itemReader,
+      progressionReader: createProgressionDefinitionReader(registry),
+      statisticsDefinitions: createStatisticsDefinitionReader(registry),
+      statisticsResolvers: createStatisticsResolverPort(resolvers, registry),
+      statisticsRuleId,
+      worldDay: config.startDay as WorldDay,
+    });
+  const adventurerResolvers = createCharacterResolverPort({
+    registry,
+    resolvers,
+    rng: deterministicRng,
+  });
+  const npcTeams: Team[] = [];
+  const npcFreeActions: MemberFreeAction[] = [];
+  const npcFormations: TeamCombatFormation[] = [];
+  let adventurerState: CharacterState = createCharacterState({ characters: [leader] });
+  const adventurerProgress: Record<string, ReturnType<typeof createCharacterProgression>> = {};
+
+  for (const [cityIndex, cityDef] of cityDefinitions.entries()) {
+    const supplyRule = cityReader.getPopulationSupplyRule(cityDef.populationSupplyRuleId);
+    const batch: CreateWorldAdventurerBatch = {
+      type: 'CreateWorldAdventurerBatch',
+      cityId: cityDef.worldCityId,
+      cultureId: world.getRegion(world.getCityNode(cityDef.worldCityId).regionId)
+        .nativeCultureId,
+      count: supplyRule.batchLimit,
+      generationRuleId: supplyRule.adventurerGenerationRuleId,
+      rngContext: {
+        worldSeed,
+        streamId: 'character-bootstrap-adventurer' as RngStreamId,
+        // 每座城從不同的區段起抽，否則四座城會生出同一批人。
+        cursor: (cityIndex * supplyRule.batchLimit * 4) as RngCursor,
+      },
+    };
+    const bootstrapStats = makeStatsQuery(adventurerState);
+    const before = Object.keys(adventurerState.characters);
+    const outcome = handleCreateWorldAdventurerBatch(batch, adventurerState, {
+      worldDay: config.startDay as WorldDay,
+      definitions: characters,
+      // 上限由**派生統計引擎**算（BM：max-health = 200 + safeRaw×20 之類），不是這裡挑的數字。
+      // 開局角色還沒有任何熟練度與裝備，所以算出來的就是這份內容給的基礎值。
+      stats: bootstrapStats,
+      ids: ids.character,
+      resolvers: adventurerResolvers,
+    });
+    adventurerState = outcome.nextSlice;
+
+    for (const characterId of Object.keys(adventurerState.characters)) {
+      if (before.includes(characterId)) continue;
+      const memberId = characterId as CharacterId;
+      const teamId = ids.team.nextTeamId();
+      npcTeams.push({
+        teamId,
+        control: 'npc',
+        memberIds: [memberId],
+        temporaryMemberIds: [],
+        leaderId: memberId,
+        location: { kind: 'city', cityId: cityDef.worldCityId },
+        revision: 0 as Revision,
+      });
+      npcFormations.push({
+        teamId,
+        placements: { [memberId]: { floor: 0, row: 1, col: 1 } },
+        revision: 0 as Revision,
+      });
+      npcFreeActions.push({
+        freeActionId: ids.team.nextFreeActionId(),
+        teamId,
+        memberId,
+        ruleId: tavernVisitRuleId,
+        // `tavernVisit` 是可持續的被動選項：不累積自由日、不排到期 Job（doc §3.5 不變量 5）。
+        status: 'resting',
+        accumulatedFreeDays: 0,
+        payload: { kind: 'tavernVisit' },
+        revision: 0 as Revision,
+      });
+      adventurerProgress[memberId] = createCharacterProgression(memberId);
+    }
+  }
+
+  // ── 委託（公會板）────────────────────────────────────────────────────────
+  //
+  // 委託是世界對自己的反應：地圖上出現一群怪 → 附近的公會貼出肅清委託（doc §2.1）。
+  // 平時這條路由 `MapContentGenerated` 訂閱驅動，但開局的刷新是 Bootstrap 直接呼叫的
+  // （沒有交易、沒有事件匯流排），所以這裡直接跑**同一支** Handler——與商店開局上架同一個作法，
+  // 不另寫一條 bootstrap 專用的生成邏輯。
+  const questGenerationContext = createQuestGenerationContext({
+    questDefinitions: createQuestDefinitionReader(registry),
+    teamState: createTeamState({ playerTeamId, teams: [playerTeam, ...npcTeams] }),
+    mapState: seededMapState,
+    mapDefinitions: mapReader,
+    characterState: adventurerState,
+    worldDay: config.startDay as WorldDay,
+    registry,
+    resolvers,
+    world,
+    ids: ids.quest,
+    rng: deterministicRng,
+    rngContext: {
+      worldSeed,
+      streamId: 'quest-bootstrap-generation' as RngStreamId,
+      cursor: 0 as RngCursor,
+    },
+  });
+  let seededQuestState = emptyQuestState;
+  for (const [mapId, contentIds] of generatedContentIdsByMap) {
+    seededQuestState = onMapContentGenerated(
+      { type: 'MapContentGenerated', mapId: mapId as MapInstanceId, mapVersion: 1, contentIds },
+      seededQuestState,
+      questGenerationContext,
+    ).nextSlice;
+  }
+
+  // 隊長的 HP/MP 也由同一支引擎補滿。放在這裡而不是建 leader 的當下：`createCharacterStatsQuery`
+  // 要讀 character Slice，而那時 Slice 還不存在。
+  {
+    const leaderStats = makeStatsQuery(adventurerState).getStats(leaderId);
+    const current = adventurerState.characters[leaderId];
+    if (current === undefined) throw new Error('NewGameBootstrapper：隊長不在 character Slice 裡');
+    adventurerState = {
+      ...adventurerState,
+      characters: {
+        ...adventurerState.characters,
+        [leaderId]: {
+          ...current,
+          condition: {
+            ...current.condition,
+            health: leaderStats.maxHealth,
+            mana: leaderStats.maxMana,
+          },
+        },
+      },
+    };
+  }
+
   const teamState = createTeamState({
     playerTeamId,
-    teams: [playerTeam],
-    combatFormations: [formation],
+    teams: [playerTeam, ...npcTeams],
+    combatFormations: [formation, ...npcFormations],
+    freeActions: npcFreeActions,
   });
 
   const base = createEmptyGameState({ worldSeed: config.worldSeed, startDay: config.startDay, team: teamState });
   const state: GameState = {
     ...base,
-    character: createCharacterState({ characters: [leader] }),
+    map: seededMapState,
+    quest: seededQuestState,
+    city: seededCityState,
+    economy: seededEconomyState,
+    inventory: seededInventoryState,
+    character: adventurerState,
     progression: {
       ...base.progression,
       characterProgress: {
         ...base.progression.characterProgress,
         [leaderId]: createCharacterProgression(leaderId),
+        ...adventurerProgress,
       },
     },
     core: { ...base.core, nextRuntimeSequence: currentCursor() },

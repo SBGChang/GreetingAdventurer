@@ -1,0 +1,30 @@
+{
+  "bundleId": "bundle.yunhua.en",
+  "entries": {
+    "text.adventure-site.yunhua.calendar-court-ruin.name": "Calendar Court Ruin",
+    "text.adventure-site.yunhua.cinnabar-ridge.name": "Cinnabar Ridge",
+    "text.adventure-site.yunhua.hanging-spring-grotto.name": "Hanging Spring Grotto",
+    "text.adventure-site.yunhua.mist-bamboo-valley.name": "Mist Bamboo Herb Valley",
+    "text.adventure-site.yunhua.old-canal-sunken-store.name": "Old Canal and Sunken Store",
+    "text.adventure-site.yunhua.old-kiln-flue.name": "Old Kiln Flue",
+    "text.adventure-site.yunhua.salt-well-cellar.name": "Sealed Salt Well Cellar",
+    "text.adventure-site.yunhua.seal-tower.name": "Tianheng Seal Tower",
+    "text.adventure-site.yunhua.tidal-reed-isle.name": "Tidal Reed Isle",
+    "text.city-node.yunhua.chengpu.name": "Chengpu",
+    "text.city-node.yunhua.chiling.name": "Chiling",
+    "text.city-node.yunhua.qingcen.name": "Qingcen",
+    "text.city-node.yunhua.yunjing.name": "Yunjing",
+    "text.facility-kind.yunhua.adventure-checkpoint.name": "Adventure Checkpoint",
+    "text.facility-kind.yunhua.adventurer-guild.name": "Adventurer's Guild",
+    "text.facility-kind.yunhua.bookstore.name": "Bookstore",
+    "text.facility-kind.yunhua.city-gate.name": "City Gate",
+    "text.facility-kind.yunhua.equipment-shop.name": "Equipment Shop",
+    "text.facility-kind.yunhua.home.name": "Home",
+    "text.facility-kind.yunhua.inn.name": "Inn",
+    "text.facility-kind.yunhua.item-shop.name": "Item Shop",
+    "text.facility-kind.yunhua.tavern.name": "Tavern",
+    "text.facility-kind.yunhua.training-ground.name": "Training Ground",
+    "text.nation.yunhua.name": "Yunhua"
+  },
+  "locale": "en"
+}

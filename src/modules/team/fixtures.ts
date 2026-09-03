@@ -51,6 +51,7 @@ import type {
 import { createTeamState, emptyWorkSettlement } from './state';
 import type {
   TeamCombatStatusQuery,
+  TeamCityFacilityQuery,
   TeamHandlerContext,
   TeamIdAllocator,
   TeamResolverPort,
@@ -228,6 +229,7 @@ function header(id: string) {
 const PLAYER_MODES: Readonly<Record<string, PlayerTravelModeDefinition>> = {
   [TRAVEL_MODE_3]: {
     ...header(TRAVEL_MODE_3),
+    display: { nameRef: { key: `text.fixture.travel_mode_3.name` } },
     durationDays: 3,
     segments: [1, 1, 1],
     travelExperienceRuleId: TRAVEL_XP_RULE,
@@ -236,6 +238,7 @@ const PLAYER_MODES: Readonly<Record<string, PlayerTravelModeDefinition>> = {
   },
   [TRAVEL_MODE_6]: {
     ...header(TRAVEL_MODE_6),
+    display: { nameRef: { key: `text.fixture.travel_mode_6.name` } },
     durationDays: 6,
     segments: [2, 2, 2],
     travelExperienceRuleId: TRAVEL_XP_RULE,
@@ -244,6 +247,7 @@ const PLAYER_MODES: Readonly<Record<string, PlayerTravelModeDefinition>> = {
   },
   [TRAVEL_MODE_9]: {
     ...header(TRAVEL_MODE_9),
+    display: { nameRef: { key: `text.fixture.travel_mode_9.name` } },
     durationDays: 9,
     segments: [3, 3, 3],
     travelExperienceRuleId: TRAVEL_XP_RULE,
@@ -333,6 +337,14 @@ export function stubCombatStatusQuery(
   return { hasActiveEncounter: () => false, ...overrides };
 }
 
+// 單元測試預設「城市什麼設施都有」——設施門檻的**拒絕**路徑由明確覆寫這個 stub 來測，
+// 而不是靠預設值碰巧為 false（那會讓每一條無關的測試都要先想起設施這回事）。
+export function stubCityFacilityQuery(
+  overrides: Partial<TeamCityFacilityQuery> = {},
+): TeamCityFacilityQuery {
+  return { hasOpenFacilityKind: () => true, ...overrides };
+}
+
 // ── Stub Resolver Port ──────────────────────────────────────────────────────
 
 // 擲骰型 Resolver 的 RngStep 建構子：nextCursor = 入參 cursor + 1（模擬「消費一格」），讓串接迴圈可見
@@ -387,6 +399,7 @@ export function makeContext(overrides: Partial<TeamHandlerContext> = {}): TeamHa
     },
     world: overrides.world ?? stubWorldReader(),
     combat: overrides.combat ?? stubCombatStatusQuery(),
+    city: overrides.city ?? stubCityFacilityQuery(),
     ids: overrides.ids ?? makeIdAllocator(),
     resolvers: overrides.resolvers ?? stubResolverPort(),
     ...(overrides.rngContext ? { rngContext: overrides.rngContext } : {}),

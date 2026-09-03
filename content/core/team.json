@@ -1,5 +1,10 @@
 [
   {
+    "display": {
+      "nameRef": {
+        "key": "text.player-travel-mode.core.hurried.name"
+      }
+    },
     "durationDays": 3,
     "enabled": true,
     "id": "player-travel-mode.core.hurried",
@@ -17,6 +22,11 @@
     "travelExperienceRuleId": "experience-award-rule.core.travel-normal"
   },
   {
+    "display": {
+      "nameRef": {
+        "key": "text.player-travel-mode.core.normal.name"
+      }
+    },
     "durationDays": 6,
     "enabled": true,
     "id": "player-travel-mode.core.normal",
@@ -34,6 +44,11 @@
     "travelExperienceRuleId": "experience-award-rule.core.travel-normal"
   },
   {
+    "display": {
+      "nameRef": {
+        "key": "text.player-travel-mode.core.slow.name"
+      }
+    },
     "durationDays": 9,
     "enabled": true,
     "id": "player-travel-mode.core.slow",
@@ -76,12 +91,68 @@
     "completionResolverId": "resolver:team.free-action-train-completion",
     "enabled": true,
     "freeActionKind": "train",
-    "id": "free-action-rule.core.train",
+    "id": "free-action-rule.core.train-combat-magic",
     "kind": "free-action-rule",
     "packId": "pack:core",
     "requiredFreeDays": 28,
+    "requiresCityFacilityKind": "trainingGround",
     "schemaVersion": 1,
-    "sourcePath": "core/team.json#free-action-rule.core.train"
+    "sourcePath": "core/team.json#free-action-rule.core.train-combat-magic",
+    "trainableMasteryIds": [
+      "mastery.core.one-hand-weapon",
+      "mastery.core.two-hand-weapon",
+      "mastery.core.throwing-weapon",
+      "mastery.core.shooting-weapon",
+      "mastery.core.one-hand-staff",
+      "mastery.core.two-hand-staff",
+      "mastery.core.wind-instrument",
+      "mastery.core.string-instrument",
+      "mastery.core.cloth-armor",
+      "mastery.core.light-armor",
+      "mastery.core.medium-armor",
+      "mastery.core.heavy-armor",
+      "mastery.core.one-hand-shield",
+      "mastery.core.two-hand-shield",
+      "mastery.core.attack-magic",
+      "mastery.core.defense-magic",
+      "mastery.core.blessing-magic",
+      "mastery.core.curse-magic"
+    ]
+  },
+  {
+    "completionResolverId": "resolver:team.free-action-train-completion",
+    "enabled": true,
+    "freeActionKind": "train",
+    "id": "free-action-rule.core.train-life-craft",
+    "kind": "free-action-rule",
+    "packId": "pack:core",
+    "requiredFreeDays": 28,
+    "requiresCityFacilityKind": "itemShop",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#free-action-rule.core.train-life-craft",
+    "trainableMasteryIds": [
+      "mastery.core.handicraft",
+      "mastery.core.alchemy",
+      "mastery.core.cooking",
+      "mastery.core.gathering",
+      "mastery.core.social"
+    ]
+  },
+  {
+    "completionResolverId": "resolver:team.free-action-train-completion",
+    "enabled": true,
+    "freeActionKind": "train",
+    "id": "free-action-rule.core.train-smith-tailor",
+    "kind": "free-action-rule",
+    "packId": "pack:core",
+    "requiredFreeDays": 28,
+    "requiresCityFacilityKind": "equipmentShop",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#free-action-rule.core.train-smith-tailor",
+    "trainableMasteryIds": [
+      "mastery.core.smithing",
+      "mastery.core.tailoring"
+    ]
   },
   {
     "completionResolverId": "resolver:team.free-action-teach-completion",
@@ -235,6 +306,36 @@
     "schemaVersion": 1,
     "sourcePath": "core/team.json#recruitment-rule.core.standard",
     "successChanceResolverId": "resolver:team.recruitment-success"
+  },
+  {
+    "bias": 1.4,
+    "enabled": true,
+    "id": "logistic-roll-params.core.recruitment-success",
+    "kind": "logistic-roll-params",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#logistic-roll-params.core.recruitment-success",
+    "terms": [
+      {
+        "inputKey": "currentFormalCount",
+        "weight": -0.35
+      }
+    ]
+  },
+  {
+    "bias": -2.2,
+    "enabled": true,
+    "id": "logistic-roll-params.core.member-departure",
+    "kind": "logistic-roll-params",
+    "packId": "pack:core",
+    "schemaVersion": 1,
+    "sourcePath": "core/team.json#logistic-roll-params.core.member-departure",
+    "terms": [
+      {
+        "inputKey": "workNet",
+        "weight": -0.0006
+      }
+    ]
   },
   {
     "defaultPlacementResolverId": "resolver:team.team-default-placement",

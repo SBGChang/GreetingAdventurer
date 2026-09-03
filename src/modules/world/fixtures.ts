@@ -176,18 +176,20 @@ export const REGIONS: readonly RegionDefinition[] = [
   },
 ];
 
+const nodeDisplay = (key: string): CityNodeDefinition['display'] => ({ nameRef: { key } });
+
 export const CITY_NODES: readonly CityNodeDefinition[] = [
-  { ...header(CITY_A), regionId: REGION_NORTH, adjacentRouteIds: [ROUTE_AB_1, ROUTE_AB_2, ROUTE_AC, ROUTE_OFF], adventureSiteIds: [SITE_NORTH], isCapital: true },
-  { ...header(CITY_B), regionId: REGION_NORTH, adjacentRouteIds: [ROUTE_AB_1, ROUTE_AB_2, ROUTE_BD], adventureSiteIds: [], isCapital: false },
-  { ...header(CITY_C), regionId: REGION_SOUTH, adjacentRouteIds: [ROUTE_AC, ROUTE_CD], adventureSiteIds: [SITE_SOUTH], isCapital: false },
-  { ...header(CITY_D), regionId: REGION_SOUTH, adjacentRouteIds: [ROUTE_BD, ROUTE_CD, ROUTE_DE], adventureSiteIds: [], isCapital: false },
-  { ...header(CITY_E), regionId: REGION_SOUTH, adjacentRouteIds: [ROUTE_DE], adventureSiteIds: [], isCapital: false },
-  { ...header(CITY_ISLAND), regionId: REGION_SOUTH, adjacentRouteIds: [ROUTE_OFF], adventureSiteIds: [], isCapital: false },
+  { ...header(CITY_A), regionId: REGION_NORTH, adjacentRouteIds: [ROUTE_AB_1, ROUTE_AB_2, ROUTE_AC, ROUTE_OFF], adventureSiteIds: [SITE_NORTH], isCapital: true, display: nodeDisplay('text.fixture.city.city-a.name') },
+  { ...header(CITY_B), regionId: REGION_NORTH, adjacentRouteIds: [ROUTE_AB_1, ROUTE_AB_2, ROUTE_BD], adventureSiteIds: [], isCapital: false, display: nodeDisplay('text.fixture.city.city-b.name') },
+  { ...header(CITY_C), regionId: REGION_SOUTH, adjacentRouteIds: [ROUTE_AC, ROUTE_CD], adventureSiteIds: [SITE_SOUTH], isCapital: false, display: nodeDisplay('text.fixture.city.city-c.name') },
+  { ...header(CITY_D), regionId: REGION_SOUTH, adjacentRouteIds: [ROUTE_BD, ROUTE_CD, ROUTE_DE], adventureSiteIds: [], isCapital: false, display: nodeDisplay('text.fixture.city.city-d.name') },
+  { ...header(CITY_E), regionId: REGION_SOUTH, adjacentRouteIds: [ROUTE_DE], adventureSiteIds: [], isCapital: false, display: nodeDisplay('text.fixture.city.city-e.name') },
+  { ...header(CITY_ISLAND), regionId: REGION_SOUTH, adjacentRouteIds: [ROUTE_OFF], adventureSiteIds: [], isCapital: false, display: nodeDisplay('text.fixture.city.city-island.name') },
 ];
 
 export const ADVENTURE_SITES: readonly AdventureSiteDefinition[] = [
-  { ...header(SITE_NORTH), regionId: REGION_NORTH, accessCityId: CITY_A, mapTemplateId: MAP_TEMPLATE, isNationalDungeon: true },
-  { ...header(SITE_SOUTH), regionId: REGION_SOUTH, accessCityId: CITY_C, mapTemplateId: MAP_TEMPLATE, isNationalDungeon: false },
+  { ...header(SITE_NORTH), regionId: REGION_NORTH, accessCityId: CITY_A, mapTemplateId: MAP_TEMPLATE, isNationalDungeon: true, display: nodeDisplay('text.fixture.site.site-north.name') },
+  { ...header(SITE_SOUTH), regionId: REGION_SOUTH, accessCityId: CITY_C, mapTemplateId: MAP_TEMPLATE, isNationalDungeon: false, display: nodeDisplay('text.fixture.site.site-south.name') },
 ];
 
 const TRAVEL_POOL = 'player-travel-pool-1' as PlayerTravelEventPoolId;

@@ -15,8 +15,14 @@
 
 import type {
   CharacterId,
+  CityId,
   ContentInstanceId,
+  DeterministicRng,
   DomainEventDraft,
+  MapInstanceId,
+  ResolverId,
+  RngContext,
+  RngStep,
   InternalCommandDraft,
   ModuleId,
   ModuleOutcome,
@@ -33,6 +39,7 @@ import type {
   QuestDomainEvent,
   QuestKind,
   QuestObjective,
+  QuestReactionSourceKind,
   QuestStateChangeReason,
   QuestStatus,
   AcceptQuestCommand,
@@ -43,7 +50,12 @@ import type {
 } from '../../contracts/quest';
 
 // 跨模組引用（僅型別 import；外送命令一律用接收模組契約的真實型別）。
-import type { MapContentView, MapContentResolved } from '../../contracts/map';
+import type {
+  MapContentGenerated,
+  MapContentKind,
+  MapContentResolved,
+  MapContentView,
+} from '../../contracts/map';
 import type { TeamLocation, TeamLocationChangedEvent } from '../../contracts/team';
 import type { CombatEncounterResolvedPayload } from '../../contracts/combat';
 import type { CharacterCreatedEvent, CharacterDiedEvent, TemporaryCharacterOrigin } from '../../contracts/character';
@@ -51,6 +63,7 @@ import type { CharacterCreatedEvent, CharacterDiedEvent, TemporaryCharacterOrigi
 import {
   bumpRevision,
   clearClaim,
+  emptyObjectiveProgress as EMPTY_OBJECTIVE_PROGRESS,
   hasAllTargetsResolved,
   listQuestsOrdered,
   objectiveCharacterId,
@@ -102,6 +115,33 @@ export type QuestHandlerContext = Readonly<{
   mapContents: QuestMapContentPort;
   characters: QuestTemporaryCharacterPort;
 }>;
+
+// 委託生成需要三件既有 Context 沒有的東西：鑄 QuestId、擲骰、以及兩個生成 Resolver。
+// 它們只在生成這條路上用得到，所以擴充成一個獨立的 Context，而不是讓每個既有 Handler
+// 都被迫接受四個它們永遠不讀的欄位。
+export interface QuestIdAllocator {
+  nextQuestId(): QuestId;
+}
+
+// 生成期的兩個 Resolver（都由內容的規則指名 resolverId）：
+//   * guild        這筆委託貼在哪座城的公會（local-city／random-legal-city…）
+//   * actualEnd    從接取期限起算，還有幾天可以完成
+export interface QuestGenerationResolverPort {
+  resolveGuildCity(
+    input: Readonly<{ resolverId: ResolverId; mapId: MapInstanceId; rngContext: RngContext }>,
+  ): RngStep<CityId>;
+  resolveActualEndDays(
+    input: Readonly<{ resolverId: ResolverId; rngContext: RngContext }>,
+  ): RngStep<number>;
+}
+
+export type QuestGenerationContext = QuestHandlerContext &
+  Readonly<{
+    ids: QuestIdAllocator;
+    rng: DeterministicRng;
+    rngContext: RngContext;
+    resolvers: QuestGenerationResolverPort;
+  }>;
 
 export type QuestHandlerResult = ModuleOutcome<QuestState>;
 
@@ -547,6 +587,155 @@ export function handleQuestDeadline(
 // ──────────────────────────────────────────────────────────────────────────
 
 // 內容處理結果 → 鎮壓／討伐的目標累計、救援的被擄者救出（doc §5.3、§8）。
+// ──────────────────────────────────────────────────────────────────────────
+// §5.3 DomainEvent 訂閱：MapContentGenerated（委託的生成入口）
+// ──────────────────────────────────────────────────────────────────────────
+//
+// 委託是**世界的反應**，不是憑空出現的清單（doc §2.1「QuestReactionRule：某種來源出現時，
+// 以 creationChance 決定要不要生成一筆對應種類的委託」）。這一支把那句話接起來：
+//
+//   地圖刷新生成內容（怪群／Boss／綁架／地圖物品）
+//     → 逐筆比對 `sourceKind` 相符的 QuestReactionRule
+//     → 擲 creationChance
+//     → 由 guildResolver 決定貼在哪座城的公會
+//     → 由 deadlineRule 決定接取期限與實際結束期限
+//     → 建立 QuestInstance（status 'open'）
+//
+// 一筆內容最多生成一筆委託：`sourceKind` 與內容種類是一對一（怪群→肅清、Boss→狩獵…），
+// 而同一筆怪群同時是「肅清目標」又是「狩獵目標」在設計上沒有意義。內容有兩條規則指向它時
+// 明確拋錯——那是內容配置矛盾，不是可以靠「取第一條」蓋過去的事。
+export function onMapContentGenerated(
+  event: MapContentGenerated,
+  state: QuestState,
+  ctx: QuestGenerationContext,
+): ModuleResult<QuestState> {
+  let working = state;
+  const messages: Outgoing[] = [];
+  let cursor = ctx.rngContext.cursor;
+
+  for (const contentId of event.contentIds) {
+    const content = ctx.mapContents.getContent(contentId);
+    if (content === undefined) continue;
+    const sourceKind = questSourceKindOf(content);
+    if (sourceKind === undefined) continue; // 這種內容不是任何委託的來源（例如寶箱）
+
+    const rules = ctx.definitions
+      .listQuestReactionRules()
+      .filter((rule) => rule.sourceKind === sourceKind);
+    if (rules.length === 0) continue; // 這份 Pack 不為這種來源生成委託——一句宣告，不是遺漏
+    if (rules.length > 1) {
+      throw new Error(
+        `quest：來源種類 "${sourceKind}" 有 ${rules.length} 條 quest-reaction-rule` +
+          `（${rules.map((r) => String(r.id)).join(', ')}）——沒有人說得出該用哪一條。`,
+      );
+    }
+    const rule = rules[0]!;
+
+    // 生成擲骰。creationChance 1 代表必生（怪群與 Boss 就是這樣授權的），此時仍然消費一格
+    // 游標——否則「這份內容改成 0.5」會讓之後所有委託的隨機結果整串位移。
+    const chanceRoll = ctx.rng.nextFloat({ ...ctx.rngContext, cursor });
+    cursor = chanceRoll.nextCursor;
+    if (chanceRoll.value >= rule.creationChance) continue;
+
+    const guild = ctx.resolvers.resolveGuildCity({
+      resolverId: rule.guildResolverId,
+      mapId: content.mapId,
+      rngContext: { ...ctx.rngContext, cursor },
+    });
+    cursor = guild.nextCursor;
+
+    const deadlineRule = ctx.definitions.getQuestDeadlineRule(rule.deadlineRuleId);
+    const actualEnd = ctx.resolvers.resolveActualEndDays({
+      resolverId: deadlineRule.actualEndResolverId,
+      rngContext: { ...ctx.rngContext, cursor },
+    });
+    cursor = actualEnd.nextCursor;
+
+    const objective = objectiveFor(rule.questKind, content);
+    if (objective === undefined) {
+      throw new Error(
+        `quest：規則 "${String(rule.id)}" 的 questKind "${rule.questKind}" 接不上來源內容 ` +
+          `"${String(contentId)}"（kind ${content.kind}）——內容配置把兩種不相干的東西綁在一起了。`,
+      );
+    }
+
+    const acceptDeadline = (ctx.worldDay + deadlineRule.acceptDurationDays) as WorldDay;
+    const quest: QuestInstance = {
+      questId: ctx.ids.nextQuestId(),
+      kind: rule.questKind,
+      sourceRuleId: rule.id,
+      // 來源實體是這張地圖實例（`EntitySourceRef` 是一個 ID 聯集，不是 tagged union）。
+      sourceId: content.mapId,
+      postingGuildCityId: guild.value,
+      createdOnDay: ctx.worldDay,
+      acceptDeadline,
+      // 實際結束期限從**接取期限**起算：接取期內都還沒有人開工。
+      actualEndDeadline: (acceptDeadline + actualEnd.value) as WorldDay,
+      // 距離 RNG 在建立時一次確定（doc §2.4、不變量 2）：這裡存下這一筆的抽取結果，
+      // 接取時不重抽、不延長。
+      deadlineRolls: [actualEnd.value],
+      // 尚未被任何隊伍接取。`QuestStatus` 沒有 'open' 這個值——公會板上「還能接」的條件是
+      // `unaccepted` ＋ 未過接取期限（見 projectGuildBoard）。
+      status: 'unaccepted',
+      participantCharacterIds: [],
+      objective,
+      progress: EMPTY_OBJECTIVE_PROGRESS,
+      rewardRuleId: rule.rewardRuleId,
+      revision: 0 as Revision,
+    };
+    working = updateQuest(working, quest);
+    messages.push(
+      emit({
+        type: 'QuestCreated',
+        questId: quest.questId,
+        kind: quest.kind,
+        sourceId: quest.sourceId,
+        deadlines: {
+          acceptDeadline: quest.acceptDeadline,
+          actualEndDeadline: quest.actualEndDeadline,
+        },
+      }),
+    );
+  }
+
+  return makeResult(working, messages);
+}
+
+// 內容種類 → 委託來源種類。非 Partial 的 Record：map 新增一種內容卻沒說它是不是委託來源，
+// 就是這一行的編譯錯誤。`undefined` 是明確的「這種內容不生成委託」。
+const QUEST_SOURCE_KIND_BY_CONTENT: Readonly<
+  Record<MapContentKind, QuestReactionSourceKind | undefined>
+> = {
+  monsterGroup: 'monsterGroup',
+  boss: 'boss',
+  kidnap: 'kidnap',
+  chest: undefined,
+  mapEvent: undefined,
+  control: undefined,
+};
+
+function questSourceKindOf(content: MapContentView): QuestReactionSourceKind | undefined {
+  return QUEST_SOURCE_KIND_BY_CONTENT[content.kind];
+}
+
+function objectiveFor(kind: QuestKind, content: MapContentView): QuestObjective | undefined {
+  switch (kind) {
+    case 'suppression':
+      return { kind: 'suppression', mapId: content.mapId, targetContentIds: [content.contentId] };
+    case 'hunt':
+      return { kind: 'hunt', mapId: content.mapId, bossContentIds: [content.contentId] };
+    case 'rescue':
+      return { kind: 'rescue', contentId: content.contentId, mapId: content.mapId };
+    // 其餘四種的來源不是地圖內容（購買／運送來自城市貨架、護衛來自護衛候選），
+    // 走不到這條路徑；真的走到就是內容把不相干的規則綁在一起了，由呼叫端明確拋錯。
+    case 'purchase':
+    case 'delivery':
+    case 'escort':
+    case 'exploration':
+      return undefined;
+  }
+}
+
 export function onMapContentResolved(
   event: MapContentResolved,
   state: QuestState,

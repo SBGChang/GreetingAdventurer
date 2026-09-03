@@ -252,7 +252,9 @@ export const WORKFLOW_ENTRY = 'workflow' as const;
 export type GameCommandEntry = ModuleId | typeof WORKFLOW_ENTRY;
 
 export const GAME_COMMAND_ENTRY: Readonly<Record<GameCommandType, GameCommandEntry>> = {
-  // dungeon（僅四筆；入場／離場／採集與 NPC 流程皆未註冊，見 contracts/dungeon）
+  // dungeon（探索迴圈；採集與 NPC 流程仍未註冊，見 contracts/dungeon）
+  startPlayerExploration: 'dungeon' as ModuleId,
+  useDungeonExit: 'dungeon' as ModuleId,
   moveDungeonRoom: 'dungeon' as ModuleId,
   openDungeonDoor: 'dungeon' as ModuleId,
   interactDungeonContent: 'dungeon' as ModuleId,
@@ -299,6 +301,7 @@ export const GAME_COMMAND_ENTRY: Readonly<Record<GameCommandType, GameCommandEnt
   enterAdventureMap: 'team' as ModuleId,
   returnToCity: 'team' as ModuleId,
   beginCityFreePeriod: 'team' as ModuleId,
+  chooseCityFreeAction: 'team' as ModuleId,
   rest: 'team' as ModuleId,
   selectPlayerSuccessor: 'team' as ModuleId,
   recruitTavernAdventurer: 'team' as ModuleId,

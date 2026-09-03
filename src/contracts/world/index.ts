@@ -30,6 +30,7 @@ import type {
   WorldEventWeightModifierId,
   EntitySourceRef,
   ScheduledJobBase,
+  DisplayDefinition,
 } from '../core';
 
 // ── World 擁有但未列於 contracts/core 的 ID ────────────────────────────────
@@ -105,6 +106,9 @@ export type CityNodeDefinition = DefinitionHeader<CityId> & {
   adjacentRouteIds: readonly RouteId[];
   adventureSiteIds: readonly AdventureSiteId[];
   isCapital: boolean;
+  // 城市在世界地圖上的顯示身分。放在 city-node 而非 city：node 是「地點」本身（世界地圖的節點、
+  // 路線的端點、冒險據點的所在），city 只是城市模組掛設施與商店的那一層。
+  display: DisplayDefinition;
 };
 
 export type AdventureSiteDefinition = DefinitionHeader<AdventureSiteId> & {
@@ -112,6 +116,7 @@ export type AdventureSiteDefinition = DefinitionHeader<AdventureSiteId> & {
   accessCityId: CityId;
   mapTemplateId: MapTemplateId;
   isNationalDungeon: boolean;
+  display: DisplayDefinition;
 };
 
 export type RouteDefinition = DefinitionHeader<RouteId> & {

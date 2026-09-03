@@ -13,6 +13,7 @@ import type { GameCommandRequest } from '../../contracts/core';
 import { loadContentFromDisk } from '../../platform/content-repository';
 import { createResolverRegistry } from '../../data-runtime';
 import { createProductionContextAssembler } from '../content/context-assembler';
+import { createProductionResolverRegistry } from '../content/resolver-registrations';
 import { createNewGame, type NewGameConfig } from './new-game-bootstrap';
 import { runGameCommand } from './session';
 import type { GameCommand } from './messages';
@@ -21,17 +22,24 @@ function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
 
+// 開新遊戲需要 ResolverRegistry（世界冒險者的原型／性別／年齡／天賦由 Resolver 決定）。
+// 測試一律用**正式**註冊表，不用 stub：這條路要驗的正是「真內容 + 真 Resolver 開得起來」。
+function resolversOf(loaded: { resolverBindings: Parameters<typeof createProductionResolverRegistry>[0] }) {
+  return createProductionResolverRegistry(loaded.resolverBindings);
+}
+
 const CONTENT_ROOT = resolve(import.meta.dirname, '../../../content');
 const PLAYER_LINEAGE = 'character-archetype.core.player-lineage' as CharacterArchetypeId;
 const CAPITAL = 'city-node.yunhua.yunjing' as CityId;
 
 const CONFIG: NewGameConfig = {
   worldSeed: 'f3-vertical-slice',
-  startDay: 8000,
+  startDay: 14600,
   startingArchetypeId: PLAYER_LINEAGE,
   startCityId: CAPITAL,
   leaderSex: 'female',
-  leaderBirthDay: 0,
+  leaderBirthDay: 5475,
+  startingMoney: 500,
 };
 
 type Case = Readonly<{ name: string; run: () => void }>;
@@ -43,7 +51,7 @@ const CASES: readonly Case[] = [
       const loaded = loadContentFromDisk(CONTENT_ROOT);
       if (!loaded.success) throw new Error('內容載入失敗');
 
-      const game = createNewGame(CONFIG, loaded.registry);
+      const game = createNewGame(CONFIG, loaded.registry, resolversOf(loaded));
       assert(game.success, '開新遊戲應成功');
       if (!game.success) return;
 
@@ -84,7 +92,7 @@ const CASES: readonly Case[] = [
     run: () => {
       const loaded = loadContentFromDisk(CONTENT_ROOT);
       if (!loaded.success) throw new Error('內容載入失敗');
-      const game = createNewGame(CONFIG, loaded.registry);
+      const game = createNewGame(CONFIG, loaded.registry, resolversOf(loaded));
       if (!game.success) throw new Error('開新遊戲失敗');
       const assembler = createProductionContextAssembler(loaded.registry, createResolverRegistry());
 
@@ -110,7 +118,7 @@ const CASES: readonly Case[] = [
     run: () => {
       const loaded = loadContentFromDisk(CONTENT_ROOT);
       if (!loaded.success) throw new Error('內容載入失敗');
-      const game = createNewGame(CONFIG, loaded.registry);
+      const game = createNewGame(CONFIG, loaded.registry, resolversOf(loaded));
       if (!game.success) throw new Error('開新遊戲失敗');
       const assembler = createProductionContextAssembler(loaded.registry, createResolverRegistry());
       // 已接線的 context（team/combat/inventory）建置時會讀真實 Slice，故傳真實開局狀態；dummyRuntime
@@ -119,6 +127,7 @@ const CASES: readonly Case[] = [
       const dummyRuntime = {
         worldSeed: 'x' as never,
         worldDay: 0 as never,
+        transactionId: 'test-transaction' as never,
         ids: new Proxy({}, { get: () => ({}) }) as never,
         rng: {} as never,
         rngContextFor: () => ({}) as never,
@@ -126,8 +135,10 @@ const CASES: readonly Case[] = [
       const contexts = assembler(dummyRuntime, game.state);
       let threw = false;
       try {
-        // city 尚未接線；存取任一屬性應拋。
-        void (contexts.city as { anything?: unknown }).anything;
+        // 挑一個**目前仍未接線**的模組；存取任一屬性應拋。
+        // （city／map／dungeon 已接線，所以不能再拿它們當樣本——這個測試證的是
+        //  pending proxy 的行為，不是某個特定模組還沒做。）
+        void (contexts.crafting as { anything?: unknown }).anything;
       } catch {
         threw = true;
       }

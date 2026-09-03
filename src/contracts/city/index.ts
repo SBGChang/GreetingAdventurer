@@ -40,6 +40,7 @@ import type {
   MasteryId,
   CultureId,
   EntitySourceRef,
+  DisplayDefinition,
 } from '../core';
 
 // 跨模組外送命令：引用接收模組契約的真實型別（B.5 慣例）。
@@ -85,6 +86,14 @@ export type CityDefinition = DefinitionHeader & {
   // 那個換算（含資料上下限，doc §5.3）是資料調校，必須由 Resolver 提供；由哪一個 Resolver 提供
   // 則是城市資料的宣告。缺這個欄位時 Handler 只能自己決定增減量，而增減量是內容（規範 §3）。
   cityMetricEffectResolverId: ResolverId;
+  // 世界建立時的繁榮／安全起始值。
+  //
+  // `09_city_module.md` §3.1 說「第一版沒有數值來源時，不自行建立每日漂移公式」——那禁止的是
+  // **漂移公式**，不是起始值。起始值必須有人給：`cityPopulationReview` 拿它算冒險者供給缺口，
+  // 沒有它整座城不會有人。放在 CityDefinition 是因為它是**每座城不同的內容**（首都與邊城本來
+  // 就不該一樣），而且換一份 Pack 就該換。
+  initialProsperity: number;
+  initialSafety: number;
 };
 
 // `kind` 這個欄位名**不能**用來裝領域變體：Content Pack 的每一筆 Definition 都以 `kind` 宣告
@@ -101,6 +110,9 @@ export type CityDefinition = DefinitionHeader & {
 export type FacilityDefinition = DefinitionHeader<FacilityDefinitionId> & {
   facilityKind: FacilityKind;
   actionRuleIds: CityActionRuleId[];
+  // 設施的顯示身分。四座城的酒館可以共用同一個 nameRef（「酒館」），也可以各給一個專名——
+  // 那是內容的選擇，不是程式的。
+  display: DisplayDefinition;
   // 該設施常駐教師的熟練等級（有教師的設施才有此欄位；沒有就是這裡沒有教師）。
   // 值由內容資料提供——它決定玩家能在此學到多高，是平衡量。程式不得補預設值：缺了代表
   // 「這個設施沒有教師」，不是「教師等級未知」。

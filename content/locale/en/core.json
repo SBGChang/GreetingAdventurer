@@ -1,0 +1,9 @@
+{
+  "bundleId": "bundle.core.en",
+  "entries": {
+    "text.player-travel-mode.core.hurried.name": "Hurried",
+    "text.player-travel-mode.core.normal.name": "Normal",
+    "text.player-travel-mode.core.slow.name": "Slow"
+  },
+  "locale": "en"
+}

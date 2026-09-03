@@ -77,7 +77,13 @@ export const dungeonModuleContract: ModuleContract = {
   //（選項效果會作用到 inventory／character／world，dungeon 不得同步呼叫它們）。Workflow 驗過並
   // 派發效果後才委派 dungeon 寫自己的 Slice。§5.1 禁止一個 Game Command 同時有模組入口與
   // Workflow 入口——啟動驗證會擋下，別把它加回來。
-  handlesGameCommands: ['moveDungeonRoom', 'openDungeonDoor', 'interactDungeonContent'],
+  handlesGameCommands: [
+    'startPlayerExploration',
+    'moveDungeonRoom',
+    'openDungeonDoor',
+    'interactDungeonContent',
+    'useDungeonExit',
+  ],
   handlesInternalCommands: [],
   handlesJobs: [],
   // 本模組**會送出**的全部 Internal Command。這張表的用途是啟動時的「送出端 → Owner」交叉驗證：

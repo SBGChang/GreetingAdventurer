@@ -22,6 +22,9 @@ import type {
   QuestReactionRuleId,
   QuestRewardRuleId,
   ResolverId,
+  ResolverBinding,
+  ModuleId,
+  DefinitionHeader,
 } from '../../src/contracts/core';
 import type {
   QuestDeadlineRuleDefinition,
@@ -45,9 +48,11 @@ import type {
 import type { RewardRuleId } from '../../src/contracts/economy';
 import type { CombatPowerRuleId } from '../../src/contracts/combat-power';
 import type { DefenseMasteryRoutingRuleId } from '../../src/contracts/progression';
+import type { IntegerRangeParams } from '../../src/app/content/character-resolvers';
 import { cultureIds, type Authored, type AuthoredDomain } from '../authoring';
 
 const core = cultureIds('core');
+const QUEST_MODULE = 'quest' as ModuleId;
 
 // `ResolverId` 不是 `DefinitionId`，所以它不走 `cultureIds().id`（那支只產生
 // `<prefix>.<culture>.<local>` 的定義 ID）。Resolver 的字串形狀在既有程式裡一律是
@@ -490,6 +495,52 @@ const combatSequenceRule: Authored<CombatSequenceRuleDefinition> = {
 //     手寫它們就是製造第二份怪物經驗表，doc §2.3 明文禁止。
 //   * `effect` / `item`：crafting reader 讀得到它們，但兩者的內容擁有者分別是效果軌與物品軌。
 
+// ── 生成期 Resolver 的 params 與綁定 ────────────────────────────────────────
+//
+// 三筆「實際結束期限」的天數區間。doc §2.4 只給接取期限（14／7／14），實際結束期限寫的是
+// 「生成時以距離 RNG 一次確定」——距離模型還沒定案，所以三個區間都是
+// 【第一版方案（待討論）】，取法只有一條理由：讓每一類的完成窗口跟它的接取窗口同量級。
+//
+//   購買／送貨   14～28 日（最多相隔 2 城，來回要走；一趟旅行 3～9 日）
+//   救援／探索    7～14 日（接取窗口只有 7 日，這一類本來就急）
+//   肅清／狩獵   21～28 日（接取 14 日＋完成，對齊 41 日那句敘事的上緣）
+//
+// 兩個公會 Resolver 沒有 params：規則就是名字本身（本地城市／隨機城市），沒有可調的數字。
+const ACTUAL_END_RANGES: readonly Readonly<{ local: string; min: number; max: number }>[] = [
+  { local: 'purchase-delivery', min: 14, max: 28 },
+  { local: 'rescue-exploration', min: 7, max: 14 },
+  { local: 'suppression-hunt', min: 21, max: 28 },
+];
+
+const actualEndParams: readonly Authored<DefinitionHeader & IntegerRangeParams>[] =
+  ACTUAL_END_RANGES.map((row) => ({
+    kind: 'integer-range-params',
+    id: core.id('integer-range-params', `quest-actual-end-${row.local}`),
+    min: row.min,
+    max: row.max,
+  }));
+
+export function questGenerationBindings(): readonly ResolverBinding[] {
+  return [
+    {
+      resolverId: resolver('quest', 'guild.local-city'),
+      ownerModule: QUEST_MODULE,
+      shape: 'quest-guild:local-city',
+    },
+    {
+      resolverId: resolver('quest', 'guild.random-legal-city'),
+      ownerModule: QUEST_MODULE,
+      shape: 'quest-guild:random-city',
+    },
+    ...ACTUAL_END_RANGES.map((row, i) => ({
+      resolverId: resolver('quest', `actual-end.${row.local}`),
+      ownerModule: QUEST_MODULE,
+      shape: 'quest-actual-end:day-range',
+      paramsDefId: actualEndParams[i]!.id,
+    })),
+  ];
+}
+
 export const questCraftingSequenceDomain: AuthoredDomain = {
   domain: 'quest-crafting-sequence',
   definitions: [
@@ -497,6 +548,7 @@ export const questCraftingSequenceDomain: AuthoredDomain = {
     ...deadlineRules,
     ...rewardRules,
     ...reactionRules,
+    ...actualEndParams,
     ...craftQualityRules,
     npcCuisineDecisionRule,
     retrySupplyPolicy,

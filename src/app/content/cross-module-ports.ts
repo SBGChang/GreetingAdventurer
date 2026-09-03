@@ -16,6 +16,7 @@ import type { DungeonTeamPort } from '../../modules/dungeon/public';
 import { createTeamQuery, type TeamState } from '../../modules/team/public';
 import {
   createCharacterQuery,
+  type Character,
   type CharacterState,
   type CharacterStatsQuery,
 } from '../../modules/character/public';
@@ -33,7 +34,28 @@ import {
 } from '../../modules/inventory/public';
 import { createMapQuery, type MapState } from '../../modules/map/public';
 import type { MapDefinitionReader } from '../../contracts/map';
-import type { QuestHandlerContext } from '../../modules/quest/public';
+import type {
+  QuestGenerationContext,
+  QuestHandlerContext,
+  QuestIdAllocator,
+} from '../../modules/quest/public';
+import type { WorldDefinitionReader } from '../../contracts/world';
+import type {
+  DefinitionRegistry,
+  ResolverContext,
+  ResolverRegistry,
+} from '../../data-runtime';
+import type {
+  CityId,
+  DeterministicRng,
+  MapInstanceId,
+  ResolverId,
+  RngContext,
+  RngCursor,
+  RngStep,
+} from '../../contracts/core';
+import { narrowedDomainReader } from './reader-adapter';
+import { runResolver, resolverContext } from './resolver-adapter';
 import type { QuestDefinitionReader } from '../../contracts/quest';
 import { createCharacterStatisticsCalculator, type StatisticsResolverPort } from '../../domain-services/statistics/public';
 import type {
@@ -180,9 +202,10 @@ export function createCharacterStatsQuery(deps: CharacterStatsQueryDeps): Charac
     resolvers: deps.statisticsResolvers,
   });
 
-  return {
-    getStats: (id: CharacterId) => {
-      const character = characterQuery.getCharacter(id);
+  // 兩個入口共用同一條算式；差別只有「角色從哪裡來」——已在 Slice 裡的用 id 查，
+  // 還沒進 Slice 的（生成／出生）直接把草稿傳進來。
+  const statsOf = (character: Character) => {
+      const id = character.characterId;
       const loadout = inventoryQuery.getEquipmentLoadout(id);
       const equipmentDefinitionViews = collectEquippedEquipmentViews(
         loadout,
@@ -195,7 +218,9 @@ export function createCharacterStatsQuery(deps: CharacterStatsQueryDeps): Charac
       const input: CharacterStatisticsInput = {
         characterId: id,
         characterRevision: character.revision,
-        ageDays: characterQuery.getAgeDays(id, deps.worldDay),
+        // 年齡直接由草稿的出生日算：`characterQuery.getAgeDays` 要角色已在 Slice 裡，
+        // 而這條路徑同時服務「還沒進 Slice 的草稿」。
+        ageDays: Number(deps.worldDay) - Number(character.birthDay),
         reputation: character.reputation,
         // 主屬真相在 progression（由熟練度推導）；getPrimaryAttributes 已含「無進度 → 全 0」的投影。
         primaryAttributesFromMastery: progressionQuery.getPrimaryAttributes(id),
@@ -211,7 +236,11 @@ export function createCharacterStatsQuery(deps: CharacterStatsQueryDeps): Charac
       };
       const snapshot = calculator.calculate(input);
       return { maxHealth: snapshot.maxHealth, maxMana: snapshot.maxMana };
-    },
+  };
+
+  return {
+    getStats: (id: CharacterId) => statsOf(characterQuery.getCharacter(id)),
+    getStatsForCharacter: (character: Character) => statsOf(character),
   };
 }
 
@@ -334,6 +363,73 @@ export type QuestContextDeps = Readonly<{
   characterState: CharacterState;
   worldDay: WorldDay;
 }>;
+
+// 生成期的擴充 Context：多了鑄 QuestId、擲骰、以及兩個生成 Resolver（公會城市／實際結束天數）。
+// 兩個 Resolver 需要的世界事實（地圖 → 城市、有哪些城市）在這裡以唯讀 Query 注入，
+// 於是 Resolver 自己不必認識 world Slice。
+export type QuestGenerationContextDeps = QuestContextDeps &
+  Readonly<{
+    registry: DefinitionRegistry;
+    resolvers: ResolverRegistry;
+    world: WorldDefinitionReader;
+    ids: QuestIdAllocator;
+    rng: DeterministicRng;
+    rngContext: RngContext;
+  }>;
+
+export function createQuestGenerationContext(
+  deps: QuestGenerationContextDeps,
+): QuestGenerationContext {
+  const base = createQuestContext(deps);
+  const rangeParams = narrowedDomainReader<{ min: number; max: number }>(
+    deps.registry,
+    'reader:quest.integer-range-params',
+    ['integer-range-params'],
+  );
+  // 地圖實例 → 它的冒險據點 → 據點所屬城市。三段都是既有事實的投影，不新增第二份歸屬。
+  const guildQueries = {
+    getCityOfMap: (mapId: MapInstanceId): CityId | undefined => {
+      const instance = deps.mapState.instances[mapId];
+      if (instance === undefined) return undefined;
+      return deps.world.getAdventureSite(instance.adventureSiteId).accessCityId;
+    },
+    // 依 id 排序：「隨機挑一座城」必須是決定性的，而 registry 的列舉順序不是契約。
+    listCityIds: (): readonly CityId[] =>
+      deps.registry
+        .list({ kinds: ['city-node'] })
+        .map((d) => d.id as CityId)
+        .slice()
+        .sort((a, b) => String(a).localeCompare(String(b))),
+  };
+  const ctxFor = (rngContext: RngContext): ResolverContext =>
+    resolverContext({
+      definitions: { getIntegerRangeParams: (id: string) => rangeParams.get(id as never) },
+      queries: guildQueries,
+      rng: deps.rng,
+      rngContext,
+    });
+  const step = <T>(resolverId: ResolverId, input: object, rngContext: RngContext): RngStep<T> => {
+    const result = runResolver<T>(deps.resolvers, resolverId, input, ctxFor(rngContext));
+    if (result.nextRngCursor === undefined) {
+      throw new Error(
+        `quest-generation：Resolver "${String(resolverId)}" 沒有回傳 nextRngCursor——` +
+          `同一次生成的連續抽取會全部落在同一格。`,
+      );
+    }
+    return { value: result.value, nextCursor: result.nextRngCursor as RngCursor };
+  };
+
+  return {
+    ...base,
+    ids: deps.ids,
+    rng: deps.rng,
+    rngContext: deps.rngContext,
+    resolvers: {
+      resolveGuildCity: (input) => step<CityId>(input.resolverId, { mapId: input.mapId }, input.rngContext),
+      resolveActualEndDays: (input) => step<number>(input.resolverId, {}, input.rngContext),
+    },
+  };
+}
 
 export function createQuestContext(deps: QuestContextDeps): QuestHandlerContext {
   const teamQuery = createTeamQuery(deps.teamState);

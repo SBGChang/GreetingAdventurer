@@ -47,8 +47,10 @@ import type {
   SelectPlayerSuccessorCommand,
   RecruitTavernAdventurerCommand,
   ConfigureCombatFormationCommand,
+  ChooseCityFreeActionCommand,
   // Job / internal payloads
   TeamPlanDueJob,
+  FreeActionDueJob,
   TeamModuleId,
   StartReturnFromDungeonPayload,
   StartNpcTeamPlanPayload,
@@ -63,6 +65,8 @@ import type {
   TeamMemberDepartedEvent,
   TeamCombatFormationChangedEvent,
   HomeYearRestCompletedEvent,
+  FreeActionCompletedEvent,
+  FreeActionChangedEvent,
   // Support types
   TeamLocation,
   TeamPlanPayload,
@@ -70,11 +74,13 @@ import type {
   StartNpcDungeonRunPayload,
 } from '../../contracts/team';
 import type { GridCell } from '../../contracts/map';
+import type { FacilityKind } from '../../contracts/city';
 
 import type {
   Team,
   TeamState,
   TeamPlan,
+  MemberFreeAction,
   TeamCombatFormation,
   PendingSuccession,
 } from './state';
@@ -85,6 +91,7 @@ import {
   upsertTeam,
   removeTeam,
   upsertPlan,
+  upsertFreeAction,
   upsertFormation,
   upsertRetention,
   setPendingSuccession,
@@ -149,6 +156,15 @@ export interface TeamCombatStatusQuery {
   hasActiveEncounter(teamId: TeamId): boolean;
 }
 
+// 窄化跨模組 Query Port：這座城市有沒有一間**營業中**的該種設施。
+//
+// 為什麼是 Port：設施清單與營業狀態的擁有者是 city（`CityDefinition.facilityIds` ＋
+// `CityRuntimeState` 的可用性）。team 自己抄一份就會有第二個真相，而且城市關店時不會同步。
+// 窄到只回一個布林——team 不需要知道是哪一間，只需要知道「這件事在這座城做不做得成」。
+export interface TeamCityFacilityQuery {
+  hasOpenFacilityKind(cityId: CityId, kind: FacilityKind): boolean;
+}
+
 // 資料調諧 Resolver（RNG 藏於其內；Handler 不含機率/公式，只消費結果）。
 // 擲骰型方法回傳 RngStep<boolean>（value=判定、nextCursor=續接游標），呼叫端須把 nextCursor 顯式串接到
 // 下一次抽取（見 12_engine_runtime.md §7.1、settleRetentionAndDepartures 的離隊迴圈）。只回 boolean 會丟失
@@ -193,6 +209,8 @@ export type TeamHandlerContext = Readonly<{
   world: TeamWorldReader;
   // 戰鬥狀態（combat 擁有的事實）。必填：選填等於「沒注入就跳過檢查」，那正是這次要修掉的洞。
   combat: TeamCombatStatusQuery;
+  // 城市設施（city 擁有的事實）。自由行動的設施門檻（`requiresCityFacilityKind`）要問它。
+  city: TeamCityFacilityQuery;
   ids: TeamIdAllocator;
   resolvers: TeamResolverPort;
   rngContext?: RngContext;
@@ -213,7 +231,9 @@ export type TeamDomainEvent =
   | TeamMemberJoinedEvent
   | TeamMemberDepartedEvent
   | TeamCombatFormationChangedEvent
-  | HomeYearRestCompletedEvent;
+  | HomeYearRestCompletedEvent
+  | FreeActionCompletedEvent
+  | FreeActionChangedEvent;
 
 // 輸出 Internal Command（唯一處理者：dungeon）。
 export type StartNpcDungeonRunCommand = StartNpcDungeonRunPayload;
@@ -335,7 +355,9 @@ export function handleStartCityTravel(
   };
   const nextTeam: Team = { ...team, location: to, activePlanId: planId, revision: bump(team.revision) };
 
-  let next = upsertPlan(state, plan);
+  // 離開 cityFree：先把已取得的自由日寫進累積再凍結（doc §3.5 不變量 3）。
+  let next = freezeFreeActions(state, team.teamId, ctx.worldDay);
+  next = upsertPlan(next, plan);
   next = upsertTeam(next, nextTeam);
 
   const locationChanged: TeamLocationChangedEvent = { type: 'TeamLocationChanged', teamId: team.teamId, from: team.location, to };
@@ -384,7 +406,8 @@ export function handleEnterAdventureMap(
     payload: { kind: 'enterAdventureMap', adventureSiteId: cmd.adventureSiteId, mapId },
     revision: 0 as Revision,
   };
-  let next = upsertPlan(state, plan);
+  let next = freezeFreeActions(state, team.teamId, ctx.worldDay);
+  next = upsertPlan(next, plan);
   next = upsertTeam(next, { ...team, activePlanId: planId, revision: bump(team.revision) });
   return accept(next, [], [planDueJob(team.teamId, planId, dueDay, plan.revision)]);
 }
@@ -488,7 +511,9 @@ export function handleRest(
         : { kind: 'cityFacilityAction', facilityKind: 'inn' },
     revision: 0 as Revision,
   };
-  let next = upsertPlan(state, plan);
+  // 休息也是「離開 cityFree」：訓練照樣凍結，不歸零（doc §3.5 不變量 3）。
+  let next = freezeFreeActions(state, team.teamId, ctx.worldDay);
+  next = upsertPlan(next, plan);
   next = upsertTeam(next, { ...team, activePlanId: planId, revision: bump(team.revision) });
   return accept(next, [], [planDueJob(team.teamId, planId, dueDay, plan.revision)]);
 }
@@ -797,7 +822,235 @@ export function handleBeginCityFreePeriod(
   };
   next = upsertPlan(next, plan);
   next = upsertTeam(next, { ...currentTeam, activePlanId: planId, revision: bump(currentTeam.revision) });
-  return accept(next, settled.events, []);
+  // 回到 cityFree：恢復被凍結的未完成行動，從次日繼續累積（doc §3.5 不變量 4）。
+  const thawed = thawFreeActions(next, team.teamId, ctx.worldDay);
+  return accept(thawed.next, settled.events, thawed.jobs);
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// 5.1 玩家 Command — 選擇個人自由行動（doc §4「chooseCityFreeAction」）
+// ──────────────────────────────────────────────────────────────────────────
+//
+// 自由日的算法（doc §3.5 不變量 6：「新抽出的自由行動最早從次日開始累積」）：
+//   activeSinceDay = 今日 + 1          ← 第一個計入的自由日
+//   nextDueDay     = activeSinceDay + (requiredFreeDays − accumulatedFreeDays) − 1
+// 於是 28 日訓練在今日 D 選定時，D+28 到期，中間恰好 28 個自由日。
+//
+// 三種形狀對應三種 `requiredFreeDays`（doc §2.3）：
+//   * 有天數（craft/train/teach）→ status 'active' ＋ 一支 freeActionDue Job。
+//   * 不填（tavernVisit/rest）  → status 'resting'，不排 Job（不變量 5）。
+//   * 明寫 0（trade/proposeToTeammate）→ NPC 的零日子步驟，玩家入口一律拒絕（doc §3.3/§7.2）。
+export function handleChooseCityFreeAction(
+  state: TeamState,
+  cmd: ChooseCityFreeActionCommand,
+  ctx: TeamHandlerContext,
+): TeamHandlerResult {
+  const team = tryGetTeam(state, state.playerTeamId);
+  if (team === undefined) return reject('team/unknown-player-team');
+  const cityId = cityOf(team.location);
+  if (cityId === undefined) return reject('team/not-in-city');
+
+  // 不變量 1：只有 active plan 為 cityFree 時才累積自由日。
+  const plan = team.activePlanId === undefined ? undefined : tryGetPlan(state, team.activePlanId);
+  if (plan === undefined || plan.status !== 'active' || plan.kind !== 'cityFree') {
+    return reject('team/not-in-city-free-period');
+  }
+  if (!team.memberIds.includes(cmd.memberId)) {
+    return reject('team/not-a-formal-member', { memberId: String(cmd.memberId) });
+  }
+  // 不變量 2：一名成員同時最多一筆 active/resting 的自由行動。
+  const existing = Object.values(state.freeActions).find(
+    (f) => f.memberId === cmd.memberId && (f.status === 'active' || f.status === 'resting'),
+  );
+  if (existing !== undefined) {
+    return reject('team/free-action-in-progress', { freeActionId: String(existing.freeActionId) });
+  }
+
+  const rule = ctx.definitions.getFreeActionRule(cmd.ruleId);
+  if (rule.freeActionKind !== cmd.payload.kind) {
+    return reject('team/free-action-payload-kind-mismatch', {
+      ruleKind: rule.freeActionKind,
+      payloadKind: cmd.payload.kind,
+    });
+  }
+  // 設施門檻由規則宣告；城市有沒有那種設施是 city 的事實，經窄化 Port 詢問。
+  if (
+    rule.requiresCityFacilityKind !== undefined &&
+    !ctx.city.hasOpenFacilityKind(cityId, rule.requiresCityFacilityKind)
+  ) {
+    return reject('team/free-action-facility-not-available', {
+      cityId: String(cityId),
+      facilityKind: rule.requiresCityFacilityKind,
+    });
+  }
+  // 鍛鍊的可選項目由規則自己列出（見 contracts/team 的 trainableMasteryIds）。
+  if (cmd.payload.kind === 'train') {
+    const trainable = rule.trainableMasteryIds;
+    const masteryId = cmd.payload.masteryId;
+    if (trainable === undefined || !trainable.includes(masteryId)) {
+      return reject('team/free-action-mastery-not-trainable', {
+        ruleId: String(cmd.ruleId),
+        masteryId: String(masteryId),
+      });
+    }
+  }
+
+  const required = rule.requiredFreeDays;
+  if (required !== undefined && required <= 0) {
+    // 零日子步驟由 NPC Behavior 經 AssignNpcMemberFreeAction 建立，不是玩家的選單項目。
+    return reject('team/free-action-zero-day-not-player-selectable', { ruleId: String(cmd.ruleId) });
+  }
+
+  const freeActionId = ctx.ids.nextFreeActionId();
+  if (required === undefined) {
+    // 可持續的被動選項：不累積、不排 Job（不變量 5）。
+    const passive: MemberFreeAction = {
+      freeActionId,
+      teamId: team.teamId,
+      memberId: cmd.memberId,
+      ruleId: cmd.ruleId,
+      status: 'resting',
+      accumulatedFreeDays: 0,
+      payload: cmd.payload,
+      revision: 0 as Revision,
+    };
+    return accept(upsertFreeAction(state, passive), [emit(freeActionChangedEvent(passive))], []);
+  }
+
+  const activeSinceDay = (ctx.worldDay + 1) as WorldDay;
+  const nextDueDay = (activeSinceDay + required - 1) as WorldDay;
+  const action: MemberFreeAction = {
+    freeActionId,
+    teamId: team.teamId,
+    memberId: cmd.memberId,
+    ruleId: cmd.ruleId,
+    status: 'active',
+    requiredFreeDays: required,
+    accumulatedFreeDays: 0,
+    activeSinceDay,
+    nextDueDay,
+    payload: cmd.payload,
+    revision: 0 as Revision,
+  };
+  return accept(
+    upsertFreeAction(state, action),
+    [emit(freeActionChangedEvent(action))],
+    [freeActionDueJob(team.teamId, action, nextDueDay)],
+  );
+}
+
+// 自由行動到期 → 完成。MXP／成品由訂閱 FreeActionCompleted 的模組套用；Team 只管時間進度
+// （doc §2.3「28 日傳授／訓練的 MXP 計算屬 progression；Team 只追蹤其時間進度」）。
+export function handleFreeActionDueJob(
+  state: TeamState,
+  job: FreeActionDueJob,
+): ModuleResult<TeamState> {
+  const noop: ModuleResult<TeamState> = { nextSlice: state, outgoingMessages: [], scheduledJobs: [] };
+  const action = state.freeActions[job.payload.freeActionId];
+  if (action === undefined) return noop;
+  if (action.status !== 'active') return noop;
+  // 凍結（見 freezeFreeActions）會遞增 revision，於是舊 Job 走到這裡安全跳過——
+  // 這與 teamPlanDue 的處理一致（doc §5.2）。
+  if (job.expectedRevision !== undefined && action.revision !== job.expectedRevision) return noop;
+
+  const completed: MemberFreeAction = {
+    ...action,
+    status: 'completed',
+    accumulatedFreeDays: action.requiredFreeDays ?? action.accumulatedFreeDays,
+    activeSinceDay: undefined,
+    nextDueDay: undefined,
+    revision: bump(action.revision),
+  };
+  const event: FreeActionCompletedEvent = {
+    type: 'FreeActionCompleted',
+    teamId: action.teamId,
+    memberId: action.memberId,
+    ruleId: action.ruleId,
+    payload: action.payload,
+  };
+  return {
+    nextSlice: upsertFreeAction(state, completed),
+    outgoingMessages: [emit(event), emit(freeActionChangedEvent(completed))],
+    scheduledJobs: [],
+  };
+}
+
+// ── 凍結／解凍（doc §3.5 不變量 3、4）──────────────────────────────────────
+//
+// 離開 cityFree 時把「已實際取得的自由日」寫進 accumulatedFreeDays 再凍結；一般行程切換
+// 不取消、不歸零。revision 遞增讓已排出的到期 Job 自然失效（不需要「取消 Job」這個能力）。
+function freezeFreeActions(state: TeamState, teamId: TeamId, onDay: WorldDay): TeamState {
+  let next = state;
+  for (const action of Object.values(state.freeActions)) {
+    if (action.teamId !== teamId) continue;
+    if (action.status !== 'active') continue;
+    const since = action.activeSinceDay;
+    if (since === undefined) continue;
+    // 今天已經不是自由日（新行程今天開始），所以只計到昨天為止。
+    const gained = Math.max(0, onDay - since);
+    next = upsertFreeAction(next, {
+      ...action,
+      accumulatedFreeDays: action.accumulatedFreeDays + gained,
+      activeSinceDay: undefined,
+      nextDueDay: undefined,
+      revision: bump(action.revision),
+    });
+  }
+  return next;
+}
+
+// 回到 cityFree：恢復同一筆未完成行動，從次日繼續累積到 requiredFreeDays。
+function thawFreeActions(
+  state: TeamState,
+  teamId: TeamId,
+  onDay: WorldDay,
+): Readonly<{ next: TeamState; jobs: readonly ScheduledJobDraft<AnyScheduledJob>[] }> {
+  let next = state;
+  const jobs: ScheduledJobDraft<AnyScheduledJob>[] = [];
+  for (const action of Object.values(state.freeActions)) {
+    if (action.teamId !== teamId) continue;
+    if (action.status !== 'active') continue;
+    if (action.activeSinceDay !== undefined) continue; // 沒被凍結
+    const required = action.requiredFreeDays;
+    if (required === undefined) continue;
+    const remaining = Math.max(1, required - action.accumulatedFreeDays);
+    const activeSinceDay = (onDay + 1) as WorldDay;
+    const nextDueDay = (activeSinceDay + remaining - 1) as WorldDay;
+    const resumed: MemberFreeAction = {
+      ...action,
+      activeSinceDay,
+      nextDueDay,
+      revision: bump(action.revision),
+    };
+    next = upsertFreeAction(next, resumed);
+    jobs.push(freeActionDueJob(teamId, resumed, nextDueDay));
+  }
+  return { next, jobs };
+}
+
+function freeActionDueJob(
+  teamId: TeamId,
+  action: MemberFreeAction,
+  dueDay: WorldDay,
+): ScheduledJobDraft<AnyScheduledJob> {
+  const draft: ScheduledJobDraft<FreeActionDueJob> = {
+    type: 'freeActionDue',
+    dueDay,
+    ownerModule: TEAM_OWNER_MODULE,
+    targetId: teamId,
+    expectedRevision: action.revision,
+    payload: { freeActionId: action.freeActionId, memberId: action.memberId },
+  };
+  return draft;
+}
+
+function freeActionChangedEvent(action: MemberFreeAction): FreeActionChangedEvent {
+  return {
+    type: 'FreeActionChanged',
+    freeActionId: action.freeActionId,
+    status: action.status,
+    progress: action.accumulatedFreeDays,
+  };
 }
 
 // 留隊判定（doc §6.1）：入隊滿指定日數的非隊長正式成員，依 workNet 擲離隊骰。

@@ -13,16 +13,20 @@ import { runTests as composition } from '../src/app/composition/composition.test
 import { runTests as transactionWiring } from '../src/app/composition/transaction.test';
 import { runTests as engineSession } from '../src/app/composition/session.test';
 import { runTests as dungeonReader } from '../src/app/content/dungeon-reader.test';
+import { runTests as localization } from '../src/data-runtime/localization.test';
 import { runTests as moduleReaders } from '../src/app/content/readers.test';
 import { runTests as resolvers } from '../src/app/content/resolvers.test';
 // F3：Resolver 綁定 spine——內容宣告 binding → pack.json → 載入器匯總 → registry（含真實內容路徑）。
 import { runTests as resolverRegistrations } from '../src/app/content/resolver-registrations.test';
 // F3：combat resolver bridge——真實內容傷害 params 一路算成傷害數字（整合塊第一塊端到端證據）。
 import { runTests as combatResolverBridge } from '../src/app/content/combat-resolver-bridge.test';
+import { runTests as combatAiResolvers } from '../src/app/content/combat-ai-resolvers.test';
 // F3：派生統計引擎端到端——真實內容 params → registry → StatisticsResolverPort bridge → BM 值。
 import { runTests as statisticsResolverBridge } from '../src/app/content/statistics-resolver-bridge.test';
 // F3：live 戰鬥接線端到端——真實開局狀態 → ContextAssembler combat context → 隊長引擎上限 HP + 真實遭遇組開場。
 import { runTests as liveCombatWiring } from '../src/app/content/live-combat-wiring.test';
+import { runTests as localizationWiring } from '../src/app/content/localization-wiring.test';
+import { runTests as dungeonWiring } from '../src/app/content/dungeon-wiring.test';
 import { runTests as crossModulePorts } from '../src/app/content/cross-module-ports.test';
 // 正式 Content Pack 端到端：磁碟 JSON → ContentRepository → Registry → 窄化 Reader → 模組純函式。
 import { runTests as contentPackIntegration } from '../src/app/content/content-pack-integration.test';
@@ -83,6 +87,7 @@ const throwing: ReadonlyArray<readonly [string, () => void]> = [
   ],
   // data-runtime 載入器：Manifest／Pack 標頭（§8）、重複 ID、循環相依、壞 header 的失敗路徑。
   ['data-runtime content-pack', contentPackLoader],
+  ['data-runtime localization', localization],
   ['character', character],
   ['inventory', inventory],
   ['map', map],
@@ -104,8 +109,11 @@ const throwing: ReadonlyArray<readonly [string, () => void]> = [
   ['resolvers', resolvers],
   ['resolver-registrations', resolverRegistrations],
   ['combat-resolver-bridge', combatResolverBridge],
+  ['combat-ai-resolvers', combatAiResolvers],
   ['statistics-resolver-bridge', statisticsResolverBridge],
   ['live-combat-wiring', liveCombatWiring],
+  ['localization-wiring', localizationWiring],
+  ['dungeon-wiring', dungeonWiring],
   // content：真實跨模組 Query Port adapter（讀真實 sibling Slice，取代 fixture stub）。
   ['cross-module-ports', crossModulePorts],
   // Wave D：9 個補齊的模組。每一支都在自己的目錄內完成，測試由該模組自己持有。

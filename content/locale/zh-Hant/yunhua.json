@@ -1,0 +1,30 @@
+{
+  "bundleId": "bundle.yunhua.zh-Hant",
+  "entries": {
+    "text.adventure-site.yunhua.calendar-court-ruin.name": "司曆殘院",
+    "text.adventure-site.yunhua.cinnabar-ridge.name": "朱砂斷嶺",
+    "text.adventure-site.yunhua.hanging-spring-grotto.name": "懸泉石窟",
+    "text.adventure-site.yunhua.mist-bamboo-valley.name": "霧篁藥谷",
+    "text.adventure-site.yunhua.old-canal-sunken-store.name": "舊漕渠與沉倉",
+    "text.adventure-site.yunhua.old-kiln-flue.name": "古窯火道",
+    "text.adventure-site.yunhua.salt-well-cellar.name": "鹽井封窖",
+    "text.adventure-site.yunhua.seal-tower.name": "天衡印塔",
+    "text.adventure-site.yunhua.tidal-reed-isle.name": "潮生蘆洲",
+    "text.city-node.yunhua.chengpu.name": "澄浦城",
+    "text.city-node.yunhua.chiling.name": "赤嶺城",
+    "text.city-node.yunhua.qingcen.name": "青岑城",
+    "text.city-node.yunhua.yunjing.name": "雲京",
+    "text.facility-kind.yunhua.adventure-checkpoint.name": "冒險者關卡",
+    "text.facility-kind.yunhua.adventurer-guild.name": "冒險者公會",
+    "text.facility-kind.yunhua.bookstore.name": "書店",
+    "text.facility-kind.yunhua.city-gate.name": "城門口",
+    "text.facility-kind.yunhua.equipment-shop.name": "裝備店",
+    "text.facility-kind.yunhua.home.name": "家",
+    "text.facility-kind.yunhua.inn.name": "旅館",
+    "text.facility-kind.yunhua.item-shop.name": "道具店",
+    "text.facility-kind.yunhua.tavern.name": "酒館",
+    "text.facility-kind.yunhua.training-ground.name": "訓練所",
+    "text.nation.yunhua.name": "雲華"
+  },
+  "locale": "zh-Hant"
+}

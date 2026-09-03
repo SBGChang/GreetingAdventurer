@@ -25,6 +25,7 @@ import type {
   AdventureSiteId,
   EncounterGroupDefinitionId,
   ContentEventDefinitionId,
+  ContentEventInstanceId,
   DefinitionId,
   ContentPackId,
   Revision,
@@ -163,6 +164,7 @@ export const SPAWN_RULE: MapSpawnRuleDefinition = {
   schemaVersion: 1,
   packId: PACK_ID,
   enabled: true,
+  contentTier: 1,
   localCultureContentRuleId: LOCAL_CULTURE_RULE_ID,
   humanCultureContentRuleId: HUMAN_CULTURE_RULE_ID,
   chestPoolId: CHEST_POOL_ID,
@@ -260,6 +262,15 @@ export function stubDefinitionReader(
   return {
     getMapTemplate: () => TEMPLATE,
     getMapSpawnRule: () => overrides.spawnRule ?? SPAWN_RULE,
+    getCultureContentRule: (id) => ({
+      id,
+      schemaVersion: 1,
+      packId: PACK_ID,
+      enabled: true,
+      cultureId: 'culture.fixture' as CultureId,
+      speciesKind: 'nonHuman',
+      candidates: [],
+    }),
     getNpcSequenceRule: () => overrides.npcSequenceRule ?? stubNpcSequenceRule(),
     getContentDefinition: (id): MapContentDefinition => {
       const def = definitions[id];
@@ -322,6 +333,8 @@ export function makeIdAllocator(prefix = 'gen'): MapIdAllocator {
   return {
     nextContentInstanceId: () => next('content') as ContentInstanceId,
     nextMapRefreshLockId: () => next('lock') as MapRefreshLockId,
+    nextMapInstanceId: () => next('map') as MapInstanceId,
+    nextContentEventInstanceId: () => next('event-instance') as ContentEventInstanceId,
   };
 }
 
@@ -372,7 +385,12 @@ const SPAWN_DRAFT_BY_KIND: Readonly<Record<MapContentKind, SpawnDraft>> = {
   chest: { definitionId: CHEST_CONTENT_DEF_ID, payload: { kind: 'chest', itemIds: [] } },
   mapEvent: {
     definitionId: EVENT_CONTENT_DEF_ID,
-    payload: { kind: 'mapEvent', contentEventDefinitionId: EVENT_DEF_ID },
+    payload: {
+      kind: 'mapEvent',
+      contentEventDefinitionId: EVENT_DEF_ID,
+      eventInstanceId: 'fixture-event-instance' as ContentEventInstanceId,
+      rngStreamId: 'fixture-event-stream' as RngStreamId,
+    },
   },
   kidnap: {
     definitionId: KIDNAP_CONTENT_DEF_ID,

@@ -3,7 +3,28 @@
     "pack:core",
     "pack:yunhua"
   ],
-  "localizationBundles": [],
+  "localizationBundles": [
+    {
+      "bundleId": "bundle.core.zh-Hant",
+      "contentRoot": "locale/zh-Hant",
+      "locale": "zh-Hant"
+    },
+    {
+      "bundleId": "bundle.core.en",
+      "contentRoot": "locale/en",
+      "locale": "en"
+    },
+    {
+      "bundleId": "bundle.yunhua.zh-Hant",
+      "contentRoot": "locale/zh-Hant",
+      "locale": "zh-Hant"
+    },
+    {
+      "bundleId": "bundle.yunhua.en",
+      "contentRoot": "locale/en",
+      "locale": "en"
+    }
+  ],
   "manifestVersion": "1.0.0",
   "packs": [
     {

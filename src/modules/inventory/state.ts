@@ -72,6 +72,15 @@ export type InventoryState = Readonly<{
 }>;
 
 // 初始工廠：空 slice。
+// 由既有實體集合建構 Slice（世界建立時的城市永久庫存；fixture／存檔載入同法）。
+export function createInventoryState(
+  input: Readonly<{ items?: readonly ItemInstance[] }> = {},
+): InventoryState {
+  const items: Record<ItemInstanceId, ItemInstance> = {};
+  for (const item of input.items ?? []) items[item.itemId] = item;
+  return { ...createInitialInventoryState(), items };
+}
+
 export function createInitialInventoryState(): InventoryState {
   return {
     items: {},

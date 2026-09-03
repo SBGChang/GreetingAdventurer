@@ -40,6 +40,7 @@ import type {
   JsonScalar,
   WorldDay,
   Revision,
+  DisplayDefinition,
 } from '../core';
 import type { DefinitionHeader, ScheduledJobBase } from '../core';
 
@@ -96,6 +97,8 @@ export type TeamPlanRuleDefinition = DefinitionHeader & {
 
 // ── 玩家／NPC 旅行規則 ──────────────────────────────────────────────────
 export type PlayerTravelModeDefinition = DefinitionHeader & {
+  // 玩家在城門口看到的選項名稱（趕路／正常／慢行）。是玩家面向的文字，故走本地化引用。
+  display: DisplayDefinition;
   durationDays: 3 | 6 | 9;
   segments: [number, number, number]; // 1/1/1、2/2/2、3/3/3
   travelExperienceRuleId: ExperienceAwardRuleId;
@@ -127,6 +130,16 @@ export type FreeActionRuleDefinition = DefinitionHeader & {
   completionResolverId?: ResolverId;
   requiresCityFacilityKind?: FacilityKind;
   npcMarriageRuleId?: NpcMarriageRuleId;
+  // `train` 專用：這條規則能鍛鍊哪些熟練度。
+  //
+  // 為什麼在規則上而不是在熟練度上：可鍛鍊的地點是**規則**的事（GDD §建築表把戰鬥與魔法放在
+  // 訓練所、生活技藝放在道具店、鍛冶與裁縫放在裝備店），所以「哪個設施、練哪幾項」是同一句
+  // 宣告的兩半，拆開就會出現一個設施允許、另一個否認的矛盾。Team 讀得到這一筆，因此
+  // `chooseCityFreeAction` 當場就能拒絕不可鍛鍊的項目，不必等 28 日後才在別的模組炸開。
+  //
+  // 只有 `freeActionKind: 'train'` 得填；其他種類填了即為資料錯誤（由編譯期作者型別與
+  // Handler 的 typed rejection 兩邊擋）。
+  trainableMasteryIds?: readonly MasteryId[];
 };
 
 export type RecentActivityRuleDefinition = DefinitionHeader & {
@@ -431,12 +444,13 @@ export type ConfigureCombatFormationCommand = Readonly<{
   placements: Readonly<Record<CharacterId, GridCell>>;
 }>;
 
-// 尚未註冊：chooseCityFreeAction、dismissMember（兩者 Handler 皆未撰寫）。
+// 尚未註冊：dismissMember（Handler 未撰寫）。
 export type TeamGameCommand =
   | StartCityTravelCommand
   | EnterAdventureMapCommand
   | ReturnToCityCommand
   | BeginCityFreePeriodCommand
+  | ChooseCityFreeActionCommand
   | RestCommand
   | SelectPlayerSuccessorCommand
   | RecruitTavernAdventurerCommand
@@ -471,9 +485,9 @@ export type NonPlayerMemberCityFreeDayTickJob = ScheduledJobBase<
   NonPlayerMemberCityFreeDayTickJobPayload
 >;
 
-// 只列**已實作**的 Job。尚未註冊：freeActionDue、nonPlayerMemberCityFreeDayTick
+// 只列**已實作**的 Job。尚未註冊：nonPlayerMemberCityFreeDayTick
 // （team 宣告處理，Handler 未撰寫）。
-export type TeamScheduledJob = TeamPlanDueJob;
+export type TeamScheduledJob = TeamPlanDueJob | FreeActionDueJob;
 
 // ── Internal Command payload（inbound；欄位依 prose 推導）─────────────────
 export type StartReturnFromDungeonPayload = Readonly<{

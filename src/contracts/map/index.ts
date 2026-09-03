@@ -34,8 +34,11 @@ import type {
   MapRefreshLockId,
   GatheringResolutionId,
   EncounterGroupDefinitionId,
+  CultureId,
   ItemInstanceId,
   ContentEventDefinitionId,
+  ContentEventInstanceId,
+  RngStreamId,
   CharacterArchetypeId,
   AssetDistributionId,
   NpcDungeonRunId,
@@ -45,6 +48,8 @@ import type {
 
 // 跨模組引用：NPC 地牢結算命令需引用 Dungeon 的暫存結果。
 import type { PendingDungeonResult } from '../dungeon';
+// 文化內容池的候選分類直接引用 combat 擁有的怪物分級型別（不另行複寫字面聯集）。
+import type { MonsterSpeciesKind, MonsterThreatRank } from '../combat';
 
 // ──────────────────────────────────────────────────────────────────────────
 // 共用列舉／位置基元
@@ -140,8 +145,38 @@ export type SpawnBudgetDefinition = Readonly<{
   maxCount: number;
 }>;
 
+// 內容分級。`yunhua_content.md` §7.2 用「Tier I／Tier II」分組怪物、§7.4 給每張圖一個 Tier，
+// 並明文「地圖只限制 Tier、威脅、體型與槽位」。先前契約沒有這個欄位，於是分級只能靠
+// `experienceProfileId` 的 local 名（`tier1-normal`…）間接表達——那是從 ID 字串反推內容分類，
+// 規範明文禁止。這裡把它補成正式欄位（§7 的 Schema 補齊）。
+export type ContentTier = 1 | 2;
+
+// 文化內容池（`yunhua_content.md` §7.2／§7.3）。
+//
+// 它是**地圖挑遭遇時的候選目錄**：地圖不擁有怪種名單（§4「不建立地圖專屬怪種 Pool」），
+// 只宣告槽位與 Tier；實際可選的怪由文化池提供，而人類池會在該地區被他國佔領時整池替換
+//（§7.3），所以人類與非人類是兩筆獨立的池。
+//
+// 每一筆候選自帶 `tier` 與 `threatRank`：這張表就是「挑選用的索引」，自帶分類才能讓 Resolver
+// 只讀這一個 Reader 就選得出來，不必回頭去讀每隻怪的定義（跨模組讀取）。兩者與 encounter group
+// 成員的實際分級是否一致，由內容驗證器交叉比對，不由 Resolver 執行期推論。
+export type CultureContentCandidate = Readonly<{
+  encounterGroupId: EncounterGroupDefinitionId;
+  tier: ContentTier;
+  threatRank: MonsterThreatRank;
+}>;
+
+export type CultureContentRuleDefinition = DefinitionHeader<CultureContentRuleId> &
+  Readonly<{
+    cultureId: CultureId;
+    speciesKind: MonsterSpeciesKind;
+    candidates: readonly CultureContentCandidate[];
+  }>;
+
 export type MapSpawnRuleDefinition = DefinitionHeader &
   Readonly<{
+    // 這張圖允許出現的最高內容分級（§7.4 逐圖給定）。Resolver 只從 tier ≤ 此值的候選裡挑。
+    contentTier: ContentTier;
     localCultureContentRuleId: CultureContentRuleId;
     humanCultureContentRuleId: CultureContentRuleId;
     chestPoolId: ChestPoolId;
@@ -223,11 +258,20 @@ export type MapContentDefinition = DefinitionHeader &
   Readonly<{
     contentKind: MapContentKind;
     npcPolicy: MapContentNpcPolicy;
+    // 怪物類內容的威脅等級。**只有怪物類才有**——寶箱與事件沒有威脅等級，缺席即代表「不適用」，
+    // 不是「忘了填」（同 `FacilityDefinition.teacherMasteryLevel` 的慣例）。
+    //
+    // 為什麼需要它：一般群與菁英群的 `contentKind` **都是** `monsterGroup`
+    //（`MapContentKind` 沒有 elite 這一值），沒有這一欄就沒有任何欄位分得開兩者，於是
+    // 「文化池挑到一隻菁英」對不到「菁英群」那筆內容定義。
+    // `content-source/yunhua/maps.ts` 的 spawnBudgets 註解早就記載了這個缺口。
+    threatRank?: MonsterThreatRank;
   }>;
 
 export interface MapDefinitionReader {
   getMapTemplate(id: MapTemplateId): MapTemplateDefinition;
   getMapSpawnRule(id: MapSpawnRuleId): MapSpawnRuleDefinition;
+  getCultureContentRule(id: CultureContentRuleId): CultureContentRuleDefinition;
   getNpcSequenceRule(id: NpcSequenceRuleId): NpcSequenceRuleDefinition;
   getContentDefinition(id: DefinitionId): MapContentDefinition;
   getGatheringMapView(id: GatheringRuleId): Readonly<{
@@ -305,7 +349,17 @@ export type MapInstance = Readonly<{
 export type MapContentPayload =
   | Readonly<{ kind: 'monsterGroup' | 'boss'; encounterGroupId: EncounterGroupDefinitionId }>
   | Readonly<{ kind: 'chest'; itemIds: readonly ItemInstanceId[] }>
-  | Readonly<{ kind: 'mapEvent'; contentEventDefinitionId: ContentEventDefinitionId }>
+  // 事件內容必須帶**實例身分**，不只是定義 ID：`ContentEventInstance`（contracts/core）要求
+  // `instanceId` 與 `rngStreamId`——同一個事件定義出現在兩個房間時，兩者必須是不同的實例，
+  // 才能各自重播出不同結果。少了這兩欄，dungeon 想取得事件實例就只能拿 ContentInstanceId
+  // 硬轉成 ContentEventInstanceId（跨語意轉型，規範 §7 點名的反樣式），而 rngStreamId 更是
+  // 無中生有。兩者都由 map 在生成內容時鑄造。
+  | Readonly<{
+      kind: 'mapEvent';
+      contentEventDefinitionId: ContentEventDefinitionId;
+      eventInstanceId: ContentEventInstanceId;
+      rngStreamId: RngStreamId;
+    }>
   | Readonly<{
       kind: 'kidnap';
       captiveArchetypeId: CharacterArchetypeId;

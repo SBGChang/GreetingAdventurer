@@ -167,14 +167,19 @@ export const CITY_DEFINITION: CityDefinition = {
   populationSupplyRuleId: POPULATION_RULE_ID,
   playerCommerceDailyLimitId: COMMERCE_LIMIT_ID,
   playerCommercePracticeRuleId: COMMERCE_PRACTICE_ID,
+  initialProsperity: 50,
+  initialSafety: 50,
   cityMetricEffectResolverId: METRIC_RESOLVER_ID,
 };
 
+// Fixture 的顯示名稱走與正式內容相同的 nameRef 形狀（測試不解析文字，只需要欄位存在且合法）。
+const fixtureDisplay = (key: string): FacilityDefinition['display'] => ({ nameRef: { key } });
+
 const FACILITIES: readonly FacilityDefinition[] = [
-  { ...header(FACILITY_INN), facilityKind: 'inn', actionRuleIds: [CITY_ACTION_INN_REST] },
-  { ...header(FACILITY_TAVERN), facilityKind: 'tavern', actionRuleIds: [] },
-  { ...header(FACILITY_ITEM_SHOP), facilityKind: 'itemShop', actionRuleIds: [] },
-  { ...header(FACILITY_HOME), facilityKind: 'home', actionRuleIds: [] },
+  { ...header(FACILITY_INN), facilityKind: 'inn', actionRuleIds: [CITY_ACTION_INN_REST], display: fixtureDisplay('text.fixture.facility.inn.name') },
+  { ...header(FACILITY_TAVERN), facilityKind: 'tavern', actionRuleIds: [], display: fixtureDisplay('text.fixture.facility.tavern.name') },
+  { ...header(FACILITY_ITEM_SHOP), facilityKind: 'itemShop', actionRuleIds: [], display: fixtureDisplay('text.fixture.facility.item-shop.name') },
+  { ...header(FACILITY_HOME), facilityKind: 'home', actionRuleIds: [], display: fixtureDisplay('text.fixture.facility.home.name') },
 ];
 
 export const SHOP_RULE: ShopRuleDefinition = {

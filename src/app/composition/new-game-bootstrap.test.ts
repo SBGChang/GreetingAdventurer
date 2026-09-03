@@ -6,10 +6,17 @@ import { resolve } from 'node:path';
 
 import type { CharacterArchetypeId, CityId } from '../../contracts/core';
 import { loadContentFromDisk } from '../../platform/content-repository';
+import { createProductionResolverRegistry } from '../content/resolver-registrations';
 import { createNewGame, type NewGameConfig } from './new-game-bootstrap';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
+}
+
+// 開新遊戲需要 ResolverRegistry（世界冒險者的原型／性別／年齡／天賦由 Resolver 決定）。
+// 測試一律用**正式**註冊表，不用 stub：這條路要驗的正是「真內容 + 真 Resolver 開得起來」。
+function resolversOf(loaded: { resolverBindings: Parameters<typeof createProductionResolverRegistry>[0] }) {
+  return createProductionResolverRegistry(loaded.resolverBindings);
 }
 
 const CONTENT_ROOT = resolve(import.meta.dirname, '../../../content');
@@ -21,11 +28,12 @@ const CAPITAL = 'city-node.yunhua.yunjing' as CityId;
 // 成年天數 5475（見 lifecycle-rule.core.standard）；startDay 取更大值確保開局成年。
 const BASE_CONFIG: NewGameConfig = {
   worldSeed: 'f3-newgame-test',
-  startDay: 8000,
+  startDay: 14600,
   startingArchetypeId: PLAYER_LINEAGE,
   startCityId: CAPITAL,
   leaderSex: 'female',
-  leaderBirthDay: 0,
+  leaderBirthDay: 5475,
+  startingMoney: 500,
 };
 
 type Case = Readonly<{ name: string; run: () => void }>;
@@ -37,13 +45,13 @@ const CASES: readonly Case[] = [
       const loaded = loadContentFromDisk(CONTENT_ROOT);
       if (!loaded.success) throw new Error(`內容載入失敗：${JSON.stringify(loaded.diagnostics).slice(0, 300)}`);
 
-      const result = createNewGame(BASE_CONFIG, loaded.registry);
+      const result = createNewGame(BASE_CONFIG, loaded.registry, resolversOf(loaded));
       assert(result.success, `開新遊戲應成功，實得 ${result.success ? '' : JSON.stringify(result.diagnostics)}`);
       if (!result.success) return;
 
       const { state, playerTeamId, leaderId } = result;
       // 世界日取自 config。
-      assert(state.core.worldDay === 8000, `worldDay 應為 8000，實得 ${state.core.worldDay}`);
+      assert(state.core.worldDay === BASE_CONFIG.startDay, `worldDay 應為 ${BASE_CONFIG.startDay}，實得 ${state.core.worldDay}`);
       // 玩家隊存在且在指定城市。
       const team = state.team.teams[playerTeamId];
       assert(team !== undefined, '玩家隊應存在');
@@ -76,6 +84,7 @@ const CASES: readonly Case[] = [
       const result = createNewGame(
         { ...BASE_CONFIG, startingArchetypeId: 'character-archetype.core.does-not-exist' as CharacterArchetypeId },
         loaded.registry,
+        resolversOf(loaded),
       );
       assert(!result.success, '不存在的 archetype 應導致開新遊戲失敗');
       if (result.success) return;
@@ -94,6 +103,7 @@ const CASES: readonly Case[] = [
       const result = createNewGame(
         { ...BASE_CONFIG, startCityId: PLAYER_LINEAGE as unknown as CityId },
         loaded.registry,
+        resolversOf(loaded),
       );
       assert(!result.success, '非 city-node 的起始城市應失敗');
       if (result.success) return;
@@ -108,8 +118,8 @@ const CASES: readonly Case[] = [
     run: () => {
       const loaded = loadContentFromDisk(CONTENT_ROOT);
       if (!loaded.success) throw new Error('內容載入失敗');
-      const a = createNewGame(BASE_CONFIG, loaded.registry);
-      const b = createNewGame(BASE_CONFIG, loaded.registry);
+      const a = createNewGame(BASE_CONFIG, loaded.registry, resolversOf(loaded));
+      const b = createNewGame(BASE_CONFIG, loaded.registry, resolversOf(loaded));
       assert(a.success && b.success, '兩次都應成功');
       if (!a.success || !b.success) return;
       assert(a.leaderId === b.leaderId, `leaderId 應決定性相同，實得 ${a.leaderId} vs ${b.leaderId}`);

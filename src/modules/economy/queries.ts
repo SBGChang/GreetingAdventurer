@@ -42,6 +42,7 @@ import type {
   PurchaseQuoteInput,
   SellQuoteInput,
   ServiceQuoteInput,
+  PriceRuleQuoteInput,
 } from '../../contracts/economy';
 
 import {
@@ -374,6 +375,38 @@ export function createEconomyQuery(state: EconomyState, ctx: EconomyQueryContext
         scopes: [
           citySettlementScope(input.cityId),
           { kind: 'characterReputation', characterId: input.sellerCharacterId },
+        ],
+      });
+    },
+
+    // 資產報價（房屋購買／功能間升級）。基礎價值來自 **Price Rule 自己的 `baseAmount`**，
+    // 不經任何來源 Port——那正是 `ruleFixedAmount` 這個來源種類的意思。
+    // 規則沒有 `baseAmount`＝內容把一條非資產規則掛到了資產購買上，明確失敗（不猜價格）。
+    getPriceRuleQuote(input: PriceRuleQuoteInput): PriceQuote {
+      const rule = ctx.definitions.getPriceRule(input.priceRuleId);
+      if (rule.baseValueSource !== 'ruleFixedAmount' || rule.baseAmount === undefined) {
+        throw new Error(
+          `EconomyQuery: price rule "${String(input.priceRuleId)}" 不是資產規則` +
+            `（baseValueSource=${rule.baseValueSource}，baseAmount=${String(rule.baseAmount)}）——` +
+            `以 Price Rule 直接報價只適用 ruleFixedAmount。`,
+        );
+      }
+      return buildQuote(state, ctx, {
+        kind: 'service',
+        sourceRef: `${String(input.priceRuleId)}@${String(input.cityId)}`,
+        source: {
+          priceRuleId: input.priceRuleId,
+          currencyId: rule.baseAmount.currencyId,
+          baseValue: rule.baseAmount.amount,
+          sourceRevision: input.sourceRevision,
+        },
+        direction: 'buy',
+        subjectCharacterId: input.buyerCharacterId,
+        expectedSourceRevision: input.sourceRevision,
+        cityId: input.cityId,
+        scopes: [
+          citySettlementScope(input.cityId),
+          { kind: 'characterReputation', characterId: input.buyerCharacterId },
         ],
       });
     },

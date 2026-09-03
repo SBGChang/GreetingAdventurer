@@ -111,6 +111,44 @@ export type CombatAiPolicyDefinition = DefinitionHeader & {
   behaviorResolverId: ResolverId;
 };
 
+// ── 敵方 AI 的行為參數（F3 P1）──────────────────────────────────────────────
+//
+// 三個 AI Policy（雜兵／菁英／首領）**共用同一個 shape**，差異全部落在這張表——
+// 工作單明講「若你發現需要三份不同程式，先回報，那代表 shape 切錯了」。
+//
+// 兩個欄位都是**封閉 tagged 值**（不是自由字串、不是 expression DSL）：資料只能從已註冊的有限
+// 選項裡挑一個，新增一種行為必須改程式（新策略＋測試），這正是 §6「封閉 tagged variant」允許
+// 而 expression DSL 禁止的分界。
+export type CombatAiSkillSelection =
+  // 只會一招的雜兵：取唯一一招（多於一招＝資料與 policy 不符，明確失敗）。
+  | 'onlySkill'
+  // 首領輪替：依 encounter.revision 取模輪流。revision 每筆交易遞增，所以同一場戰鬥的連續行動
+  // 會拿到不同招式，且可重播。
+  | 'rotateByEncounterRevision'
+  // 從負擔得起的招式裡隨機挑一招。
+  | 'randomAffordable';
+
+export type CombatAiTargetPreference =
+  // 射程內任一敵方，均勻抽取。
+  | 'randomInReach'
+  // 射程內生命最低者（收尾）。
+  | 'lowestHealthInReach'
+  // 射程內生命最高者（先啃硬的）。
+  | 'highestHealthInReach';
+
+export type CombatAiParamsDefinition = DefinitionHeader & {
+  skillSelection: CombatAiSkillSelection;
+  targetPreference: CombatAiTargetPreference;
+};
+
+// 反擊架勢條件的參數（F3 P1 的第二個 shape）。述詞，無 RNG。
+export type CombatCounterConditionParamsDefinition = DefinitionHeader & {
+  // 哪些來襲動作種類會觸發反擊。
+  triggeringActionKinds: readonly CombatActionKind[];
+  // 攻方排距上限；**缺席＝不限距離**（不是「距離 0」）。近戰架勢填 1。
+  maxAttackerDistanceCells?: number;
+};
+
 // Derived: doc references getEquipmentEffect(id): EquipmentEffectDefinition but
 // never specifies its body here; likely inventory-owned (see report note).
 export type EquipmentEffectDefinition = DefinitionHeader & {

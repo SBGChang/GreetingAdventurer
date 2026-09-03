@@ -81,13 +81,23 @@ import type {
   PlayerCommercePracticeRuleId,
   PopulationSupplyRuleId,
   PriceRuleId,
+  PriceModifierRuleId,
+  CurrencyId,
   RegionId,
   ResolverId,
   RouteId,
   ShopRuleId,
   WorldAdventurerGenerationRuleId,
 } from '../../src/contracts/core';
-import { cultureIds, type Authored, type AuthoredDomain } from '../authoring';
+import {
+  cultureIds,
+  textKeyFor,
+  type Authored,
+  type AuthoredDomain,
+  type AuthoredText,
+  type LocalizedName,
+} from '../authoring';
+import type { PriceRuleDefinition } from '../../src/contracts/economy';
 import { CHARACTER_ARCHETYPE_IDS } from '../core/character';
 
 const yunhua = cultureIds('yunhua');
@@ -232,16 +242,16 @@ function mapTemplateId(local: string): MapTemplateId {
 // （「赤嶺」譯成 red-ridge 會與素材「朱砂」的 cinnabar 混在一起）。
 type CityRow = Readonly<{
   /** 設計來源 `cultureMeta.cities` 的原字。只出現在註解與這張表，不進定義。 */
-  readonly name: string;
+  readonly name: LocalizedName;
   readonly local: string;
   readonly isCapital: boolean;
 }>;
 
 const CITY_ROWS: readonly CityRow[] = [
-  { name: '雲京', local: 'yunjing', isCapital: true },
-  { name: '青岑城', local: 'qingcen', isCapital: false },
-  { name: '澄浦城', local: 'chengpu', isCapital: false },
-  { name: '赤嶺城', local: 'chiling', isCapital: false },
+  { name: { 'zh-Hant': '雲京', en: 'Yunjing' }, local: 'yunjing', isCapital: true },
+  { name: { 'zh-Hant': '青岑城', en: 'Qingcen' }, local: 'qingcen', isCapital: false },
+  { name: { 'zh-Hant': '澄浦城', en: 'Chengpu' }, local: 'chengpu', isCapital: false },
+  { name: { 'zh-Hant': '赤嶺城', en: 'Chiling' }, local: 'chiling', isCapital: false },
 ];
 
 // `city-node` 的定義 id 與 `city` 的定義 id 是**兩個不同的 ID**（`src/app/content/city-reader.ts`
@@ -352,7 +362,7 @@ const REGION_ID = yunhua.id<RegionId>('region', 'yunhua');
 // 要對帳的東西。
 type SiteRow = Readonly<{
   /** 設計來源 `firstMapConfigs[].name`。只出現在註解與這張表。 */
-  readonly name: string;
+  readonly name: LocalizedName;
   readonly local: string;
   readonly cityLocal: string;
   readonly citySlot: 1 | 2 | 3;
@@ -361,23 +371,23 @@ type SiteRow = Readonly<{
 
 const SITE_ROWS: readonly SiteRow[] = [
   // 雲京 1。設計來源已有英文字 `waterway`（§5 的 pool、§11.2 的 gathering rule）。
-  { name: '舊漕渠與沉倉', local: 'old-canal-sunken-store', cityLocal: 'yunjing', citySlot: 1, isNationalDungeon: false },
+  { name: { 'zh-Hant': '舊漕渠與沉倉', en: 'Old Canal and Sunken Store' }, local: 'old-canal-sunken-store', cityLocal: 'yunjing', citySlot: 1, isNationalDungeon: false },
   // 雲京 2。設計來源無英文字。「司曆」是掌曆的官署、「殘院」是廢棄院落 → calendar-court。
-  { name: '司曆殘院', local: 'calendar-court-ruin', cityLocal: 'yunjing', citySlot: 2, isNationalDungeon: false },
+  { name: { 'zh-Hant': '司曆殘院', en: 'Calendar Court Ruin' }, local: 'calendar-court-ruin', cityLocal: 'yunjing', citySlot: 2, isNationalDungeon: false },
   // 雲京 3，國家迷宮。設計來源已有英文字 `seal-tower`（§5 的 pool、`monster.yunhua.seal-tower-deserter`）。
-  { name: '天衡印塔', local: 'seal-tower', cityLocal: 'yunjing', citySlot: 3, isNationalDungeon: true },
+  { name: { 'zh-Hant': '天衡印塔', en: 'Tianheng Seal Tower' }, local: 'seal-tower', cityLocal: 'yunjing', citySlot: 3, isNationalDungeon: true },
   // 青岑 1。設計來源已有英文字 `mist`（§5 的 pool、§11.2 的 `gathering.yunhua.mist-herb`）。
-  { name: '霧篁藥谷', local: 'mist-bamboo-valley', cityLocal: 'qingcen', citySlot: 1, isNationalDungeon: false },
+  { name: { 'zh-Hant': '霧篁藥谷', en: 'Mist Bamboo Herb Valley' }, local: 'mist-bamboo-valley', cityLocal: 'qingcen', citySlot: 1, isNationalDungeon: false },
   // 青岑 2。設計來源無英文字。「懸泉」是懸掛而下的泉、「石窟」是洞窟 → spring-grotto。
-  { name: '懸泉石窟', local: 'hanging-spring-grotto', cityLocal: 'qingcen', citySlot: 2, isNationalDungeon: false },
+  { name: { 'zh-Hant': '懸泉石窟', en: 'Hanging Spring Grotto' }, local: 'hanging-spring-grotto', cityLocal: 'qingcen', citySlot: 2, isNationalDungeon: false },
   // 澄浦 1。設計來源無英文字。§4 把它的類型寫成「水澤型迷宮」、主題「潮溝、蘆島」→ tidal-marsh。
-  { name: '潮生蘆洲', local: 'tidal-reed-isle', cityLocal: 'chengpu', citySlot: 1, isNationalDungeon: false },
+  { name: { 'zh-Hant': '潮生蘆洲', en: 'Tidal Reed Isle' }, local: 'tidal-reed-isle', cityLocal: 'chengpu', citySlot: 1, isNationalDungeon: false },
   // 澄浦 2。設計來源無英文字。「鹽井」是取滷的井 → salt-well。
-  { name: '鹽井封窖', local: 'salt-well-cellar', cityLocal: 'chengpu', citySlot: 2, isNationalDungeon: false },
+  { name: { 'zh-Hant': '鹽井封窖', en: 'Sealed Salt Well Cellar' }, local: 'salt-well-cellar', cityLocal: 'chengpu', citySlot: 2, isNationalDungeon: false },
   // 赤嶺 1。設計來源無英文字。「朱砂」是 cinnabar（素材「官朱砂」同字）、「斷嶺」是斷裂的山脊。
-  { name: '朱砂斷嶺', local: 'cinnabar-ridge', cityLocal: 'chiling', citySlot: 1, isNationalDungeon: false },
+  { name: { 'zh-Hant': '朱砂斷嶺', en: 'Cinnabar Ridge' }, local: 'cinnabar-ridge', cityLocal: 'chiling', citySlot: 1, isNationalDungeon: false },
   // 赤嶺 2。設計來源無英文字。「古窯」是廢棄窯場、「火道」是排煙火道 → kiln-flue。
-  { name: '古窯火道', local: 'old-kiln-flue', cityLocal: 'chiling', citySlot: 2, isNationalDungeon: false },
+  { name: { 'zh-Hant': '古窯火道', en: 'Old Kiln Flue' }, local: 'old-kiln-flue', cityLocal: 'chiling', citySlot: 2, isNationalDungeon: false },
 ];
 
 /**
@@ -400,6 +410,7 @@ function adventureSite(row: SiteRow): Authored<AdventureSiteDefinition> {
     accessCityId: cityNodeIdOf(row.cityLocal),
     mapTemplateId: mapTemplateId(row.local),
     isNationalDungeon: row.isNationalDungeon,
+    display: { nameRef: { key: textKeyFor(adventureSiteId(row.local)) } },
   };
 }
 
@@ -483,6 +494,7 @@ function cityNode(row: CityRow): Authored<CityNodeDefinition> {
     adjacentRouteIds: routeIdsOfCity(row.local),
     adventureSiteIds: siteIdsOfCity(row.local),
     isCapital: row.isCapital,
+    display: { nameRef: { key: textKeyFor(cityNodeIdOf(row.local)) } },
   };
 }
 
@@ -642,29 +654,58 @@ const homeStorageUpgrade: Authored<HomeUpgradeDefinition> = {
   actionRuleIds: [],
 };
 
-// ⚠ **`purchasableSlotCounts` 與 `purchasePriceRuleIds` 刻意留空 → 買房本版不啟用。**
+// ── 買房 ────────────────────────────────────────────────────────────────────
 //
-// 這不是偷懶，是契約現在表達不出房價。`purchasePriceRuleIds` 要的是 `PriceRuleId`，而
-// `PriceRuleDefinition.baseValueSource` 的值域只有四個：
-//   `'itemDefinition' | 'offerFixedValue' | 'rewardDefinition' | 'serviceDefinition'`
-// 一棟房子不是物品、不是商店 Offer、不是委託報酬、也不是服務。四個都填得下去、四個都是謊：
-//   * `itemDefinition`  → 房子得先是一筆 ItemDefinition 才有 value，那會讓房子進得了背包。
-//   * `offerFixedValue` → 價格由 ShopOffer 自帶，但買房不經過 ShopOffer。
-//   * `serviceDefinition` → 僱用勞務的形狀（core 用它定家教費），房屋是資產不是勞務。
-// 而 GDD 八「買房時決定 Slot 數量（**越大越貴**）」要求的正是「slot 數 → 價格」這條對應，
-// 契約裡沒有任何地方裝得下它。
+// 這裡原本刻意留空（「買房本版不啟用」），理由是契約表達不出房價：`PriceRuleDefinition.baseValueSource`
+// 只有物品／Offer／報酬／服務四種，一棟房子哪一種都不是，而 GDD §八「買房時決定 Slot 數量
+// （**越大越貴**）」要的正是「slot 數 → 價格」這條對應。
 //
-// 於是選規範五個合法出口的第 3 項：**該 Capability 不啟用**。`purchasableSlotCounts` 空陣列讓
-// `BuyOrUpgradeHome` 的 slotCount 永遠驗不過，玩家不會拿到一個算得出錯價格的買房按鈕。
-// 補法寫在回報的「契約缺口」。
+// **缺口已補**：契約新增第五種來源 `ruleFixedAmount`，價格住在 Price Rule 自己的 `baseAmount` 上，
+// 一個 slot 數一條規則。於是「越大越貴」是內容的宣告，不是程式的公式。
 //
-// `allowedUpgradeIds` 空陣列的理由不同（見檔頭）：六種功能間是**還沒設計**，不是本版關閉。
+// 【第一版方案（待討論）】slot 數與價格 GDD 都沒有給數字（§十二明講房間形狀、家具、功能間與
+// 升級規則「屬獨立大議題，尚未定案」）。下面三檔是可玩的第一版：2／4／6 格，價格線性偏陡，
+// 讓「要不要買大的」是一個真的取捨。改它們不需要動任何程式。
+// 跨 domain 引用：貨幣與個人交易加成修正都由 core 擁有（見 content-source/core）。
+const CORE_CURRENCY_ID = 'currency.core.standard' as CurrencyId;
+const PERSONAL_TRADE_BONUS_BUY_ID =
+  'price-modifier-rule.core.personal-trade-bonus-buy' as PriceModifierRuleId;
+
+type HomeSizeRow = Readonly<{ slotCount: number; price: number }>;
+
+const HOME_SIZE_ROWS: readonly HomeSizeRow[] = [
+  { slotCount: 2, price: 4000 },
+  { slotCount: 4, price: 12000 },
+  { slotCount: 6, price: 28000 },
+];
+
+function homePriceRuleId(slotCount: number): PriceRuleId {
+  return yunhua.id<PriceRuleId>('price-rule', `home-slot-${slotCount}`);
+}
+
+const HOME_PRICE_RULES: readonly Authored<PriceRuleDefinition>[] = HOME_SIZE_ROWS.map((row) => ({
+  kind: 'price-rule',
+  id: homePriceRuleId(row.slotCount),
+  // 資產：價格住在規則自己身上（見契約說明）。
+  baseValueSource: 'ruleFixedAmount',
+  baseAmount: { currencyId: CORE_CURRENCY_ID, amount: row.price },
+  // 買房套用與商店同一條個人交易加成；賣房本版不開放，所以沒有 sell 修正。
+  buyModifierIds: [PERSONAL_TRADE_BONUS_BUY_ID],
+  sellModifierIds: [],
+  roundingPolicy: 'nearest',
+  minimumPrice: 1,
+}));
+
 const homeRule: Authored<HomeRuleDefinition> = {
   kind: 'home-rule',
   id: yunhua.id<HomeRuleId>('home-rule', 'standard'),
-  purchasableSlotCounts: [],
-  purchasePriceRuleIds: {},
+  purchasableSlotCounts: HOME_SIZE_ROWS.map((row) => row.slotCount),
+  purchasePriceRuleIds: Object.fromEntries(
+    HOME_SIZE_ROWS.map((row) => [row.slotCount, homePriceRuleId(row.slotCount)]),
+  ),
   initialUpgradeIds: [HOME_UPGRADE_ROOM_ID, HOME_UPGRADE_STORAGE_ID],
+  // `allowedUpgradeIds` 仍為空：六種功能間是**還沒設計**（GDD §十二明列為未定案），
+  // 不是本版關閉。與買房不同，這一項沒有契約缺口可補。
   allowedUpgradeIds: [],
 };
 
@@ -855,6 +896,8 @@ function populationRule(cityLocal: string): Authored<PopulationSupplyRuleDefinit
 // 不是城市耗時行動。
 type FacilityRow = Readonly<{
   readonly facilityKind: FacilityKind;
+  /** 設施名稱。四座城共用同一個 nameRef（酒館就叫「酒館」），故 key 依 facilityKind 而非 facilityId。 */
+  readonly name: LocalizedName;
   /** ID 的第三段用的 kebab 名。 */
   readonly local: string;
   /** 這座設施承載哪些城市耗時行動。 */
@@ -865,15 +908,16 @@ type FacilityRow = Readonly<{
 
 const FACILITY_ROWS: readonly FacilityRow[] = [
   // 旅館：「住宿至少 1 日，恢復生命、魔力與可由休息解除的暫時狀態。」
-  { facilityKind: 'inn', local: 'inn', actionRuleIds: [INN_REST_RULE_ID] },
+  { facilityKind: 'inn', local: 'inn', name: { 'zh-Hant': '旅館', en: "Inn" }, actionRuleIds: [INN_REST_RULE_ID] },
   // 酒館：「探聽情報、遇見與互動冒險者。」聊天與探聽不消耗時間。
-  { facilityKind: 'tavern', local: 'tavern', actionRuleIds: [] },
+  { facilityKind: 'tavern', local: 'tavern', name: { 'zh-Hant': '酒館', en: "Tavern" }, actionRuleIds: [] },
   // 冒險者公會：「接取與交付委託。」不消耗時間。
-  { facilityKind: 'adventurerGuild', local: 'adventurer-guild', actionRuleIds: [] },
+  { facilityKind: 'adventurerGuild', local: 'adventurer-guild', name: { 'zh-Hant': '冒險者公會', en: "Adventurer's Guild" }, actionRuleIds: [] },
   // 道具店：「買賣道具、提供相關製作環境與生活熟練度訓練。」
   {
     facilityKind: 'itemShop',
     local: 'item-shop',
+    name: { 'zh-Hant': '道具店', en: "Item Shop" },
     actionRuleIds: [trainingRuleId('training-life-craft')],
     teacherMasteryLevel: 5,
   },
@@ -881,6 +925,7 @@ const FACILITY_ROWS: readonly FacilityRow[] = [
   {
     facilityKind: 'equipmentShop',
     local: 'equipment-shop',
+    name: { 'zh-Hant': '裝備店', en: "Equipment Shop" },
     actionRuleIds: [trainingRuleId('training-smith-tailor')],
     teacherMasteryLevel: 5,
   },
@@ -888,21 +933,27 @@ const FACILITY_ROWS: readonly FacilityRow[] = [
   {
     facilityKind: 'trainingGround',
     local: 'training-ground',
+    name: { 'zh-Hant': '訓練所', en: "Training Ground" },
     actionRuleIds: [trainingRuleId('training-combat-magic')],
     teacherMasteryLevel: 5,
   },
   // 書店：「販售技能與鍛造／製作內容的基礎書籍。」不提供傳授 → 無教師、無耗時行動。
-  { facilityKind: 'bookstore', local: 'bookstore', actionRuleIds: [] },
+  { facilityKind: 'bookstore', local: 'bookstore', name: { 'zh-Hant': '書店', en: "Bookstore" }, actionRuleIds: [] },
   // 冒險者關卡：「前往或返回本城對應的冒險地圖。」1 日／1 日歸 team-plan-rule。
-  { facilityKind: 'adventureCheckpoint', local: 'adventure-checkpoint', actionRuleIds: [] },
+  { facilityKind: 'adventureCheckpoint', local: 'adventure-checkpoint', name: { 'zh-Hant': '冒險者關卡', en: "Adventure Checkpoint" }, actionRuleIds: [] },
   // 城門口：「選擇趕路、正常或慢行前往其他城市。」3／6／9 日歸 player-travel-mode。
-  { facilityKind: 'cityGate', local: 'city-gate', actionRuleIds: [] },
+  { facilityKind: 'cityGate', local: 'city-gate', name: { 'zh-Hant': '城門口', en: "City Gate" }, actionRuleIds: [] },
   // 家：「家族、子女教育、熟練度傳授、休息與休息一年。」
   // 熟練度傳授是**個人自由行動**（`free-action-rule.core.teach`，requiresCityFacilityKind: 'home'）
   // 與隊伍教學崗位（`team-plan-rule.core.home-teaching-post`），不是 city-action-rule；
   // 子女教育是 `child-study` TeamPlan。所以家在 city 側只承載 365 日的年度休息。
-  { facilityKind: 'home', local: 'home', actionRuleIds: [HOME_YEAR_REST_RULE_ID] },
+  { facilityKind: 'home', local: 'home', name: { 'zh-Hant': '家', en: "Home" }, actionRuleIds: [HOME_YEAR_REST_RULE_ID] },
 ];
+
+// 設施名稱的 key 以 facilityKind 為單位（見 facility() 的說明）。
+function facilityKindTextKey(row: FacilityRow): string {
+  return textKeyFor(`facility-kind.${yunhua.culture}.${row.local}`);
+}
 
 function facilityId(cityLocal: string, facilityLocal: string): FacilityDefinitionId {
   return yunhua.id<FacilityDefinitionId>('facility', `${cityLocal}-${facilityLocal}`);
@@ -917,6 +968,9 @@ function facility(cityLocal: string, row: FacilityRow): Authored<FacilityDefinit
     // 窄化）和 `'inn'`（給領域判斷）——JSON 裡只有一個 kind 欄位，兩者不可能同時成立。」
     facilityKind: row.facilityKind,
     actionRuleIds: [...row.actionRuleIds],
+    // 名稱掛在 facilityKind 而非個別設施：雲華四城的酒館都叫「酒館」，四筆定義共用一個 key。
+    // 要讓某城的酒館有專名，就給那一筆自己的 key——那是內容的選擇，不需要改程式。
+    display: { nameRef: { key: facilityKindTextKey(row) } },
   };
   // 沒有教師的設施**不帶**這個欄位（缺席＝沒有教師），所以不能寫成 `teacherMasteryLevel: undefined`。
   return row.teacherMasteryLevel === undefined
@@ -980,6 +1034,11 @@ function city(row: CityRow): Authored<CityDefinition> {
     // `ApplyCityMetricEffect` 只帶 EffectDefinitionId，沒帶「怎麼把該 Effect 換成繁榮／安全數值」。
     // 那個換算（含資料上下限）由 Resolver 提供，由哪一個提供則是城市資料的宣告（契約第 84 行）。
     // 四城共用一個：換算方式是引擎行為，不是城市差異。
+    // 【第一版方案（待討論）】繁榮／安全起始值。設計來源沒有給數字（`09_city_module.md` §3.1
+    // 只禁止自創每日漂移公式，沒有給起始值）。這裡照 §5 的城市定位分兩級：首都較高、其餘同級。
+    // 值域與上下限由 cityMetricEffect Resolver 的 params 決定，不是這裡。
+    initialProsperity: row.isCapital ? 70 : 50,
+    initialSafety: row.isCapital ? 70 : 50,
     cityMetricEffectResolverId: resolverId('metric-effect'),
   };
 }
@@ -1016,6 +1075,7 @@ export const WORLD_CITY_DECLARED_KINDS: readonly string[] = [
   'escort-generation-rule',
   'facility',
   'home-rule',
+  'price-rule',
   'home-upgrade',
   'intel-rule',
   'nation',
@@ -1038,8 +1098,27 @@ export const WORLD_CITY_REQUIRED_RESOLVER_IDS: readonly ResolverId[] = [
   resolverId('metric-effect'),
 ];
 
+// ════════════════════════════════════════════════════════════════════════════
+// 顯示文字（全語系）
+// ════════════════════════════════════════════════════════════════════════════
+//
+// 每一筆名稱都必須同時寫出 `SUPPORTED_LOCALES` 的所有語系（`LocalizedName` 是非 optional 的
+// 具名欄位），所以「加了繁中忘了英文」是 tsc 錯誤而不是執行期的空白。
+// Compiler 另外雙向驗證：每個 nameRef 都有文字、每筆文字都有人引用。
+const WORLD_CITY_TEXTS: readonly AuthoredText[] = [
+  // 國度。key 沿用上面 `nation` 那筆刻意選定的字串形狀（見該處說明）。
+  { key: 'text.nation.yunhua.name', name: { 'zh-Hant': '雲華', en: 'Yunhua' } },
+  // 四座城市。
+  ...CITY_ROWS.map((row) => ({ key: textKeyFor(cityNodeIdOf(row.local)), name: row.name })),
+  // 九座冒險據點。
+  ...SITE_ROWS.map((row) => ({ key: textKeyFor(adventureSiteId(row.local)), name: row.name })),
+  // 十種設施（四城共用，故以 facilityKind 為單位宣告一次）。
+  ...FACILITY_ROWS.map((row) => ({ key: facilityKindTextKey(row), name: row.name })),
+];
+
 export const yunhuaWorldCityDomain: AuthoredDomain = {
   domain: 'world-city',
+  texts: WORLD_CITY_TEXTS,
   definitions: [
     // world
     culture,
@@ -1054,6 +1133,7 @@ export const yunhuaWorldCityDomain: AuthoredDomain = {
     ...SHOP_RULES,
     ...CITY_ACTION_RULES,
     homeRule,
+    ...HOME_PRICE_RULES,
     homeRoomUpgrade,
     homeStorageUpgrade,
     intelRule,

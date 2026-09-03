@@ -60,7 +60,23 @@ export type MoneyValue = {
 };
 
 export type PriceRuleDefinition = DefinitionHeader<PriceRuleId> & {
-  baseValueSource: 'itemDefinition' | 'offerFixedValue' | 'rewardDefinition' | 'serviceDefinition';
+  // 基礎價值從哪裡來。
+  //
+  // `ruleFixedAmount` 是為「資產」補的第五種（F3：家園）。`content-source/yunhua/world-city.ts`
+  // 記載了為什麼原本四種都裝不下房價：一棟房子不是物品（填 itemDefinition 會讓它進得了背包）、
+  // 不是商店 Offer、不是委託報酬、也不是勞務服務（那是家教費的形狀）。而 GDD §八
+  // 「買房時決定 Slot 數量（越大越貴）」要的正是「slot 數 → 價格」這條對應。
+  //
+  // 補法是讓價格**住在規則自己身上**：一個 slot 數一條 Price Rule，各自帶自己的 `baseAmount`。
+  // 這樣「越大越貴」是內容的宣告，不是程式的公式。
+  baseValueSource:
+    | 'itemDefinition'
+    | 'offerFixedValue'
+    | 'rewardDefinition'
+    | 'serviceDefinition'
+    | 'ruleFixedAmount';
+  // 只有 `ruleFixedAmount` 有這一欄；其餘來源的基礎價值由該來源提供，缺席＝不適用。
+  baseAmount?: MoneyValue;
   buyModifierIds: PriceModifierRuleId[];
   sellModifierIds: PriceModifierRuleId[];
   roundingPolicy: 'floor' | 'ceil' | 'nearest';
@@ -70,6 +86,28 @@ export type PriceRuleDefinition = DefinitionHeader<PriceRuleId> & {
 export type PriceModifierRuleDefinition = DefinitionHeader<PriceModifierRuleId> & {
   resolverId: ResolverId;
   stackPolicy: 'multiply' | 'add' | 'strongest';
+};
+
+// 價格修正係數的調校量（F3：economy 報價鏈）。
+//
+// 程式只實作**一種形狀**：`係數 = base + weight × 來源值`。三個來源是封閉集合，
+// 「哪一條修正用哪個來源、係數怎麼配」全部是內容。設計來源目前只寫「最終公式另行定案」
+//（GDD §隊員交流），所以實際數字是第一版方案，改它不需要動程式。
+//
+// 三個欄位對每一種 source 都必填且語意相同（fixed 時 weight 為 0），符合「共用表只放
+// 所有 Func 都必填且同義的欄位」。
+export type PriceModifierSource =
+  // 付款／收款角色本人的交流熟練買賣加成（doc §2.2 要求必須納入）。
+  | 'personalTradeBonus'
+  // 玩家對該冒險者的好感所產生的家教價格修正（doc §4）。只有 homeTutor 服務會帶。
+  | 'homeTutorPriceModifier'
+  // 不看任何來源的固定係數（例如商店買回率）。
+  | 'fixed';
+
+export type PriceModifierParamsDefinition = DefinitionHeader & {
+  source: PriceModifierSource;
+  base: number;
+  weight: number;
 };
 
 // `EconomyDefinitionReader.getRewardRule` 的回傳（doc §2 只給簽章沒給形狀）。報酬金額本身是可調
@@ -138,6 +176,17 @@ export type EconomyState = {
 
 // ── §4 公開 Query ──────────────────────────────────────────────────────────
 
+// 以 Price Rule 直接報價（資產購買：房屋與功能間升級）。
+//
+// 前四種來源都裝不下房價（見 PriceRuleDefinition.baseValueSource 的說明），所以資產的價格
+// **住在規則自己身上**：一個 slot 數一條 Price Rule，各自帶 `baseAmount`。
+export type PriceRuleQuoteInput = {
+  priceRuleId: PriceRuleId;
+  buyerCharacterId: CharacterId;
+  cityId: CityId;
+  sourceRevision: Revision;
+};
+
 export type ServiceQuoteInput = {
   serviceKind: 'homeTutor';
   serviceDefinitionId: DefinitionId;
@@ -197,6 +246,7 @@ export interface EconomyQuery {
   getPurchaseQuote(input: PurchaseQuoteInput): PriceQuote;
   getSellQuote(input: SellQuoteInput): PriceQuote;
   getServiceQuote(input: ServiceQuoteInput): PriceQuote;
+  getPriceRuleQuote(input: PriceRuleQuoteInput): PriceQuote;
 }
 
 // ── §5.1 Internal Command ──────────────────────────────────────────────────

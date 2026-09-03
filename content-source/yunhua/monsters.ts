@@ -48,6 +48,8 @@ import type {
   SkillDefinitionId,
 } from '../../src/contracts/core';
 import { cultureIds, type Authored, type AuthoredDomain } from '../authoring';
+// 怪物共通招式由 core 擁有（四國共用），文化包只引用它的 ID。
+import { MONSTER_COMMON_SKILL_ID } from '../core/combat-rules';
 
 const yunhua = cultureIds('yunhua');
 const core = cultureIds('core');
@@ -171,7 +173,11 @@ function rewardResolverId(threat: MonsterThreatRank): ResolverId {
 // 「一般敵人剛好一招；菁英／Boss 二至四招」在 skillIds 全空時對 20 筆全部失敗，而且怪物在
 // Detailed Combat 裡選不到任何行動。**這 20 筆怪物在 skillIds 接上之前不是可玩內容。**
 // 逐怪的招數與招名見下方每一列的註解，以及回報的「怪物技能對照表」。
-const NO_SKILLS: readonly SkillDefinitionId[] = [];
+// 【設計決定】所有怪物共用 core 的一招「撞擊」（`combat-skill.core.monster-slam`）。
+// 上面那段記載的缺口——41 招怪物技能屬 skills domain、尚未授權——由這個共通招關掉：
+// 怪物在 Detailed Combat 裡選得到行動了，而且不必先發明 41 招的數值。
+// 日後個別怪物要有自己的招式時，把該怪的這一欄換成它自己的技能即可，共通招留給其餘怪物。
+const COMMON_SKILLS: readonly SkillDefinitionId[] = [MONSTER_COMMON_SKILL_ID];
 
 // ── 九宮格座標 ──────────────────────────────────────────────────────────────
 //
@@ -627,7 +633,7 @@ function monster(row: MonsterRow): Authored<MonsterDefinition> {
       charisma: row.charisma,
     },
     // 刻意留空，見上方 NO_SKILLS 的說明。契約要求可變陣列，所以每筆展開成新陣列。
-    skillIds: [...NO_SKILLS],
+    skillIds: [...COMMON_SKILLS],
     naturalAttackProfileId: naturalAttackProfileId(row.threat),
     controlResistanceProfileId: controlResistanceProfileId(row.threat),
     aiPolicyId: aiPolicyId(row.threat),
@@ -685,6 +691,35 @@ function encounterGroup(row: MonsterRow): Authored<EncounterGroupDefinition> {
 export const YUNHUA_MONSTER_IDS: readonly MonsterDefinitionId[] = ALL_ROWS.map((row) =>
   monsterId(row.local),
 );
+
+// 文化內容池的候選項（`yunhua_content.md` §7.2／§7.3）。
+//
+// 從**同一份 `MONSTER_ROWS`** 導出，所以「這隻怪是 Tier 幾／什麼威脅／人不人類」在怪物定義與
+// 文化池裡不可能講出兩種答案——手抄第二份一定會漂移。
+// 地圖挑的是**編組**不是怪種，所以候選帶的是 encounterGroupId。
+export type YunhuaContentCandidate = Readonly<{
+  encounterGroupId: EncounterGroupDefinitionId;
+  tier: Tier;
+  threatRank: MonsterThreatRank;
+  speciesKind: MonsterSpeciesKind;
+}>;
+
+function candidateOf(row: MonsterRow): YunhuaContentCandidate {
+  return {
+    encounterGroupId: yunhua.id<EncounterGroupDefinitionId>(
+      KIND.encounterGroup,
+      `${row.local}-${row.groupShape === 'swarm' ? 'swarm' : 'lone'}`,
+    ),
+    tier: row.tier,
+    threatRank: row.threat,
+    speciesKind: row.speciesKind,
+  };
+}
+
+export const YUNHUA_NON_HUMAN_CANDIDATES: readonly YunhuaContentCandidate[] =
+  NON_HUMAN_ROWS.map(candidateOf);
+export const YUNHUA_HUMAN_CANDIDATES: readonly YunhuaContentCandidate[] =
+  HUMAN_ROWS.map(candidateOf);
 
 export const monstersDomain: AuthoredDomain = {
   domain: 'monsters',

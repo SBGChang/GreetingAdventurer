@@ -171,7 +171,8 @@ export function makeIdAllocator(prefix = 'gen'): CharacterIdAllocator {
 }
 
 export function stubStatsQuery(maxHealth = 100, maxMana = 50): CharacterStatsQuery {
-  return { getStats: () => ({ maxHealth, maxMana }) };
+  const stats = { maxHealth, maxMana };
+  return { getStats: () => stats, getStatsForCharacter: () => stats };
 }
 
 function header(id: string, packId: ContentPackId) {

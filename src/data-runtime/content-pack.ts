@@ -13,6 +13,12 @@ import type {
   ResolverId,
 } from '../contracts/core';
 import type { DataDiagnostic } from './validation';
+import {
+  createLocalizationCatalog,
+  diffLocaleCoverage,
+  type LocalizationCatalog,
+  type RawLocalizationBundle,
+} from './localization';
 
 // ── 基礎 JSON 形狀 ────────────────────────────────────────────────────────
 
@@ -155,6 +161,9 @@ export type CompileContentResult =
       // 全 pack 依載入順序匯總的 Resolver shape 綁定。組裝 ResolverRegistry 的唯一輸入
       // （見 app/content/resolver-registrations.ts）——與 Definition Registry 並列的姊妹產物。
       resolverBindings: readonly ResolverBinding[];
+      // 依語系解析顯示文字的唯讀目錄。與 Registry 並列的姊妹產物：Definition 帶 nameRef，
+      // 這裡把 nameRef 換成該語系的字（15_ui_application.md §10：UI 邊界才解析）。
+      localization: LocalizationCatalog;
       report: CompileReport;
     }>
   | Readonly<{ success: false; diagnostics: readonly DataDiagnostic[] }>;
@@ -162,6 +171,9 @@ export type CompileContentResult =
 export type LoadContentInput = Readonly<{
   manifest: RawContentManifest;
   packs: readonly RawContentPack[];
+  // Manifest 宣告的每一份 bundle 的實際內容。Platform Port 依 `manifest.localizationBundles`
+  // 讀進來後原樣傳入；缺一份就是缺內容，由下方的載入檢查擋下（§出口 2）。
+  localizationBundles?: readonly RawLocalizationBundle[];
 }>;
 
 // ── Diagnostic codes（載入階段）─────────────────────────────────────────────
@@ -179,6 +191,9 @@ export const DataLoadCode = {
   RuntimeVersionIncompatible: 'data.load.runtimeVersionIncompatible',
   UndeclaredDefinitionKind: 'data.load.undeclaredDefinitionKind',
   DeclaredKindWithoutDefinitions: 'data.load.declaredKindWithoutDefinitions',
+  // 本地化（§出口 2：宣告了卻讀不到，或語系之間覆蓋不齊，一律不啟動）。
+  MissingLocalizationBundle: 'data.load.missingLocalizationBundle',
+  LocalizationCoverageGap: 'data.load.localizationCoverageGap',
 } as const;
 
 // 診斷訊息在指涉一筆「連 kind/id 都缺」的定義時所用的占位字。它是錯誤訊息的一部分，
@@ -426,6 +441,7 @@ function detectCycle(
 // 深度 Schema／Reference／Rule 驗證交給 validation.ts；載入器只做結構完整性。
 export function loadContent(input: LoadContentInput): CompileContentResult {
   const { manifest, packs } = input;
+  const localizationBundles = input.localizationBundles ?? [];
   const diagnostics: DataDiagnostic[] = [];
   const warnings: DataDiagnostic[] = [];
 
@@ -688,10 +704,46 @@ export function loadContent(input: LoadContentInput): CompileContentResult {
     const pack = packById.get(packId);
     return pack === undefined ? [] : [...pack.resolverBindings];
   });
+  // 本地化目錄。Manifest 宣告了幾份 bundle 就必須拿到幾份——少一份代表 Platform Port 沒讀到，
+  // 那是缺內容（§出口 2），不是「這個語系剛好沒字」。
+  for (const ref of manifest.localizationBundles) {
+    if (!localizationBundles.some((b) => b.bundleId === ref.bundleId)) {
+      diagnostics.push({
+        severity: 'error',
+        code: DataLoadCode.MissingLocalizationBundle,
+        packId: manifest.loadOrder[0] as ContentPackId,
+        filePath: 'manifest.json',
+        messageKey: 'data.load.missingLocalizationBundle',
+        details: { bundleId: ref.bundleId, locale: ref.locale },
+      });
+    }
+  }
+  if (diagnostics.length > 0) {
+    return { success: false, diagnostics };
+  }
+
+  const localization = createLocalizationCatalog(localizationBundles);
+  // 語系之間覆蓋不齊＝有語系會缺字。編譯期的 Compiler 已擋過一次，這裡是載入期的第二道——
+  // 因為 Content Pack 可以由 Compiler 以外的來源（DLC、玩家 mod）提供。
+  for (const diag of diffLocaleCoverage(localization)) {
+    diagnostics.push({
+      severity: 'error',
+      code: DataLoadCode.LocalizationCoverageGap,
+      packId: manifest.loadOrder[0] as ContentPackId,
+      filePath: 'manifest.json',
+      messageKey: 'data.load.localizationCoverageGap',
+      details: { detail: diag.detail },
+    });
+  }
+  if (diagnostics.length > 0) {
+    return { success: false, diagnostics };
+  }
+
   return {
     success: true,
     registry,
     resolverBindings,
+    localization,
     report: {
       definitionCount: ordered.length,
       packCount: identity.packs.length,

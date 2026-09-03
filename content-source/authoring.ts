@@ -39,11 +39,37 @@ export type Authored<TDefinition extends DefinitionHeader> = Readonly<{
 }> &
   Omit<TDefinition, 'schemaVersion' | 'packId' | 'enabled'>;
 
-// 一個 domain 檔案的匯出形狀。Compiler 逐檔讀 `definitions`。
+// ── 本地化（作者層）──────────────────────────────────────────────────────
+//
+// 本遊戲出貨的語系。加一個語系 = 在這裡加一筆，然後 `LocalizedName` 會**強制**每一個既有名稱
+// 都補上該語系——漏翻譯是編譯錯誤，不是執行期的空白畫面。
+export const SUPPORTED_LOCALES = ['zh-Hant', 'en'] as const;
+export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
+
+// 一個名稱的全語系寫法。刻意用**非 optional 的具名欄位**而不是 `Record<string, string>`：
+// 後者可以只填一半而編譯器不會說話，那正是規範 §「一個 Func 一張表」要避免的「不適用與忘了填
+// 分不出來」。這裡兩個欄位都必填，所以「加了中文忘了英文」在 tsc 就爆。
+export type LocalizedName = Readonly<Record<SupportedLocale, string>>;
+
+// 作者層的一筆文字。`key` 是 Definition 的 `nameRef.key`，由 `textKeyFor()` 產生。
+export type AuthoredText = Readonly<{
+  key: string;
+  name: LocalizedName;
+}>;
+
+// nameRef key 的唯一產生方式。機械式從 Definition ID 導出，因此 Compiler 能反過來驗證
+// 「每一個 nameRef 都有對應文字、每一筆文字都有人引用」——手打 key 就沒有這個保證。
+export function textKeyFor(definitionId: string): string {
+  return `text.${definitionId}.name`;
+}
+
+// 一個 domain 檔案的匯出形狀。Compiler 逐檔讀 `definitions` 與 `texts`。
 export type AuthoredDomain = Readonly<{
   // 產物檔名（`content/<culture>/<domain>.json`）。同一個 pack 內不得重複。
   domain: string;
   definitions: readonly Authored<DefinitionHeader>[];
+  // 本 domain 宣告的顯示文字。Compiler 依語系拆成 `content/locale/<locale>/<pack>.json`。
+  texts?: readonly AuthoredText[];
 }>;
 
 // ── Pack 宣告 ──────────────────────────────────────────────────────────────
