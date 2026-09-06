@@ -38,7 +38,13 @@ export const IMPLEMENTED_COMBAT_TARGET_LOCALS: readonly string[] = [
   'whole-party',
   'own-front-row',
   'single-hostile',
+  // 近／中／遠：與不分距離的單體同一形狀，範圍由武器射程承載（見 target-shapes.ts 的說明）。
+  // 沒有它們，所有短兵器技能都會在「未註冊 Resolver」上失敗——玩家一招都出不了。
+  'single-hostile-melee',
+  'single-hostile-mid',
+  'single-hostile-ranged',
   'single-hostile-casting',
+  'single-hostile-casting-ranged',
   'same-column-hostiles',
 ];
 

@@ -171,7 +171,12 @@ export interface CombatResolverPort {
   // 攻擊 MXP 路由：該次技能有效傷害計入哪個 Mastery。
   resolveAttackMastery(skillId: SkillDefinitionId): MasteryId;
   // 防禦 MXP 路由：該角色開戰防具對應的 Mastery。
-  resolveDefenseMastery(characterId: CharacterId): MasteryId;
+  // 這名角色的防禦 MXP 該記進哪一項熟練度。
+  //
+  // `undefined` ＝**沒有可歸屬的防具**（赤手空拳、只穿便服）。那不是「查不到」，而是「這一份
+  // 防禦經驗沒有承載的熟練度」——回一個假的防具熟練度會讓沒穿甲的人也在練甲。
+  // 呼叫端據此**略過**該角色的這一份，不是給 0。
+  resolveDefenseMastery(characterId: CharacterId): MasteryId | undefined;
   // 敵方 AI（data-driven policy）：選招 + 目標；undefined = 無合法行動 → 視為休息。
   chooseEnemyAction(input: Readonly<{ encounter: CombatEncounter; actorId: CombatantId }>):
     | EnemyActionChoice
@@ -1136,13 +1141,26 @@ export function handleUseCombatSkill(
 
   // 技能合法性（玩家角色）：必須**學會**且**配置在目前生效的武器組**。這一關必須在取 SkillView **之前**：
   // configureWeaponSet 尚未經技能驗證 Workflow（見 messages.ts），可能把不存在的技能 ID 寫入武器組;若先
-  // getSkillView 會直接拋錯。knows() 對偽造/未學技能回 false，於此擋下。敵方（monster）用自身招式，不受限。
+  // getSkillView 會直接拋錯。敵方（monster）用自身招式，不受限。
+  //
+  // 「學會了沒」問的是**知識**那一筆（progression 的 `skill.*`），而武器組裡放的是**戰鬥招式**
+  // （combat 的 `combat-skill.*`）。兩者由 `CombatSkillDefinitionView.acquisition` 連起來；
+  // 直接拿戰鬥招式 ID 去問 knows() 永遠是 false（兩族 ID 從來不相等）。
   if (actor0.source.kind === 'character') {
     const characterId = actor0.source.characterId;
-    if (!ctx.progression.knows(characterId, cmd.skillId)) {
+    const acquisition = ctx.definitions.trySkillView(cmd.skillId)?.acquisition;
+    if (acquisition === undefined) {
+      return reject('combat/skill-definition-missing', { skillId: String(cmd.skillId) });
+    }
+    if (acquisition.kind === 'innate') {
+      // 天生招式是怪物的。角色用它＝武器組被塞了不屬於角色的招。
+      return reject('combat/skill-not-learnable', { skillId: String(cmd.skillId) });
+    }
+    if (!ctx.progression.knows(characterId, acquisition.knowledgeSkillId)) {
       return reject('combat/skill-not-learned', {
         characterId: String(characterId),
         skillId: String(cmd.skillId),
+        knowledgeSkillId: String(acquisition.knowledgeSkillId),
       });
     }
     const configuredSet = ctx.loadout
@@ -1631,9 +1649,12 @@ function computeDefenseAwards(
   const awards: Award[] = [];
   for (const [characterId, w] of perChar) {
     if (w <= 0) continue;
+    // 沒有可歸屬的防具＝這一份沒有去處。略過（不是記 0，也不是塞一個預設熟練度）。
+    const masteryId = ctx.resolvers.resolveDefenseMastery(characterId);
+    if (masteryId === undefined) continue;
     awards.push({
       characterId,
-      masteryId: ctx.resolvers.resolveDefenseMastery(characterId),
+      masteryId,
       amount: (w / totalWeight) * budget,
     });
   }

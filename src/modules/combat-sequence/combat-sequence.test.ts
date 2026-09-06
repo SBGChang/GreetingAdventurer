@@ -448,7 +448,7 @@ const cases: readonly Readonly<{ name: string; run: () => void }>[] = [
     run: () => {
       const ctx = createFixtureContext();
       const members = fixtureMembers().map((m, i) =>
-        i === 0 ? { ...m, formationCell: { floor: 0, row: 7, col: 0 } } : m,
+        i === 0 ? { ...m, formationCell: { floor: 0, row: 7, col: 1 } } : m,
       );
       const outcome = handleStartCombatSequence(
         createInitialCombatSequenceState(),
@@ -1514,7 +1514,7 @@ const cases: readonly Readonly<{ name: string; run: () => void }>[] = [
       // 只有列 1 與列 2 有人 → 排名 0 與 1 → 權重 3 與 2（不是 2 與 1）。
       const members = fixtureMembers()
         .slice(0, 2)
-        .map((m, i) => ({ ...m, formationCell: { floor: 0, row: i + 1, col: 0 } }));
+        .map((m, i) => ({ ...m, formationCell: { floor: 0, row: (i % 3) + 1, col: 1 } }));
       const first = members[0];
       const second = members[1];
       if (first === undefined || second === undefined) throw new Error('fixture members 不足');

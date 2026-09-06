@@ -1182,15 +1182,21 @@
     "kind": "shop-rule",
     "packId": "pack:yunhua",
     "permanentStockOfferCount": {
-      "max": 2,
-      "min": 1
+      "max": 10,
+      "min": 6
     },
     "priceRuleId": "price-rule.core.shop-item",
     "refreshCadenceDays": 7,
     "refreshOffsetDays": 0,
     "schemaVersion": 1,
     "shopKind": "item",
-    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.yunjing-item"
+    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.yunjing-item",
+    "stockedItemKinds": [
+      "combatConsumable",
+      "nonCombatConsumable",
+      "generalItem",
+      "material"
+    ]
   },
   {
     "clearPlayerSoldOnRefresh": true,
@@ -1200,15 +1206,18 @@
     "kind": "shop-rule",
     "packId": "pack:yunhua",
     "permanentStockOfferCount": {
-      "max": 2,
-      "min": 1
+      "max": 10,
+      "min": 6
     },
     "priceRuleId": "price-rule.core.shop-item",
     "refreshCadenceDays": 7,
     "refreshOffsetDays": 0,
     "schemaVersion": 1,
     "shopKind": "equipment",
-    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.yunjing-equipment"
+    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.yunjing-equipment",
+    "stockedItemKinds": [
+      "equipment"
+    ]
   },
   {
     "clearPlayerSoldOnRefresh": true,
@@ -1218,15 +1227,18 @@
     "kind": "shop-rule",
     "packId": "pack:yunhua",
     "permanentStockOfferCount": {
-      "max": 2,
-      "min": 1
+      "max": 10,
+      "min": 6
     },
     "priceRuleId": "price-rule.core.shop-item",
     "refreshCadenceDays": 7,
     "refreshOffsetDays": 0,
     "schemaVersion": 1,
     "shopKind": "book",
-    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.yunjing-book"
+    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.yunjing-book",
+    "stockedItemKinds": [
+      "book"
+    ]
   },
   {
     "clearPlayerSoldOnRefresh": true,
@@ -1236,15 +1248,21 @@
     "kind": "shop-rule",
     "packId": "pack:yunhua",
     "permanentStockOfferCount": {
-      "max": 2,
-      "min": 1
+      "max": 10,
+      "min": 6
     },
     "priceRuleId": "price-rule.core.shop-item",
     "refreshCadenceDays": 7,
     "refreshOffsetDays": 2,
     "schemaVersion": 1,
     "shopKind": "item",
-    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.qingcen-item"
+    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.qingcen-item",
+    "stockedItemKinds": [
+      "combatConsumable",
+      "nonCombatConsumable",
+      "generalItem",
+      "material"
+    ]
   },
   {
     "clearPlayerSoldOnRefresh": true,
@@ -1254,15 +1272,18 @@
     "kind": "shop-rule",
     "packId": "pack:yunhua",
     "permanentStockOfferCount": {
-      "max": 2,
-      "min": 1
+      "max": 10,
+      "min": 6
     },
     "priceRuleId": "price-rule.core.shop-item",
     "refreshCadenceDays": 7,
     "refreshOffsetDays": 2,
     "schemaVersion": 1,
     "shopKind": "equipment",
-    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.qingcen-equipment"
+    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.qingcen-equipment",
+    "stockedItemKinds": [
+      "equipment"
+    ]
   },
   {
     "clearPlayerSoldOnRefresh": true,
@@ -1272,15 +1293,18 @@
     "kind": "shop-rule",
     "packId": "pack:yunhua",
     "permanentStockOfferCount": {
-      "max": 2,
-      "min": 1
+      "max": 10,
+      "min": 6
     },
     "priceRuleId": "price-rule.core.shop-item",
     "refreshCadenceDays": 7,
     "refreshOffsetDays": 2,
     "schemaVersion": 1,
     "shopKind": "book",
-    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.qingcen-book"
+    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.qingcen-book",
+    "stockedItemKinds": [
+      "book"
+    ]
   },
   {
     "clearPlayerSoldOnRefresh": true,
@@ -1290,15 +1314,21 @@
     "kind": "shop-rule",
     "packId": "pack:yunhua",
     "permanentStockOfferCount": {
-      "max": 2,
-      "min": 1
+      "max": 10,
+      "min": 6
     },
     "priceRuleId": "price-rule.core.shop-item",
     "refreshCadenceDays": 7,
     "refreshOffsetDays": 4,
     "schemaVersion": 1,
     "shopKind": "item",
-    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.chengpu-item"
+    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.chengpu-item",
+    "stockedItemKinds": [
+      "combatConsumable",
+      "nonCombatConsumable",
+      "generalItem",
+      "material"
+    ]
   },
   {
     "clearPlayerSoldOnRefresh": true,
@@ -1308,15 +1338,18 @@
     "kind": "shop-rule",
     "packId": "pack:yunhua",
     "permanentStockOfferCount": {
-      "max": 2,
-      "min": 1
+      "max": 10,
+      "min": 6
     },
     "priceRuleId": "price-rule.core.shop-item",
     "refreshCadenceDays": 7,
     "refreshOffsetDays": 4,
     "schemaVersion": 1,
     "shopKind": "equipment",
-    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.chengpu-equipment"
+    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.chengpu-equipment",
+    "stockedItemKinds": [
+      "equipment"
+    ]
   },
   {
     "clearPlayerSoldOnRefresh": true,
@@ -1326,15 +1359,18 @@
     "kind": "shop-rule",
     "packId": "pack:yunhua",
     "permanentStockOfferCount": {
-      "max": 2,
-      "min": 1
+      "max": 10,
+      "min": 6
     },
     "priceRuleId": "price-rule.core.shop-item",
     "refreshCadenceDays": 7,
     "refreshOffsetDays": 4,
     "schemaVersion": 1,
     "shopKind": "book",
-    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.chengpu-book"
+    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.chengpu-book",
+    "stockedItemKinds": [
+      "book"
+    ]
   },
   {
     "clearPlayerSoldOnRefresh": true,
@@ -1344,15 +1380,21 @@
     "kind": "shop-rule",
     "packId": "pack:yunhua",
     "permanentStockOfferCount": {
-      "max": 2,
-      "min": 1
+      "max": 10,
+      "min": 6
     },
     "priceRuleId": "price-rule.core.shop-item",
     "refreshCadenceDays": 7,
     "refreshOffsetDays": 6,
     "schemaVersion": 1,
     "shopKind": "item",
-    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.chiling-item"
+    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.chiling-item",
+    "stockedItemKinds": [
+      "combatConsumable",
+      "nonCombatConsumable",
+      "generalItem",
+      "material"
+    ]
   },
   {
     "clearPlayerSoldOnRefresh": true,
@@ -1362,15 +1404,18 @@
     "kind": "shop-rule",
     "packId": "pack:yunhua",
     "permanentStockOfferCount": {
-      "max": 2,
-      "min": 1
+      "max": 10,
+      "min": 6
     },
     "priceRuleId": "price-rule.core.shop-item",
     "refreshCadenceDays": 7,
     "refreshOffsetDays": 6,
     "schemaVersion": 1,
     "shopKind": "equipment",
-    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.chiling-equipment"
+    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.chiling-equipment",
+    "stockedItemKinds": [
+      "equipment"
+    ]
   },
   {
     "clearPlayerSoldOnRefresh": true,
@@ -1380,15 +1425,18 @@
     "kind": "shop-rule",
     "packId": "pack:yunhua",
     "permanentStockOfferCount": {
-      "max": 2,
-      "min": 1
+      "max": 10,
+      "min": 6
     },
     "priceRuleId": "price-rule.core.shop-item",
     "refreshCadenceDays": 7,
     "refreshOffsetDays": 6,
     "schemaVersion": 1,
     "shopKind": "book",
-    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.chiling-book"
+    "sourcePath": "yunhua/world-city.json#shop-rule.yunhua.chiling-book",
+    "stockedItemKinds": [
+      "book"
+    ]
   },
   {
     "actionKind": "innRest",

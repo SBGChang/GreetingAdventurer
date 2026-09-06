@@ -52,6 +52,7 @@ const swordMastery: MasteryDefinition = {
   schemaVersion: 1,
   packId: PACK,
   enabled: true,
+  display: { nameRef: { key: 'text.fixture.mastery.name' } },
   curveId: LINEAR_CURVE,
   // 各級 muscle 新增值（Lv.0..Lv.10 累加）；Lv.10 累計 = 120 → 觸發 clamp 100。
   primaryAttributeGainsByLevel: [
@@ -75,6 +76,7 @@ const alchemyMastery: MasteryDefinition = {
   schemaVersion: 1,
   packId: PACK,
   enabled: true,
+  display: { nameRef: { key: 'text.fixture.mastery.name' } },
   curveId: LINEAR_CURVE,
   primaryAttributeGainsByLevel: [
     { intelligence: 1 },
@@ -156,6 +158,7 @@ export function makeFixtureReader(): ProgressionDefinitionReader {
     getExperienceAwardRule: (id) => awardRules[id] ?? (notInFixture(`award rule ${id}`) as never),
     listSocialMasteryBenefits: () => [socialBenefit],
     getSkill: (id) => notInFixture(`skill ${id}`) as never,
+    listAutomaticSkills: () => [],
     getTeachingRule: (id) => notInFixture(`teaching rule ${id}`) as never,
     getAttackMasteryAwardRule: (id) => notInFixture(`attack rule ${id}`) as never,
     getDefenseMasteryRoutingRule: (id) => notInFixture(`defense routing ${id}`) as never,

@@ -18,6 +18,16 @@ import { createProductionContextAssembler } from '../../src/app/content/context-
 import { createProductionResolverRegistry } from '../../src/app/content/resolver-registrations';
 import { createNewGame, type NewGameConfig } from '../../src/app/composition/new-game-bootstrap';
 import { createTeamQuery } from '../../src/modules/team/public';
+import { makeCombatQuery } from '../../src/modules/combat/public';
+import { createCombatDefinitionReader } from '../../src/app/content/combat-reader';
+import { createStatisticsDefinitionReader } from '../../src/app/content/statistics-reader';
+import { createStatisticsResolverPort } from '../../src/app/content/statistics-resolver-bridge';
+import {
+  createCharacterStatsQuery,
+  createCombatLoadoutQuery,
+} from '../../src/app/content/cross-module-ports';
+import type { EquipmentDefinition } from '../../src/contracts/inventory';
+import type { DefinitionId, StatisticsRuleId } from '../../src/contracts/core';
 import { MAX_FORMAL_MEMBERS } from '../../src/contracts/core';
 
 // 世界曆一年的日數。沒有月份、沒有閏年（GDD「在家休息一年 365 日」；同一個數字在
@@ -25,6 +35,7 @@ import { MAX_FORMAL_MEMBERS } from '../../src/contracts/core';
 const DAYS_PER_YEAR = 365;
 import {
   runGameCommand,
+  settleCombat,
   settleWorld,
   type ContextAssembler,
   type SettleStep,
@@ -41,6 +52,12 @@ import type {
   HomeUpgradeDefinition,
 } from '../../src/contracts/city';
 import type { FreeActionRuleDefinition, PlayerTravelModeDefinition } from '../../src/contracts/team';
+import type {
+  CombatSkillDefinitionView,
+  EncounterGroupDefinition,
+  MonsterDefinition,
+} from '../../src/contracts/combat';
+import type { MasteryDefinition } from '../../src/contracts/progression';
 import type { MapTemplateDefinition } from '../../src/contracts/map';
 import type { ItemDefinitionReader } from '../../src/contracts/inventory';
 import { createProductionEconomyQuery } from '../../src/app/content/city-context';
@@ -163,7 +180,9 @@ export type RoomExitView = Readonly<{
 export type RoomContentView = Readonly<{
   contentId: string;
   kind: string;
-  label: string;
+  // 怪群／Boss 的名字＝編組第一名成員的怪物名。寶箱與事件沒有對應的怪物，所以是 undefined，
+  // 由 UI 只顯示種類（不編一個名字出來）。
+  nameRef: LocalizedTextRef | undefined;
   available: boolean;
 }>;
 
@@ -171,7 +190,7 @@ export type RoomContentView = Readonly<{
 export type ShopOfferView = Readonly<{
   offerId: string;
   itemDefinitionId: string;
-  label: string;
+  nameRef: LocalizedTextRef;
   price: number;
   affordable: boolean;
 }>;
@@ -212,7 +231,7 @@ export type HomeView = Readonly<{
 // （見 contracts/team），所以換一份 Content Pack 就換一組可練項目，這裡不必改。
 export type TrainingOptionView = Readonly<{
   masteryId: string;
-  label: string;
+  nameRef: LocalizedTextRef;
   level: number;
   experience: number;
 }>;
@@ -249,7 +268,13 @@ export type QuestOfferView = Readonly<{
   kind: string;
   acceptDeadline: number;
   actualEndDeadline: number;
+  // 目標所在地：肅清／狩獵／救援是冒險據點，採買是這座城，送貨是目的城。
   siteNameRef: LocalizedTextRef | undefined;
+  // 目標本身：肅清／狩獵是怪物名，採買／送貨是物品名。沒有這一欄時，板上十筆「肅清」
+  // 長得一模一樣——玩家沒有任何依據挑選，那不是隨機性，是資訊沒有畫出來。
+  targetNameRef: LocalizedTextRef | undefined;
+  // 目標房間（肅清／狩獵／救援才有）。同一張圖的不同怪群靠它區分。
+  roomId: string | undefined;
   targetCount: number;
 }>;
 
@@ -259,6 +284,132 @@ export type GuildView = Readonly<{
   offers: readonly QuestOfferView[];
   // 已接取、進行中的委託（同一塊板子上看得到自己接了什麼）。
   accepted: readonly QuestOfferView[];
+}>;
+
+// ── 地牢小地圖 ───────────────────────────────────────────────────────────────
+//
+// 一層樓的平面圖。房間佔的格子來自 Template（`RoomDefinition.cells`），玩家看得見哪些房間
+// 來自 dungeon 的 `PlayerMapKnowledge`。兩個真相各自回答自己的部分，這一層只組合。
+//
+// 「未探索」不畫成空白：畫成一格灰底，讓玩家看得出「那邊還有地方」，但不透露裡面有什麼——
+// 這與 `revealedRoomIds` 的語意一致（知道有路，不知道內容）。
+export type MapCellView = Readonly<{
+  row: number;
+  col: number;
+  roomId: string;
+  revealed: boolean;
+  isCurrent: boolean;
+  isExit: boolean;
+  // 這一格所屬房間裡還有幾筆未處理的內容（只在已探索的房間有意義）。
+  contentCount: number;
+}>;
+
+export type MapFloorView = Readonly<{
+  floor: number;
+  rows: number;
+  cols: number;
+  cells: readonly MapCellView[];
+}>;
+
+// 四方向移動。`direction` 由兩個房間的**格座標**決定，不是靠連線順序猜的。
+export type MoveOptionView = Readonly<{
+  direction: 'north' | 'south' | 'west' | 'east';
+  roomId: string;
+  linkId: string;
+  kind: string;
+  open: boolean;
+  revealed: boolean;
+}>;
+
+// ── 戰鬥 ─────────────────────────────────────────────────────────────────────
+
+export type CombatantView2 = Readonly<{
+  combatantId: string;
+  side: 'player' | 'enemy';
+  nameRef: LocalizedTextRef | undefined;
+  // 角色沒有授權顯示名（L1 文字欠債），所以玩家側用執行期 ID 末段；怪物側有 nameRef。
+  fallbackLabel: string;
+  row: number;
+  col: number;
+  health: number;
+  maxHealth: number;
+  mana: number;
+  maxMana: number;
+  ctb: number;
+  state: string;
+  isCurrentActor: boolean;
+}>;
+
+export type CombatActionView = Readonly<{
+  skillId: string;
+  nameRef: LocalizedTextRef | undefined;
+  actionKind: string;
+  available: boolean;
+}>;
+
+export type CombatView = Readonly<{
+  encounterId: string;
+  state: string;
+  // 目前輪到誰。`undefined` ＝ 這場已經結束。
+  currentActorId: string | undefined;
+  // 目前行動者是玩家側時才有可選行動；敵方回合由引擎自己推進（settleCombat）。
+  actions: readonly CombatActionView[];
+  combatants: readonly CombatantView2[];
+  // 出手順序（CTB 升冪）。玩家看得到「下一個是誰」。
+  order: readonly string[];
+}>;
+
+// ── 人物 ─────────────────────────────────────────────────────────────────────
+
+export type EquippedSlotView = Readonly<{
+  slotId: string;
+  itemId: string | undefined;
+  nameRef: LocalizedTextRef | undefined;
+}>;
+
+export type WeaponSetView = Readonly<{
+  weaponSetId: string;
+  index: number;
+  isActive: boolean;
+  mainHand: EquippedSlotView;
+  offHand: EquippedSlotView;
+  // 三個招式欄位。`undefined` ＝ 這一格沒配招（不是「沒有招式可配」）。
+  skills: readonly (CombatActionView | undefined)[];
+}>;
+
+export type MasteryLevelView = Readonly<{
+  masteryId: string;
+  nameRef: LocalizedTextRef;
+  level: number;
+  experience: number;
+}>;
+
+export type CharacterSheetView = Readonly<{
+  characterId: string;
+  archetypeNameRef: LocalizedTextRef | undefined;
+  sex: string;
+  ageYears: number;
+  health: number;
+  maxHealth: number;
+  mana: number;
+  maxMana: number;
+  // 主屬性。它們是**熟練度的推導值**（GDD），不是可獨立配點的數字——UI 因此只顯示、不編輯。
+  primary: Readonly<Record<string, number>>;
+  armorSlots: readonly EquippedSlotView[];
+  weaponSets: readonly WeaponSetView[];
+  // 背包裡可以裝備的東西（依可裝的格位分組由 UI 決定）。
+  equipable: readonly Readonly<{
+    itemId: string;
+    nameRef: LocalizedTextRef;
+    equipmentKind: string;
+    slotIds: readonly string[];
+  }>[];
+  // 已練過的熟練度（等級或經驗大於 0）。全 0 的不列，避免 34 行全是 Lv.0。
+  masteries: readonly MasteryLevelView[];
+  // 可以配進武器組的招式：角色**已學會**（知識那一筆在 learnedKnowledgeIds 裡）且有對應的
+  // 戰鬥招式定義。配得進去不代表用得出來——啟動手是否有裝備由 configureWeaponSet 那條
+  // Workflow 驗（見 weapon-set-configuration.ts），這裡不預先過濾，否則會有兩份規則。
+  assignableSkills: readonly CombatActionView[];
 }>;
 
 export type DungeonView = Readonly<{
@@ -274,6 +425,10 @@ export type DungeonView = Readonly<{
   roomContents: readonly RoomContentView[];
   // 這張圖本版本還剩幾筆未處理的內容。
   remainingContentCount: number;
+  // 目前所在樓層的平面圖。
+  floor: MapFloorView;
+  // 四方向可走的鄰接房間（由格座標判方位，不是由連線順序）。
+  moves: readonly MoveOptionView[];
 }>;
 
 export type TravelModeView = Readonly<{
@@ -323,6 +478,10 @@ export type GameView = Readonly<{
     | undefined;
   // 只有隊伍在冒險地圖且已開始探索時才有。
   dungeon: DungeonView | undefined;
+  // 只有進行中的遭遇才有。有值時 UI 一律顯示戰鬥畫面（戰鬥期間不能做別的事）。
+  combat: CombatView | undefined;
+  // 隊長的人物頁。隨時可看，所以不綁在任何位置上。
+  sheet: CharacterSheetView | undefined;
 }>;
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -433,12 +592,46 @@ function projectGuild(
         : quest.objective.kind === 'hunt'
           ? quest.objective.bossContentIds.length
           : 1;
+
+    // 目標內容（怪群／Boss／被擄者）：取第一筆，由它反查怪物名與所在房間。
+    const contentId =
+      quest.objective.kind === 'suppression'
+        ? quest.objective.targetContentIds[0]
+        : quest.objective.kind === 'hunt'
+          ? quest.objective.bossContentIds[0]
+          : quest.objective.kind === 'rescue'
+            ? quest.objective.contentId
+            : undefined;
+    const content = contentId === undefined ? undefined : state.map.contents[contentId];
+
+    // 採買／送貨的目標是一件貨。送貨還要說「送去哪」——那是目的城，不是據點。
+    const itemId =
+      quest.objective.kind === 'purchase' || quest.objective.kind === 'delivery'
+        ? quest.objective.itemId
+        : undefined;
+    const item = itemId === undefined ? undefined : state.inventory.items[itemId];
+    const destination =
+      quest.objective.kind === 'delivery'
+        ? requireData<CityNodeDefinition>(
+            registry,
+            String(quest.objective.destinationCityId),
+            '目的城市',
+          ).display.nameRef
+        : undefined;
+
     return {
       questId: String(quest.questId),
       kind: quest.kind,
       acceptDeadline: Number(quest.acceptDeadline),
       actualEndDeadline: Number(quest.actualEndDeadline),
-      siteNameRef: site?.display.nameRef,
+      siteNameRef: destination ?? site?.display.nameRef,
+      targetNameRef:
+        content !== undefined
+          ? monsterNameRefOf(registry, content)
+          : item !== undefined
+            ? createItemDefinitionReader(registry).getItem(item.definitionId).display.nameRef
+            : undefined,
+      roomId: content === undefined ? undefined : String(content.position.roomId),
       targetCount: targets,
     };
   };
@@ -532,8 +725,7 @@ function projectTrainings(
       const current = progress?.masteries[mid];
       return {
         masteryId: String(mid),
-        // 熟練度顯示名尚未授權（L1 文字欠債，同物品）：顯示識別碼末段，不編造名字。
-        label: String(mid).split('.').slice(2).join('.'),
+        nameRef: requireData<MasteryDefinition>(registry, String(mid), '熟練度').display.nameRef,
         level: current?.level ?? 0,
         experience: current?.experience ?? 0,
       };
@@ -632,8 +824,324 @@ function projectHome(
   };
 }
 
+// 一筆地圖內容的「怪物名」。內容的 payload 指向 EncounterGroup，編組的第一名成員就是這一群的
+// 代表怪（swarm 是同一隻重複 8 次，boss 只有一隻）。編組本身沒有 display——它是「幾隻、站哪裡」
+// 的編排，名字屬於怪物，所以這裡投影怪物的 nameRef，不另外替編組發明一個名字。
+function monsterNameRefOf(
+  registry: DefinitionRegistry,
+  content: Readonly<{ payload: unknown }>,
+): LocalizedTextRef | undefined {
+  const payload = content.payload as { encounterGroupId?: unknown };
+  const groupId = payload.encounterGroupId;
+  if (typeof groupId !== 'string') return undefined;
+  const group = registry.get(groupId as never);
+  if (group === undefined) return undefined;
+  const memberIds = (group.data as unknown as EncounterGroupDefinition).memberDefinitionIds;
+  const first = memberIds[0];
+  if (first === undefined) return undefined;
+  const monster = registry.get(first as never);
+  if (monster === undefined) return undefined;
+  return (monster.data as unknown as MonsterDefinition).display.nameRef;
+}
+
 // 地牢畫面投影。地形來自 Template（房間與連線）、門的開關來自 map Slice、已揭露房間來自
 // dungeon Slice——三個真相來源各自回答自己的部分，這一層只組合，不決定。
+// 一層樓的平面圖 ＋ 四方向出口。
+//
+// 房間佔哪些格子是 Template 的事實（`RoomDefinition.cells`）；哪些房間看得見是 dungeon 的事實
+// （`PlayerMapKnowledge.revealedRoomIds`）。方位由**格座標**算：兩個房間的代表格誰在上下左右。
+// 用座標而不是用連線的宣告順序，換一張圖也不會把「北」畫成「西」。
+function projectFloor(
+  template: MapTemplateDefinition,
+  floorNo: number,
+  currentRoomId: string,
+  revealed: ReadonlySet<string>,
+  exitRoomIds: ReadonlySet<string>,
+  contentCountByRoom: ReadonlyMap<string, number>,
+): MapFloorView {
+  const cells: MapCellView[] = [];
+  let maxRow = 0;
+  let maxCol = 0;
+  for (const room of template.rooms) {
+    if (room.floor !== floorNo) continue;
+    const roomId = String(room.roomId);
+    for (const cell of room.cells) {
+      maxRow = Math.max(maxRow, cell.row);
+      maxCol = Math.max(maxCol, cell.col);
+      cells.push({
+        row: cell.row,
+        col: cell.col,
+        roomId,
+        revealed: revealed.has(roomId),
+        isCurrent: roomId === currentRoomId,
+        isExit: exitRoomIds.has(roomId),
+        contentCount: contentCountByRoom.get(roomId) ?? 0,
+      });
+    }
+  }
+  return { floor: floorNo, rows: maxRow, cols: maxCol, cells };
+}
+
+// 房間的代表格：取最小 (row, col)。L 形／凹形房間也因此有一個穩定的錨點。
+function roomAnchor(
+  template: MapTemplateDefinition,
+  roomId: string,
+): Readonly<{ row: number; col: number }> | undefined {
+  const room = template.rooms.find((r) => String(r.roomId) === roomId);
+  if (room === undefined) return undefined;
+  let best: { row: number; col: number } | undefined;
+  for (const cell of room.cells) {
+    if (best === undefined || cell.row < best.row || (cell.row === best.row && cell.col < best.col)) {
+      best = { row: cell.row, col: cell.col };
+    }
+  }
+  return best;
+}
+
+// 兩個房間的相對方位。row 往下增（南），col 往右增（東）——與 `cells` 的座標一致。
+// 同列同欄（跨樓層的樓梯）不是四方向之一，回 undefined 由呼叫端排除。
+function directionOf(
+  from: Readonly<{ row: number; col: number }>,
+  to: Readonly<{ row: number; col: number }>,
+): MoveOptionView['direction'] | undefined {
+  const dRow = to.row - from.row;
+  const dCol = to.col - from.col;
+  if (dRow === 0 && dCol === 0) return undefined;
+  // 主要位移的那一軸決定方位；相等時以垂直優先（任一選擇都可，重點是決定性）。
+  if (Math.abs(dRow) >= Math.abs(dCol)) return dRow < 0 ? 'north' : 'south';
+  return dCol < 0 ? 'west' : 'east';
+}
+
+// ── 戰鬥投影 ─────────────────────────────────────────────────────────────────
+
+function projectCombat(
+  state: GameState,
+  registry: DefinitionRegistry,
+  resolvers: ResolverRegistry,
+  teamId: GameState['team']['playerTeamId'],
+): CombatView | undefined {
+  // 這支隊伍進行中的遭遇。結算完成（resolved）的不再顯示——那時該回到地牢畫面。
+  const encounter = Object.values(state.combat.encounters).find(
+    (e) => String(e.playerTeamId) === String(teamId) && e.state !== 'resolved',
+  );
+  if (encounter === undefined) return undefined;
+
+  const itemReader = createItemDefinitionReader(registry);
+  const combatDefinitions = createCombatDefinitionReader(registry);
+  const query = makeCombatQuery(state.combat, {
+    definitions: combatDefinitions,
+    loadout: createCombatLoadoutQuery(state.inventory, itemReader),
+    progression: makeProgressionQuery(state.progression, createProgressionDefinitionReader(registry)),
+  });
+
+  const currentActorId = encounter.currentActorId;
+  const actorIsPlayer =
+    currentActorId !== undefined && encounter.combatants[currentActorId]?.side === 'player';
+
+  const actions: CombatActionView[] =
+    currentActorId === undefined || !actorIsPlayer
+      ? []
+      : query.getAvailableActions(encounter.encounterId, currentActorId).map((o) => ({
+          skillId: String(o.skillId),
+          nameRef: skillNameRefOf(registry, String(o.skillId)),
+          actionKind: o.actionKind,
+          available: o.available,
+        }));
+
+  const combatants: CombatantView2[] = Object.values(encounter.combatants).map((c) => ({
+    combatantId: String(c.combatantId),
+    side: c.side,
+    nameRef:
+      c.source.kind === 'monster'
+        ? requireData<MonsterDefinition>(registry, String(c.source.monsterDefinitionId), '怪物')
+            .display.nameRef
+        : undefined,
+    // 角色顯示名尚未授權（L1 文字欠債）：顯示執行期 ID 末段，不編造名字。
+    fallbackLabel: String(c.combatantId).split('~').slice(-1)[0] ?? String(c.combatantId),
+    row: c.anchorCell.row,
+    col: c.anchorCell.col,
+    health: c.health,
+    maxHealth: c.maxHealth,
+    mana: c.mana,
+    maxMana: c.maxMana,
+    ctb: c.currentCtb,
+    state: c.state,
+    isCurrentActor: String(c.combatantId) === String(currentActorId),
+  }));
+
+  return {
+    encounterId: String(encounter.encounterId),
+    state: encounter.state,
+    currentActorId: currentActorId === undefined ? undefined : String(currentActorId),
+    actions,
+    combatants,
+    order: query.getCtbOrder(encounter.encounterId).map(String),
+  };
+}
+
+// 戰鬥招式的顯示名：`combat-skill.*` 沒有 display，名字住在它連到的**知識**那一筆
+// （`skill.*` 也沒有 display）——兩族都還沒授權文字，所以這裡回 undefined，由 UI 顯示 local 名。
+// 這是已知的 L1 文字欠債（161 筆技能），不是這一層可以就地補的。
+function skillNameRefOf(registry: DefinitionRegistry, skillId: string): LocalizedTextRef | undefined {
+  const def = registry.get(skillId as never);
+  if (def === undefined) return undefined;
+  const display = (def.data as { display?: { nameRef?: LocalizedTextRef } }).display;
+  return display?.nameRef;
+}
+
+// ── 人物頁投影 ───────────────────────────────────────────────────────────────
+
+function projectSheet(
+  state: GameState,
+  registry: DefinitionRegistry,
+  resolvers: ResolverRegistry,
+  teamId: GameState['team']['playerTeamId'],
+): CharacterSheetView | undefined {
+  const team = state.team.teams[teamId];
+  const characterId = team?.leaderId;
+  if (characterId === undefined) return undefined;
+  const character = state.character.characters[characterId];
+  if (character === undefined) return undefined;
+
+  const itemReader = createItemDefinitionReader(registry);
+  const loadout = state.inventory.equipmentLoadouts[characterId];
+  const progress = state.progression.characterProgress[characterId];
+
+  const nameRefOfItem = (itemId: string | undefined): LocalizedTextRef | undefined => {
+    if (itemId === undefined) return undefined;
+    const item = state.inventory.items[itemId as never];
+    if (item === undefined) return undefined;
+    return itemReader.getItem(item.definitionId).display.nameRef;
+  };
+  const slot = (slotId: string, itemId: string | undefined): EquippedSlotView => ({
+    slotId,
+    itemId,
+    nameRef: nameRefOfItem(itemId),
+  });
+
+  // 防具格：以**內容宣告過的格位**為準（所有裝備的 occupiedSlots 聯集扣掉雙手），
+  // 而不是在這裡列一份寫死的格位清單——換一份 Pack 就換一組格位。
+  const handSlotIds = new Set<string>();
+  const armorSlotIds = new Set<string>();
+  for (const d of registry.list({ kinds: ['equipment'] })) {
+    const eq = d.data as unknown as EquipmentDefinition;
+    if (eq.equipmentKind === 'armor') for (const sid of eq.occupiedSlots) armorSlotIds.add(String(sid));
+    else for (const sid of eq.occupiedSlots) handSlotIds.add(String(sid));
+  }
+  const armorSlots = [...armorSlotIds]
+    .sort()
+    .map((sid) => slot(sid, loadout === undefined ? undefined : String(loadout.armorSlots[sid as never] ?? '') || undefined));
+
+  const weaponSets: WeaponSetView[] = (loadout?.weaponSets ?? []).map((ws, index) => ({
+    weaponSetId: String(ws.weaponSetId),
+    index,
+    // 「目前生效」由 character 的戰鬥快照決定，而戰鬥外沒有生效組——第一組即預設。
+    isActive: index === 0,
+    mainHand: slot('mainHand', ws.mainHandItemId === undefined ? undefined : String(ws.mainHandItemId)),
+    offHand: slot('offHand', ws.offHandItemId === undefined ? undefined : String(ws.offHandItemId)),
+    skills: ws.selectedSkillIds.map((sid) =>
+      sid === undefined
+        ? undefined
+        : {
+            skillId: String(sid),
+            nameRef: skillNameRefOf(registry, String(sid)),
+            actionKind: '',
+            available: true,
+          },
+    ),
+  }));
+
+  const equipable = Object.values(state.inventory.items)
+    .filter(
+      (i) => i.location.kind === 'characterBag' && String(i.location.characterId) === String(characterId),
+    )
+    .map((i) => ({ item: i, def: itemReader.getItem(i.definitionId) }))
+    .filter((x) => x.def.kind === 'equipment')
+    .map(({ item, def }) => {
+      const eq = itemReader.getEquipment(item.definitionId);
+      return {
+        itemId: String(item.itemId),
+        nameRef: def.display.nameRef,
+        equipmentKind: eq.equipmentKind,
+        slotIds: eq.occupiedSlots.map(String),
+      };
+    })
+    .sort((a, b) => a.itemId.localeCompare(b.itemId));
+
+  const masteries: MasteryLevelView[] = Object.values(progress?.masteries ?? {})
+    .filter((m) => m.experience > 0 || m.level > 0)
+    .map((m) => ({
+      masteryId: String(m.masteryId),
+      nameRef: requireData<MasteryDefinition>(registry, String(m.masteryId), '熟練度').display.nameRef,
+      level: m.level,
+      experience: m.experience,
+    }))
+    .sort((a, b) => b.experience - a.experience);
+
+  const stats = createCharacterStatsQuery({
+    characterState: state.character,
+    progressionState: state.progression,
+    inventoryState: state.inventory,
+    itemReader,
+    progressionReader: createProgressionDefinitionReader(registry),
+    statisticsDefinitions: createStatisticsDefinitionReader(registry),
+    statisticsResolvers: createStatisticsResolverPort(resolvers, registry),
+    // 內容裡恰好一筆 statistics-rule（同 Bootstrap 的判準）。
+    statisticsRuleId: onlyDefinitionId(registry, 'statistics-rule') as StatisticsRuleId,
+    worldDay: state.core.worldDay,
+  }).getStats(characterId);
+
+  return {
+    characterId: String(characterId),
+    archetypeNameRef: undefined,
+    sex: character.sex,
+    ageYears: Math.floor((state.core.worldDay - Number(character.birthDay)) / DAYS_PER_YEAR),
+    health: character.condition.health,
+    maxHealth: stats.maxHealth,
+    mana: character.condition.mana,
+    maxMana: stats.maxMana,
+    primary: makeProgressionQuery(
+      state.progression,
+      createProgressionDefinitionReader(registry),
+    ).getPrimaryAttributes(characterId) as unknown as Readonly<Record<string, number>>,
+    armorSlots,
+    weaponSets,
+    equipable,
+    masteries,
+    assignableSkills: assignableSkillsOf(registry, progress?.learnedKnowledgeIds ?? []),
+  };
+}
+
+// 已學知識 → 對應的戰鬥招式。連結的方向是 `combat-skill → skill`
+// （`CombatSkillDefinitionView.acquisition.knowledgeSkillId`），所以反查要掃一次戰鬥招式。
+// 依 ID 排序，讓清單順序在重播中固定。
+function assignableSkillsOf(
+  registry: DefinitionRegistry,
+  learned: readonly DefinitionId[],
+): readonly CombatActionView[] {
+  const known = new Set(learned.map(String));
+  return registry
+    .list({ kinds: ['combat-skill'] })
+    .map((d) => ({ id: String(d.id), view: d.data as unknown as CombatSkillDefinitionView }))
+    .filter(({ view }) => view.acquisition.kind === 'learned' && known.has(String(view.acquisition.knowledgeSkillId)))
+    .map(({ id, view }) => ({
+      skillId: id,
+      nameRef: skillNameRefOf(registry, id),
+      actionKind: view.actionKind,
+      available: true,
+    }))
+    .sort((a, b) => a.skillId.localeCompare(b.skillId));
+}
+
+// 某個 kind 裡**恰好一筆**定義的 id。缺或重複都是內容錯，明確拋——不挑第一筆。
+function onlyDefinitionId(registry: DefinitionRegistry, kind: string): string {
+  const found = registry.list({ kinds: [kind] });
+  if (found.length !== 1) {
+    throw new Error(`game-facade：期望恰好一筆 "${kind}"，實得 ${found.length}`);
+  }
+  return String(found[0]!.id);
+}
+
 function projectDungeon(
   state: GameState,
   registry: DefinitionRegistry,
@@ -681,17 +1189,51 @@ function projectDungeon(
   const roomContents: RoomContentView[] = liveContents
     .filter((c) => String(c.position.roomId) === current)
     .map((c) => {
-      const payload = c.payload as { encounterGroupId?: unknown };
-      const groupId = typeof payload.encounterGroupId === 'string' ? payload.encounterGroupId : undefined;
       return {
         contentId: String(c.contentId),
         kind: c.kind,
-        // 編組 ID 的最後一段（怪物 local 名）。怪物的顯示名尚未授權，所以這裡顯示的是識別碼，
-        // 不是憑空翻譯出來的名字。
-        label: groupId === undefined ? String(c.definitionId) : groupId.split('.').slice(2).join('.'),
+        nameRef: monsterNameRefOf(registry, c),
         available: c.state === 'available',
       };
     });
+
+  // 每個房間還剩幾筆內容（小地圖上顯示為一個小數字）。
+  const contentCountByRoom = new Map<string, number>();
+  for (const c of liveContents) {
+    const rid = String(c.position.roomId);
+    contentCountByRoom.set(rid, (contentCountByRoom.get(rid) ?? 0) + 1);
+  }
+
+  const currentFloor =
+    template.rooms.find((r) => String(r.roomId) === current)?.floor ?? template.rooms[0]?.floor ?? 1;
+  const floor = projectFloor(
+    template,
+    currentFloor,
+    current,
+    revealed,
+    new Set(template.exitRoomIds.map(String)),
+    contentCountByRoom,
+  );
+
+  // 四方向出口：由格座標判方位。同一方向有兩條路時保留先宣告的那一條（決定性）。
+  const here = roomAnchor(template, current);
+  const moves: MoveOptionView[] = [];
+  const takenDirections = new Set<MoveOptionView['direction']>();
+  for (const exit of exits) {
+    const there = roomAnchor(template, exit.roomId);
+    if (here === undefined || there === undefined) continue;
+    const direction = directionOf(here, there);
+    if (direction === undefined || takenDirections.has(direction)) continue;
+    takenDirections.add(direction);
+    moves.push({
+      direction,
+      roomId: exit.roomId,
+      linkId: exit.linkId,
+      kind: exit.kind,
+      open: exit.state === 'open',
+      revealed: exit.revealed,
+    });
+  }
 
   return {
     mapId,
@@ -704,6 +1246,8 @@ function projectDungeon(
     revealedRoomCount: revealed.size,
     totalRoomCount: template.rooms.length,
     exits,
+    floor,
+    moves,
   };
 }
 
@@ -739,8 +1283,7 @@ function projectShops(
     list.push({
       offerId: String(offer.offerId),
       itemDefinitionId: String(item.definitionId),
-      // 物品顯示名尚未授權（L1 文字欠債），所以顯示的是識別碼的最後一段，不是編造的名字。
-      label: String(item.definitionId).split('.').slice(2).join('.'),
+      nameRef: definition.display.nameRef,
       price: quote.amount,
       affordable: balance >= quote.amount,
     });
@@ -843,6 +1386,8 @@ export function projectView(
   return {
     worldDay: state.core.worldDay,
     activePlanKind: activePlan?.status === 'active' ? activePlan.kind : undefined,
+    combat: projectCombat(state, registry, resolvers, playerTeamId),
+    sheet: projectSheet(state, registry, resolvers, playerTeamId),
     location,
     leader,
     memberCount: team.memberIds.length,
@@ -904,6 +1449,15 @@ export function createGame(config: NewGameConfig): GameHandle {
   let state: GameState = started.state;
   const playerTeamId = started.playerTeamId;
 
+  // 把這支隊伍進行中的遭遇推進到「輪到玩家」為止。沒有進行中的遭遇時原樣回傳。
+  const advanceCombat = (working: GameState): GameState => {
+    const encounter = Object.values(working.combat.encounters).find(
+      (e) => String(e.playerTeamId) === String(playerTeamId) && e.state !== 'resolved',
+    );
+    if (encounter === undefined) return working;
+    return settleCombat(working, encounter.encounterId, assembler).state;
+  };
+
   // 時間是動作的後果，不是玩家的一個指令——規則與理由見
   // `src/app/composition/session.ts` 的 `settleWorld`。這一層只負責把結果轉成 ViewModel。
   const runCommand = (command: GameCommand): CommandOutcome => {
@@ -912,8 +1466,11 @@ export function createGame(config: NewGameConfig): GameHandle {
     if (!result.accepted) {
       return { accepted: false, rejectionCode: result.rejection.code, view: projectView(state, registry, resolvers) };
     }
-    // 指令接受後世界立刻結算到玩家下一個決策點。
-    const settled = settleWorld(result.state, playerTeamId, assembler);
+    // 指令接受後，先把**戰鬥**推進到輪回玩家（CTB 決定誰先動，常常是怪先），
+    // 再讓世界結算到下一個決策點。順序不能反：戰鬥中的隊伍沒有 activePlan，
+    // settleWorld 什麼都不會做，而怪的回合會停在那裡沒有人推。
+    const afterCombat = advanceCombat(result.state);
+    const settled = settleWorld(afterCombat, playerTeamId, assembler);
     state = settled.state;
     return {
       accepted: true,
@@ -922,6 +1479,9 @@ export function createGame(config: NewGameConfig): GameHandle {
       blocked: settled.blocked,
     };
   };
+
+  // 開局若已在戰鬥中（存讀檔情境）同樣要先推進到玩家回合。
+  state = advanceCombat(state);
 
   return {
     view: projectView(state, registry, resolvers),

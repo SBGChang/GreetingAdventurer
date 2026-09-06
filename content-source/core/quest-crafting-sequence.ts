@@ -277,6 +277,8 @@ type ReactionRow = Readonly<{
   questKind: QuestKind;
   creationChance: number;
   guildResolverLocal: string;
+  // 只有送貨要填：「送到哪一座城」由它決定（見 contracts/quest 的 destinationResolverId）。
+  destinationResolverLocal?: string;
   deadlineRuleId: QuestDeadlineRuleId;
 }>;
 
@@ -328,6 +330,7 @@ const REACTION_ROWS: readonly ReactionRow[] = [
     questKind: 'delivery',
     creationChance: 0.2,
     guildResolverLocal: 'guild.local-city',
+    destinationResolverLocal: 'delivery-destination',
     deadlineRuleId: DEADLINE_RULE_IDS.purchaseDelivery,
   },
   // `escortCandidate` 沒有這一列——護衛的兩個期限「尚未定義，不自行假設」（GDD）；
@@ -341,6 +344,9 @@ const reactionRules: readonly Authored<QuestReactionRuleDefinition>[] = REACTION
   questKind: row.questKind,
   creationChance: row.creationChance,
   guildResolverId: resolver('quest', row.guildResolverLocal),
+  ...(row.destinationResolverLocal === undefined
+    ? {}
+    : { destinationResolverId: resolver('quest', row.destinationResolverLocal) }),
   deadlineRuleId: row.deadlineRuleId,
   objectiveRuleId: OBJECTIVE_RULE_IDS[row.questKind],
   rewardRuleId: REWARD_RULE_IDS[row.questKind],
@@ -531,6 +537,13 @@ export function questGenerationBindings(): readonly ResolverBinding[] {
       resolverId: resolver('quest', 'guild.random-legal-city'),
       ownerModule: QUEST_MODULE,
       shape: 'quest-guild:random-city',
+    },
+    {
+      // 送貨目的地：一座不是出發地的城（doc §2.4 的「最多相隔 2 城」是期限規則的事，
+      // 不是候選篩選；世界只有四座城，任兩座都在兩格內）。
+      resolverId: resolver('quest', 'delivery-destination'),
+      ownerModule: QUEST_MODULE,
+      shape: 'quest-destination:other-city',
     },
     ...ACTUAL_END_RANGES.map((row, i) => ({
       resolverId: resolver('quest', `actual-end.${row.local}`),

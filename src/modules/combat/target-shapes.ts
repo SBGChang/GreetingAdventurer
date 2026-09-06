@@ -7,8 +7,11 @@
 // 不讀任何 Definition，可離線逐案驗證。
 //
 // 需要額外佐料的形狀**不在**本檔（它們的實作要等對應佐料進到 ResolverContext 才誠實）：
-//   * 武器 reach（近/中/遠）：single-hostile-{melee,mid,ranged}、up-to-three-hostiles-{melee,ranged}、
-//     single-hostile-casting-ranged —— 需要行動者當前武器組的 reach（Loadout Query）。
+//   * 目標數上限（可調）：up-to-three-hostiles-{melee,ranged} —— 上限是資料（binding params）。
+//
+// **已解除的一項**：single-hostile-{melee,mid,ranged} 與 single-hostile-casting-ranged 原本列在
+// 「需要武器 reach」而未實作。但射程過濾本來就由呼叫端統一施加（見下方 PURE_TARGET_SHAPES 的
+// 說明），所以這四個 local 與不分距離的版本是同一個形狀，不需要額外佐料。
 //   * 目標守備語意（格擋中／破綻）：single-hostile-{guarding,with-guard-down} —— 需要 guard 狀態表達。
 //   * 戰鬥狀態正負判定：single-hostile-with-negative-status —— 需要 combat-status 定義的 valence。
 //   * 反擊流程當下才知道攻擊者：blocked-melee-attacker、self-after-block —— 由 §8.4 反擊解析直接指定
@@ -174,7 +177,11 @@ export type PureTargetLocal =
   | 'whole-party'
   | 'own-front-row'
   | 'single-hostile'
+  | 'single-hostile-melee'
+  | 'single-hostile-mid'
+  | 'single-hostile-ranged'
   | 'single-hostile-casting'
+  | 'single-hostile-casting-ranged'
   | 'same-column-hostiles';
 
 // 非 Partial：新增一個 PureTargetLocal 而忘了給實作，就是編譯錯誤（規範「非 Partial dispatch table」）。
@@ -185,6 +192,18 @@ export const PURE_TARGET_SHAPES: Readonly<Record<PureTargetLocal, TargetShapeFn>
   'whole-party': wholeParty,
   'own-front-row': ownFrontRow,
   'single-hostile': singleHostile,
+  // 近／中／遠三個距離帶與不分距離的單體**是同一個形狀**：可及範圍由**行動者的武器射程**
+  // 決定，而射程過濾已經由 `resolveSkillTargets` 的呼叫端統一施加
+  //（combat-resolver-bridge：`filterByReach(..., input.actorReachCells, candidates)`，
+  //  其中 actorReachCells ＝ 武器射程 ＋ 招式 extraReachCells）。
+  //
+  // 也就是說「近距離單體」不是一個獨立的幾何規則，而是「拿短兵器時單體打得到的範圍」。
+  // 為它們各寫一個會把同一件事寫三遍，而且三份都得自己重算一次距離——那正是本檔開頭
+  // 「不要自己寫距離」要避免的。這裡讓三個 local 指向同一個形狀，語意由射程資料承載。
+  'single-hostile-melee': singleHostile,
+  'single-hostile-mid': singleHostile,
+  'single-hostile-ranged': singleHostile,
   'single-hostile-casting': singleHostileCasting,
+  'single-hostile-casting-ranged': singleHostileCasting,
   'same-column-hostiles': sameColumnHostiles,
 };

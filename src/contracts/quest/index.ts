@@ -59,6 +59,10 @@ export type QuestReactionRuleDefinition = DefinitionHeader<QuestReactionRuleId> 
   questKind: QuestKind;
   creationChance: number;
   guildResolverId: ResolverId;
+  // 送貨的**目的地**由誰決定。只有 `questKind: 'delivery'` 需要——貼在哪裡（guildResolverId）
+  // 與送到哪裡是兩件事，把它們合成一個欄位就說不出「在雲京接、送去青岑」。
+  // 其他種類不填；填了即為資料錯（由 Handler 的 typed rejection 擋）。
+  destinationResolverId?: ResolverId;
   deadlineRuleId: QuestDeadlineRuleId;
   objectiveRuleId: QuestObjectiveRuleId;
   rewardRuleId: QuestRewardRuleId;

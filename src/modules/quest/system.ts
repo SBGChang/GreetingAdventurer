@@ -31,6 +31,7 @@ import type {
   Revision,
   TeamId,
   WorldDay,
+  FacilityDefinitionId,
 } from '../../contracts/core';
 import type {
   NpcQuestClaimState,
@@ -50,6 +51,7 @@ import type {
 } from '../../contracts/quest';
 
 // 跨模組引用（僅型別 import；外送命令一律用接收模組契約的真實型別）。
+import type { CityStockItemAvailable } from '../../contracts/city';
 import type {
   MapContentGenerated,
   MapContentKind,
@@ -126,6 +128,11 @@ export interface QuestIdAllocator {
 // 生成期的兩個 Resolver（都由內容的規則指名 resolverId）：
 //   * guild        這筆委託貼在哪座城的公會（local-city／random-legal-city…）
 //   * actualEnd    從接取期限起算，還有幾天可以完成
+// 這座城的冒險者公會設施。送貨的收貨點要用它。窄到只回一個 id：quest 不需要知道城裡還有什麼。
+export interface QuestCityPort {
+  getGuildFacilityId(cityId: CityId): FacilityDefinitionId | undefined;
+}
+
 export interface QuestGenerationResolverPort {
   resolveGuildCity(
     input: Readonly<{ resolverId: ResolverId; mapId: MapInstanceId; rngContext: RngContext }>,
@@ -133,6 +140,10 @@ export interface QuestGenerationResolverPort {
   resolveActualEndDays(
     input: Readonly<{ resolverId: ResolverId; rngContext: RngContext }>,
   ): RngStep<number>;
+  // 送貨目的地：一座**不是出發地**的城。
+  resolveDeliveryDestination(
+    input: Readonly<{ resolverId: ResolverId; excludeCityId: CityId; rngContext: RngContext }>,
+  ): RngStep<CityId>;
 }
 
 export type QuestGenerationContext = QuestHandlerContext &
@@ -141,6 +152,7 @@ export type QuestGenerationContext = QuestHandlerContext &
     rng: DeterministicRng;
     rngContext: RngContext;
     resolvers: QuestGenerationResolverPort;
+    cities: QuestCityPort;
   }>;
 
 export type QuestHandlerResult = ModuleOutcome<QuestState>;
@@ -734,6 +746,119 @@ function objectiveFor(kind: QuestKind, content: MapContentView): QuestObjective 
     case 'exploration':
       return undefined;
   }
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// §5.3 DomainEvent 訂閱：CityStockItemAvailable（採買／送貨委託的生成入口）
+// ──────────────────────────────────────────────────────────────────────────
+//
+// doc §2.3「地圖或城市庫存物品：依資料機率形成探索、購買或送貨委託」。與地圖內容那條路
+// 對稱：城市把一件東西擺上貨架 → 對 `sourceKind: 'cityStockItem'` 的每一條規則各擲一次骰。
+//
+// 為什麼是「每一條各擲一次」而不是「挑一條」：採買（0.3）與送貨（0.2）是**兩種不同的委託**，
+// 同一件貨可以同時有人要買、有人要運。地圖內容那邊是一對一（一群怪不會同時是肅清又是狩獵），
+// 所以那裡多於一條就拋錯；這裡不是。
+export function onCityStockItemAvailable(
+  event: CityStockItemAvailable,
+  state: QuestState,
+  ctx: QuestGenerationContext,
+): ModuleResult<QuestState> {
+  let working = state;
+  const messages: Outgoing[] = [];
+  let cursor = ctx.rngContext.cursor;
+
+  for (const rule of ctx.definitions.listQuestReactionRules()) {
+    if (rule.sourceKind !== 'cityStockItem') continue;
+
+    const chanceRoll = ctx.rng.nextFloat({ ...ctx.rngContext, cursor });
+    cursor = chanceRoll.nextCursor;
+    if (chanceRoll.value >= rule.creationChance) continue;
+
+    // 貨架委託貼在**這座城**的公會（guildResolverId 仍由內容指名；地圖那條路共用同一個 Port）。
+    // 這裡沒有 mapId 可帶——`local-city` 這條規則只看地圖。所以貨架委託一律貼在貨所在的城：
+    // 那正是 `local-city` 對「城市庫存」這個來源的自然解，而且不需要另造一個 Resolver。
+    const postingCityId = event.cityId;
+
+    const deadlineRule = ctx.definitions.getQuestDeadlineRule(rule.deadlineRuleId);
+    const actualEnd = ctx.resolvers.resolveActualEndDays({
+      resolverId: deadlineRule.actualEndResolverId,
+      rngContext: { ...ctx.rngContext, cursor },
+    });
+    cursor = actualEnd.nextCursor;
+
+    let objective: QuestObjective;
+    if (rule.questKind === 'purchase') {
+      objective = { kind: 'purchase', itemId: event.itemId, shopOfferId: event.offerId };
+    } else if (rule.questKind === 'delivery') {
+      const resolverId = rule.destinationResolverId;
+      if (resolverId === undefined) {
+        throw new Error(
+          `quest：送貨規則 "${String(rule.id)}" 沒有 destinationResolverId——` +
+            `「送到哪裡」沒有人決定，這筆委託建不出來。`,
+        );
+      }
+      const destination = ctx.resolvers.resolveDeliveryDestination({
+        resolverId,
+        excludeCityId: postingCityId,
+        rngContext: { ...ctx.rngContext, cursor },
+      });
+      cursor = destination.nextCursor;
+      // 收貨地點＝目的城的冒險者公會。送貨的對口是公會而不是某間店：委託本來就是公會發的，
+      // 而「哪一間店收貨」在資料裡沒有任何欄位承載（見 QuestObjective.delivery 的 facilityId）。
+      const facilityId = ctx.cities.getGuildFacilityId(destination.value);
+      if (facilityId === undefined) {
+        throw new Error(
+          `quest：城市 "${String(destination.value)}" 沒有冒險者公會設施——送貨委託沒有收貨點。`,
+        );
+      }
+      objective = {
+        kind: 'delivery',
+        itemId: event.itemId,
+        destinationCityId: destination.value,
+        facilityId,
+      };
+    } else {
+      throw new Error(
+        `quest：規則 "${String(rule.id)}" 宣告 sourceKind='cityStockItem' 卻是 ` +
+          `questKind='${rule.questKind}'——城市貨架只生得出採買與送貨。`,
+      );
+    }
+
+    const acceptDeadline = (ctx.worldDay + deadlineRule.acceptDurationDays) as WorldDay;
+    const quest: QuestInstance = {
+      questId: ctx.ids.nextQuestId(),
+      kind: rule.questKind,
+      sourceRuleId: rule.id,
+      // 來源實體是那件貨（`EntitySourceRef` 含 ItemInstanceId）。
+      sourceId: event.itemId,
+      postingGuildCityId: postingCityId,
+      createdOnDay: ctx.worldDay,
+      acceptDeadline,
+      actualEndDeadline: (acceptDeadline + actualEnd.value) as WorldDay,
+      deadlineRolls: [actualEnd.value],
+      status: 'unaccepted',
+      participantCharacterIds: [],
+      objective,
+      progress: EMPTY_OBJECTIVE_PROGRESS,
+      rewardRuleId: rule.rewardRuleId,
+      revision: 0 as Revision,
+    };
+    working = updateQuest(working, quest);
+    messages.push(
+      emit({
+        type: 'QuestCreated',
+        questId: quest.questId,
+        kind: quest.kind,
+        sourceId: quest.sourceId,
+        deadlines: {
+          acceptDeadline: quest.acceptDeadline,
+          actualEndDeadline: quest.actualEndDeadline,
+        },
+      }),
+    );
+  }
+
+  return makeResult(working, messages);
 }
 
 export function onMapContentResolved(

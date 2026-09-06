@@ -214,6 +214,12 @@ export function createCityContext(deps: CityContextDeps): CityHandlerContext {
       listAtLocation: (location) => inventory.listAtLocation(location),
       characterOwnsItem: (characterId, itemId) => inventory.characterOwnsItem(characterId, itemId),
       isReserved: (itemId) => inventory.isReserved(itemId),
+      // `ItemDefinition.kind` 的投影。商店刷新用它比對規則的 `stockedItemKinds`。
+      getItemKind: (itemId) => {
+        const item = inventory.getItem(itemId);
+        if (item === undefined) return undefined;
+        return deps.itemReader.getItem(item.definitionId).kind;
+      },
       // `ItemDefinition.tradePolicy.tradable` 的投影——是否可交易是**內容**的宣告。
       isTradable: (itemId) => {
         const item = inventory.getItem(itemId);

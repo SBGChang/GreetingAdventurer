@@ -64,6 +64,7 @@ import type {
   ShopKind,
   ShopRuleDefinition,
 } from '../../src/contracts/city';
+import type { ItemKind } from '../../src/contracts/inventory';
 import type {
   AdventureSiteId,
   CharacterArchetypeId,
@@ -804,9 +805,19 @@ function escortRule(cityLocal: string): Authored<EscortGenerationRuleDefinition>
 
 // ── 商店刷新 ────────────────────────────────────────────────────────────────
 //
-// 【明文】`permanentStockOfferCount` 取 `{ min: 1, max: 2 }`：09_city §2.3 的契約註解逐字寫
-// 「// 第一版 1..2」。三種 `ShopKind`（item／equipment／book）對應 GDD 城市固定功能表的
-// 道具店／裝備店／書店。
+// 【第一版方案（待討論）】`permanentStockOfferCount` 取 `{ min: 6, max: 10 }`。
+//
+// 契約註解原本寫「// 第一版 1..2」，本檔也照抄了，但那個數字在**貨架沒有依店別篩選**的前提下
+// 訂的：一間店抽 1～2 件，玩家看到的是三間店各一件雜貨。加上 `stockedItemKinds` 之後每間店
+// 只從自己那幾種裡抽，1～2 件會讓「裝備店」長期只有一兩把武器——買不到能用的東西，戰鬥也就
+// 打不了（GDD §戰鬥「沒有普通攻擊」，沒武器＝沒有任何可選行動）。
+//
+// 取 6～10 的理由：雲華的永久庫存是 90 件裝備／30 件道具／19 種素材，一間店擺 6～10 件約是
+// 該類的一成，既看得到選擇又不會讓貨架變成型錄；七日刷新一次會輪到不同的貨。
+// 這是最該被平衡討論的一筆，改它只要改這一行。
+const SHOP_OFFER_COUNT = { min: 6, max: 10 } as const;
+
+// 三種 `ShopKind`（item／equipment／book）對應 GDD 城市固定功能表的道具店／裝備店／書店。
 //
 // 【第一版方案（待討論）】`refreshCadenceDays: 7`。設計來源沒有商店刷新週期。取 7 的理由：
 // 這份契約裡**唯一被文件釘住的週期**就是護衛生成的 7 日（`cadenceDays: 7` 是字面型別），
@@ -978,6 +989,18 @@ function facility(cityLocal: string, row: FacilityRow): Authored<FacilityDefinit
     : { ...base, teacherMasteryLevel: row.teacherMasteryLevel };
 }
 
+// 【明文】GDD §城市固定功能：道具店「買賣道具」、裝備店「買賣裝備」、
+// 書店「販售技能與鍛造／製作內容的基礎書籍」。三行逐字對應三個 ShopKind。
+//
+// 道具店涵蓋**四種**物品 kind：戰鬥／非戰鬥消耗品、一般物品、素材。理由是 GDD 同一行還寫
+// 「提供相關製作環境與生活熟練度訓練」——製作要材料，材料就得買得到，而雲華沒有第四種店面。
+// 非 Partial 的 Record：新增一種 ShopKind 卻沒說它賣什麼，是編譯錯誤。
+const SHOP_STOCKED_ITEM_KINDS: Readonly<Record<ShopKind, readonly ItemKind[]>> = {
+  item: ['combatConsumable', 'nonCombatConsumable', 'generalItem', 'material'],
+  equipment: ['equipment'],
+  book: ['book'],
+};
+
 function shopRuleId(cityLocal: string, shopKind: ShopKind): ShopRuleId {
   return yunhua.id<ShopRuleId>('shop-rule', `${cityLocal}-${shopKind}`);
 }
@@ -999,7 +1022,8 @@ function shopRule(cityLocal: string, shopKind: ShopKind): Authored<ShopRuleDefin
     facilityId: facilityId(cityLocal, facilityRow.local),
     refreshCadenceDays: 7,
     refreshOffsetDays: cityIndexOf(cityLocal) * 2,
-    permanentStockOfferCount: { min: 1, max: 2 },
+    stockedItemKinds: SHOP_STOCKED_ITEM_KINDS[shopKind],
+    permanentStockOfferCount: SHOP_OFFER_COUNT,
     priceRuleId: PRICE_RULE_SHOP_ITEM,
     clearPlayerSoldOnRefresh: true,
   };

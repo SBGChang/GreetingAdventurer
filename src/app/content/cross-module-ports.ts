@@ -48,6 +48,7 @@ import type {
 import type {
   CityId,
   DeterministicRng,
+  FacilityDefinitionId,
   MapInstanceId,
   ResolverId,
   RngContext,
@@ -55,6 +56,8 @@ import type {
   RngStep,
 } from '../../contracts/core';
 import { narrowedDomainReader } from './reader-adapter';
+import { createCityDefinitionReader } from './city-reader';
+import { findFacilityIdByKind } from '../../modules/city/public';
 import { runResolver, resolverContext } from './resolver-adapter';
 import type { QuestDefinitionReader } from '../../contracts/quest';
 import { createCharacterStatisticsCalculator, type StatisticsResolverPort } from '../../domain-services/statistics/public';
@@ -427,6 +430,18 @@ export function createQuestGenerationContext(
     resolvers: {
       resolveGuildCity: (input) => step<CityId>(input.resolverId, { mapId: input.mapId }, input.rngContext),
       resolveActualEndDays: (input) => step<number>(input.resolverId, {}, input.rngContext),
+      resolveDeliveryDestination: (input) =>
+        step<CityId>(input.resolverId, { excludeCityId: input.excludeCityId }, input.rngContext),
+    },
+    // 目的城的冒險者公會設施。由 city 定義投影（設施清單的擁有者是 city，不是 quest）。
+    cities: {
+      getGuildFacilityId: (cityId) => {
+        // 走窄化 Reader 而不是自己從 registry 撈：`CityDefinitionReader` 已經是「city 的定義」
+        // 這件事的正式入口，型別也由它保證（自己撈就得手寫一個結構型別去對，那正是轉型的來源）。
+        const cityDefs = createCityDefinitionReader(deps.registry);
+        const facilityId = findFacilityIdByKind(cityDefs, cityId, 'adventurerGuild');
+        return facilityId;
+      },
     },
   };
 }

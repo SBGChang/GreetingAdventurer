@@ -2,6 +2,7 @@
 
 import type {
   DefinitionHeader,
+  DisplayDefinition,
   ResolverId,
   CultureId,
   CombatRuleId,
@@ -67,7 +68,10 @@ export type MonsterSpeciesKind = 'nonHuman' | 'human';
 export type MonsterThreatRank = 'normal' | 'elite' | 'boss';
 export type MonsterBodySize = 'small' | 'medium' | 'large';
 
+// `display` 必填：玩家會在戰鬥、委託目標與掉落敘述裡看到怪物的名字。做成選填等於允許一隻
+// 沒有名字的怪出現在畫面上，而那時 UI 只能退回顯示識別碼——那正是這一輪要修掉的症狀。
 export type MonsterDefinition = DefinitionHeader & {
+  display: DisplayDefinition;
   cultureId: CultureId;
   speciesKind: MonsterSpeciesKind;
   threatRank: MonsterThreatRank;
@@ -204,8 +208,24 @@ export type ResourceCostDefinition = {
   amount: number;
 };
 
+// 這一招怎麼被取得。兩種來源在資料上是**不同的東西**，不是同一件事的選填欄位：
+//
+//   * `innate`   怪物天生的招式。沒有人「學」它，也不該出現在任何角色的已學清單裡。
+//   * `learned`  角色學得會的招式。`knowledgeSkillId` 指向 progression 的 `SkillDefinition`
+//                （`requiredMasteries` ＋ `acquisition` 住在那裡）。
+//
+// 為什麼需要這個連結：`skill` 與 `combat-skill` 是**兩個 kind**（一個管取得門檻、一個管戰鬥行為，
+// 見「一個 Func 一張表」），內容也確實各寫了 80 筆。但引擎兩邊都用同一個 `SkillDefinitionId`——
+// `knows()` 拿到的是 `skill.*`、`trySkillView()` 讀的是 `combat-skill.*`，於是**沒有任何 ID 能同時
+// 通過兩道檢查**，武器組永遠設定不起來（症狀：角色有武器卻一招都選不了）。連結補在這裡，
+// 兩張表就都不必為了對方改形狀。
+export type CombatSkillAcquisition =
+  | Readonly<{ kind: 'innate' }>
+  | Readonly<{ kind: 'learned'; knowledgeSkillId: SkillDefinitionId }>;
+
 export type CombatSkillDefinitionView = {
   skillId: SkillDefinitionId;
+  acquisition: CombatSkillAcquisition;
   activationHand: CombatActivationHand;
   weaponRequirementIds: WeaponRequirementId[];
   actionKind: CombatActionKind;

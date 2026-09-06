@@ -28,6 +28,9 @@ const skillView = (
 ): CombatSkillDefinitionView =>
   ({
     skillId,
+    // 這些 fixture 都是角色學得會的招。知識 ID 與自己同名——測試不在意連結指向誰，
+    // 只在意「必須走那條連結」，所以最短的合法值就夠。
+    acquisition: { kind: 'learned', knowledgeSkillId: skillId },
     activationHand,
     weaponRequirementIds: [],
     actionKind: 'attack',

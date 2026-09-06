@@ -68,7 +68,7 @@ import type {
   HomeInstance,
   HomeTeachingPost,
 } from '../../contracts/city';
-import type { ItemInstanceView, ItemLocation } from '../../contracts/inventory';
+import type { ItemInstanceView, ItemKind, ItemLocation } from '../../contracts/inventory';
 import type { PriceQuote } from '../../contracts/economy';
 
 import { createCityState, createCityRuntimeState } from './state';
@@ -185,6 +185,7 @@ const FACILITIES: readonly FacilityDefinition[] = [
 export const SHOP_RULE: ShopRuleDefinition = {
   ...header(SHOP_RULE_ITEM),
   shopKind: 'item',
+  stockedItemKinds: ['generalItem'],
   facilityId: FACILITY_ITEM_SHOP,
   refreshCadenceDays: 30,
   refreshOffsetDays: 3,
@@ -197,6 +198,7 @@ export const SHOP_RULE: ShopRuleDefinition = {
 export const SHOP_RULE_WITH_CATALOG: ShopRuleDefinition = {
   ...header(SHOP_RULE_BOOK_WITH_CATALOG),
   shopKind: 'book',
+  stockedItemKinds: ['book'],
   facilityId: FACILITY_ITEM_SHOP,
   refreshCadenceDays: 30,
   refreshOffsetDays: 3,
@@ -448,6 +450,8 @@ export function stubInventoryPort(
         : [],
     characterOwnsItem: (characterId, itemId) => ownerOf[String(itemId)] === characterId,
     isReserved: (itemId) => reserved.has(String(itemId)),
+    // 測試 stub：所有實體都當成一般物品。要驗「依店別篩選」的測試自己覆寫這一格。
+    getItemKind: (): ItemKind => 'generalItem',
     isTradable: () => opts.tradable ?? true,
   };
 }

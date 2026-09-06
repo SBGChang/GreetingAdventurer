@@ -1,5 +1,9 @@
 [
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.ring-saber-l0"
+    },
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "attack",
     "activationHand": "mainHand",
@@ -24,6 +28,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.ring-saber-l3"
+    },
     "actionDelayRuleId": "action-delay-rule.core.quick",
     "actionKind": "attack",
     "activationHand": "mainHand",
@@ -50,6 +58,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.ring-saber-basic"
+    },
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "guard",
     "activationHand": "mainHand",
@@ -79,6 +91,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.ring-saber-advanced"
+    },
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "attack",
     "activationHand": "mainHand",
@@ -105,6 +121,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.ring-saber-supreme"
+    },
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "guard",
     "activationHand": "mainHand",
@@ -134,6 +154,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.iron-fan-l0"
+    },
     "actionDelayRuleId": "action-delay-rule.core.quick",
     "actionKind": "attack",
     "activationHand": "mainHand",
@@ -158,6 +182,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.iron-fan-l3"
+    },
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "support",
     "activationHand": "mainHand",
@@ -185,6 +213,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.iron-fan-basic"
+    },
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "attack",
     "activationHand": "mainHand",
@@ -209,6 +241,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.iron-fan-advanced"
+    },
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "support",
     "activationHand": "mainHand",
@@ -234,6 +270,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.iron-fan-supreme"
+    },
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "guard",
     "activationHand": "mainHand",
@@ -263,6 +303,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.spear-l0"
+    },
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -289,6 +333,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.spear-l3"
+    },
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "guard",
     "activationHand": "bothHands",
@@ -318,6 +366,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.spear-basic"
+    },
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -344,6 +396,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.spear-advanced"
+    },
     "actionDelayRuleId": "action-delay-rule.core.heavy",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -369,6 +425,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.spear-supreme"
+    },
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "guard",
     "activationHand": "bothHands",
@@ -398,6 +458,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.glaive-l0"
+    },
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -422,6 +486,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.glaive-l3"
+    },
     "actionDelayRuleId": "action-delay-rule.core.heavy",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -446,6 +514,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.glaive-basic"
+    },
     "actionDelayRuleId": "action-delay-rule.core.heavy",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -472,6 +544,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.glaive-advanced"
+    },
     "actionDelayRuleId": "action-delay-rule.core.heavy",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -498,6 +574,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.glaive-supreme"
+    },
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "guard",
     "activationHand": "bothHands",
@@ -527,6 +607,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.needle-l0"
+    },
     "actionDelayRuleId": "action-delay-rule.core.quick",
     "actionKind": "attack",
     "activationHand": "mainHand",
@@ -551,6 +635,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.needle-l3"
+    },
     "actionDelayRuleId": "action-delay-rule.core.quick",
     "actionKind": "attack",
     "activationHand": "mainHand",
@@ -577,6 +665,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.needle-basic"
+    },
     "actionDelayRuleId": "action-delay-rule.core.quick",
     "actionKind": "attack",
     "activationHand": "mainHand",
@@ -601,6 +693,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.needle-advanced"
+    },
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "attack",
     "activationHand": "mainHand",
@@ -627,6 +723,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.needle-supreme"
+    },
     "actionDelayRuleId": "action-delay-rule.core.heavy",
     "actionKind": "attack",
     "activationHand": "mainHand",
@@ -651,6 +751,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.chain-weight-l0"
+    },
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "attack",
     "activationHand": "mainHand",
@@ -675,6 +779,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.chain-weight-l3"
+    },
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "attack",
     "activationHand": "mainHand",
@@ -699,6 +807,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.chain-weight-basic"
+    },
     "actionDelayRuleId": "action-delay-rule.core.quick",
     "actionKind": "support",
     "activationHand": "mainHand",
@@ -726,6 +838,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.chain-weight-advanced"
+    },
     "actionDelayRuleId": "action-delay-rule.core.heavy",
     "actionKind": "attack",
     "activationHand": "mainHand",
@@ -752,6 +868,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.chain-weight-supreme"
+    },
     "actionDelayRuleId": "action-delay-rule.core.heavy",
     "actionKind": "attack",
     "activationHand": "mainHand",
@@ -778,6 +898,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.bamboo-bow-l0"
+    },
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -802,6 +926,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.bamboo-bow-l3"
+    },
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "support",
     "activationHand": "bothHands",
@@ -827,6 +955,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.bamboo-bow-basic"
+    },
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -853,6 +985,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.bamboo-bow-advanced"
+    },
     "actionDelayRuleId": "action-delay-rule.core.heavy",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -877,6 +1013,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.bamboo-bow-supreme"
+    },
     "actionDelayRuleId": "action-delay-rule.core.heavy",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -901,6 +1041,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.repeating-crossbow-l0"
+    },
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -925,6 +1069,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.repeating-crossbow-l3"
+    },
     "actionDelayRuleId": "action-delay-rule.core.quick",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -949,6 +1097,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.repeating-crossbow-basic"
+    },
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -975,6 +1127,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.repeating-crossbow-advanced"
+    },
     "actionDelayRuleId": "action-delay-rule.core.heavy",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -1001,6 +1157,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.repeating-crossbow-supreme"
+    },
     "actionDelayRuleId": "action-delay-rule.core.heavy",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -1025,6 +1185,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.one-hand-shield-l0"
+    },
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "guard",
     "activationHand": "offHand",
@@ -1049,6 +1213,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.one-hand-shield-l3"
+    },
     "actionDelayRuleId": "action-delay-rule.core.quick",
     "actionKind": "support",
     "activationHand": "offHand",
@@ -1074,6 +1242,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.one-hand-shield-basic"
+    },
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "attack",
     "activationHand": "offHand",
@@ -1098,6 +1270,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.one-hand-shield-advanced"
+    },
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "support",
     "activationHand": "offHand",
@@ -1125,6 +1301,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.one-hand-shield-supreme"
+    },
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "guard",
     "activationHand": "offHand",
@@ -1154,6 +1334,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.two-hand-shield-l0"
+    },
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "guard",
     "activationHand": "bothHands",
@@ -1178,6 +1362,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.two-hand-shield-l3"
+    },
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "support",
     "activationHand": "bothHands",
@@ -1205,6 +1393,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.two-hand-shield-basic"
+    },
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "support",
     "activationHand": "bothHands",
@@ -1232,6 +1424,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.two-hand-shield-advanced"
+    },
     "actionDelayRuleId": "action-delay-rule.core.heavy",
     "actionKind": "attack",
     "activationHand": "bothHands",
@@ -1258,6 +1454,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.two-hand-shield-supreme"
+    },
     "actionDelayRuleId": "action-delay-rule.core.heavy",
     "actionKind": "support",
     "activationHand": "bothHands",
@@ -1285,6 +1485,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.bamboo-flute-l0"
+    },
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
@@ -1311,6 +1515,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.bamboo-flute-l3"
+    },
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
@@ -1337,6 +1545,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.bamboo-flute-basic"
+    },
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
@@ -1363,6 +1575,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.bamboo-flute-advanced"
+    },
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
@@ -1390,6 +1606,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.bamboo-flute-supreme"
+    },
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
@@ -1414,6 +1634,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.seven-string-l0"
+    },
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
@@ -1440,6 +1664,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.seven-string-l3"
+    },
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
@@ -1466,6 +1694,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.seven-string-basic"
+    },
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
@@ -1493,6 +1725,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.seven-string-advanced"
+    },
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
@@ -1520,6 +1756,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.seven-string-supreme"
+    },
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
@@ -1546,6 +1786,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.attack-magic-l0"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
@@ -1572,6 +1816,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.attack-magic-l3"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
@@ -1600,6 +1848,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.attack-magic-basic"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
@@ -1628,6 +1880,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.attack-magic-advanced"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "bothHands",
@@ -1653,6 +1909,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.attack-magic-supreme"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "bothHands",
@@ -1678,6 +1938,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.defense-magic-l0"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
@@ -1706,6 +1970,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.defense-magic-l3"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
@@ -1734,6 +2002,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.defense-magic-basic"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
@@ -1760,6 +2032,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.defense-magic-advanced"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "bothHands",
@@ -1787,6 +2063,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.defense-magic-supreme"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "bothHands",
@@ -1815,6 +2095,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.blessing-magic-l0"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
@@ -1843,6 +2127,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.blessing-magic-l3"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
@@ -1871,6 +2159,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.blessing-magic-basic"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
@@ -1899,6 +2191,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.blessing-magic-advanced"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
@@ -1927,6 +2223,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.blessing-magic-supreme"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
@@ -1955,6 +2255,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.curse-magic-l0"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
@@ -1983,6 +2287,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.curse-magic-l3"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
@@ -2011,6 +2319,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.curse-magic-basic"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
@@ -2039,6 +2351,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.curse-magic-advanced"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
@@ -2068,6 +2384,10 @@
     ]
   },
   {
+    "acquisition": {
+      "kind": "learned",
+      "knowledgeSkillId": "skill.yunhua.curse-magic-supreme"
+    },
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "bothHands",

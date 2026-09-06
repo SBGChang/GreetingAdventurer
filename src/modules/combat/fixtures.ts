@@ -176,6 +176,7 @@ function header<T extends string>(id: T) {
 function skillStrike(): CombatSkillDefinitionView {
   return {
     skillId: SKILL_STRIKE,
+    acquisition: { kind: 'learned', knowledgeSkillId: SKILL_STRIKE },
     activationHand: 'mainHand',
     weaponRequirementIds: [],
     actionKind: 'attack',
@@ -191,6 +192,7 @@ function skillStrike(): CombatSkillDefinitionView {
 function skillCounter(): CombatSkillDefinitionView {
   return {
     skillId: SKILL_COUNTER,
+    acquisition: { kind: 'learned', knowledgeSkillId: SKILL_COUNTER },
     activationHand: 'mainHand',
     weaponRequirementIds: [],
     actionKind: 'guard',
@@ -209,6 +211,7 @@ function skillCounter(): CombatSkillDefinitionView {
 function skillHeal(): CombatSkillDefinitionView {
   return {
     skillId: SKILL_HEAL,
+    acquisition: { kind: 'learned', knowledgeSkillId: SKILL_HEAL },
     activationHand: 'handless',
     weaponRequirementIds: [],
     actionKind: 'support',
@@ -224,6 +227,7 @@ function skillHeal(): CombatSkillDefinitionView {
 function skillBite(): CombatSkillDefinitionView {
   return {
     skillId: SKILL_BITE,
+    acquisition: { kind: 'learned', knowledgeSkillId: SKILL_BITE },
     activationHand: 'handless',
     weaponRequirementIds: [],
     actionKind: 'attack',
@@ -239,6 +243,7 @@ function skillBite(): CombatSkillDefinitionView {
 function skillCastDamage(): CombatSkillDefinitionView {
   return {
     skillId: SKILL_CAST_DAMAGE,
+    acquisition: { kind: 'learned', knowledgeSkillId: SKILL_CAST_DAMAGE },
     activationHand: 'handless',
     weaponRequirementIds: [],
     actionKind: 'cast', // 標成 cast，但效果是 dealDamage —— 側別須由效果推定
@@ -255,6 +260,7 @@ function skillCastDamage(): CombatSkillDefinitionView {
 function controlSkill(skillId: SkillDefinitionId, effectId: CombatEffectDefinitionId): CombatSkillDefinitionView {
   return {
     skillId,
+    acquisition: { kind: 'learned', knowledgeSkillId: skillId },
     activationHand: 'handless',
     weaponRequirementIds: [],
     actionKind: 'perform',
@@ -337,7 +343,7 @@ export const CTRL_BOSS = 'ctrl-boss' as CombatControlResistanceProfileId;
 // ── Monster / Encounter / Experience ────────────────────────────────────
 function goblin(controlResistanceProfileId: CombatControlResistanceProfileId = CTRL_NORMAL): MonsterDefinition {
   return {
-    ...header(GOBLIN_ID),
+    ...header(GOBLIN_ID),    display: { nameRef: { key: 'text.fixture.monster.name' } },
     cultureId: 'culture-wild' as never,
     speciesKind: 'nonHuman',
     threatRank: 'normal',

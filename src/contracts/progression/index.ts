@@ -27,6 +27,7 @@ import type {
   EffectDefinitionId,
   WorldDay,
   Revision,
+  DisplayDefinition,
 } from '../core';
 
 // 跨模組（sibling）：書籍分級由 Inventory 擁有；學書輸出命令由 Inventory 處理。
@@ -58,6 +59,14 @@ export interface ProgressionDefinitionReader {
   getMastery(id: MasteryId): MasteryDefinition;
   getMasteryCurve(id: MasteryCurveId): MasteryCurveDefinition;
   getSkill(id: SkillDefinitionId): SkillDefinition;
+  // `acquisition.kind === 'automatic'` 的技能。這一族要**反查**：角色的熟練度變了，
+  // 哪些技能因此達到門檻？以 id 逐筆問答不出來（沒有人知道有哪些 id）。
+  //
+  // 為什麼是這一側而不是 `MasteryDefinition.automaticKnowledgeUnlocks`：自動取得的條件寫在
+  // 技能上（`requiredMasteries` + `acquisition`），而技能是**文化內容**；反向欄位會把文化技能的
+  // ID 塞進文化無關的熟練度定義裡（見 content-source/core/progression.ts 的說明，那個欄位因此
+  // 一律留空）。兩邊都有欄位而只有一邊被讀，正是「自動取得從來沒發生過」的原因。
+  listAutomaticSkills(): readonly SkillDefinition[];
   getTeachingRule(id: TeachingRuleId): TeachingRuleDefinition;
   getExperienceAwardRule(id: ExperienceAwardRuleId): ExperienceAwardRuleDefinition;
   listSocialMasteryBenefits(): readonly SocialMasteryBenefitDefinition[];
@@ -70,8 +79,10 @@ export interface ProgressionDefinitionReader {
   getChildEducationRule(id: ChildEducationRuleId): ChildEducationRuleDefinition;
 }
 
+// `display` 必填：熟練度會出現在訓練所選單、角色面板與委託敘述裡。
 export type MasteryDefinition = DefinitionHeader<MasteryId> &
   Readonly<{
+    display: DisplayDefinition;
     curveId: MasteryCurveId;
     primaryAttributeGainsByLevel: readonly PrimaryAttributeGains[];
     automaticKnowledgeUnlocks: readonly AutomaticKnowledgeUnlock[];

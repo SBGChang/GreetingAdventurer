@@ -68,7 +68,7 @@ import type {
   RestaurantMealVariantId,
   UseDelayRuleId,
 } from '../../src/contracts/core';
-import { cultureIds, type Authored, type AuthoredDomain } from '../authoring';
+import { cultureIds, type Authored, type AuthoredDomain, type AuthoredText } from '../authoring';
 
 const yunhua = cultureIds('yunhua');
 const core = cultureIds('core');
@@ -1330,6 +1330,66 @@ const cuisineRecipes: readonly Authored<CuisineRecipeDefinition>[] = CUISINE_ROW
 // 匯出
 // ════════════════════════════════════════════════════════════════════════════
 
+// ── 顯示名 ─────────────────────────────────────────────────────────────────
+//
+// 中文逐字取自設計來源 `docs/03_content/yunhua/yunhua_content.data.mjs`
+// （`consumables.combat` / `.nonCombat` / `.general`、`materials`）；英文是這一輪授權的翻譯
+// （意譯為主，專名保留：霧篁 Mistbamboo、印塔 Seal Tower）。
+//
+// key 用**同一個** `nameRef()` 產生，不是重打一次字串——所以「有 nameRef 卻沒有文字」與
+// 「有文字卻沒人引用」兩邊都由 Compiler 檢查得到，抄錯一個字母就會在編譯期現形。
+const ITEM_TEXTS: readonly AuthoredText[] = [
+  { key: nameRef('item', 'academy-ledger').nameRef.key, name: { 'zh-Hant': '書院帳冊', en: 'Academy Ledger' } },
+  { key: nameRef('item', 'ancient-edict-fragment').nameRef.key, name: { 'zh-Hant': '古詔殘頁', en: 'Ancient Edict Fragment' } },
+  { key: nameRef('item', 'attendant-figurine').nameRef.key, name: { 'zh-Hant': '侍從陶俑', en: 'Attendant Figurine' } },
+  { key: nameRef('item', 'bronze-lamp-stand').nameRef.key, name: { 'zh-Hant': '銅燈架', en: 'Bronze Lamp Stand' } },
+  { key: nameRef('item', 'bronze-scale-weight').nameRef.key, name: { 'zh-Hant': '青銅秤砣', en: 'Bronze Scale Weight' } },
+  { key: nameRef('item', 'canal-manifest').nameRef.key, name: { 'zh-Hant': '漕運貨單', en: 'Canal Freight Manifest' } },
+  { key: nameRef('item', 'clear-miasma-pill').nameRef.key, name: { 'zh-Hant': '清瘴丸', en: 'Miasma-Clearing Pill' } },
+  { key: nameRef('item', 'cloud-pattern-paper').nameRef.key, name: { 'zh-Hant': '雲紋宣紙', en: 'Cloud-Pattern Paper' } },
+  { key: nameRef('item', 'dry-salve').nameRef.key, name: { 'zh-Hant': '祛濕膏', en: 'Damp-Drawing Salve' } },
+  { key: nameRef('item', 'five-herbs-decoction').nameRef.key, name: { 'zh-Hant': '五草湯劑', en: 'Five-Herb Decoction' } },
+  { key: nameRef('item', 'gold-wound-powder').nameRef.key, name: { 'zh-Hant': '金瘡散', en: 'Goldwound Powder' } },
+  { key: nameRef('item', 'herb-cabinet').nameRef.key, name: { 'zh-Hant': '藥材櫃', en: 'Herb Cabinet' } },
+  { key: nameRef('item', 'jade-wine-pot').nameRef.key, name: { 'zh-Hant': '青玉酒壺', en: 'Jade Wine Pot' } },
+  { key: nameRef('item', 'kiln-marked-shard').nameRef.key, name: { 'zh-Hant': '窯印陶片', en: 'Kiln-Marked Shard' } },
+  { key: nameRef('item', 'lacquered-bookshelf').nameRef.key, name: { 'zh-Hant': '漆木書架', en: 'Lacquered Bookshelf' } },
+  { key: nameRef('item', 'low-table').nameRef.key, name: { 'zh-Hant': '矮案', en: 'Low Table' } },
+  { key: nameRef('item', 'medicine-bamboo-tube').nameRef.key, name: { 'zh-Hant': '藥竹筒', en: 'Medicine Bamboo Tube' } },
+  { key: nameRef('item', 'miasma-repelling-incense').nameRef.key, name: { 'zh-Hant': '驅瘴香', en: 'Miasma-Repelling Incense' } },
+  { key: nameRef('item', 'mist-bamboo-tea-brick').nameRef.key, name: { 'zh-Hant': '霧篁茶磚', en: 'Mistbamboo Tea Brick' } },
+  { key: nameRef('item', 'red-ginseng-root').nameRef.key, name: { 'zh-Hant': '赤參根', en: 'Red Ginseng Root' } },
+  { key: nameRef('item', 'returning-heaven-paste').nameRef.key, name: { 'zh-Hant': '回天膏', en: 'Heaven-Returning Salve' } },
+  { key: nameRef('item', 'returning-origin-paste').nameRef.key, name: { 'zh-Hant': '回元膏', en: 'Origin-Restoring Salve' } },
+  { key: nameRef('item', 'seal-tower-transcript').nameRef.key, name: { 'zh-Hant': '印塔抄本', en: 'Seal Tower Transcript' } },
+  { key: nameRef('item', 'sinking-reed-bundle').nameRef.key, name: { 'zh-Hant': '沉水草束', en: 'Sunken-Reed Bundle' } },
+  { key: nameRef('item', 'sober-incense').nameRef.key, name: { 'zh-Hant': '醒神香', en: 'Waking Incense' } },
+  { key: nameRef('item', 'towerheart-elixir').nameRef.key, name: { 'zh-Hant': '鎮心靈膏', en: 'Heart-Stilling Elixir' } },
+  { key: nameRef('item', 'ward-incense-pill').nameRef.key, name: { 'zh-Hant': '護印香丸', en: 'Seal-Warding Pastille' } },
+  { key: nameRef('item', 'water-damaged-cloth-roll').nameRef.key, name: { 'zh-Hant': '濕損布卷', en: 'Water-Damaged Cloth Roll' } },
+  { key: nameRef('item', 'wax-sealed-casket').nameRef.key, name: { 'zh-Hant': '封蠟木匣', en: 'Wax-Sealed Casket' } },
+  { key: nameRef('item', 'woven-bamboo-screen').nameRef.key, name: { 'zh-Hant': '竹編屏風', en: 'Woven Bamboo Screen' } },
+  { key: nameRef('material', 'aromatic-herb').nameRef.key, name: { 'zh-Hant': '香草', en: 'Aromatic Herb' } },
+  { key: nameRef('material', 'badger-king-meat').nameRef.key, name: { 'zh-Hant': '獾王肉材', en: 'Badger King Meat' } },
+  { key: nameRef('material', 'badger-meat').nameRef.key, name: { 'zh-Hant': '獾肉', en: 'Badger Meat' } },
+  { key: nameRef('material', 'bamboo-back-hide').nameRef.key, name: { 'zh-Hant': '竹背皮', en: 'Bamboo-Back Hide' } },
+  { key: nameRef('material', 'bell-shell').nameRef.key, name: { 'zh-Hant': '鈴殼', en: 'Bell Shell' } },
+  { key: nameRef('material', 'common-herb').nameRef.key, name: { 'zh-Hant': '常見藥草', en: 'Common Herb' } },
+  { key: nameRef('material', 'fish').nameRef.key, name: { 'zh-Hant': '魚材', en: 'Fish' } },
+  { key: nameRef('material', 'frayed-seal-ink').nameRef.key, name: { 'zh-Hant': '斷符墨', en: 'Seal-Breaking Ink' } },
+  { key: nameRef('material', 'grain').nameRef.key, name: { 'zh-Hant': '穀物', en: 'Grain' } },
+  { key: nameRef('material', 'green-iron-ingot').nameRef.key, name: { 'zh-Hant': '青鐵錠', en: 'Green-Iron Ingot' } },
+  { key: nameRef('material', 'mist-bamboo').nameRef.key, name: { 'zh-Hant': '霧篁藥竹', en: 'Mistbamboo Cane' } },
+  { key: nameRef('material', 'mist-wing-powder').nameRef.key, name: { 'zh-Hant': '瘴翅粉', en: 'Miasma-Wing Powder' } },
+  { key: nameRef('material', 'official-cinnabar').nameRef.key, name: { 'zh-Hant': '官朱砂', en: 'Official Cinnabar' } },
+  { key: nameRef('material', 'red-ginseng-root').nameRef.key, name: { 'zh-Hant': '赤參根', en: 'Red Ginseng Root' } },
+  { key: nameRef('material', 'seal-ceramic-core').nameRef.key, name: { 'zh-Hant': '鎖印陶芯', en: 'Sealbound Ceramic Core' } },
+  { key: nameRef('material', 'seal-stone').nameRef.key, name: { 'zh-Hant': '印塔石', en: 'Seal Tower Stone' } },
+  { key: nameRef('material', 'sinking-reed').nameRef.key, name: { 'zh-Hant': '沉水草', en: 'Sunken Reed' } },
+  { key: nameRef('material', 'spring-ginger').nameRef.key, name: { 'zh-Hant': '藥泉薑根', en: 'Springwell Ginger' } },
+  { key: nameRef('material', 'tide-shell').nameRef.key, name: { 'zh-Hant': '潮殼', en: 'Tide Shell' } },
+];
+
 export const yunhuaItemsDomain: AuthoredDomain = {
   domain: 'items',
   definitions: [
@@ -1345,6 +1405,7 @@ export const yunhuaItemsDomain: AuthoredDomain = {
     ...handicraftRecipes,
     ...cuisineRecipes,
   ],
+  texts: ITEM_TEXTS,
 };
 
 // 本檔擁有的 kind（供 `packs.ts` 的 `declaredKinds` 交叉比對；那一欄由整合者手寫，這裡只列出

@@ -520,6 +520,8 @@ type CombatSkillDefinition = DefinitionHeader<SkillDefinitionId> &
 const monsterSlamSkill: Authored<CombatSkillDefinition> = {
   kind: KIND.skill,
   id: MONSTER_COMMON_SKILL_ID,
+  // 天生招式：怪物不「學」撞擊，它也不該出現在任何角色的已學清單上。
+  acquisition: { kind: 'innate' },
   activationHand: 'handless',
   weaponRequirementIds: [],
   actionKind: 'attack',

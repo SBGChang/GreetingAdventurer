@@ -227,6 +227,26 @@
     },
     {
       "ownerModule": "combat",
+      "resolverId": "resolver:combat.target-single-hostile-casting-ranged",
+      "shape": "combat-target:single-hostile-casting-ranged"
+    },
+    {
+      "ownerModule": "combat",
+      "resolverId": "resolver:combat.target-single-hostile-melee",
+      "shape": "combat-target:single-hostile-melee"
+    },
+    {
+      "ownerModule": "combat",
+      "resolverId": "resolver:combat.target-single-hostile-mid",
+      "shape": "combat-target:single-hostile-mid"
+    },
+    {
+      "ownerModule": "combat",
+      "resolverId": "resolver:combat.target-single-hostile-ranged",
+      "shape": "combat-target:single-hostile-ranged"
+    },
+    {
+      "ownerModule": "combat",
       "resolverId": "resolver:combat.target-whole-party",
       "shape": "combat-target:whole-party"
     },
@@ -271,6 +291,11 @@
       "paramsDefId": "integer-range-params.core.quest-actual-end-suppression-hunt",
       "resolverId": "resolver:quest.actual-end.suppression-hunt",
       "shape": "quest-actual-end:day-range"
+    },
+    {
+      "ownerModule": "quest",
+      "resolverId": "resolver:quest.delivery-destination",
+      "shape": "quest-destination:other-city"
     },
     {
       "ownerModule": "quest",

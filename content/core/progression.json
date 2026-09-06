@@ -24,6 +24,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.one-hand-weapon.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.one-hand-weapon",
     "kind": "mastery",
@@ -87,6 +92,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.two-hand-weapon.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.two-hand-weapon",
     "kind": "mastery",
@@ -150,6 +160,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.throwing-weapon.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.throwing-weapon",
     "kind": "mastery",
@@ -213,6 +228,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.shooting-weapon.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.shooting-weapon",
     "kind": "mastery",
@@ -276,6 +296,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.one-hand-staff.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.one-hand-staff",
     "kind": "mastery",
@@ -339,6 +364,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.two-hand-staff.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.two-hand-staff",
     "kind": "mastery",
@@ -392,6 +422,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.wind-instrument.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.wind-instrument",
     "kind": "mastery",
@@ -445,6 +480,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.string-instrument.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.string-instrument",
     "kind": "mastery",
@@ -508,6 +548,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.cloth-armor.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.cloth-armor",
     "kind": "mastery",
@@ -571,6 +616,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.light-armor.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.light-armor",
     "kind": "mastery",
@@ -634,6 +684,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.medium-armor.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.medium-armor",
     "kind": "mastery",
@@ -697,6 +752,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.heavy-armor.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.heavy-armor",
     "kind": "mastery",
@@ -750,6 +810,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.one-hand-shield.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.one-hand-shield",
     "kind": "mastery",
@@ -773,6 +838,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.two-hand-shield.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.two-hand-shield",
     "kind": "mastery",
@@ -796,6 +866,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.smithing.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.smithing",
     "kind": "mastery",
@@ -849,6 +924,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.tailoring.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.tailoring",
     "kind": "mastery",
@@ -902,6 +982,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.handicraft.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.handicraft",
     "kind": "mastery",
@@ -955,6 +1040,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.alchemy.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.alchemy",
     "kind": "mastery",
@@ -1008,6 +1098,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.cooking.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.cooking",
     "kind": "mastery",
@@ -1071,6 +1166,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.gathering.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.gathering",
     "kind": "mastery",
@@ -1134,6 +1234,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.social.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.social",
     "kind": "mastery",
@@ -1187,6 +1292,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.attack-magic.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.attack-magic",
     "kind": "mastery",
@@ -1240,6 +1350,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.defense-magic.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.defense-magic",
     "kind": "mastery",
@@ -1293,6 +1408,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.blessing-magic.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.blessing-magic",
     "kind": "mastery",
@@ -1346,6 +1466,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.curse-magic.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.curse-magic",
     "kind": "mastery",
@@ -1399,6 +1524,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.quest-purchase.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.quest-purchase",
     "kind": "mastery",
@@ -1422,6 +1552,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.quest-delivery.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.quest-delivery",
     "kind": "mastery",
@@ -1445,6 +1580,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.quest-escort.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.quest-escort",
     "kind": "mastery",
@@ -1468,6 +1608,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.quest-rescue.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.quest-rescue",
     "kind": "mastery",
@@ -1491,6 +1636,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.quest-exploration.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.quest-exploration",
     "kind": "mastery",
@@ -1514,6 +1664,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.quest-suppression.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.quest-suppression",
     "kind": "mastery",
@@ -1537,6 +1692,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.quest-subjugation.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.quest-subjugation",
     "kind": "mastery",
@@ -1560,6 +1720,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.map-exploration.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.map-exploration",
     "kind": "mastery",
@@ -1583,6 +1748,11 @@
   {
     "automaticKnowledgeUnlocks": [],
     "curveId": "mastery-curve.core.shared",
+    "display": {
+      "nameRef": {
+        "key": "text.mastery.core.travel.name"
+      }
+    },
     "enabled": true,
     "id": "mastery.core.travel",
     "kind": "mastery",

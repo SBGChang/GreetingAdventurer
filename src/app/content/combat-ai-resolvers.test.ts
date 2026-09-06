@@ -74,6 +74,8 @@ function makeBridge(): ReturnType<typeof createCombatResolverPort> {
       },
     } as never,
     loadout: {} as never,
+    // 本測試不觸及防禦 MXP 路由：沒有裝備定義可查（回 undefined ＝「沒有可歸屬的防具」）。
+    equipmentOf: () => undefined,
     rng: deterministicRng,
     rngContextFor: (tag: string) => ({
       worldSeed: 'ai-test-seed' as Seed,
@@ -85,9 +87,11 @@ function makeBridge(): ReturnType<typeof createCombatResolverPort> {
 
 // 一隻怪 vs 一名玩家戰鬥員的最小遭遇。
 //
-// 站位預設**雙方都在前排**：`combatDistance` 是「攻方離前排 ＋ 守方離前排 ＋ 1」
+// 站位預設**雙方都在前排（row 1）**：`combatDistance` 是「攻方離前排 ＋ 守方離前排 ＋ 1」
 //（見 modules/combat/state.ts），所以前排對前排＝1，是全場最近的距離——近戰招式打得到。
-// 把雙方都放 row 1 會得到距離 3，近戰反而構不著；這正是本測試第一版寫錯的地方。
+//
+// 格座標 **1 起算**（GRID_MIN=1；11_combat_module.md §3.3「以第 1 排為前排、第 3 排為後排」）。
+// 本檔第一版寫成 0 起算，是因為當時 `GRID_MIN` 誤設為 0——那個常數已訂正，這裡跟著回到 1。
 function encounterWith(
   monsterId: MonsterDefinitionId,
   opts: Readonly<{ playerAlive?: boolean; playerRow?: number }> = {},
@@ -113,7 +117,7 @@ function encounterWith(
     combatantId: monsterCombatantId,
     source: { kind: 'monster', monsterDefinitionId: monsterId, runtimeEnemyId: 'enemy:1' as never },
     side: 'enemy',
-    anchorCell: { floor: 0, row: 0, col: 1 },
+    anchorCell: { floor: 0, row: 1, col: 1 },
     state: 'ready',
   } as CombatantState;
   const player: CombatantState = {
@@ -121,7 +125,7 @@ function encounterWith(
     combatantId: playerCombatantId,
     source: { kind: 'character', characterId: 'character:1' as never },
     side: 'player',
-    anchorCell: { floor: 0, row: opts.playerRow ?? 0, col: 1 },
+    anchorCell: { floor: 0, row: opts.playerRow ?? 1, col: 1 },
     state: opts.playerAlive === false ? 'dead' : 'ready',
   } as CombatantState;
 
@@ -280,11 +284,11 @@ const cases: readonly Case[] = [
       };
 
       // 不限距離的格擋反擊：攻擊觸發、支援不觸發（距離不參與判定）。
-      assert(evaluate('counter-condition-block', 'attack', 0), 'block：攻擊應觸發');
-      assert(!evaluate('counter-condition-block', 'support', 0), 'block：支援不應觸發');
-      // 近戰限定（≤1）：前排對前排＝距離 1 → 觸發；守方退到 row 2 → 距離 3 → 不觸發。
-      assert(evaluate('counter-condition-melee-block', 'attack', 0), 'melee：前排對前排應觸發');
-      assert(!evaluate('counter-condition-melee-block', 'attack', 2), 'melee：後排攻擊不應觸發');
+      assert(evaluate('counter-condition-block', 'attack', 1), 'block：攻擊應觸發');
+      assert(!evaluate('counter-condition-block', 'support', 1), 'block：支援不應觸發');
+      // 近戰限定（≤1）：前排對前排（row 1）＝距離 1 → 觸發；守方退到 row 3 → 距離 3 → 不觸發。
+      assert(evaluate('counter-condition-melee-block', 'attack', 1), 'melee：前排對前排應觸發');
+      assert(!evaluate('counter-condition-melee-block', 'attack', 3), 'melee：後排攻擊不應觸發');
     },
   },
 ];

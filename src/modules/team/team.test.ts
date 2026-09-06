@@ -244,7 +244,7 @@ const cases: readonly Case[] = [
     run: () => {
       const s0 = fixtureTeamState();
       const ctx = makeContext();
-      const same: GridCell = { floor: 0, row: 0, col: 0 };
+      const same: GridCell = { floor: 0, row: 1, col: 1 };
       const placements: Record<string, GridCell> = {
         [PLAYER_LEADER_ID]: same,
         [PLAYER_MEMBER_ID]: same,
@@ -260,7 +260,7 @@ const cases: readonly Case[] = [
       const ctx = makeContext();
       // 同 row/col、不同 floor：戰鬥配置單一 3×3，floor≠0 應被擋（否則兩人重疊卻過關）。
       const placements: Record<string, GridCell> = {
-        [PLAYER_LEADER_ID]: { floor: 0, row: 1, col: 1 },
+        [PLAYER_LEADER_ID]: { floor: 0, row: 2, col: 2 },
         [PLAYER_MEMBER_ID]: { floor: 99, row: 1, col: 1 },
       };
       const r = handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, actorCharacterId: PLAYER_LEADER_ID, placements }, ctx);
@@ -275,7 +275,7 @@ const cases: readonly Case[] = [
     run: () => {
       const s0 = fixtureTeamState();
       const ctx = makeContext();
-      const placements: Record<string, GridCell> = { [PLAYER_LEADER_ID]: { floor: 0, row: 0, col: 0 } };
+      const placements: Record<string, GridCell> = { [PLAYER_LEADER_ID]: { floor: 0, row: 1, col: 1 } };
       const r = handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, actorCharacterId: PLAYER_LEADER_ID, placements }, ctx);
       assert(!r.ok && r.rejection.code === 'team/formation-benched-member', `bench rejected (got ${r.ok ? 'ok' : r.rejection.code})`);
     },
@@ -286,9 +286,9 @@ const cases: readonly Case[] = [
       const s0 = fixtureTeamState();
       const ctx = makeContext();
       const placements: Record<string, GridCell> = {
-        [PLAYER_LEADER_ID]: { floor: 0, row: 0, col: 0 },
-        [PLAYER_MEMBER_ID]: { floor: 0, row: 0, col: 1 },
-        ['char-stranger']: { floor: 0, row: 1, col: 0 },
+        [PLAYER_LEADER_ID]: { floor: 0, row: 1, col: 1 },
+        [PLAYER_MEMBER_ID]: { floor: 0, row: 1, col: 2 },
+        ['char-stranger']: { floor: 0, row: 2, col: 1 },
       };
       const r = handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, actorCharacterId: PLAYER_LEADER_ID, placements }, ctx);
       assert(!r.ok && r.rejection.code === 'team/formation-non-member', `non-member rejected (got ${r.ok ? 'ok' : r.rejection.code})`);
@@ -300,8 +300,8 @@ const cases: readonly Case[] = [
       const s0 = fixtureTeamState();
       const ctx = makeContext();
       const placements: Record<string, GridCell> = {
-        [PLAYER_LEADER_ID]: { floor: 0, row: 2, col: 2 },
-        [PLAYER_MEMBER_ID]: { floor: 0, row: 0, col: 0 },
+        [PLAYER_LEADER_ID]: { floor: 0, row: 3, col: 3 },
+        [PLAYER_MEMBER_ID]: { floor: 0, row: 1, col: 1 },
       };
       const r = ok(handleConfigureCombatFormation(s0, { type: 'configureCombatFormation', teamId: PLAYER_TEAM_ID, actorCharacterId: PLAYER_LEADER_ID, placements }, ctx));
       const f = r.result.nextSlice.combatFormations[PLAYER_TEAM_ID]!;
@@ -316,8 +316,8 @@ const cases: readonly Case[] = [
       const s0 = fixtureTeamState();
       const ctx = makeContext();
       const placements: Record<string, GridCell> = {
-        [PLAYER_LEADER_ID]: { floor: 0, row: 2, col: 2 },
-        [PLAYER_MEMBER_ID]: { floor: 0, row: 0, col: 0 },
+        [PLAYER_LEADER_ID]: { floor: 0, row: 3, col: 3 },
+        [PLAYER_MEMBER_ID]: { floor: 0, row: 1, col: 1 },
       };
       const r = handleConfigureCombatFormation(
         s0,
@@ -345,8 +345,8 @@ const cases: readonly Case[] = [
         },
       });
       const placements: Record<string, GridCell> = {
-        [PLAYER_LEADER_ID]: { floor: 0, row: 2, col: 2 },
-        [PLAYER_MEMBER_ID]: { floor: 0, row: 0, col: 0 },
+        [PLAYER_LEADER_ID]: { floor: 0, row: 3, col: 3 },
+        [PLAYER_MEMBER_ID]: { floor: 0, row: 1, col: 1 },
       };
       const r = handleConfigureCombatFormation(
         s0,
@@ -370,8 +370,8 @@ const cases: readonly Case[] = [
     run: () => {
       const s0 = fixtureTeamState();
       const placements: Record<string, GridCell> = {
-        [PLAYER_LEADER_ID]: { floor: 0, row: 2, col: 2 },
-        [PLAYER_MEMBER_ID]: { floor: 0, row: 0, col: 0 },
+        [PLAYER_LEADER_ID]: { floor: 0, row: 3, col: 3 },
+        [PLAYER_MEMBER_ID]: { floor: 0, row: 1, col: 1 },
       };
       const notLeader = handleConfigureCombatFormation(
         s0,
@@ -420,7 +420,7 @@ const cases: readonly Case[] = [
       const badResolver = stubResolverPort({
         resolveDefaultPlacement: ({ memberIds }) => {
           const out: Record<CharacterId, GridCell> = {};
-          for (const id of memberIds) out[id] = { floor: 0, row: 0, col: 0 }; // 全部塞 (0,0)
+          for (const id of memberIds) out[id] = { floor: 0, row: 1, col: 1 }; // 全部塞同一格（前排左）
           return out;
         },
       });

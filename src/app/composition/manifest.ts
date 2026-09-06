@@ -250,6 +250,8 @@ export const EVENT_SUBSCRIPTIONS_BY_TYPE: Readonly<
   FreeActionCompleted: [sub('FreeActionCompleted', 'progression')],
   // 地圖刷新生成內容 → quest 依 QuestReactionRule 決定要不要貼一筆委託（doc §2.1）。
   MapContentGenerated: [sub('MapContentGenerated', 'quest')],
+  // 貨上架 → quest 依 QuestReactionRule 決定要不要貼採買／送貨委託（doc §2.3）。
+  CityStockItemAvailable: [sub('CityStockItemAvailable', 'quest')],
   CombatDefenseMasteryEarned: [sub('CombatDefenseMasteryEarned', 'progression')],
   CombatSupportMasteryEarned: [sub('CombatSupportMasteryEarned', 'progression')],
 

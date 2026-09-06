@@ -15,9 +15,20 @@
 
 // ── 戰鬥 ────────────────────────────────────────────────────────────────────
 
-/** 戰鬥場地 3×3。格座標 row/col ∈ [GRID_MIN, GRID_MAX]。 */
-export const GRID_MIN = 0;
-export const GRID_MAX = 2;
+/**
+ * 戰鬥場地 3×3。格座標 row/col ∈ [GRID_MIN, GRID_MAX]，**1 起算**。
+ *
+ * 11_combat_module.md §3.3 逐字：「雙方各自的局部座標都以第 1 排為前排、第 3 排為後排」。
+ * 這兩個常數原本是 0／2，與文件、與所有實際擺位（Bootstrap 的隊長站位、雲華編組的
+ * `combatCell(1..3, 1..3)`）以及 combat 自己的 `backfillSide()`（以字面 1 判斷「第 1 排仍有人」）
+ * 全部相反。後果不是座標偏移而是**近戰全面失效**：
+ *
+ *   `rowsFromFront(row) = row - GRID_MIN`，前排 row 1 在 0 起算下得到 1（應為 0），
+ *   於是 `combatDistance(1,1) = 1 + 1 + 1 = 3`，而所有近戰武器與怪物天生攻擊的射程都是 1
+ *   → 前排對前排也「超出射程」→ 每隻怪每回合都因「沒有合法目標」改為休息，整場戰鬥零傷害。
+ */
+export const GRID_MIN = 1;
+export const GRID_MAX = 3;
 
 /** 同角色、同支援技能，每場戰鬥最多記 3 次熟練（doc §3.2 / §8.6）。 */
 export const SUPPORT_USE_CAP = 3;

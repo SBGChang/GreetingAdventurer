@@ -12,6 +12,11 @@
     "bodySize": "small",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.mistwing-moth.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier1-normal",
     "id": "monster.yunhua.mistwing-moth",
@@ -40,6 +45,11 @@
     "bodySize": "small",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.bamboo-back-badger.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier1-normal",
     "id": "monster.yunhua.bamboo-back-badger",
@@ -68,6 +78,11 @@
     "bodySize": "small",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.tide-shell-crab.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier1-normal",
     "id": "monster.yunhua.tide-shell-crab",
@@ -96,6 +111,11 @@
     "bodySize": "small",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.scrap-sigil-doll.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier1-normal",
     "id": "monster.yunhua.scrap-sigil-doll",
@@ -124,6 +144,11 @@
     "bodySize": "medium",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.elite",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.miasma-pouch-badger.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier1-elite",
     "id": "monster.yunhua.miasma-pouch-badger",
@@ -152,6 +177,11 @@
     "bodySize": "medium",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.elite",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.gatewater-salamander.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier1-elite",
     "id": "monster.yunhua.gatewater-salamander",
@@ -180,6 +210,11 @@
     "bodySize": "small",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.elite",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.armored-pottery-guard.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier1-elite",
     "id": "monster.yunhua.armored-pottery-guard",
@@ -208,6 +243,11 @@
     "bodySize": "large",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.boss",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.mist-bamboo-king.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier1-boss",
     "id": "monster.yunhua.mist-bamboo-king",
@@ -236,6 +276,11 @@
     "bodySize": "large",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.boss",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.sunken-weir-beast.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier1-boss",
     "id": "monster.yunhua.sunken-weir-beast",
@@ -264,6 +309,11 @@
     "bodySize": "small",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.frayed-seal-wisp.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier2-normal",
     "id": "monster.yunhua.frayed-seal-wisp",
@@ -292,6 +342,11 @@
     "bodySize": "small",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.bell-mandible-beetle.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier2-normal",
     "id": "monster.yunhua.bell-mandible-beetle",
@@ -320,6 +375,11 @@
     "bodySize": "medium",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.tower-stone-lizard.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier2-normal",
     "id": "monster.yunhua.tower-stone-lizard",
@@ -348,6 +408,11 @@
     "bodySize": "medium",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.elite",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.seal-halberd-warden.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier2-elite",
     "id": "monster.yunhua.seal-halberd-warden",
@@ -376,6 +441,11 @@
     "bodySize": "small",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.elite",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.broken-edict-scribe.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier2-elite",
     "id": "monster.yunhua.broken-edict-scribe",
@@ -404,6 +474,11 @@
     "bodySize": "large",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.boss",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.balance-seal-colossus.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier2-boss",
     "id": "monster.yunhua.balance-seal-colossus",
@@ -432,6 +507,11 @@
     "bodySize": "small",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.river-cutthroat.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier1-normal",
     "id": "monster.yunhua.river-cutthroat",
@@ -460,6 +540,11 @@
     "bodySize": "small",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.privateer-crossbow.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier1-normal",
     "id": "monster.yunhua.privateer-crossbow",
@@ -488,6 +573,11 @@
     "bodySize": "small",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.elite",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.salt-route-leader.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier1-elite",
     "id": "monster.yunhua.salt-route-leader",
@@ -516,6 +606,11 @@
     "bodySize": "small",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.normal",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.seal-tower-deserter.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier2-normal",
     "id": "monster.yunhua.seal-tower-deserter",
@@ -544,6 +639,11 @@
     "bodySize": "small",
     "controlResistanceProfileId": "combat-control-resistance-profile.core.elite",
     "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.monster.yunhua.false-seal-officer.name"
+      }
+    },
     "enabled": true,
     "experienceProfileId": "monster-experience-profile.core.tier2-elite",
     "id": "monster.yunhua.false-seal-officer",

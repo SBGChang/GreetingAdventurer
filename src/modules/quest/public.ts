@@ -64,6 +64,7 @@ export {
   handleQuestDeadline,
   // Event subscribers
   onMapContentGenerated,
+  onCityStockItemAvailable,
 
   onMapContentResolved,
   onTeamLocationChanged,
@@ -76,6 +77,7 @@ export type {
   QuestGenerationContext,
   QuestIdAllocator,
   QuestGenerationResolverPort,
+  QuestCityPort,
   QuestHandlerResult,
   QuestTeamPort,
   QuestMapContentPort,
@@ -130,6 +132,7 @@ export const questModuleContract: ModuleContract = {
   sendsInternalCommands: ['ProtectMapContent', 'CreateQuestTemporaryCharacter'],
   subscriptionHandlerIds: [
     'subscription.MapContentGenerated.quest' as EventSubscriptionId,
+    'subscription.CityStockItemAvailable.quest' as EventSubscriptionId,
     'subscription.MapContentResolved.quest' as EventSubscriptionId,
     'subscription.TeamLocationChanged.quest' as EventSubscriptionId,
     'subscription.CombatEncounterResolved.quest' as EventSubscriptionId,

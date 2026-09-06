@@ -17,6 +17,8 @@ import {
   CAPABILITIES,
   type GameHandle,
   type FacilityAction,
+  type CombatActionView,
+  type MoveOptionView,
   type GameView,
   type FacilityView,
 } from './engine/game-facade';
@@ -43,7 +45,7 @@ const DEFAULT_CONFIG: NewGameConfig = {
   startingMoney: 5000,
 };
 
-type Screen = 'city' | 'worldMap' | 'adventure' | 'shop' | 'home' | 'training' | 'tavern' | 'guild';
+type Screen = 'city' | 'worldMap' | 'adventure' | 'shop' | 'home' | 'training' | 'tavern' | 'guild' | 'sheet';
 
 // 日誌條目存**引用**，不存已翻譯字串（15_ui_application.md §10 的同一條理由：把翻譯結果存進
 // state，切語系時就換不掉了）。內容名稱以 LocalizedTextRef 帶著，render 當下才解析。
@@ -54,7 +56,7 @@ type LogEntry =
   | Readonly<{ kind: 'rested'; place: LocalizedTextRef }>
   | Readonly<{ kind: 'daysPassed'; days: number; day: number }>
   | Readonly<{ kind: 'settleBlocked'; code: string }>
-  | Readonly<{ kind: 'actionRejected'; action: LocalizedTextRef; code: string }>
+  | Readonly<{ kind: 'actionRejected'; action: string; code: string }>
   | Readonly<{ kind: 'jobBlocked'; code: string }>
   | Readonly<{ kind: 'enteredSite'; place: LocalizedTextRef }>
   | Readonly<{ kind: 'exploreStarted'; place: LocalizedTextRef }>
@@ -67,7 +69,12 @@ type LogEntry =
   | Readonly<{ kind: 'trainingStarted'; mastery: string; days: number }>
   | Readonly<{ kind: 'recruitSucceeded'; who: string }>
   | Readonly<{ kind: 'recruitFailed'; who: string }>
-  | Readonly<{ kind: 'questAccepted'; quest: string }>;
+  | Readonly<{ kind: 'questAccepted'; quest: string }>
+  | Readonly<{ kind: 'usedSkill'; skill: string }>
+  | Readonly<{ kind: 'combatRested' }>
+  | Readonly<{ kind: 'equipped'; item: string }>
+  | Readonly<{ kind: 'combatStarted'; who: string }>
+  | Readonly<{ kind: 'skillSet'; skill: string; n: number }>;
 
 type LogLine = Readonly<{ id: number; entry: LogEntry; tone: 'info' | 'ok' | 'warn' }>;
 
@@ -127,6 +134,25 @@ const S = {
     fontSize: 14,
     font: 'inherit',
   } as const,
+  barTrack: {
+    display: 'inline-block',
+    flex: 1,
+    height: 8,
+    borderRadius: 4,
+    background: '#e9ecef',
+    overflow: 'hidden',
+  } as const,
+  barFill: { display: 'block', height: '100%' } as const,
+  mapCell: {
+    width: 28,
+    height: 28,
+    borderRadius: 4,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 11,
+    fontWeight: 600,
+  } as const,
   btnGhost: {
     padding: '9px 15px',
     borderRadius: 8,
@@ -165,6 +191,11 @@ export function App(): JSX.Element {
   const [screen, setScreen] = useState<Screen>('city');
   const [shopFacilityId, setShopFacilityId] = useState<string | undefined>(undefined);
   const [trainFacilityId, setTrainFacilityId] = useState<string | undefined>(undefined);
+  // 戰鬥是兩段式選擇：先點招、再點目標。存在這裡而不是塞進 GameView——它是**畫面的**狀態，
+  // 不是世界的狀態（重新載入後不該記得你剛剛點了哪一招）。
+  const [pickedSkill, setPickedSkill] = useState<CombatActionView | undefined>(undefined);
+  // 裝備武器要指定裝到哪一組。玩家在人物頁點卡片切換；未選時用第一組（下面 view 就緒後才決定）。
+  const [pickedSetRaw, setPickedSet] = useState<string | undefined>(undefined);
   const [view, setView] = useState<GameView | undefined>(init.handle?.view);
   const [log, setLog] = useState<readonly LogLine[]>([]);
   const nextId = useState({ n: 1 })[0];
@@ -190,6 +221,11 @@ export function App(): JSX.Element {
     );
   }
   const handle = init.handle;
+  const pickedSet = pickedSetRaw ?? view.sheet?.weaponSets[0]?.weaponSetId ?? '';
+
+  // 技能顯示名尚未授權（L1 文字欠債，161 筆）：顯示識別碼末段，不編造名字。
+  // 這與物品那一批不同——物品的名字已經補完了，技能還沒有人授權。
+  const skillLocal = (skillId: string): string => skillId.split('.').slice(2).join('.');
 
   // 缺字時顯示明確的缺字標記，不顯示 key 本身也不留空——空白會讓「漏翻譯」看起來像設計。
   const text = (ref: LocalizedTextRef): string =>
@@ -204,7 +240,10 @@ export function App(): JSX.Element {
   const dispatch = (
     command: GameCommand,
     onAccepted: LogEntry | ((view: GameView) => LogEntry),
-    subject: LocalizedTextRef,
+    // 「哪個動作被拒」的標籤。**純字串**而不是 LocalizedTextRef：有些動作的主體是內容
+    // （設施名、物品名），有些是畫面本身（人物頁、戰鬥）——後者的字在 UI 文字表裡，
+    // 用 `text()` 去解會得到「缺文字」。由呼叫端先解好再傳進來。
+    subject: string,
   ): boolean => {
     const before = progress.day;
     const wasCity = progress.cityId;
@@ -231,6 +270,37 @@ export function App(): JSX.Element {
   };
 
 
+  // 改一個武器組的某一格招式。`configureWeaponSet` 是**整組覆寫**，所以要把另外兩格原樣帶回去——
+  // 只送一格會把其餘兩格清空。
+  const setWeaponSetSkills = (
+    set: NonNullable<GameView['sheet']>['weaponSets'][number],
+    slot: number,
+    skillId: string | undefined,
+  ): void => {
+    const next = set.skills.map((x, i) => (i === slot ? skillId : x?.skillId));
+    const sheet = view.sheet;
+    if (sheet === undefined) return;
+    const label =
+      skillId === undefined
+        ? t(locale, 'ui.sheet.empty')
+        : (() => {
+            const found = sheet.assignableSkills.find((x) => x.skillId === skillId);
+            return found?.nameRef !== undefined ? text(found.nameRef) : skillLocal(skillId);
+          })();
+    dispatch(
+      {
+        type: 'configureWeaponSet',
+        characterId: sheet.characterId,
+        weaponSetId: set.weaponSetId,
+        mainHandItemId: set.mainHand.itemId,
+        offHandItemId: set.offHand.itemId,
+        selectedSkillIds: next,
+      } as unknown as GameCommand,
+      { kind: 'skillSet', skill: label, n: set.index + 1 },
+      t(locale, 'ui.screen.sheet'),
+    );
+  };
+
   // 設施 → 按下去發生什麼。非 Partial 的 Record：facade 新增一種 FacilityAction 而這裡沒接，
   // 就是編譯錯誤，而不是「按了沒反應」——後者正是這份表原本是 if/else 串時發生過的事。
   const FACILITY_HANDLER: Readonly<Record<FacilityAction, (f: FacilityView) => void>> = {
@@ -238,7 +308,7 @@ export function App(): JSX.Element {
       void dispatch(
         { type: 'rest', planKind: 'cityFacilityAction' } as GameCommand,
         { kind: 'rested', place: f.nameRef },
-        f.nameRef,
+        text(f.nameRef),
       ),
     leaveCity: () => setScreen('worldMap'),
     goAdventure: () => setScreen('adventure'),
@@ -277,7 +347,7 @@ export function App(): JSX.Element {
       case 'settleBlocked':
         return t(locale, 'ui.log.settleBlocked', { code: entry.code });
       case 'actionRejected':
-        return t(locale, 'ui.log.actionRejected', { action: text(entry.action), code: entry.code });
+        return t(locale, 'ui.log.actionRejected', { action: entry.action, code: entry.code });
       case 'jobBlocked':
         return t(locale, 'ui.log.jobBlocked', { code: entry.code });
       case 'enteredSite':
@@ -290,6 +360,16 @@ export function App(): JSX.Element {
         return t(locale, 'ui.log.doorOpened');
       case 'leftDungeon':
         return t(locale, 'ui.log.leftDungeon');
+      case 'skillSet':
+        return t(locale, 'ui.log.skillSet', { skill: entry.skill, n: entry.n });
+      case 'combatStarted':
+        return t(locale, 'ui.log.combatStarted', { who: entry.who });
+      case 'usedSkill':
+        return t(locale, 'ui.log.usedSkill', { skill: entry.skill });
+      case 'combatRested':
+        return t(locale, 'ui.log.combatRested');
+      case 'equipped':
+        return t(locale, 'ui.log.equipped', { item: entry.item });
       case 'questAccepted':
         return t(locale, 'ui.log.questAccepted', { quest: entry.quest });
       case 'recruitSucceeded':
@@ -368,6 +448,17 @@ export function App(): JSX.Element {
         </div>
       </div>
 
+      {view.combat === undefined ? (
+        <div style={{ ...S.btnRow, marginBottom: 12 }}>
+          <button
+            style={screen === 'sheet' ? { ...S.btnGhost, borderColor: C.accent, color: C.accent } : S.btnGhost}
+            onClick={() => setScreen(screen === 'sheet' ? 'city' : 'sheet')}
+          >
+            {t(locale, 'ui.action.sheet')}
+          </button>
+        </div>
+      ) : null}
+
       {screen !== 'city' ? (
         <div style={S.btnRow}>
           <button style={S.btnGhost} onClick={() => setScreen('city')}>
@@ -377,7 +468,7 @@ export function App(): JSX.Element {
       ) : null}
 
       {/* ── 主城 ─────────────────────────────────────────────── */}
-      {screen === 'city' && city !== undefined ? (
+      {view.combat === undefined && screen === 'city' && city !== undefined ? (
         <>
           <h2 style={{ fontSize: 15, margin: '0 0 10px' }}>{t(locale, 'ui.screen.city')}</h2>
           <div style={S.grid}>
@@ -418,7 +509,7 @@ export function App(): JSX.Element {
       ) : null}
 
       {/* ── 世界地圖 ──────────────────────────────────────────── */}
-      {screen === 'worldMap' && city !== undefined ? (
+      {view.combat === undefined && screen === 'worldMap' && city !== undefined ? (
         <WorldMap
           locale={locale}
           city={city}
@@ -428,7 +519,7 @@ export function App(): JSX.Element {
             const ok = dispatch(
               { type: 'startCityTravel', toCityId, routeId, modeId } as unknown as GameCommand,
               { kind: 'travelStarted', place: placeRef },
-              placeRef,
+              text(placeRef),
             );
             if (ok) setScreen('city');
           }}
@@ -436,7 +527,7 @@ export function App(): JSX.Element {
       ) : null}
 
       {/* ── 選冒險地 ──────────────────────────────────────────── */}
-      {screen === 'adventure' && city !== undefined ? (
+      {view.combat === undefined && screen === 'adventure' && city !== undefined ? (
         <>
           <h2 style={{ fontSize: 15, margin: '0 0 10px' }}>{t(locale, 'ui.screen.adventure')}</h2>
           {city.sites.length === 0 ? (
@@ -454,13 +545,13 @@ export function App(): JSX.Element {
                     const ok = dispatch(
                       { type: 'enterAdventureMap', adventureSiteId: site.siteId } as unknown as GameCommand,
                       { kind: 'enteredSite', place: site.nameRef },
-                      site.nameRef,
+                      text(site.nameRef),
                     );
                     if (!ok) return;
                     dispatch(
                       { type: 'startPlayerExploration' } as unknown as GameCommand,
                       { kind: 'exploreStarted', place: site.nameRef },
-                      site.nameRef,
+                      text(site.nameRef),
                     );
                     setScreen('city');
                   }}
@@ -478,7 +569,7 @@ export function App(): JSX.Element {
       ) : null}
 
       {/* ── 商店 ─────────────────────────────────────────────── */}
-      {screen === 'shop' && city !== undefined ? (
+      {view.combat === undefined && screen === 'shop' && city !== undefined ? (
         (() => {
           const shop = city.shops.find((sh) => sh.facilityId === shopFacilityId);
           if (shop === undefined) {
@@ -525,12 +616,12 @@ export function App(): JSX.Element {
                           payerCharacterId: view.leader?.id,
                           quantity: 1,
                         } as unknown as GameCommand,
-                        { kind: 'bought', item: o.label, price: o.price },
-                        shop.nameRef,
+                        { kind: 'bought', item: text(o.nameRef), price: o.price },
+                        text(shop.nameRef),
                       )
                     }
                   >
-                    <span style={S.tileName}>{o.label}</span>
+                    <span style={S.tileName}>{text(o.nameRef)}</span>
                     <span
                       style={{ ...S.tileNote, color: o.affordable ? C.accent : C.dim }}
                     >
@@ -546,7 +637,7 @@ export function App(): JSX.Element {
       ) : null}
 
       {/* ── 冒險者公會 ───────────────────────────────────────── */}
-      {screen === 'guild' && city?.guild !== undefined ? (
+      {view.combat === undefined && screen === 'guild' && city?.guild !== undefined ? (
         (() => {
           const guild = city.guild;
           const questKindText = (kind: string): string => {
@@ -564,20 +655,26 @@ export function App(): JSX.Element {
                       dispatch(
                         { type: 'acceptQuest', questId: q.questId } as unknown as GameCommand,
                         { kind: 'questAccepted', quest: questKindText(q.kind) },
-                        guild.nameRef,
+                        text(guild.nameRef),
                       )
                   : undefined
               }
             >
               <span style={S.tileName}>
                 {questKindText(q.kind)}
-                {q.siteNameRef !== undefined ? ` · ${text(q.siteNameRef)}` : ''}
+                {q.targetNameRef !== undefined ? ` · ${text(q.targetNameRef)}` : ''}
               </span>
               <span style={{ ...S.tileNote, color: acceptable ? C.accent : C.dim }}>
-                {t(locale, 'ui.guild.targets', { n: q.targetCount })} ·{' '}
-                {acceptable
-                  ? t(locale, 'ui.guild.deadline', { day: q.acceptDeadline })
-                  : t(locale, 'ui.guild.endBy', { day: q.actualEndDeadline })}
+                {[
+                  q.siteNameRef === undefined ? undefined : text(q.siteNameRef),
+                  q.roomId,
+                  q.targetCount > 1 ? t(locale, 'ui.guild.targets', { n: q.targetCount }) : undefined,
+                  acceptable
+                    ? t(locale, 'ui.guild.deadline', { day: q.acceptDeadline })
+                    : t(locale, 'ui.guild.endBy', { day: q.actualEndDeadline }),
+                ]
+                  .filter((x): x is string => x !== undefined)
+                  .join(' · ')}
               </span>
             </button>
           );
@@ -606,7 +703,7 @@ export function App(): JSX.Element {
       ) : null}
 
       {/* ── 酒館 ─────────────────────────────────────────────── */}
-      {screen === 'tavern' && city?.tavern !== undefined ? (
+      {view.combat === undefined && screen === 'tavern' && city?.tavern !== undefined ? (
         (() => {
           const tavern = city.tavern;
           return (
@@ -635,7 +732,7 @@ export function App(): JSX.Element {
                             next.memberCount > view.memberCount
                               ? { kind: 'recruitSucceeded', who: v.label }
                               : { kind: 'recruitFailed', who: v.label },
-                          tavern.nameRef,
+                          text(tavern.nameRef),
                         )
                       }
                     >
@@ -660,7 +757,7 @@ export function App(): JSX.Element {
       ) : null}
 
       {/* ── 訓練 ─────────────────────────────────────────────── */}
-      {screen === 'training' && city !== undefined ? (
+      {view.combat === undefined && screen === 'training' && city !== undefined ? (
         (() => {
           const training = city.trainings.find((tr) => tr.facilityId === trainFacilityId);
           if (training === undefined) return null;
@@ -671,7 +768,7 @@ export function App(): JSX.Element {
               const opened = dispatch(
                 { type: 'beginCityFreePeriod' } as GameCommand,
                 { kind: 'freePeriodBegan' },
-                training.nameRef,
+                text(training.nameRef),
               );
               if (!opened) return;
             }
@@ -682,8 +779,8 @@ export function App(): JSX.Element {
                 ruleId: training.ruleId,
                 payload: { kind: 'train', masteryId: o.masteryId },
               } as unknown as GameCommand,
-              { kind: 'trainingStarted', mastery: o.label, days: training.requiredDays },
-              training.nameRef,
+              { kind: 'trainingStarted', mastery: text(o.nameRef), days: training.requiredDays },
+              text(training.nameRef),
             );
             setScreen('city');
           };
@@ -698,7 +795,7 @@ export function App(): JSX.Element {
               <div style={S.grid}>
                 {training.options.map((o) => (
                   <button key={o.masteryId} style={S.tile} onClick={() => startTraining(o)}>
-                    <span style={S.tileName}>{o.label}</span>
+                    <span style={S.tileName}>{text(o.nameRef)}</span>
                     <span style={{ ...S.tileNote, color: C.accent }}>
                       {t(locale, 'ui.training.level', { n: o.level })} ·{' '}
                       {t(locale, 'ui.training.exp', { n: o.experience })}
@@ -712,7 +809,7 @@ export function App(): JSX.Element {
       ) : null}
 
       {/* ── 家 ───────────────────────────────────────────────── */}
-      {screen === 'home' && city?.home !== undefined ? (
+      {view.combat === undefined && screen === 'home' && city?.home !== undefined ? (
         (() => {
           const home = city.home;
           return (
@@ -769,7 +866,7 @@ export function App(): JSX.Element {
                               slots: o.slotCount,
                               price: o.price,
                             },
-                            home.nameRef,
+                            text(home.nameRef),
                           )
                         }
                       >
@@ -792,8 +889,360 @@ export function App(): JSX.Element {
         })()
       ) : null}
 
+      {/* ── 人物 ─────────────────────────────────────────────── */}
+      {view.combat === undefined && screen === 'sheet' && view.sheet !== undefined ? (
+        (() => {
+          const sh = view.sheet;
+          const ATTRS = [
+            ['muscle', 'ui.attr.muscle'],
+            ['intelligence', 'ui.attr.intelligence'],
+            ['reaction', 'ui.attr.reaction'],
+            ['coordination', 'ui.attr.coordination'],
+            ['charisma', 'ui.attr.charisma'],
+          ] as const;
+          const slotName = (slotId: string): string => slotId.split('.').slice(2).join('.') || slotId;
+          return (
+            <>
+              <h2 style={{ fontSize: 15, margin: '0 0 10px' }}>{t(locale, 'ui.screen.sheet')}</h2>
+
+              <div style={S.card}>
+                <div style={S.row}>
+                  <span style={S.label}>{t(locale, 'ui.status.health')}</span>
+                  <span style={{ fontWeight: 600 }}>
+                    {sh.health}/{sh.maxHealth} · {sh.mana}/{sh.maxMana}
+                  </span>
+                </div>
+                <div style={{ ...S.row, borderBottom: 'none' }}>
+                  <span style={S.label}>{t(locale, 'ui.tavern.who', {
+                    sex: t(locale, sh.sex === 'female' ? 'ui.sex.female' : 'ui.sex.male'),
+                    age: sh.ageYears,
+                  })}</span>
+                  <span style={S.sub}>{sh.characterId.split('~').slice(-1)[0]}</span>
+                </div>
+              </div>
+
+              <p style={{ ...S.label, margin: '0 0 6px' }}>{t(locale, 'ui.sheet.attributes')}</p>
+              <div style={{ ...S.card, display: 'flex', gap: 18, flexWrap: 'wrap' }}>
+                {ATTRS.map(([key, textKey]) => (
+                  <span key={key}>
+                    <span style={S.label}>{t(locale, textKey)} </span>
+                    <span style={{ fontWeight: 600 }}>{sh.primary[key] ?? 0}</span>
+                  </span>
+                ))}
+              </div>
+              <p style={{ ...S.sub, margin: '-10px 0 14px' }}>{t(locale, 'ui.sheet.attributesNote')}</p>
+
+              <p style={{ ...S.label, margin: '0 0 6px' }}>{t(locale, 'ui.sheet.armor')}</p>
+              <div style={{ ...S.grid, marginBottom: 14 }}>
+                {sh.armorSlots.map((slot) => (
+                  <div key={slot.slotId} style={S.tileOff}>
+                    <span style={S.tileName}>{slotName(slot.slotId)}</span>
+                    <span style={S.tileNote}>
+                      {slot.nameRef !== undefined ? text(slot.nameRef) : t(locale, 'ui.sheet.empty')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <p style={{ ...S.label, margin: '0 0 6px' }}>{t(locale, 'ui.sheet.weaponSets')}</p>
+              <div style={{ ...S.grid, marginBottom: 14 }}>
+                {sh.weaponSets.map((ws) => (
+                  <div
+                    key={ws.weaponSetId}
+                    style={{
+                      ...S.card,
+                      marginBottom: 0,
+                      borderColor: ws.weaponSetId === pickedSet ? C.accent : C.line,
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => setPickedSet(ws.weaponSetId)}
+                  >
+                    <div style={{ fontWeight: 600, marginBottom: 6 }}>
+                      {t(locale, 'ui.sheet.weaponSet', { n: ws.index + 1 })}
+                      {ws.weaponSetId === pickedSet ? ' ✓' : ''}
+                    </div>
+                    <div style={S.row}>
+                      <span style={S.label}>{t(locale, 'ui.sheet.mainHand')}</span>
+                      <span>
+                        {ws.mainHand.nameRef !== undefined
+                          ? text(ws.mainHand.nameRef)
+                          : t(locale, 'ui.sheet.empty')}
+                      </span>
+                    </div>
+                    <div style={S.row}>
+                      <span style={S.label}>{t(locale, 'ui.sheet.offHand')}</span>
+                      <span>
+                        {ws.offHand.nameRef !== undefined
+                          ? text(ws.offHand.nameRef)
+                          : t(locale, 'ui.sheet.empty')}
+                      </span>
+                    </div>
+                    {ws.skills.map((sk, i) => (
+                      <div
+                        key={i}
+                        style={i === ws.skills.length - 1 ? { ...S.row, borderBottom: 'none' } : S.row}
+                      >
+                        <span style={S.label}>{t(locale, 'ui.sheet.skillSlot', { n: i + 1 })}</span>
+                        <span
+                          style={sk === undefined ? undefined : { color: C.accent, cursor: 'pointer' }}
+                          onClick={
+                            sk === undefined
+                              ? undefined
+                              : (e) => {
+                                  e.stopPropagation();
+                                  setWeaponSetSkills(ws, i, undefined);
+                                }
+                          }
+                        >
+                          {sk === undefined
+                            ? t(locale, 'ui.sheet.empty')
+                            : sk.nameRef !== undefined
+                              ? text(sk.nameRef)
+                              : skillLocal(sk.skillId)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+
+              <p style={{ ...S.label, margin: '0 0 6px' }}>{t(locale, 'ui.sheet.skills')}</p>
+              {sh.assignableSkills.length === 0 ? (
+                <p style={{ ...S.sub, marginBottom: 14 }}>{t(locale, 'ui.sheet.skillsEmpty')}</p>
+              ) : (
+                <div style={{ ...S.grid, marginBottom: 14 }}>
+                  {sh.assignableSkills.map((sk) => {
+                    const set = sh.weaponSets.find((w) => w.weaponSetId === pickedSet);
+                    const already = set?.skills.some((x) => x?.skillId === sk.skillId) ?? false;
+                    const label = sk.nameRef !== undefined ? text(sk.nameRef) : skillLocal(sk.skillId);
+                    return (
+                      <button
+                        key={sk.skillId}
+                        style={already ? S.tileOff : S.tile}
+                        disabled={already || set === undefined}
+                        onClick={() => {
+                          if (set === undefined) return;
+                          const slot = set.skills.findIndex((x) => x === undefined);
+                          if (slot < 0) return; // 三格都滿了：先點掉一格再配
+                          setWeaponSetSkills(set, slot, sk.skillId);
+                        }}
+                      >
+                        <span style={S.tileName}>{label}</span>
+                        <span style={{ ...S.tileNote, color: already ? C.dim : C.accent }}>
+                          {sk.actionKind} ·{' '}
+                          {already
+                            ? t(locale, 'ui.sheet.assigned')
+                            : t(locale, 'ui.sheet.assignTo', { n: (sh.weaponSets.findIndex((w) => w.weaponSetId === pickedSet) + 1) })}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              <p style={{ ...S.label, margin: '0 0 6px' }}>{t(locale, 'ui.sheet.bag')}</p>
+              {sh.equipable.length === 0 ? (
+                <p style={{ ...S.sub, marginBottom: 14 }}>{t(locale, 'ui.sheet.bagEmpty')}</p>
+              ) : (
+                <div style={{ ...S.grid, marginBottom: 14 }}>
+                  {sh.equipable.map((e) => (
+                    <button
+                      key={e.itemId}
+                      style={S.tile}
+                      onClick={() =>
+                        dispatch(
+                          {
+                            type: 'equipItem',
+                            characterId: sh.characterId,
+                            itemId: e.itemId,
+                            slotId: e.slotIds[0],
+                            ...(e.equipmentKind === 'armor' ? {} : { weaponSetId: pickedSet }),
+                          } as unknown as GameCommand,
+                          { kind: 'equipped', item: text(e.nameRef) },
+                          text(e.nameRef),
+                        )
+                      }
+                    >
+                      <span style={S.tileName}>{text(e.nameRef)}</span>
+                      <span style={{ ...S.tileNote, color: C.accent }}>
+                        {e.equipmentKind} · {t(locale, 'ui.sheet.equip')} →
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <p style={{ ...S.label, margin: '0 0 6px' }}>{t(locale, 'ui.sheet.masteries')}</p>
+              {sh.masteries.length === 0 ? (
+                <p style={S.sub}>{t(locale, 'ui.sheet.masteriesEmpty')}</p>
+              ) : (
+                <div style={S.grid}>
+                  {sh.masteries.map((m) => (
+                    <div key={m.masteryId} style={S.tileOff}>
+                      <span style={S.tileName}>{text(m.nameRef)}</span>
+                      <span style={S.tileNote}>
+                        {t(locale, 'ui.training.level', { n: m.level })} ·{' '}
+                        {t(locale, 'ui.training.exp', { n: m.experience })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          );
+        })()
+      ) : null}
+
+      {/* ── 戰鬥 ─────────────────────────────────────────────────
+          有進行中的遭遇時，戰鬥畫面**取代**其他畫面：戰鬥中不能買東西、不能走路。
+          這不是 UI 偷懶，是引擎的實際狀態——其他指令在戰鬥中都會被拒。 */}
+      {view.combat !== undefined ? (
+        (() => {
+          const c = view.combat;
+          const side = (s: 'player' | 'enemy') => c.combatants.filter((x) => x.side === s);
+          const label = (x: (typeof c.combatants)[number]): string =>
+            x.nameRef !== undefined ? text(x.nameRef) : x.fallbackLabel;
+          const bar = (cur: number, max: number, color: string) => (
+            <span style={S.barTrack}>
+              <span
+                style={{
+                  ...S.barFill,
+                  width: `${max <= 0 ? 0 : Math.max(0, Math.min(100, (cur / max) * 100))}%`,
+                  background: color,
+                }}
+              />
+            </span>
+          );
+          const unit = (x: (typeof c.combatants)[number]) => (
+            <div
+              key={x.combatantId}
+              style={{
+                ...S.card,
+                padding: '8px 10px',
+                marginBottom: 6,
+                opacity: x.state === 'dead' ? 0.4 : 1,
+                borderColor: x.isCurrentActor ? C.accent : C.line,
+                borderWidth: x.isCurrentActor ? 2 : 1,
+                cursor: pickedSkill !== undefined && x.side === 'enemy' && x.state !== 'dead' ? 'pointer' : 'default',
+              }}
+              onClick={
+                pickedSkill !== undefined && x.side === 'enemy' && x.state !== 'dead'
+                  ? () => {
+                      const skill = pickedSkill;
+                      setPickedSkill(undefined);
+                      dispatch(
+                        {
+                          type: 'useCombatSkill',
+                          encounterId: c.encounterId,
+                          actorId: c.currentActorId,
+                          skillId: skill.skillId,
+                          targetCombatantIds: [x.combatantId],
+                        } as unknown as GameCommand,
+                        {
+                          kind: 'usedSkill',
+                          skill: skill.nameRef !== undefined ? text(skill.nameRef) : skillLocal(skill.skillId),
+                        },
+                        t(locale, 'ui.screen.combat'),
+                      );
+                    }
+                  : undefined
+              }
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                <span style={{ fontWeight: x.isCurrentActor ? 700 : 500 }}>
+                  {x.isCurrentActor ? '▶ ' : ''}
+                  {label(x)}
+                </span>
+                <span style={S.sub}>
+                  {t(locale, 'ui.combat.row', { n: x.row })} · {t(locale, 'ui.combat.ctb', { n: Math.round(x.ctb) })}
+                </span>
+              </div>
+              {x.state === 'dead' ? (
+                <div style={S.sub}>{t(locale, 'ui.combat.dead')}</div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                  {bar(x.health, x.maxHealth, '#c0392b')}
+                  <span style={{ ...S.sub, minWidth: 62 }}>
+                    {x.health}/{x.maxHealth}
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+          return (
+            <>
+              <h2 style={{ fontSize: 15, margin: '0 0 10px' }}>{t(locale, 'ui.screen.combat')}</h2>
+              <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                <div style={{ flex: '1 1 240px', minWidth: 220 }}>
+                  <p style={{ ...S.label, margin: '0 0 6px' }}>{t(locale, 'ui.combat.foe')}</p>
+                  {side('enemy').map(unit)}
+                </div>
+                <div style={{ flex: '1 1 240px', minWidth: 220 }}>
+                  <p style={{ ...S.label, margin: '0 0 6px' }}>{t(locale, 'ui.combat.ally')}</p>
+                  {side('player').map(unit)}
+                </div>
+              </div>
+
+              {c.currentActorId === undefined ? (
+                <p style={S.sub}>{t(locale, 'ui.combat.won')}</p>
+              ) : (
+                <div style={{ marginTop: 12 }}>
+                  <p style={{ ...S.label, margin: '0 0 6px' }}>
+                    {pickedSkill === undefined
+                      ? t(locale, 'ui.combat.pickAction')
+                      : t(locale, 'ui.combat.pickTarget')}
+                  </p>
+                  {c.actions.length === 0 ? (
+                    <p style={{ ...S.sub, marginBottom: 8 }}>{t(locale, 'ui.combat.noAction')}</p>
+                  ) : (
+                    <div style={S.grid}>
+                      {c.actions.map((a) => (
+                        <button
+                          key={a.skillId}
+                          style={
+                            pickedSkill?.skillId === a.skillId
+                              ? { ...S.tile, borderColor: C.accent, borderWidth: 2 }
+                              : a.available
+                                ? S.tile
+                                : S.tileOff
+                          }
+                          disabled={!a.available}
+                          onClick={() => setPickedSkill(a)}
+                        >
+                          <span style={S.tileName}>
+                            {a.nameRef !== undefined ? text(a.nameRef) : skillLocal(a.skillId)}
+                          </span>
+                          <span style={S.tileNote}>{a.actionKind}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <button
+                    style={{ ...S.btnGhost, marginTop: 10 }}
+                    onClick={() => {
+                      setPickedSkill(undefined);
+                      dispatch(
+                        {
+                          type: 'combatRest',
+                          encounterId: c.encounterId,
+                          actorId: c.currentActorId,
+                        } as unknown as GameCommand,
+                        { kind: 'combatRested' },
+                        t(locale, 'ui.screen.combat'),
+                      );
+                    }}
+                  >
+                    {t(locale, 'ui.combat.rest')}
+                  </button>
+                </div>
+              )}
+            </>
+          );
+        })()
+      ) : null}
+
       {/* ── 地城 ─────────────────────────────────────────────── */}
-      {atMap !== undefined ? (
+      {view.combat === undefined && atMap !== undefined ? (
         view.dungeon === undefined ? (
           <>
             <h2 style={{ fontSize: 15, margin: '0 0 10px' }}>{t(locale, 'ui.dungeon.title')}</h2>
@@ -805,7 +1254,7 @@ export function App(): JSX.Element {
                   dispatch(
                     { type: 'startPlayerExploration' } as unknown as GameCommand,
                     { kind: 'exploreStarted', place: atMap.siteNameRef },
-                    atMap.siteNameRef,
+                    text(atMap.siteNameRef),
                   )
                 }
               >
@@ -822,14 +1271,14 @@ export function App(): JSX.Element {
               dispatch(
                 { type: 'openDungeonDoor', linkId } as unknown as GameCommand,
                 { kind: 'doorOpened' },
-                view.dungeon!.siteNameRef,
+                text(view.dungeon!.siteNameRef),
               )
             }
             onMove={(roomId) =>
               dispatch(
                 { type: 'moveDungeonRoom', targetRoomId: roomId } as unknown as GameCommand,
                 { kind: 'movedPlain', room: roomId },
-                view.dungeon!.siteNameRef,
+                text(view.dungeon!.siteNameRef),
               )
             }
             onLeave={() =>
@@ -839,7 +1288,14 @@ export function App(): JSX.Element {
                   exitRoomId: view.dungeon!.currentRoomId,
                 } as unknown as GameCommand,
                 { kind: 'leftDungeon' },
-                view.dungeon!.siteNameRef,
+                text(view.dungeon!.siteNameRef),
+              )
+            }
+            onFight={(contentId, who) =>
+              dispatch(
+                { type: 'interactDungeonContent', contentId } as unknown as GameCommand,
+                { kind: 'combatStarted', who },
+                text(view.dungeon!.siteNameRef),
               )
             }
           />
@@ -931,8 +1387,40 @@ function Dungeon(props: {
   onOpenDoor: (linkId: string) => void;
   onMove: (roomId: string) => void;
   onLeave: () => void;
+  onFight: (contentId: string, label: string) => void;
 }): JSX.Element {
-  const { locale, dungeon, text, onOpenDoor, onMove, onLeave } = props;
+  const { locale, dungeon, text, onOpenDoor, onMove, onLeave, onFight } = props;
+
+  // 小地圖：以房間的格座標畫平面圖。同一個房間可能佔多格（L 形／大廳），所以逐格畫。
+  // 沒有房間的格子留白——那是牆，不是「未探索」。
+  const byCell = new Map<string, (typeof dungeon.floor.cells)[number]>();
+  for (const cell of dungeon.floor.cells) byCell.set(`${cell.row},${cell.col}`, cell);
+
+  // 一個房間可能佔好幾格（倉房、大廳）。整個房間都塗色，但「你在這裡」的記號只畫在**錨點格**
+  // （row 最小、其次 col 最小）——七個 ◉ 看起來像七個玩家。內容數同理，一間房只標一次。
+  const anchorOf = new Map<string, string>();
+  for (const cell of dungeon.floor.cells) {
+    const prev = anchorOf.get(cell.roomId);
+    const key = `${String(cell.row).padStart(3, '0')},${String(cell.col).padStart(3, '0')}`;
+    if (prev === undefined || key < prev) anchorOf.set(cell.roomId, key);
+  }
+  const isAnchor = (cell: (typeof dungeon.floor.cells)[number]): boolean =>
+    anchorOf.get(cell.roomId) ===
+    `${String(cell.row).padStart(3, '0')},${String(cell.col).padStart(3, '0')}`;
+
+  const DIR_TEXT = {
+    north: 'ui.dir.north',
+    west: 'ui.dir.west',
+    east: 'ui.dir.east',
+    south: 'ui.dir.south',
+  } as const satisfies Readonly<Record<MoveOptionView['direction'], UiTextKey>>;
+
+  // 十字排列：上北、左西、右東、下南。空格代表那一格不是方向鍵。
+  const DIR_GRID: readonly (MoveOptionView['direction'] | undefined)[] = [
+    undefined, 'north', undefined,
+    'west', undefined, 'east',
+    undefined, 'south', undefined,
+  ];
   return (
     <>
       <h2 style={{ fontSize: 15, margin: '0 0 10px' }}>
@@ -976,8 +1464,11 @@ function Dungeon(props: {
         <p style={{ ...S.sub, marginBottom: 16 }}>{t(locale, 'ui.dungeon.roomEmpty')}</p>
       ) : (
         <div style={{ ...S.grid, marginBottom: 16 }}>
-          {dungeon.roomContents.map((c) => (
-            <div key={c.contentId} style={S.tileOff} title={t(locale, 'ui.dungeon.combatPending')}>
+          {dungeon.roomContents.map((c) => {
+            const isFight = c.kind === 'monsterGroup' || c.kind === 'boss';
+            const who = c.nameRef !== undefined ? text(c.nameRef) : '';
+            return (
+            <button key={c.contentId} style={S.tile} onClick={() => onFight(c.contentId, who)}>
               <span style={S.tileName}>
                 {c.kind === 'boss' ? '★ ' : ''}
                 {t(
@@ -993,36 +1484,107 @@ function Dungeon(props: {
                           : 'ui.dungeon.kind.other',
                 )}
               </span>
-              <span style={S.tileNote}>{c.label}</span>
-            </div>
-          ))}
+              <span style={{ ...S.tileNote, color: C.accent }}>
+                {who === '' ? '' : `${who} \u00b7 `}
+                {isFight ? t(locale, 'ui.dungeon.fight') : t(locale, 'ui.dungeon.open')} \u2192
+              </span>
+            </button>
+            );
+          })}
         </div>
       )}
 
-      <div style={{ fontSize: 12, color: C.dim, margin: '0 0 8px' }}>{t(locale, 'ui.dungeon.exits')}</div>
-      <div style={S.grid}>
-        {dungeon.exits.map((exit) => {
-          const blocked = exit.kind === 'redDoor' && exit.state === 'closed';
-          const kindLabel = blocked
-            ? t(locale, 'ui.dungeon.redDoorClosed')
-            : exit.kind === 'redDoor'
-              ? t(locale, 'ui.dungeon.redDoorOpen')
-              : t(locale, 'ui.dungeon.passage');
-          return (
-            <button
-              key={exit.linkId}
-              style={S.tile}
-              onClick={() => (blocked ? onOpenDoor(exit.linkId) : onMove(exit.roomId))}
-            >
-              <span style={S.tileName}>
-                {exit.revealed ? exit.roomId : `? ${t(locale, 'ui.dungeon.unexplored')}`}
-              </span>
-              <span style={{ ...S.tileNote, color: blocked ? C.warn : C.accent }}>
-                {kindLabel} · {blocked ? t(locale, 'ui.dungeon.openDoor') : t(locale, 'ui.action.travelHere')} →
-              </span>
-            </button>
-          );
-        })}
+      <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div>
+          <div style={{ fontSize: 12, color: C.dim, margin: '0 0 8px' }}>
+            {t(locale, 'ui.dungeon.map')} · {t(locale, 'ui.dungeon.floor', { n: dungeon.floor.floor })}
+          </div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: `repeat(${dungeon.floor.cols}, 30px)`,
+              gap: 2,
+            }}
+          >
+            {Array.from({ length: dungeon.floor.rows * dungeon.floor.cols }, (_, i) => {
+              const row = Math.floor(i / dungeon.floor.cols) + 1;
+              const col = (i % dungeon.floor.cols) + 1;
+              const cell = byCell.get(`${row},${col}`);
+              if (cell === undefined) return <span key={i} style={{ width: 28, height: 28 }} />;
+              const background = cell.isCurrent
+                ? C.accent
+                : cell.isExit
+                  ? '#8fbf8f'
+                  : cell.revealed
+                    ? '#dfe4ea'
+                    : '#f4f5f7';
+              const mark = cell.isCurrent
+                ? '\u25c9'
+                : cell.revealed
+                  ? cell.contentCount > 0
+                    ? String(cell.contentCount)
+                    : ''
+                  : '?';
+              return (
+                <span
+                  key={i}
+                  title={cell.revealed ? cell.roomId : t(locale, 'ui.dungeon.unexplored')}
+                  style={{
+                    ...S.mapCell,
+                    background,
+                    color: cell.isCurrent ? '#fff' : C.dim,
+                    border: `1px solid ${cell.revealed ? C.line : '#eceef1'}`,
+                  }}
+                >
+                  {mark}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <div style={{ fontSize: 12, color: C.dim, margin: '0 0 8px' }}>{t(locale, 'ui.dungeon.exits')}</div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 78px)',
+              gap: 6,
+            }}
+          >
+            {DIR_GRID.map((dir, i) => {
+              if (dir === undefined) return <span key={i} />;
+              const move = dungeon.moves.find((m) => m.direction === dir);
+              if (move === undefined) {
+                return (
+                  <span
+                    key={i}
+                    style={{ ...S.tileOff, textAlign: 'center', padding: '10px 0', color: '#c9ced6' }}
+                  >
+                    {t(locale, DIR_TEXT[dir])}
+                  </span>
+                );
+              }
+              const blocked = !move.open;
+              return (
+                <button
+                  key={i}
+                  style={{ ...S.tile, textAlign: 'center', padding: '6px 4px' }}
+                  onClick={() => (blocked ? onOpenDoor(move.linkId) : onMove(move.roomId))}
+                >
+                  <span style={{ ...S.tileName, fontSize: 15 }}>{t(locale, DIR_TEXT[dir])}</span>
+                  <span style={{ ...S.tileNote, color: blocked ? C.warn : C.accent, fontSize: 11 }}>
+                    {blocked
+                      ? t(locale, 'ui.dungeon.openDoor')
+                      : move.revealed
+                        ? t(locale, 'ui.action.travelHere')
+                        : t(locale, 'ui.dungeon.unexplored')}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </>
   );

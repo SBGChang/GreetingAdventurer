@@ -89,6 +89,7 @@ export function createProgressionDefinitionReader(
     getMastery: (id) => mastery.get(id),
     getMasteryCurve: (id) => masteryCurve.get(id),
     getSkill: (id) => skill.get(id),
+    listAutomaticSkills: () => skill.list().filter((s) => s.acquisition.kind === 'automatic'),
     getTeachingRule: (id) => teaching.get(id),
     getExperienceAwardRule: (id) => experienceAward.get(id),
     listSocialMasteryBenefits: () => socialBenefit.list(),

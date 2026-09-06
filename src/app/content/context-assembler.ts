@@ -21,6 +21,7 @@ import type {
   StatisticsRuleId,
   TeamPlanRuleId,
   TeachingRuleId,
+  ItemInstanceId,
 } from '../../contracts/core';
 import type {
   MemberRetentionRuleDefinition,
@@ -58,6 +59,8 @@ import type {
 import { createItemDefinitionReader } from './inventory-reader';
 import { createCityDefinitionReader } from './city-reader';
 import { createTeamResolverPort } from './team-resolver-port';
+import { createCharacterResolverPort } from './character-context';
+import { createCharacterDefinitionReader } from './character-reader';
 import { findFacilityIdByKind } from '../../modules/city/public';
 import { createStatisticsDefinitionReader, STATISTICS_DEFINITION_KINDS } from './statistics-reader';
 import { createStatisticsResolverPort } from './statistics-resolver-bridge';
@@ -223,6 +226,14 @@ export function createProductionContextAssembler(
     });
     const combatResolvers = createCombatResolverPort({
       registry: resolvers,
+      // 防禦 MXP 路由要由裝備實體反查它的定義（equipmentKind ＋ relatedMasteryIds）。
+      equipmentOf: (itemId: ItemInstanceId) => {
+        const item = state.inventory.items[itemId];
+        if (item === undefined) return undefined;
+        // 只有裝備才有 equipmentKind／relatedMasteryIds；一般物品不是防具，回 undefined。
+        if (itemReader.getItem(item.definitionId).kind !== 'equipment') return undefined;
+        return itemReader.getEquipment(item.definitionId);
+      },
       combatDefs: combatDefinitions,
       progressionDefs: progressionReader,
       powerParams: { getPowerParams: (id) => combatPowerParams.get(id) },
@@ -400,7 +411,18 @@ export function createProductionContextAssembler(
       // ── 已接：quest 生成（地圖刷新出內容 → 依 QuestReactionRule 貼委託）──
       questGeneration: questGenerationContext,
 
-      character: pending('character'),
+      // ── 已接：character（裝備變動夾住 HP/MP 上限、世界冒險者生成）──────────────
+      //
+      // `resolvers` 只接了世界冒險者生成那一支；退休／自然死亡／生育／任務暫時角色四支仍是
+      // 「一被呼叫就拋並指名是誰」（見 character-context.ts）。那是能力最小化，不是缺口掩蓋：
+      // 走到那四條路的 Job 與 Command 目前都沒有註冊。
+      character: {
+        worldDay: runtime.worldDay,
+        definitions: createCharacterDefinitionReader(registry),
+        stats,
+        ids: runtime.ids.character,
+        resolvers: createCharacterResolverPort({ registry, resolvers, rng: runtime.rng }),
+      },
 
       // ── 已接：map（刷新生成、開門、陷阱、採集、內容結算）───────────────────────
       map: mapContext,

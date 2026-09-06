@@ -267,20 +267,13 @@ function compileLocalization(
 
   // ── 未授權文字的棘輪 ──────────────────────────────────────────────────
   //
-  // 裝備／道具／素材／貨幣的 `nameRef` 在本地化管線存在**之前**就寫進內容了，指向的 key 從來
-  // 沒有人提供文字（equipment 的中文名甚至已經備妥在 `YUNHUA_EQUIPMENT_DISPLAY_NAMES`，
-  // 只是沒有管線可以送出去）。那是既有欠債，不是這次改動造成的。
+  // 裝備／道具／素材／貨幣的 `nameRef` 曾經在本地化管線存在**之前**就寫進內容，指向的 key
+  // 沒有人提供文字。那筆欠債用這個棘輪逐步清掉（每個 kind 的欠債數只能減少），現在**已經清完**：
+  // 表是空的，於是任何一筆沒有文字的 nameRef 都直接是編譯錯誤。
   //
-  // 直接放行等於讓「指向不存在的文字」變成常態；直接擋下則會讓整包內容編不出來。所以用棘輪：
-  // 每個 kind 的欠債數**只能減少**。少於宣告值也報錯——否則補完的進度會被下一筆新欠債悄悄吃掉。
-  //
-  // 這份表只能變短。補完一個 kind 的文字後，把它從表裡刪掉。
-  const TEXT_DEBT_RATCHET: Readonly<Record<string, number>> = {
-    equipment: 90,
-    item: 30,
-    material: 19,
-    currency: 1,
-  };
+  // 表留著而不是刪掉函式：日後若真的必須帶著一筆新欠債落地（例如內容軌與在地化軌分開發包），
+  // 這裡就是唯一的登記處，而且登記完就會被強迫還清——空表本身是最強的狀態，不要為了方便而重開。
+  const TEXT_DEBT_RATCHET: Readonly<Record<string, number>> = {};
 
   const danglingByKind = new Map<string, string[]>();
   for (const key of [...referenced].sort()) {

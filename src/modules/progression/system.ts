@@ -18,7 +18,12 @@ import type {
   DomainEventDraft,
   TeachingRuleId,
 } from '../../contracts/core';
-import { MAX_MASTERY_LEVEL, MAX_PRIMARY_ATTRIBUTE, SUPPORT_USE_CAP } from '../../contracts/core';
+import {
+  MAX_MASTERY_LEVEL,
+  MAX_PRIMARY_ATTRIBUTE,
+  MIN_MASTERY_LEVEL,
+  SUPPORT_USE_CAP,
+} from '../../contracts/core';
 import type {
   ExperienceAwardRuleDefinition,
   ProgressionDefinitionReader,
@@ -182,7 +187,14 @@ function applyOne(
     [input.masteryId]: nextMastery,
   };
 
-  // 自動知識解鎖：升級跨越的 atLevel 一律解鎖並寫入 learnedKnowledgeIds（doc §7.2）。
+  // 自動知識解鎖，兩個來源：
+  //
+  //   1. `MasteryDefinition.automaticKnowledgeUnlocks`（doc §7.2）——熟練度那一側的宣告。
+  //   2. `SkillDefinition.acquisition.kind === 'automatic'` ＋ `requiredMasteries`——技能那一側。
+  //
+  // 只讀第一個來源時，`acquisition: 'automatic'` 的技能永遠學不會（雲華的內容全部走第二種，
+  // 而熟練度那一側刻意留空，因為文化技能的 ID 不該塞進文化無關的熟練度定義裡）。症狀是
+  // 角色手上有武器卻一招都沒有——戰鬥選單全空，而 GDD 明訂「沒有普通攻擊」。
   const unlockedKnowledgeIds: DefinitionId[] = [];
   if (newLevel > oldLevel) {
     for (const unlock of def.automaticKnowledgeUnlocks) {
@@ -192,6 +204,11 @@ function applyOne(
         }
       }
     }
+  }
+  for (const skill of automaticSkillsNowMet({ ...progression, masteries: nextMasteries }, reader)) {
+    if (progression.learnedKnowledgeIds.includes(skill)) continue;
+    if (unlockedKnowledgeIds.includes(skill)) continue;
+    unlockedKnowledgeIds.push(skill);
   }
 
   const next: CharacterProgression = {
@@ -646,18 +663,38 @@ export function handleFreeActionCompleted(
 export function handleCharacterBorn(
   state: ProgressionModuleState,
   characterId: CharacterId,
+  reader: ProgressionDefinitionReader,
 ): ModuleResult<ProgressionModuleState> {
   if (state.characterProgress[characterId] !== undefined) {
     return emptyResult(state); // 已存在：不重建（不因父母熟練度贈送等級）。
   }
+  // 門檻是 Lv.0 的自動技能在**出生當下**就成立（每個熟練度都從 0 開始）。不在這裡解鎖的話，
+  // 一個角色要等到第一次獲得任何 MXP 才學得會基礎招式——而基礎招式正是拿來賺那份 MXP 的。
+  const fresh = createCharacterProgression(characterId);
   const nextState: ProgressionModuleState = {
     ...state,
     characterProgress: {
       ...state.characterProgress,
-      [characterId]: createCharacterProgression(characterId),
+      [characterId]: { ...fresh, learnedKnowledgeIds: [...automaticSkillsNowMet(fresh, reader)] },
     },
   };
   return emptyResult(nextState);
+}
+
+// 目前熟練度已達門檻、且取得方式為「自動」的技能。純函式：不看已學清單（呼叫端負責去重），
+// 也不看等級以外的條件——`requiredMasteries` 是契約給的唯一門檻。
+function automaticSkillsNowMet(
+  progression: CharacterProgression,
+  reader: ProgressionDefinitionReader,
+): readonly DefinitionId[] {
+  return reader
+    .listAutomaticSkills()
+    .filter((skill) =>
+      skill.requiredMasteries.every(
+        (req) => (progression.masteries[req.masteryId]?.level ?? MIN_MASTERY_LEVEL) >= req.minLevel,
+      ),
+    )
+    .map((skill) => skill.id as DefinitionId);
 }
 
 // ──────────────────────────────────────────────────────────────────────────

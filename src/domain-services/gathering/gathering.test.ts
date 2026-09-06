@@ -91,9 +91,13 @@ function progressionReader(): ProgressionDefinitionReader {
       packId: FIXTURE.packId,
       enabled: true,
       curveId: CURVE_ID,
+      display: { nameRef: { key: 'text.fixture.mastery.name' } },
       primaryAttributeGainsByLevel: [],
       automaticKnowledgeUnlocks: [],
     }),
+    // 這份內容沒有自動取得的技能。空陣列是一句宣告（progression 會照樣走那條路），
+    // 不是「這個 stub 剛好沒實作」——缺這一格會讓真 handler 在此崩，而不是安靜跳過。
+    listAutomaticSkills: () => [],
     getMasteryCurve: (id: MasteryCurveId) => ({
       id,
       schemaVersion: 1,

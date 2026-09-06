@@ -241,6 +241,7 @@
   {
     "creationChance": 0.2,
     "deadlineRuleId": "quest-deadline-rule.core.purchase-delivery",
+    "destinationResolverId": "resolver:quest.delivery-destination",
     "enabled": true,
     "guildResolverId": "resolver:quest.guild.local-city",
     "id": "quest-reaction-rule.core.city-stock-delivery",

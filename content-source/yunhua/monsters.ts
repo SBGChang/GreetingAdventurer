@@ -47,7 +47,7 @@ import type {
   ResolverId,
   SkillDefinitionId,
 } from '../../src/contracts/core';
-import { cultureIds, type Authored, type AuthoredDomain } from '../authoring';
+import { cultureIds, textKeyFor, type Authored, type AuthoredDomain } from '../authoring';
 // 怪物共通招式由 core 擁有（四國共用），文化包只引用它的 ID。
 import { MONSTER_COMMON_SKILL_ID } from '../core/combat-rules';
 
@@ -243,6 +243,10 @@ const LONE_SMALL_ANCHOR: readonly [number, number] = [1, 2];
 // 「威脅／體型」欄與 data.mjs 的 `threat`／`size` 互為校對——兩邊不一致的話就不會有一致的判讀。
 type MonsterRow = Readonly<{
   local: string;
+  // 顯示名。中文逐字取自設計來源的怪物表；英文是這一輪授權的翻譯。兩個語系都在 Row 上，
+  // 所以「新增一隻怪卻只寫一種語言」是編譯錯誤，而不是切到英文才看見一個 slug。
+  nameZh: string;
+  nameEn: string;
   speciesKind: MonsterSpeciesKind;
   tier: Tier;
   threat: MonsterThreatRank;
@@ -264,6 +268,8 @@ const NON_HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：瘴翅粉、薄翅膜
   {
     local: 'mistwing-moth',
+    nameZh: '瘴翅蛾',
+    nameEn: 'Mistwing Moth',
     speciesKind: 'nonHuman',
     tier: 1,
     threat: 'normal',
@@ -280,6 +286,8 @@ const NON_HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：竹背皮、獾肉、獾腺囊
   {
     local: 'bamboo-back-badger',
+    nameZh: '竹背獾',
+    nameEn: 'Bamboo-Back Badger',
     speciesKind: 'nonHuman',
     tier: 1,
     threat: 'normal',
@@ -296,6 +304,8 @@ const NON_HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：潮殼、蟹鉗
   {
     local: 'tide-shell-crab',
+    nameZh: '潮殼蟹',
+    nameEn: 'Tide-Shell Crab',
     speciesKind: 'nonHuman',
     tier: 1,
     threat: 'normal',
@@ -312,6 +322,8 @@ const NON_HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：殘符紙、舊朱砂
   {
     local: 'scrap-sigil-doll',
+    nameZh: '殘頁符偶',
+    nameEn: 'Scrap-Sigil Poppet',
     speciesKind: 'nonHuman',
     tier: 1,
     threat: 'normal',
@@ -328,6 +340,8 @@ const NON_HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：完整獾腺、韌皮、獾肉
   {
     local: 'miasma-pouch-badger',
+    nameZh: '瘴囊獾母',
+    nameEn: 'Miasma-Pouch Badger Sow',
     speciesKind: 'nonHuman',
     tier: 1,
     threat: 'elite',
@@ -344,6 +358,8 @@ const NON_HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：潮腺、濕鱗、沉水草
   {
     local: 'gatewater-salamander',
+    nameZh: '閘水母螈',
+    nameEn: 'Gatewater Salamander',
     speciesKind: 'nonHuman',
     tier: 1,
     threat: 'elite',
@@ -360,6 +376,8 @@ const NON_HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：陶衛甲片、窯印、銅扣
   {
     local: 'armored-pottery-guard',
+    nameZh: '披甲陶衛',
+    nameEn: 'Armored Pottery Guard',
     speciesKind: 'nonHuman',
     tier: 1,
     threat: 'elite',
@@ -376,6 +394,8 @@ const NON_HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：獾王硬皮、巨型腺囊、藥谷寶材
   {
     local: 'mist-bamboo-king',
+    nameZh: '霧篁獾王',
+    nameEn: 'Mistbamboo Badger King',
     speciesKind: 'nonHuman',
     tier: 1,
     threat: 'boss',
@@ -392,6 +412,8 @@ const NON_HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：巨螈鱗、閘骨、沉貨殘件
   {
     local: 'sunken-weir-beast',
+    nameZh: '沉閘巨螈',
+    nameEn: 'Sunken-Weir Salamander',
     speciesKind: 'nonHuman',
     tier: 1,
     threat: 'boss',
@@ -408,6 +430,8 @@ const NON_HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：斷符墨、靈紙纖維
   {
     local: 'frayed-seal-wisp',
+    nameZh: '斷符游靈',
+    nameEn: 'Frayed-Seal Wisp',
     speciesKind: 'nonHuman',
     tier: 2,
     threat: 'normal',
@@ -424,6 +448,8 @@ const NON_HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：鈴殼、銅質顎片
   {
     local: 'bell-mandible-beetle',
+    nameZh: '銅鈴顎蟲',
+    nameEn: 'Bell-Mandible Beetle',
     speciesKind: 'nonHuman',
     tier: 2,
     threat: 'normal',
@@ -446,6 +472,8 @@ const NON_HUMAN_ROWS: readonly MonsterRow[] = [
   // 這是契約形狀的問題（逐怪定值 Profile 表達不出「隻數改變分配、總額不變」），見回報。
   {
     local: 'tower-stone-lizard',
+    nameZh: '塔脊石蜥',
+    nameEn: 'Tower-Ridge Stone Lizard',
     speciesKind: 'nonHuman',
     tier: 2,
     threat: 'normal',
@@ -462,6 +490,8 @@ const NON_HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：鎖印陶芯、陶將戈刃、銅鈴座
   {
     local: 'seal-halberd-warden',
+    nameZh: '鎖印陶將',
+    nameEn: 'Sealbound Pottery Warden',
     speciesKind: 'nonHuman',
     tier: 2,
     threat: 'elite',
@@ -478,6 +508,8 @@ const NON_HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：古詔殘頁、官朱砂、封卷線
   {
     local: 'broken-edict-scribe',
+    nameZh: '殘詔書吏',
+    nameEn: 'Broken-Edict Scribe',
     speciesKind: 'nonHuman',
     tier: 2,
     threat: 'elite',
@@ -494,6 +526,8 @@ const NON_HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：天衡印石、鎮符銅心、極品書池
   {
     local: 'balance-seal-colossus',
+    nameZh: '天衡印俑',
+    nameEn: 'Tianheng Seal Colossus',
     speciesKind: 'nonHuman',
     tier: 2,
     threat: 'boss',
@@ -519,6 +553,8 @@ const HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：環首刀零件、舊皮甲、漕運票根
   {
     local: 'river-cutthroat',
+    nameZh: '漕幫刀客',
+    nameEn: 'Canal-Gang Cutthroat',
     speciesKind: 'human',
     tier: 1,
     threat: 'normal',
@@ -535,6 +571,8 @@ const HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：竹弩件、短矢、私運貨單
   {
     local: 'privateer-crossbow',
+    nameZh: '私運弩手',
+    nameEn: 'Smuggler Crossbowman',
     speciesKind: 'human',
     tier: 1,
     threat: 'normal',
@@ -557,6 +595,8 @@ const HUMAN_ROWS: readonly MonsterRow[] = [
   // 在編組補上隨扈之前，這一招永遠不可用。見回報「第一版方案（待討論）」第 4 項。
   {
     local: 'salt-route-leader',
+    nameZh: '鹽路頭目',
+    nameEn: 'Salt-Route Chieftain',
     speciesKind: 'human',
     tier: 1,
     threat: 'elite',
@@ -573,6 +613,8 @@ const HUMAN_ROWS: readonly MonsterRow[] = [
   // 掉落（無欄位）：札甲件、制式槍頭、印塔通行牌
   {
     local: 'seal-tower-deserter',
+    nameZh: '守印逃卒',
+    nameEn: 'Seal-Tower Deserter',
     speciesKind: 'human',
     tier: 2,
     threat: 'normal',
@@ -590,6 +632,8 @@ const HUMAN_ROWS: readonly MonsterRow[] = [
   // 三招都不依賴其他人類敵人在場，所以單隻編組不會讓任何一招失效（與鹽路頭目相反）。
   {
     local: 'false-seal-officer',
+    nameZh: '偽印校尉',
+    nameEn: 'False-Seal Officer',
     speciesKind: 'human',
     tier: 2,
     threat: 'elite',
@@ -619,6 +663,7 @@ function monster(row: MonsterRow): Authored<MonsterDefinition> {
   return {
     kind: KIND.monster,
     id: monsterId(row.local),
+    display: { nameRef: { key: textKeyFor(monsterId(row.local)) } },
     // `cultureMeta.id` 就是 'culture.yunhua'（文化 ID 只有兩段，見 authoring.ts 的 cultureIds）。
     cultureId: yunhua.cultureId,
     speciesKind: row.speciesKind,
@@ -724,4 +769,8 @@ export const YUNHUA_HUMAN_CANDIDATES: readonly YunhuaContentCandidate[] =
 export const monstersDomain: AuthoredDomain = {
   domain: 'monsters',
   definitions: [...ALL_ROWS.map(monster), ...ALL_ROWS.map(encounterGroup)],
+  texts: ALL_ROWS.map((row) => ({
+    key: textKeyFor(monsterId(row.local)),
+    name: { 'zh-Hant': row.nameZh, en: row.nameEn },
+  })),
 };

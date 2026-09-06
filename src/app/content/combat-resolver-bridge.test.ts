@@ -59,6 +59,8 @@ export function runTests(): void {
     },
     progression: { ...stubProgressionQuery(), getPrimaryAttributes: (id) => attributesById(id) },
     loadout: stubLoadoutQuery(),
+    // 本測試不觸及防禦 MXP 路由：沒有裝備定義可查（回 undefined ＝「沒有可歸屬的防具」）。
+    equipmentOf: () => undefined,
     rng: deterministicRng,
     rngContextFor: () => ({ worldSeed: 'seed' as never, streamId: 'combat.ai' as never, cursor: 0 as never }),
   });

@@ -15,6 +15,7 @@ import type { GridCell } from '../../contracts/map';
 import type { CombatSkillTargetInput } from '../../modules/combat/system';
 import { makeEncounter } from '../../modules/combat/fixtures';
 import { loadContentFromDisk } from '../../platform/content-repository';
+import { IMPLEMENTED_COMBAT_TARGET_LOCALS } from '../../../content-source/core/resolver-ids';
 import { createProductionResolverRegistry } from './resolver-registrations';
 import { resolverContext } from './resolver-adapter';
 
@@ -124,10 +125,11 @@ const cases: readonly Case[] = [
       const c = placement[id as CharacterId];
       return c === undefined ? 'none' : `${c.row},${c.col}`;
     };
-    assert(at('c1') === '0,0', `c1 應在 0,0，實得 ${at('c1')}`);
-    assert(at('c2') === '0,1', `c2 應在 0,1，實得 ${at('c2')}`);
-    assert(at('c3') === '0,2', `c3 應在 0,2，實得 ${at('c3')}`);
-    assert(at('c4') === '1,0', `c4 應換行到 1,0，實得 ${at('c4')}`);
+    // 格座標 1 起算（GRID_MIN=1；11_combat_module.md §3.3「第 1 排為前排」）。
+    assert(at('c1') === '1,1', `c1 應在 1,1，實得 ${at('c1')}`);
+    assert(at('c2') === '1,2', `c2 應在 1,2，實得 ${at('c2')}`);
+    assert(at('c3') === '1,3', `c3 應在 1,3，實得 ${at('c3')}`);
+    assert(at('c4') === '2,1', `c4 應換行到 2,1，實得 ${at('c4')}`);
   }],
 
   // combat 傷害：weighted-power shape 讀 params（我設計的數值）＋攤平主屬 → 算出傷害數字。
@@ -182,14 +184,16 @@ const cases: readonly Case[] = [
   }],
 
   // 真實資料路徑：content/** 的綁定匯總 → 全部 shape 都有實作（組裝不拋）→ 真 ID 可解析。
-  ['真實內容：8 個 combat 目標綁定一路到 registry 並可解析', () => {
+  ['真實內容：combat 目標綁定一路到 registry 並可解析', () => {
     const loaded = loadContentFromDisk(CONTENT_ROOT);
     if (!loaded.success) throw new Error('內容載入失敗');
 
     const combatTargets = loaded.resolverBindings.filter((b) => b.shape.startsWith('combat-target:'));
+    // 綁定數＝`IMPLEMENTED_COMBAT_TARGET_LOCALS` 的長度。釘住那份清單本身而不是一個字面數字：
+    // 每實作一種形狀就會多一筆，寫死數字只會讓測試在每次進展時假性失敗。
     assert(
-      combatTargets.length === 8,
-      `core 應宣告 8 個 combat 目標綁定，實得 ${combatTargets.length}`,
+      combatTargets.length === IMPLEMENTED_COMBAT_TARGET_LOCALS.length,
+      `combat 目標綁定應有 ${IMPLEMENTED_COMBAT_TARGET_LOCALS.length} 筆，實得 ${combatTargets.length}`,
     );
     // 每筆綁定的 shape 在 src/ 都要有實作——組裝會對未知 shape 拋錯，故這行本身就是斷言。
     const registry = createProductionResolverRegistry(loaded.resolverBindings);

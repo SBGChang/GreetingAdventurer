@@ -76,7 +76,7 @@ import type {
 } from '../../contracts/city';
 
 // 跨模組（僅型別 import）。
-import type { ItemInstanceView, ItemLocationSelector } from '../../contracts/inventory';
+import type { ItemInstanceView, ItemKind, ItemLocationSelector } from '../../contracts/inventory';
 import type {
   EconomyTransferReason, PriceQuote, SellQuoteInput } from '../../contracts/economy';
 
@@ -145,6 +145,10 @@ export interface CityTeamPort {
 // （`ItemDefinition.tradePolicy.tradable`），由 Composition 以 inventory 的 Item Definition Reader 組出。
 export interface CityInventoryPort {
   getItem(itemId: ItemInstanceId): ItemInstanceView | undefined;
+  // 這件物品的種類（`ItemDefinition.kind`）。商店刷新要用它比對規則宣告的 `stockedItemKinds`。
+  // 窄到只回一個 kind：City 不需要知道物品的其他任何事，也不得代 inventory 決定它。
+  // 查不到＝這件實體指向一筆不存在的定義，回 undefined 讓呼叫端把它排除在候選之外。
+  getItemKind(itemId: ItemInstanceId): ItemKind | undefined;
   listAtLocation(location: ItemLocationSelector): readonly ItemInstanceView[];
   characterOwnsItem(characterId: CharacterId, itemId: ItemInstanceId): boolean;
   isReserved(itemId: ItemInstanceId): boolean;
@@ -649,7 +653,12 @@ export function handleSellItemToShop(
       itemId: offer.itemId,
       source: offer.source,
     }),
-    emit({ type: 'CityStockItemAvailable', cityId: command.cityId, itemId: command.itemId }),
+    emit({
+      type: 'CityStockItemAvailable',
+      cityId: command.cityId,
+      itemId: command.itemId,
+      offerId: offer.offerId,
+    }),
   ];
 
   let next = upsertOffer(state, offer);
@@ -1238,14 +1247,18 @@ export function handleShopRefresh(
 
   // 步驟 4–5：以永久庫存為候選，固定 RNG Stream 抽 permanentStockOfferCount 件建立新 Offer。
   const walk = newWalk(ctx);
+  // 候選必須是**這間店賣的種類**（規則的 `stockedItemKinds`）。少了這道篩選，書店會從整個
+  // 城市庫存亂抽，於是賣出流星錘——那不是隨機性，是把「這間店賣什麼」這句宣告丟掉了。
+  const stocked = new Set<ItemKind>(rule.stockedItemKinds);
   const candidates = ctx.inventory
     .listAtLocation({ kind: 'cityPermanentStock', cityId })
-    .filter(
-      (item) =>
-        item.state === 'active' &&
-        !ctx.inventory.isReserved(item.itemId) &&
-        findAvailableOfferForItemId(next, item.itemId) === undefined,
-    )
+    .filter((item) => {
+      if (item.state !== 'active') return false;
+      if (ctx.inventory.isReserved(item.itemId)) return false;
+      if (findAvailableOfferForItemId(next, item.itemId) !== undefined) return false;
+      const itemKind = ctx.inventory.getItemKind(item.itemId);
+      return itemKind !== undefined && stocked.has(itemKind);
+    })
     .slice()
     .sort((a, b) => (String(a.itemId) < String(b.itemId) ? -1 : 1));
 
@@ -1282,7 +1295,7 @@ export function handleShopRefresh(
         itemId: offer.itemId,
         source: offer.source,
       }),
-      emit({ type: 'CityStockItemAvailable', cityId, itemId: offer.itemId }),
+      emit({ type: 'CityStockItemAvailable', cityId, itemId: offer.itemId, offerId: offer.offerId }),
     );
   }
 

@@ -149,24 +149,25 @@ const cases: readonly Case[] = [
     eq(f(input(big, [E2])), ['e1', 'e2'], '寬體 e1 覆蓋 col2 故被 col2 錨點納入');
   }],
 
-  // §2.4 施展距離：排距、不管左右。0-based row(前0/中1/後2)。
+  // §2.4 施展距離：排距、不管左右。row **1 起算**（前 1／中 2／後 3），
+  // 與 11_combat_module.md §3.3「以第 1 排為前排、第 3 排為後排」及 GRID_MIN 一致。
   ['combatDistance 排距幾何', () => {
-    assert(combatDistance(0, 0) === 1, `前對前應 1，實得 ${combatDistance(0, 0)}`);
-    assert(combatDistance(2, 0) === 3, `後打敵前應 3，實得 ${combatDistance(2, 0)}`); // 你的例子
-    assert(combatDistance(0, 2) === 3, `前打敵後應 3，實得 ${combatDistance(0, 2)}`);
-    assert(combatDistance(2, 2) === 5, `雙方後排應 5（最遠），實得 ${combatDistance(2, 2)}`);
-    assert(combatDistance(1, 0) === 2, `中打敵前應 2，實得 ${combatDistance(1, 0)}`);
+    assert(combatDistance(1, 1) === 1, `前對前應 1，實得 ${combatDistance(1, 1)}`);
+    assert(combatDistance(3, 1) === 3, `後打敵前應 3，實得 ${combatDistance(3, 1)}`);
+    assert(combatDistance(1, 3) === 3, `前打敵後應 3，實得 ${combatDistance(1, 3)}`);
+    assert(combatDistance(3, 3) === 5, `雙方後排應 5（最遠），實得 ${combatDistance(3, 3)}`);
+    assert(combatDistance(2, 1) === 2, `中打敵前應 2，實得 ${combatDistance(2, 1)}`);
   }],
 
   // §2.4 射程過濾：剔除超出有效射程的敵方；同側不受限。
   ['filterByReach 依排距剔除超射程敵方', () => {
     // 敵方 e1 前(dist1) e2 中(dist2) e3 後(dist3)；隊友 p2。actor p1 前排。
     const enc = makeEncounter([
-      { combatantId: 'p1', side: 'player', row: 0, col: 0 },
-      { combatantId: 'p2', side: 'player', row: 0, col: 1 },
-      { combatantId: 'e1', side: 'enemy', row: 0, col: 0 },
-      { combatantId: 'e2', side: 'enemy', row: 1, col: 0 },
-      { combatantId: 'e3', side: 'enemy', row: 2, col: 0 },
+      { combatantId: 'p1', side: 'player', row: 1, col: 1 },
+      { combatantId: 'p2', side: 'player', row: 1, col: 2 },
+      { combatantId: 'e1', side: 'enemy', row: 1, col: 1 },
+      { combatantId: 'e2', side: 'enemy', row: 2, col: 1 },
+      { combatantId: 'e3', side: 'enemy', row: 3, col: 1 },
     ]);
     const all = [E1, E2, E3, P2];
     eq(filterByReach(enc, P1, 1, all), ['e1', 'p2'], 'reach1：只留 dist1 敵方＋同側');

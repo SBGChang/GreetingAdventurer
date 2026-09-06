@@ -15,7 +15,7 @@ import type {
   SocialMasteryBenefitDefinition,
 } from '../../src/contracts/progression';
 import type { MasteryCurveId, MasteryId } from '../../src/contracts/core';
-import { cultureIds, type Authored, type AuthoredDomain } from '../authoring';
+import { cultureIds, textKeyFor, type Authored, type AuthoredDomain } from '../authoring';
 
 const core = cultureIds('core');
 
@@ -53,6 +53,54 @@ const LEVEL_COUNT = 11; // Lv.0…Lv.10，與 curve 的門檻筆數相同。
 function perLevel(gains: Gains): readonly PrimaryAttributeGains[] {
   // Lv.0 不給成長（角色一開始就有的等級不該憑空加屬性）；Lv.1…Lv.10 各給一份。
   return Array.from({ length: LEVEL_COUNT }, (_, level) => (level === 0 ? {} : gains));
+}
+
+// 顯示名。中文逐字取自 GDD「熟練度清單」的六大類；英文是這一輪授權的翻譯。
+// 委託類的中文是「購買／送貨／…」，英文加上 Quests 以免與動詞混淆（GDD 的分類標題已經說了
+// 那是任務熟練度，英文清單裡沒有那個標題）。
+const MASTERY_NAMES: Readonly<Record<string, readonly [string, string]>> = {
+  'one-hand-weapon': ['單手武器', 'One-Handed Weapon'],
+  'two-hand-weapon': ['雙手武器', 'Two-Handed Weapon'],
+  'throwing-weapon': ['投擲武器', 'Thrown Weapon'],
+  'shooting-weapon': ['射擊武器', 'Ranged Weapon'],
+  'one-hand-staff': ['單手法杖', 'One-Handed Staff'],
+  'two-hand-staff': ['雙手法杖', 'Two-Handed Staff'],
+  'wind-instrument': ['管樂器', 'Wind Instrument'],
+  'string-instrument': ['弦樂器', 'String Instrument'],
+  'cloth-armor': ['布甲', 'Cloth Armor'],
+  'light-armor': ['輕甲', 'Light Armor'],
+  'medium-armor': ['中甲', 'Medium Armor'],
+  'heavy-armor': ['重甲', 'Heavy Armor'],
+  'one-hand-shield': ['單手盾', 'One-Handed Shield'],
+  'two-hand-shield': ['雙手盾', 'Two-Handed Shield'],
+  'smithing': ['鍛造', 'Smithing'],
+  'tailoring': ['裁縫', 'Tailoring'],
+  'handicraft': ['工藝', 'Handicraft'],
+  'alchemy': ['製藥', 'Alchemy'],
+  'cooking': ['廚藝', 'Cooking'],
+  'gathering': ['採集', 'Gathering'],
+  'social': ['交流', 'Social'],
+  'attack-magic': ['攻擊魔法', 'Attack Magic'],
+  'defense-magic': ['防禦魔法', 'Defense Magic'],
+  'blessing-magic': ['祝福魔法', 'Blessing Magic'],
+  'curse-magic': ['詛咒魔法', 'Curse Magic'],
+  'quest-purchase': ['購買', 'Purchase Quests'],
+  'quest-delivery': ['送貨', 'Delivery Quests'],
+  'quest-escort': ['護衛', 'Escort Quests'],
+  'quest-rescue': ['救援', 'Rescue Quests'],
+  'quest-exploration': ['探索（委託）', 'Exploration Quests'],
+  'quest-suppression': ['鎮壓', 'Suppression Quests'],
+  'quest-subjugation': ['討伐', 'Subjugation Quests'],
+  'map-exploration': ['探索（地圖）', 'Map Exploration'],
+  'travel': ['旅行', 'Travel'],
+};
+
+function masteryName(local: string): { 'zh-Hant': string; en: string } {
+  const row = MASTERY_NAMES[local];
+  if (row === undefined) {
+    throw new Error(`content-source/core/progression：熟練度 "${local}" 沒有顯示名`);
+  }
+  return { 'zh-Hant': row[0], en: row[1] };
 }
 
 type MasteryRow = Readonly<{ local: string; gains: Gains }>;
@@ -155,6 +203,7 @@ function mastery(row: MasteryRow): Authored<MasteryDefinition> {
   return {
     kind: 'mastery',
     id: core.id<MasteryId>('mastery', row.local),
+    display: { nameRef: { key: textKeyFor(core.id<MasteryId>('mastery', row.local)) } },
     curveId: CURVE_ID,
     primaryAttributeGainsByLevel: perLevel(row.gains),
     // 技能的自動取得寫在**技能那一側**（`SkillDefinition.requiredMasteries` +
@@ -183,4 +232,8 @@ export const MASTERY_IDS: Readonly<Record<string, MasteryId>> = Object.fromEntri
 export const progressionDomain: AuthoredDomain = {
   domain: 'progression',
   definitions: [masteryCurve, ...ALL_MASTERY_ROWS.map(mastery), socialMasteryBenefit],
+  texts: ALL_MASTERY_ROWS.map((row) => ({
+    key: textKeyFor(core.id<MasteryId>('mastery', row.local)),
+    name: masteryName(row.local),
+  })),
 };

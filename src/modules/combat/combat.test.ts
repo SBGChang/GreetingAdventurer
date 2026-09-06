@@ -376,26 +376,34 @@ const cases: readonly Case[] = [
     },
   },
   {
-    name: '#6：未學/偽造技能於 knows() 即擋下，不得先呼叫 getSkillView（不崩潰）',
+    name: '#6：偽造技能與未學技能各自有明確拒絕碼（都不崩潰）',
     run: () => {
       const BOGUS = 'skill-bogus-not-a-def' as SkillDefinitionId;
-      // 真實 progression：偽造/未學技能 knows() 回 false。fixture getSkillView 對未知 id 會 throw，
-      // 故舊順序（先 getSkillView）會崩；新順序 knows() 先擋。
+      // 「學會了沒」問的是**知識**那一筆，而武器組裡放的是**戰鬥招式**——兩族 ID 不相等，
+      // 所以必須先取戰鬥招式定義、由它的 `acquisition` 連到知識 ID，才問得出 knows()。
+      // 這一關全程走 trySkillView（不拋），所以兩種情形都是拒絕而不是例外。
       const ctx = makeCombatContext({
-        progression: { ...stubProgressionQuery(), knows: (_c, skillId) => skillId !== BOGUS },
+        progression: {
+          ...stubProgressionQuery(),
+          // SKILL_STRIKE 的知識 ID 與自己同名（見 fixtures 的 acquisition）；這裡讓它「沒學會」。
+          knows: (_c, skillId) => skillId !== SKILL_STRIKE,
+        },
       });
       const started = ok(handleStartCombatEncounter(createInitialCombatState(), fixtureStartCommand(), ctx));
       const encounterId = Object.keys(started.nextSlice.encounters)[0]! as EncounterId;
       const enc = started.nextSlice.encounters[encounterId]!;
       const actorId = enc.currentActorId!;
       const enemyId = aliveEnemies(enc)[0]!.combatantId;
-      const res = handleUseCombatSkill(
-        started.nextSlice,
-        { type: 'useCombatSkill', encounterId, actorId, skillId: BOGUS, targetCombatantIds: [enemyId] },
-        ctx,
-      );
-      // 拒絕碼本身就是「擋在 knows() 這一關」的證據：走到 getSkillView 會是例外而非拒絕。
-      rejectedWith(res, 'combat/skill-not-learned');
+      const use = (skillId: SkillDefinitionId) =>
+        handleUseCombatSkill(
+          started.nextSlice,
+          { type: 'useCombatSkill', encounterId, actorId, skillId, targetCombatantIds: [enemyId] },
+          ctx,
+        );
+      // 偽造 ID：連定義都沒有——「不存在」與「沒學會」是兩件事，拒絕碼要分得開。
+      rejectedWith(use(BOGUS), 'combat/skill-definition-missing');
+      // 真實定義但沒學會。
+      rejectedWith(use(SKILL_STRIKE), 'combat/skill-not-learned');
     },
   },
   {

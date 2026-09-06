@@ -37,7 +37,12 @@ import { createCharacterStatsQuery } from '../content/cross-module-ports';
 import { createProgressionDefinitionReader } from '../content/progression-reader';
 import { createStatisticsDefinitionReader } from '../content/statistics-reader';
 import { createStatisticsResolverPort } from '../content/statistics-resolver-bridge';
-import { emptyQuestState, onMapContentGenerated } from '../../modules/quest/public';
+import {
+  emptyQuestState,
+  onCityStockItemAvailable,
+  onMapContentGenerated,
+} from '../../modules/quest/public';
+import type { CityDomainEvent, CityStockItemAvailable } from '../../contracts/city';
 import { createQuestGenerationContext } from '../content/cross-module-ports';
 import { createQuestDefinitionReader } from '../content/quest-reader';
 import type { ContentInstanceId, MapInstanceId } from '../../contracts/core';
@@ -48,7 +53,7 @@ import type { MemberFreeAction } from '../../modules/team/public';
 import type { CharacterId } from '../../contracts/core';
 import { createCharacterResolverPort } from '../content/character-context';
 import type { ResolverRegistry } from '../../data-runtime';
-import { createCharacterProgression, createInitialProgressionState } from '../../modules/progression/public';
+import { createInitialProgressionState, handleCharacterBorn } from '../../modules/progression/public';
 import type { Team, TeamCombatFormation } from '../../modules/team/public';
 import { createTeamState } from '../../modules/team/public';
 import { createCharacterDefinitionReader } from '../content/character-reader';
@@ -69,7 +74,7 @@ import { createCityState } from '../../modules/city/public';
 import type { CityRuntimeState, FacilityRuntimeState } from '../../modules/city/public';
 import { createEconomyState } from '../../modules/economy/public';
 import type { EconomyAccount } from '../../modules/economy/public';
-import { createInventoryState } from '../../modules/inventory/public';
+import { createInitialLoadout, createInventoryState } from '../../modules/inventory/public';
 import type { ItemInstance } from '../../modules/inventory/public';
 
 // 會進城市永久庫存的物品家族。內容的 item kind 分六種（見 contracts/inventory 的 ItemKind），
@@ -337,6 +342,9 @@ export function createNewGame(
   //   * 哪些城市、哪些設施 → CityDefinition.facilityIds
   //   * 繁榮／安全起始值   → CityDefinition.initialProsperity / initialSafety
   //   * 城裡有哪些貨       → 該文化所有「可交易」的物品定義（不是這裡挑的清單）
+  // 開局上架時發出的「貨上架了」事件，稍後交給委託生成（見下面的委託段）。
+  const stockEvents: CityStockItemAvailable[] = [];
+
   const cityReader = createCityDefinitionReader(registry);
   const itemReader = createItemDefinitionReader(registry);
   // 幣別由窄化 Reader 取得（`CurrencyDefinition.id` 本來就是 CurrencyId，不需要轉型）。
@@ -444,6 +452,10 @@ export function createNewGame(
         listAtLocation: inventoryQuery.listAtLocation,
         characterOwnsItem: inventoryQuery.characterOwnsItem,
         isReserved: inventoryQuery.isReserved,
+        getItemKind: (itemId: ItemInstanceId) => {
+          const item = inventoryQuery.getItem(itemId);
+          return item === undefined ? undefined : itemReader.getItem(item.definitionId).kind;
+        },
         isTradable: (itemId: ItemInstanceId) => {
           const item = inventoryQuery.getItem(itemId);
           return item === undefined ? false : itemReader.getItem(item.definitionId).tradePolicy.tradable;
@@ -487,6 +499,17 @@ export function createNewGame(
           ]);
         }
         seededCityState = outcome.result.nextSlice;
+        // 上架同時記下「哪一件貨、哪一筆 Offer」——採買與送貨委託是**對貨架的反應**
+        // （見下面的委託生成段）。平時這條路由 `CityStockItemAvailable` 訂閱驅動，
+        // 但開局的上架是 Bootstrap 直接呼叫的，沒有事件匯流排。
+        for (const message of outcome.result.outgoingMessages) {
+          // `TransactionMessageDraft` 是 event / internal command 的聯集，事件本體以 unknown 承載
+          // （core messages.ts 的約定）。這裡以判別欄位收窄到 city 的事件聯集，再挑出要的那一種
+          // ——不是跨語意轉型，而是聯集的正常收窄：型別守衛保證只有真的是這個 type 才會通過。
+          const event = (message as { event?: CityDomainEvent }).event;
+          if (event === undefined || event.type !== 'CityStockItemAvailable') continue;
+          stockEvents.push(event);
+        }
       }
     }
   }
@@ -505,6 +528,7 @@ export function createNewGame(
   // `listTavernVisitorsInCity` 認的就是這兩件事（team/state.ts）。招募把人從那支一人隊伍
   // 轉進玩家隊，所以「酒館名單」與「隊伍歸屬」始終是同一份真相，沒有第二個可見性旗標。
   const tavernVisitRuleId = requireTavernVisitRuleId(registry);
+  const progressionReader = createProgressionDefinitionReader(registry);
   // 派生統計引擎（與正式 ContextAssembler 同一支）。開局角色的 HP/MP 上限由它決定——
   // 寫死一組起手值等於把玩法數字搬進程式，而那個數字之後永遠不會跟著內容改。
   const statisticsRules = narrowedDomainReader<{ id: string }>(
@@ -524,7 +548,7 @@ export function createNewGame(
       progressionState: createInitialProgressionState(),
       inventoryState: seededInventoryState,
       itemReader,
-      progressionReader: createProgressionDefinitionReader(registry),
+      progressionReader,
       statisticsDefinitions: createStatisticsDefinitionReader(registry),
       statisticsResolvers: createStatisticsResolverPort(resolvers, registry),
       statisticsRuleId,
@@ -539,7 +563,7 @@ export function createNewGame(
   const npcFreeActions: MemberFreeAction[] = [];
   const npcFormations: TeamCombatFormation[] = [];
   let adventurerState: CharacterState = createCharacterState({ characters: [leader] });
-  const adventurerProgress: Record<string, ReturnType<typeof createCharacterProgression>> = {};
+
 
   for (const [cityIndex, cityDef] of cityDefinitions.entries()) {
     const supplyRule = cityReader.getPopulationSupplyRule(cityDef.populationSupplyRuleId);
@@ -599,7 +623,7 @@ export function createNewGame(
         payload: { kind: 'tavernVisit' },
         revision: 0 as Revision,
       });
-      adventurerProgress[memberId] = createCharacterProgression(memberId);
+
     }
   }
 
@@ -609,7 +633,7 @@ export function createNewGame(
   // 平時這條路由 `MapContentGenerated` 訂閱驅動，但開局的刷新是 Bootstrap 直接呼叫的
   // （沒有交易、沒有事件匯流排），所以這裡直接跑**同一支** Handler——與商店開局上架同一個作法，
   // 不另寫一條 bootstrap 專用的生成邏輯。
-  const questGenerationContext = createQuestGenerationContext({
+  const questGenerationDeps = {
     questDefinitions: createQuestDefinitionReader(registry),
     teamState: createTeamState({ playerTeamId, teams: [playerTeam, ...npcTeams] }),
     mapState: seededMapState,
@@ -621,18 +645,37 @@ export function createNewGame(
     world,
     ids: ids.quest,
     rng: deterministicRng,
-    rngContext: {
-      worldSeed,
-      streamId: 'quest-bootstrap-generation' as RngStreamId,
-      cursor: 0 as RngCursor,
-    },
-  });
+  };
+  // 每一筆生成事件用**自己的** RNG 串流。
+  //
+  // 正式路徑上每個事件都是一筆交易，`rngContextFor()` 以訊息 ID 派生 stream，所以天然不同。
+  // Bootstrap 直接呼叫 Handler，沒有交易也沒有訊息 ID——若整批共用一條 stream 與同一個起始
+  // 游標，每一次 `creationChance` 都會抽到**同一個數**：0.3 的採買委託要嘛全生、要嘛一筆都沒有。
+  // （症狀就是「委託幾乎都一樣」的其中一半。）
+  const questContextFor = (tag: string) =>
+    createQuestGenerationContext({
+      ...questGenerationDeps,
+      rngContext: {
+        worldSeed,
+        streamId: `quest-bootstrap-generation:${tag}` as RngStreamId,
+        cursor: 0 as RngCursor,
+      },
+    });
+
   let seededQuestState = emptyQuestState;
   for (const [mapId, contentIds] of generatedContentIdsByMap) {
     seededQuestState = onMapContentGenerated(
       { type: 'MapContentGenerated', mapId: mapId as MapInstanceId, mapVersion: 1, contentIds },
       seededQuestState,
-      questGenerationContext,
+      questContextFor(`map:${mapId}`),
+    ).nextSlice;
+  }
+  // 貨架委託（採買／送貨）。與地圖那一批走**同一支** Handler。
+  for (const event of stockEvents) {
+    seededQuestState = onCityStockItemAvailable(
+      event,
+      seededQuestState,
+      questContextFor(`stock:${String(event.offerId)}`),
     ).nextSlice;
   }
 
@@ -658,6 +701,27 @@ export function createNewGame(
     };
   }
 
+  // 每一位角色的裝備欄位（三個空武器組）。`createInitialLoadout` 是契約明訂的**單一**建立入口，
+  // 而且必須在任何 equip／設定武器組／Query 之前就存在——`equipItem` 對沒有 Loadout 的角色一律
+  // 回 `loadout-not-initialized`（不惰性建立，否則 Handler 與 Query 會各自鑄出不同的 WeaponSetId）。
+  // 沒有這一段，開局角色連武器都裝不上，於是戰鬥永遠沒有可選行動。
+  const loadouts: Record<CharacterId, ReturnType<typeof createInitialLoadout>> = {};
+  for (const characterId of Object.keys(adventurerState.characters) as CharacterId[]) {
+    loadouts[characterId] = createInitialLoadout(characterId, ids.inventory.nextWeaponSetId);
+  }
+  const inventoryWithLoadouts: typeof seededInventoryState = {
+    ...seededInventoryState,
+    equipmentLoadouts: loadouts,
+  };
+
+  // 每一位角色的初始成長：走**同一支** `handleCharacterBorn`，不是在這裡自己 new 一份。
+  // 那支 Handler 除了建立空成長，還會解鎖「門檻 Lv.0 的自動技能」——自己 new 就會漏掉那一步，
+  // 於是開局角色手上有武器卻一招都沒有（GDD §戰鬥「沒有普通攻擊」，選單會是空的）。
+  let seededProgression = createInitialProgressionState();
+  for (const characterId of Object.keys(adventurerState.characters) as CharacterId[]) {
+    seededProgression = handleCharacterBorn(seededProgression, characterId, progressionReader).nextSlice;
+  }
+
   const teamState = createTeamState({
     playerTeamId,
     teams: [playerTeam, ...npcTeams],
@@ -672,15 +736,11 @@ export function createNewGame(
     quest: seededQuestState,
     city: seededCityState,
     economy: seededEconomyState,
-    inventory: seededInventoryState,
+    inventory: inventoryWithLoadouts,
     character: adventurerState,
     progression: {
       ...base.progression,
-      characterProgress: {
-        ...base.progression.characterProgress,
-        [leaderId]: createCharacterProgression(leaderId),
-        ...adventurerProgress,
-      },
+      characterProgress: seededProgression.characterProgress,
     },
     core: { ...base.core, nextRuntimeSequence: currentCursor() },
   };

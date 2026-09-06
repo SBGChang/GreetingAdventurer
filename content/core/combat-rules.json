@@ -560,6 +560,9 @@
     "sourcePath": "core/combat-rules.json#combat-ai-policy.core.boss-rotation"
   },
   {
+    "acquisition": {
+      "kind": "innate"
+    },
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "attack",
     "activationHand": "handless",

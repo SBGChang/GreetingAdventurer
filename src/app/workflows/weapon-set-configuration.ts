@@ -58,10 +58,24 @@ export function validateWeaponSetSkills(
     }
 
     // 2. 角色是否已學會（doc §1.2：技能知識屬 Progression）。
-    if (!ports.knows(cmd.characterId, id)) {
+    //
+    // 武器組裡放的是**戰鬥招式**（`combat-skill.*`），而「學會了沒」問的是**知識**那一筆
+    // （`skill.*`）。兩族 ID 從來不相等，所以必須經由 `acquisition` 這條連結轉一次；
+    // 直接拿戰鬥招式 ID 去問 knows() 永遠得到 false，武器組因此一招都設定不起來。
+    if (skill.acquisition.kind !== 'learned') {
+      return {
+        code: 'workflow/weapon-set-skill-not-learnable',
+        details: { skillId: String(id) },
+      };
+    }
+    if (!ports.knows(cmd.characterId, skill.acquisition.knowledgeSkillId)) {
       return {
         code: 'workflow/weapon-set-skill-not-learned',
-        details: { skillId: String(id), characterId: String(cmd.characterId) },
+        details: {
+          skillId: String(id),
+          knowledgeSkillId: String(skill.acquisition.knowledgeSkillId),
+          characterId: String(cmd.characterId),
+        },
       };
     }
 

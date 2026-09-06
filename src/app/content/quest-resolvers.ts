@@ -35,6 +35,9 @@ export type QuestRangeDefinitions = Readonly<{
 
 export type GuildResolverInput = Readonly<{ mapId: MapInstanceId }>;
 
+// 送貨目的地：世界上任何一座**不是出發地**的城。送到自己所在的城不是送貨。
+export type DestinationResolverInput = Readonly<{ excludeCityId: CityId }>;
+
 function requireRng(ctx: ResolverContext): Readonly<{
   rng: NonNullable<ResolverContext['rng']>;
   rngContext: NonNullable<ResolverContext['rngContext']>;
@@ -93,6 +96,30 @@ function randomCityRegistration(
   };
 }
 
+// 送貨目的地。候選＝所有城市扣掉出發地；只有一座城的世界不可能有送貨委託，明確拋。
+function otherCityRegistration(
+  binding: ResolverBinding,
+): ResolverRegistration<DestinationResolverInput, CityId> {
+  return {
+    resolverId: binding.resolverId,
+    ownerModule: binding.ownerModule,
+    inputSchemaId: GUILD_INPUT_SCHEMA,
+    resultSchemaId: CITY_RESULT_SCHEMA,
+    resolve: (input, ctx) => {
+      const queries = ctx.queries as QuestGuildQueries;
+      const candidates = queries.listCityIds().filter((id) => String(id) !== String(input.excludeCityId));
+      if (candidates.length === 0) {
+        throw new Error(
+          `quest-resolvers：除了 "${String(input.excludeCityId)}" 之外沒有別的城市——送貨委託送不出去。`,
+        );
+      }
+      const { rng, rngContext } = requireRng(ctx);
+      const step = rng.nextInt({ ...rngContext, minInclusive: 0, maxInclusive: candidates.length - 1 });
+      return { value: candidates[step.value]!, nextRngCursor: step.nextCursor };
+    },
+  };
+}
+
 // 實際結束期限：一個閉區間裡抽一個整數天數。
 function actualEndRegistration(binding: ResolverBinding): ResolverRegistration<object, number> {
   const paramsDefId = binding.paramsDefId;
@@ -126,5 +153,6 @@ export const QUEST_GENERATION_SHAPE_BUILDERS: Readonly<
 > = {
   'quest-guild:local-city': localCityRegistration,
   'quest-guild:random-city': randomCityRegistration,
+  'quest-destination:other-city': otherCityRegistration,
   'quest-actual-end:day-range': actualEndRegistration,
 };

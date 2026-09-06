@@ -101,9 +101,12 @@ export function makeCombatQuery(state: CombatState, deps: QueryDeps): CombatQuer
           // 「不存在」由 Reader 契約的 trySkillView 回答，**不是**攔 getSkillView 的例外：攔例外會把
           // Reader 內部的程式錯誤也一併誤判成「技能不存在」，屬規範 §6 禁止的「捕捉 Reader 例外後繼續」。
           // 先 knows() 擋掉未學／偽造的 ID（同 handleUseCombatSkill），再確認 Definition 是否存在。
-          if (!deps.progression.knows(actor.source.characterId, skillId as SkillDefinitionId)) continue;
+          // 先取戰鬥招式定義，再由它的 `acquisition` 連到知識那一筆去問 knows()。
+          // 直接拿戰鬥招式 ID 問 knows() 永遠是 false（見 handleUseCombatSkill 的說明）。
           const view = deps.definitions.trySkillView(skillId as SkillDefinitionId);
           if (view === undefined) continue;
+          if (view.acquisition.kind !== 'learned') continue;
+          if (!deps.progression.knows(actor.source.characterId, view.acquisition.knowledgeSkillId)) continue;
           const requiresSwitch = actor.activeWeaponSetId !== set.weaponSetId;
           options.push({
             skillId: view.skillId,

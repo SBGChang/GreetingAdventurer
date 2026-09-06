@@ -63,7 +63,7 @@ import type {
   SecondaryAttributeCoefficients,
 } from '../../src/contracts/inventory';
 import type { CurrencyId, EquipmentDefinitionId, MasteryId } from '../../src/contracts/core';
-import { cultureIds, type Authored, type AuthoredDomain } from '../authoring';
+import { cultureIds, type Authored, type AuthoredDomain, type AuthoredText } from '../authoring';
 import { MASTERY_IDS } from '../core/progression';
 
 const yunhua = cultureIds('yunhua');
@@ -263,7 +263,12 @@ type Blueprint = Readonly<{
     handSlots: EquipmentHandSlots;
   }>;
   baseValue: number;
+  // 顯示名。中文逐字照抄設計來源；英文是**這一輪授權的翻譯**（意譯為主，專名音譯：
+  // 玄衡 Xuanheng、天衡 Tianheng、望舒 Wangshu、清商 Qingshang、青岑 Qingcen）。
+  // 兩個語系都放進 Blueprint 而不是另開一張對照表：新增一條武器線卻只寫一種語言，
+  // 現在是編譯錯誤，而不是切到英文才看見一個 ID。
   names: Quintuple<string>;
+  namesEn: Quintuple<string>;
   weights: Quintuple<number>;
   baseRows: readonly CoefficientRow[];
 }>;
@@ -285,6 +290,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: ONE_HAND_HELD,
     baseValue: 80,
     names: ['環首短刀', '雲紋佩刀', '銀環柳葉刀', '斷潮佩刀', '御紋長刀'],
+    namesEn: ['Ring-Pommel Shortsaber', 'Cloud-Pattern Saber', 'Silver-Ring Willowleaf Saber', 'Tidebreaker Saber', 'Imperial-Crest Longsaber'],
     weights: [6, 7, 8, 9, 10],
     baseRows: [physical(1.25, 0.95), hit(0, 0.22, 0.18), predict(0.08, 0.1)],
   },
@@ -296,6 +302,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: ONE_HAND_HELD,
     baseValue: 70,
     names: ['鐵骨折扇', '漆紋鐵扇', '青玉開山扇', '鎮風羽扇', '百頁玄扇'],
+    namesEn: ['Iron-Ribbed Folding Fan', 'Lacquered Iron Fan', 'Jade Mountain-Cleaving Fan', 'Windstilling Feather Fan', 'Hundred-Leaf Dark Fan'],
     weights: [3, 3, 4, 4, 5],
     baseRows: [physical(0.85, 0.72), hit(0.1, 0.25, 0.22), predict(0.14, 0.16), magicDr(0.05)],
   },
@@ -310,6 +317,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: TWO_HAND_HELD,
     baseValue: 105,
     names: ['棗木長槍', '青鐵長槍', '流雲槍', '鎖陣槍', '玄衡龍槍'],
+    namesEn: ['Jujube-Wood Spear', 'Green-Iron Spear', 'Drifting-Cloud Spear', 'Formation-Locking Spear', 'Xuanheng Dragon Spear'],
     weights: [11, 12, 13, 14, 15],
     baseRows: [physical(1.7, 1.0), hit(0, 0.32, 0.24), predict(0.1, 0.18), block(0.08, 0.06)],
   },
@@ -321,6 +329,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: TWO_HAND_HELD,
     baseValue: 120,
     names: ['木柄偃刀', '月牙偃刀', '鐵脊偃刀', '斷岳偃刀', '九環大偃'],
+    namesEn: ['Wood-Hafted Glaive', 'Crescent Glaive', 'Iron-Spine Glaive', 'Mountain-Cleaving Glaive', 'Nine-Ring Great Glaive'],
     weights: [14, 16, 18, 20, 23],
     baseRows: [physical(2.05, 1.05), hit(0, 0.16, 0.18), normalDr(0.06), blockAbsorb(0.05)],
   },
@@ -336,6 +345,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: ONE_HAND_HELD,
     baseValue: 68,
     names: ['飛針囊', '銅尾飛針', '鎖線飛鏢', '照影流星', '天羅鏢匣'],
+    namesEn: ['Flying-Needle Pouch', 'Bronze-Tail Needles', 'Threadlock Darts', 'Shadowlit Meteor Darts', 'Skynet Dart Case'],
     weights: [2, 2, 3, 3, 4],
     baseRows: [physical(0.55, 1.45), hit(0.08, 0.38, 0.28), predict(0.05, 0.16)],
   },
@@ -349,6 +359,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: ONE_HAND_HELD,
     baseValue: 92,
     names: ['鐵蒺藜袋', '青鐵流星錘', '鎖鏈鏢', '萬鈞繩錘', '九節鎮鎖'],
+    namesEn: ['Iron-Caltrop Sack', 'Green-Iron Meteor Hammer', 'Chain Dart', 'Myriad-Weight Rope Hammer', 'Nine-Section Warding Chain'],
     weights: [5, 7, 8, 10, 12],
     baseRows: [physical(1.35, 1.05), hit(0, 0.3, 0.22), blockAbsorb(0.04)],
   },
@@ -360,6 +371,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: TWO_HAND_HELD,
     baseValue: 86,
     names: ['竹弓', '漆背角弓', '穿雲長弓', '鎮關鐵胎弓', '望舒神弓'],
+    namesEn: ['Bamboo Bow', 'Lacquer-Backed Horn Bow', 'Cloudpiercer Longbow', 'Passguard Iron-Core Bow', 'Wangshu Divine Bow'],
     weights: [4, 5, 6, 7, 8],
     baseRows: [physical(0.6, 1.65), hit(0.12, 0.42, 0.32), predict(0.08, 0.16)],
   },
@@ -371,6 +383,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: TWO_HAND_HELD,
     baseValue: 105,
     names: ['手弩', '連珠弩', '機簧重弩', '破城臂張弩', '天機重弩'],
+    namesEn: ['Hand Crossbow', 'Repeating Crossbow', 'Spring-Lock Heavy Crossbow', 'Wallbreaker Arm-Drawn Crossbow', 'Celestial-Mechanism Crossbow'],
     weights: [6, 8, 10, 13, 16],
     baseRows: [physical(0.85, 1.7), hit(0.08, 0.36, 0.3), predict(0.06, 0.12)],
   },
@@ -384,6 +397,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: ONE_HAND_HELD,
     baseValue: 84,
     names: ['桃木短杖', '朱砂令杖', '墨玉符杖', '鎮紙玉杖', '司印權杖'],
+    namesEn: ['Peachwood Rod', 'Cinnabar Command Rod', 'Inkjade Talisman Rod', 'Paperweight Jade Rod', 'Seal-Warden Scepter'],
     weights: [3, 4, 4, 5, 6],
     baseRows: [magic(2.35), hit(0.25, 0.22, 0.08), magicDr(0.06), predict(0.1, 0.08)],
   },
@@ -395,6 +409,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: TWO_HAND_HELD,
     baseValue: 116,
     names: ['桑木長杖', '銅鈴長杖', '四象陣杖', '萬籙儀杖', '天衡法杖'],
+    namesEn: ['Mulberry Staff', 'Bronze-Bell Staff', 'Four-Symbols Array Staff', 'Myriad-Register Ritual Staff', 'Tianheng Arcane Staff'],
     weights: [8, 10, 12, 14, 16],
     baseRows: [magic(2.9), hit(0.34, 0.22, 0.1), magicDr(0.09), predict(0.14, 0.1)],
   },
@@ -411,6 +426,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: TWO_HAND_HELD,
     baseValue: 78,
     names: ['竹笛', '銅節簫', '清商玉笛', '鳳鳴長簫', '九霄龍笛'],
+    namesEn: ['Bamboo Flute', 'Bronze-Jointed Xiao', 'Qingshang Jade Flute', 'Phoenixcall Long Xiao', 'Ninth-Heaven Dragon Flute'],
     weights: [2, 2, 3, 3, 4],
     baseRows: [instrument(0.42, 0.24, 0.5), hit(0.1, 0.18, 0.12), magicDr(0.04)],
   },
@@ -422,6 +438,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: TWO_HAND_HELD,
     baseValue: 88,
     names: ['桐木短琴', '漆面七弦', '雲水古琴', '斷金瑤琴', '大音無弦'],
+    namesEn: ['Paulownia Short Zither', 'Lacquered Seven-String', 'Cloudwater Guqin', 'Goldsevering Jade Zither', 'The Great Sound, Stringless'],
     weights: [4, 5, 6, 7, 8],
     baseRows: [instrument(0.36, 0.3, 0.56), predict(0.12, 0.16), magicDr(0.07)],
   },
@@ -440,6 +457,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: BODY_WORN,
     baseValue: 54,
     names: ['青岑布衣', '素紋罩袍', '雲紗術袍', '五色道袍', '萬象法衣'],
+    namesEn: ['Qingcen Cloth Robe', 'Plain-Pattern Overrobe', 'Cloudgauze Arcane Robe', 'Five-Color Daoist Robe', 'Myriad-Forms Vestment'],
     weights: [3, 4, 5, 5, 6],
     baseRows: [evade(0.1, 0.26, 0.12), magicDr(0.12), predict(0.08, 0.12)],
   },
@@ -451,6 +469,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: BODY_WORN,
     baseValue: 68,
     names: ['竹面皮甲', '魚鱗輕甲', '雲紋皮札', '風羽鱗衣', '天游輕鎧'],
+    namesEn: ['Bamboo-Faced Leather', 'Fish-Scale Light Armor', 'Cloud-Pattern Leather Lamellar', 'Windfeather Scale Coat', 'Skyroaming Light Cuirass'],
     weights: [7, 8, 9, 10, 11],
     baseRows: [evade(0.05, 0.34, 0.28), hit(0, 0.1, 0.12), normalDr(0.06)],
   },
@@ -462,6 +481,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: BODY_WORN,
     baseValue: 90,
     names: ['皮襯札甲', '青鐵札甲', '鎖片明光甲', '虎紋山文甲', '玄衡中鎧'],
+    namesEn: ['Leather-Lined Lamellar', 'Green-Iron Lamellar', 'Chain-Plate Mingguang Armor', 'Tiger-Pattern Mountain Armor', 'Xuanheng Medium Cuirass'],
     weights: [13, 15, 17, 19, 21],
     baseRows: [normalDr(0.14), blockAbsorb(0.16), block(0.1, 0.08), evade(0, 0.08, 0.08)],
   },
@@ -475,6 +495,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     // 迴避是**負值**（md §9「最高一般減傷、明確犧牲迴避與命中向係數」）。負係數是設計意圖，
     // 不是資料錯誤；statistics 的 safeRaw = max(0, raw) 只夾最終 raw，不夾單件係數。
     names: ['鐵葉重札', '鎮關重鎧', '玄鱗重甲', '龍紋步人甲', '天衡玄甲'],
+    namesEn: ['Iron-Leaf Heavy Lamellar', 'Passguard Heavy Cuirass', 'Darkscale Heavy Armor', 'Dragon-Pattern Buren Armor', 'Tianheng Dark Panoply'],
     weights: [21, 25, 29, 34, 40],
     baseRows: [normalDr(0.22), blockAbsorb(0.24), magicDr(0.05), evade(0, -0.06, -0.04)],
   },
@@ -487,6 +508,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: OFF_HAND_ONLY,
     baseValue: 72,
     names: ['藤編小盾', '圓木鐵緣盾', '鐵面圓盾', '雲獸吞口盾', '玄龜寶盾'],
+    namesEn: ['Woven-Rattan Buckler', 'Iron-Rimmed Round Shield', 'Iron-Faced Round Shield', 'Cloudbeast Maw Shield', 'Dark-Tortoise Treasure Shield'],
     weights: [5, 7, 9, 11, 13],
     baseRows: [block(0.28, 0.22), blockAbsorb(0.18), normalDr(0.04)],
   },
@@ -505,6 +527,7 @@ const BLUEPRINTS: readonly Blueprint[] = [
     placement: TWO_HAND_HELD,
     baseValue: 108,
     names: ['木骨大牌', '漕關門盾', '鎮門塔盾', '岳紋方盾', '天柱巨盾'],
+    namesEn: ['Wood-Framed Pavise', 'Canalgate Door Shield', 'Gatewarden Tower Shield', 'Peak-Pattern Square Shield', 'Skypillar Great Shield'],
     weights: [16, 20, 25, 31, 38],
     baseRows: [block(0.36, 0.28), blockAbsorb(0.28), normalDr(0.1), magicDr(0.06)],
   },
@@ -596,18 +619,21 @@ function equipmentTier(blueprint: Blueprint, index: TierIndex): Authored<Equipme
   };
 }
 
-// ── 顯示名的過渡出口 ────────────────────────────────────────────────────────
+// ── 顯示名 ─────────────────────────────────────────────────────────────────
 //
-// `ItemDisplayDefinition` 只能存一個 `LocalizedTextRef`（key + params），存不了設計來源的中文
-// 顯示名，所以 90 個名字在產物 JSON 裡是**看不到**的（見回報的契約缺口 4）。這份對照表把它們
-// 留在作者層並匯出，讓在地化表的作者不必回頭重讀 `.data.mjs`；它不是 Definition，不進 pack。
+// `ItemDisplayDefinition` 只存 `LocalizedTextRef`（key + params），名字本身住在 locale bundle。
+// 這裡把 Blueprint 的兩組名字展開成 90 筆 `AuthoredText`，key 與 `nameRef.key` 同一個產生式
+// （`nameKey`）——所以「有 nameRef 卻沒有文字」與「有文字卻沒人引用」兩邊都由 Compiler 檢查得到。
+const EQUIPMENT_TEXTS: readonly AuthoredText[] = BLUEPRINTS.flatMap((blueprint) =>
+  TIER_INDEXES.map((index) => ({
+    key: nameKey(blueprint.local, TIER_META[index].tier),
+    name: { 'zh-Hant': blueprint.names[index], en: blueprint.namesEn[index] },
+  })),
+);
+
+// 供在地化以外的用途引用中文名（例如比對設計來源）；它不是 Definition，不進 pack。
 export const YUNHUA_EQUIPMENT_DISPLAY_NAMES: Readonly<Record<string, string>> = Object.fromEntries(
-  BLUEPRINTS.flatMap((blueprint) =>
-    TIER_INDEXES.map((index) => [
-      nameKey(blueprint.local, TIER_META[index].tier),
-      blueprint.names[index],
-    ]),
-  ),
+  EQUIPMENT_TEXTS.map((t) => [t.key, t.name['zh-Hant']]),
 );
 
 export const yunhuaEquipmentDomain: AuthoredDomain = {
@@ -615,4 +641,5 @@ export const yunhuaEquipmentDomain: AuthoredDomain = {
   definitions: BLUEPRINTS.flatMap((blueprint) =>
     TIER_INDEXES.map((index) => equipmentTier(blueprint, index)),
   ),
+  texts: EQUIPMENT_TEXTS,
 };

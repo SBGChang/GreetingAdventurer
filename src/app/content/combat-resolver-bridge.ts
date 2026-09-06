@@ -15,6 +15,7 @@ import type {
   MonsterDefinitionId,
   RngContext,
   SkillDefinitionId,
+  ItemInstanceId,
 } from '../../contracts/core';
 import type {
   CombatAiParamsDefinition,
@@ -24,6 +25,7 @@ import type {
 import type { CombatAiDefinitions, MonsterSkillView } from './combat-ai-resolvers';
 import type { ProgressionDefinitionReader, ProgressionQuery } from '../../contracts/progression';
 import type { ResolverRegistry, WeightedLinearProductParams } from '../../data-runtime';
+import type { EquipmentDefinition } from '../../contracts/inventory';
 import type {
   CombatLoadoutQuery,
   CombatPowerInput,
@@ -52,7 +54,9 @@ export type CombatResolverBridgeDeps = Readonly<{
   powerParams: CombatPowerParamsReader;
   aiParams: CombatAiParamsReader; // weighted-product-params
   progression: ProgressionQuery; // getPrimaryAttributes（power kernel 的輸入）
-  loadout: CombatLoadoutQuery; // 防禦 Mastery 路由用（本版尚未接）
+  loadout: CombatLoadoutQuery; // 防禦 Mastery 路由：讀該角色身上的防具
+  // 由裝備實體反查它的定義（防禦路由要看 equipmentKind 與 relatedMasteryIds）。
+  equipmentOf: (itemId: ItemInstanceId) => EquipmentDefinition | undefined;
   rng: DeterministicRng;
   rngContextFor: (tag: string) => RngContext; // AI 抽選用
 }>;
@@ -131,13 +135,37 @@ export function createCombatResolverPort(deps: CombatResolverBridgeDeps): Combat
       return best.masteryId;
     },
 
-    // 防禦 MXP 路由：讀防禦裝備 → defense-mastery-routing-rule → mastery。整合塊·防禦 MXP 增量接線；
-    // 玩家攻擊的基本戰不觸及（沒有角色在此路徑防禦）。未接時明確拋，不回假值。
-    resolveDefenseMastery: (characterId: CharacterId): MasteryId => {
-      throw new Error(
-        `combat-bridge: resolveDefenseMastery 尚未接線（characterId=${String(characterId)}）——` +
-          `待防禦 MXP 增量（讀防禦裝備＋defense-mastery-routing-rule）。`,
-      );
+    // 防禦 MXP 路由：這一份經驗記進**身上那件防具**的熟練度。
+    //
+    // 為什麼不必再繞一個 Resolver：路由的自由度在資料裡已經用完了。
+    // `EquipmentDefinition.relatedMasteryIds` 就是「這件裝備練哪一項」的宣告（輕甲→輕甲熟練、
+    // 圓盾→單手盾熟練），而雲華的防具每件只占一格 `body`、盾只占手格——所以「穿哪件」對應
+    // 「練哪項」是一對一，沒有需要決定的事。
+    //
+    // 優先序：防具（armor）優先於盾（shield）。文件（mastery_experience_economy_v1.md §六）寫
+    // 「個人份額最後進入哪些防具／盾牌 Mastery」——兩者都可能，而承受傷害的主體是身上的甲；
+    // 只有在完全沒穿甲時，這一份才記到盾上。
+    //
+    // 兩件都沒有 → `undefined`：那是「這一份沒有去處」，呼叫端略過（見 CombatResolverPort 的說明）。
+    resolveDefenseMastery: (characterId: CharacterId): MasteryId | undefined => {
+      const loadout = deps.loadout.getEquipmentLoadout(characterId);
+      const worn: EquipmentDefinition[] = [];
+      for (const itemId of Object.values(loadout.armorSlots)) {
+        if (itemId === undefined) continue;
+        const def = deps.equipmentOf(itemId);
+        if (def !== undefined) worn.push(def);
+      }
+      for (const set of loadout.weaponSets) {
+        for (const itemId of [set.mainHandItemId, set.offHandItemId]) {
+          if (itemId === undefined) continue;
+          const def = deps.equipmentOf(itemId);
+          if (def !== undefined) worn.push(def);
+        }
+      }
+      const pick = (kind: EquipmentDefinition['equipmentKind']): MasteryId | undefined =>
+        worn.find((d) => d.equipmentKind === kind && d.relatedMasteryIds.length > 0)
+          ?.relatedMasteryIds[0];
+      return pick('armor') ?? pick('shield');
     },
 
     // 敵方 AI：讀怪物 ai-policy 的 behaviorResolverId，走該 resolver 選招＋目標（用 RNG）。

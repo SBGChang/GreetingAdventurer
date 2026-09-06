@@ -800,6 +800,28 @@ if (UNHANDLED_JOBS.length > 0) {
 }
 
 // 把一筆到期 Job 轉為 runTransaction 的 rootHandler。
+// ──────────────────────────────────────────────────────────────────────────
+// 敵方回合（Root）
+// ──────────────────────────────────────────────────────────────────────────
+//
+// 敵方回合是**引擎驅動**的 root，不是 Game Command（玩家沒有下令），也不是 ScheduledJob
+// （它不排程，而是「輪到誰」的直接後果）。它需要自己的 root 是因為：
+//
+//   * 它改 state、發事件、可能結算整場遭遇——那就是一筆交易。
+//   * 它消費 RNG（AI 選招、命中判定），所以要有自己的 invocation stream。
+//
+// 先前 `handleEnemyTurn` 寫好了卻沒有任何呼叫端：玩家打完一招之後輪到怪，然後**永遠停在那裡**。
+// 症狀是「進得了戰鬥但打不下去」。驅動迴圈見 session.ts 的 `settleCombat`。
+export function routeEnemyTurn(
+  encounterId: EncounterId,
+  contextFactory: ModuleContextFactory,
+): RootHandler<GameState> {
+  return (ctx) => {
+    const ctxs = contextFactory(ctx.workingState);
+    return fromOutcome('combat', combat.handleEnemyTurn(ctx.workingState.combat, encounterId, ctxs.combat));
+  };
+}
+
 export function routeJob(
   job: GameScheduledJob,
   contextFactory: ModuleContextFactory,
@@ -881,10 +903,14 @@ const EVENT_SUBSCRIBERS: Readonly<Record<string, SubscriberDispatch>> = {
         x.progression.teachingRuleId,
       ),
     ),
-  'CharacterBorn::progression': (e, s) =>
+  'CharacterBorn::progression': (e, s, x) =>
     subscriberResult(
       'progression',
-      progression.handleCharacterBorn(s.progression, (e as { characterId: never }).characterId),
+      progression.handleCharacterBorn(
+        s.progression,
+        (e as { characterId: never }).characterId,
+        x.progression.definitions,
+      ),
     ),
   'ProgressionCapacityChanged::character': (e, s, x) =>
     subscriberResult('character', character.onStatsCapacityChanged(e as never, s.character, x.character)),
@@ -892,6 +918,8 @@ const EVENT_SUBSCRIBERS: Readonly<Record<string, SubscriberDispatch>> = {
     subscriberResult('character', character.onStatsCapacityChanged(e as never, s.character, x.character)),
 
   // ── quest：目標完成一律由事件累計，quest 不查別的模組 State ──
+  'CityStockItemAvailable::quest': (e, s, x) =>
+    subscriberResult('quest', quest.onCityStockItemAvailable(e as never, s.quest, x.questGeneration)),
   'MapContentGenerated::quest': (e, s, x) =>
     subscriberResult('quest', quest.onMapContentGenerated(e as never, s.quest, x.questGeneration)),
   'MapContentResolved::quest': (e, s, x) =>

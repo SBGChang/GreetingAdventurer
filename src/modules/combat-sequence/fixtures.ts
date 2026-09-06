@@ -309,7 +309,8 @@ function member(
 ): CombatSequenceMemberSnapshot {
   return {
     characterId,
-    formationCell: { floor: 0, row, col: 0 },
+    // 戰鬥格 1 起算（GRID_MIN=1）。col 固定第 1 欄：本模組不看左右，只看排。
+    formationCell: { floor: 0, row, col: 1 },
     selectedWeaponSetId: weaponSetId,
     configuredSkillIds: [...configuredSkillIds],
     attackSkillCount,
@@ -327,17 +328,17 @@ function member(
 // 三人隊：權重 6 / 4 / 0（doc §10 驗收 7），列 0 / 1 / 2 → 防禦權重 3 / 2 / 1（驗收 8）。
 export function fixtureMembers(): CombatSequenceMemberSnapshot[] {
   return [
-    member(FIXTURE.hero, FIXTURE.weaponSetHero, 0, [FIXTURE.skillBladeA], 1, 6, []),
+    member(FIXTURE.hero, FIXTURE.weaponSetHero, 1, [FIXTURE.skillBladeA], 1, 6, []),
     member(
       FIXTURE.ally,
       FIXTURE.weaponSetAlly,
-      1,
+      2,
       [FIXTURE.skillBladeA, FIXTURE.skillBladeB, FIXTURE.skillChant],
       2,
       4,
       [FIXTURE.skillChant],
     ),
-    member(FIXTURE.bard, FIXTURE.weaponSetBard, 2, [FIXTURE.skillChant], 0, 0, [
+    member(FIXTURE.bard, FIXTURE.weaponSetBard, 3, [FIXTURE.skillChant], 0, 0, [
       FIXTURE.skillChant,
     ]),
   ];

@@ -46,6 +46,7 @@ import type {
 // 跨模組外送命令：引用接收模組契約的真實型別（B.5 慣例）。
 import type {
   CreateItemInstance,
+  ItemKind,
   RemoveItemInstance,
   TransferItem,
   MoveItemToTeamQuestCargo,
@@ -135,6 +136,16 @@ export type ShopRuleDefinition = DefinitionHeader<ShopRuleId> & {
   facilityId: FacilityDefinitionId;
   refreshCadenceDays: number;
   refreshOffsetDays: number;
+  // 這間店賣哪幾種物品。GDD §城市固定功能：道具店「買賣道具」、裝備店「買賣裝備」、
+  // 書店「販售基礎書籍」——三句話都是**內容**，不是程式該知道的事。
+  //
+  // 沒有這個欄位時 `handleShopRefresh` 從整個城市永久庫存亂抽，於是書店會賣流星錘、
+  // 裝備店會賣屏風。要修它只有兩條路：在 Handler 裡寫一張 shopKind → ItemKind[] 的對照表
+  // （跨資料對照屬於資料，規範 §3 禁止），或把那張表放進規則自己身上——就是這個欄位。
+  //
+  // 必填且允許空陣列：空的意思是「這間店不從永久庫存上架任何東西」，那是一句封閉的宣告，
+  // 與「忘了填」有區別（忘了填是編譯錯誤）。
+  stockedItemKinds: readonly ItemKind[];
   permanentStockOfferCount: { min: number; max: number };
   baseCatalogPoolId?: ItemPoolId;
   priceRuleId: PriceRuleId;
@@ -536,10 +547,16 @@ export type CommerceInteractionCompleted = Readonly<{
   experienceAwardRuleId: ExperienceAwardRuleId;
 }>;
 
+// 「這件東西現在擺在貨架上了」。
+//
+// `offerId` 必填：訂閱者（quest 的採買委託）要指名**買哪一筆 Offer**，而
+// `QuestObjective.purchase` 的欄位正是 `{ itemId, shopOfferId }`。只發 itemId 的話，訂閱者得回頭
+// 掃一次 city 的 Slice 去猜是哪一筆——那是把 city 的事實在別的模組重算一次。
 export type CityStockItemAvailable = Readonly<{
   type: 'CityStockItemAvailable';
   cityId: CityId;
   itemId: ItemInstanceId;
+  offerId: ShopOfferId;
 }>;
 
 export type IntelRevealed = Readonly<{

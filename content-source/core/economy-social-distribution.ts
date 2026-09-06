@@ -51,9 +51,17 @@ import type {
   ResolverId,
   SocialSystemDefinitionId,
 } from '../../src/contracts/core';
-import { cultureIds, type Authored, type AuthoredDomain } from '../authoring';
+import { cultureIds, type Authored, type AuthoredDomain, type AuthoredText } from '../authoring';
 
 const core = cultureIds('core');
+
+// 標準貨幣的顯示名。「文」是雲華的銅錢單位；英文取通用的 Coin（貨幣是 core，不是雲華專屬，
+// 所以不用「文」的音譯 wen）。
+const CURRENCY_NAME_KEY = 'currency.standard';
+
+const ECONOMY_TEXTS: readonly AuthoredText[] = [
+  { key: CURRENCY_NAME_KEY, name: { 'zh-Hant': '文', en: 'Coin' } },
+];
 
 // Resolver ID 的字串形狀是**規約**（既有落地的寫法：`resolver:<module>.<name>`，見
 // `src/domain-services/statistics` 與 `src/domain-services/combat-power` 的命名）。以工具產生而不是
@@ -82,7 +90,9 @@ const currency: Authored<CurrencyDefinition> = {
   kind: 'currency',
   id: core.id<CurrencyId>('currency', 'standard'),
   smallestUnit: 1,
-  display: { nameRef: { key: 'currency.standard' } },
+  // 這個 key 刻意不是 `textKeyFor(id)` 的三段式：`currency` 是已登記的 kind，三段式會被
+  // 跨定義引用檢查當成定義引用（同 items.ts 的 `nameRef()` 註解）。
+  display: { nameRef: { key: CURRENCY_NAME_KEY } },
 };
 
 // ── Price Modifier ──────────────────────────────────────────────────────────
@@ -529,4 +539,5 @@ export const economySocialDistributionDomain: AuthoredDomain = {
     npcExpiredCargoRule,
     questRewardCurrencyRule,
   ],
+  texts: ECONOMY_TEXTS,
 };

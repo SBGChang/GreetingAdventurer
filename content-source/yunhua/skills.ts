@@ -1440,6 +1440,13 @@ function combatSkill(route: RouteRow, entry: SkillRow): Authored<CombatSkillDefi
   return {
     kind: KIND.combatSkill,
     id: yunhua.id<SkillDefinitionId>(KIND.combatSkill, local),
+    // 這 80 招都是角色學得會的。指向**同一個 local 名**的 progression 技能（門檻與取得方式
+    // 住在那一筆）——兩張表是 1:1，所以連結由同一個 `skillLocal(route, entry)` 產生，
+    // 不是各自手打一次字串。
+    acquisition: {
+      kind: 'learned',
+      knowledgeSkillId: yunhua.id<SkillDefinitionId>(KIND.skill, local),
+    },
     activationHand: entry.activationHand ?? route.activationHand,
     weaponRequirementIds: requirementLocals.map(weaponRequirementId),
     actionKind: entry.actionKind,

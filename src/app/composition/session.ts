@@ -86,6 +86,7 @@ import type { TeamIdAllocator } from '../../modules/team/public';
 
 import {
   createTransactionConfig,
+  routeEnemyTurn,
   routeGameCommand,
   routeJob,
   type ModuleContextFactory,
@@ -515,4 +516,90 @@ export function settleWorld(
   }
 
   return { state, steps, blocked };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// 敵方回合推進
+// ──────────────────────────────────────────────────────────────────────────
+
+// 跑一次敵方回合。與 runDueJob 同形狀的引擎 root：自己的 transaction／invocation stream。
+export function runEnemyTurn(
+  state: GameState,
+  encounterId: EncounterId,
+  assembler: ContextAssembler,
+): GameStepResult {
+  const worldSeed = state.core.worldSeed as Seed;
+  const holder: CursorHolder = { cursor: state.core.nextRuntimeSequence };
+  const transactionId = mintId<TransactionId>(worldSeed, holder, 'transaction');
+  return runRoot(
+    state,
+    worldSeed,
+    holder,
+    transactionId,
+    transactionId as string,
+    (cf) => routeEnemyTurn(encounterId, cf),
+    assembler,
+  );
+}
+
+// 一次戰鬥推進的紀錄：誰動了、之後這場遭遇還在不在。
+//
+// `encounterState` 是**選填**：遭遇在這一步之後可能已經從 Slice 移除（結算完成），那時沒有狀態
+// 可讀。給 `undefined` 而不是補一個 'resolved'——後者是猜的，而且會把「已移除」與「真的
+// resolved」兩件事混成同一個字。
+export type CombatStep = Readonly<{ actorId: CombatantId; encounterState?: string }>;
+
+export type CombatSettleResult = Readonly<{
+  state: GameState;
+  steps: readonly CombatStep[];
+  blockedBy?: string;
+}>;
+
+// 把遭遇推進到「輪到玩家」為止。
+//
+// 為什麼需要這一支：CTB 決定誰先動，而先動的常常是敵方（8 隻獾的 CTB 都是 0，玩家 9.15）。
+// 玩家下完一招之後也一樣——輪到誰是結算的結果，不是玩家能決定的。沒有這個迴圈，畫面會停在
+// 「目前行動者是一隻怪」而沒有任何人去動它。
+//
+// 停止條件三選一：
+//   1. 遭遇不再是 active（全滅／隊伍戰敗）——這一場結束了。
+//   2. 目前行動者是**玩家側**——把控制權交還玩家。
+//   3. 被拒（例如缺內容）——把原因交給呼叫端，不吞掉。
+//
+// 上限用 Kernel 的 `MAX_SETTLE_STEPS`（與 settleWorld 同一個安全閥）：那是結構性的防跑飛，
+// 不是平衡量。
+export function settleCombat(
+  initial: GameState,
+  encounterId: EncounterId,
+  assembler: ContextAssembler,
+): CombatSettleResult {
+  let state = initial;
+  const steps: CombatStep[] = [];
+  let blocked: string | undefined;
+
+  for (let guard = 0; guard <= MAX_SETTLE_STEPS; guard += 1) {
+    if (guard === MAX_SETTLE_STEPS) {
+      blocked = 'engine/settle-step-limit';
+      break;
+    }
+    const encounter = state.combat.encounters[encounterId];
+    if (encounter === undefined) break;
+    if (encounter.state !== 'active') break;
+    const actorId = encounter.currentActorId;
+    if (actorId === undefined) break;
+    const actor = encounter.combatants[actorId];
+    if (actor === undefined) break;
+    if (actor.side !== 'enemy') break; // 輪到玩家了
+
+    const result = runEnemyTurn(state, encounterId, assembler);
+    if (!result.accepted) {
+      blocked = result.rejection.code;
+      break;
+    }
+    state = result.state;
+    const after = state.combat.encounters[encounterId];
+    steps.push({ actorId, ...(after !== undefined ? { encounterState: after.state } : {}) });
+  }
+
+  return { state, steps, ...(blocked !== undefined ? { blockedBy: blocked } : {}) };
 }
