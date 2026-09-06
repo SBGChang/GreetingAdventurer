@@ -134,8 +134,9 @@ P1、P2 建議優先且**不要同時發給兩個人**——兩者都動 combat 
 **設計來源**（已定案，見 `docs/02_systems/combat_skill_effect_spec.md` 與
 `docs/00_core/game_design_document.md` 九、戰鬥系統）：
 
-* 距離＝**排距**（不管左右）：`combatDistance(attackerRow, targetRow)` 已實作於
-  `src/modules/combat/state.ts`＝`rowsFromFront(a) + rowsFromFront(t) + 1`。
+* 距離＝**排距**（不管左右，**從自己 0 起算**）：`combatDistance(attackerRow, targetRow)` 已實作於
+  `src/modules/combat/state.ts`＝`rowsFromFront(a) + rowsFromFront(t)`（前對前＝0，最遠＝4）。
+  距離修正表以**距離 2 為標準**（不是 3）。
 * 有效射程＝武器 `reachCells` ＋ 招式 `extraReachCells`（Handler 已算好並過濾目標）。
 * 命中率 ＝ `clamp(15, 95, 70 + (攻方命中 − 守方迴避) × 0.25)`，其中命中／迴避是**副屬分數**，
   且進公式前要先套**距離命中補正**（近距離加成、遠距離減成，正向壓低）。

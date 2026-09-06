@@ -19,13 +19,13 @@
  * 戰鬥場地 3×3。格座標 row/col ∈ [GRID_MIN, GRID_MAX]，**1 起算**。
  *
  * 11_combat_module.md §3.3 逐字：「雙方各自的局部座標都以第 1 排為前排、第 3 排為後排」。
- * 這兩個常數原本是 0／2，與文件、與所有實際擺位（Bootstrap 的隊長站位、雲華編組的
+ * 這兩個常數原本是 0／2，與文件、與所有實際撫位（Bootstrap 的隊長站位、雲華編組的
  * `combatCell(1..3, 1..3)`）以及 combat 自己的 `backfillSide()`（以字面 1 判斷「第 1 排仍有人」）
- * 全部相反。後果不是座標偏移而是**近戰全面失效**：
+ * 全部相反：`rowsFromFront(row) = row - GRID_MIN` 會把前排算成「離前排 1 排」，整個排距偏一格。
  *
- *   `rowsFromFront(row) = row - GRID_MIN`，前排 row 1 在 0 起算下得到 1（應為 0），
- *   於是 `combatDistance(1,1) = 1 + 1 + 1 = 3`，而所有近戰武器與怪物天生攻擊的射程都是 1
- *   → 前排對前排也「超出射程」→ 每隻怪每回合都因「沒有合法目標」改為休息，整場戰鬥零傷害。
+ * 這裡只管**座標標籤**。玩家感受到的「距離」是 **0 起算**的（自己那一格＝0，
+ * 所以射程 1 的近戰站前排可以打到敵方第 1、2 排），由 `rowsFromFront()` 與 `combatDistance()`
+ * 負責換算——見 modules/combat/state.ts §2.4。
  */
 export const GRID_MIN = 1;
 export const GRID_MAX = 3;

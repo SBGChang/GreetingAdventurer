@@ -87,8 +87,8 @@ function makeBridge(): ReturnType<typeof createCombatResolverPort> {
 
 // 一隻怪 vs 一名玩家戰鬥員的最小遭遇。
 //
-// 站位預設**雙方都在前排（row 1）**：`combatDistance` 是「攻方離前排 ＋ 守方離前排 ＋ 1」
-//（見 modules/combat/state.ts），所以前排對前排＝1，是全場最近的距離——近戰招式打得到。
+// 站位預設**雙方都在前排（row 1）**：`combatDistance` 是「攻方離前排 ＋ 守方離前排」
+//（見 modules/combat/state.ts；距離從自己 0 起算），所以前排對前排＝0，是全場最近的距離——近戰招式打得到。
 //
 // 格座標 **1 起算**（GRID_MIN=1；11_combat_module.md §3.3「以第 1 排為前排、第 3 排為後排」）。
 // 本檔第一版寫成 0 起算，是因為當時 `GRID_MIN` 誤設為 0——那個常數已訂正，這裡跟著回到 1。

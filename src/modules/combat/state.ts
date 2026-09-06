@@ -161,16 +161,28 @@ export function coveredCells(anchor: GridCell, footprint: CombatFootprint): Grid
   return cells;
 }
 
-// ── §2.4 施展距離（排距；不管左右）────────────────────────────────────────
+// ── §2.4 施展距離（排距；不管左右）────────────────────────
 // 攻守分屬對向的兩個 3×3。距離只看「離己方前排的排數」——左右完全不影響（右後、左後打敵左前
-// 都是同一距離）。distance = 攻方離前排 + 守方離前排 + 1（前排對前排＝1；雙方後排＝5＝最遠）。
+// 都是同一距離）。
+//
+// **距離從自己起算，自己那一格是 0**：
+//   distance = 攻方離前排 + 守方離前排
+// 前排對前排＝0；前排打敵方第 2 排＝1；雙方後排＝4（最遠）。
+// 因此射程 1 的一般近戰站前排，打得到敵方第 1 、第 2 排（distance 0 與 1）；
+// 射程 2 的雙手長柄從前排涵蓋整個敵陣。
+//
+// 這裡**沒有 +1**。舊版寫成 `+1`（前對前＝1、雙方後排＝5），配上「一般近戰射程 1」
+// 的結果是近戰**只**打得到敵方前排，與設計意圖不符（見 docs/02_systems/combat_skill_effect_spec.md
+// 「射程與距離」）。座標本身仍然 1 起算（GRID_MIN=1，因為 backfillSide() 與全部內容都以
+// 第 1 排為前排）；rowsFromFront() 負責把它換成 0 起算的「離前排幾排」。
+//
 // 這是戰場的**結構幾何**（不是可調平衡量），所以住程式；距離帶來的傷害/命中/CD 修正才是資料。
 // 大體型目標取其**最前佔用排**：footprint 由 anchorCell 向後（row 增）延伸，故最前排＝anchorCell.row。
 export function rowsFromFront(row: number): number {
   return row - GRID_MIN;
 }
 export function combatDistance(attackerAnchorRow: number, targetAnchorRow: number): number {
-  return rowsFromFront(attackerAnchorRow) + rowsFromFront(targetAnchorRow) + 1;
+  return rowsFromFront(attackerAnchorRow) + rowsFromFront(targetAnchorRow);
 }
 
 // 由某側目前存活單位（非 dead）重建 occupancy（dead 移出 occupancy，其餘仍占格）。

@@ -697,13 +697,16 @@ export function handleRecruitTavernAdventurer(
   ]);
 }
 
-// 模組自算的 row-major 合法配置：memberIds[i] → (row=⌊i/3⌋, col=i%3, floor=0)。≤9 名成員恆合法（無重疊、
-// 不越界），供 Resolver 產生非法配置時的退路。
+// 模組自算的 row-major 合法配置：memberIds[i] → 從前排左上角逐格填。≤9 名成員恆合法
+//（無重疊、不越界），供 Resolver 產生非法配置時的退路。
+//
+// 寬度與起點都從 GRID_MIN/GRID_MAX 導出：舊寫法是 `cols = GRID_MAX + 1` 加上 row 從 0 開始，
+// 那只在座標 0 起算時成立；座標改回 1 起算後它會產出 row 0（越界）且每排塔 4 人。
 function rowMajorPlacements(memberIds: readonly CharacterId[]): Record<CharacterId, GridCell> {
-  const cols = GRID_MAX + 1;
+  const cols = GRID_MAX - GRID_MIN + 1;
   const out: Record<CharacterId, GridCell> = {};
   memberIds.forEach((id, i) => {
-    out[id] = { floor: 0, row: Math.floor(i / cols), col: i % cols };
+    out[id] = { floor: 0, row: GRID_MIN + Math.floor(i / cols), col: GRID_MIN + (i % cols) };
   });
   return out;
 }

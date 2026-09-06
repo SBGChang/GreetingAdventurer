@@ -196,7 +196,8 @@ export type CombatMasteryExperienceMode = 'damage' | 'fixedSupport';
 export type TargetingDefinition = {
   targetResolverId: ResolverId;
   // §2.4 射程：有效射程 = 武器格數 + 本欄「招式額外距離」。大多數招式沒有（省略＝0）；魔法/治療
-  // 招式一律 +6（全場可及）。合法目標＝施展當下真實排距 ≤ 有效射程（見 combatDistance）。
+  // 招式一律 +6（全場可及）。合法目標＝施展當下真實排距 ≤ 有效射程；
+  // 排距**從自己 0 起算**（前對前＝0），所以射程 1 的近戰能打到敵方第 1、2 排——見 combatDistance。
   extraReachCells?: number;
 };
 export type CounterStanceDefinition = {
