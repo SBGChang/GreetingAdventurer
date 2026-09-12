@@ -205,6 +205,7 @@ function event(e: AssetDistributionDomainEvent): DomainEventDraft<unknown> {
 function internal(
   targetModule: ModuleId,
   command:
+    | import('../../contracts/economy').GrantCurrencyCommand
     | CreateEconomyAccountCommand
     | TransferCurrencyCommand
     | TransferItem
@@ -719,7 +720,11 @@ function openAuctionRound(
   const bids: LootBid[] = [];
   for (const characterId of distribution.participantCharacterIds) {
     if (characterId === controller) continue;
-    const step = ctx.resolvers.resolveCompanionBid({
+    const accountId = ctx.economy.findCharacterAccount(characterId, intrinsicValue.currencyId);
+    const step: RngStep<CompanionBidDecision> = auction.companionBidPolicy === 'affordableIntrinsic'
+      ? { value: accountId !== undefined && ctx.economy.canAfford(accountId, minimumBid)
+          ? { kind: 'bid', amount: minimumBid } : { kind: 'pass' }, nextCursor: rngContext.cursor }
+      : ctx.resolvers.resolveCompanionBid({
       resolverId: auction.companionBidResolverId,
       distributionId: distribution.distributionId,
       itemId,
@@ -1054,6 +1059,11 @@ export function handleResolveLootAuctionRound(
     );
   } else {
     const saleValue = directSaleValue(round, auction.unclaimedSaleMultiplier, unit);
+    if (auction.directSaleRewardRuleId) {
+      settledRound = { ...round, state: 'directSold' };
+      messages.push(internal(ECONOMY_MODULE_ID, { type: 'GrantCurrency', transferId: ctx.ids.nextEconomyTransferId(),
+        toAccountId: escrowAccountId, rewardRuleId: auction.directSaleRewardRuleId, reason: REASON_DIRECT_SALE, sourceId: round.itemId }));
+    } else {
     const saleSource = ctx.economy.findSystemAccount(
       DIRECT_SALE_SOURCE_PURPOSE,
       round.intrinsicValue.currencyId,
@@ -1076,6 +1086,7 @@ export function handleResolveLootAuctionRound(
         sourceId: sourceRefOf(working.source),
       }),
     );
+    }
     const removal: RemoveItemInstance = {
       type: 'RemoveItemInstance',
       itemId: round.itemId,
@@ -1348,6 +1359,10 @@ function settleCurrency(
           sourceKind: working.source.kind,
         });
       }
+      if (working.source.kind === 'questReward' && working.source.rewardRuleId) {
+        messages.push(internal(ECONOMY_MODULE_ID, { type: 'GrantCurrency', transferId: ctx.ids.nextEconomyTransferId(),
+          toAccountId: escrowAccountId, rewardRuleId: working.source.rewardRuleId, reason: REASON_CURRENCY_INPUT, sourceId: working.source.questId }));
+      } else {
       const inputSource = ctx.economy.findSystemAccount(purpose, currencyId);
       if (inputSource === undefined) {
         return stepReject('distribution.settle.inputSourceAccountMissing', {
@@ -1366,6 +1381,7 @@ function settleCurrency(
           sourceId: sourceRefOf(working.source),
         }),
       );
+      }
     }
 
     const shares = equalSplitShares(total, unit, participantCount, rotation, rule.remainderPolicy);

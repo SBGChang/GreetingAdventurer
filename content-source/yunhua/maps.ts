@@ -993,6 +993,7 @@ function mapTemplate(row: TopologyRow): Authored<MapTemplateDefinition> {
       ? {}
       : { nationalDungeonForm: profile.nationalDungeonForm }),
     refreshOffsetDays: profile.refreshOffsetDays,
+    refreshCadenceDays: 14,
     floors,
     rooms,
     links,

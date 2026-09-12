@@ -168,6 +168,7 @@ export type EnemyPlacementDefinition = {
 };
 
 export type EncounterGroupDefinition = DefinitionHeader & {
+  itemRewards?: readonly Readonly<{ itemDefinitionId: import('../core').ItemDefinitionId; quantity: number }>[];
   memberDefinitionIds: MonsterDefinitionId[];
   initialPlacements: EnemyPlacementDefinition[];
   experienceBudgetId: EncounterExperienceBudgetId;
@@ -225,6 +226,7 @@ export type CombatSkillAcquisition =
   | Readonly<{ kind: 'learned'; knowledgeSkillId: SkillDefinitionId }>;
 
 export type CombatSkillDefinitionView = {
+  display?: { nameRef: import('../core').LocalizedTextRef };
   skillId: SkillDefinitionId;
   acquisition: CombatSkillAcquisition;
   activationHand: CombatActivationHand;
@@ -263,6 +265,9 @@ export type CombatDamageChannel = 'physical' | 'magic' | 'instrument';
 
 export type CombatDamageRuleDefinition = DefinitionHeader & {
   damageChannel: CombatDamageChannel;
+  /** Omitted multiplier is the identity; omitted mitigation means no secondary resistance. */
+  powerMultiplier?: number;
+  mitigationSecondaryId?: import('../core').SecondaryAttributeId;
   powerResolverId: ResolverId;
   canBeBlocked: boolean;
 };

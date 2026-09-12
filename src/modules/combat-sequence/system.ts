@@ -64,7 +64,7 @@ import type {
   StartCombatSequence,
   StopCombatSequence,
 } from '../../contracts/combat-sequence';
-// 外送命令引用**接收模組**契約的真實型別（HANDOFF 慣例）；inventory 是 ConsumeCombatSequenceRetrySupply
+// 外送命令引用**接收模組**契約的真實型別（docs/CURRENT_STATUS.md 慣例）；inventory 是 ConsumeCombatSequenceRetrySupply
 // 的唯一處理者。注意它的 payload 與 doc §6.3 不同（沒有 itemId／quantity）——見實作回報的依賴清單。
 import type { ConsumeCombatSequenceRetrySupply } from '../../contracts/inventory';
 

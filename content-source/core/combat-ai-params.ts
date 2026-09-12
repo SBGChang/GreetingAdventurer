@@ -1,5 +1,5 @@
 // content-source/core/combat-ai-params.ts
-// 敵方 AI 與反擊條件的參數（f3_work_packages.md P1 的內容側）。
+// 敵方 AI 與反擊條件的參數（docs/00_core/technical_architecture.md 的內容側）。
 //
 // ── 為什麼這些是內容而不是程式 ────────────────────────────────────────────
 //

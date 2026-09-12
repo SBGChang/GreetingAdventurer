@@ -278,6 +278,7 @@ function damageRule(row: DamageRow): Authored<CombatDamageRuleDefinition> {
     kind: KIND.damageRule,
     id: core.id<CombatDamageRuleId>(KIND.damageRule, row.local),
     damageChannel: row.channel,
+    mitigationSecondaryId: core.id<import('../../src/contracts/core').SecondaryAttributeId>('secondary-attribute', `${row.channel === 'physical' ? 'general' : row.channel}-damage-reduction`),
     powerResolverId: row.powerResolverId,
     canBeBlocked: row.canBeBlocked,
   };

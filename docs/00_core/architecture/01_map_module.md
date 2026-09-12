@@ -1,5 +1,7 @@
 # Map 模組契約
 
+> 本文件定義設計契約，不代表全部功能已接入正式遊戲。實際狀態與驗收入口見 [目前實作狀態](../../CURRENT_STATUS.md)。
+
 > **模組 ID：** `map`
 >
 > **依賴：** [共用核心契約](00_shared_contracts.md)、Team Presence Query、World Query。
@@ -46,7 +48,8 @@ Map 不保存隊伍位置或隊伍名單。刷新時「是否有人在圖內」�
 type MapTemplateDefinition = DefinitionHeader & {
   kind: 'outdoor' | 'interior';
   nationalDungeonForm?: 'outdoor' | 'subterranean' | 'building';
-  refreshOffsetDays: number;       // 0..13
+  refreshCadenceDays: number;      // 正整數；正式雲華資料為 14
+  refreshOffsetDays: number;       // 0 <= offset < cadence
   floors: FloorDefinition[];
   rooms: RoomDefinition[];
   links: RoomLinkDefinition[];
@@ -458,7 +461,7 @@ sequenceDiagram
   無鎖 + 有人 → 保留 Pending，重排下一日檢查（pendingCheckScheduledFor ← 次日）
 ```
 
-固定 14 日節奏永遠依 `refreshOffsetDays` 推導；Pending 成功刷新不會改寫下一個固定刷新日。
+固定節奏依 `refreshCadenceDays` 與 `refreshOffsetDays` 推導；Pending 成功刷新不會改寫下一個固定刷新日。MapTemplate v2 必填週期，v1 作者資料必須依設計明確補齊，不由 runtime 預設。
 
 ### 7.3 NPC 地牢結算要求
 

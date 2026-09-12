@@ -1,3 +1,4 @@
+import { UnavailableCapabilityError } from '../composition/capability';
 // app/content/context-assembler.ts
 // 正式 ContextAssembler（session.ts 的 ContextAssembler 型別的正式實作）。
 //
@@ -6,13 +7,7 @@
 // HandlerContext。測試用的 `session-fixture.ts` 只接 dungeon、其餘 unusedContext；這一支逐模組
 // 接上真實的 Definition Reader / 跨模組 Query / id allocator / Resolver bridge。
 //
-// **F3 逐模組接線，分多個增量。** 尚未接上的模組，其 context 以 `pending()` 提供：一個一被存取
-// 就明確拋錯的 Proxy。這與「靜默回 undefined 然後行為錯掉」相反——它讓「這條路碰到了還沒接線的
-// 模組」當場現形、指名是誰。只要**已註冊且可達的 Game Command** 不碰未接模組，引擎就跑得動；
-// 碰到了就是一個清楚的「尚未接線」錯誤，不是難查的靜默失敗。
-//
-// 目前已接：team（足以跑 rest / startCityTravel 這類只讀 plan 規則的指令）。
-// 待接：其餘模組與 team 自己的 world / combat / resolvers 子 port（見 pending 標記）。
+// 正式接線狀態見 docs/CURRENT_STATUS.md。未接線 port 由 Session 轉為 typed rejection。
 
 import type {
   CombatRuleId,
@@ -76,6 +71,7 @@ import {
 import { createMapDefinitionReader } from './map-reader';
 import { createQuestDefinitionReader } from './quest-reader';
 import { RESOLVER_PARAMS_KINDS } from './resolvers';
+import { createCombatStatusQuery } from '../../modules/combat/public';
 import { makeProgressionQuery } from '../../modules/progression/public';
 
 // 一被存取就拋錯的 Proxy，代表「這個 port／context 在本次建置尚未接線」。回傳 never 以便賦值給
@@ -83,13 +79,10 @@ import { makeProgressionQuery } from '../../modules/progression/public';
 function pending(path: string): never {
   const handler: ProxyHandler<object> = {
     get(_target, prop) {
-      throw new Error(
-        `ContextAssembler: "${path}" 尚未接線（存取 .${String(prop)}）——F3 逐模組接上中，` +
-          `這條指令路徑碰到了還沒接的模組`,
-      );
+      throw new UnavailableCapabilityError(`${path}.${String(prop)}`);
     },
     apply() {
-      throw new Error(`ContextAssembler: "${path}" 尚未接線（被當成函式呼叫）`);
+      throw new UnavailableCapabilityError(path);
     },
   };
   return new Proxy(function pendingCallable(): void {}, handler) as never;
@@ -242,6 +235,7 @@ export function createProductionContextAssembler(
         getCounterParams: (id) => combatCounterParams.get(id),
       },
       progression: combatProgression,
+      statistics: stats,
       loadout: combatLoadout,
       rng: runtime.rng,
       rngContextFor: runtime.rngContextFor,
@@ -379,8 +373,7 @@ export function createProductionContextAssembler(
             return runtimeCity.facilityStates[facilityId]?.availability === 'open';
           },
         },
-        // 這個 port 這批已接的指令不會觸及；接上前以 pending 明確標記（碰到就拋、指名是誰）。
-        combat: pending('team.combat'),
+        combat: createCombatStatusQuery(state.combat),
         // 招募擲骰／離隊擲骰／預設站位。三個 resolverId 都由內容的規則定義指名（見該檔）。
         resolvers: createTeamResolverPort({
           registry,
@@ -408,8 +401,14 @@ export function createProductionContextAssembler(
       // ── 待接：其餘模組與服務（F3 後續增量逐一換成真實 context）─────────────────
       // ── 已接：quest（acceptQuest；team/map/character 唯讀投影）──
       quest: questContext,
+      questSettlement: {
+        ...questContext,
+        nextDistributionId: runtime.ids.dungeon.nextDistributionId,
+        distributionRuleId: requireQuestDistributionRule(registry),
+        resolveCurrencyReward: (id) => createEconomyDefinitionReader(registry).getRewardRule(id).fixedAmount,
+      },
       // ── 已接：quest 生成（地圖刷新出內容 → 依 QuestReactionRule 貼委託）──
-      questGeneration: questGenerationContext,
+      questGeneration: { ...questGenerationContext, enabledKinds: ['suppression', 'hunt'] },
 
       // ── 已接：character（裝備變動夾住 HP/MP 上限、世界冒險者生成）──────────────
       //
@@ -439,16 +438,31 @@ export function createProductionContextAssembler(
         transactionId: runtime.transactionId,
         definitions: createEconomyDefinitionReader(registry),
         ids: runtime.ids.economy,
-        // 報酬 Resolver（委託／戰利品直售的金額）尚未接線；買賣路徑不觸及它。
-        resolvers: pending('economy.resolvers'),
+        // 固定委託金額由 RewardRule 提供；物品直售按內容倍率與最小貨幣單位計價。
+        resolvers: { resolveRewardAmount: input => {
+          const rule = createEconomyDefinitionReader(registry).getRewardRule(input.rewardRuleId);
+          if (rule.itemValueMultiplier === undefined) return undefined;
+          const item = state.inventory.items[input.sourceId as ItemInstanceId];
+          if (!item) return undefined;
+          const value = itemReader.getItem(item.definitionId).intrinsicValue;
+          const unit = createEconomyDefinitionReader(registry).getCurrency(value.currencyId).smallestUnit;
+          return { currencyId: value.currencyId, amount: Math.floor(value.amount * item.quantity * rule.itemValueMultiplier / unit) * unit };
+        } },
       },
       world: pending('world'),
       crafting: pending('crafting'),
-      // ── 已接：distribution（地牢戰利品分配的 collecting 開場；拍賣輪的 Resolver 仍待接）──
+      // ── 玩家戰利品：蒐集、競價／放棄、直售與均分 ──
       distribution: distributionContext,
       combatSequence: pending('combatSequence'),
       npcBehavior: pending('npcBehavior'),
       effects: effectsReader,
     };
   };
+}
+
+function requireQuestDistributionRule(registry: DefinitionRegistry): import('../../contracts/distribution').AssetDistributionRuleId {
+  const rules = narrowedDomainReader<import('../../contracts/distribution').AssetDistributionRuleDefinition>(registry, 'reader:quest.distribution-rule', ['asset-distribution-rule']).list()
+    .filter(r => r.sourceKind === 'questReward' && r.controllerPolicy === 'equalCurrencyOnly');
+  if (rules.length !== 1) throw new Error('quest/distribution-rule-not-unique');
+  return rules[0]!.id;
 }

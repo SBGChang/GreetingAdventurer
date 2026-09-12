@@ -115,6 +115,9 @@ export type PriceModifierParamsDefinition = DefinitionHeader & {
 // 調校＝資料」。規則不直接帶金額，否則報酬平衡會需要改契約。
 export type RewardRuleDefinition = DefinitionHeader<RewardRuleId> & {
   resolverId: ResolverId;
+  /** 固定報酬的作者參數；缺席時必須由指定 Resolver 解析。 */
+  fixedAmount?: MoneyValue;
+  itemValueMultiplier?: number;
 };
 
 export interface EconomyDefinitionReader {

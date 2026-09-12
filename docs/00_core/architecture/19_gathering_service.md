@@ -1,5 +1,7 @@
 # Gathering Resolver 與採集 Workflow 契約
 
+> 本文件定義設計契約，不代表全部功能已接入正式遊戲。實際狀態與驗收入口見 [目前實作狀態](../../CURRENT_STATUS.md)。
+
 > **技術元件：** `domain-services/gathering`，以及各來源的 Host Workflow（例如 `app/workflows/dungeon-gathering`）
 >
 > **依賴：** 共用核心契約、Team／Progression／Map／Inventory／Asset Distribution 的公開契約，以及 Gathering Definition Reader。

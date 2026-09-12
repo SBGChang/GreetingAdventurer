@@ -38,6 +38,10 @@ export function runTests(): void {
   assert(final('final.max-health', 10) === 400, `max-health 應 400，實得 ${final('final.max-health', 10)}`);
   // 魔力上限 = 120 + safeRaw×14。safeRaw 10 → 260。
   assert(final('final.max-mana', 10) === 260, `max-mana 應 260，實得 ${final('final.max-mana', 10)}`);
+  const trained = bridge.resolveFinalSecondaryValue('resolver:statistics.final.max-health' as ResolverId, {
+    secondaryAttributeId: SEC, safeRaw: 0, effectivePrimaryAttributes: { ...ATTRS, muscle: 20 }, ageDays: 0, equippedWeight: 0,
+  });
+  assert(trained === 600, '角色肌力必須增加生命上限，即使沒有裝備');
   // 分數直出（identity）。
   assert(final('final.identity', 37) === 37, 'identity 直出');
   // 一般減傷 raw/(raw+120)：raw=120 → 0.5。

@@ -21,9 +21,7 @@
 //              aurelien_content.md／safir_content.md §「命名與共用」也寫「數值公式、CTB、命中、
 //              減傷與 Mastery 規則沿用共用平衡模型」。本檔只用到這些被點名為跨文化的那幾條。
 //
-// **未採用**：docs/02_systems/equipment_balance.md。該檔首行自述「歷史草稿，暫不作為現行規格或
-// 實作依據……本文件中的數值範例……均不應直接沿用」，所以本檔不引用它的任何數字，只沿用它與
-// GDD 一致的結構觀念（「裝備係數只是一層；副屬性只再乘持握係數與對應熟練度係數」）。
+// 裝備係數以現行 GDD、派生統計契約與正式文化平衡資料為準。
 //
 // 凡設計文件沒有給的數值，一律標「**第一版方案（待討論）**」並寫出設計理由。它們全部落在
 // Definition 的欄位裡（不是程式常數），所以調整平衡只需改這個檔。
@@ -134,15 +132,7 @@ function channel(local: string): EquipmentCoefficientChannelId {
 // 「最大生命、最大魔力」。**攜帶重量上限不在這裡**：DS §7 不變量 9 規定它只由 Carry Capacity
 // Rule 與有效肌力決定，契約也把它做成 `carryingCapacity` 而不是副屬之一。
 //
-// `primaryCoefficients` 的語意是**方向向量**（GDD 副屬性公式的「武器/防具權重配方」那一項裡，
-// 屬於「這個副屬走哪些主屬、相對權重多少」的部分）。絕對量級由裝備的
-// `primaryAttributeCoefficients` 提供，兩者相乘。
-//
-// 為什麼方向必須放在這裡而不是裝備上：裝備契約只有**一份** `primaryAttributeCoefficients`，
-// 對它宣告的所有通道共用。所以同一把武器的「物理傷害走肌＋協」與「命中走反＋協＋智」這件事，
-// 只能由副屬規則的方向向量表達。（這也是一個契約缺口，見回報。）
-//
-// 有比例可引的照文件比例，沒有的一律標第一版方案。
+// 裝備逐通道提供方向與量級。此層用 1 宣告適用的主屬，避免把作者係數再縮放一次。
 
 type SecondaryRow = Readonly<{
   local: string;
@@ -165,18 +155,14 @@ type SecondaryRow = Readonly<{
 }>;
 
 const SECONDARY_ROWS: readonly SecondaryRow[] = [
-  // 物理傷害：GDD 肌＋協。相對權重取 BM「怪物物理傷害基礎 = 肌 × 1.20 + 協 × 0.45」
-  // 正規化為 肌 1.00 / 協 0.375——BM 是現行平衡基準，且該式明說人類快速模擬共用同一 Profile。
   {
     local: 'physical-damage',
-    primaries: { muscle: 1, coordination: 0.375 },
+    primaries: { muscle: 1, coordination: 1 },
     channelLocals: ['physical-damage'],
     masteryStage: true,
     finalResolverId: RESOLVERS.finalIdentity,
     combatPowerCoefficient: 0.05,
   },
-  // 魔法傷害：GDD 智（只有智）。BM 的怪物魔法傷害另含 協 × 0.20，但 GDD 的對應表是副屬方向的
-  // 權威，此處以 GDD 為準；兩者差異列入回報。
   {
     local: 'magic-damage',
     primaries: { intelligence: 1 },
@@ -185,49 +171,38 @@ const SECONDARY_ROWS: readonly SecondaryRow[] = [
     finalResolverId: RESOLVERS.finalIdentity,
     combatPowerCoefficient: 0.05,
   },
-  // 樂器傷害：GDD 的副屬清單有它，但「副屬性對應主屬性」表沒有它的列。BM 只說「樂器傷害用智、
-  // 協、魅」。相對權重取 GDD「熟練度→主屬性成長配比」裡兩種樂器熟練度的配比方向
-  // （管樂器 智2/魅3、弦樂器 智1/協2/魅3 → 魅為主軸）：魅 1.00 / 智 0.60 / 協 0.50。
-  // **第一版方案（待討論）**——文件只給了主屬集合，沒給權重。
   {
     local: 'instrument-damage',
-    primaries: { intelligence: 0.6, coordination: 0.5, charisma: 1 },
+    primaries: { intelligence: 1, coordination: 1, charisma: 1 },
     channelLocals: ['instrument-damage'],
     masteryStage: true,
     finalResolverId: RESOLVERS.finalIdentity,
     combatPowerCoefficient: 0.05,
   },
-  // 命中：GDD 反＋協＋智。相對權重取 BM「怪物命中分數 = 反 × 0.40 + 協 × 0.55 + 智 × 0.10」
-  // 正規化為 協 1.00 / 反 0.73 / 智 0.18。
   {
     local: 'accuracy',
-    primaries: { reaction: 0.73, coordination: 1, intelligence: 0.18 },
+    primaries: { reaction: 1, coordination: 1, intelligence: 1 },
     channelLocals: ['accuracy'],
     masteryStage: true,
     finalResolverId: RESOLVERS.finalIdentity,
     combatPowerCoefficient: 0.27,
   },
-  // 魔法命中：GDD 的副屬清單有它，對應表沒有。BM 的命中式註記「只有魔法與遠距技能使用智通道」，
-  // 所以這裡把智提為主軸、反／協沿用 BM 的 0.40／0.55。**第一版方案（待討論）**。
   {
     local: 'magic-accuracy',
-    primaries: { intelligence: 1, reaction: 0.4, coordination: 0.55 },
+    primaries: { intelligence: 1, reaction: 1, coordination: 1 },
     channelLocals: ['magic-accuracy'],
     masteryStage: true,
     finalResolverId: RESOLVERS.finalIdentity,
     combatPowerCoefficient: 0.13,
   },
-  // 迴避：GDD 反＋協＋智，與命中同一組主屬。沿用命中的權重向量。
-  // **第一版方案（待討論）**——文件沒給迴避自己的權重。
   {
     local: 'evasion',
-    primaries: { reaction: 0.73, coordination: 1, intelligence: 0.18 },
+    primaries: { reaction: 1, coordination: 1, intelligence: 1 },
     channelLocals: ['evasion'],
     masteryStage: true,
     finalResolverId: RESOLVERS.finalIdentity,
     combatPowerCoefficient: 0.27,
   },
-  // 預判：GDD 智＋反。無權重來源，兩項等重。**第一版方案（待討論）**。
   {
     local: 'anticipation',
     primaries: { intelligence: 1, reaction: 1 },
@@ -236,8 +211,6 @@ const SECONDARY_ROWS: readonly SecondaryRow[] = [
     finalResolverId: RESOLVERS.finalIdentity,
     combatPowerCoefficient: 0.13,
   },
-  // 格擋成功率：GDD 反＋協。BM「格擋成功率 = clamp(0, 75, 格擋分數 × 0.25)」——轉成機率是
-  // combat 的事，本服務輸出的是**分數**，所以 final 用 identity。權重兩項等重為第一版方案。
   {
     local: 'block-chance',
     primaries: { reaction: 1, coordination: 1 },
@@ -246,8 +219,6 @@ const SECONDARY_ROWS: readonly SecondaryRow[] = [
     finalResolverId: RESOLVERS.finalIdentity,
     combatPowerCoefficient: 0.17,
   },
-  // 格擋吸收（GDD 副屬清單寫「格擋減傷」，對應表寫「格擋吸收」，同一項）：GDD 肌。
-  // BM：safeRaw / (safeRaw + 80)，只在成功格擋時生效。
   {
     local: 'block-absorption',
     primaries: { muscle: 1 },
@@ -256,7 +227,6 @@ const SECONDARY_ROWS: readonly SecondaryRow[] = [
     finalResolverId: RESOLVERS.finalBlockAbsorption,
     combatPowerCoefficient: 62.5,
   },
-  // 一般減傷：GDD 肌＋防具（防具＝裝備通道）。BM：safeRaw / (safeRaw + 120)。
   {
     local: 'general-damage-reduction',
     primaries: { muscle: 1 },
@@ -265,8 +235,6 @@ const SECONDARY_ROWS: readonly SecondaryRow[] = [
     finalResolverId: RESOLVERS.finalMitigation,
     combatPowerCoefficient: 154,
   },
-  // 魔法減傷：GDD 智＋魔法熟練度＋裝備——三項在契約裡分別是 primaryCoefficients、
-  // masteryCoefficientResolverId、equipmentCoefficientChannelIds。BM 與一般減傷同一條遞減曲線。
   {
     local: 'magic-damage-reduction',
     primaries: { intelligence: 1 },
@@ -275,11 +243,6 @@ const SECONDARY_ROWS: readonly SecondaryRow[] = [
     finalResolverId: RESOLVERS.finalMitigation,
     combatPowerCoefficient: 123,
   },
-  // 樂器減傷：GDD「頭盔重量＋年紀」——**沒有主屬項、也沒有裝備係數項**。
-  // DS §4 明說這條走專用 Secondary Rule 讀裝備重量與年齡，而契約把重量與 ageDays 直接餵給
-  // finalResolver，所以整條公式住在那條 Resolver 的 params 裡：primaries 與 channels 都是空的
-  // （＝「這個副屬不走這兩條管道」，不是漏填）。
-  // 注意：契約給的是**全身裝備總重**，GDD 要的是頭盔重量——差異列入回報的契約缺口。
   {
     local: 'instrument-damage-reduction',
     primaries: {},
@@ -288,9 +251,6 @@ const SECONDARY_ROWS: readonly SecondaryRow[] = [
     finalResolverId: RESOLVERS.finalInstrumentMitigation,
     combatPowerCoefficient: 31,
   },
-  // 生命上限：GDD 對應表「生命值＝肌力」；BM「生命上限 = 200 + 肌 × 20」。基礎項 200 與每點 20
-  // 是 finalResolver 的 params；這裡的通道讓裝備還能再加一份（safeRaw 進同一條 params）。
-  // 戰力權重在 RESOURCE_FEATURE_ROWS（`maximumResource`），這裡不重複給。
   {
     local: 'max-health',
     primaries: { muscle: 1 },
@@ -298,7 +258,6 @@ const SECONDARY_ROWS: readonly SecondaryRow[] = [
     masteryStage: true,
     finalResolverId: RESOLVERS.finalMaxHealth,
   },
-  // 魔力上限：BM「魔力上限 = 120 + 智 × 14」。GDD 的對應表沒有這一列，主屬取智（與公式一致）。
   {
     local: 'max-mana',
     primaries: { intelligence: 1 },
@@ -409,7 +368,7 @@ const statisticsRule: Authored<StatisticsRuleDefinition> = {
 // 頂到自己那一路（物理或魔法或樂器），所以真實戰力遠低於 1000，而不同流派彼此可比。
 //
 // 用到的天花板。**只有最後一項是 BM 直接算得出來的；其餘四項都是本檔選的切點**（下面逐項標明
-// 哪一半是引文、哪一半是裁決）。四項都不引用 equipment_balance。
+// 哪一半是引文、哪一半是裁決）。四項均使用現行正式來源。
 //   * 物理／魔法傷害分數 2400 —— **第一版方案（待討論）**。BM primaryBrackets Tier V 寫的是
 //     「雙手／雙手法杖主力單體約 1,900～2,500」，而那一欄是**技能傷害輸出**（BM 傷害公式已乘過
 //     Mastery 與技能威力），不是本 Feature 讀的**傷害分數**。所以 2400 既不是那個區間的上緣

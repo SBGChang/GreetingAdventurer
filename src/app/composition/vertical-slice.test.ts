@@ -55,9 +55,9 @@ const CASES: readonly Case[] = [
       assert(game.success, '開新遊戲應成功');
       if (!game.success) return;
 
-      // 開局排程器是空的。
+      // 開局即有世界週期工作；玩家操作必須保留它们。
       const jobsBefore = Object.keys(game.state.core.scheduler.jobsById).length;
-      assert(jobsBefore === 0, `開局排程器應為空，實得 ${jobsBefore}`);
+      assert(jobsBefore > 0, '開局必須建立世界週期排程');
 
       const assembler = createProductionContextAssembler(loaded.registry, createResolverRegistry());
       const request: GameCommandRequest<GameCommand> = {
@@ -74,8 +74,8 @@ const CASES: readonly Case[] = [
       if (!result.accepted) return;
 
       // 引擎排出了一筆到期 Job（計畫的到期日由內容的 durationDays 推導，不是寫死）。
-      const jobsAfter = Object.values(result.state.core.scheduler.jobsById);
-      assert(jobsAfter.length === 1, `rest 後應排出 1 筆 Job，實得 ${jobsAfter.length}`);
+      const jobsAfter = Object.values(result.state.core.scheduler.jobsById).filter(job => job.type === 'teamPlanDue');
+      assert(jobsAfter.length === 1, `rest 後應排出 1 筆隊伍工作，實得 ${jobsAfter.length}`);
       assert(
         jobsAfter[0]!.type === 'teamPlanDue',
         `應為 teamPlanDue，實得 ${jobsAfter[0]!.type}`,

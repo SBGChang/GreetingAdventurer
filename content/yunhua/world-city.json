@@ -58,7 +58,8 @@
     "adjacentRouteIds": [
       "route.yunhua.yunjing-qingcen",
       "route.yunhua.yunjing-chengpu",
-      "route.yunhua.yunjing-chiling"
+      "route.yunhua.yunjing-chiling",
+      "route.core.yunjing-starwell"
     ],
     "adventureSiteIds": [
       "adventure-site.yunhua.old-canal-sunken-store",
@@ -83,7 +84,8 @@
     "adjacentRouteIds": [
       "route.yunhua.yunjing-qingcen",
       "route.yunhua.qingcen-chengpu",
-      "route.yunhua.qingcen-chiling"
+      "route.yunhua.qingcen-chiling",
+      "route.core.qingcen-emberforge"
     ],
     "adventureSiteIds": [
       "adventure-site.yunhua.mist-bamboo-valley",
@@ -107,7 +109,8 @@
     "adjacentRouteIds": [
       "route.yunhua.yunjing-chengpu",
       "route.yunhua.qingcen-chengpu",
-      "route.yunhua.chengpu-chiling"
+      "route.yunhua.chengpu-chiling",
+      "route.core.chengpu-redsail"
     ],
     "adventureSiteIds": [
       "adventure-site.yunhua.tidal-reed-isle",

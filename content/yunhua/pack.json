@@ -5,6 +5,8 @@
     "city",
     "city-action-rule",
     "city-node",
+    "combat-damage-rule",
+    "combat-effect",
     "combat-skill",
     "combatConsumable",
     "content-event",

@@ -100,6 +100,7 @@ import {
 } from '../authoring';
 import type { PriceRuleDefinition } from '../../src/contracts/economy';
 import { CHARACTER_ARCHETYPE_IDS } from '../core/character';
+import { extraRouteIdsFor } from '../world-network';
 
 const yunhua = cultureIds('yunhua');
 const core = cultureIds('core');
@@ -332,8 +333,6 @@ const nation: Authored<NationDefinition> = {
 //
 // 【第一版方案（待討論）】**設計來源完全沒有「地區」這一層。** `cultureMeta` 只有國、首都、
 // 四城；`worldbuilding.md` §4 明文禁止自己記錄「城市與迷宮的正式數量、名稱、配置」；
-// `national_content_catalog.md` 被 `worldbuilding.md` §5 標為「早期發想稿，不是現行內容依據」，
-// 所以不採用。
 //
 // 但 `CityNodeDefinition.regionId` 與 `AdventureSiteDefinition.regionId` 都是必填，所以至少要一筆。
 //
@@ -492,7 +491,7 @@ function cityNode(row: CityRow): Authored<CityNodeDefinition> {
     kind: 'city-node',
     id: cityNodeIdOf(row.local),
     regionId: REGION_ID,
-    adjacentRouteIds: routeIdsOfCity(row.local),
+    adjacentRouteIds: [...routeIdsOfCity(row.local), ...extraRouteIdsFor(cityNodeIdOf(row.local))],
     adventureSiteIds: siteIdsOfCity(row.local),
     isCapital: row.isCapital,
     display: { nameRef: { key: textKeyFor(cityNodeIdOf(row.local)) } },

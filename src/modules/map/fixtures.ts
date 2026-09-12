@@ -122,6 +122,7 @@ export const TEMPLATE: MapTemplateDefinition = {
   enabled: true,
   templateKind: 'interior',
   refreshOffsetDays: 3,
+  refreshCadenceDays: 14,
   floors: [{ floor: 0, rows: 3, cols: 3 }],
   rooms: [
     { roomId: ROOM_ENTRANCE, floor: 0, cells: [cell(0, 0, 0)] },

@@ -2,7 +2,7 @@
 // 瀏覽器端的內容載入：把編譯好的 `content/**` JSON 餵給 data-runtime 的**純函式** loadContent。
 //
 // 為什麼不能用 src/platform/content-repository：那支用 node:fs（readFileSync/readdirSync），
-// 在 renderer（瀏覽器）跑不起來。F4 架構決定（見 HANDOFF）：renderer 不碰 node:fs。
+// 在 renderer（瀏覽器）跑不起來。renderer 不碰 node:fs；組裝方式見 docs/CURRENT_STATUS.md。
 // 這裡改用 Vite 的 import.meta.glob 在**打包時**把所有 content JSON 收進來，於執行期組成
 // loadContent 需要的 { manifest, packs } 形狀——與 content-repository 讀檔組出的結構逐欄一致，
 // 只是來源從檔案系統換成打包進 bundle 的物件。loadContent 本身完全共用，不分叉。

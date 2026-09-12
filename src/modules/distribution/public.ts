@@ -78,6 +78,7 @@ export const distributionModuleContract: ModuleContract = {
   handlesJobs: [],
   sendsInternalCommands: [
     'CreateEconomyAccount',
+    'GrantCurrency',
     'TransferCurrency',
     'TransferItem',
     'RemoveItemInstance',

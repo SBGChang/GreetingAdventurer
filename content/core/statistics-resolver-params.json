@@ -10,6 +10,10 @@
     "sourcePath": "core/statistics-resolver-params.json#weighted-product-params.core.stat-max-health",
     "terms": [
       {
+        "inputKey": "muscle",
+        "weight": 20
+      },
+      {
         "inputKey": "safeRaw",
         "weight": 20
       }
@@ -25,6 +29,10 @@
     "schemaVersion": 1,
     "sourcePath": "core/statistics-resolver-params.json#weighted-product-params.core.stat-max-mana",
     "terms": [
+      {
+        "inputKey": "intelligence",
+        "weight": 14
+      },
       {
         "inputKey": "safeRaw",
         "weight": 14

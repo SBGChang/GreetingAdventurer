@@ -126,7 +126,8 @@ export type MapTemplateDefinition = DefinitionHeader &
   Readonly<{
     templateKind: 'outdoor' | 'interior';
     nationalDungeonForm?: 'outdoor' | 'subterranean' | 'building';
-    refreshOffsetDays: number; // 0..13
+    refreshCadenceDays: number;
+    refreshOffsetDays: number;
     floors: readonly FloorDefinition[];
     rooms: readonly RoomDefinition[];
     links: readonly RoomLinkDefinition[];

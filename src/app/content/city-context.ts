@@ -1,5 +1,5 @@
 // app/content/city-context.ts
-// `EconomyQuery` 與 `CityHandlerContext` 的正式組裝（f3_work_packages.md P8 ＋ 經濟報價鏈）。
+// `EconomyQuery` 與 `CityHandlerContext` 的正式組裝（docs/00_core/technical_architecture.md ＋ 經濟報價鏈）。
 //
 // 這一檔是「主城能買東西」的落點。買一件商品要走完這條鏈，缺任何一環都買不了：
 //
@@ -99,7 +99,7 @@ export function createProductionEconomyQuery(deps: EconomyQueryDeps): ReturnType
       return {
         priceRuleId: offer.priceRuleId,
         currencyId: definition.intrinsicValue.currencyId,
-        baseValue: definition.intrinsicValue.amount,
+        baseValue: definition.intrinsicValue.amount * item.quantity,
         sourceRevision: offer.revision,
       };
     },
@@ -120,8 +120,8 @@ export function createProductionEconomyQuery(deps: EconomyQueryDeps): ReturnType
       return {
         priceRuleId: cityDefs.getShopRule(shopRuleId).priceRuleId,
         currencyId: definition.intrinsicValue.currencyId,
-        baseValue: definition.intrinsicValue.amount,
-        sourceRevision: city.revision,
+        baseValue: definition.intrinsicValue.amount * item.quantity,
+        sourceRevision: item.revision,
       };
     },
 

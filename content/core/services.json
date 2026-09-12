@@ -42,7 +42,7 @@
     "output": "secondary-attribute.core.physical-damage",
     "packId": "pack:core",
     "primaryCoefficients": {
-      "coordination": 0.375,
+      "coordination": 1,
       "muscle": 1
     },
     "schemaVersion": 1,
@@ -78,8 +78,8 @@
     "packId": "pack:core",
     "primaryCoefficients": {
       "charisma": 1,
-      "coordination": 0.5,
-      "intelligence": 0.6
+      "coordination": 1,
+      "intelligence": 1
     },
     "schemaVersion": 1,
     "sourcePath": "core/services.json#secondary-attribute.core.instrument-damage"
@@ -97,8 +97,8 @@
     "packId": "pack:core",
     "primaryCoefficients": {
       "coordination": 1,
-      "intelligence": 0.18,
-      "reaction": 0.73
+      "intelligence": 1,
+      "reaction": 1
     },
     "schemaVersion": 1,
     "sourcePath": "core/services.json#secondary-attribute.core.accuracy"
@@ -115,9 +115,9 @@
     "output": "secondary-attribute.core.magic-accuracy",
     "packId": "pack:core",
     "primaryCoefficients": {
-      "coordination": 0.55,
+      "coordination": 1,
       "intelligence": 1,
-      "reaction": 0.4
+      "reaction": 1
     },
     "schemaVersion": 1,
     "sourcePath": "core/services.json#secondary-attribute.core.magic-accuracy"
@@ -135,8 +135,8 @@
     "packId": "pack:core",
     "primaryCoefficients": {
       "coordination": 1,
-      "intelligence": 0.18,
-      "reaction": 0.73
+      "intelligence": 1,
+      "reaction": 1
     },
     "schemaVersion": 1,
     "sourcePath": "core/services.json#secondary-attribute.core.evasion"

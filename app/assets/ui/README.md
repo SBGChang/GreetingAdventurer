@@ -1,0 +1,29 @@
+# 玩家介面美術
+
+以內建 imagegen 產生；由 `app/UiArt.tsx` 與 `app/ui-art.css` 使用，沒有外部圖片依賴。
+
+- [atlas.png](atlas.png)：4 × 4 等分圖集，依列排序為旅館、酒館、公會、補給、鍛坊、訓練、書籍、探索、城門、家園、金錢、人物徽章、武器、防具、委託、世界地圖。使用 CSS 背景座標取圖，不另存裁切副本。
+- [panel.png](panel.png)：木框、銅角與紙本面板。文字、按鈕與捲動區由正式 HTML 呈現，沒有把遊戲操作烘焙在圖片中。
+- [cloud-tag.png](cloud-tag.png)：透明底青綠織錦與舊銅雲紋頁簽，供右側設施及行囊選單共用；圖示和名稱另由介面疊入。
+
+- [culture-plates.png](culture-plates.png)：2 × 2 文化資訊牌圖集，依列為雲華、維爾冬、奧瑞恩、薩菲爾；城池圖示與空白書寫面一體繪製，名稱、世界日與文化選擇由 GameView 提供。目前正式內容僅使用雲華，其餘為預備美術。
+
+圖示是類別美術，不是每件物品的實物圖，也不是 NPC 身分或性別的來源。商店類別由正式內容投影取得。文字與可操作性仍以 GameView 為準。
+
+## 雲紋頁簽提示詞
+
+Create a production game UI asset: ONE isolated long horizontal ancient Chinese fantasy silk-and-bronze nameplate on a genuinely transparent background. Wide landscape aspect ratio 3:1. The plaque fills 94 percent of the canvas width and 86 percent of height. Asymmetrical silhouette, an antique bronze round medallion mounting at left for a separate icon, flowing pointed cloud-scroll tail at right. Main writing surface pale desaturated jade-green woven silk with visible fine brocade texture, aged gold thread piping and subtle Chinese auspicious cloud embroidery along edges, dark patinated bronze fittings, a short red silk knot on left edge. Large empty central area for readable dark Chinese lettering to be added in code. Elegant tactile hand-painted dimensional RPG interface art, crafted Yunhua canal-city culture, sophisticated warm antique gold and celadon, crisp silhouette. No text, no words, no letters, no icons inside medallion, no surrounding board, no page, no rectangle backdrop, no drop shadow outside asset. This is a single usable button/nameplate sprite, not a mockup or collection. Preserve transparent alpha.
+
+## 圖集提示詞
+
+Use case: stylized-concept. Create ONE production-ready game UI sprite atlas for an ancient Chinese fantasy single-player RPG. Exactly 4 columns x 4 rows, sixteen equally-sized square cells in a perfectly regular grid covering the entire square image. Each cell has identical deep dark jade green background (#142a24), no borders or text. One large centered beautifully hand-painted inventory emblem per cell, ample consistent 12% padding, warm antique gold rim light, dimensional crafted wood, jade, bronze, ivory paper, richly textured polished game UI illustration with strong readable silhouettes. Cell order left-to-right top-to-bottom: row1 ornate glowing red Chinese lantern (inn), red ceramic wine jug (tavern), bronze shield with crossed Chinese swords (guild), bundle of medicine pouches and green potion flask (supplies). row2 blacksmith anvil with upright hammer (equipment shop), archery target with three arrows (training), stack of blue cloth-bound books and scroll (bookstore), rolled travel map with compass (adventure). row3 fortified Chinese city gate (travel), elegant courtyard house with green roof (home), coin purse overflowing gold cash coins (currency), jade-framed portrait medallion of a female Chinese adventurer (character). row4 curved Chinese saber (weapon), lamellar armor cuirass (armor), sealed parchment mission scroll with red cord (quest), ornate jade and bronze compass rose (world map). Strict sixteen distinct cells, centered subjects, no words, no labels, no numbers, no UI mockup. Consistent professional painterly RPG icon atlas, not flat vector, no emoji, no modern objects. Output square high resolution.
+
+## 面板提示詞
+
+Use case: stylized-concept. Asset type: production game UI panel background illustration, wide landscape 3:2. Ancient Chinese fantasy RPG menu frame, ornate hand-painted dark carved rosewood outer frame with aged bronze corner fittings and restrained jade cloud motifs, elegant premium single-player RPG aesthetic. Broad inset warm pale ivory parchment occupying central 85 percent, clean subtly mottled paper with plenty of empty space for dynamic dark text and cards to be rendered by game code. Thin gold inner frame. Narrow top wooden header rail and bottom rail. At far left and far right edges only delicate faded ink mountains, bamboo brushwork and subtle cloud scroll engraving. Flat front view, symmetrical straight rectangular framing, no perspective, no rendered text, no letters, no buttons, no icons, no objects in central writing area, no UI mockup, no surrounding scene. Crisp material detail, softly worn corners, sophisticated warm gold / dark jade / parchment color harmony. Fill canvas exactly with this single panel asset.
+
+## 文化資訊牌提示詞
+
+以內建 image_gen.imagegen 產生。
+
+Production RPG UI sprite atlas, exactly TWO columns by TWO rows, four equal rectangular cells across a wide landscape image. Each cell contains one wide ornate culture-specific city status plaque, transparent outside its silhouette. Identical layout: small detailed city illustration medallion at left 22%, ornate rectangular writing panel across right 78%, entirely blank writing area to receive two lines of text from code. Each plaque fills its cell with consistent 5 percent padding. Top left: Chinese fantasy canal city jade roofs icon, celadon silk writing panel with aged bronze cloud-scroll fittings and red tassel. Top right: northern fantasy timber palisade and longhouse city icon, pale carved oak panel with dark hammered iron and knotwork. Bottom left: western fantasy stone cathedral and castle city icon, warm ivory stone panel with polished gold fleur ornaments and navy cloth accents. Bottom right: desert fantasy dome city icon, pale turquoise glazed writing panel with engraved brass arabesques and cobalt tile borders. Premium detailed hand-painted dimensional game UI assets, strong beautiful silhouettes, restrained dark borders and light blank text surfaces. No words, letters, numerals, labels, watermark or modern UI. No backdrop, keep genuinely transparent alpha between and around four plaques. Strict regular 2x2 equal cell alignment for CSS atlas use.

@@ -402,7 +402,7 @@ export function handleGrantCurrency(
     return reject('economy/reward-rule-disabled', { rewardRuleId: String(command.rewardRuleId) });
   }
 
-  const money = ctx.resolvers.resolveRewardAmount({
+  const money = rule.fixedAmount ?? ctx.resolvers.resolveRewardAmount({
     resolverId: rule.resolverId,
     rewardRuleId: rule.id,
     toAccountId: command.toAccountId,

@@ -82,7 +82,7 @@ function weightedFinalRegistration(binding: ResolverBinding): AnyResolverRegistr
   const paramsDefId = requireParamsDefId(binding);
   return reg<FinalSecondaryResolverInput, number>(binding, NUMBER_RESULT_SCHEMA, (input, ctx) => {
     const params = (ctx.definitions as StatisticsParamsReader).getWeightedParams(paramsDefId);
-    return { value: weightedLinearProduct(params, { safeRaw: input.safeRaw }) };
+    return { value: weightedLinearProduct(params, { safeRaw: input.safeRaw, ...input.effectivePrimaryAttributes }) };
   });
 }
 

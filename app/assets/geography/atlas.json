@@ -1,0 +1,1021 @@
+{
+  "cities": [
+    {
+      "key": "yunjing",
+      "cityId": "city-node.yunhua.yunjing",
+      "name": "雲京",
+      "en": "Yunjing",
+      "culture": "yunhua",
+      "position": [
+        145,
+        0
+      ],
+      "theme": "canal",
+      "description": "漕河穿城、官署重簷、石橋與整齊坊市。",
+      "model": "../town3d/yunhua-town.glb",
+      "enDescription": "Canal wards, stone bridges and tiered civic halls.",
+      "rank": "capital"
+    },
+    {
+      "key": "qingcen",
+      "cityId": "city-node.yunhua.qingcen",
+      "name": "青岑城",
+      "en": "Qingcen",
+      "culture": "yunhua",
+      "position": [
+        145,
+        44
+      ],
+      "theme": "terrace",
+      "description": "依山分層的藥材城，石階串接竹林、藥圃與高台院落。",
+      "model": "qingcen.glb",
+      "enDescription": "Terraced mountain courtyards, bamboo groves and medicinal gardens.",
+      "rank": "town"
+    },
+    {
+      "key": "chengpu",
+      "cityId": "city-node.yunhua.chengpu",
+      "name": "澄浦城",
+      "en": "Chengpu",
+      "culture": "yunhua",
+      "position": [
+        208,
+        -14
+      ],
+      "theme": "harbor",
+      "description": "向海展開的港埠，長棧橋、鹽田、倉街與泊船。",
+      "model": "chengpu.glb",
+      "enDescription": "A working harbor with long piers, boats, warehouses and salt beds.",
+      "rank": "town"
+    },
+    {
+      "key": "chiling",
+      "cityId": "city-node.yunhua.chiling",
+      "name": "赤嶺城",
+      "en": "Chiling",
+      "culture": "yunhua",
+      "position": [
+        135,
+        -43
+      ],
+      "theme": "kiln",
+      "description": "紅岩環抱的窯業城，中央工坊、階梯窯爐與煙囪群。",
+      "model": "chiling.glb",
+      "enDescription": "Cinnabar cliffs, brick kilns, chimneys and a craft quarter.",
+      "rank": "town"
+    },
+    {
+      "key": "frostbay",
+      "name": "霜灣",
+      "en": "Frostbay",
+      "culture": "vildun",
+      "position": [
+        -45,
+        140
+      ],
+      "theme": "fjord",
+      "description": "雪峰與峽灣間的海港，陡頂長屋、船塢與臨水氏族大廳。",
+      "model": "frostbay.glb",
+      "enDescription": "Snow-covered timber halls and ship piers beneath a fjord ridge.",
+      "rank": "capital",
+      "cityId": "city-node.vildun.frostbay"
+    },
+    {
+      "key": "cedarkeep",
+      "name": "杉脊堡",
+      "en": "Cedarkeep",
+      "culture": "vildun",
+      "position": [
+        -5,
+        111
+      ],
+      "theme": "forest",
+      "description": "杉林山脊上的木鐵堡寨，環形木柵、瞭望塔與符石。",
+      "model": "cedarkeep.glb",
+      "enDescription": "A cedar-ringed timber fortress with palisades, watchtowers and rune stones.",
+      "rank": "town",
+      "cityId": "city-node.vildun.cedarkeep"
+    },
+    {
+      "key": "dawncrown",
+      "name": "晨冠城",
+      "en": "Dawncrown",
+      "culture": "aurelien",
+      "position": [
+        -160,
+        20
+      ],
+      "theme": "cathedral",
+      "description": "白石教堂與藍頂塔樓主導的城，放射狀街道連接學院與廣場。",
+      "model": "dawncrown.glb",
+      "enDescription": "White limestone, cathedral spires, a fountain plaza and academy streets.",
+      "rank": "capital",
+      "cityId": "city-node.aurelien.dawncrown"
+    },
+    {
+      "key": "greyshield",
+      "name": "灰楯堡",
+      "en": "Greyshield",
+      "culture": "aurelien",
+      "position": [
+        -120,
+        -23
+      ],
+      "theme": "citadel",
+      "description": "扼守山口的雙層石堡，厚重城垣、兵營與閱兵大道。",
+      "model": "greyshield.glb",
+      "enDescription": "An inner stone keep, double curtain walls and garrison courtyards.",
+      "rank": "town",
+      "cityId": "city-node.aurelien.greyshield"
+    },
+    {
+      "key": "starwell",
+      "name": "星井城",
+      "en": "Starwell",
+      "culture": "safir",
+      "position": [
+        -18,
+        -126
+      ],
+      "theme": "oasis",
+      "description": "以星井綠洲為中心，藍釉穹頂、觀星塔與環湖市集。",
+      "model": "starwell.glb",
+      "enDescription": "A central oasis surrounded by glazed domes, palms and an observatory.",
+      "rank": "capital",
+      "cityId": "city-node.safir.starwell"
+    },
+    {
+      "key": "redsail",
+      "name": "赤帆驛",
+      "en": "Redsail",
+      "culture": "safir",
+      "position": [
+        35,
+        -150
+      ],
+      "theme": "caravan",
+      "description": "沙丘商路上的驛城，紅帆棚頂、駝隊庭院與長形商旅院。",
+      "model": "redsail.glb",
+      "enDescription": "Red-sailed markets, caravan courtyards and water stores in the dunes.",
+      "rank": "town",
+      "cityId": "city-node.safir.redsail"
+    },
+    {
+      "key": "icechisel",
+      "name": "冰鑿城",
+      "en": "Icechisel",
+      "culture": "vildun",
+      "theme": "glacier",
+      "position": [
+        20,
+        165
+      ],
+      "description": "冰川谷中的採石階城，冰藍融水、吊架、石台與寒地長屋。",
+      "enDescription": "Glacial quarry terraces, hoists and timber halls around blue meltwater.",
+      "rank": "town",
+      "model": "icechisel.glb",
+      "cityId": "city-node.vildun.icechisel"
+    },
+    {
+      "key": "emberforge",
+      "name": "燼鐵城",
+      "en": "Emberforge",
+      "culture": "vildun",
+      "theme": "volcanic",
+      "position": [
+        48,
+        130
+      ],
+      "description": "黑岩火山台上的鍛爐城，煙道、熔渣溝與木鐵工坊。",
+      "enDescription": "Basalt forge terraces, chimneys and slag channels beneath a volcanic ridge.",
+      "rank": "town",
+      "model": "emberforge.glb",
+      "cityId": "city-node.vildun.emberforge"
+    },
+    {
+      "key": "windharvest",
+      "name": "風穗城",
+      "en": "Windharvest",
+      "culture": "aurelien",
+      "theme": "farmland",
+      "position": [
+        -187,
+        -30
+      ],
+      "description": "穀田緩丘上的風車城，穀倉、石屋與田埂圍繞市集。",
+      "enDescription": "Windmills, granaries and stone wards among rolling grain fields.",
+      "rank": "town",
+      "model": "windharvest.glb",
+      "cityId": "city-node.aurelien.windharvest"
+    },
+    {
+      "key": "whitecliff",
+      "name": "白崖港",
+      "en": "Whitecliff",
+      "culture": "aurelien",
+      "theme": "chalkport",
+      "position": [
+        -211,
+        20
+      ],
+      "description": "白堊海崖上的階梯港，燈塔、吊貨機與藍頂石屋。",
+      "enDescription": "A terraced chalk-cliff port with a lighthouse, cranes and blue roofs.",
+      "rank": "town",
+      "model": "whitecliff.glb",
+      "cityId": "city-node.aurelien.whitecliff"
+    },
+    {
+      "key": "saltmirror",
+      "name": "鹽鏡城",
+      "en": "Saltmirror",
+      "culture": "safir",
+      "theme": "saltlake",
+      "position": [
+        -42,
+        -173
+      ],
+      "description": "鹽湖盆地中的結晶階池、鹽倉與淺色穹頂小城。",
+      "enDescription": "Crystalline salt pans, storehouses and pale domes in a salt basin.",
+      "rank": "town",
+      "model": "saltmirror.glb",
+      "cityId": "city-node.safir.saltmirror"
+    },
+    {
+      "key": "ochrestep",
+      "name": "赭階城",
+      "en": "Ochrestep",
+      "culture": "safir",
+      "theme": "canyon",
+      "position": [
+        28,
+        -109
+      ],
+      "description": "紅砂岩峽谷的層疊階城，跨谷橋串起石台與城牆。",
+      "enDescription": "Stepped sandstone wards and a bridge spanning a red-rock canyon.",
+      "rank": "town",
+      "model": "ochrestep.glb",
+      "cityId": "city-node.safir.ochrestep"
+    }
+  ],
+  "roads": [
+    {
+      "ends": [
+        "yunjing",
+        "qingcen"
+      ],
+      "points": [
+        [
+          145,
+          0
+        ],
+        [
+          148,
+          24
+        ],
+        [
+          145,
+          44
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.yunhua.yunjing-qingcen"
+    },
+    {
+      "ends": [
+        "yunjing",
+        "chengpu"
+      ],
+      "points": [
+        [
+          145,
+          0
+        ],
+        [
+          179.5,
+          -5
+        ],
+        [
+          208,
+          -14
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.yunhua.yunjing-chengpu"
+    },
+    {
+      "ends": [
+        "yunjing",
+        "chiling"
+      ],
+      "points": [
+        [
+          145,
+          0
+        ],
+        [
+          143,
+          -19.5
+        ],
+        [
+          135,
+          -43
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.yunhua.yunjing-chiling"
+    },
+    {
+      "ends": [
+        "qingcen",
+        "chengpu"
+      ],
+      "points": [
+        [
+          145,
+          44
+        ],
+        [
+          179.5,
+          17
+        ],
+        [
+          208,
+          -14
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.yunhua.qingcen-chengpu"
+    },
+    {
+      "ends": [
+        "qingcen",
+        "chiling"
+      ],
+      "points": [
+        [
+          145,
+          44
+        ],
+        [
+          143,
+          2.5
+        ],
+        [
+          135,
+          -43
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.yunhua.qingcen-chiling"
+    },
+    {
+      "ends": [
+        "chengpu",
+        "chiling"
+      ],
+      "points": [
+        [
+          208,
+          -14
+        ],
+        [
+          174.5,
+          -26.5
+        ],
+        [
+          135,
+          -43
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.yunhua.chengpu-chiling"
+    },
+    {
+      "ends": [
+        "frostbay",
+        "cedarkeep"
+      ],
+      "points": [
+        [
+          -45,
+          140
+        ],
+        [
+          -22,
+          127.5
+        ],
+        [
+          -5,
+          111
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.frostbay-cedarkeep"
+    },
+    {
+      "ends": [
+        "frostbay",
+        "icechisel"
+      ],
+      "points": [
+        [
+          -45,
+          140
+        ],
+        [
+          -9.5,
+          154.5
+        ],
+        [
+          20,
+          165
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.frostbay-icechisel"
+    },
+    {
+      "ends": [
+        "frostbay",
+        "emberforge"
+      ],
+      "points": [
+        [
+          -45,
+          140
+        ],
+        [
+          4.5,
+          137
+        ],
+        [
+          48,
+          130
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.frostbay-emberforge"
+    },
+    {
+      "ends": [
+        "icechisel",
+        "emberforge"
+      ],
+      "points": [
+        [
+          20,
+          165
+        ],
+        [
+          37,
+          149.5
+        ],
+        [
+          48,
+          130
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.icechisel-emberforge"
+    },
+    {
+      "ends": [
+        "dawncrown",
+        "greyshield"
+      ],
+      "points": [
+        [
+          -160,
+          20
+        ],
+        [
+          -137,
+          0.5
+        ],
+        [
+          -120,
+          -23
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.dawncrown-greyshield"
+    },
+    {
+      "ends": [
+        "dawncrown",
+        "windharvest"
+      ],
+      "points": [
+        [
+          -160,
+          20
+        ],
+        [
+          -170.5,
+          -3
+        ],
+        [
+          -187,
+          -30
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.dawncrown-windharvest"
+    },
+    {
+      "ends": [
+        "dawncrown",
+        "whitecliff"
+      ],
+      "points": [
+        [
+          -160,
+          20
+        ],
+        [
+          -182.5,
+          22
+        ],
+        [
+          -211,
+          20
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.dawncrown-whitecliff"
+    },
+    {
+      "ends": [
+        "greyshield",
+        "windharvest"
+      ],
+      "points": [
+        [
+          -120,
+          -23
+        ],
+        [
+          -150.5,
+          -24.5
+        ],
+        [
+          -187,
+          -30
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.greyshield-windharvest"
+    },
+    {
+      "ends": [
+        "windharvest",
+        "whitecliff"
+      ],
+      "points": [
+        [
+          -187,
+          -30
+        ],
+        [
+          -196,
+          -3
+        ],
+        [
+          -211,
+          20
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.windharvest-whitecliff"
+    },
+    {
+      "ends": [
+        "starwell",
+        "redsail"
+      ],
+      "points": [
+        [
+          -18,
+          -126
+        ],
+        [
+          11.5,
+          -136
+        ],
+        [
+          35,
+          -150
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.starwell-redsail"
+    },
+    {
+      "ends": [
+        "starwell",
+        "saltmirror"
+      ],
+      "points": [
+        [
+          -18,
+          -126
+        ],
+        [
+          -27,
+          -147.5
+        ],
+        [
+          -42,
+          -173
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.starwell-saltmirror"
+    },
+    {
+      "ends": [
+        "starwell",
+        "ochrestep"
+      ],
+      "points": [
+        [
+          -18,
+          -126
+        ],
+        [
+          8,
+          -115.5
+        ],
+        [
+          28,
+          -109
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.starwell-ochrestep"
+    },
+    {
+      "ends": [
+        "redsail",
+        "saltmirror"
+      ],
+      "points": [
+        [
+          35,
+          -150
+        ],
+        [
+          -0.5,
+          -159.5
+        ],
+        [
+          -42,
+          -173
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.redsail-saltmirror"
+    },
+    {
+      "ends": [
+        "saltmirror",
+        "ochrestep"
+      ],
+      "points": [
+        [
+          -42,
+          -173
+        ],
+        [
+          -4,
+          -139
+        ],
+        [
+          28,
+          -109
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.saltmirror-ochrestep"
+    },
+    {
+      "ends": [
+        "qingcen",
+        "emberforge"
+      ],
+      "points": [
+        [
+          145,
+          44
+        ],
+        [
+          117,
+          73
+        ],
+        [
+          80,
+          99
+        ],
+        [
+          48,
+          130
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.qingcen-emberforge"
+    },
+    {
+      "ends": [
+        "chengpu",
+        "redsail"
+      ],
+      "points": [
+        [
+          208,
+          -14
+        ],
+        [
+          177,
+          -65
+        ],
+        [
+          123,
+          -120
+        ],
+        [
+          77,
+          -154
+        ],
+        [
+          35,
+          -150
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.chengpu-redsail"
+    },
+    {
+      "ends": [
+        "saltmirror",
+        "windharvest"
+      ],
+      "points": [
+        [
+          -42,
+          -173
+        ],
+        [
+          -101,
+          -137
+        ],
+        [
+          -150,
+          -83
+        ],
+        [
+          -187,
+          -30
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.saltmirror-windharvest"
+    },
+    {
+      "ends": [
+        "whitecliff",
+        "frostbay"
+      ],
+      "points": [
+        [
+          -211,
+          20
+        ],
+        [
+          -176,
+          76
+        ],
+        [
+          -105,
+          116
+        ],
+        [
+          -45,
+          140
+        ]
+      ],
+      "playable": true,
+      "kind": "land",
+      "routeId": "route.core.whitecliff-frostbay"
+    },
+    {
+      "ends": [
+        "yunjing",
+        "starwell"
+      ],
+      "points": [
+        [
+          145,
+          0
+        ],
+        [
+          96,
+          -9
+        ],
+        [
+          2,
+          -72
+        ],
+        [
+          -18,
+          -126
+        ]
+      ],
+      "playable": true,
+      "kind": "ferry",
+      "routeId": "route.core.yunjing-starwell"
+    }
+  ],
+  "regions": [
+    {
+      "key": "yunhua",
+      "name": "雲華東境",
+      "center": [
+        150,
+        0
+      ],
+      "radius": [
+        95,
+        85
+      ],
+      "peaks": [
+        [
+          120,
+          42,
+          19,
+          17
+        ],
+        [
+          119,
+          15,
+          17,
+          14
+        ],
+        [
+          111,
+          -32,
+          13,
+          18
+        ]
+      ]
+    },
+    {
+      "key": "vildun",
+      "name": "維爾冬北境",
+      "center": [
+        0,
+        140
+      ],
+      "radius": [
+        95,
+        70
+      ],
+      "peaks": [
+        [
+          -14,
+          169,
+          25,
+          16
+        ],
+        [
+          7,
+          149,
+          21,
+          14
+        ],
+        [
+          49,
+          154,
+          19,
+          13
+        ]
+      ]
+    },
+    {
+      "key": "aurelien",
+      "name": "奧瑞恩西境",
+      "center": [
+        -150,
+        0
+      ],
+      "radius": [
+        95,
+        85
+      ],
+      "peaks": [
+        [
+          -136,
+          34,
+          14,
+          20
+        ],
+        [
+          -109,
+          11,
+          19,
+          15
+        ],
+        [
+          -151,
+          -47,
+          11,
+          18
+        ]
+      ]
+    },
+    {
+      "key": "safir",
+      "name": "薩菲爾南境",
+      "center": [
+        0,
+        -140
+      ],
+      "radius": [
+        100,
+        72
+      ],
+      "peaks": [
+        [
+          37,
+          -101,
+          17,
+          17
+        ],
+        [
+          13,
+          -91,
+          14,
+          18
+        ],
+        [
+          -58,
+          -134,
+          11,
+          19
+        ]
+      ]
+    }
+  ],
+  "camera": {
+    "localZoom": 2.15,
+    "overviewZoom": 0.34,
+    "minZoom": 0.3,
+    "maxZoom": 3.4
+  },
+  "landscape": {
+    "continent": {
+      "center": [
+        0,
+        0
+      ],
+      "radius": [
+        263,
+        226
+      ]
+    },
+    "lake": {
+      "name": "雲星大湖",
+      "en": "Yunxing Lake",
+      "center": [
+        35,
+        -37
+      ],
+      "radius": [
+        78,
+        50
+      ]
+    }
+  }
+}

@@ -52,6 +52,7 @@ const assembler: ContextAssembler = (runtime): ModuleContexts => ({
   // 絆線，所以「這個切片其實碰到了某個沒準備好的模組」會立刻現形，而不是安靜地讀到 undefined。
   city: unusedContext('city'),
   quest: unusedContext('quest'),
+    questSettlement: unusedContext('questSettlement'),
   questGeneration: unusedContext('quest'),
   social: unusedContext('social'),
   economy: unusedContext('economy'),

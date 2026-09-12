@@ -1,20 +1,8 @@
-// scripts/verify-content-sync.mjs
-// 內容產物同步門禁：committed 的 *_content.html 必須等於「用 committed 的資料重新產生的結果」。
-//
-// 為什麼需要它：HTML 是產物，但它被 commit 進 repo。只要有人改了資料或 renderer 卻沒重跑 Builder，
-// repo 裡就留著一份與資料不符的閱讀頁，而且**不會有任何檢查失敗**。本門禁建立時實測 HEAD：
-// 維爾冬／奧雷利安／薩菲爾三國的 committed HTML 仍是 R13 #3 樓梯修正**之前**的版本（樓梯全畫成 ↓），
-// 資料與 renderer 都已經是對的，只有產物沒重生成。這種漂移人工 review 幾乎不可能抓到。
-//
-// **本腳本不會寫入你的工作目錄。** 它在暫存目錄開一個 detached worktree（預設 HEAD），
-// 在那裡跑 Builder 再比對。這點是刻意的：內容軌經常有未提交的變更，重跑 Builder 會把它們覆蓋掉。
-//
-// 執行：
-//   node scripts/verify-content-sync.mjs            # 檢查 HEAD
-//   node scripts/verify-content-sync.mjs --ref=abc  # 檢查指定 commit
+// HTML 同步：預設檢查工作樹；--ref=<commit> 可稽核指定提交。
+// 在暫存目錄重建後比對，從不覆蓋原始工作檔。
 
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -32,12 +20,19 @@ function git(cwd, ...args) {
   return execFileSync('git', args, { cwd, encoding: 'utf8', maxBuffer: 1 << 28 });
 }
 
-const ref = arg('ref') ?? 'HEAD';
+const ref = arg('ref');
 const work = mkdtempSync(join(tmpdir(), 'ga-content-sync-'));
 let failures = 0;
 
 try {
-  git(ROOT, 'worktree', 'add', '--detach', '--quiet', work, ref);
+  if (ref !== undefined) {
+    git(ROOT, 'worktree', 'add', '--detach', '--quiet', work, ref);
+  } else {
+    cpSync(join(ROOT, 'docs', '03_content'), join(work, 'docs', '03_content'), { recursive: true });
+    for (const culture of CULTURES) {
+      cpSync(join(ROOT, `build_${culture}_content_html.mjs`), join(work, `build_${culture}_content_html.mjs`));
+    }
+  }
 
   for (const culture of CULTURES) {
     const builder = `build_${culture}_content_html.mjs`;
@@ -59,7 +54,7 @@ try {
 
     // 以 byte 比對，避開任何字串編碼與換行的干擾。
     const rebuilt = readFileSync(join(work, relPath));
-    const committed = execFileSync('git', ['show', `${ref}:${relPath}`], {
+    const committed = ref === undefined ? readFileSync(join(ROOT, relPath)) : execFileSync('git', ['show', `${ref}:${relPath}`], {
       cwd: ROOT,
       maxBuffer: 1 << 28,
     });
@@ -89,7 +84,8 @@ try {
   }
 } finally {
   try {
-    git(ROOT, 'worktree', 'remove', '--force', work);
+    if (ref !== undefined) git(ROOT, 'worktree', 'remove', '--force', work);
+    else rmSync(work, { recursive: true, force: true });
   } catch {
     rmSync(work, { recursive: true, force: true });
   }

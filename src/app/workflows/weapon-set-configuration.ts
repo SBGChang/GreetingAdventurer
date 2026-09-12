@@ -94,7 +94,7 @@ export function validateWeaponSetSkills(
     // 4.【待契約】技能的 `weaponRequirementIds` 目前**驗不了**：`EquipmentDefinition` 沒有對應的
     //    武器需求標記欄位，裝備這一側根本沒有可比對的資料（combat 與 combat-power 都只宣告了技能側）。
     //    要真的驗，得先在 inventory 契約補上裝備側的 requirement 標記，並由內容軌填資料——那會動到
-    //    正在被改寫的內容檔，故不在此擅自新增。見 HANDOFF。
+    //    正在被改寫的內容檔，故不在此擅自新增。見 docs/CURRENT_STATUS.md。
   }
   return undefined;
 }

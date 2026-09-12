@@ -1,0 +1,32 @@
+{
+  "declaredKinds": [
+    "city",
+    "city-node",
+    "culture",
+    "escort-generation-rule",
+    "facility",
+    "nation",
+    "population-supply-rule",
+    "region",
+    "route"
+  ],
+  "packId": "pack:world-cities",
+  "requiredResolverIds": [],
+  "resolverBindings": [],
+  "runtimeCompatibility": {
+    "minRuntimeVersion": "0.1.0"
+  },
+  "schemaVersion": 1,
+  "scope": {
+    "cultureIds": [
+      "culture.vildun",
+      "culture.aurelien",
+      "culture.safir"
+    ],
+    "features": [
+      "city-travel",
+      "lodging"
+    ]
+  },
+  "version": "1.0.0"
+}

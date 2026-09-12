@@ -1,5 +1,7 @@
 # Greeting Adventurer｜技術架構藍圖
 
+> 本文件描述設計目標，不是已完成清單。正式可用範圍與驗證方式見 [目前實作狀態](../CURRENT_STATUS.md)。
+
 > **文件定位：** 本文件是 React／TypeScript 版本的架構契約與交接藍圖，不是遊戲實作，也不是數值或內容規格。後續實作者應在本文件劃定的邊界內填入規則、資料與 View；若必須改動契約，必須先更新本文件與共用型別。
 >
 > **適用環境：** Vite + React + TypeScript + Electron；未來可包裝為 Steam 桌面版。遊戲目前是單機、以本機存檔為主；Steam Cloud、成就與 DLC 都屬平台介接，不得滲入遊戲規則核心。

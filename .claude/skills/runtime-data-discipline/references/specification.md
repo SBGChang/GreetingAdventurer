@@ -1,7 +1,7 @@
 # 正式 Runtime 資料驅動與零暫代規範
 
-> 本檔為**權威原文**，逐字保存。操作層摘要與判斷流程見 `../SKILL.md`；
-> 目前待清理項目見 `cleanup-backlog.md`（會隨進度變動，原文 §16 亦保留於此）。
+> 本檔為現行 Runtime 規範；操作摘要見 `../SKILL.md`。
+> 專案現況只記錄於根目錄的 `docs/CURRENT_STATUS.md`，規範不混入歷史待辦。
 
 ## 一、目的
 
@@ -388,27 +388,9 @@ CI 與正式 Build 必須執行：
 
 只要其中任何問題無法明確回答，修改不得合併。
 
-## 十六、目前優先清理項目
+## 十六、現況維護
 
-依風險排序：
-
-1. Effect ID 被直接當成 Status ID。
-2. Dungeon 事件選項固定成功。
-3. Dungeon 固定陷阱尚未解析。
-4. NPC Dungeon 怪物內容固定視為成功。
-5. `combat-rule-standard` 寫死於 Combat。
-6. 控制抗性 Definition 尚未被 Runtime 使用。
-7. 戰鬥休息固定恢復 5 HP／MP。
-8. 臨時角色性別固定為 female。
-9. 年齡經驗倍率固定為 1。
-10. Team 休息時間寫在 Handler。
-11. Skill 的 `weaponRequirementIds` 缺少裝備端正式資料契約。
-12. Combat 沒有消費 `targetResolverId`。
-13. Team 自行鑄造 Map Instance ID。
-14. Bring-up Bootstrap 使用固定 archetype、HP／MP、性別與站位。
-15. 正式 Content Pack、Composition Root 與 NewGameBootstrapper 尚未建立。
-
-上述項目不能以保留 TODO 的方式結案。必須擴充正式資料契約並移除暫代行為；在完成以前，對應 Capability 不得視為可用。
+實作狀態以 `docs/CURRENT_STATUS.md` 與可執行驗證為準。修復後移除已結案項目，不追加歷史版本。
 
 ## 十七、完成標準
 

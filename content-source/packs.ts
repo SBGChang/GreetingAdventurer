@@ -213,6 +213,8 @@ const YUNHUA_DECLARED_KINDS: readonly string[] = [
   'city',
   'city-action-rule',
   'city-node',
+  'combat-effect',
+  'combat-damage-rule',
   'combat-skill',
   'combatConsumable',
   'content-event',
@@ -273,10 +275,18 @@ const yunhuaPack: AuthoredPack = {
   ],
 };
 
+import { worldCitiesDomain } from './world-cities';
+const worldPack: AuthoredPack = {
+  packId:'pack:world-cities' as ContentPackId,version:'1.0.0',contentRoot:'world',
+  requiredPacks:[...CORE_DEPENDENCY,{packId:yunhuaPack.packId,version:yunhuaPack.version}],optional:false,
+  scope:{cultureIds:['culture.vildun','culture.aurelien','culture.safir'],features:['city-travel','lodging']},
+  requiredResolverIds:[],resolverBindings:[],runtimeCompatibility:{minRuntimeVersion:'0.1.0'},
+  declaredKinds:['culture','nation','region','city-node','city','facility','route','population-supply-rule','escort-generation-rule'],domains:[worldCitiesDomain],
+};
 export const AUTHORED_MANIFEST: AuthoredManifest = {
   manifestVersion: '1.0.0',
   // core 先載入：文化 pack 引用它的熟練度、貨幣與規則 ID。
   // core 先載入：文化 pack 引用它的熟練度、規則與貨幣 ID。
-  loadOrder: [CORE_PACK_ID, 'pack:yunhua' as ContentPackId],
-  packs: [corePack, yunhuaPack],
+  loadOrder: [CORE_PACK_ID, yunhuaPack.packId,worldPack.packId],
+  packs: [corePack, yunhuaPack,worldPack],
 };

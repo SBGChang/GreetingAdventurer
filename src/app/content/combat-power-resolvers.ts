@@ -1,15 +1,6 @@
 // app/content/combat-power-resolvers.ts
 // combat 的數值 Resolver：傷害／治療／CTB 調整（CombatResolverPort.resolvePower 的實作）。
-//
-// 「形狀＝程式，數值＝內容」（規範 §7.1）：本檔用**單一** kernel 形狀 `combat:weighted-power`
-// 服務全部傷害/治療/CTB resolver。差別**只在內容**——每個 resolver 綁定一筆 weighted-product-params
-// （bias + 具名 terms），terms 用哪些屬性、權重多少，全由那筆 params 決定。因此：
-//   * 物理/魔法/樂器傷害的差別 = 三筆 params 分別取 muscle/intelligence/charisma（見 combat-rules 的通道）。
-//   * 傷害含「− 目標屬」減項、治療只有「+ 行動者屬」、CTB 只有常數 bias——全是 params 的 terms 差異。
-// 程式這邊完全不含任何倍率或屬性選擇；那些是我設計的第一版數值，記在 docs/first_version_design_ledger.html。
-//
-// 輸入組裝：把行動者與（若有）目標的五個主屬攤成 KernelInputs 的 `actor.<attr>` / `target.<attr>`。
-// 角色的屬性走 progression Query，怪物的走 Monster Definition——與 combat/system.ts 的 attributesOf 同源。
+// 主屬與角色裝備副屬攤平成 kernel 輸入；公式係數由 content-source/core/combat-resolver-params.ts 提供。
 
 import {
   weightedLinearProduct,
@@ -48,6 +39,7 @@ export type CombatPowerDefinitions = Readonly<{
   getMonster(id: MonsterDefinitionId): MonsterDefinition;
 }>;
 export type CombatPowerQueries = Readonly<{
+  getSecondaryAttribute(characterId: CharacterId, weaponSetId: import('../../contracts/core').WeaponSetId | undefined, attributeId: string): number;
   getPrimaryAttributes(characterId: CharacterId): Readonly<Record<PrimaryAttributeId, number>>;
 }>;
 
@@ -112,7 +104,17 @@ function weightedPowerRegistration(
       const defs = ctx.definitions as CombatPowerDefinitions;
       const queries = ctx.queries as CombatPowerQueries;
       const params = defs.getPowerParams(paramsDefId);
-      return { value: weightedLinearProduct(params, gatherInputs(input, defs, queries)) };
+      const inputs: Record<string, number> = { ...gatherInputs(input, defs, queries) };
+      for (const term of params.terms) {
+        const match = /^(actor|target)\.secondary\.(.+)$/.exec(term.inputKey);
+        if (!match) continue;
+        const id = match[1] === 'actor' ? input.actorId : input.targetId;
+        const unit = id === undefined ? undefined : input.encounter.combatants[id];
+        if (!unit) throw new Error('combat/power-combatant-missing');
+        // 怪物沒有角色裝備；天生力量已由其主屬項提供。
+        inputs[term.inputKey] = unit.source.kind === 'monster' ? 0 : queries.getSecondaryAttribute(unit.source.characterId, unit.activeWeaponSetId, match[2]!);
+      }
+      return { value: weightedLinearProduct(params, inputs) };
     },
   };
 }

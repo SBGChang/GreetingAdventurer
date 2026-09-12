@@ -1201,7 +1201,7 @@ export function handleShopRefresh(
     });
   }
   // Base Catalog 的 Offer 必須引用真實 ItemInstance（doc §3.2、不變量 1），而 ItemInstanceId 只有
-  // inventory 能鑄造，且本專案禁止跨模組同步取回（HANDOFF 慣例）。因此「建立實體 → 建立 Offer」
+  // inventory 能鑄造，且本專案禁止跨模組同步取回（docs/CURRENT_STATUS.md 慣例）。因此「建立實體 → 建立 Offer」
   // 是兩筆交易，必須由 Workflow 編排（doc §6 也把買賣歸給 Workflow）；City Handler 無法完成它。
   // 缺這條 Workflow 時明確拒絕，而不是靜靜略過 baseCatalogPoolId。
   if (rule.baseCatalogPoolId !== undefined) {

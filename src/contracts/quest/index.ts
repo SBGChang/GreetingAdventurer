@@ -190,10 +190,7 @@ export type AcceptQuestCommand = Readonly<{ type: 'acceptQuest'; questId: QuestI
 export type SettleQuestCommand = Readonly<{ type: 'settleQuest'; questId: QuestId }>;
 
 // 只列**已註冊**的入口（同 contracts/dungeon、contracts/inventory 的作法）。
-// `settleQuest` 不在此聯集：doc §7 要求 `equalCurrencyOnly` 的 Asset Distribution 在同一筆
-// EngineTransaction 內同步完成，且 QuestSettlement.rewardDistributionId 是必填欄位——沒有
-// Distribution 模組就無法在不違反不變量 16 的前提下寫入 settlement。Handler 不存在、入口不出現。
-export type QuestGameCommand = AcceptQuestCommand;
+export type QuestGameCommand = AcceptQuestCommand | SettleQuestCommand;
 
 // ── 輸入契約：NPC Internal Command（§5.1.1）──────────────────────────────
 export type AcceptQuestForNpcTeamCommand = Readonly<{
@@ -220,8 +217,7 @@ export type ReleaseNpcQuestClaimCommand = Readonly<{
   teamId: TeamId;
   chainId: ActionChainId;
 }>;
-// 只列**已註冊**的接收能力。`SettleQuestForNpcTeam` 與玩家的 `settleQuest` 同一條結案流程，
-// 因此同樣不出現（見上方說明）。
+// NPC 自主結案尚未接入；這裡只列已註冊的認領與接取入口。
 export type QuestInternalCommand =
   | AcceptQuestForNpcTeamCommand
   | ClaimQuestForNpcTeamCommand
@@ -230,7 +226,8 @@ export type QuestInternalCommand =
 // Quest **送出**的 Internal Command：一律引用接收模組契約的真實型別，不自行複寫欄位。
 // 只列已註冊 Handler 送得出去的那幾筆——送一個沒有 Owner 的命令等於保證那條流程跑不完
 // （registry 的「送出端 → Owner」交叉驗證會擋）。
-export type QuestOutboundInternalCommand = ProtectMapContent | CreateQuestTemporaryCharacter;
+export type QuestOutboundInternalCommand = ProtectMapContent | CreateQuestTemporaryCharacter
+  | import('../distribution').AssetDistributionInboundInternalCommand;
 
 // ── ScheduledJob（§5.2）───────────────────────────────────────────────
 export type QuestDeadlineJobKind = 'accept' | 'actualEnd';

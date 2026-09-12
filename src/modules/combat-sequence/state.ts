@@ -41,7 +41,7 @@ export type CombatSequenceSettlementRecord = Readonly<{
 
 // ── 等待補品消耗的中繼狀態（doc §6.2／§6.3）─────────────────────────────────
 //
-// 為什麼需要它：跨模組不得同步呼叫（HANDOFF「慣例」：`CombatSequenceHostPort.resolveNext()` 已移除）。
+// 為什麼需要它：跨模組不得同步呼叫（docs/CURRENT_STATUS.md「慣例」：`CombatSequenceHostPort.resolveNext()` 已移除）。
 // 所以「消耗補品後重骰」不能寫成一個函式呼叫，只能是
 //   ResolveNext → 送 ConsumeCombatSequenceRetrySupply → inventory 發 CombatSequenceRetrySupplyConsumed
 //   → 本模組訂閱者接手重骰

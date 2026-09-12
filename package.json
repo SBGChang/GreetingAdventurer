@@ -4,7 +4,7 @@
   "type": "module",
   "version": "0.0.0",
   "main": "electron/main.cjs",
-  "description": "Greeting Adventurer — React/TypeScript/Electron implementation of the archived design blueprint.",
+  "description": "Greeting Adventurer — data-driven single-player RPG prototype.",
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "verify:modules": "tsx scripts/verify-modules.ts",
@@ -22,25 +22,41 @@
     "typecheck:ui": "tsc --noEmit -p app/tsconfig.json",
     "report:content": "tsx scripts/report-content-coverage.ts",
     "verify:content-scope": "node scripts/verify-content-scope.mjs",
-    "verify": "npm run typecheck && npm run verify:discipline && npm run verify:modules && npm run verify:content-packs && npm run verify:content-sync && npm run verify:content-scope",
+    "verify": "npm run typecheck && npm run typecheck:ui && npm run verify:discipline && npm run verify:modules && npm run verify:ui && npm run verify:playthrough && npm run verify:world-travel && npm run verify:save-schema && npm run verify:content-packs && npm run verify:content-sync && npm run verify:content-scope && npm run verify:docs && npm run verify:geography && npm run build:ui",
     "content:all": "npm run content:yunhua && npm run content:vildun && npm run content:aurelien && npm run content:safir",
     "content:yunhua": "node build_yunhua_content_html.mjs",
     "content:vildun": "node build_vildun_content_html.mjs",
     "content:aurelien": "node build_aurelien_content_html.mjs",
-    "content:safir": "node build_safir_content_html.mjs"
+    "content:safir": "node build_safir_content_html.mjs",
+    "verify:ui": "tsx scripts/verify-ui.ts",
+    "schema:save": "tsx scripts/generate-save-schema.ts",
+    "verify:save-schema": "tsx scripts/generate-save-schema.ts --check",
+    "verify:docs": "node scripts/verify-docs.mjs",
+    "verify:desktop": "npm run build:ui && electron scripts/electron-smoke.cjs",
+    "verify:playthrough": "tsx scripts/verify-playthrough.ts",
+    "verify:geography": "node scripts/verify-geography.mjs",
+    "verify:atlas": "npm run build:ui && electron scripts/electron-atlas-smoke.cjs",
+    "verify:world-travel": "tsx scripts/verify-world-travel.ts"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
-    "@vitejs/plugin-react": "^4.7.0",
-    "electron": "^31.7.7",
+    "@types/three": "^0.185.4",
+    "@vitejs/plugin-react": "^6.1.1",
+    "electron": "^44.3.0",
+    "ts-json-schema-generator": "^2.9.0",
     "tsx": "^4.23.11",
     "typescript": "^5.6.3",
-    "vite": "^5.4.21"
+    "vite": "^8.2.2"
   },
   "dependencies": {
+    "ajv": "^8.20.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "three": "^0.186.0"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }

@@ -49,14 +49,8 @@ export const MAX_PRIMARY_ATTRIBUTE = 100;
 
 // ── Engine 安全上限 ─────────────────────────────────────────────────────────
 
-/**
- * 一次「世界結算」最多連續執行幾個到期 Job（`settleWorld`）。
- *
- * 這是 **Kernel 安全上限**，不是玩法量：它不決定任何動作要花幾天（那些全在 Definition 裡——
- * 旅行 3／6／9 日、去冒險點 1 日、訓練 28 日…），只保證「Plan 因為 bug 而永遠不結束」時
- * 迴圈會停下來而不是把瀏覽器鎖死。改這個數字不會改變任何一趟旅程的長度。
- *
- * 64 的來源：合法流程裡最長的連鎖是玩家旅行的三段（3 個 Job），其餘動作都是 1 個 Job；
- * 留兩個數量級的餘裕給未來的沿途 Job（NPC、刷新、年齡）。
- */
+/** 敵方連續回合的執行安全上限；不決定行動速度或玩法數值。 */
 export const MAX_SETTLE_STEPS = 64;
+
+/** World cadence adds many jobs during 28-day training or 365-day rest. This bounds execution work, not elapsed game time. */
+export const MAX_WORLD_SETTLE_STEPS = 4096;

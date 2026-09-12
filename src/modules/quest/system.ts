@@ -148,6 +148,8 @@ export interface QuestGenerationResolverPort {
 
 export type QuestGenerationContext = QuestHandlerContext &
   Readonly<{
+    /** Composition limits generation to capabilities with a complete lifecycle. */
+    enabledKinds?: readonly QuestKind[];
     ids: QuestIdAllocator;
     rng: DeterministicRng;
     rngContext: RngContext;
@@ -156,6 +158,45 @@ export type QuestGenerationContext = QuestHandlerContext &
   }>;
 
 export type QuestHandlerResult = ModuleOutcome<QuestState>;
+
+export type QuestSettlementContext = QuestHandlerContext & Readonly<{
+  nextDistributionId(): import('../../contracts/core').AssetDistributionId;
+  distributionRuleId: import('../../contracts/distribution').AssetDistributionRuleId;
+  resolveCurrencyReward(ruleId: import('../../contracts/economy').RewardRuleId): import('../../contracts/economy').MoneyValue | undefined;
+}>;
+
+/** 結案及分配在同一筆交易完成；任何下游拒絕會回滾 settlement。 */
+export function handleSettleQuest(
+  state: QuestState, cmd: import('../../contracts/quest').SettleQuestCommand,
+  teamId: TeamId, ctx: QuestSettlementContext,
+): QuestHandlerResult {
+  const quest = tryGetQuest(state, cmd.questId);
+  if (!quest || quest.acceptedByTeamId !== teamId) return reject('quest/not-accepted-by-team');
+  if (quest.settlement) return reject('quest/already-settled');
+  if (quest.status !== 'completed') return reject('quest/objective-not-completed');
+  if (ctx.worldDay >= quest.actualEndDeadline) return reject('quest/settlement-deadline-passed');
+  const location = ctx.teams.getLocation(teamId);
+  if (location.kind !== 'city' || location.cityId !== quest.postingGuildCityId) return reject('quest/team-not-at-posting-guild');
+  const reward = ctx.definitions.getQuestRewardRule(quest.rewardRuleId);
+  if (reward.reputationEffectIds?.length) return reject('quest/reputation-effects-unavailable');
+  const money = reward.currencyRewardRuleId ? ctx.resolveCurrencyReward(reward.currencyRewardRuleId) : undefined;
+  if (reward.currencyRewardRuleId && !money) return reject('quest/reward-unresolved');
+  const distributionId = ctx.nextDistributionId();
+  const beneficiaryCharacterIds = quest.participantCharacterIds;
+  const next = updateQuest(state, { ...quest, revision: bumpRevision(quest.revision), settlement: {
+    settledOnDay: ctx.worldDay, settledAtCityId: location.cityId, settledByTeamId: teamId,
+    beneficiaryCharacterIds, rewardDistributionId: distributionId,
+  }});
+  const target = 'distribution' as ModuleId;
+  return accept(next, [
+    internal(target, { type: 'StartAssetDistribution', distributionId, source: { kind: 'questReward', questId: quest.questId, rewardRuleId: reward.currencyRewardRuleId }, teamId, participantCharacterIds: beneficiaryCharacterIds, ruleId: ctx.distributionRuleId }),
+    internal(target, { type: 'AppendAssetDistributionResult', distributionId, itemIds: [], currencyInputs: money ? [money] : [] }),
+    internal(target, { type: 'FinalizeAssetDistributionCollection', distributionId }),
+    ...releaseProtection(quest),
+    emit({ type: 'QuestSettled', questId: quest.questId, teamId, beneficiaryCharacterIds,
+      guildCityId: location.cityId, kind: quest.kind, masteryExperienceRuleId: reward.masteryExperienceRuleId }),
+  ]);
+}
 
 // ──────────────────────────────────────────────────────────────────────────
 // 訊息小工具
@@ -178,7 +219,19 @@ function makeResult(
   nextSlice: QuestState,
   outgoingMessages: readonly Outgoing[] = [],
 ): ModuleResult<QuestState> {
-  return { nextSlice, outgoingMessages, scheduledJobs: [] };
+  const scheduledJobs: import('../../contracts/core').ScheduledJobDraft<QuestDeadlineJob>[] = [];
+  for (const message of outgoingMessages) {
+    if (!('event' in message)) continue;
+    const event = message.event as QuestDomainEvent;
+    if (event.type !== 'QuestCreated') continue;
+    const quest = tryGetQuest(nextSlice, event.questId);
+    if (!quest || missingExpiryCleanup(quest) !== undefined) continue;
+    scheduledJobs.push(
+      { type: 'questDeadline', ownerModule: QUEST_MODULE_ID, targetId: quest.questId, dueDay: quest.acceptDeadline, payload: { kind: 'accept' } },
+      { type: 'questDeadline', ownerModule: QUEST_MODULE_ID, targetId: quest.questId, dueDay: quest.actualEndDeadline, payload: { kind: 'actualEnd' } },
+    );
+  }
+  return { nextSlice, outgoingMessages, scheduledJobs };
 }
 
 function accept(
@@ -642,6 +695,7 @@ export function onMapContentGenerated(
       );
     }
     const rule = rules[0]!;
+    if (ctx.enabledKinds && !ctx.enabledKinds.includes(rule.questKind)) continue;
 
     // 生成擲骰。creationChance 1 代表必生（怪群與 Boss 就是這樣授權的），此時仍然消費一格
     // 游標——否則「這份內容改成 0.5」會讓之後所有委託的隨機結果整串位移。
@@ -769,6 +823,7 @@ export function onCityStockItemAvailable(
 
   for (const rule of ctx.definitions.listQuestReactionRules()) {
     if (rule.sourceKind !== 'cityStockItem') continue;
+    if (ctx.enabledKinds && !ctx.enabledKinds.includes(rule.questKind)) continue;
 
     const chanceRoll = ctx.rng.nextFloat({ ...ctx.rngContext, cursor });
     cursor = chanceRoll.nextCursor;

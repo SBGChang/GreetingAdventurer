@@ -134,6 +134,7 @@ export interface CombatFormationQuery {
 
 // 資料調校 kernel（= 文件的 Combat Power / Damage / Heal / CTB / Hit Resolver 家族）。
 export type CombatPowerInput = Readonly<{
+  mitigationSecondaryId?: import('../../contracts/core').SecondaryAttributeId;
   resolverId: ResolverId;
   encounter: CombatEncounter;
   actorId: CombatantId;
@@ -716,10 +717,11 @@ function applyEffect(
           Math.round(
             ctx.resolvers.resolvePower({
               resolverId: rule.powerResolverId,
+              mitigationSecondaryId: rule.mitigationSecondaryId,
               encounter: work.encounter,
               actorId,
               targetId,
-            }),
+            }) * (rule.powerMultiplier === undefined ? 1 : rule.powerMultiplier),
           ),
         );
         // 有效傷害＝真正扣除的 HP：尾刀溢出（面板 30 打剩 5 HP）不計入熟練度，否則高傷武器靠尾刀

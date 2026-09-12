@@ -1,5 +1,7 @@
 # Data Runtime 與內容契約
 
+> 本文件定義設計契約，不代表全部功能已接入正式遊戲。實際狀態與驗收入口見 [目前實作狀態](../../CURRENT_STATUS.md)。
+
 > **技術元件：** `data-runtime`
 >
 > **依賴：** `contracts/core` 與各模組公開的 Definition Schema contribution。

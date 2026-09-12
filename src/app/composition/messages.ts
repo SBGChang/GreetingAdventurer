@@ -286,6 +286,7 @@ export const GAME_COMMAND_ENTRY: Readonly<Record<GameCommandType, GameCommandEnt
 
   // quest
   acceptQuest: 'quest' as ModuleId,
+  settleQuest: 'quest' as ModuleId,
 
   // social
   interactWithAdventurer: 'social' as ModuleId,

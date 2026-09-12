@@ -39,9 +39,9 @@ type AttrModDef = DefinitionHeader & PrimaryAttributeModifierParams;
 // ── params 定義（值大多照 BM）────────────────────────────────────────────────
 const weightedDefs: readonly Authored<WeightedDef>[] = [
   // 生命上限 = 200 + safeRaw×20（safeRaw = 肌×1 ＋裝備）。
-  { kind: WEIGHTED, id: paramsId(WEIGHTED, 'stat-max-health'), mode: 'linear', bias: 200, terms: [{ inputKey: 'safeRaw', weight: 20 }] },
+  { kind: WEIGHTED, id: paramsId(WEIGHTED, 'stat-max-health'), mode: 'linear', bias: 200, terms: [{ inputKey: 'muscle', weight: 20 }, { inputKey: 'safeRaw', weight: 20 }] },
   // 魔力上限 = 120 + safeRaw×14。
-  { kind: WEIGHTED, id: paramsId(WEIGHTED, 'stat-max-mana'), mode: 'linear', bias: 120, terms: [{ inputKey: 'safeRaw', weight: 14 }] },
+  { kind: WEIGHTED, id: paramsId(WEIGHTED, 'stat-max-mana'), mode: 'linear', bias: 120, terms: [{ inputKey: 'intelligence', weight: 14 }, { inputKey: 'safeRaw', weight: 14 }] },
 ];
 
 const saturationDefs: readonly Authored<SaturationDef>[] = [

@@ -1,5 +1,6 @@
+import { UnavailableCapabilityError } from '../composition/capability';
 // app/content/dungeon-context.ts
-// `DungeonContext` 與 `TeamWorldReader` 的正式組裝（f3_work_packages.md P3）。
+// `DungeonContext` 與 `TeamWorldReader` 的正式組裝（docs/00_core/technical_architecture.md）。
 //
 // 這一檔把「地牢跑得起來」需要的四種東西接在一起：
 //   * Definition Reader（互動規則、NPC 探索規則、戰利品分配規則）
@@ -133,10 +134,7 @@ export function requireDungeonLootRuleId(registry: DefinitionRegistry): AssetDis
 function pendingPort<T>(path: string): T {
   const handler: ProxyHandler<object> = {
     get: (_t, prop) => {
-      throw new Error(
-        `DungeonContext："${path}" 尚未接線（存取 .${String(prop)}）——` +
-          `NPC 地牢流程需要 CombatSequenceSnapshotAssembler，見 contracts/dungeon 的說明。`,
-      );
+      throw new UnavailableCapabilityError(`${path}.${String(prop)}`);
     },
   };
   return new Proxy({}, handler) as T;
@@ -228,7 +226,7 @@ export function createPendingDungeonResolverPort(): DungeonResolverPort {
 // 那正是規範 §6 點名的偽裝，所以這裡把它接成真的。
 //
 // 三個 Query 都是唯讀投影，缺就回 undefined（契約明文：「回 undefined 而不是編造帳戶 ID」）：
-// 開局 economy slice 是空的，所以帳戶查詢本來就查不到——那是事實，不是錯誤。
+// 帳戶由 economy 擁有；查無指定角色帳戶時回 undefined，不鑄造或推測 ID。
 export function createDistributionContext(
   deps: Readonly<{
     registry: DefinitionRegistry;
@@ -284,7 +282,8 @@ export function createDistributionContext(
       findIntrinsicValue: (itemId) => {
         const instance = deps.inventoryState.items[itemId];
         if (instance === undefined) return undefined;
-        return deps.itemReader.getItem(instance.definitionId).intrinsicValue;
+        const value = deps.itemReader.getItem(instance.definitionId).intrinsicValue;
+        return { ...value, amount: value.amount * instance.quantity };
       },
     },
     team: {

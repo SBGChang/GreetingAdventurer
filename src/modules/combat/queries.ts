@@ -1,7 +1,7 @@
 // modules/combat/queries.ts
 // Combat 公開 Query port（文件 §4）。純讀取：以目前 slice + Reader 推導 View，不改動 state、不消費 RNG。
 
-import type { EncounterId, CombatantId, WeaponSetId, SkillDefinitionId } from '../../contracts/core';
+import type { TeamId, EncounterId, CombatantId, WeaponSetId, SkillDefinitionId } from '../../contracts/core';
 import type {
   CombatQuery,
   CombatEncounterView,
@@ -119,6 +119,16 @@ export function makeCombatQuery(state: CombatState, deps: QueryDeps): CombatQuer
         }
       }
       return options;
+    },
+  };
+}
+
+// Team 的隊形鎖定只需讀取尚未結束的戰鬥，不依賴技能與裝備投影。
+export function createCombatStatusQuery(state: CombatState) {
+  return {
+    hasActiveEncounter(teamId: TeamId): boolean {
+      return Object.values(state.encounters).some(encounter =>
+        encounter.playerTeamId === teamId && encounter.state !== 'resolved');
     },
   };
 }

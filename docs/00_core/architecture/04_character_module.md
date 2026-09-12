@@ -1,5 +1,7 @@
 # Character 模組契約
 
+> 本文件定義設計契約，不代表全部功能已接入正式遊戲。實際狀態與驗收入口見 [目前實作狀態](../../CURRENT_STATUS.md)。
+
 > **模組 ID：** `character`
 >
 > **依賴：** [共用核心契約](00_shared_contracts.md)。Character 透過由 Composition Adapter 實作的窄化 `CharacterStatsQuery` 讀取角色最大生命／魔力；Adapter 使用 [Derived Statistics](16_derived_statistics.md)，Character 不直接依賴 progression、inventory、combat、team 或 quest 的內部 State。

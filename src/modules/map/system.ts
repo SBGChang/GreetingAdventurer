@@ -510,6 +510,38 @@ export function handleMapRefreshCheck(
   state: MapState,
   ctx: MapHandlerContext,
 ): ModuleResult<MapState> {
+  const result = applyMapRefreshCheck(job, state, ctx);
+  const instance = tryGetInstance(result.nextSlice, job.targetId);
+  if (instance === undefined || job.payload.reason !== 'regular') return result;
+  const template = ctx.definitions.getMapTemplate(instance.templateId);
+  return {
+    ...result,
+    scheduledJobs: [...result.scheduledJobs, nextMapRefreshJob(instance.mapId, template, ctx.worldDay)],
+  };
+}
+
+export function nextMapRefreshJob(
+  mapId: MapInstanceId,
+  template: MapTemplateDefinition,
+  afterDay: number,
+): ScheduledJobDraft<MapRefreshCheckJob> {
+  const cadence = template.refreshCadenceDays;
+  const offset = template.refreshOffsetDays;
+  if (!Number.isSafeInteger(cadence) || cadence <= 0 || !Number.isSafeInteger(offset) || offset < 0 || offset >= cadence) {
+    throw new Error('map/invalid-refresh-calendar');
+  }
+  return {
+    type: 'mapRefreshCheck', ownerModule: MAP_MODULE_ID, targetId: mapId,
+    dueDay: (offset + (Math.floor((afterDay - offset) / cadence) + 1) * cadence) as WorldDay,
+    payload: { reason: 'regular' },
+  };
+}
+
+function applyMapRefreshCheck(
+  job: MapRefreshCheckJob,
+  state: MapState,
+  ctx: MapHandlerContext,
+): ModuleResult<MapState> {
   const instance = tryGetInstance(state, job.targetId);
   if (instance === undefined) return makeResult(state); // 過期 Job：安靜丟棄
 

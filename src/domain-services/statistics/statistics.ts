@@ -382,9 +382,6 @@ function channelPrimaryWeights(
 // 這件裝備把「副屬規則的主屬方向」× 「裝備該通道的主屬係數」合成後，餵給 weightedLinearProduct。
 // 兩個因子都是資料；相乘是形狀。
 //
-// ⚠ 兩份方向向量相乘是**已知的重複真相**：補完裝備側的逐通道向量以後，設計來源的係數會再被
-// 副屬規則的方向向量縮放一次。裁決屬跨模組（見 contracts/inventory 的
-// SecondaryAttributeCoefficients 註解），本檔維持既有的合成順序不自行改變語意。
 function equipmentPrimaryTerms(
   rule: SecondaryAttributeRuleDefinition,
   equipmentWeights: ReadonlyMap<PrimaryAttributeId, number>,

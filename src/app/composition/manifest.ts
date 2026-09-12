@@ -80,6 +80,7 @@ export const ENCUMBRANCE_ON_ITEM_MOVED_WORKFLOW =
 // 由 Game Command 啟動的 Workflow（身分宣告在其實作檔，此處引用以維持單一真相）。
 import { WEAPON_SET_CONFIGURATION_WORKFLOW } from '../workflows/weapon-set-configuration';
 import { CONTENT_EVENT_RESOLUTION_WORKFLOW } from '../workflows/content-event-resolution';
+import { ADVENTURE_LOOT_WORKFLOW, COLLECT_LOOT_WORKFLOW } from '../workflows/adventure-loot';
 import { GAME_COMMAND_ENTRY, WORKFLOW_ENTRY } from './messages';
 
 // 未完成的能力**不進註冊表**。
@@ -126,6 +127,8 @@ export type WorkflowDefinition = Readonly<{
 }>;
 
 export const REGISTERED_WORKFLOWS: readonly WorkflowDefinition[] = [
+  { workflowId: ADVENTURE_LOOT_WORKFLOW, startsFrom: { kind: 'domainEvent', eventType: 'MapContentResolved' }, steps: [] },
+  { workflowId: COLLECT_LOOT_WORKFLOW, startsFrom: { kind: 'domainEvent', eventType: 'ItemInstanceCreated' }, steps: [] },
   {
     workflowId: TRAVEL_EVENT_WORKFLOW,
     startsFrom: { kind: 'domainEvent', eventType: 'TravelSegmentReached' },
@@ -238,7 +241,7 @@ export const EVENT_SUBSCRIPTIONS_BY_TYPE: Readonly<
   //
   // 兩個事件都要訂：只看 Created 會漏掉「物品被移走後隊伍不再超載」，而那筆變化只有在
   // InventoryTransferred 的 from 側看得到。
-  ItemInstanceCreated: [sub('ItemInstanceCreated', ENCUMBRANCE_ON_ITEM_CREATED_WORKFLOW)],
+  ItemInstanceCreated: [sub('ItemInstanceCreated', ENCUMBRANCE_ON_ITEM_CREATED_WORKFLOW), sub('ItemInstanceCreated', COLLECT_LOOT_WORKFLOW)],
   InventoryTransferred: [sub('InventoryTransferred', ENCUMBRANCE_ON_ITEM_MOVED_WORKFLOW)],
 
   // NPC 地城結算套用完成 → dungeon 記錄三方結算之一。
@@ -248,6 +251,7 @@ export const EVENT_SUBSCRIPTIONS_BY_TYPE: Readonly<
   CombatAttackMasteryEarned: [sub('CombatAttackMasteryEarned', 'progression')],
   // 28 日城鎮訓練完成 → progression 依傳授差額公式發 MXP（Team 只追蹤時間）。
   FreeActionCompleted: [sub('FreeActionCompleted', 'progression')],
+  QuestSettled: [sub('QuestSettled', 'progression')],
   // 地圖刷新生成內容 → quest 依 QuestReactionRule 決定要不要貼一筆委託（doc §2.1）。
   MapContentGenerated: [sub('MapContentGenerated', 'quest')],
   // 貨上架 → quest 依 QuestReactionRule 決定要不要貼採買／送貨委託（doc §2.3）。
@@ -268,7 +272,7 @@ export const EVENT_SUBSCRIPTIONS_BY_TYPE: Readonly<
   // ── Wave D 的其餘綁定 ────────────────────────────────────────────────────
 
   // 地圖內容被解決 → quest 累計鎮壓／討伐目標與救援救出。
-  MapContentResolved: [sub('MapContentResolved', 'quest')],
+  MapContentResolved: [sub('MapContentResolved', 'quest'), sub('MapContentResolved', ADVENTURE_LOOT_WORKFLOW)],
 
   // 角色死亡 → quest 判定護送／救援對象已死。
   CharacterDied: [sub('CharacterDied', 'quest')],

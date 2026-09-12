@@ -54,6 +54,7 @@ import type {
 import { cultureIds, type Authored, type AuthoredDomain, type AuthoredText } from '../authoring';
 
 const core = cultureIds('core');
+const DIRECT_SALE_MULTIPLIER = 0.8;
 
 // 標準貨幣的顯示名。「文」是雲華的銅錢單位；英文取通用的 Coin（貨幣是 core，不是雲華專屬，
 // 所以不用「文」的音譯 wen）。
@@ -261,11 +262,15 @@ const QUEST_REWARD_KINDS = [
   'hunt',
 ] as const;
 
+// 第一版方案（待討論）：各類委託固定貨幣報酬，與熟練度規則分開調校。
+const QUEST_MONEY = { purchase: 200, delivery: 400, escort: 600, rescue: 800, exploration: 600, suppression: 1000, hunt: 1500 };
+
 const questCurrencyRewards: readonly Authored<RewardRuleDefinition>[] = QUEST_REWARD_KINDS.map(
   (questKind) => ({
     kind: 'reward-rule',
     id: core.id<RewardRuleId>('reward-rule', `quest-${questKind}`),
     resolverId: resolverId('economy', `reward.quest-${questKind}`),
+    fixedAmount: { currencyId: core.id<CurrencyId>('currency', 'standard'), amount: QUEST_MONEY[questKind] },
   }),
 );
 
@@ -279,6 +284,7 @@ const lootDirectSaleReward: Authored<RewardRuleDefinition> = {
   kind: 'reward-rule',
   id: core.id<RewardRuleId>('reward-rule', 'loot-direct-sale'),
   resolverId: resolverId('economy', 'reward.loot-direct-sale'),
+  itemValueMultiplier: DIRECT_SALE_MULTIPLIER,
 };
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -442,8 +448,10 @@ const npcMarriageRule: Authored<NpcMarriageRuleDefinition> = {
 // 但仍是兩筆 Rule：sourceKind 不同，而 sourceKind 是 Rule 的識別欄位。
 const PLAYER_AUCTION = {
   minimumBid: 'intrinsicValue',
-  unclaimedSaleMultiplier: 0.8,
+  unclaimedSaleMultiplier: DIRECT_SALE_MULTIPLIER,
+  directSaleRewardRuleId: core.id<RewardRuleId>('reward-rule', 'loot-direct-sale'),
   companionBidResolverId: resolverId('distribution', 'companion-bid'),
+  companionBidPolicy: 'affordableIntrinsic',
   tieBreakPolicy: 'deterministicFromDistributionId',
 } as const;
 

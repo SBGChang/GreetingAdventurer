@@ -1843,7 +1843,7 @@ export function handleCombatEncounterResolved(
 
   // 戰敗：探索**結束**——不得回到 exploring（否則全隊戰敗仍能繼續走地牢）。收掉 Session（closed）並請 team
   // 結束地牢 Plan + 返城。[架構待做] 完整版應由 CombatTeamOutcome(canContinue=false) 統一驅動 Team+Dungeon
-  // 的退出（該事件與其 Team/Dungeon 訂閱尚未接入 Manifest，見 HANDOFF）。
+  // 的退出（該事件與其 Team/Dungeon 訂閱尚未接入 Manifest，見 docs/CURRENT_STATUS.md）。
   if (event.outcome !== 'victory') {
     // 轉 defeated：探索結束（不得回 exploring），但**不在此關 Session、也不在此返城**。
     // R8 #5 那版直接 closed + StartReturnFromDungeon，同一筆交易就開始返城，違反 doc §443

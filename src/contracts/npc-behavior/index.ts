@@ -332,6 +332,6 @@ export type NpcBehaviorState = Readonly<{
 // ── 訊息聯集（供 app/composition 併入全遊戲聯集）───────────────────────
 export type NpcBehaviorScheduledJob = NpcDecisionDueJob | NpcChainAdvanceJob;
 
-// 外送 Internal Command 一律引用**接收模組**的真實型別（HANDOFF 慣例）：team 是
+// 外送 Internal Command 一律引用**接收模組**的真實型別（docs/CURRENT_STATUS.md 慣例）：team 是
 // `StartNpcTeamPlan` 的唯一處理者，欄位漂移由編譯器在發送端擋下。
 export type NpcBehaviorOutboundInternalCommand = StartNpcTeamPlanPayload;

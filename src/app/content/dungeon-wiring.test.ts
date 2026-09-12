@@ -64,14 +64,10 @@ function dispatch(state: GameState, teamId: TeamId, command: unknown): GameState
   return r.state;
 }
 
-// 把最早到期的 Job 跑掉（等同 UI 的「推進時間」）。
+// 與正式 UI 一樣，把行動結算至下一個玩家決策點。
 function advance(state: GameState): GameState {
-  const jobs = Object.values(state.core.scheduler.jobsById);
-  if (jobs.length === 0) throw new Error('沒有可推進的 Job');
-  const earliest = jobs.reduce((a, b) => (b.dueDay < a.dueDay ? b : a));
-  const atDue: GameState = { ...state, core: { ...state.core, worldDay: earliest.dueDay } };
-  const r = runDueJob(atDue, earliest, assembler);
-  if (!r.accepted) throw new Error(`Job ${earliest.type} 被拒：${r.rejection.code}`);
+  const r = settleWorld(state, state.team.playerTeamId, assembler);
+  if (r.blocked !== undefined) throw new Error(`世界結算被拒：${r.blocked}`);
   return r.state;
 }
 

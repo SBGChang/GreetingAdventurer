@@ -35,6 +35,7 @@ export {
   handleCraftingCompleted,
   handleFreeActionCompleted,
   handleCharacterBorn,
+  handleQuestSettled,
   computeTeachingResult,
   resolveLevel,
   masteryAttributeContribution,
@@ -63,6 +64,7 @@ export const progressionModuleContract: ModuleContract = {
     'subscription.CombatSupportMasteryEarned.progression' as EventSubscriptionId,
     'subscription.CharacterBorn.progression' as EventSubscriptionId,
     'subscription.FreeActionCompleted.progression' as EventSubscriptionId,
+    'subscription.QuestSettled.progression' as EventSubscriptionId,
   ],
   emits: [
     'MasteryExperienceGranted',

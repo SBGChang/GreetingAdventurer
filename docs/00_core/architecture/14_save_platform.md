@@ -1,5 +1,7 @@
 # Save、Electron 與 Steam 平台契約
 
+> 本文件定義設計契約，不代表全部功能已接入正式遊戲。實際狀態與驗收入口見 [目前實作狀態](../../CURRENT_STATUS.md)。
+
 > **技術元件：** `app/save`、`platform/electron`、`platform/save`、`platform/steam`
 >
 > **依賴：** Engine 的 committed GameState／Outbox，以及 Data Runtime 的 Content Manifest Identity。

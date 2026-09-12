@@ -1,3 +1,6 @@
+import { createAssetDistributionQuery } from '../../src/modules/distribution/public';
+import { createEconomyDefinitionReader } from '../../src/app/content/economy-reader';
+import { createQuestDefinitionReader } from '../../src/app/content/quest-reader';
 // app/engine/game-facade.ts
 // UI 與引擎之間的窄門面。UI 只認這裡的東西：開新遊戲、下指令、把 GameState + Definition 投影成
 // 畫面用的 ViewModel、以及依語系解析文字。引擎的型別細節不外洩到 React 元件。
@@ -12,6 +15,7 @@
 // 「核心 State 不保存已翻譯文字」。
 
 import type { DefinitionRegistry, LocalizationCatalog, ResolverRegistry } from '../../src/data-runtime';
+import { decodeSave, encodeSave } from '../../src/app/save/save-file';
 import { makeProgressionQuery } from '../../src/modules/progression/public';
 import { createProgressionDefinitionReader } from '../../src/app/content/progression-reader';
 import { createProductionContextAssembler } from '../../src/app/content/context-assembler';
@@ -35,8 +39,7 @@ import { MAX_FORMAL_MEMBERS } from '../../src/contracts/core';
 const DAYS_PER_YEAR = 365;
 import {
   runGameCommand,
-  settleCombat,
-  settleWorld,
+  settlePlayerDecision,
   type ContextAssembler,
   type SettleStep,
 } from '../../src/app/composition/session';
@@ -85,15 +88,12 @@ export const CAPABILITIES = {
   // team context 已接：rest / startCityTravel 走 plan 規則，不觸及 world / combat 子 port。
   rest: { wired: true },
   startCityTravel: { wired: true },
-  // team.world 子 port 是 pending()：enterAdventureMap 要 getAdventureSiteMapInstance，
-  // 而正式實作不存在（全 repo 只有 fixtures 有），且 bootstrap 不建 map instance。
   // 已接：Bootstrap 建出 MapInstance、team.world 解析得到它、DungeonMapPort 供給地形。
   enterAdventureMap: { wired: true },
   startPlayerExploration: { wired: true },
   moveDungeonRoom: { wired: true },
   openDungeonDoor: { wired: true },
   useDungeonExit: { wired: true },
-  // city context 是 pending()，且 city slice 開局沒有任何商品。
   // 已接：city context ＋ 經濟報價鏈（價格來源／交易加成／修正 resolver）＋ 開局上架。
   buyShopOffer: { wired: true },
   // 已接：MapContentGenerated → QuestReactionRule → 貼在公會的委託實例（開局即有）。
@@ -176,7 +176,7 @@ export type RoomExitView = Readonly<{
 }>;
 
 // 房間裡的一筆動態內容（怪群／Boss／寶箱／事件）。名稱走 encounter group 的 id：它是
-// template-local 之外的內容 ID，目前沒有 nameRef（怪物顯示名屬 L1 文字欠債，見 cleanup-backlog）。
+// 房間內容顯示：可用的本地化名稱、種類與互動狀態。
 export type RoomContentView = Readonly<{
   contentId: string;
   kind: string;
@@ -190,12 +190,15 @@ export type RoomContentView = Readonly<{
 export type ShopOfferView = Readonly<{
   offerId: string;
   itemDefinitionId: string;
+  itemKind: import('../../src/contracts/inventory').ItemKind;
+  equipmentKind?: EquipmentDefinition['equipmentKind'];
   nameRef: LocalizedTextRef;
   price: number;
   affordable: boolean;
 }>;
 
 export type ShopView = Readonly<{
+  sellable: readonly { itemId: string; nameRef: LocalizedTextRef; quantity: number; price: number }[];
   facilityId: string;
   nameRef: LocalizedTextRef;
   offers: readonly ShopOfferView[];
@@ -264,6 +267,10 @@ export type TavernView = Readonly<{
 // 公會委託板。「可接」＝尚未被接取、且還在接取期限內（`QuestStatus` 沒有 'open' 這個值，
 // 開放與否是這兩個條件合起來說的）。
 export type QuestOfferView = Readonly<{
+  status: string;
+  settled: boolean;
+  reward: number;
+  completedTargets: number;
   questId: string;
   kind: string;
   acceptDeadline: number;
@@ -313,7 +320,7 @@ export type MapFloorView = Readonly<{
 
 // 四方向移動。`direction` 由兩個房間的**格座標**決定，不是靠連線順序猜的。
 export type MoveOptionView = Readonly<{
-  direction: 'north' | 'south' | 'west' | 'east';
+  direction: 'north' | 'south' | 'west' | 'east' | 'up' | 'down';
   roomId: string;
   linkId: string;
   kind: string;
@@ -327,7 +334,7 @@ export type CombatantView2 = Readonly<{
   combatantId: string;
   side: 'player' | 'enemy';
   nameRef: LocalizedTextRef | undefined;
-  // 角色沒有授權顯示名（L1 文字欠債），所以玩家側用執行期 ID 末段；怪物側有 nameRef。
+  // 角色尚無命名欄位；UI 以隊員序號顯示。怪物側提供 nameRef。
   fallbackLabel: string;
   row: number;
   col: number;
@@ -341,6 +348,7 @@ export type CombatantView2 = Readonly<{
 }>;
 
 export type CombatActionView = Readonly<{
+  costs?: readonly { resource: 'health' | 'mana'; amount: number }[];
   skillId: string;
   nameRef: LocalizedTextRef | undefined;
   actionKind: string;
@@ -385,6 +393,8 @@ export type MasteryLevelView = Readonly<{
 }>;
 
 export type CharacterSheetView = Readonly<{
+  bag: readonly { itemId: string; nameRef: LocalizedTextRef; quantity: number; weight: number }[];
+  carryingCapacity: number;
   characterId: string;
   archetypeNameRef: LocalizedTextRef | undefined;
   sex: string;
@@ -438,6 +448,7 @@ export type TravelModeView = Readonly<{
 }>;
 
 export type LeaderView = Readonly<{
+  lifeState: 'alive' | 'dead' | 'retired';
   id: string;
   archetypeId: string;
   sex: string;
@@ -454,6 +465,12 @@ export type LocationView =
 
 export type GameView = Readonly<{
   worldDay: number;
+  cultureId: string | undefined;
+  formation: import('../../src/contracts/team').TeamCombatFormationView & {
+    actorCharacterId: import('../../src/contracts/core').CharacterId;
+    members: readonly import('../../src/contracts/core').CharacterId[];
+  };
+  quests: readonly QuestOfferView[];
   // 隊伍目前的大動作種類（undefined＝沒有進行中的 Plan）。UI 用它決定要不要先開自由活動期：
   // 個人自由行動（鍛鍊）只在 `cityFree` 期間才收得下（doc §3.5 不變量 1）。
   activePlanKind: string | undefined;
@@ -461,6 +478,8 @@ export type GameView = Readonly<{
   leader: LeaderView | undefined;
   memberCount: number;
   scheduledJobs: number;
+  balance: number;
+  loot: Readonly<{ distributionId: string; itemId: string; nameRef: LocalizedTextRef; minimumBid: number; highestBid: number; remaining: number }> | undefined;
   // 只有位於城市時才有主城畫面資料。
   city:
     | Readonly<{
@@ -620,6 +639,12 @@ function projectGuild(
         : undefined;
 
     return {
+      status: quest.status, settled: quest.settlement !== undefined,
+      reward: (() => {
+        const rule = createQuestDefinitionReader(registry).getQuestRewardRule(quest.rewardRuleId);
+        return rule.currencyRewardRuleId ? createEconomyDefinitionReader(registry).getRewardRule(rule.currencyRewardRuleId).fixedAmount?.amount ?? 0 : 0;
+      })(),
+      completedTargets: quest.progress.resolvedTargetContentIds.length,
       questId: String(quest.questId),
       kind: quest.kind,
       acceptDeadline: Number(quest.acceptDeadline),
@@ -643,9 +668,9 @@ function projectGuild(
     facilityId: String(facilityId),
     nameRef: requireData<FacilityDefinition>(registry, String(facilityId), '設施').display.nameRef,
     offers: here
-      .filter((q) => q.status === 'unaccepted' && Number(q.acceptDeadline) >= state.core.worldDay)
+      .filter((q) => q.status === 'unaccepted' && (q.kind === 'suppression' || q.kind === 'hunt') && Number(q.acceptDeadline) >= state.core.worldDay)
       .map(toView),
-    accepted: here.filter((q) => q.status === 'incomplete' && q.acceptedByTeamId === teamId).map(toView),
+    accepted: here.filter((q) => q.acceptedByTeamId === teamId).map(toView),
   };
 }
 
@@ -672,7 +697,7 @@ function projectTavern(
       if (character === undefined) return undefined;
       return {
         characterId: String(id),
-        // 角色顯示名尚未授權（L1 文字欠債）：顯示執行期 ID 的末段，不編造名字。
+        // 尚無角色命名欄位，保留識別標籤。
         label: String(id).split('~').slice(-1)[0] ?? String(id),
         sex: character.sex,
         // 年齡是「世界日 − 出生日」除以一年的日數。一年 365 日是這個世界的曆法
@@ -944,6 +969,7 @@ function projectCombat(
       : query.getAvailableActions(encounter.encounterId, currentActorId).map((o) => ({
           skillId: String(o.skillId),
           nameRef: skillNameRefOf(registry, String(o.skillId)),
+          costs: combatDefinitions.getSkillView(o.skillId).resourceCosts,
           actionKind: o.actionKind,
           available: o.available,
         }));
@@ -956,7 +982,7 @@ function projectCombat(
         ? requireData<MonsterDefinition>(registry, String(c.source.monsterDefinitionId), '怪物')
             .display.nameRef
         : undefined,
-    // 角色顯示名尚未授權（L1 文字欠債）：顯示執行期 ID 末段，不編造名字。
+    // 尚無角色命名欄位，保留識別標籤。
     fallbackLabel: String(c.combatantId).split('~').slice(-1)[0] ?? String(c.combatantId),
     row: c.anchorCell.row,
     col: c.anchorCell.col,
@@ -979,9 +1005,7 @@ function projectCombat(
   };
 }
 
-// 戰鬥招式的顯示名：`combat-skill.*` 沒有 display，名字住在它連到的**知識**那一筆
-// （`skill.*` 也沒有 display）——兩族都還沒授權文字，所以這裡回 undefined，由 UI 顯示 local 名。
-// 這是已知的 L1 文字欠債（161 筆技能），不是這一層可以就地補的。
+// 由戰鬥招式的本地化引用取得名稱。
 function skillNameRefOf(registry: DefinitionRegistry, skillId: string): LocalizedTextRef | undefined {
   const def = registry.get(skillId as never);
   if (def === undefined) return undefined;
@@ -1089,9 +1113,12 @@ function projectSheet(
     // 內容裡恰好一筆 statistics-rule（同 Bootstrap 的判準）。
     statisticsRuleId: onlyDefinitionId(registry, 'statistics-rule') as StatisticsRuleId,
     worldDay: state.core.worldDay,
-  }).getStats(characterId);
+  }).getSnapshot(characterId);
 
   return {
+    carryingCapacity: stats.carryingCapacity,
+    bag: Object.values(state.inventory.items).filter(i => i.location.kind === 'characterBag' && i.location.characterId === characterId)
+      .map(i => { const def = itemReader.getItem(i.definitionId); return { itemId: String(i.itemId), nameRef: def.display.nameRef, quantity: i.quantity, weight: i.quantity * def.unitWeight }; }),
     characterId: String(characterId),
     archetypeNameRef: undefined,
     sex: character.sex,
@@ -1123,10 +1150,11 @@ function assignableSkillsOf(
   return registry
     .list({ kinds: ['combat-skill'] })
     .map((d) => ({ id: String(d.id), view: d.data as unknown as CombatSkillDefinitionView }))
-    .filter(({ view }) => view.acquisition.kind === 'learned' && known.has(String(view.acquisition.knowledgeSkillId)))
+    .filter(({ view }) => view.effectIds.length > 0 && view.acquisition.kind === 'learned' && known.has(String(view.acquisition.knowledgeSkillId)))
     .map(({ id, view }) => ({
       skillId: id,
       nameRef: skillNameRefOf(registry, id),
+      costs: view.resourceCosts,
       actionKind: view.actionKind,
       available: true,
     }))
@@ -1218,13 +1246,12 @@ function projectDungeon(
   // 四方向出口：由格座標判方位。同一方向有兩條路時保留先宣告的那一條（決定性）。
   const here = roomAnchor(template, current);
   const moves: MoveOptionView[] = [];
-  const takenDirections = new Set<MoveOptionView['direction']>();
   for (const exit of exits) {
     const there = roomAnchor(template, exit.roomId);
     if (here === undefined || there === undefined) continue;
-    const direction = directionOf(here, there);
-    if (direction === undefined || takenDirections.has(direction)) continue;
-    takenDirections.add(direction);
+    const otherFloor = template.rooms.find(r => String(r.roomId) === exit.roomId)!.floor;
+    const direction = otherFloor !== currentFloor ? (otherFloor > currentFloor ? 'down' : 'up') : directionOf(here, there);
+    if (direction === undefined) continue;
     moves.push({
       direction,
       roomId: exit.roomId,
@@ -1268,6 +1295,11 @@ function projectShops(
     .filter((a) => a.owner.kind === 'character' && a.owner.characterId === buyerId)
     .reduce((sum, a) => sum + a.balance, 0);
 
+  const sellable = Object.values(state.inventory.items)
+    .filter(item => item.location.kind === 'characterBag' && item.location.characterId === buyerId && !item.reservation && item.state === 'active')
+    .filter(item => itemReader.getItem(item.definitionId).tradePolicy.tradable)
+    .map(item => ({ itemId: String(item.itemId), quantity: item.quantity, nameRef: itemReader.getItem(item.definitionId).display.nameRef,
+      price: economyQuery.getSellQuote({ itemSourceId: item.itemId, sellerCharacterId: buyerId, cityId: cityId as import('../../src/contracts/core').CityId, sourceRevision: item.revision }).amount }));
   const byFacility = new Map<string, ShopOfferView[]>();
   for (const offer of Object.values(state.city.shopOffers)) {
     if (String(offer.cityId) !== cityId || offer.state !== 'available') continue;
@@ -1283,6 +1315,8 @@ function projectShops(
     list.push({
       offerId: String(offer.offerId),
       itemDefinitionId: String(item.definitionId),
+      itemKind: definition.kind,
+      equipmentKind: definition.kind === 'equipment' ? requireData<EquipmentDefinition>(registry, String(item.definitionId), '裝備').equipmentKind : undefined,
       nameRef: definition.display.nameRef,
       price: quote.amount,
       affordable: balance >= quote.amount,
@@ -1303,6 +1337,7 @@ function projectShops(
       facilityId: fid,
       nameRef: requireData<FacilityDefinition>(registry, fid, '設施').display.nameRef,
       offers: offers.sort((a, b) => a.price - b.price),
+      sellable,
       balance,
     }));
 }
@@ -1322,6 +1357,7 @@ export function projectView(
       : {
           id: String(leaderChar.characterId),
           archetypeId: String(leaderChar.archetypeId),
+          lifeState: leaderChar.lifeState,
           sex: leaderChar.sex,
           health: leaderChar.condition.health,
           mana: leaderChar.condition.mana,
@@ -1329,12 +1365,14 @@ export function projectView(
 
   if (team === undefined) throw new Error('game-facade：GameState 沒有玩家隊伍');
 
+  let cultureId: string | undefined;
   let location: LocationView;
   let city: GameView['city'];
   let dungeon: DungeonView | undefined;
   if (team.location.kind === 'city') {
     const cityId = String(team.location.cityId);
     const node = requireData<CityNodeDefinition>(registry, cityId, '城市節點');
+    cultureId = String(requireData<import('../../src/contracts/world').RegionDefinition>(registry, String(node.regionId), '區域').nativeCultureId);
     location = { kind: 'city', cityId, nameRef: node.display.nameRef };
     const itemReader = createItemDefinitionReader(registry);
     const economyQuery = createProductionEconomyQuery({
@@ -1372,6 +1410,7 @@ export function projectView(
       String(instance.adventureSiteId),
       '冒險據點',
     );
+    cultureId = String(requireData<import('../../src/contracts/world').RegionDefinition>(registry, String(site.regionId), '區域').nativeCultureId);
     location = { kind: 'adventureMap', mapId, siteNameRef: site.display.nameRef };
     city = undefined;
     dungeon = projectDungeon(state, registry, playerTeamId, mapId);
@@ -1385,6 +1424,13 @@ export function projectView(
 
   return {
     worldDay: state.core.worldDay,
+    cultureId,
+    formation: { ...createTeamQuery(state.team).getCombatFormation(playerTeamId), actorCharacterId: team.leaderId, members: team.memberIds },
+    quests: registry.list({ kinds: ['city'] }).flatMap(def => {
+      const cityDefinition = requireData<CityDefinition>(registry, String(def.id), '城市');
+      const guild = projectGuild(state, registry, String(cityDefinition.worldCityId));
+      return guild === undefined ? [] : guild.accepted;
+    }),
     activePlanKind: activePlan?.status === 'active' ? activePlan.kind : undefined,
     combat: projectCombat(state, registry, resolvers, playerTeamId),
     sheet: projectSheet(state, registry, resolvers, playerTeamId),
@@ -1392,6 +1438,19 @@ export function projectView(
     leader,
     memberCount: team.memberIds.length,
     scheduledJobs: Object.keys(state.core.scheduler.jobsById).length,
+    balance: Object.values(state.economy.accounts).filter(a => a.owner.kind === 'character' && a.owner.characterId === leaderId).reduce((sum,a) => sum + a.balance, 0),
+    loot: (() => {
+      const pending = createAssetDistributionQuery(state.distribution).getPendingPlayerDistribution(playerTeamId);
+      const round = pending?.currentRound;
+      if (!pending || !round) return undefined;
+      const item = state.inventory.items[round.itemId];
+      if (!item) throw new Error('loot/item-missing');
+      const distribution = state.distribution.distributions[pending.distributionId]!;
+      return { distributionId: String(pending.distributionId), itemId: String(round.itemId),
+        nameRef: createItemDefinitionReader(registry).getItem(item.definitionId).display.nameRef,
+        minimumBid: round.intrinsicValue.amount, highestBid: Math.max(0, ...round.bids.map(b => b.amount)),
+        remaining: distribution.itemIds.length - distribution.currentItemIndex };
+    })(),
     city,
     dungeon,
   };
@@ -1410,6 +1469,7 @@ export type CommandOutcome =
 
 export type GameHandle = Readonly<{
   view: GameView;
+  serialize: () => string;
   runCommand: (command: GameCommand) => CommandOutcome;
   // 依語系把 ViewModel 的 LocalizedTextRef 換成字。缺字回 undefined，由呼叫端呈現——
   // 本層不代為決定文字（見 data-runtime/localization.ts 的說明）。
@@ -1429,7 +1489,7 @@ function assertLocaleParity(catalog: LocalizationCatalog): void {
   }
 }
 
-export function createGame(config: NewGameConfig): GameHandle {
+export function createGame(config: NewGameConfig, saved?: string): GameHandle {
   const loaded = loadBundledContent();
   if (!loaded.success) {
     throw new Error(`內容載入失敗：${loaded.diagnostics.map((d) => d.code).join(', ')}`);
@@ -1441,22 +1501,15 @@ export function createGame(config: NewGameConfig): GameHandle {
   const resolvers = createProductionResolverRegistry(loaded.resolverBindings);
   const assembler: ContextAssembler = createProductionContextAssembler(registry, resolvers);
 
-  const started = createNewGame(config, registry, resolvers);
+  const started = saved === undefined
+    ? createNewGame(config, registry, resolvers)
+    : { success: true as const, state: decodeSave(saved, registry) };
   if (!started.success) {
     throw new Error(`開新遊戲失敗：${started.diagnostics.map((d) => d.code).join(', ')}`);
   }
 
   let state: GameState = started.state;
-  const playerTeamId = started.playerTeamId;
-
-  // 把這支隊伍進行中的遭遇推進到「輪到玩家」為止。沒有進行中的遭遇時原樣回傳。
-  const advanceCombat = (working: GameState): GameState => {
-    const encounter = Object.values(working.combat.encounters).find(
-      (e) => String(e.playerTeamId) === String(playerTeamId) && e.state !== 'resolved',
-    );
-    if (encounter === undefined) return working;
-    return settleCombat(working, encounter.encounterId, assembler).state;
-  };
+  const playerTeamId = state.team.playerTeamId;
 
   // 時間是動作的後果，不是玩家的一個指令——規則與理由見
   // `src/app/composition/session.ts` 的 `settleWorld`。這一層只負責把結果轉成 ViewModel。
@@ -1469,22 +1522,22 @@ export function createGame(config: NewGameConfig): GameHandle {
     // 指令接受後，先把**戰鬥**推進到輪回玩家（CTB 決定誰先動，常常是怪先），
     // 再讓世界結算到下一個決策點。順序不能反：戰鬥中的隊伍沒有 activePlan，
     // settleWorld 什麼都不會做，而怪的回合會停在那裡沒有人推。
-    const afterCombat = advanceCombat(result.state);
-    const settled = settleWorld(afterCombat, playerTeamId, assembler);
+    const settled = settlePlayerDecision(result.state, playerTeamId, assembler);
+    const view = projectView(settled.state, registry, resolvers);
     state = settled.state;
     return {
       accepted: true,
-      view: projectView(state, registry, resolvers),
+      view,
       settled: settled.steps,
       blocked: settled.blocked,
     };
   };
 
-  // 開局若已在戰鬥中（存讀檔情境）同樣要先推進到玩家回合。
-  state = advanceCombat(state);
+  // Loading restores the exact committed state, without silently executing another turn.
 
   return {
     view: projectView(state, registry, resolvers),
+    serialize: () => encodeSave(state, registry),
     runCommand,
     resolveText: (locale, ref) => catalog.resolve(locale, ref),
     locales: catalog.locales,

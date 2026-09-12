@@ -11,7 +11,7 @@ const row = (secondary, values) => ({ secondary, values });
 export const balanceModel = {
   title: '雲華｜數值平衡基準',
   version: '2026-08-06 / first playable balance pass',
-  scope: '這份數值以雲華第一版兩城三圖為可玩基準，並以 Tier III～V 的成長比例延伸。它取代舊版 Bar、疲勞、位移與行動效率假設。',
+  scope: '這份數值以雲華四城中首批三張遭遇圖為平衡基準，並以 Tier III～V 的成長比例延伸。它取代舊版 Bar、疲勞、位移與行動效率假設。',
   formulas: [
     ['生命上限', '200 + 肌 × 20', '肌 30／60／100 時為 800／1,400／2,200；讓第一代前期仍有容錯，後期不超過 GDD 目標。'],
     ['魔力上限', '120 + 智 × 14', '智 30／60／100 時為 540／960／1,520。'],

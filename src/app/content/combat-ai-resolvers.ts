@@ -1,5 +1,5 @@
 // app/content/combat-ai-resolvers.ts
-// 敵方 AI 與反擊條件的 Resolver shape（f3_work_packages.md P1）。
+// 敵方 AI 與反擊條件的 Resolver shape（docs/00_core/technical_architecture.md）。
 //
 // 現況（工作單已核實）：`combat-resolver-bridge.ts` 的 `chooseEnemyAction` 早就正確地走
 // `monster.aiPolicyId → CombatAiPolicyDefinition.behaviorResolverId → registry`，但 registry 裡

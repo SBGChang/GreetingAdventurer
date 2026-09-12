@@ -1,5 +1,7 @@
 # Combat Sequence 模組契約
 
+> 本文件定義設計契約，不代表全部功能已接入正式遊戲。實際狀態與驗收入口見 [目前實作狀態](../../CURRENT_STATUS.md)。
+
 > **模組 ID：** `combat-sequence`
 >
 > **依賴：** [共用核心契約](00_shared_contracts.md)、自己的窄化 Definition Reader、Inventory 的補品 Query／Command Port，以及共用的 [Combat Power Query](22_combat_power_service.md)。Team／Inventory／Progression／Combat View 的跨模組組合只存在 `app/composition` 的 Snapshot Assembler，不成為本模組對其他 Runtime 模組的直接依賴。

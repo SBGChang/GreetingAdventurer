@@ -1,5 +1,5 @@
 // app/content/map-context.ts
-// `MapContentResolver` 與 `MapHandlerContext` 的正式組裝（f3_work_packages.md P4）。
+// `MapContentResolver` 與 `MapHandlerContext` 的正式組裝（docs/00_core/technical_architecture.md）。
 //
 // ── 為什麼是 Port 而不是 Resolver shape ────────────────────────────────────
 //

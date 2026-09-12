@@ -16,6 +16,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
@@ -32,7 +33,7 @@ function arg(name) {
 
 function git(...args) {
   // -c core.quotepath=false：否則 git 會把非 ASCII 路徑加引號並八進位轉義，glob 永遠對不上。
-  return execFileSync('git', ['-c', 'core.quotepath=false', ...args], {
+    return execFileSync('git', ['-c', 'core.quotepath=false', '-c', 'core.safecrlf=false', ...args], {
     cwd: ROOT,
     encoding: 'utf8',
     maxBuffer: 1 << 28,
@@ -107,14 +108,14 @@ if (scope === undefined) {
   process.exit(2);
 }
 
-// 本機預設只看**最新一筆 commit**：長期未推送的分支累積了多個 scope 的工作，
-// 拿 origin/main..HEAD 去比會把別人早先提交的內容工作一起算進來，變成無意義的紅燈。
-// CI 一律以 PR／push 的真實範圍覆寫（見 .github/workflows/verify.yml）。
-const range = arg('range') ?? process.env.CONTENT_SCOPE_RANGE ?? 'HEAD~1..HEAD';
+// 本機預設檢查工作樹；CI 指定 PR／push 的提交範圍。
+const range = arg('range') ?? process.env.CONTENT_SCOPE_RANGE;
 
 let changed;
 try {
-  changed = git('diff', '--name-only', range).split('\n').filter((l) => l.length > 0);
+  changed = range === undefined
+    ? [...new Set([...git('diff', '--name-only', 'HEAD').split('\n'), ...git('ls-files', '--others', '--exclude-standard').split('\n')])].filter(Boolean)
+    : git('diff', '--name-only', range).split('\n').filter(Boolean);
 } catch (err) {
   console.error(`無法取得 git diff（range="${range}"）：${err instanceof Error ? err.message : err}`);
   console.error('CI 請確保有抓到比較基準（actions/checkout 需要 fetch-depth: 0）。');
@@ -122,10 +123,24 @@ try {
 }
 
 console.log(`scope：${scopeName}（${scope.why}）`);
-console.log(`比較範圍：${range}`);
+console.log(`比較範圍：${range ?? '工作樹（含未追蹤檔案）'}`);
 console.log(`變更檔案：${changed.length} 筆`);
 
-const violations = changed.filter((f) => !matchesAny(f, scope.allow));
+// Engine documentation maintenance may fix comments in shared rendering code, but may not alter its executable output.
+function sharedCommentOnly(file) {
+  if (!['engine','world-atlas'].includes(scopeName) || !file.startsWith('docs/03_content/shared/') || !file.endsWith('.mjs')) return false;
+  try {
+    const refs = range?.split('..');
+    if (refs !== undefined && (refs.length !== 2 || !refs[0] || !refs[1] || refs[1].startsWith('.'))) return false;
+    const before = git('show', `${refs?.[0] ?? 'HEAD'}:${file}`);
+    const after = refs === undefined ? readFileSync(join(ROOT, file), 'utf8') : git('show', `${refs[1]}:${file}`);
+    const compile = source => ts.transpileModule(source, {
+      fileName: file, compilerOptions: { allowJs: true, removeComments: true, target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext },
+    }).outputText;
+    return compile(before) === compile(after);
+  } catch { return false; }
+}
+const violations = changed.filter((f) => !matchesAny(f, scope.allow) && !sharedCommentOnly(f));
 
 if (violations.length === 0) {
   console.log('');

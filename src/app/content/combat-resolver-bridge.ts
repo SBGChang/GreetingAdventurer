@@ -53,6 +53,7 @@ export type CombatResolverBridgeDeps = Readonly<{
   progressionDefs: ProgressionDefinitionReader; // getAttackMasteryAwardRule
   powerParams: CombatPowerParamsReader;
   aiParams: CombatAiParamsReader; // weighted-product-params
+  statistics?: { getSnapshot(id: CharacterId, weaponSetId?: import('../../contracts/core').WeaponSetId): import('../../contracts/statistics').CharacterStatisticsSnapshot };
   progression: ProgressionQuery; // getPrimaryAttributes（power kernel 的輸入）
   loadout: CombatLoadoutQuery; // 防禦 Mastery 路由：讀該角色身上的防具
   // 由裝備實體反查它的定義（防禦路由要看 equipmentKind 與 relatedMasteryIds）。
@@ -99,13 +100,28 @@ export function createCombatResolverPort(deps: CombatResolverBridgeDeps): Combat
         getPowerParams: (id: DefinitionId) => deps.powerParams.getPowerParams(id),
         getMonster: (id: MonsterDefinitionId) => deps.combatDefs.getMonster(id),
       },
-      queries: { getPrimaryAttributes: (id: CharacterId) => deps.progression.getPrimaryAttributes(id) },
+      queries: {
+        getPrimaryAttributes: (id: CharacterId) => deps.progression.getPrimaryAttributes(id),
+        getSecondaryAttribute: (id: CharacterId, setId: import('../../contracts/core').WeaponSetId | undefined, attributeId: string) => {
+          if (!deps.statistics) throw new Error('combat/statistics-query-missing');
+          const value = deps.statistics.getSnapshot(id, setId).secondaryAttributes[attributeId as import('../../contracts/core').SecondaryAttributeId];
+          if (value === undefined) throw new Error('combat/secondary-attribute-missing');
+          return value;
+        },
+      },
     });
 
   return {
     // 傷害/治療/CTB 的實際數值：resolverId 由規則帶入，走 weighted-power kernel。
-    resolvePower: (input: CombatPowerInput): number =>
-      runResolver<number>(deps.registry, input.resolverId, input, powerContext()).value,
+    resolvePower: (input: CombatPowerInput): number => {
+      const power = runResolver<number>(deps.registry, input.resolverId, input, powerContext()).value;
+      const target = input.targetId === undefined ? undefined : input.encounter.combatants[input.targetId];
+      if (input.mitigationSecondaryId === undefined || target?.source.kind !== 'character') return power;
+      if (!deps.statistics) throw new Error('combat/statistics-query-missing');
+      const ratio = deps.statistics.getSnapshot(target.source.characterId, target.activeWeaponSetId).secondaryAttributes[input.mitigationSecondaryId];
+      if (ratio === undefined || !Number.isFinite(ratio) || ratio < 0 || ratio > 1) throw new Error('combat/invalid-damage-reduction');
+      return power * (1 - ratio);
+    },
 
     // 合法目標集合：純格陣 shape 產候選，再以 Handler 算好的有效射程（input.actorReachCells）做排距過濾
     //（敵方超射程剔除；同側不受限）。shape 無 params、無 RNG。
@@ -169,7 +185,7 @@ export function createCombatResolverPort(deps: CombatResolverBridgeDeps): Combat
     },
 
     // 敵方 AI：讀怪物 ai-policy 的 behaviorResolverId，走該 resolver 選招＋目標（用 RNG）。
-    // AI resolver 尚未實作＝registry.require 明確拋（不靜默休息）。
+    // 缺少指名的 AI resolver 時由 registry.require 明確拋錯，不靜默改成休息。
     chooseEnemyAction: ({ encounter, actorId }): EnemyActionChoice | undefined => {
       const actor = encounter.combatants[actorId];
       if (actor === undefined || actor.source.kind !== 'monster') return undefined;

@@ -242,6 +242,7 @@
       }
     ],
     "packId": "pack:yunhua",
+    "refreshCadenceDays": 14,
     "refreshOffsetDays": 0,
     "rooms": [
       {
@@ -499,7 +500,7 @@
         "roomId": "b1.沉木陷阱"
       }
     ],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/maps.json#map-template.yunhua.old-canal-sunken-store",
     "spawnRuleId": "map-spawn-rule.yunhua.old-canal-sunken-store",
     "templateKind": "interior"
@@ -853,6 +854,7 @@
       }
     ],
     "packId": "pack:yunhua",
+    "refreshCadenceDays": 14,
     "refreshOffsetDays": 1,
     "rooms": [
       {
@@ -1188,7 +1190,7 @@
         "roomId": "f1.exit"
       }
     ],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/maps.json#map-template.yunhua.calendar-court-ruin",
     "spawnRuleId": "map-spawn-rule.yunhua.calendar-court-ruin",
     "templateKind": "outdoor"
@@ -1916,6 +1918,7 @@
     ],
     "nationalDungeonForm": "building",
     "packId": "pack:yunhua",
+    "refreshCadenceDays": 14,
     "refreshOffsetDays": 2,
     "rooms": [
       {
@@ -2691,7 +2694,7 @@
         "roomId": "b2.地脈側庫"
       }
     ],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/maps.json#map-template.yunhua.seal-tower",
     "spawnRuleId": "map-spawn-rule.yunhua.seal-tower",
     "templateKind": "interior"
@@ -2866,6 +2869,7 @@
       }
     ],
     "packId": "pack:yunhua",
+    "refreshCadenceDays": 14,
     "refreshOffsetDays": 3,
     "rooms": [
       {
@@ -3089,7 +3093,7 @@
         "roomId": "f1.北口"
       }
     ],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/maps.json#map-template.yunhua.mist-bamboo-valley",
     "spawnRuleId": "map-spawn-rule.yunhua.mist-bamboo-valley",
     "templateKind": "outdoor"
@@ -3433,6 +3437,7 @@
       }
     ],
     "packId": "pack:yunhua",
+    "refreshCadenceDays": 14,
     "refreshOffsetDays": 4,
     "rooms": [
       {
@@ -3704,7 +3709,7 @@
         "roomId": "b1.sunkenCargo"
       }
     ],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/maps.json#map-template.yunhua.hanging-spring-grotto",
     "spawnRuleId": "map-spawn-rule.yunhua.hanging-spring-grotto",
     "templateKind": "interior"
@@ -4058,6 +4063,7 @@
       }
     ],
     "packId": "pack:yunhua",
+    "refreshCadenceDays": 14,
     "refreshOffsetDays": 5,
     "rooms": [
       {
@@ -4393,7 +4399,7 @@
         "roomId": "f1.exit"
       }
     ],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/maps.json#map-template.yunhua.tidal-reed-isle",
     "spawnRuleId": "map-spawn-rule.yunhua.tidal-reed-isle",
     "templateKind": "outdoor"
@@ -4737,6 +4743,7 @@
       }
     ],
     "packId": "pack:yunhua",
+    "refreshCadenceDays": 14,
     "refreshOffsetDays": 6,
     "rooms": [
       {
@@ -5008,7 +5015,7 @@
         "roomId": "b1.sunkenCargo"
       }
     ],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/maps.json#map-template.yunhua.salt-well-cellar",
     "spawnRuleId": "map-spawn-rule.yunhua.salt-well-cellar",
     "templateKind": "interior"
@@ -5362,6 +5369,7 @@
       }
     ],
     "packId": "pack:yunhua",
+    "refreshCadenceDays": 14,
     "refreshOffsetDays": 7,
     "rooms": [
       {
@@ -5697,7 +5705,7 @@
         "roomId": "f1.exit"
       }
     ],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/maps.json#map-template.yunhua.cinnabar-ridge",
     "spawnRuleId": "map-spawn-rule.yunhua.cinnabar-ridge",
     "templateKind": "outdoor"
@@ -6041,6 +6049,7 @@
       }
     ],
     "packId": "pack:yunhua",
+    "refreshCadenceDays": 14,
     "refreshOffsetDays": 8,
     "rooms": [
       {
@@ -6312,7 +6321,7 @@
         "roomId": "b1.sunkenCargo"
       }
     ],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/maps.json#map-template.yunhua.old-kiln-flue",
     "spawnRuleId": "map-spawn-rule.yunhua.old-kiln-flue",
     "templateKind": "interior"

@@ -116,7 +116,7 @@ const mapConfigs = [
 
 const data = createCultureData({
   key:'aurelien',
-  meta:{ name:'奧瑞恩',direction:'西方',pillars:['騎士與軍陣','學院法術','誓院祈禱','工坊整備'],cities:['晨冠城','灰楯堡'],scope:'Tier I～II 第一版可玩內容；Tier III～V 鎖定命名、裝備路線與內容語法。' },
+  meta:{ name:'奧瑞恩',direction:'西方',pillars:['騎士與軍陣','學院法術','誓院祈禱','工坊整備'],cities:['晨冠城','灰楯堡','風穗城','白崖港'],scope:'Tier I～II 第一版可玩內容；Tier III～V 鎖定命名、裝備路線與內容語法。' },
   statusRules:[['破甲','負面','降低一般減傷與格擋吸收 raw','2 目標行動','refresh'],['束縛','負面','降低迴避與預判 raw','2 目標行動','refresh'],['誓衛','正面','提高一般減傷與格擋 raw','2 目標行動','strongest'],['淨明','正面','提高魔法減傷與預判 raw','2 目標行動','strongest'],['號令','正面','提高命中與格擋 raw','2 目標行動','strongest']],
   equipment,skillRoutes,monsters,humanEncounters,items,materials,cuisine,books,mapLayouts,mapConfigs,
 });

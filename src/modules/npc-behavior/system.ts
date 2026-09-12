@@ -179,7 +179,7 @@ function emit(event: NpcBehaviorDomainEvent): DomainEventDraft<unknown> {
   return { event };
 }
 
-// 外送命令以**接收模組契約的真實型別**為參數（HANDOFF 慣例），讓編譯器在發送端就攔下欄位不符。
+// 外送命令以**接收模組契約的真實型別**為參數（docs/CURRENT_STATUS.md 慣例），讓編譯器在發送端就攔下欄位不符。
 function internal(
   targetModule: ModuleId,
   command: NpcBehaviorOutboundInternalCommand,

@@ -53,7 +53,10 @@ import type { MemberFreeAction } from '../../modules/team/public';
 import type { CharacterId } from '../../contracts/core';
 import { createCharacterResolverPort } from '../content/character-context';
 import type { ResolverRegistry } from '../../data-runtime';
-import { createInitialProgressionState, handleCharacterBorn } from '../../modules/progression/public';
+import type { AnyScheduledJob, ScheduledJobDraft } from '../../contracts/core';
+import { scheduleBootstrapJobs } from './session';
+import { nextMapRefreshJob } from '../../modules/map/public';
+import { createInitialProgressionState, handleCharacterBorn, awardMasteryExperience } from '../../modules/progression/public';
 import type { Team, TeamCombatFormation } from '../../modules/team/public';
 import { createTeamState } from '../../modules/team/public';
 import { createCharacterDefinitionReader } from '../content/character-reader';
@@ -106,6 +109,7 @@ export type NewGameConfig = Readonly<{
   // 隊長的起始金錢（最小貨幣單位）。與起始城市、起始 archetype 同性質：是**開新遊戲的選擇**，
   // 由呼叫端提供，Bootstrapper 不替它發明預設。
   startingMoney: number;
+  startingMasteries?: readonly Readonly<{ masteryId: import('../../contracts/core').MasteryId; level: number }>[];
 }>;
 
 export type NewGameDiagnostic = Readonly<{ code: string; detail: string }>;
@@ -214,6 +218,7 @@ export function createNewGame(
   // ── 組裝 State ──────────────────────────────────────────────────────────
   const worldSeed = config.worldSeed as Seed;
   const { ids, currentCursor } = createIdPortsForBootstrap(worldSeed, 0 as RuntimeIdCursor);
+  const initialJobs: ScheduledJobDraft<AnyScheduledJob>[] = [];
   const leaderId = ids.character.nextCharacterId();
   const playerTeamId = ids.team.nextTeamId();
 
@@ -327,6 +332,7 @@ export function createNewGame(
     // 不該讓遊戲帶著空地圖開起來——Bootstrap 的合法反應就是不開新遊戲（§出口 2）。
     const refreshed = refreshMapInstance(instance, seededMapState, mapContext);
     seededMapState = refreshed.nextSlice;
+    initialJobs.push(nextMapRefreshJob(instance.mapId, mapContext.definitions.getMapTemplate(instance.templateId), config.startDay));
     generatedContentIdsByMap.set(
       String(instance.mapId),
       Object.values(seededMapState.contents)
@@ -499,6 +505,7 @@ export function createNewGame(
           ]);
         }
         seededCityState = outcome.result.nextSlice;
+        initialJobs.push(...outcome.result.scheduledJobs);
         // 上架同時記下「哪一件貨、哪一筆 Offer」——採買與送貨委託是**對貨架的反應**
         // （見下面的委託生成段）。平時這條路由 `CityStockItemAvailable` 訂閱驅動，
         // 但開局的上架是 Bootstrap 直接呼叫的，沒有事件匯流排。
@@ -652,31 +659,37 @@ export function createNewGame(
   // Bootstrap 直接呼叫 Handler，沒有交易也沒有訊息 ID——若整批共用一條 stream 與同一個起始
   // 游標，每一次 `creationChance` 都會抽到**同一個數**：0.3 的採買委託要嘛全生、要嘛一筆都沒有。
   // （症狀就是「委託幾乎都一樣」的其中一半。）
-  const questContextFor = (tag: string) =>
-    createQuestGenerationContext({
+  const questContextFor = (tag: string): import('../../modules/quest/public').QuestGenerationContext => ({
+    ...createQuestGenerationContext({
       ...questGenerationDeps,
       rngContext: {
         worldSeed,
         streamId: `quest-bootstrap-generation:${tag}` as RngStreamId,
         cursor: 0 as RngCursor,
       },
-    });
+    }),
+    enabledKinds: ['suppression', 'hunt'],
+  });
 
   let seededQuestState = emptyQuestState;
   for (const [mapId, contentIds] of generatedContentIdsByMap) {
-    seededQuestState = onMapContentGenerated(
+    const result = onMapContentGenerated(
       { type: 'MapContentGenerated', mapId: mapId as MapInstanceId, mapVersion: 1, contentIds },
       seededQuestState,
       questContextFor(`map:${mapId}`),
-    ).nextSlice;
+    );
+    seededQuestState = result.nextSlice;
+    initialJobs.push(...result.scheduledJobs);
   }
   // 貨架委託（採買／送貨）。與地圖那一批走**同一支** Handler。
   for (const event of stockEvents) {
-    seededQuestState = onCityStockItemAvailable(
+    const result = onCityStockItemAvailable(
       event,
       seededQuestState,
       questContextFor(`stock:${String(event.offerId)}`),
-    ).nextSlice;
+    );
+    seededQuestState = result.nextSlice;
+    initialJobs.push(...result.scheduledJobs);
   }
 
   // 隊長的 HP/MP 也由同一支引擎補滿。放在這裡而不是建 leader 的當下：`createCharacterStatsQuery`
@@ -722,6 +735,14 @@ export function createNewGame(
     seededProgression = handleCharacterBorn(seededProgression, characterId, progressionReader).nextSlice;
   }
 
+  for (const entry of config.startingMasteries ?? []) {
+    const mastery = progressionReader.getMastery(entry.masteryId);
+    const curve = progressionReader.getMasteryCurve(mastery.curveId);
+    const amount = curve.cumulativeExperienceThresholds[entry.level];
+    if (!Number.isInteger(entry.level) || amount === undefined) throw new Error('newGame/invalid-starting-mastery');
+    seededProgression = awardMasteryExperience(seededProgression, { characterId: leaderId,
+      masteryId: entry.masteryId, amount, source: 'newGame' }, progressionReader).nextSlice;
+  }
   const teamState = createTeamState({
     playerTeamId,
     teams: [playerTeam, ...npcTeams],
@@ -745,5 +766,11 @@ export function createNewGame(
     core: { ...base.core, nextRuntimeSequence: currentCursor() },
   };
 
-  return { success: true, state, playerTeamId, leaderId: String(leaderId) };
+  const initialStats = createCharacterStatsQuery({ characterState: state.character, progressionState: state.progression,
+    inventoryState: state.inventory, itemReader, progressionReader, statisticsDefinitions: createStatisticsDefinitionReader(registry),
+    statisticsResolvers: createStatisticsResolverPort(resolvers, registry), statisticsRuleId, worldDay: config.startDay as WorldDay }).getStats(leaderId);
+  const currentLeader = state.character.characters[leaderId]!;
+  const hydrated = { ...state, character: { ...state.character, characters: { ...state.character.characters,
+    [leaderId]: { ...currentLeader, condition: { ...currentLeader.condition, health: initialStats.maxHealth, mana: initialStats.maxMana } } } } };
+  return { success: true, state: scheduleBootstrapJobs(hydrated, initialJobs), playerTeamId, leaderId: String(leaderId) };
 }

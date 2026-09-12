@@ -1,3 +1,4 @@
+import { UnavailableCapabilityError } from '../composition/capability';
 // app/content/character-context.ts
 // `CharacterResolverPort` 的正式組裝——目前只接**世界冒險者生成**那一條路。
 //
@@ -37,10 +38,7 @@ const INTEGER_RANGE_KIND = 'integer-range-params';
 const WEIGHTED_DRAW_KIND = 'weighted-draw-params';
 
 function pendingMethod(name: string): never {
-  throw new Error(
-    `character-context："${name}" 尚未接線——它需要自己的 Resolver shape 與 params，` +
-      `本輪只接了世界冒險者生成（酒館名單的前提）。`,
-  );
+  throw new UnavailableCapabilityError(name);
 }
 
 export type CharacterResolverPortDeps = Readonly<{

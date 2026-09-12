@@ -69,7 +69,7 @@ import type {
 } from '../../src/contracts/progression';
 import { cultureIds, type Authored, type AuthoredDomain } from '../authoring';
 import { MASTERY_IDS } from '../core/progression';
-import { ACTION_DELAY_RULE_IDS, COMBAT_EFFECT_IDS, COUNTER_DELAY_RULE_ID } from '../core/combat-rules';
+import { RESOLVER, ACTION_DELAY_RULE_IDS, COMBAT_EFFECT_IDS, COUNTER_DELAY_RULE_ID } from '../core/combat-rules';
 
 const yunhua = cultureIds('yunhua');
 const core = cultureIds('core');
@@ -279,6 +279,7 @@ const coreAttackAwardRuleId = (local: string): AttackMasteryAwardRuleId =>
 type SkillRow = Readonly<{
   local: StageLocal;
   sourceName: string;
+  damage?: Readonly<{ channel: 'physical' | 'magic' | 'instrument'; multiplier: number; hits: number }>;
   actionKind: CombatActionKind;
   delayLocal: 'quick' | 'standard' | 'heavy' | 'cast' | 'perform' | 'stance';
   target: TargetLocal;
@@ -339,7 +340,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-melee',
         techniques: ['slash'],
         effectLocals: [],
-        unexpressed: ['dealDamage 物理 ×0.95'],
+        damage: { channel: 'physical', multiplier: 0.95, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'l3',
@@ -349,7 +351,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-melee',
         techniques: ['slash'],
         effectLocals: ['apply-guard-down'],
-        unexpressed: ['dealDamage 物理 ×0.82', '「每名目標 1 次」的使用次數上限'],
+        damage: { channel: 'physical', multiplier: 0.82, hits: 1 },
+        unexpressed: ['「每名目標 1 次」的使用次數上限'],
       },
       {
         local: 'basic',
@@ -360,7 +363,8 @@ const ROUTES: readonly RouteRow[] = [
         techniques: ['guard', 'counter'],
         effectLocals: [],
         counterCondition: 'melee-block',
-        unexpressed: ['反擊 dealDamage 物理 ×0.85（CounterStanceDefinition 沒有 effectIds）'],
+        damage: { channel: 'physical', multiplier: 0.85, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'advanced',
@@ -370,7 +374,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-with-guard-down',
         techniques: ['slash'],
         effectLocals: ['ctb-light'],
-        unexpressed: ['dealDamage 物理 ×1.22'],
+        damage: { channel: 'physical', multiplier: 1.22, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'supreme',
@@ -381,8 +386,9 @@ const ROUTES: readonly RouteRow[] = [
         techniques: ['guard', 'counter'],
         effectLocals: [],
         counterCondition: 'block',
+        damage: { channel: 'physical', multiplier: 1.35, hits: 1 },
         unexpressed: [
-          '反擊 dealDamage 物理 ×1.35 與 interruptCasting（CounterStanceDefinition 沒有 effectIds）',
+          '反擊追加 interruptCasting',
           '「每次架勢 1 次」的使用次數上限',
         ],
       },
@@ -406,7 +412,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-melee',
         techniques: ['slash'],
         effectLocals: [],
-        unexpressed: ['dealDamage 物理 ×0.78'],
+        damage: { channel: 'physical', multiplier: 0.78, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'l3',
@@ -427,8 +434,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-melee',
         techniques: ['slash'],
         effectLocals: [],
+        damage: { channel: 'physical', multiplier: 0.90, hits: 1 },
         unexpressed: [
-          'dealDamage 物理 ×0.90',
           'applyStatus 破綻 **1** 目標行動（core 只有 2 行動版 apply-guard-down）',
         ],
       },
@@ -450,8 +457,9 @@ const ROUTES: readonly RouteRow[] = [
         techniques: ['guard', 'counter'],
         effectLocals: [],
         counterCondition: 'melee-block',
+        damage: { channel: 'physical', multiplier: 1.15, hits: 1 },
         unexpressed: [
-          '反擊 dealDamage 物理 ×1.15 與 interruptCasting（CounterStanceDefinition 沒有 effectIds）',
+          '反擊追加 interruptCasting',
         ],
       },
     ],
@@ -475,7 +483,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-mid',
         techniques: ['thrust'],
         effectLocals: ['ctb-light'],
-        unexpressed: ['dealDamage 物理 ×0.95', '「近距離傷害 −20%」的距離修正'],
+        damage: { channel: 'physical', multiplier: 0.95, hits: 1 },
+        unexpressed: ['「近距離傷害 −20%」的距離修正'],
       },
       {
         local: 'l3',
@@ -486,7 +495,8 @@ const ROUTES: readonly RouteRow[] = [
         techniques: ['guard', 'counter'],
         effectLocals: [],
         counterCondition: 'melee-block',
-        unexpressed: ['反擊 dealDamage 物理 ×0.90（CounterStanceDefinition 沒有 effectIds）'],
+        damage: { channel: 'physical', multiplier: 0.90, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'basic',
@@ -496,8 +506,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-guarding',
         techniques: ['thrust'],
         effectLocals: ['apply-guard-down'],
+        damage: { channel: 'physical', multiplier: 1.08, hits: 1 },
         unexpressed: [
-          'dealDamage 物理 ×1.08',
           '「目標未在守勢仍可傷害但不套破綻」的條件式效果（效果清單無條件欄位）',
         ],
       },
@@ -509,7 +519,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'same-column-hostiles',
         techniques: ['thrust', 'sweep'],
         effectLocals: [],
-        unexpressed: ['dealDamage 物理 ×1.18', '「每名目標只命中 1 次」的使用次數上限'],
+        damage: { channel: 'physical', multiplier: 1.18, hits: 1 },
+        unexpressed: ['「每名目標只命中 1 次」的使用次數上限'],
       },
       {
         local: 'supreme',
@@ -520,6 +531,7 @@ const ROUTES: readonly RouteRow[] = [
         techniques: ['guard', 'counter'],
         effectLocals: [],
         counterCondition: 'block',
+        damage: { channel: 'physical', multiplier: 1.28, hits: 1 },
         unexpressed: [
           '反擊 dealDamage 物理 ×1.28 與目標 +22 CTB（CounterStanceDefinition 沒有 effectIds）',
         ],
@@ -544,7 +556,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-melee',
         techniques: ['slash'],
         effectLocals: [],
-        unexpressed: ['dealDamage 物理 ×1.05'],
+        damage: { channel: 'physical', multiplier: 1.05, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'l3',
@@ -554,7 +567,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'up-to-three-hostiles-melee',
         techniques: ['sweep'],
         effectLocals: [],
-        unexpressed: ['dealDamage 物理 ×0.85', '「每多一目標傷害衰減 10%」的多目標衰減'],
+        damage: { channel: 'physical', multiplier: 0.85, hits: 1 },
+        unexpressed: ['「每多一目標傷害衰減 10%」的多目標衰減'],
       },
       {
         local: 'basic',
@@ -564,7 +578,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-melee',
         techniques: ['slash'],
         effectLocals: ['ctb-standard'],
-        unexpressed: ['dealDamage 物理 ×1.32'],
+        damage: { channel: 'physical', multiplier: 1.32, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'advanced',
@@ -574,7 +589,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'up-to-three-hostiles-melee',
         techniques: ['sweep'],
         effectLocals: ['apply-guard-down'],
-        unexpressed: ['dealDamage 物理 ×1.18', '「每名目標 1 次」的使用次數上限'],
+        damage: { channel: 'physical', multiplier: 1.18, hits: 1 },
+        unexpressed: ['「每名目標 1 次」的使用次數上限'],
       },
       {
         local: 'supreme',
@@ -585,8 +601,9 @@ const ROUTES: readonly RouteRow[] = [
         techniques: ['guard', 'counter'],
         effectLocals: [],
         counterCondition: 'block',
+        damage: { channel: 'physical', multiplier: 1.40, hits: 1 },
         unexpressed: [
-          '反擊 dealDamage 物理 ×1.40 與 interruptCasting（CounterStanceDefinition 沒有 effectIds）',
+          '反擊追加 interruptCasting',
         ],
       },
     ],
@@ -610,7 +627,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-ranged',
         techniques: ['throw'],
         effectLocals: [],
-        unexpressed: ['dealDamage 物理 ×0.72'],
+        damage: { channel: 'physical', multiplier: 0.72, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'l3',
@@ -620,7 +638,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-ranged',
         techniques: ['throw'],
         effectLocals: ['ctb-light'],
-        unexpressed: ['dealDamage 物理 ×0.62'],
+        damage: { channel: 'physical', multiplier: 0.62, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'basic',
@@ -630,7 +649,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-with-negative-status',
         techniques: ['throw'],
         effectLocals: [],
-        unexpressed: ['dealDamage 物理 ×0.85', '「命中 raw +12」的單次命中加成'],
+        damage: { channel: 'physical', multiplier: 0.85, hits: 1 },
+        unexpressed: ['「命中 raw +12」的單次命中加成'],
       },
       {
         local: 'advanced',
@@ -640,7 +660,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-ranged',
         techniques: ['throw'],
         effectLocals: ['apply-magic-defense-down'],
-        unexpressed: ['dealDamage 物理 ×1.02'],
+        damage: { channel: 'physical', multiplier: 1.02, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'supreme',
@@ -650,7 +671,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'up-to-three-hostiles-ranged',
         techniques: ['throw'],
         effectLocals: [],
-        unexpressed: ['dealDamage 物理 ×1.12', '「每多一目標傷害衰減 12%」的多目標衰減'],
+        damage: { channel: 'physical', multiplier: 1.12, hits: 1 },
+        unexpressed: ['「每多一目標傷害衰減 12%」的多目標衰減'],
       },
     ],
   },
@@ -672,7 +694,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-ranged',
         techniques: ['throw'],
         effectLocals: [],
-        unexpressed: ['dealDamage 物理 ×0.88'],
+        damage: { channel: 'physical', multiplier: 0.88, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'l3',
@@ -682,8 +705,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-ranged',
         techniques: ['throw'],
         effectLocals: [],
+        damage: { channel: 'physical', multiplier: 0.75, hits: 1 },
         unexpressed: [
-          'dealDamage 物理 ×0.75',
           'applyStatus 破綻 **1** 目標行動（core 只有 2 行動版 apply-guard-down）',
         ],
       },
@@ -704,7 +727,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-ranged',
         techniques: ['throw'],
         effectLocals: ['ctb-standard'],
-        unexpressed: ['dealDamage 物理 ×1.25'],
+        damage: { channel: 'physical', multiplier: 1.25, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'supreme',
@@ -714,7 +738,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-ranged',
         techniques: ['throw'],
         effectLocals: ['ctb-heavy'],
-        unexpressed: ['dealDamage 物理 ×1.42', '「每場對同一目標 1 次」的使用次數上限'],
+        damage: { channel: 'physical', multiplier: 1.42, hits: 1 },
+        unexpressed: ['「每場對同一目標 1 次」的使用次數上限'],
       },
     ],
   },
@@ -737,7 +762,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-ranged',
         techniques: ['shot'],
         effectLocals: [],
-        unexpressed: ['dealDamage 物理 ×0.92'],
+        damage: { channel: 'physical', multiplier: 0.92, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'l3',
@@ -756,7 +782,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-ranged',
         techniques: ['shot'],
         effectLocals: ['apply-guard-down'],
-        unexpressed: ['dealDamage 物理 ×1.05'],
+        damage: { channel: 'physical', multiplier: 1.05, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'advanced',
@@ -766,8 +793,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-ranged',
         techniques: ['shot'],
         effectLocals: [],
+        damage: { channel: 'physical', multiplier: 0.62, hits: 3 },
         unexpressed: [
-          'dealDamage 物理 ×0.62 **三次**、每次命中獨立判定（效果清單沒有重複次數欄位）',
         ],
       },
       {
@@ -778,7 +805,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-ranged',
         techniques: ['shot'],
         effectLocals: [],
-        unexpressed: ['dealDamage 物理 ×1.48', '「高命中」的單次命中加成'],
+        damage: { channel: 'physical', multiplier: 1.48, hits: 1 },
+        unexpressed: ['「高命中」的單次命中加成'],
       },
     ],
   },
@@ -800,7 +828,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-ranged',
         techniques: ['shot'],
         effectLocals: [],
-        unexpressed: ['dealDamage 物理 ×0.92'],
+        damage: { channel: 'physical', multiplier: 0.92, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'l3',
@@ -810,8 +839,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-ranged',
         techniques: ['shot'],
         effectLocals: [],
+        damage: { channel: 'physical', multiplier: 0.72, hits: 1 },
         unexpressed: [
-          'dealDamage 物理 ×0.72',
           '「命中後自身下一個射擊 CTB −6」（core 的 adjustCtb 效果只有 +8／+14／+22 三筆正值）',
           '「每 2 次自身行動 1 次」的使用次數上限',
         ],
@@ -824,7 +853,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-ranged',
         techniques: ['shot'],
         effectLocals: ['ctb-standard'],
-        unexpressed: ['dealDamage 物理 ×0.90'],
+        damage: { channel: 'physical', multiplier: 0.90, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'advanced',
@@ -834,7 +864,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile-ranged',
         techniques: ['shot'],
         effectLocals: ['apply-guard-down'],
-        unexpressed: ['dealDamage 物理 ×1.18'],
+        damage: { channel: 'physical', multiplier: 1.18, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'supreme',
@@ -844,7 +875,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'up-to-three-hostiles-ranged',
         techniques: ['shot'],
         effectLocals: [],
-        unexpressed: ['dealDamage 物理 ×1.15', '「每多一目標傷害衰減 12%」的多目標衰減'],
+        damage: { channel: 'physical', multiplier: 1.15, hits: 1 },
+        unexpressed: ['「每多一目標傷害衰減 12%」的多目標衰減'],
       },
     ],
   },
@@ -890,8 +922,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'blocked-melee-attacker',
         techniques: ['guard'],
         effectLocals: [],
+        damage: { channel: 'physical', multiplier: 0.68, hits: 1 },
         unexpressed: [
-          'dealDamage 物理 ×0.68',
           'applyStatus 破綻 **1** 目標行動（core 只有 2 行動版 apply-guard-down）',
           '「每次守勢 1 次」的使用次數上限',
         ],
@@ -914,7 +946,8 @@ const ROUTES: readonly RouteRow[] = [
         techniques: ['guard', 'counter'],
         effectLocals: [],
         counterCondition: 'block',
-        unexpressed: ['反擊 dealDamage 物理 ×1.08（CounterStanceDefinition 沒有 effectIds）'],
+        damage: { channel: 'physical', multiplier: 1.08, hits: 1 },
+        unexpressed: [],
       },
     ],
   },
@@ -967,7 +1000,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'blocked-melee-attacker',
         techniques: ['guard'],
         effectLocals: ['ctb-standard'],
-        unexpressed: ['dealDamage 物理 ×0.72', '「每次守勢 1 次」的使用次數上限'],
+        damage: { channel: 'physical', multiplier: 0.72, hits: 1 },
+        unexpressed: ['「每次守勢 1 次」的使用次數上限'],
       },
       {
         local: 'supreme',
@@ -1034,7 +1068,8 @@ const ROUTES: readonly RouteRow[] = [
         // §6.2 末：「傷害型演奏另帶 `damage`」。
         techniques: ['perform', 'damage'],
         effectLocals: ['interrupt-casting'],
-        unexpressed: ['dealDamage 樂器 ×0.80'],
+        damage: { channel: 'instrument', multiplier: 0.80, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'supreme',
@@ -1094,7 +1129,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile',
         techniques: ['perform', 'damage'],
         effectLocals: ['apply-magic-defense-down'],
-        unexpressed: ['dealDamage 樂器 ×0.72'],
+        damage: { channel: 'instrument', multiplier: 0.72, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'supreme',
@@ -1135,7 +1171,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile',
         techniques: ['talisman'],
         effectLocals: [],
-        unexpressed: ['dealDamage 魔法 ×0.95'],
+        damage: { channel: 'magic', multiplier: 0.95, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'l3',
@@ -1145,7 +1182,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile',
         techniques: ['talisman'],
         effectLocals: ['apply-magic-defense-down'],
-        unexpressed: ['dealDamage 魔法 ×0.88'],
+        damage: { channel: 'magic', multiplier: 0.88, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'basic',
@@ -1155,7 +1193,8 @@ const ROUTES: readonly RouteRow[] = [
         target: 'single-hostile',
         techniques: ['talisman'],
         effectLocals: ['ctb-light'],
-        unexpressed: ['dealDamage 魔法 ×0.92'],
+        damage: { channel: 'magic', multiplier: 0.92, hits: 1 },
+        unexpressed: [],
       },
       {
         local: 'advanced',
@@ -1168,7 +1207,8 @@ const ROUTES: readonly RouteRow[] = [
         activationHand: 'bothHands',
         weaponRequirementLocals: ['two-hand-staff'],
         attackAwardRuleId: coreAttackAwardRuleId('two-hand-staff-and-attack-magic'),
-        unexpressed: ['dealDamage 魔法 ×1.12', '「每多一目標衰減 12%」的多目標衰減'],
+        damage: { channel: 'magic', multiplier: 1.12, hits: 1 },
+        unexpressed: ['「每多一目標衰減 12%」的多目標衰減'],
       },
       {
         local: 'supreme',
@@ -1181,8 +1221,8 @@ const ROUTES: readonly RouteRow[] = [
         activationHand: 'bothHands',
         weaponRequirementLocals: ['two-hand-staff'],
         attackAwardRuleId: coreAttackAwardRuleId('two-hand-staff-and-attack-magic'),
+        damage: { channel: 'magic', multiplier: 1.55, hits: 1 },
         unexpressed: [
-          'dealDamage 魔法 ×1.55',
           '「帶印痕目標威力 +0.20」的條件式威力加成',
           '「每場 1 次」的使用次數上限',
         ],
@@ -1440,6 +1480,7 @@ function combatSkill(route: RouteRow, entry: SkillRow): Authored<CombatSkillDefi
   return {
     kind: KIND.combatSkill,
     id: yunhua.id<SkillDefinitionId>(KIND.combatSkill, local),
+    display: { nameRef: { key: `text.combat-skill.yunhua.${local}.name` } },
     // 這 80 招都是角色學得會的。指向**同一個 local 名**的 progression 技能（門檻與取得方式
     // 住在那一筆）——兩張表是 1:1，所以連結由同一個 `skillLocal(route, entry)` 產生，
     // 不是各自手打一次字串。
@@ -1463,7 +1504,7 @@ function combatSkill(route: RouteRow, entry: SkillRow): Authored<CombatSkillDefi
         : { extraReachCells: extraReachCellsFor(entry.actionKind) }),
     },
     actionDelayRuleId: delayRuleId(entry.delayLocal),
-    effectIds: entry.effectLocals.map(effectId),
+    effectIds: [...(entry.damage ? Array.from({ length: entry.damage.hits }, () => yunhua.id<CombatEffectDefinitionId>('combat-effect', `${local}-damage`)) : []), ...entry.effectLocals.map(effectId)],
     ...(entry.counterCondition === undefined
       ? {}
       : {
@@ -1534,6 +1575,8 @@ export const YUNHUA_SKILL_REQUIRED_RESOLVER_IDS: readonly ResolverId[] = [
 
 // 本 domain 用到的 kind，供 pack 的 `declaredKinds` 對帳。
 export const YUNHUA_SKILL_DECLARED_KINDS: readonly string[] = [
+  'combat-effect',
+  'combat-damage-rule',
   KIND.combatSkill,
   KIND.skill,
   KIND.attackAwardRule,
@@ -1544,16 +1587,37 @@ export const YUNHUA_SKILL_DECLARED_KINDS: readonly string[] = [
 // 這不是待辦註解，而是可清點的資料：`Object.keys(...).length` 就是還沒閉合的招數。
 export const YUNHUA_SKILL_UNEXPRESSED: Readonly<Record<string, readonly string[]>> =
   Object.fromEntries(
-    ALL_ENTRIES.filter(({ entry }) => entry.unexpressed !== undefined).map(({ route, entry }) => [
+    ALL_ENTRIES.filter(({ entry }) => entry.unexpressed !== undefined && entry.unexpressed.length > 0).map(({ route, entry }) => [
       `${skillLocal(route, entry)}（${entry.sourceName}）`,
       entry.unexpressed ?? [],
     ]),
   );
 
+
+const skillDamageDefinitions = ALL_ENTRIES.flatMap(({ route, entry }) => {
+  if (!entry.damage) return [];
+  const local = skillLocal(route, entry);
+  const damageId = yunhua.id<import('../../src/contracts/core').CombatDamageRuleId>('combat-damage-rule', local);
+  const rule: Authored<import('../../src/contracts/combat').CombatDamageRuleDefinition> = {
+    kind: 'combat-damage-rule', id: damageId, damageChannel: entry.damage.channel,
+    powerResolverId: { physical: RESOLVER.damagePhysical, magic: RESOLVER.damageMagic, instrument: RESOLVER.damageInstrument }[entry.damage.channel],
+    mitigationSecondaryId: core.id<import('../../src/contracts/core').SecondaryAttributeId>('secondary-attribute', `${entry.damage.channel === 'physical' ? 'general' : entry.damage.channel}-damage-reduction`),
+    powerMultiplier: entry.damage.multiplier, canBeBlocked: entry.damage.channel === 'physical',
+  };
+  const effect: Authored<import('../../src/contracts/combat').CombatEffectDefinition> = {
+    kind: 'combat-effect', id: yunhua.id<CombatEffectDefinitionId>('combat-effect', `${local}-damage`),
+    operation: { kind: 'dealDamage', damageRuleId: damageId },
+  };
+  return [rule, effect];
+});
+
 export const yunhuaSkillsDomain: AuthoredDomain = {
   domain: 'skills',
+  texts: ALL_ENTRIES.map(({ route, entry }) => ({ key: `text.combat-skill.yunhua.${skillLocal(route, entry)}.name`,
+    name: { 'zh-Hant': entry.sourceName, en: `${route.local.split('-').map(x => x[0]!.toUpperCase() + x.slice(1)).join(' ')} · ${entry.local.toUpperCase()}` } })),
   definitions: [
     ...combatSkills,
+    ...skillDamageDefinitions,
     ...progressionSkills,
     ...shieldAttackAwardRules,
     ...supportAwardRules,

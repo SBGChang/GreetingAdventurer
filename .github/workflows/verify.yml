@@ -16,6 +16,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  desktop:
+    name: Windows desktop smoke
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run verify:desktop
+
   runtime:
     name: 型別 · Runtime 紀律 · 模組測試
     runs-on: ubuntu-latest
@@ -31,6 +43,24 @@ jobs:
 
       - name: typecheck
         run: npm run typecheck
+
+      - name: UI typecheck
+        run: npm run typecheck:ui
+
+      - name: UI build
+        run: npm run build:ui
+
+      - name: Content packs
+        run: npm run verify:content-packs
+
+      - name: Save schema
+        run: npm run verify:save-schema
+
+      - name: UI integration
+        run: npm run verify:ui && npm run verify:playthrough
+
+      - name: Documents
+        run: npm run verify:docs
 
       # 正式 Runtime 紀律門禁（規範 §14）：測試抓不到的那一類——
       # 測試資料滲進正式路徑、內容 ID 寫死、型別轉換掩蓋契約缺口、缺資料偷給預設值。
@@ -68,12 +98,17 @@ jobs:
       # 而 engine 本身也被禁止改文化資料，所以兩個方向都擋得住。
       - name: verify:content-scope
         env:
-          CONTENT_SCOPE: >-
-            ${{ startsWith(github.head_ref || github.ref_name, 'content/')
-                && format('culture:{0}', split(github.head_ref || github.ref_name, '/')[1])
-                || 'engine' }}
+          CONTENT_BRANCH: ${{ github.head_ref || github.ref_name }}
           CONTENT_SCOPE_RANGE: >-
             ${{ github.event_name == 'pull_request'
                 && format('{0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha)
                 || format('{0}..{1}', github.event.before, github.sha) }}
-        run: npm run verify:content-scope
+        shell: bash
+        run: |
+          if [[ "$CONTENT_BRANCH" == content/*/* ]]; then
+            culture="${CONTENT_BRANCH#content/}"
+            export CONTENT_SCOPE="culture:${culture%%/*}"
+          else
+            export CONTENT_SCOPE=engine
+          fi
+          npm run verify:content-scope

@@ -23,7 +23,7 @@ import type {
 
 // B.5 慣例：外送 Internal Command 一律引用**接收模組**契約的真實型別，不在此重宣告 placeholder
 // （原本各自宣告的 shape 與擁有者對不上，跨模組接線時會錯誤縮窄或被迫轉型）。
-import type { CreateEconomyAccountCommand, GrantCurrencyCommand, TransferCurrencyCommand } from '../economy';
+import type { CreateEconomyAccountCommand, GrantCurrencyCommand, TransferCurrencyCommand, RewardRuleId } from '../economy';
 import type { TransferItem, RemoveItemInstance } from '../inventory';
 // PlayerInteractionOpened 事件由 team 擁有（單一聯集，三個模組共發）。
 import type { PlayerInteractionOpenedEvent } from '../team';
@@ -40,7 +40,7 @@ export type MoneyValue = Readonly<{
 
 // ── 來源（runtime state 與 event payload 共用） ──────────────────────────
 export type AssetDistributionSource =
-  | Readonly<{ kind: 'questReward'; questId: QuestId }>
+  | Readonly<{ kind: 'questReward'; questId: QuestId; rewardRuleId?: RewardRuleId }>
   | Readonly<{ kind: 'dungeonLoot'; mapId: MapInstanceId; runId?: NpcDungeonRunId }>
   | Readonly<{ kind: 'expiredQuestCargo'; questId: QuestId }>;
 
@@ -53,6 +53,8 @@ export type AssetDistributionRuleDefinition = DefinitionHeader<AssetDistribution
     currencyPolicy: 'equalSplit';
     itemPolicy: 'internalAuction' | 'rngPerItem' | 'none';
     auction?: Readonly<{
+      companionBidPolicy?: 'affordableIntrinsic';
+      directSaleRewardRuleId?: RewardRuleId;
       minimumBid: 'intrinsicValue';
       unclaimedSaleMultiplier: 0.8;
       companionBidResolverId: ResolverId;

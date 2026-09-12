@@ -18,7 +18,7 @@
 //     目標，不走一般 resolveSkillTargets 路徑。
 //   * 目標數上限（可調）：two-allies、up-to-three-allies、up-to-three-hostiles —— 上限是資料（binding
 //     params），要等 resolver binding 的 params 通道就緒，才不必把 2/3 硬寫進程式（規範 §6）。
-// 完整盤點與後續機制見 docs/00_core/architecture/F3_runtime_activation.md。
+// 完整盤點與後續機制見 docs/CURRENT_STATUS.md。
 //
 // 每個形狀都是 (input) => CombatantId[]：
 //   * requestedTargetIds 是玩家／AI 指定的**錨點**，不是最終集合；錨點型形狀據此過濾／展開。

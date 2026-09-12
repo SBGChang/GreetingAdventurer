@@ -83,12 +83,14 @@ import {
   type EventSubscription,
   type ExecutionOrderManifest,
 } from './manifest';
+import { WORKFLOW_SUBSCRIBERS as LOOT_WORKFLOW_SUBSCRIBERS } from '../workflows/adventure-loot';
 import { WORKFLOW_SUBSCRIBERS as TRAVEL_WORKFLOW_SUBSCRIBERS } from '../workflows/player-travel-event';
 import { WORKFLOW_SUBSCRIBERS as ENCUMBRANCE_WORKFLOW_SUBSCRIBERS } from '../workflows/encumbrance-transition';
 
 // 所有 Workflow 訂閱者共用同一個命名空間（`${eventType}::${workflowId}`），故合成一張表。
 const WORKFLOW_SUBSCRIBERS = {
   ...TRAVEL_WORKFLOW_SUBSCRIBERS,
+  ...LOOT_WORKFLOW_SUBSCRIBERS,
   ...ENCUMBRANCE_WORKFLOW_SUBSCRIBERS,
 };
 
@@ -117,6 +119,7 @@ export type ModuleContexts = Readonly<{
   // 具體實作由 GameSession 注入的 ContextAssembler 提供。
   city: city.CityHandlerContext;
   quest: quest.QuestHandlerContext;
+  questSettlement: quest.QuestSettlementContext;
   // 委託生成比 acceptQuest 多需要「鑄 id ＋ 擲骰 ＋ 兩個生成 Resolver」。分成兩格而不是把
   // 四個欄位塞進 quest：讓「只讀前置」的 Handler 保持看不到 RNG 與 id 配發（§7 的能力最小化）。
   questGeneration: quest.QuestGenerationContext;
@@ -484,6 +487,7 @@ const GAME_COMMAND_HANDLERS: Readonly<Partial<Record<GameCommandType, RootDispat
     fromOutcome('city', city.handleReleaseHomeTeacher(c as never, s.city, x.city)),
 
   // ── quest：(state, cmd, actorTeamId, ctx)。接取委託的隊伍身分來自 envelope，不在 payload。──
+  settleQuest: (c, t, s, x) => fromOutcome('quest', quest.handleSettleQuest(s.quest, c as never, t, x.questSettlement)),
   acceptQuest: (c, t, s, x) =>
     fromOutcome('quest', quest.handleAcceptQuest(s.quest, c as never, t, x.quest)),
 
@@ -893,6 +897,11 @@ const EVENT_SUBSCRIBERS: Readonly<Record<string, SubscriberDispatch>> = {
       'progression',
       progression.handleCombatSupportMasteryEarned(s.progression, e as never, x.progression.definitions),
     ),
+  'QuestSettled::progression': (e, s, x) => subscriberResult('progression',
+    progression.handleQuestSettled(s.progression, e as never, {
+      definitions: x.progression.definitions, worldDay: x.character.worldDay,
+      characters: { getBirthDay: id => s.character.characters[id]?.birthDay },
+    })),
   'FreeActionCompleted::progression': (e, s, x) =>
     subscriberResult(
       'progression',
@@ -1017,7 +1026,7 @@ export function createTransactionConfig(
         const key = `${binding.eventType}::${String(binding.subscriber)}`;
         const workflowDispatch = WORKFLOW_SUBSCRIBERS[key];
         if (workflowDispatch !== undefined) {
-          subscribers.push((event, ctx) => workflowDispatch(event, ctx.workingState));
+          subscribers.push((event, ctx) => workflowDispatch(event, ctx.workingState, contextFactory(ctx.workingState)));
           continue;
         }
         const dispatch = EVENT_SUBSCRIBERS[key];

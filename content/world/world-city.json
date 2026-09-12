@@ -1,0 +1,1667 @@
+[
+  {
+    "enabled": true,
+    "equipmentPoolIds": [],
+    "humanEnemyPoolIds": [],
+    "id": "culture.vildun",
+    "itemPoolIds": [],
+    "kind": "culture",
+    "nonHumanMonsterPoolIds": [],
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "skillPoolIds": [],
+    "sourcePath": "world/world-city.json#culture.vildun"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.nation.vildun.realm.name"
+      }
+    },
+    "enabled": true,
+    "id": "nation.vildun.realm",
+    "kind": "nation",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#nation.vildun.realm"
+  },
+  {
+    "adventureSiteIds": [],
+    "cityIds": [
+      "city-node.vildun.frostbay",
+      "city-node.vildun.cedarkeep",
+      "city-node.vildun.icechisel",
+      "city-node.vildun.emberforge"
+    ],
+    "enabled": true,
+    "id": "region.vildun.heartland",
+    "kind": "region",
+    "nativeCultureId": "culture.vildun",
+    "nativeNationId": "nation.vildun.realm",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#region.vildun.heartland"
+  },
+  {
+    "adjacentRouteIds": [
+      "route.core.frostbay-cedarkeep",
+      "route.core.frostbay-icechisel",
+      "route.core.frostbay-emberforge",
+      "route.core.whitecliff-frostbay"
+    ],
+    "adventureSiteIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.city-node.vildun.frostbay.name"
+      }
+    },
+    "enabled": true,
+    "id": "city-node.vildun.frostbay",
+    "isCapital": true,
+    "kind": "city-node",
+    "packId": "pack:world-cities",
+    "regionId": "region.vildun.heartland",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#city-node.vildun.frostbay"
+  },
+  {
+    "actionRuleIds": [
+      "city-action-rule.yunhua.inn-rest"
+    ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.vildun.frostbay-inn.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "inn",
+    "id": "facility.vildun.frostbay-inn",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.vildun.frostbay-inn"
+  },
+  {
+    "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.vildun.frostbay-city-gate.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "cityGate",
+    "id": "facility.vildun.frostbay-city-gate",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.vildun.frostbay-city-gate"
+  },
+  {
+    "adventurerGenerationRuleId": "world-adventurer-generation-rule.core.standard",
+    "batchLimit": 5,
+    "cadenceDays": 28,
+    "cityOffsetDays": 0,
+    "enabled": true,
+    "id": "population-supply-rule.vildun.frostbay",
+    "kind": "population-supply-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#population-supply-rule.vildun.frostbay",
+    "targetCountResolverId": "resolver:city.population-target-count"
+  },
+  {
+    "allowedArchetypeIds": [
+      "character-archetype.core.escort-merchant"
+    ],
+    "cadenceDays": 7,
+    "candidateCount": {
+      "max": 5,
+      "min": 0
+    },
+    "cityOffsetDays": 0,
+    "destinationResolverId": "resolver:city.escort-destination",
+    "enabled": true,
+    "id": "escort-generation-rule.vildun.frostbay",
+    "kind": "escort-generation-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#escort-generation-rule.vildun.frostbay"
+  },
+  {
+    "cityMetricEffectResolverId": "resolver:city.metric-effect",
+    "enabled": true,
+    "escortGenerationRuleId": "escort-generation-rule.vildun.frostbay",
+    "facilityIds": [
+      "facility.vildun.frostbay-inn",
+      "facility.vildun.frostbay-city-gate"
+    ],
+    "homeRuleId": "home-rule.yunhua.standard",
+    "id": "city.vildun.frostbay",
+    "initialProsperity": 70,
+    "initialSafety": 70,
+    "intelRuleId": "intel-rule.yunhua.standard",
+    "kind": "city",
+    "packId": "pack:world-cities",
+    "playerCommerceDailyLimitId": "player-commerce-daily-limit.yunhua.standard",
+    "playerCommercePracticeRuleId": "player-commerce-practice-rule.yunhua.standard",
+    "populationSupplyRuleId": "population-supply-rule.vildun.frostbay",
+    "schemaVersion": 1,
+    "shopRuleIds": [],
+    "sourcePath": "world/world-city.json#city.vildun.frostbay",
+    "worldCityId": "city-node.vildun.frostbay"
+  },
+  {
+    "adjacentRouteIds": [
+      "route.core.frostbay-cedarkeep"
+    ],
+    "adventureSiteIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.city-node.vildun.cedarkeep.name"
+      }
+    },
+    "enabled": true,
+    "id": "city-node.vildun.cedarkeep",
+    "isCapital": false,
+    "kind": "city-node",
+    "packId": "pack:world-cities",
+    "regionId": "region.vildun.heartland",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#city-node.vildun.cedarkeep"
+  },
+  {
+    "actionRuleIds": [
+      "city-action-rule.yunhua.inn-rest"
+    ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.vildun.cedarkeep-inn.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "inn",
+    "id": "facility.vildun.cedarkeep-inn",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.vildun.cedarkeep-inn"
+  },
+  {
+    "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.vildun.cedarkeep-city-gate.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "cityGate",
+    "id": "facility.vildun.cedarkeep-city-gate",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.vildun.cedarkeep-city-gate"
+  },
+  {
+    "adventurerGenerationRuleId": "world-adventurer-generation-rule.core.standard",
+    "batchLimit": 5,
+    "cadenceDays": 28,
+    "cityOffsetDays": 0,
+    "enabled": true,
+    "id": "population-supply-rule.vildun.cedarkeep",
+    "kind": "population-supply-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#population-supply-rule.vildun.cedarkeep",
+    "targetCountResolverId": "resolver:city.population-target-count"
+  },
+  {
+    "allowedArchetypeIds": [
+      "character-archetype.core.escort-merchant"
+    ],
+    "cadenceDays": 7,
+    "candidateCount": {
+      "max": 5,
+      "min": 0
+    },
+    "cityOffsetDays": 0,
+    "destinationResolverId": "resolver:city.escort-destination",
+    "enabled": true,
+    "id": "escort-generation-rule.vildun.cedarkeep",
+    "kind": "escort-generation-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#escort-generation-rule.vildun.cedarkeep"
+  },
+  {
+    "cityMetricEffectResolverId": "resolver:city.metric-effect",
+    "enabled": true,
+    "escortGenerationRuleId": "escort-generation-rule.vildun.cedarkeep",
+    "facilityIds": [
+      "facility.vildun.cedarkeep-inn",
+      "facility.vildun.cedarkeep-city-gate"
+    ],
+    "homeRuleId": "home-rule.yunhua.standard",
+    "id": "city.vildun.cedarkeep",
+    "initialProsperity": 50,
+    "initialSafety": 50,
+    "intelRuleId": "intel-rule.yunhua.standard",
+    "kind": "city",
+    "packId": "pack:world-cities",
+    "playerCommerceDailyLimitId": "player-commerce-daily-limit.yunhua.standard",
+    "playerCommercePracticeRuleId": "player-commerce-practice-rule.yunhua.standard",
+    "populationSupplyRuleId": "population-supply-rule.vildun.cedarkeep",
+    "schemaVersion": 1,
+    "shopRuleIds": [],
+    "sourcePath": "world/world-city.json#city.vildun.cedarkeep",
+    "worldCityId": "city-node.vildun.cedarkeep"
+  },
+  {
+    "adjacentRouteIds": [
+      "route.core.frostbay-icechisel",
+      "route.core.icechisel-emberforge"
+    ],
+    "adventureSiteIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.city-node.vildun.icechisel.name"
+      }
+    },
+    "enabled": true,
+    "id": "city-node.vildun.icechisel",
+    "isCapital": false,
+    "kind": "city-node",
+    "packId": "pack:world-cities",
+    "regionId": "region.vildun.heartland",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#city-node.vildun.icechisel"
+  },
+  {
+    "actionRuleIds": [
+      "city-action-rule.yunhua.inn-rest"
+    ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.vildun.icechisel-inn.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "inn",
+    "id": "facility.vildun.icechisel-inn",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.vildun.icechisel-inn"
+  },
+  {
+    "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.vildun.icechisel-city-gate.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "cityGate",
+    "id": "facility.vildun.icechisel-city-gate",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.vildun.icechisel-city-gate"
+  },
+  {
+    "adventurerGenerationRuleId": "world-adventurer-generation-rule.core.standard",
+    "batchLimit": 5,
+    "cadenceDays": 28,
+    "cityOffsetDays": 0,
+    "enabled": true,
+    "id": "population-supply-rule.vildun.icechisel",
+    "kind": "population-supply-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#population-supply-rule.vildun.icechisel",
+    "targetCountResolverId": "resolver:city.population-target-count"
+  },
+  {
+    "allowedArchetypeIds": [
+      "character-archetype.core.escort-merchant"
+    ],
+    "cadenceDays": 7,
+    "candidateCount": {
+      "max": 5,
+      "min": 0
+    },
+    "cityOffsetDays": 0,
+    "destinationResolverId": "resolver:city.escort-destination",
+    "enabled": true,
+    "id": "escort-generation-rule.vildun.icechisel",
+    "kind": "escort-generation-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#escort-generation-rule.vildun.icechisel"
+  },
+  {
+    "cityMetricEffectResolverId": "resolver:city.metric-effect",
+    "enabled": true,
+    "escortGenerationRuleId": "escort-generation-rule.vildun.icechisel",
+    "facilityIds": [
+      "facility.vildun.icechisel-inn",
+      "facility.vildun.icechisel-city-gate"
+    ],
+    "homeRuleId": "home-rule.yunhua.standard",
+    "id": "city.vildun.icechisel",
+    "initialProsperity": 50,
+    "initialSafety": 50,
+    "intelRuleId": "intel-rule.yunhua.standard",
+    "kind": "city",
+    "packId": "pack:world-cities",
+    "playerCommerceDailyLimitId": "player-commerce-daily-limit.yunhua.standard",
+    "playerCommercePracticeRuleId": "player-commerce-practice-rule.yunhua.standard",
+    "populationSupplyRuleId": "population-supply-rule.vildun.icechisel",
+    "schemaVersion": 1,
+    "shopRuleIds": [],
+    "sourcePath": "world/world-city.json#city.vildun.icechisel",
+    "worldCityId": "city-node.vildun.icechisel"
+  },
+  {
+    "adjacentRouteIds": [
+      "route.core.frostbay-emberforge",
+      "route.core.icechisel-emberforge",
+      "route.core.qingcen-emberforge"
+    ],
+    "adventureSiteIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.city-node.vildun.emberforge.name"
+      }
+    },
+    "enabled": true,
+    "id": "city-node.vildun.emberforge",
+    "isCapital": false,
+    "kind": "city-node",
+    "packId": "pack:world-cities",
+    "regionId": "region.vildun.heartland",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#city-node.vildun.emberforge"
+  },
+  {
+    "actionRuleIds": [
+      "city-action-rule.yunhua.inn-rest"
+    ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.vildun.emberforge-inn.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "inn",
+    "id": "facility.vildun.emberforge-inn",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.vildun.emberforge-inn"
+  },
+  {
+    "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.vildun.emberforge-city-gate.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "cityGate",
+    "id": "facility.vildun.emberforge-city-gate",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.vildun.emberforge-city-gate"
+  },
+  {
+    "adventurerGenerationRuleId": "world-adventurer-generation-rule.core.standard",
+    "batchLimit": 5,
+    "cadenceDays": 28,
+    "cityOffsetDays": 0,
+    "enabled": true,
+    "id": "population-supply-rule.vildun.emberforge",
+    "kind": "population-supply-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#population-supply-rule.vildun.emberforge",
+    "targetCountResolverId": "resolver:city.population-target-count"
+  },
+  {
+    "allowedArchetypeIds": [
+      "character-archetype.core.escort-merchant"
+    ],
+    "cadenceDays": 7,
+    "candidateCount": {
+      "max": 5,
+      "min": 0
+    },
+    "cityOffsetDays": 0,
+    "destinationResolverId": "resolver:city.escort-destination",
+    "enabled": true,
+    "id": "escort-generation-rule.vildun.emberforge",
+    "kind": "escort-generation-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#escort-generation-rule.vildun.emberforge"
+  },
+  {
+    "cityMetricEffectResolverId": "resolver:city.metric-effect",
+    "enabled": true,
+    "escortGenerationRuleId": "escort-generation-rule.vildun.emberforge",
+    "facilityIds": [
+      "facility.vildun.emberforge-inn",
+      "facility.vildun.emberforge-city-gate"
+    ],
+    "homeRuleId": "home-rule.yunhua.standard",
+    "id": "city.vildun.emberforge",
+    "initialProsperity": 50,
+    "initialSafety": 50,
+    "intelRuleId": "intel-rule.yunhua.standard",
+    "kind": "city",
+    "packId": "pack:world-cities",
+    "playerCommerceDailyLimitId": "player-commerce-daily-limit.yunhua.standard",
+    "playerCommercePracticeRuleId": "player-commerce-practice-rule.yunhua.standard",
+    "populationSupplyRuleId": "population-supply-rule.vildun.emberforge",
+    "schemaVersion": 1,
+    "shopRuleIds": [],
+    "sourcePath": "world/world-city.json#city.vildun.emberforge",
+    "worldCityId": "city-node.vildun.emberforge"
+  },
+  {
+    "enabled": true,
+    "equipmentPoolIds": [],
+    "humanEnemyPoolIds": [],
+    "id": "culture.aurelien",
+    "itemPoolIds": [],
+    "kind": "culture",
+    "nonHumanMonsterPoolIds": [],
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "skillPoolIds": [],
+    "sourcePath": "world/world-city.json#culture.aurelien"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.nation.aurelien.realm.name"
+      }
+    },
+    "enabled": true,
+    "id": "nation.aurelien.realm",
+    "kind": "nation",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#nation.aurelien.realm"
+  },
+  {
+    "adventureSiteIds": [],
+    "cityIds": [
+      "city-node.aurelien.dawncrown",
+      "city-node.aurelien.greyshield",
+      "city-node.aurelien.windharvest",
+      "city-node.aurelien.whitecliff"
+    ],
+    "enabled": true,
+    "id": "region.aurelien.heartland",
+    "kind": "region",
+    "nativeCultureId": "culture.aurelien",
+    "nativeNationId": "nation.aurelien.realm",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#region.aurelien.heartland"
+  },
+  {
+    "adjacentRouteIds": [
+      "route.core.dawncrown-greyshield",
+      "route.core.dawncrown-windharvest",
+      "route.core.dawncrown-whitecliff"
+    ],
+    "adventureSiteIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.city-node.aurelien.dawncrown.name"
+      }
+    },
+    "enabled": true,
+    "id": "city-node.aurelien.dawncrown",
+    "isCapital": true,
+    "kind": "city-node",
+    "packId": "pack:world-cities",
+    "regionId": "region.aurelien.heartland",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#city-node.aurelien.dawncrown"
+  },
+  {
+    "actionRuleIds": [
+      "city-action-rule.yunhua.inn-rest"
+    ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.aurelien.dawncrown-inn.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "inn",
+    "id": "facility.aurelien.dawncrown-inn",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.aurelien.dawncrown-inn"
+  },
+  {
+    "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.aurelien.dawncrown-city-gate.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "cityGate",
+    "id": "facility.aurelien.dawncrown-city-gate",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.aurelien.dawncrown-city-gate"
+  },
+  {
+    "adventurerGenerationRuleId": "world-adventurer-generation-rule.core.standard",
+    "batchLimit": 5,
+    "cadenceDays": 28,
+    "cityOffsetDays": 0,
+    "enabled": true,
+    "id": "population-supply-rule.aurelien.dawncrown",
+    "kind": "population-supply-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#population-supply-rule.aurelien.dawncrown",
+    "targetCountResolverId": "resolver:city.population-target-count"
+  },
+  {
+    "allowedArchetypeIds": [
+      "character-archetype.core.escort-merchant"
+    ],
+    "cadenceDays": 7,
+    "candidateCount": {
+      "max": 5,
+      "min": 0
+    },
+    "cityOffsetDays": 0,
+    "destinationResolverId": "resolver:city.escort-destination",
+    "enabled": true,
+    "id": "escort-generation-rule.aurelien.dawncrown",
+    "kind": "escort-generation-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#escort-generation-rule.aurelien.dawncrown"
+  },
+  {
+    "cityMetricEffectResolverId": "resolver:city.metric-effect",
+    "enabled": true,
+    "escortGenerationRuleId": "escort-generation-rule.aurelien.dawncrown",
+    "facilityIds": [
+      "facility.aurelien.dawncrown-inn",
+      "facility.aurelien.dawncrown-city-gate"
+    ],
+    "homeRuleId": "home-rule.yunhua.standard",
+    "id": "city.aurelien.dawncrown",
+    "initialProsperity": 70,
+    "initialSafety": 70,
+    "intelRuleId": "intel-rule.yunhua.standard",
+    "kind": "city",
+    "packId": "pack:world-cities",
+    "playerCommerceDailyLimitId": "player-commerce-daily-limit.yunhua.standard",
+    "playerCommercePracticeRuleId": "player-commerce-practice-rule.yunhua.standard",
+    "populationSupplyRuleId": "population-supply-rule.aurelien.dawncrown",
+    "schemaVersion": 1,
+    "shopRuleIds": [],
+    "sourcePath": "world/world-city.json#city.aurelien.dawncrown",
+    "worldCityId": "city-node.aurelien.dawncrown"
+  },
+  {
+    "adjacentRouteIds": [
+      "route.core.dawncrown-greyshield",
+      "route.core.greyshield-windharvest"
+    ],
+    "adventureSiteIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.city-node.aurelien.greyshield.name"
+      }
+    },
+    "enabled": true,
+    "id": "city-node.aurelien.greyshield",
+    "isCapital": false,
+    "kind": "city-node",
+    "packId": "pack:world-cities",
+    "regionId": "region.aurelien.heartland",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#city-node.aurelien.greyshield"
+  },
+  {
+    "actionRuleIds": [
+      "city-action-rule.yunhua.inn-rest"
+    ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.aurelien.greyshield-inn.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "inn",
+    "id": "facility.aurelien.greyshield-inn",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.aurelien.greyshield-inn"
+  },
+  {
+    "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.aurelien.greyshield-city-gate.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "cityGate",
+    "id": "facility.aurelien.greyshield-city-gate",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.aurelien.greyshield-city-gate"
+  },
+  {
+    "adventurerGenerationRuleId": "world-adventurer-generation-rule.core.standard",
+    "batchLimit": 5,
+    "cadenceDays": 28,
+    "cityOffsetDays": 0,
+    "enabled": true,
+    "id": "population-supply-rule.aurelien.greyshield",
+    "kind": "population-supply-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#population-supply-rule.aurelien.greyshield",
+    "targetCountResolverId": "resolver:city.population-target-count"
+  },
+  {
+    "allowedArchetypeIds": [
+      "character-archetype.core.escort-merchant"
+    ],
+    "cadenceDays": 7,
+    "candidateCount": {
+      "max": 5,
+      "min": 0
+    },
+    "cityOffsetDays": 0,
+    "destinationResolverId": "resolver:city.escort-destination",
+    "enabled": true,
+    "id": "escort-generation-rule.aurelien.greyshield",
+    "kind": "escort-generation-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#escort-generation-rule.aurelien.greyshield"
+  },
+  {
+    "cityMetricEffectResolverId": "resolver:city.metric-effect",
+    "enabled": true,
+    "escortGenerationRuleId": "escort-generation-rule.aurelien.greyshield",
+    "facilityIds": [
+      "facility.aurelien.greyshield-inn",
+      "facility.aurelien.greyshield-city-gate"
+    ],
+    "homeRuleId": "home-rule.yunhua.standard",
+    "id": "city.aurelien.greyshield",
+    "initialProsperity": 50,
+    "initialSafety": 50,
+    "intelRuleId": "intel-rule.yunhua.standard",
+    "kind": "city",
+    "packId": "pack:world-cities",
+    "playerCommerceDailyLimitId": "player-commerce-daily-limit.yunhua.standard",
+    "playerCommercePracticeRuleId": "player-commerce-practice-rule.yunhua.standard",
+    "populationSupplyRuleId": "population-supply-rule.aurelien.greyshield",
+    "schemaVersion": 1,
+    "shopRuleIds": [],
+    "sourcePath": "world/world-city.json#city.aurelien.greyshield",
+    "worldCityId": "city-node.aurelien.greyshield"
+  },
+  {
+    "adjacentRouteIds": [
+      "route.core.dawncrown-windharvest",
+      "route.core.greyshield-windharvest",
+      "route.core.windharvest-whitecliff",
+      "route.core.saltmirror-windharvest"
+    ],
+    "adventureSiteIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.city-node.aurelien.windharvest.name"
+      }
+    },
+    "enabled": true,
+    "id": "city-node.aurelien.windharvest",
+    "isCapital": false,
+    "kind": "city-node",
+    "packId": "pack:world-cities",
+    "regionId": "region.aurelien.heartland",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#city-node.aurelien.windharvest"
+  },
+  {
+    "actionRuleIds": [
+      "city-action-rule.yunhua.inn-rest"
+    ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.aurelien.windharvest-inn.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "inn",
+    "id": "facility.aurelien.windharvest-inn",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.aurelien.windharvest-inn"
+  },
+  {
+    "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.aurelien.windharvest-city-gate.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "cityGate",
+    "id": "facility.aurelien.windharvest-city-gate",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.aurelien.windharvest-city-gate"
+  },
+  {
+    "adventurerGenerationRuleId": "world-adventurer-generation-rule.core.standard",
+    "batchLimit": 5,
+    "cadenceDays": 28,
+    "cityOffsetDays": 0,
+    "enabled": true,
+    "id": "population-supply-rule.aurelien.windharvest",
+    "kind": "population-supply-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#population-supply-rule.aurelien.windharvest",
+    "targetCountResolverId": "resolver:city.population-target-count"
+  },
+  {
+    "allowedArchetypeIds": [
+      "character-archetype.core.escort-merchant"
+    ],
+    "cadenceDays": 7,
+    "candidateCount": {
+      "max": 5,
+      "min": 0
+    },
+    "cityOffsetDays": 0,
+    "destinationResolverId": "resolver:city.escort-destination",
+    "enabled": true,
+    "id": "escort-generation-rule.aurelien.windharvest",
+    "kind": "escort-generation-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#escort-generation-rule.aurelien.windharvest"
+  },
+  {
+    "cityMetricEffectResolverId": "resolver:city.metric-effect",
+    "enabled": true,
+    "escortGenerationRuleId": "escort-generation-rule.aurelien.windharvest",
+    "facilityIds": [
+      "facility.aurelien.windharvest-inn",
+      "facility.aurelien.windharvest-city-gate"
+    ],
+    "homeRuleId": "home-rule.yunhua.standard",
+    "id": "city.aurelien.windharvest",
+    "initialProsperity": 50,
+    "initialSafety": 50,
+    "intelRuleId": "intel-rule.yunhua.standard",
+    "kind": "city",
+    "packId": "pack:world-cities",
+    "playerCommerceDailyLimitId": "player-commerce-daily-limit.yunhua.standard",
+    "playerCommercePracticeRuleId": "player-commerce-practice-rule.yunhua.standard",
+    "populationSupplyRuleId": "population-supply-rule.aurelien.windharvest",
+    "schemaVersion": 1,
+    "shopRuleIds": [],
+    "sourcePath": "world/world-city.json#city.aurelien.windharvest",
+    "worldCityId": "city-node.aurelien.windharvest"
+  },
+  {
+    "adjacentRouteIds": [
+      "route.core.dawncrown-whitecliff",
+      "route.core.windharvest-whitecliff",
+      "route.core.whitecliff-frostbay"
+    ],
+    "adventureSiteIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.city-node.aurelien.whitecliff.name"
+      }
+    },
+    "enabled": true,
+    "id": "city-node.aurelien.whitecliff",
+    "isCapital": false,
+    "kind": "city-node",
+    "packId": "pack:world-cities",
+    "regionId": "region.aurelien.heartland",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#city-node.aurelien.whitecliff"
+  },
+  {
+    "actionRuleIds": [
+      "city-action-rule.yunhua.inn-rest"
+    ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.aurelien.whitecliff-inn.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "inn",
+    "id": "facility.aurelien.whitecliff-inn",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.aurelien.whitecliff-inn"
+  },
+  {
+    "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.aurelien.whitecliff-city-gate.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "cityGate",
+    "id": "facility.aurelien.whitecliff-city-gate",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.aurelien.whitecliff-city-gate"
+  },
+  {
+    "adventurerGenerationRuleId": "world-adventurer-generation-rule.core.standard",
+    "batchLimit": 5,
+    "cadenceDays": 28,
+    "cityOffsetDays": 0,
+    "enabled": true,
+    "id": "population-supply-rule.aurelien.whitecliff",
+    "kind": "population-supply-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#population-supply-rule.aurelien.whitecliff",
+    "targetCountResolverId": "resolver:city.population-target-count"
+  },
+  {
+    "allowedArchetypeIds": [
+      "character-archetype.core.escort-merchant"
+    ],
+    "cadenceDays": 7,
+    "candidateCount": {
+      "max": 5,
+      "min": 0
+    },
+    "cityOffsetDays": 0,
+    "destinationResolverId": "resolver:city.escort-destination",
+    "enabled": true,
+    "id": "escort-generation-rule.aurelien.whitecliff",
+    "kind": "escort-generation-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#escort-generation-rule.aurelien.whitecliff"
+  },
+  {
+    "cityMetricEffectResolverId": "resolver:city.metric-effect",
+    "enabled": true,
+    "escortGenerationRuleId": "escort-generation-rule.aurelien.whitecliff",
+    "facilityIds": [
+      "facility.aurelien.whitecliff-inn",
+      "facility.aurelien.whitecliff-city-gate"
+    ],
+    "homeRuleId": "home-rule.yunhua.standard",
+    "id": "city.aurelien.whitecliff",
+    "initialProsperity": 50,
+    "initialSafety": 50,
+    "intelRuleId": "intel-rule.yunhua.standard",
+    "kind": "city",
+    "packId": "pack:world-cities",
+    "playerCommerceDailyLimitId": "player-commerce-daily-limit.yunhua.standard",
+    "playerCommercePracticeRuleId": "player-commerce-practice-rule.yunhua.standard",
+    "populationSupplyRuleId": "population-supply-rule.aurelien.whitecliff",
+    "schemaVersion": 1,
+    "shopRuleIds": [],
+    "sourcePath": "world/world-city.json#city.aurelien.whitecliff",
+    "worldCityId": "city-node.aurelien.whitecliff"
+  },
+  {
+    "enabled": true,
+    "equipmentPoolIds": [],
+    "humanEnemyPoolIds": [],
+    "id": "culture.safir",
+    "itemPoolIds": [],
+    "kind": "culture",
+    "nonHumanMonsterPoolIds": [],
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "skillPoolIds": [],
+    "sourcePath": "world/world-city.json#culture.safir"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.nation.safir.realm.name"
+      }
+    },
+    "enabled": true,
+    "id": "nation.safir.realm",
+    "kind": "nation",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#nation.safir.realm"
+  },
+  {
+    "adventureSiteIds": [],
+    "cityIds": [
+      "city-node.safir.starwell",
+      "city-node.safir.redsail",
+      "city-node.safir.saltmirror",
+      "city-node.safir.ochrestep"
+    ],
+    "enabled": true,
+    "id": "region.safir.heartland",
+    "kind": "region",
+    "nativeCultureId": "culture.safir",
+    "nativeNationId": "nation.safir.realm",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#region.safir.heartland"
+  },
+  {
+    "adjacentRouteIds": [
+      "route.core.starwell-redsail",
+      "route.core.starwell-saltmirror",
+      "route.core.starwell-ochrestep",
+      "route.core.yunjing-starwell"
+    ],
+    "adventureSiteIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.city-node.safir.starwell.name"
+      }
+    },
+    "enabled": true,
+    "id": "city-node.safir.starwell",
+    "isCapital": true,
+    "kind": "city-node",
+    "packId": "pack:world-cities",
+    "regionId": "region.safir.heartland",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#city-node.safir.starwell"
+  },
+  {
+    "actionRuleIds": [
+      "city-action-rule.yunhua.inn-rest"
+    ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.safir.starwell-inn.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "inn",
+    "id": "facility.safir.starwell-inn",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.safir.starwell-inn"
+  },
+  {
+    "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.safir.starwell-city-gate.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "cityGate",
+    "id": "facility.safir.starwell-city-gate",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.safir.starwell-city-gate"
+  },
+  {
+    "adventurerGenerationRuleId": "world-adventurer-generation-rule.core.standard",
+    "batchLimit": 5,
+    "cadenceDays": 28,
+    "cityOffsetDays": 0,
+    "enabled": true,
+    "id": "population-supply-rule.safir.starwell",
+    "kind": "population-supply-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#population-supply-rule.safir.starwell",
+    "targetCountResolverId": "resolver:city.population-target-count"
+  },
+  {
+    "allowedArchetypeIds": [
+      "character-archetype.core.escort-merchant"
+    ],
+    "cadenceDays": 7,
+    "candidateCount": {
+      "max": 5,
+      "min": 0
+    },
+    "cityOffsetDays": 0,
+    "destinationResolverId": "resolver:city.escort-destination",
+    "enabled": true,
+    "id": "escort-generation-rule.safir.starwell",
+    "kind": "escort-generation-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#escort-generation-rule.safir.starwell"
+  },
+  {
+    "cityMetricEffectResolverId": "resolver:city.metric-effect",
+    "enabled": true,
+    "escortGenerationRuleId": "escort-generation-rule.safir.starwell",
+    "facilityIds": [
+      "facility.safir.starwell-inn",
+      "facility.safir.starwell-city-gate"
+    ],
+    "homeRuleId": "home-rule.yunhua.standard",
+    "id": "city.safir.starwell",
+    "initialProsperity": 70,
+    "initialSafety": 70,
+    "intelRuleId": "intel-rule.yunhua.standard",
+    "kind": "city",
+    "packId": "pack:world-cities",
+    "playerCommerceDailyLimitId": "player-commerce-daily-limit.yunhua.standard",
+    "playerCommercePracticeRuleId": "player-commerce-practice-rule.yunhua.standard",
+    "populationSupplyRuleId": "population-supply-rule.safir.starwell",
+    "schemaVersion": 1,
+    "shopRuleIds": [],
+    "sourcePath": "world/world-city.json#city.safir.starwell",
+    "worldCityId": "city-node.safir.starwell"
+  },
+  {
+    "adjacentRouteIds": [
+      "route.core.starwell-redsail",
+      "route.core.redsail-saltmirror",
+      "route.core.chengpu-redsail"
+    ],
+    "adventureSiteIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.city-node.safir.redsail.name"
+      }
+    },
+    "enabled": true,
+    "id": "city-node.safir.redsail",
+    "isCapital": false,
+    "kind": "city-node",
+    "packId": "pack:world-cities",
+    "regionId": "region.safir.heartland",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#city-node.safir.redsail"
+  },
+  {
+    "actionRuleIds": [
+      "city-action-rule.yunhua.inn-rest"
+    ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.safir.redsail-inn.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "inn",
+    "id": "facility.safir.redsail-inn",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.safir.redsail-inn"
+  },
+  {
+    "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.safir.redsail-city-gate.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "cityGate",
+    "id": "facility.safir.redsail-city-gate",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.safir.redsail-city-gate"
+  },
+  {
+    "adventurerGenerationRuleId": "world-adventurer-generation-rule.core.standard",
+    "batchLimit": 5,
+    "cadenceDays": 28,
+    "cityOffsetDays": 0,
+    "enabled": true,
+    "id": "population-supply-rule.safir.redsail",
+    "kind": "population-supply-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#population-supply-rule.safir.redsail",
+    "targetCountResolverId": "resolver:city.population-target-count"
+  },
+  {
+    "allowedArchetypeIds": [
+      "character-archetype.core.escort-merchant"
+    ],
+    "cadenceDays": 7,
+    "candidateCount": {
+      "max": 5,
+      "min": 0
+    },
+    "cityOffsetDays": 0,
+    "destinationResolverId": "resolver:city.escort-destination",
+    "enabled": true,
+    "id": "escort-generation-rule.safir.redsail",
+    "kind": "escort-generation-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#escort-generation-rule.safir.redsail"
+  },
+  {
+    "cityMetricEffectResolverId": "resolver:city.metric-effect",
+    "enabled": true,
+    "escortGenerationRuleId": "escort-generation-rule.safir.redsail",
+    "facilityIds": [
+      "facility.safir.redsail-inn",
+      "facility.safir.redsail-city-gate"
+    ],
+    "homeRuleId": "home-rule.yunhua.standard",
+    "id": "city.safir.redsail",
+    "initialProsperity": 50,
+    "initialSafety": 50,
+    "intelRuleId": "intel-rule.yunhua.standard",
+    "kind": "city",
+    "packId": "pack:world-cities",
+    "playerCommerceDailyLimitId": "player-commerce-daily-limit.yunhua.standard",
+    "playerCommercePracticeRuleId": "player-commerce-practice-rule.yunhua.standard",
+    "populationSupplyRuleId": "population-supply-rule.safir.redsail",
+    "schemaVersion": 1,
+    "shopRuleIds": [],
+    "sourcePath": "world/world-city.json#city.safir.redsail",
+    "worldCityId": "city-node.safir.redsail"
+  },
+  {
+    "adjacentRouteIds": [
+      "route.core.starwell-saltmirror",
+      "route.core.redsail-saltmirror",
+      "route.core.saltmirror-ochrestep",
+      "route.core.saltmirror-windharvest"
+    ],
+    "adventureSiteIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.city-node.safir.saltmirror.name"
+      }
+    },
+    "enabled": true,
+    "id": "city-node.safir.saltmirror",
+    "isCapital": false,
+    "kind": "city-node",
+    "packId": "pack:world-cities",
+    "regionId": "region.safir.heartland",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#city-node.safir.saltmirror"
+  },
+  {
+    "actionRuleIds": [
+      "city-action-rule.yunhua.inn-rest"
+    ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.safir.saltmirror-inn.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "inn",
+    "id": "facility.safir.saltmirror-inn",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.safir.saltmirror-inn"
+  },
+  {
+    "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.safir.saltmirror-city-gate.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "cityGate",
+    "id": "facility.safir.saltmirror-city-gate",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.safir.saltmirror-city-gate"
+  },
+  {
+    "adventurerGenerationRuleId": "world-adventurer-generation-rule.core.standard",
+    "batchLimit": 5,
+    "cadenceDays": 28,
+    "cityOffsetDays": 0,
+    "enabled": true,
+    "id": "population-supply-rule.safir.saltmirror",
+    "kind": "population-supply-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#population-supply-rule.safir.saltmirror",
+    "targetCountResolverId": "resolver:city.population-target-count"
+  },
+  {
+    "allowedArchetypeIds": [
+      "character-archetype.core.escort-merchant"
+    ],
+    "cadenceDays": 7,
+    "candidateCount": {
+      "max": 5,
+      "min": 0
+    },
+    "cityOffsetDays": 0,
+    "destinationResolverId": "resolver:city.escort-destination",
+    "enabled": true,
+    "id": "escort-generation-rule.safir.saltmirror",
+    "kind": "escort-generation-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#escort-generation-rule.safir.saltmirror"
+  },
+  {
+    "cityMetricEffectResolverId": "resolver:city.metric-effect",
+    "enabled": true,
+    "escortGenerationRuleId": "escort-generation-rule.safir.saltmirror",
+    "facilityIds": [
+      "facility.safir.saltmirror-inn",
+      "facility.safir.saltmirror-city-gate"
+    ],
+    "homeRuleId": "home-rule.yunhua.standard",
+    "id": "city.safir.saltmirror",
+    "initialProsperity": 50,
+    "initialSafety": 50,
+    "intelRuleId": "intel-rule.yunhua.standard",
+    "kind": "city",
+    "packId": "pack:world-cities",
+    "playerCommerceDailyLimitId": "player-commerce-daily-limit.yunhua.standard",
+    "playerCommercePracticeRuleId": "player-commerce-practice-rule.yunhua.standard",
+    "populationSupplyRuleId": "population-supply-rule.safir.saltmirror",
+    "schemaVersion": 1,
+    "shopRuleIds": [],
+    "sourcePath": "world/world-city.json#city.safir.saltmirror",
+    "worldCityId": "city-node.safir.saltmirror"
+  },
+  {
+    "adjacentRouteIds": [
+      "route.core.starwell-ochrestep",
+      "route.core.saltmirror-ochrestep"
+    ],
+    "adventureSiteIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.city-node.safir.ochrestep.name"
+      }
+    },
+    "enabled": true,
+    "id": "city-node.safir.ochrestep",
+    "isCapital": false,
+    "kind": "city-node",
+    "packId": "pack:world-cities",
+    "regionId": "region.safir.heartland",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#city-node.safir.ochrestep"
+  },
+  {
+    "actionRuleIds": [
+      "city-action-rule.yunhua.inn-rest"
+    ],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.safir.ochrestep-inn.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "inn",
+    "id": "facility.safir.ochrestep-inn",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.safir.ochrestep-inn"
+  },
+  {
+    "actionRuleIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.facility.safir.ochrestep-city-gate.name"
+      }
+    },
+    "enabled": true,
+    "facilityKind": "cityGate",
+    "id": "facility.safir.ochrestep-city-gate",
+    "kind": "facility",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#facility.safir.ochrestep-city-gate"
+  },
+  {
+    "adventurerGenerationRuleId": "world-adventurer-generation-rule.core.standard",
+    "batchLimit": 5,
+    "cadenceDays": 28,
+    "cityOffsetDays": 0,
+    "enabled": true,
+    "id": "population-supply-rule.safir.ochrestep",
+    "kind": "population-supply-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#population-supply-rule.safir.ochrestep",
+    "targetCountResolverId": "resolver:city.population-target-count"
+  },
+  {
+    "allowedArchetypeIds": [
+      "character-archetype.core.escort-merchant"
+    ],
+    "cadenceDays": 7,
+    "candidateCount": {
+      "max": 5,
+      "min": 0
+    },
+    "cityOffsetDays": 0,
+    "destinationResolverId": "resolver:city.escort-destination",
+    "enabled": true,
+    "id": "escort-generation-rule.safir.ochrestep",
+    "kind": "escort-generation-rule",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#escort-generation-rule.safir.ochrestep"
+  },
+  {
+    "cityMetricEffectResolverId": "resolver:city.metric-effect",
+    "enabled": true,
+    "escortGenerationRuleId": "escort-generation-rule.safir.ochrestep",
+    "facilityIds": [
+      "facility.safir.ochrestep-inn",
+      "facility.safir.ochrestep-city-gate"
+    ],
+    "homeRuleId": "home-rule.yunhua.standard",
+    "id": "city.safir.ochrestep",
+    "initialProsperity": 50,
+    "initialSafety": 50,
+    "intelRuleId": "intel-rule.yunhua.standard",
+    "kind": "city",
+    "packId": "pack:world-cities",
+    "playerCommerceDailyLimitId": "player-commerce-daily-limit.yunhua.standard",
+    "playerCommercePracticeRuleId": "player-commerce-practice-rule.yunhua.standard",
+    "populationSupplyRuleId": "population-supply-rule.safir.ochrestep",
+    "schemaVersion": 1,
+    "shopRuleIds": [],
+    "sourcePath": "world/world-city.json#city.safir.ochrestep",
+    "worldCityId": "city-node.safir.ochrestep"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.vildun.frostbay",
+    "id": "route.core.frostbay-cedarkeep",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.frostbay-cedarkeep",
+    "toCityId": "city-node.vildun.cedarkeep"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.vildun.frostbay",
+    "id": "route.core.frostbay-icechisel",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.frostbay-icechisel",
+    "toCityId": "city-node.vildun.icechisel"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.vildun.frostbay",
+    "id": "route.core.frostbay-emberforge",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.frostbay-emberforge",
+    "toCityId": "city-node.vildun.emberforge"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.vildun.icechisel",
+    "id": "route.core.icechisel-emberforge",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.icechisel-emberforge",
+    "toCityId": "city-node.vildun.emberforge"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.aurelien.dawncrown",
+    "id": "route.core.dawncrown-greyshield",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.dawncrown-greyshield",
+    "toCityId": "city-node.aurelien.greyshield"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.aurelien.dawncrown",
+    "id": "route.core.dawncrown-windharvest",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.dawncrown-windharvest",
+    "toCityId": "city-node.aurelien.windharvest"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.aurelien.dawncrown",
+    "id": "route.core.dawncrown-whitecliff",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.dawncrown-whitecliff",
+    "toCityId": "city-node.aurelien.whitecliff"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.aurelien.greyshield",
+    "id": "route.core.greyshield-windharvest",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.greyshield-windharvest",
+    "toCityId": "city-node.aurelien.windharvest"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.aurelien.windharvest",
+    "id": "route.core.windharvest-whitecliff",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.windharvest-whitecliff",
+    "toCityId": "city-node.aurelien.whitecliff"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.safir.starwell",
+    "id": "route.core.starwell-redsail",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.starwell-redsail",
+    "toCityId": "city-node.safir.redsail"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.safir.starwell",
+    "id": "route.core.starwell-saltmirror",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.starwell-saltmirror",
+    "toCityId": "city-node.safir.saltmirror"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.safir.starwell",
+    "id": "route.core.starwell-ochrestep",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.starwell-ochrestep",
+    "toCityId": "city-node.safir.ochrestep"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.safir.redsail",
+    "id": "route.core.redsail-saltmirror",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.redsail-saltmirror",
+    "toCityId": "city-node.safir.saltmirror"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.safir.saltmirror",
+    "id": "route.core.saltmirror-ochrestep",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.saltmirror-ochrestep",
+    "toCityId": "city-node.safir.ochrestep"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.yunhua.qingcen",
+    "id": "route.core.qingcen-emberforge",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.qingcen-emberforge",
+    "toCityId": "city-node.vildun.emberforge"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.yunhua.chengpu",
+    "id": "route.core.chengpu-redsail",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.chengpu-redsail",
+    "toCityId": "city-node.safir.redsail"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.safir.saltmirror",
+    "id": "route.core.saltmirror-windharvest",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.saltmirror-windharvest",
+    "toCityId": "city-node.aurelien.windharvest"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.aurelien.whitecliff",
+    "id": "route.core.whitecliff-frostbay",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.whitecliff-frostbay",
+    "toCityId": "city-node.vildun.frostbay"
+  },
+  {
+    "enabled": true,
+    "enabledByDefault": true,
+    "fromCityId": "city-node.yunhua.yunjing",
+    "id": "route.core.yunjing-starwell",
+    "kind": "route",
+    "packId": "pack:world-cities",
+    "passagePolicyId": "passage-policy.core.domestic-open",
+    "playerTravelEventPoolId": "player-travel-event-pool.yunhua.domestic",
+    "schemaVersion": 1,
+    "sourcePath": "world/world-city.json#route.core.yunjing-starwell",
+    "toCityId": "city-node.safir.starwell"
+  }
+]

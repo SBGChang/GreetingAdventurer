@@ -17,6 +17,10 @@
       {
         "inputKey": "target.muscle",
         "weight": -1
+      },
+      {
+        "inputKey": "actor.secondary.secondary-attribute.core.physical-damage",
+        "weight": 1
       }
     ]
   },
@@ -38,6 +42,10 @@
       {
         "inputKey": "target.intelligence",
         "weight": -1
+      },
+      {
+        "inputKey": "actor.secondary.secondary-attribute.core.magic-damage",
+        "weight": 1
       }
     ]
   },
@@ -59,6 +67,10 @@
       {
         "inputKey": "target.charisma",
         "weight": -1
+      },
+      {
+        "inputKey": "actor.secondary.secondary-attribute.core.instrument-damage",
+        "weight": 1
       }
     ]
   },

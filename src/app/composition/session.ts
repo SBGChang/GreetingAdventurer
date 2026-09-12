@@ -75,7 +75,10 @@ import type {
   CombatSequenceId,
   CombatSequenceSourceCommitId,
 } from '../../contracts/combat-sequence';
-import { KERNEL_REJECTION_SOURCE, MAX_SETTLE_STEPS } from '../../contracts/core';
+import { KERNEL_REJECTION_SOURCE, MAX_SETTLE_STEPS, MAX_WORLD_SETTLE_STEPS } from '../../contracts/core';
+import { createScheduler } from '../../kernel/scheduler';
+import { JOB_TYPE_ORDER_BY_PHASE } from './manifest';
+import { UnavailableCapabilityError } from './capability';
 import { deterministicRng, nextRuntimeId, runTransaction, type SchedulingEffects } from '../../kernel';
 
 import type { CharacterIdAllocator } from '../../modules/character/public';
@@ -94,6 +97,15 @@ import {
 } from './router';
 import type { GameCommand } from './messages';
 import type { GameScheduledJob, GameState } from './state';
+import type { AnyScheduledJob, ScheduledJobDraft } from '../../contracts/core';
+
+export function scheduleBootstrapJobs(state: GameState, jobs: readonly ScheduledJobDraft<AnyScheduledJob>[]): GameState {
+  const holder: CursorHolder = { cursor: state.core.nextRuntimeSequence };
+  const next = makeApplyScheduling(state.core.worldSeed as Seed, holder)(state, {
+    scheduledJobs: jobs, cancelledJobIds: [],
+  });
+  return commitCursor(next, holder.cursor);
+}
 
 // ──────────────────────────────────────────────────────────────────────────
 // 交易私有 cursor（§7.2）
@@ -230,7 +242,7 @@ export type EngineRuntime = Readonly<{
   worldDay: WorldDay; // 當前 workingState 的世界日（每次重建 Context 時帶入）
   // 本次交易的身分。`EconomyTransferRecord.transactionId` 是契約必填欄位（可重播的帳本要指回
   // 開啟它的那筆交易），而它是**每筆交易**的值、不是建置期常數——所以它住在 EngineRuntime，
-  // 由 runRoot 在開交易時帶入。（f3_work_packages.md P10 把這一項列為整合者的決定。）
+  // 由 runRoot 在開交易時帶入。（docs/00_core/technical_architecture.md 把這一項列為整合者的決定。）
   transactionId: TransactionId;
   ids: EngineIdPorts;
   rng: DeterministicRng;
@@ -326,7 +338,17 @@ function runRoot(
     contextFactory,
     applyScheduling: makeApplyScheduling(worldSeed, holder),
   });
-  const outcome = runTransaction(config, state, transactionId, makeRoot(contextFactory), null);
+  let outcome;
+  try {
+    outcome = runTransaction(config, state, transactionId, makeRoot(contextFactory), null);
+  } catch (error) {
+    if (!(error instanceof UnavailableCapabilityError)) throw error;
+    return {
+      accepted: false, state,
+      rejection: { code: 'engine/capability-unavailable', source: KERNEL_REJECTION_SOURCE,
+        details: { capability: error.capability } },
+    };
+  }
   if (!outcome.accepted) {
     // §7.2 拒絕：丟棄 cursor，原序號不變（回傳的 baseState 本就未改 core.nextRuntimeSequence）。
     return { accepted: false, state: outcome.state, rejection: outcome.rejection };
@@ -471,10 +493,14 @@ export function settleWorld(
   const steps: SettleStep[] = [];
   let blocked: string | undefined;
   let guard = 0;
+  const scheduler = createScheduler<GameScheduledJob>({ jobTypeOrderByPhase: JOB_TYPE_ORDER_BY_PHASE });
 
-  while (state.team.teams[teamId]?.activePlanId !== undefined) {
+  while (true) {
+    const hasPlan = state.team.teams[teamId]?.activePlanId !== undefined;
+    const hasDueJobs = Object.values(state.core.scheduler.jobsById).some(job => job.dueDay <= state.core.worldDay);
+    if (!hasPlan && !hasDueJobs) break;
     guard += 1;
-    if (guard > MAX_SETTLE_STEPS) {
+    if (guard > MAX_WORLD_SETTLE_STEPS) {
       blocked = 'engine/settle-step-limit';
       break;
     }
@@ -498,13 +524,16 @@ export function settleWorld(
       const ownDueDays = jobs
         .filter((j) => String(j.targetId) === String(teamId))
         .map((j) => Number(j.dueDay));
-      if (ownDueDays.length === 0) break;
+      if (ownDueDays.length === 0 && !hasDueJobs) break;
     }
 
-    const earliest = jobs.reduce((a, b) => (b.dueDay < a.dueDay ? b : a));
+    const earliest = jobs.reduce((a, b) => scheduler.compare(a, b) <= 0 ? a : b);
     // worldDay 由 Kernel 擁有；呼叫端負責把時鐘撥到到期日再 runDueJob
     //（與 travel-integration.test 的自驅迴圈同法）。
-    const atDueDay: GameState = { ...state, core: { ...state.core, worldDay: earliest.dueDay } };
+    const atDueDay: GameState = {
+      ...state,
+      core: { ...state.core, worldDay: Math.max(state.core.worldDay, earliest.dueDay) },
+    };
     const result = runDueJob(atDueDay, earliest, assembler);
     if (!result.accepted) {
       // 被拒：不撥動時鐘（Job 留在佇列），把原因交給呼叫端。
@@ -512,7 +541,7 @@ export function settleWorld(
       break;
     }
     state = result.state;
-    steps.push({ toDay: Number(earliest.dueDay), jobType: earliest.type });
+    steps.push({ toDay: Number(state.core.worldDay), jobType: earliest.type });
   }
 
   return { state, steps, blocked };
@@ -554,6 +583,16 @@ export type CombatSettleResult = Readonly<{
   steps: readonly CombatStep[];
   blockedBy?: string;
 }>;
+
+export function settlePlayerDecision(state: GameState, teamId: TeamId, assembler: ContextAssembler): SettleResult {
+  const encounter = Object.values(state.combat.encounters).find(e => e.playerTeamId === teamId && e.state !== 'resolved');
+  if (encounter !== undefined) {
+    const combat = settleCombat(state, encounter.encounterId, assembler);
+    if (combat.blockedBy !== undefined) return { state: combat.state, steps: [], blocked: combat.blockedBy };
+    state = combat.state;
+  }
+  return settleWorld(state, teamId, assembler);
+}
 
 // 把遭遇推進到「輪到玩家」為止。
 //

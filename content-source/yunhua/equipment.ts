@@ -34,24 +34,7 @@
 //
 // 設計來源的 `coefficients` 是「**每個副屬各有自己的主屬方向向量**」：環首刀對物理傷害是
 // `{muscle: 1.25, coordination: 0.95}`、對命中是 `{reaction: 0.22, coordination: 0.18}`。
-// 舊的 `SecondaryAttributeCoefficients` 是「一份共用主屬向量 × 每通道一個純量」——純量只能縮放
-// 不能轉向，所以那個形狀無論怎麼填都至少有一個通道方向是錯的。已把它改成逐通道帶向量
-// （`src/contracts/inventory/index.ts`，就地寫明理由），並讓
-// `src/domain-services/statistics/statistics.ts` 逐通道讀；`EquipmentDefinition.primaryAttributeCoefficients`
-// 因此失去消費者，改成選填並標記待刪（刪除會動到 `src/modules/inventory/fixtures.ts`，不在範圍內）。
-// `npx tsx scripts/verify-modules.ts` 全綠，statistics 的期望值一個都沒有改。
-//
-// ⚠ **改完之後浮出一個跨模組的重複真相（整合者必須裁決，本檔不自行決定）**：
-// `content-source/core/services.ts` 的 `SecondaryAttributeRuleDefinition.primaryCoefficients` 也是
-// 一份方向向量（它的註解明說那是因為「裝備契約只有一份 primaryAttributeCoefficients」才擺在那裡）。
-// 兩份相乘的結果是設計來源的係數被再縮放一次：
-//   物理傷害規則 {muscle: 1, coordination: 0.375} × 環首刀 {muscle: 1.25, coordination: 0.95}
-//   = {muscle: 1.25, coordination: 0.356}
-// 而設計來源的平衡式是「Σ(主屬 × 裝備係數)」，沒有第二個方向因子。**主屬集合兩邊完全一致**
-// （逐條核對過，見回報），差的只有量級。兩個可能的收斂方向都不在本檔的權限內：
-//   (a) core 的副屬規則把 `primaryCoefficients` 改成「有列＝走這項，權重一律 1」（方向歸裝備）；
-//   (b) statistics 在裝備有逐通道向量時不再乘規則方向。
-// 在裁決之前，本檔的數字是設計來源的原值——那是唯一有來源的一組。
+// 每條通道的係數是唯一的裝備方向與量級；core 的主屬係數保持為 1，不再重複縮放。
 
 import type {
   EquipmentDefinition,

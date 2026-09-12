@@ -121,7 +121,7 @@ const mapConfigs = [
 
 const data = createCultureData({
   key:'safir',
-  meta:{name:'薩菲爾',direction:'南方',pillars:['商旅路誓','綠洲城市','星象學舍','風砂技藝'],cities:['星井城','赤帆驛'],scope:'Tier I～II 首批可玩內容；Tier III～V 保留裝備與素材成長骨架。'},
+  meta:{name:'薩菲爾',direction:'南方',pillars:['商旅路誓','綠洲城市','星象學舍','風砂技藝'],cities:['星井城','赤帆驛','鹽鏡城','赭階城'],scope:'Tier I～II 首批可玩內容；Tier III～V 保留裝備與素材成長骨架。'},
   statusRules:[['迷目','負面','降低一種命中或預測 raw','2 次有效結算','refresh'],['失途','負面','提高下一次行動 CTB 或降低一種閃避 raw','2 次有效結算','refresh'],['風標','負面','啟用追擊、條件射擊與文化技藝','2 次有效結算','refresh'],['沙幕','正面','提高一種閃避或一般減傷 raw','2 次有效結算','strongest'],['星引','正面','提高一種命中、預測或改善下一次 CTB','2 次有效結算','strongest']],
   equipment,skillRoutes,monsters,humanEncounters,items,materials,cuisine,books,mapLayouts,mapConfigs,
 });

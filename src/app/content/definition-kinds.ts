@@ -95,10 +95,10 @@ function kindsOf(constants: Readonly<Record<string, string | readonly string[]>>
 
 export const DEFINITION_KIND_REGISTRATIONS: readonly DefinitionKindRegistration[] = [
   ...own('character', kindsOf(CHARACTER_DEFINITION_KINDS)),
-  ...own('combat', kindsOf(COMBAT_DEFINITION_KINDS)),
+  ...own('combat', kindsOf(COMBAT_DEFINITION_KINDS), { 'combat-skill': 2, 'combat-damage-rule': 2, 'encounter-group': 2 }),
   ...own('dungeon', kindsOf(DUNGEON_DEFINITION_KINDS)),
   ...own('inventory', kindsOf(INVENTORY_DEFINITION_KINDS)),
-  ...own('map', kindsOf(MAP_DEFINITION_KINDS)),
+  ...own('map', kindsOf(MAP_DEFINITION_KINDS), { 'map-template': 2 }),
   ...own('progression', kindsOf(PROGRESSION_DEFINITION_KINDS)),
   ...own('team', kindsOf(TEAM_DEFINITION_KINDS)),
   // Wave D 的九個模組與三個純服務。它們的 reader adapter 早就存在，但 kind 一直沒有登記進這張表——
@@ -107,10 +107,10 @@ export const DEFINITION_KIND_REGISTRATIONS: readonly DefinitionKindRegistration[
   ...own('city', kindsOf(CITY_DEFINITION_KINDS)),
   ...own('quest', kindsOf(QUEST_DEFINITION_KINDS)),
   ...own('social', kindsOf(SOCIAL_DEFINITION_KINDS)),
-  ...own('economy', kindsOf(ECONOMY_DEFINITION_KINDS)),
+  ...own('economy', kindsOf(ECONOMY_DEFINITION_KINDS), { 'reward-rule': 2 }),
   ...own('world', kindsOf(WORLD_DEFINITION_KINDS)),
   ...own('crafting', kindsOf(CRAFTING_DEFINITION_KINDS)),
-  ...own('distribution', kindsOf(DISTRIBUTION_DEFINITION_KINDS)),
+  ...own('distribution', kindsOf(DISTRIBUTION_DEFINITION_KINDS), { 'asset-distribution-rule': 2 }),
   ...own('combat-sequence', kindsOf(COMBAT_SEQUENCE_DEFINITION_KINDS)),
   ...own('npc-behavior', kindsOf(NPC_BEHAVIOR_DEFINITION_KINDS)),
   ...own('statistics', kindsOf(STATISTICS_DEFINITION_KINDS)),

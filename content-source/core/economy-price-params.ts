@@ -13,7 +13,7 @@
 //   * 商店買回 `0.5`：賣給商店拿回半價。這是「賣東西不該等於買東西」的基本手感，
 //     `price-rule.core.shop-item` 的 sellModifierIds 已經把它排在個人加成之前。
 //   * 家教好感 `1 - 1.0 × modifier`：好感修正直接當折扣係數，換算本身由 social 的
-//     `homeTutorPriceModifierResolver` 決定（那一條仍未接線，見 cleanup-backlog）。
+//     `homeTutorPriceModifierResolver` 決定（那一條仍未接線，見 docs/CURRENT_STATUS.md）。
 
 import type { ResolverBinding, ResolverId, ModuleId } from '../../src/contracts/core';
 import type { PriceModifierParamsDefinition } from '../../src/contracts/economy';

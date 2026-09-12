@@ -152,17 +152,6 @@ export type EquipmentDefinition = ItemDefinition & Readonly<{
   relatedMasteryIds: readonly MasteryId[];
   occupiedSlots: readonly EquipmentSlotId[];
   handSlots: EquipmentHandSlots;
-  // ⚠ **已被 `secondaryAttributeCoefficients[].primaryAttributeCoefficients` 取代，不再有任何消費者。**
-  //
-  // 它的原始角色是「這件裝備的主屬方向與量級（所有通道共用）」。共用一份向量表達不出設計來源
-  // 「同一件裝備逐通道各有方向」的資料（理由見 SecondaryAttributeCoefficients 的註解），因此
-  // `domain-services/statistics` 已改為逐通道讀向量，不再讀這個欄位。
-  //
-  // 保留成選填、而不是直接刪除，只因為刪除會動到 `src/modules/inventory/fixtures.ts`（六筆裝備
-  // fixture 都填了它，物件字面值的 excess property check 會失敗），那不在補這個形狀的工作範圍內。
-  // **正解是刪掉它**：留著一個沒人讀的選填欄位，下一個作者會以為填了有效果。清除步驟＝改那六筆
-  // fixture（它們填的都是全 0，刪掉不改變任何測試數字）＋刪這一行。
-  primaryAttributeCoefficients?: PrimaryAttributeCoefficients;
   secondaryAttributeCoefficients: readonly SecondaryAttributeCoefficients[];
   skillEffectRefs: readonly EquipmentSkillEffectRef[];
   // §2.4 射程（格數）：只有 `equipmentKind === 'weapon'` 才有意義——它決定用這把武器的招式能觸及

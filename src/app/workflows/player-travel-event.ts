@@ -17,6 +17,7 @@ import { TRAVEL_EVENT_WORKFLOW } from '../composition/manifest';
 export type WorkflowSubscriberDispatch = (
   event: unknown,
   state: GameState,
+  contexts?: import('../composition/router').ModuleContexts,
 ) => Readonly<{ outgoing: readonly TransactionMessageDraft[] }>;
 
 // TravelSegmentReached → 決定推進。無 active plan（旅行已被別的路徑收掉）時無事可推進。

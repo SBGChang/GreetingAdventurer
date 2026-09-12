@@ -1,5 +1,7 @@
 # Engine Runtime 與交易契約
 
+> 本文件定義設計契約，不代表全部功能已接入正式遊戲。實際狀態與驗收入口見 [目前實作狀態](../../CURRENT_STATUS.md)。
+
 > **模組 ID：** `kernel`／`app`
 >
 > **依賴：** [共用核心契約](00_shared_contracts.md)。

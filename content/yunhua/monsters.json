@@ -687,62 +687,18 @@
           "row": 1
         },
         "monsterDefinitionId": "monster.yunhua.mistwing-moth"
-      },
-      {
-        "anchorCell": {
-          "col": 1,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.mistwing-moth"
-      },
-      {
-        "anchorCell": {
-          "col": 2,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.mistwing-moth"
-      },
-      {
-        "anchorCell": {
-          "col": 3,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.mistwing-moth"
-      },
-      {
-        "anchorCell": {
-          "col": 1,
-          "floor": 0,
-          "row": 3
-        },
-        "monsterDefinitionId": "monster.yunhua.mistwing-moth"
-      },
-      {
-        "anchorCell": {
-          "col": 2,
-          "floor": 0,
-          "row": 3
-        },
-        "monsterDefinitionId": "monster.yunhua.mistwing-moth"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
-      "monster.yunhua.mistwing-moth",
-      "monster.yunhua.mistwing-moth",
-      "monster.yunhua.mistwing-moth",
-      "monster.yunhua.mistwing-moth",
-      "monster.yunhua.mistwing-moth",
       "monster.yunhua.mistwing-moth",
       "monster.yunhua.mistwing-moth",
       "monster.yunhua.mistwing-moth"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.normal",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.mistwing-moth-swarm"
   },
   {
@@ -773,62 +729,23 @@
           "row": 1
         },
         "monsterDefinitionId": "monster.yunhua.bamboo-back-badger"
-      },
+      }
+    ],
+    "itemRewards": [
       {
-        "anchorCell": {
-          "col": 1,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.bamboo-back-badger"
-      },
-      {
-        "anchorCell": {
-          "col": 2,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.bamboo-back-badger"
-      },
-      {
-        "anchorCell": {
-          "col": 3,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.bamboo-back-badger"
-      },
-      {
-        "anchorCell": {
-          "col": 1,
-          "floor": 0,
-          "row": 3
-        },
-        "monsterDefinitionId": "monster.yunhua.bamboo-back-badger"
-      },
-      {
-        "anchorCell": {
-          "col": 2,
-          "floor": 0,
-          "row": 3
-        },
-        "monsterDefinitionId": "monster.yunhua.bamboo-back-badger"
+        "itemDefinitionId": "material.yunhua.bamboo-back-hide",
+        "quantity": 1
       }
     ],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.bamboo-back-badger",
       "monster.yunhua.bamboo-back-badger",
-      "monster.yunhua.bamboo-back-badger",
-      "monster.yunhua.bamboo-back-badger",
-      "monster.yunhua.bamboo-back-badger",
-      "monster.yunhua.bamboo-back-badger",
-      "monster.yunhua.bamboo-back-badger",
       "monster.yunhua.bamboo-back-badger"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.normal",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.bamboo-back-badger-swarm"
   },
   {
@@ -859,62 +776,23 @@
           "row": 1
         },
         "monsterDefinitionId": "monster.yunhua.tide-shell-crab"
-      },
+      }
+    ],
+    "itemRewards": [
       {
-        "anchorCell": {
-          "col": 1,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.tide-shell-crab"
-      },
-      {
-        "anchorCell": {
-          "col": 2,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.tide-shell-crab"
-      },
-      {
-        "anchorCell": {
-          "col": 3,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.tide-shell-crab"
-      },
-      {
-        "anchorCell": {
-          "col": 1,
-          "floor": 0,
-          "row": 3
-        },
-        "monsterDefinitionId": "monster.yunhua.tide-shell-crab"
-      },
-      {
-        "anchorCell": {
-          "col": 2,
-          "floor": 0,
-          "row": 3
-        },
-        "monsterDefinitionId": "monster.yunhua.tide-shell-crab"
+        "itemDefinitionId": "material.yunhua.tide-shell",
+        "quantity": 1
       }
     ],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.tide-shell-crab",
       "monster.yunhua.tide-shell-crab",
-      "monster.yunhua.tide-shell-crab",
-      "monster.yunhua.tide-shell-crab",
-      "monster.yunhua.tide-shell-crab",
-      "monster.yunhua.tide-shell-crab",
-      "monster.yunhua.tide-shell-crab",
       "monster.yunhua.tide-shell-crab"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.normal",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.tide-shell-crab-swarm"
   },
   {
@@ -945,62 +823,18 @@
           "row": 1
         },
         "monsterDefinitionId": "monster.yunhua.scrap-sigil-doll"
-      },
-      {
-        "anchorCell": {
-          "col": 1,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.scrap-sigil-doll"
-      },
-      {
-        "anchorCell": {
-          "col": 2,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.scrap-sigil-doll"
-      },
-      {
-        "anchorCell": {
-          "col": 3,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.scrap-sigil-doll"
-      },
-      {
-        "anchorCell": {
-          "col": 1,
-          "floor": 0,
-          "row": 3
-        },
-        "monsterDefinitionId": "monster.yunhua.scrap-sigil-doll"
-      },
-      {
-        "anchorCell": {
-          "col": 2,
-          "floor": 0,
-          "row": 3
-        },
-        "monsterDefinitionId": "monster.yunhua.scrap-sigil-doll"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
-      "monster.yunhua.scrap-sigil-doll",
-      "monster.yunhua.scrap-sigil-doll",
-      "monster.yunhua.scrap-sigil-doll",
-      "monster.yunhua.scrap-sigil-doll",
-      "monster.yunhua.scrap-sigil-doll",
       "monster.yunhua.scrap-sigil-doll",
       "monster.yunhua.scrap-sigil-doll",
       "monster.yunhua.scrap-sigil-doll"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.normal",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.scrap-sigil-doll-swarm"
   },
   {
@@ -1017,13 +851,14 @@
         "monsterDefinitionId": "monster.yunhua.miasma-pouch-badger"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.miasma-pouch-badger"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.elite",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.miasma-pouch-badger-lone"
   },
   {
@@ -1040,13 +875,14 @@
         "monsterDefinitionId": "monster.yunhua.gatewater-salamander"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.gatewater-salamander"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.elite",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.gatewater-salamander-lone"
   },
   {
@@ -1063,13 +899,14 @@
         "monsterDefinitionId": "monster.yunhua.armored-pottery-guard"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.armored-pottery-guard"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.elite",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.armored-pottery-guard-lone"
   },
   {
@@ -1086,13 +923,14 @@
         "monsterDefinitionId": "monster.yunhua.mist-bamboo-king"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.mist-bamboo-king"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.boss",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.mist-bamboo-king-lone"
   },
   {
@@ -1109,13 +947,14 @@
         "monsterDefinitionId": "monster.yunhua.sunken-weir-beast"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.sunken-weir-beast"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.boss",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.sunken-weir-beast-lone"
   },
   {
@@ -1188,6 +1027,7 @@
         "monsterDefinitionId": "monster.yunhua.frayed-seal-wisp"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.frayed-seal-wisp",
@@ -1201,7 +1041,7 @@
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.normal",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.frayed-seal-wisp-swarm"
   },
   {
@@ -1274,6 +1114,7 @@
         "monsterDefinitionId": "monster.yunhua.bell-mandible-beetle"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.bell-mandible-beetle",
@@ -1287,7 +1128,7 @@
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.normal",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.bell-mandible-beetle-swarm"
   },
   {
@@ -1304,13 +1145,14 @@
         "monsterDefinitionId": "monster.yunhua.tower-stone-lizard"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.tower-stone-lizard"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.normal",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.tower-stone-lizard-lone"
   },
   {
@@ -1327,13 +1169,14 @@
         "monsterDefinitionId": "monster.yunhua.seal-halberd-warden"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.seal-halberd-warden"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.elite",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.seal-halberd-warden-lone"
   },
   {
@@ -1350,13 +1193,14 @@
         "monsterDefinitionId": "monster.yunhua.broken-edict-scribe"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.broken-edict-scribe"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.elite",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.broken-edict-scribe-lone"
   },
   {
@@ -1373,13 +1217,14 @@
         "monsterDefinitionId": "monster.yunhua.balance-seal-colossus"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.balance-seal-colossus"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.boss",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.balance-seal-colossus-lone"
   },
   {
@@ -1410,62 +1255,18 @@
           "row": 1
         },
         "monsterDefinitionId": "monster.yunhua.river-cutthroat"
-      },
-      {
-        "anchorCell": {
-          "col": 1,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.river-cutthroat"
-      },
-      {
-        "anchorCell": {
-          "col": 2,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.river-cutthroat"
-      },
-      {
-        "anchorCell": {
-          "col": 3,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.river-cutthroat"
-      },
-      {
-        "anchorCell": {
-          "col": 1,
-          "floor": 0,
-          "row": 3
-        },
-        "monsterDefinitionId": "monster.yunhua.river-cutthroat"
-      },
-      {
-        "anchorCell": {
-          "col": 2,
-          "floor": 0,
-          "row": 3
-        },
-        "monsterDefinitionId": "monster.yunhua.river-cutthroat"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
-      "monster.yunhua.river-cutthroat",
-      "monster.yunhua.river-cutthroat",
-      "monster.yunhua.river-cutthroat",
-      "monster.yunhua.river-cutthroat",
-      "monster.yunhua.river-cutthroat",
       "monster.yunhua.river-cutthroat",
       "monster.yunhua.river-cutthroat",
       "monster.yunhua.river-cutthroat"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.normal",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.river-cutthroat-swarm"
   },
   {
@@ -1496,62 +1297,23 @@
           "row": 1
         },
         "monsterDefinitionId": "monster.yunhua.privateer-crossbow"
-      },
+      }
+    ],
+    "itemRewards": [
       {
-        "anchorCell": {
-          "col": 1,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.privateer-crossbow"
-      },
-      {
-        "anchorCell": {
-          "col": 2,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.privateer-crossbow"
-      },
-      {
-        "anchorCell": {
-          "col": 3,
-          "floor": 0,
-          "row": 2
-        },
-        "monsterDefinitionId": "monster.yunhua.privateer-crossbow"
-      },
-      {
-        "anchorCell": {
-          "col": 1,
-          "floor": 0,
-          "row": 3
-        },
-        "monsterDefinitionId": "monster.yunhua.privateer-crossbow"
-      },
-      {
-        "anchorCell": {
-          "col": 2,
-          "floor": 0,
-          "row": 3
-        },
-        "monsterDefinitionId": "monster.yunhua.privateer-crossbow"
+        "itemDefinitionId": "material.yunhua.green-iron-ingot",
+        "quantity": 1
       }
     ],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.privateer-crossbow",
       "monster.yunhua.privateer-crossbow",
-      "monster.yunhua.privateer-crossbow",
-      "monster.yunhua.privateer-crossbow",
-      "monster.yunhua.privateer-crossbow",
-      "monster.yunhua.privateer-crossbow",
-      "monster.yunhua.privateer-crossbow",
       "monster.yunhua.privateer-crossbow"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.normal",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.privateer-crossbow-swarm"
   },
   {
@@ -1568,13 +1330,14 @@
         "monsterDefinitionId": "monster.yunhua.salt-route-leader"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.salt-route-leader"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.elite",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.salt-route-leader-lone"
   },
   {
@@ -1647,6 +1410,7 @@
         "monsterDefinitionId": "monster.yunhua.seal-tower-deserter"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.seal-tower-deserter",
@@ -1660,7 +1424,7 @@
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.normal",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.seal-tower-deserter-swarm"
   },
   {
@@ -1677,13 +1441,14 @@
         "monsterDefinitionId": "monster.yunhua.false-seal-officer"
       }
     ],
+    "itemRewards": [],
     "kind": "encounter-group",
     "memberDefinitionIds": [
       "monster.yunhua.false-seal-officer"
     ],
     "packId": "pack:yunhua",
     "rewardResolverId": "resolver:combat.encounter-reward.elite",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/monsters.json#encounter-group.yunhua.false-seal-officer-lone"
   }
 ]

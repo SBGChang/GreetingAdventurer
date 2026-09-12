@@ -209,7 +209,7 @@ function mastery(row: MasteryRow): Authored<MasteryDefinition> {
     // 技能的自動取得寫在**技能那一側**（`SkillDefinition.requiredMasteries` +
     // `acquisition: { kind: 'automatic' }`），而技能是文化內容。反向的
     // `MasteryDefinition.automaticKnowledgeUnlocks` 會把文化技能 ID 塞進文化無關的定義裡，
-    // 所以這裡一律為空。（此欄位與 SkillDefinition 的重複，見 HANDOFF 的契約待收斂項。）
+    // 所以這裡一律為空。（此欄位與 SkillDefinition 的重複，見 docs/CURRENT_STATUS.md 的契約待收斂項。）
     automaticKnowledgeUnlocks: [],
   };
 }

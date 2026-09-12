@@ -1,5 +1,5 @@
 // app/content/dungeon-map-port.ts
-// `DungeonMapPort` 的正式實作（f3_work_packages.md P3）。
+// `DungeonMapPort` 的正式實作（docs/00_core/technical_architecture.md）。
 //
 // Dungeon 不擁有地形，也不擁有內容——它只問 map。這一層把兩個真相來源接起來：
 //   * `MapDefinitionReader`（Template）：房間、連線、入口／出口、固定陷阱、採集點。

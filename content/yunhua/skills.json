@@ -8,14 +8,21 @@
     "actionKind": "attack",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.one-hand-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.ring-saber-l0.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.ring-saber-l0-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.ring-saber-l0",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.ring-saber-l0",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-melee"
@@ -36,7 +43,13 @@
     "actionKind": "attack",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.one-hand-weapon",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.ring-saber-l3.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.ring-saber-l3-damage",
       "combat-effect.core.apply-guard-down"
     ],
     "enabled": true,
@@ -45,7 +58,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.ring-saber-l3",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-melee"
@@ -70,14 +83,21 @@
       "conditionResolverId": "resolver:combat.counter-condition-melee-block",
       "counterDelayRuleId": "action-delay-rule.core.counter"
     },
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.ring-saber-basic.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.ring-saber-basic-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.ring-saber-basic",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.ring-saber-basic",
     "targeting": {
       "targetResolverId": "resolver:combat.target-self"
@@ -99,7 +119,13 @@
     "actionKind": "attack",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.one-hand-weapon",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.ring-saber-advanced.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.ring-saber-advanced-damage",
       "combat-effect.core.ctb-light"
     ],
     "enabled": true,
@@ -108,7 +134,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.ring-saber-advanced",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-with-guard-down"
@@ -133,14 +159,21 @@
       "conditionResolverId": "resolver:combat.counter-condition-block",
       "counterDelayRuleId": "action-delay-rule.core.counter"
     },
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.ring-saber-supreme.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.ring-saber-supreme-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.ring-saber-supreme",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.ring-saber-supreme",
     "targeting": {
       "targetResolverId": "resolver:combat.target-self"
@@ -162,14 +195,21 @@
     "actionKind": "attack",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.one-hand-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.iron-fan-l0.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.iron-fan-l0-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.iron-fan-l0",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.iron-fan-l0",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-melee"
@@ -189,6 +229,11 @@
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "support",
     "activationHand": "mainHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.iron-fan-l3.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-accuracy-up"
     ],
@@ -198,7 +243,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.iron-fan-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.iron-fan-l3",
     "targeting": {
@@ -221,14 +266,21 @@
     "actionKind": "attack",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.one-hand-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.iron-fan-basic.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.iron-fan-basic-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.iron-fan-basic",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.iron-fan-basic",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-melee"
@@ -248,6 +300,11 @@
     "actionDelayRuleId": "action-delay-rule.core.standard",
     "actionKind": "support",
     "activationHand": "mainHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.iron-fan-advanced.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-magic-defense-up"
     ],
@@ -257,7 +314,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.iron-fan-advanced",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.iron-fan-advanced",
     "targeting": {
@@ -282,14 +339,21 @@
       "conditionResolverId": "resolver:combat.counter-condition-melee-block",
       "counterDelayRuleId": "action-delay-rule.core.counter"
     },
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.iron-fan-supreme.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.iron-fan-supreme-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.iron-fan-supreme",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.iron-fan-supreme",
     "targeting": {
       "targetResolverId": "resolver:combat.target-self"
@@ -311,7 +375,13 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.two-hand-weapon",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.spear-l0.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.spear-l0-damage",
       "combat-effect.core.ctb-light"
     ],
     "enabled": true,
@@ -320,7 +390,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.spear-l0",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-mid"
@@ -345,14 +415,21 @@
       "conditionResolverId": "resolver:combat.counter-condition-melee-block",
       "counterDelayRuleId": "action-delay-rule.core.counter"
     },
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.spear-l3.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.spear-l3-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.spear-l3",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.spear-l3",
     "targeting": {
       "targetResolverId": "resolver:combat.target-self"
@@ -374,7 +451,13 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.two-hand-weapon",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.spear-basic.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.spear-basic-damage",
       "combat-effect.core.apply-guard-down"
     ],
     "enabled": true,
@@ -383,7 +466,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.spear-basic",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-guarding"
@@ -404,14 +487,21 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.two-hand-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.spear-advanced.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.spear-advanced-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.spear-advanced",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.spear-advanced",
     "targeting": {
       "targetResolverId": "resolver:combat.target-same-column-hostiles"
@@ -437,14 +527,21 @@
       "conditionResolverId": "resolver:combat.counter-condition-block",
       "counterDelayRuleId": "action-delay-rule.core.counter"
     },
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.spear-supreme.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.spear-supreme-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.spear-supreme",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.spear-supreme",
     "targeting": {
       "targetResolverId": "resolver:combat.target-self"
@@ -466,14 +563,21 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.two-hand-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.glaive-l0.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.glaive-l0-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.glaive-l0",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.glaive-l0",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-melee"
@@ -494,14 +598,21 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.two-hand-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.glaive-l3.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.glaive-l3-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.glaive-l3",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.glaive-l3",
     "targeting": {
       "targetResolverId": "resolver:combat.target-up-to-three-hostiles-melee"
@@ -522,7 +633,13 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.two-hand-weapon",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.glaive-basic.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.glaive-basic-damage",
       "combat-effect.core.ctb-standard"
     ],
     "enabled": true,
@@ -531,7 +648,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.glaive-basic",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-melee"
@@ -552,7 +669,13 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.two-hand-weapon",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.glaive-advanced.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.glaive-advanced-damage",
       "combat-effect.core.apply-guard-down"
     ],
     "enabled": true,
@@ -561,7 +684,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.glaive-advanced",
     "targeting": {
       "targetResolverId": "resolver:combat.target-up-to-three-hostiles-melee"
@@ -586,14 +709,21 @@
       "conditionResolverId": "resolver:combat.counter-condition-block",
       "counterDelayRuleId": "action-delay-rule.core.counter"
     },
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.glaive-supreme.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.glaive-supreme-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.glaive-supreme",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.glaive-supreme",
     "targeting": {
       "targetResolverId": "resolver:combat.target-self"
@@ -615,14 +745,21 @@
     "actionKind": "attack",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.throwing-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.needle-l0.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.needle-l0-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.needle-l0",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.needle-l0",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-ranged"
@@ -643,7 +780,13 @@
     "actionKind": "attack",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.throwing-weapon",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.needle-l3.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.needle-l3-damage",
       "combat-effect.core.ctb-light"
     ],
     "enabled": true,
@@ -652,7 +795,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.needle-l3",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-ranged"
@@ -673,14 +816,21 @@
     "actionKind": "attack",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.throwing-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.needle-basic.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.needle-basic-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.needle-basic",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.needle-basic",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-with-negative-status"
@@ -701,7 +851,13 @@
     "actionKind": "attack",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.throwing-weapon",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.needle-advanced.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.needle-advanced-damage",
       "combat-effect.core.apply-magic-defense-down"
     ],
     "enabled": true,
@@ -710,7 +866,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.needle-advanced",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-ranged"
@@ -731,14 +887,21 @@
     "actionKind": "attack",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.throwing-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.needle-supreme.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.needle-supreme-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.needle-supreme",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.needle-supreme",
     "targeting": {
       "targetResolverId": "resolver:combat.target-up-to-three-hostiles-ranged"
@@ -759,14 +922,21 @@
     "actionKind": "attack",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.throwing-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.chain-weight-l0.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.chain-weight-l0-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.chain-weight-l0",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.chain-weight-l0",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-ranged"
@@ -787,14 +957,21 @@
     "actionKind": "attack",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.throwing-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.chain-weight-l3.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.chain-weight-l3-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.chain-weight-l3",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.chain-weight-l3",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-ranged"
@@ -814,6 +991,11 @@
     "actionDelayRuleId": "action-delay-rule.core.quick",
     "actionKind": "support",
     "activationHand": "mainHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.chain-weight-basic.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.interrupt-casting"
     ],
@@ -823,7 +1005,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.chain-weight-basic",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.chain-weight-basic",
     "targeting": {
@@ -846,7 +1028,13 @@
     "actionKind": "attack",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.throwing-weapon",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.chain-weight-advanced.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.chain-weight-advanced-damage",
       "combat-effect.core.ctb-standard"
     ],
     "enabled": true,
@@ -855,7 +1043,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.chain-weight-advanced",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-ranged"
@@ -876,7 +1064,13 @@
     "actionKind": "attack",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.throwing-weapon",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.chain-weight-supreme.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.chain-weight-supreme-damage",
       "combat-effect.core.ctb-heavy"
     ],
     "enabled": true,
@@ -885,7 +1079,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.chain-weight-supreme",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-ranged"
@@ -906,14 +1100,21 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.shooting-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.bamboo-bow-l0.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.bamboo-bow-l0-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.bamboo-bow-l0",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-bow-l0",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-ranged"
@@ -933,6 +1134,11 @@
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "support",
     "activationHand": "bothHands",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.bamboo-bow-l3.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-accuracy-up"
     ],
@@ -942,7 +1148,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-bow-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.bamboo-bow-l3",
     "targeting": {
@@ -963,7 +1169,13 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.shooting-weapon",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.bamboo-bow-basic.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.bamboo-bow-basic-damage",
       "combat-effect.core.apply-guard-down"
     ],
     "enabled": true,
@@ -972,7 +1184,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-bow-basic",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-ranged"
@@ -993,14 +1205,23 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.shooting-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.bamboo-bow-advanced.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.bamboo-bow-advanced-damage",
+      "combat-effect.yunhua.bamboo-bow-advanced-damage",
+      "combat-effect.yunhua.bamboo-bow-advanced-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.bamboo-bow-advanced",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-bow-advanced",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-ranged"
@@ -1021,14 +1242,21 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.shooting-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.bamboo-bow-supreme.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.bamboo-bow-supreme-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.bamboo-bow-supreme",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-bow-supreme",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-ranged"
@@ -1049,14 +1277,21 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.shooting-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.repeating-crossbow-l0.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.repeating-crossbow-l0-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.repeating-crossbow-l0",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.repeating-crossbow-l0",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-ranged"
@@ -1077,14 +1312,21 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.shooting-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.repeating-crossbow-l3.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.repeating-crossbow-l3-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.repeating-crossbow-l3",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.repeating-crossbow-l3",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-ranged"
@@ -1105,7 +1347,13 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.shooting-weapon",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.repeating-crossbow-basic.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.repeating-crossbow-basic-damage",
       "combat-effect.core.ctb-standard"
     ],
     "enabled": true,
@@ -1114,7 +1362,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.repeating-crossbow-basic",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-ranged"
@@ -1135,7 +1383,13 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.shooting-weapon",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.repeating-crossbow-advanced.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.repeating-crossbow-advanced-damage",
       "combat-effect.core.apply-guard-down"
     ],
     "enabled": true,
@@ -1144,7 +1398,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.repeating-crossbow-advanced",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-ranged"
@@ -1165,14 +1419,21 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.shooting-weapon",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.repeating-crossbow-supreme.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.repeating-crossbow-supreme-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.repeating-crossbow-supreme",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.repeating-crossbow-supreme",
     "targeting": {
       "targetResolverId": "resolver:combat.target-up-to-three-hostiles-ranged"
@@ -1192,6 +1453,11 @@
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "guard",
     "activationHand": "offHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.one-hand-shield-l0.name"
+      }
+    },
     "effectIds": [],
     "enabled": true,
     "id": "combat-skill.yunhua.one-hand-shield-l0",
@@ -1199,7 +1465,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.one-hand-shield-l0",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.one-hand-shield-l0",
     "targeting": {
@@ -1220,6 +1486,11 @@
     "actionDelayRuleId": "action-delay-rule.core.quick",
     "actionKind": "support",
     "activationHand": "offHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.one-hand-shield-l3.name"
+      }
+    },
     "effectIds": [],
     "enabled": true,
     "id": "combat-skill.yunhua.one-hand-shield-l3",
@@ -1227,7 +1498,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.one-hand-shield-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.one-hand-shield-l3",
     "targeting": {
@@ -1250,14 +1521,21 @@
     "actionKind": "attack",
     "activationHand": "offHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.yunhua.one-hand-shield",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.one-hand-shield-basic.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.one-hand-shield-basic-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.one-hand-shield-basic",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.one-hand-shield-basic",
     "targeting": {
       "targetResolverId": "resolver:combat.target-blocked-melee-attacker"
@@ -1277,6 +1555,11 @@
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "support",
     "activationHand": "offHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.one-hand-shield-advanced.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-magic-defense-up"
     ],
@@ -1286,7 +1569,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.one-hand-shield-advanced",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.one-hand-shield-advanced",
     "targeting": {
@@ -1313,14 +1596,21 @@
       "conditionResolverId": "resolver:combat.counter-condition-block",
       "counterDelayRuleId": "action-delay-rule.core.counter"
     },
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.one-hand-shield-supreme.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.one-hand-shield-supreme-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.one-hand-shield-supreme",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.one-hand-shield-supreme",
     "targeting": {
       "targetResolverId": "resolver:combat.target-self"
@@ -1341,6 +1631,11 @@
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "guard",
     "activationHand": "bothHands",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.two-hand-shield-l0.name"
+      }
+    },
     "effectIds": [],
     "enabled": true,
     "id": "combat-skill.yunhua.two-hand-shield-l0",
@@ -1348,7 +1643,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.two-hand-shield-l0",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.two-hand-shield-l0",
     "targeting": {
@@ -1369,6 +1664,11 @@
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "support",
     "activationHand": "bothHands",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.two-hand-shield-l3.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-magic-defense-up"
     ],
@@ -1378,7 +1678,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.two-hand-shield-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.two-hand-shield-l3",
     "targeting": {
@@ -1400,6 +1700,11 @@
     "actionDelayRuleId": "action-delay-rule.core.stance",
     "actionKind": "support",
     "activationHand": "bothHands",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.two-hand-shield-basic.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-magic-defense-up"
     ],
@@ -1409,7 +1714,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.two-hand-shield-basic",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.two-hand-shield-basic",
     "targeting": {
@@ -1432,7 +1737,13 @@
     "actionKind": "attack",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.yunhua.two-hand-shield",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.two-hand-shield-advanced.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.two-hand-shield-advanced-damage",
       "combat-effect.core.ctb-standard"
     ],
     "enabled": true,
@@ -1441,7 +1752,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.two-hand-shield-advanced",
     "targeting": {
       "targetResolverId": "resolver:combat.target-blocked-melee-attacker"
@@ -1461,6 +1772,11 @@
     "actionDelayRuleId": "action-delay-rule.core.heavy",
     "actionKind": "support",
     "activationHand": "bothHands",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.two-hand-shield-supreme.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-magic-defense-up"
     ],
@@ -1470,7 +1786,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.two-hand-shield-supreme",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.two-hand-shield-supreme",
     "targeting": {
@@ -1492,6 +1808,11 @@
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.bamboo-flute-l0.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-accuracy-up"
     ],
@@ -1501,7 +1822,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-flute-l0",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.bamboo-flute-l0",
     "targeting": {
@@ -1522,6 +1843,11 @@
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.bamboo-flute-l3.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.remove-accuracy-down"
     ],
@@ -1531,7 +1857,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-flute-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.bamboo-flute-l3",
     "targeting": {
@@ -1552,6 +1878,11 @@
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.bamboo-flute-basic.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-accuracy-up"
     ],
@@ -1561,7 +1892,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-flute-basic",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.bamboo-flute-basic",
     "targeting": {
@@ -1583,7 +1914,13 @@
     "actionKind": "perform",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.wind-instrument",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.bamboo-flute-advanced.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.bamboo-flute-advanced-damage",
       "combat-effect.core.interrupt-casting"
     ],
     "enabled": true,
@@ -1592,7 +1929,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-flute-advanced",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile-casting"
@@ -1613,6 +1950,11 @@
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.bamboo-flute-supreme.name"
+      }
+    },
     "effectIds": [],
     "enabled": true,
     "id": "combat-skill.yunhua.bamboo-flute-supreme",
@@ -1620,7 +1962,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.bamboo-flute-supreme",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.bamboo-flute-supreme",
     "targeting": {
@@ -1641,6 +1983,11 @@
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.seven-string-l0.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-magic-defense-up"
     ],
@@ -1650,7 +1997,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.seven-string-l0",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.seven-string-l0",
     "targeting": {
@@ -1671,6 +2018,11 @@
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.seven-string-l3.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.remove-magic-defense-down"
     ],
@@ -1680,7 +2032,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.seven-string-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.seven-string-l3",
     "targeting": {
@@ -1701,6 +2053,11 @@
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.seven-string-basic.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-magic-defense-up",
       "combat-effect.core.apply-accuracy-up"
@@ -1711,7 +2068,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.seven-string-basic",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.seven-string-basic",
     "targeting": {
@@ -1733,7 +2090,13 @@
     "actionKind": "perform",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.string-instrument",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.seven-string-advanced.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.seven-string-advanced-damage",
       "combat-effect.core.apply-magic-defense-down"
     ],
     "enabled": true,
@@ -1742,7 +2105,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.seven-string-advanced",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile"
@@ -1763,6 +2126,11 @@
     "actionDelayRuleId": "action-delay-rule.core.perform",
     "actionKind": "perform",
     "activationHand": "bothHands",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.seven-string-supreme.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-magic-defense-up"
     ],
@@ -1772,7 +2140,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.seven-string-supreme",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.seven-string-supreme",
     "targeting": {
@@ -1794,14 +2162,21 @@
     "actionKind": "cast",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.one-hand-staff-and-attack-magic",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.attack-magic-l0.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.attack-magic-l0-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.attack-magic-l0",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.attack-magic-l0",
     "targeting": {
       "extraReachCells": 6,
@@ -1824,7 +2199,13 @@
     "actionKind": "cast",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.one-hand-staff-and-attack-magic",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.attack-magic-l3.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.attack-magic-l3-damage",
       "combat-effect.core.apply-magic-defense-down"
     ],
     "enabled": true,
@@ -1833,7 +2214,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.attack-magic-l3",
     "targeting": {
       "extraReachCells": 6,
@@ -1856,7 +2237,13 @@
     "actionKind": "cast",
     "activationHand": "mainHand",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.one-hand-staff-and-attack-magic",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.attack-magic-basic.name"
+      }
+    },
     "effectIds": [
+      "combat-effect.yunhua.attack-magic-basic-damage",
       "combat-effect.core.ctb-light"
     ],
     "enabled": true,
@@ -1865,7 +2252,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.attack-magic-basic",
     "targeting": {
       "extraReachCells": 6,
@@ -1888,14 +2275,21 @@
     "actionKind": "cast",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.two-hand-staff-and-attack-magic",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.attack-magic-advanced.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.attack-magic-advanced-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.attack-magic-advanced",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.attack-magic-advanced",
     "targeting": {
       "extraReachCells": 6,
@@ -1917,14 +2311,21 @@
     "actionKind": "cast",
     "activationHand": "bothHands",
     "attackMasteryAwardRuleId": "attack-mastery-award-rule.core.two-hand-staff-and-attack-magic",
-    "effectIds": [],
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.attack-magic-supreme.name"
+      }
+    },
+    "effectIds": [
+      "combat-effect.yunhua.attack-magic-supreme-damage"
+    ],
     "enabled": true,
     "id": "combat-skill.yunhua.attack-magic-supreme",
     "kind": "combat-skill",
     "masteryExperienceMode": "damage",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.attack-magic-supreme",
     "targeting": {
       "extraReachCells": 6,
@@ -1945,6 +2346,11 @@
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.defense-magic-l0.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-magic-defense-up"
     ],
@@ -1954,7 +2360,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.defense-magic-l0",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.defense-magic-l0",
     "targeting": {
@@ -1977,6 +2383,11 @@
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.defense-magic-l3.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-magic-defense-up"
     ],
@@ -1986,7 +2397,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.defense-magic-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.defense-magic-l3",
     "targeting": {
@@ -2009,6 +2420,11 @@
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.defense-magic-basic.name"
+      }
+    },
     "effectIds": [],
     "enabled": true,
     "id": "combat-skill.yunhua.defense-magic-basic",
@@ -2016,7 +2432,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.defense-magic-basic",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.defense-magic-basic",
     "targeting": {
@@ -2039,6 +2455,11 @@
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "bothHands",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.defense-magic-advanced.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-magic-defense-up"
     ],
@@ -2048,7 +2469,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.defense-magic-advanced",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.defense-magic-advanced",
     "targeting": {
@@ -2070,6 +2491,11 @@
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "bothHands",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.defense-magic-supreme.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-magic-defense-up",
       "combat-effect.core.remove-magic-defense-down"
@@ -2080,7 +2506,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.defense-magic-supreme",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.defense-magic-supreme",
     "targeting": {
@@ -2102,6 +2528,11 @@
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.blessing-magic-l0.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-accuracy-up"
     ],
@@ -2111,7 +2542,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.blessing-magic-l0",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.blessing-magic-l0",
     "targeting": {
@@ -2134,6 +2565,11 @@
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.blessing-magic-l3.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.remove-accuracy-down"
     ],
@@ -2143,7 +2579,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.blessing-magic-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.blessing-magic-l3",
     "targeting": {
@@ -2166,6 +2602,11 @@
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.blessing-magic-basic.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-accuracy-up"
     ],
@@ -2175,7 +2616,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.blessing-magic-basic",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.blessing-magic-basic",
     "targeting": {
@@ -2198,6 +2639,11 @@
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.blessing-magic-advanced.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-accuracy-up"
     ],
@@ -2207,7 +2653,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.blessing-magic-advanced",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.blessing-magic-advanced",
     "targeting": {
@@ -2230,6 +2676,11 @@
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.blessing-magic-supreme.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-magic-defense-up"
     ],
@@ -2239,7 +2690,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.blessing-magic-supreme",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.blessing-magic-supreme",
     "targeting": {
@@ -2262,6 +2713,11 @@
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.curse-magic-l0.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-magic-defense-down"
     ],
@@ -2271,7 +2727,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.curse-magic-l0",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.curse-magic-l0",
     "targeting": {
@@ -2294,6 +2750,11 @@
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.curse-magic-l3.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-guard-down"
     ],
@@ -2303,7 +2764,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.curse-magic-l3",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.curse-magic-l3",
     "targeting": {
@@ -2326,6 +2787,11 @@
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.curse-magic-basic.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.ctb-standard"
     ],
@@ -2335,7 +2801,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.curse-magic-basic",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.curse-magic-basic",
     "targeting": {
@@ -2358,6 +2824,11 @@
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "mainHand",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.curse-magic-advanced.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-magic-defense-down",
       "combat-effect.core.apply-guard-down"
@@ -2368,7 +2839,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.curse-magic-advanced",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.curse-magic-advanced",
     "targeting": {
@@ -2391,6 +2862,11 @@
     "actionDelayRuleId": "action-delay-rule.core.cast",
     "actionKind": "cast",
     "activationHand": "bothHands",
+    "display": {
+      "nameRef": {
+        "key": "text.combat-skill.yunhua.curse-magic-supreme.name"
+      }
+    },
     "effectIds": [
       "combat-effect.core.apply-magic-defense-down",
       "combat-effect.core.interrupt-casting"
@@ -2401,7 +2877,7 @@
     "masteryExperienceMode": "fixedSupport",
     "packId": "pack:yunhua",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "yunhua/skills.json#combat-skill.yunhua.curse-magic-supreme",
     "supportMasteryAwardRuleId": "support-mastery-award-rule.yunhua.curse-magic-supreme",
     "targeting": {
@@ -2414,6 +2890,1156 @@
     "weaponRequirementIds": [
       "weapon-requirement.yunhua.two-hand-staff"
     ]
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.ring-saber-l0",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.95,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.ring-saber-l0"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.ring-saber-l0-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.ring-saber-l0",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.ring-saber-l0-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.ring-saber-l3",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.82,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.ring-saber-l3"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.ring-saber-l3-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.ring-saber-l3",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.ring-saber-l3-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.ring-saber-basic",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.85,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.ring-saber-basic"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.ring-saber-basic-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.ring-saber-basic",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.ring-saber-basic-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.ring-saber-advanced",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.22,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.ring-saber-advanced"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.ring-saber-advanced-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.ring-saber-advanced",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.ring-saber-advanced-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.ring-saber-supreme",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.35,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.ring-saber-supreme"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.ring-saber-supreme-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.ring-saber-supreme",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.ring-saber-supreme-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.iron-fan-l0",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.78,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.iron-fan-l0"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.iron-fan-l0-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.iron-fan-l0",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.iron-fan-l0-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.iron-fan-basic",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.9,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.iron-fan-basic"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.iron-fan-basic-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.iron-fan-basic",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.iron-fan-basic-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.iron-fan-supreme",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.15,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.iron-fan-supreme"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.iron-fan-supreme-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.iron-fan-supreme",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.iron-fan-supreme-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.spear-l0",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.95,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.spear-l0"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.spear-l0-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.spear-l0",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.spear-l0-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.spear-l3",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.9,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.spear-l3"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.spear-l3-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.spear-l3",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.spear-l3-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.spear-basic",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.08,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.spear-basic"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.spear-basic-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.spear-basic",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.spear-basic-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.spear-advanced",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.18,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.spear-advanced"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.spear-advanced-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.spear-advanced",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.spear-advanced-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.spear-supreme",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.28,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.spear-supreme"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.spear-supreme-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.spear-supreme",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.spear-supreme-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.glaive-l0",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.05,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.glaive-l0"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.glaive-l0-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.glaive-l0",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.glaive-l0-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.glaive-l3",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.85,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.glaive-l3"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.glaive-l3-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.glaive-l3",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.glaive-l3-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.glaive-basic",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.32,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.glaive-basic"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.glaive-basic-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.glaive-basic",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.glaive-basic-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.glaive-advanced",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.18,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.glaive-advanced"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.glaive-advanced-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.glaive-advanced",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.glaive-advanced-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.glaive-supreme",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.4,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.glaive-supreme"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.glaive-supreme-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.glaive-supreme",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.glaive-supreme-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.needle-l0",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.72,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.needle-l0"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.needle-l0-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.needle-l0",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.needle-l0-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.needle-l3",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.62,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.needle-l3"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.needle-l3-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.needle-l3",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.needle-l3-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.needle-basic",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.85,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.needle-basic"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.needle-basic-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.needle-basic",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.needle-basic-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.needle-advanced",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.02,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.needle-advanced"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.needle-advanced-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.needle-advanced",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.needle-advanced-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.needle-supreme",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.12,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.needle-supreme"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.needle-supreme-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.needle-supreme",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.needle-supreme-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.chain-weight-l0",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.88,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.chain-weight-l0"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.chain-weight-l0-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.chain-weight-l0",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.chain-weight-l0-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.chain-weight-l3",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.75,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.chain-weight-l3"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.chain-weight-l3-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.chain-weight-l3",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.chain-weight-l3-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.chain-weight-advanced",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.25,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.chain-weight-advanced"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.chain-weight-advanced-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.chain-weight-advanced",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.chain-weight-advanced-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.chain-weight-supreme",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.42,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.chain-weight-supreme"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.chain-weight-supreme-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.chain-weight-supreme",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.chain-weight-supreme-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.bamboo-bow-l0",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.92,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.bamboo-bow-l0"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.bamboo-bow-l0-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.bamboo-bow-l0",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.bamboo-bow-l0-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.bamboo-bow-basic",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.05,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.bamboo-bow-basic"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.bamboo-bow-basic-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.bamboo-bow-basic",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.bamboo-bow-basic-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.bamboo-bow-advanced",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.62,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.bamboo-bow-advanced"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.bamboo-bow-advanced-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.bamboo-bow-advanced",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.bamboo-bow-advanced-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.bamboo-bow-supreme",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.48,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.bamboo-bow-supreme"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.bamboo-bow-supreme-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.bamboo-bow-supreme",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.bamboo-bow-supreme-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.repeating-crossbow-l0",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.92,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.repeating-crossbow-l0"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.repeating-crossbow-l0-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.repeating-crossbow-l0",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.repeating-crossbow-l0-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.repeating-crossbow-l3",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.72,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.repeating-crossbow-l3"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.repeating-crossbow-l3-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.repeating-crossbow-l3",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.repeating-crossbow-l3-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.repeating-crossbow-basic",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.9,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.repeating-crossbow-basic"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.repeating-crossbow-basic-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.repeating-crossbow-basic",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.repeating-crossbow-basic-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.repeating-crossbow-advanced",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.18,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.repeating-crossbow-advanced"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.repeating-crossbow-advanced-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.repeating-crossbow-advanced",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.repeating-crossbow-advanced-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.repeating-crossbow-supreme",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.15,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.repeating-crossbow-supreme"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.repeating-crossbow-supreme-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.repeating-crossbow-supreme",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.repeating-crossbow-supreme-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.one-hand-shield-basic",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.68,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.one-hand-shield-basic"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.one-hand-shield-basic-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.one-hand-shield-basic",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.one-hand-shield-basic-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.one-hand-shield-supreme",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.08,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.one-hand-shield-supreme"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.one-hand-shield-supreme-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.one-hand-shield-supreme",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.one-hand-shield-supreme-damage"
+  },
+  {
+    "canBeBlocked": true,
+    "damageChannel": "physical",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.two-hand-shield-advanced",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.72,
+    "powerResolverId": "resolver:combat.damage-power.physical",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.two-hand-shield-advanced"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.two-hand-shield-advanced-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.two-hand-shield-advanced",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.two-hand-shield-advanced-damage"
+  },
+  {
+    "canBeBlocked": false,
+    "damageChannel": "instrument",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.bamboo-flute-advanced",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.instrument-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.8,
+    "powerResolverId": "resolver:combat.damage-power.instrument",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.bamboo-flute-advanced"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.bamboo-flute-advanced-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.bamboo-flute-advanced",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.bamboo-flute-advanced-damage"
+  },
+  {
+    "canBeBlocked": false,
+    "damageChannel": "instrument",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.seven-string-advanced",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.instrument-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.72,
+    "powerResolverId": "resolver:combat.damage-power.instrument",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.seven-string-advanced"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.seven-string-advanced-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.seven-string-advanced",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.seven-string-advanced-damage"
+  },
+  {
+    "canBeBlocked": false,
+    "damageChannel": "magic",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.attack-magic-l0",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.magic-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.95,
+    "powerResolverId": "resolver:combat.damage-power.magic",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.attack-magic-l0"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.attack-magic-l0-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.attack-magic-l0",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.attack-magic-l0-damage"
+  },
+  {
+    "canBeBlocked": false,
+    "damageChannel": "magic",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.attack-magic-l3",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.magic-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.88,
+    "powerResolverId": "resolver:combat.damage-power.magic",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.attack-magic-l3"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.attack-magic-l3-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.attack-magic-l3",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.attack-magic-l3-damage"
+  },
+  {
+    "canBeBlocked": false,
+    "damageChannel": "magic",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.attack-magic-basic",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.magic-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 0.92,
+    "powerResolverId": "resolver:combat.damage-power.magic",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.attack-magic-basic"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.attack-magic-basic-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.attack-magic-basic",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.attack-magic-basic-damage"
+  },
+  {
+    "canBeBlocked": false,
+    "damageChannel": "magic",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.attack-magic-advanced",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.magic-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.12,
+    "powerResolverId": "resolver:combat.damage-power.magic",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.attack-magic-advanced"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.attack-magic-advanced-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.attack-magic-advanced",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.attack-magic-advanced-damage"
+  },
+  {
+    "canBeBlocked": false,
+    "damageChannel": "magic",
+    "enabled": true,
+    "id": "combat-damage-rule.yunhua.attack-magic-supreme",
+    "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.magic-damage-reduction",
+    "packId": "pack:yunhua",
+    "powerMultiplier": 1.55,
+    "powerResolverId": "resolver:combat.damage-power.magic",
+    "schemaVersion": 2,
+    "sourcePath": "yunhua/skills.json#combat-damage-rule.yunhua.attack-magic-supreme"
+  },
+  {
+    "enabled": true,
+    "id": "combat-effect.yunhua.attack-magic-supreme-damage",
+    "kind": "combat-effect",
+    "operation": {
+      "damageRuleId": "combat-damage-rule.yunhua.attack-magic-supreme",
+      "kind": "dealDamage"
+    },
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/skills.json#combat-effect.yunhua.attack-magic-supreme-damage"
   },
   {
     "acquisition": {

@@ -701,5 +701,17 @@ function automaticSkillsNowMet(
 // 其餘來源訂閱（doc §5.1）：主路徑框架備妥，內容規則待接。
 // TODO: CuisineConsumed（餐館 ×1/3 倍率）、CommerceInteractionCompleted /
 //   PlayerConversationCompleted（走 dailyUsage 上限）、TravelCompleted（每趟一次 + 模式倍率）、
-//   MapExplorationCompleted（claimedExplorationRewards 去重）、QuestSettled、
+//   MapExplorationCompleted（claimedExplorationRewards 去重）、
 //   BookUseCommittedForLearning（寫入 learnedKnowledgeIds）、傳授 / 子女學習 Cycle。
+
+/** 公會結案後依報酬規則與角色年齡發放，每筆委託僅一次。 */
+export function handleQuestSettled(state: ProgressionModuleState,
+  event: import('../../contracts/quest').QuestSettledPayload, age: AgeExperienceInput,
+): ModuleResult<ProgressionModuleState> {
+  const key = `quest:${event.questId}`;
+  if (state.masteryLedger[key]) return emptyResult(state);
+  const awards = event.beneficiaryCharacterIds.map(characterId => ({ characterId,
+    ...resolveBaseExperience(event.masteryExperienceRuleId, characterId, age) }));
+  const result = applyCharacterAwards(state, awards, 'quest', age.definitions);
+  return { ...result, nextSlice: { ...result.nextSlice, masteryLedger: { ...result.nextSlice.masteryLedger, [key]: true } } };
+}

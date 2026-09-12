@@ -14,7 +14,7 @@ description: >
 # 正式 Runtime 資料驅動與零暫代
 
 完整規範原文在 `references/specification.md`（十七節，權威文本，逐字保存）。
-目前待清理項目與進度在 `references/cleanup-backlog.md`。
+現況與未完成項目只記錄於專案根目錄下的 `docs/CURRENT_STATUS.md`。不維護重複交接或清理清單。
 本檔是**動手當下**要用的判斷流程與辨識樣式；遇到規範文字的爭議，以原文為準。
 
 ## 為什麼這件事值得這麼嚴格
@@ -285,8 +285,7 @@ Internal Command Handler、Domain Event Subscriber、Pending Interaction Query�
 沒閉合的 Capability：不進正式 Manifest、UI 不顯示、不註冊 Game Command 入口、不被其他 Workflow 呼叫、
 **也不要等玩家按下去才拋「尚未實作」**。
 
-本專案的具體作法：列入 `src/app/composition/manifest.ts` 的 `UNAVAILABLE_CAPABILITIES`，
-每一項附**書面理由**，Router 回 `engine/feature-not-available`。這份清單只能變短。
+本專案的具體作法：未實作能力不加入契約 union、Manifest 或 UI。已註冊的入口必須有完整 Handler 與正式 Context。現況只記錄於 `docs/CURRENT_STATUS.md`。
 
 ## Fixture 與正式路徑必須完全隔離
 
@@ -322,5 +321,4 @@ Fixture 與 Bring-up 工具本身不違規——**被正式路徑碰到才違規
 ## 回報時要誠實標示
 
 做不完的部分要明說，而且要說清楚**卡在哪個具體缺口**（缺哪個 Schema 欄位、哪個模組沒實作、
-哪個檔案被別的工作佔用），不要只寫「待辦」。把它同時記進 `HANDOFF.md` 與
-`references/cleanup-backlog.md`，讓下一個人不必重新調查一次。
+哪個檔案被別的工作佔用），不要只寫「待辦」。只更新 `docs/CURRENT_STATUS.md` 的對應項目；完成後移除該項，不附加舊階段紀錄。

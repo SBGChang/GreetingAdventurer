@@ -1,5 +1,7 @@
 # Inventory 模組契約
 
+> 本文件定義設計契約，不代表全部功能已接入正式遊戲。實際狀態與驗收入口見 [目前實作狀態](../../CURRENT_STATUS.md)。
+
 > **模組 ID：** `inventory`
 >
 > **依賴：** [共用核心契約](00_shared_contracts.md)、Item／Equipment Definition Reader。Inventory 不依賴城市、委託、地圖或戰鬥的內部 State；它只處理已驗證的物品建立、移轉、保留、消耗與裝備要求。

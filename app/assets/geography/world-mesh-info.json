@@ -1,0 +1,18 @@
+{
+  "terrainVertices": 15752,
+  "regions": 4,
+  "landmasses": 1,
+  "inlandLakes": 1,
+  "maxRelief": 27.36257449372445,
+  "cityModels": 16,
+  "uvTextures": [
+    "meadow-albedo.png",
+    "meadow-normal.png",
+    "snow-albedo.png",
+    "snow-normal.png",
+    "sand-albedo.png",
+    "sand-normal.png",
+    "rock-albedo.png",
+    "rock-normal.png"
+  ]
+}

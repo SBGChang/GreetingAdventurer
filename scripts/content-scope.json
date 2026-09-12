@@ -11,7 +11,7 @@
     "都沒有時使用 default。",
     "文化 scope 只允許 *.data.mjs 與 *.md：產出的 HTML 由 Builder 生成（改它等於改產物而非來源），共用 Factory／版型／Builder 會同時影響四國，屬 content-platform。注意 .data.mjs 目前仍是可執行 JavaScript，因此這道門禁擋得住『改到別人的檔』，擋不住『在自己的檔裡寫程式邏輯』——那要等內容改成純 JSON 才能真正保證。"
   ],
-  "default": "engine",
+  "default": "world-atlas",
   "scopes": {
     "culture:yunhua": {
       "why": "yunhua 內容工作：只調整該文化自己的**資料與說明**",
@@ -68,15 +68,55 @@
         "vite.config.ts",
         "electron/**",
         "Start.bat",
-        "HANDOFF.md",
         "README.md",
+        "HANDOFF.md",
+        "docs/DEVLOG.md",
+        "AGENTS.md",
+        "docs/CURRENT_STATUS.md",
+        "docs/03_content/*/*_content.html",
+        ".gitignore",
+        ".claude/**",
+        "docs/00_core/**",
+        "docs/01_world/**",
+        "docs/02_systems/**",
+        "docs/review/**"
+      ]
+    },
+    "world-atlas": {
+      "why": "四國十六城整合：本次明確包含世界文件、四國城市設計資料、Blender 美術與玩家介面。文化單項工作仍使用 culture scope。",
+      "allow": [
+        "src/**",
+        "scripts/**",
+        "content-source/**",
+        "content/**",
+        ".github/**",
+        "package.json",
+        "package-lock.json",
+        "tsconfig.json",
+        "app/**",
+        "vite.config.ts",
+        "electron/**",
+        "Start.bat",
+        "README.md",
+        "HANDOFF.md",
+        "docs/DEVLOG.md",
+        "AGENTS.md",
+        "docs/CURRENT_STATUS.md",
+        "docs/03_content/*/*_content.html",
         ".gitignore",
         ".claude/**",
         "docs/00_core/**",
         "docs/01_world/**",
         "docs/02_systems/**",
         "docs/review/**",
-        "docs/DEVLOG.md"
+        "docs/03_content/yunhua/yunhua_content.md",
+        "docs/03_content/yunhua/yunhua_content.data.mjs",
+        "docs/03_content/vildun/vildun_content.md",
+        "docs/03_content/vildun/vildun_content.data.mjs",
+        "docs/03_content/aurelien/aurelien_content.md",
+        "docs/03_content/aurelien/aurelien_content.data.mjs",
+        "docs/03_content/safir/safir_content.md",
+        "docs/03_content/safir/safir_content.data.mjs"
       ]
     }
   }

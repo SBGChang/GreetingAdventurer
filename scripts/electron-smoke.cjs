@@ -1,0 +1,179 @@
+const { app } = require('electron');
+const { createWindow } = require('../electron/window.cjs');
+const { mkdtempSync, writeFileSync, mkdirSync } = require('node:fs');
+const { tmpdir } = require('node:os');
+const { join, resolve } = require('node:path');
+const assert = require('node:assert/strict');
+app.setPath('userData', mkdtempSync(join(tmpdir(), 'ga-desktop-smoke-')));
+const timeout = setTimeout(() => { console.error('Electron smoke timed out'); app.exit(1); }, 120000);
+app.whenReady().then(async () => {
+  const { win, ready } = createWindow({ show: false, offscreen: true, devUrl: '' });
+  const errors = [];
+  win.webContents.on('console-message', details => { if (details.level === 'error') errors.push(details.message); });
+  await ready;
+  win.webContents.setBackgroundThrottling(false);
+  const run = code => win.webContents.executeJavaScript(code, true);
+  const capture = async filename => {
+    await run(`new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))`);
+    win.webContents.invalidate();
+    await new Promise(resolve => setTimeout(resolve, 350));
+    const frame = await win.webContents.capturePage();
+    writeFileSync(resolve(`dist/${filename}`), frame.toPNG());
+  };
+  const waitFor = async expression => {
+    for (let attempt = 0; attempt < 300; attempt++) {
+      if (await run(expression)) return;
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    throw new Error(`UI did not appear: ${expression}`);
+  };
+  const checkStage = async () => {
+    assert(await run(`(() => { const r=document.querySelector('.game-stage').getBoundingClientRect();
+      return Math.abs(r.width/r.height-16/9)<0.001 && r.left>=-1 && r.top>=-1 && r.right<=innerWidth+1 && r.bottom<=innerHeight+1;
+    })()`), 'landscape stage must fit entirely inside the viewport');
+  };
+  const click = async label => {
+    const expression = `Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim().includes(${JSON.stringify(label)}) && !b.disabled)`;
+    await waitFor(`Boolean(${expression})`);
+    await run(`(${expression}).click()`);
+  };
+  mkdirSync(resolve('dist'), { recursive: true });
+  await waitFor(`Boolean(document.querySelector('.welcome form'))`);
+  await checkStage();
+  await capture('welcome-smoke.png');
+  await run(`document.querySelector('input[name=seed]').value='ui-regression'; document.querySelector('.welcome form').requestSubmit()`);
+  await waitFor(`Boolean(document.querySelector('.player-hud'))`);
+  await click('儲存進度');
+  const saved = await run(`localStorage.getItem('greeting-adventurer.save.v1')`);
+  assert(saved, 'desktop save missing');
+  await waitFor(`document.querySelector('.town-model')?.dataset.ready === 'true'`);
+  assert.equal(await run(`Number(document.querySelector('.town-model').dataset.sceneryCount)`), 36);
+  assert.equal(await run(`document.querySelectorAll('.game-bottom button').length`), 1);
+  assert.equal(await run(`document.querySelector('.player-hud').dataset.culture`), 'culture.yunhua');
+  await capture('desktop-smoke.png');
+  const pointAt = async selector => run(`(() => { const r=document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect(); return {x:Math.round(r.x+r.width/2),y:Math.round(r.y+r.height/2)}; })()`);
+  const hoverAt = async selector => { win.webContents.sendInputEvent({type:'mouseMove',...await pointAt(selector)}); };
+  const tabHeight = await run(`document.querySelector('[data-building-tab=equipmentShop]').getBoundingClientRect().height`);
+  await hoverAt('[data-building-tab=equipmentShop]');
+  await waitFor(`document.querySelector('.town-model').dataset.hovered === 'equipmentShop'`);
+  assert(await run(`!document.querySelector('.building-label').hidden && document.querySelector('.building-label').textContent.includes('裝備店')`), 'tab hover must label the 3D building');
+  await capture('town-hover-smoke.png');
+  assert(await run(`!document.querySelector('.game-brand') && !document.querySelector('.town-heading')`), 'town chrome must omit game title and sidebar headings');
+  assert(await run(`(() => {const nav=document.querySelector('.building-sidebar nav');return nav.scrollHeight<=nav.clientHeight+1 && getComputedStyle(nav).scrollbarWidth==='none';})()`), 'all facility labels must fit without scrollbar');
+  assert(await run(`getComputedStyle(document.querySelector('.building-sidebar')).backgroundImage==='none'`), 'facility labels must have no sidebar board');
+
+  assert(await run(`document.querySelector('[data-building-tab=equipmentShop]').getBoundingClientRect().height > ${tabHeight} * 1.4`), 'selected tab must expand its layout height');
+  assert(await run(`document.querySelector('[data-building-tab][data-neighbor=true]').getBoundingClientRect().height < ${tabHeight} * .9`), 'adjacent tabs must compress');
+  assert(await run(`document.querySelectorAll('[data-building-tab] .ui-art').length === document.querySelectorAll('[data-building-tab]').length`), 'every facility tab needs painted art');
+
+  win.webContents.sendInputEvent({type:'mouseMove',x:500,y:35});
+  await waitFor(`document.querySelector('.town-model').dataset.hovered === '' && document.querySelector('.building-label').hidden`);
+  const canvasPoint = async kind => run(`(() => {
+    const host=document.querySelector('.town-model');
+    const p=JSON.parse(host.dataset.landmarks)[${JSON.stringify(kind)}];
+    const r=host.querySelector('canvas').getBoundingClientRect();
+    return {x:Math.round(r.x+p.x*r.width),y:Math.round(r.y+p.y*r.height)};
+  })()`);
+  const kinds = await run(`Array.from(document.querySelectorAll('[data-building-tab]')).map(b=>b.dataset.buildingTab)`);
+  for (const kind of kinds) {
+    await hoverAt(`[data-building-tab=${kind}]`);
+    await waitFor(`document.querySelector('.town-model').dataset.cameraFocus==='${kind}' && document.querySelector('.town-model').dataset.cameraMoving==='false'`);
+    win.webContents.sendInputEvent({type:'mouseMove',...await canvasPoint(kind)});
+    await waitFor(`document.querySelector('[data-building-tab=${kind}]').dataset.active === 'true'`);
+  }
+  await hoverAt('[data-building-tab=equipmentShop]');
+  await waitFor(`document.querySelector('.town-model').dataset.cameraFocus==='equipmentShop' && document.querySelector('.town-model').dataset.cameraMoving==='false'`);
+  const buildingPoint = await canvasPoint('equipmentShop');
+  win.webContents.sendInputEvent({type:'mouseDown',button:'left',clickCount:1,...buildingPoint});
+  win.webContents.sendInputEvent({type:'mouseUp',button:'left',clickCount:1,...buildingPoint});
+  await waitFor(`Boolean(document.querySelector('[data-screen=shop]'))`);
+  await click('回主城');
+  await waitFor(`document.querySelector('.town-model')?.dataset.ready === 'true'`);
+  // Hidden offscreen windows lack OS focus; explicitly deliver the DOM focus events.
+  await run(`(() => { const tab=document.querySelector('[data-building-tab=adventurerGuild]'); tab.focus(); tab.dispatchEvent(new FocusEvent('focusin',{bubbles:true})); })()`);
+  await waitFor(`document.querySelector('.town-model').dataset.hovered === 'adventurerGuild'`);
+  await run(`document.activeElement.dispatchEvent(new FocusEvent('focusout',{bubbles:true})); document.activeElement.blur()`);
+  await click('冒險者公會');
+  await waitFor(`Boolean(document.querySelector('[data-screen=guild]'))`);
+  await new Promise(resolve => setTimeout(resolve, 200));
+  await capture('guild-smoke.png');
+  await click('回主城');
+  await click('裝備店');
+  await waitFor(`Boolean(document.querySelector('[data-screen=shop]'))`);
+  await capture('shop-smoke.png');
+  await click('環首短刀');
+  await click('鎖片明光甲');
+  await click('行囊選單');
+  await waitFor(`Boolean(document.querySelector('[data-screen=sheet]'))`);
+  await click('隊形配置');
+  await run(`document.querySelector('[data-formation-cell="1-2"]').click()`);
+  await waitFor(`document.querySelector('[data-formation-cell="1-2"]').dataset.occupied === 'true'`);
+  await click('儲存隊形');
+  const formed = await run(`JSON.parse(JSON.parse(localStorage.getItem('greeting-adventurer.save.v1')).payload).state`);
+  const formation = formed.team.combatFormations[formed.team.playerTeamId];
+  assert.equal(formation.placements[formed.team.teams[formed.team.playerTeamId].leaderId].col, 2);
+  await capture('formation-smoke.png');
+  await run(`document.querySelector('[data-menu-tab=items]').click()`);
+  assert(await run(`!!document.querySelector('.inventory-list')`), 'items tab must show the real bag');
+  await run(`document.querySelector('[data-menu-tab=quests]').click()`);
+  assert(await run(`!!document.querySelector('.quest-status-list')`), 'quests tab must render accepted quests');
+  await run(`document.querySelector('[data-menu-tab=equipment]').click()`);
+  await click('環首短刀');
+  await click('鎖片明光甲');
+  await click('引環斬');
+  await new Promise(resolve => setTimeout(resolve, 200));
+  await capture('sheet-smoke.png');
+  const purchased = await run(`localStorage.getItem('greeting-adventurer.save.v1')`);
+  const snapshot = JSON.parse(JSON.parse(purchased).payload).state;
+  const leader = snapshot.team.teams[snapshot.team.playerTeamId].leaderId;
+  assert(snapshot.inventory.equipmentLoadouts[leader].weaponSets[0].mainHandItemId, 'UI must equip weapon');
+  assert(snapshot.inventory.equipmentLoadouts[leader].weaponSets[0].selectedSkillIds.includes('combat-skill.yunhua.ring-saber-l0'), 'UI must configure actual skill');
+  assert.notEqual(purchased, saved, 'UI purchase must persist a changed save');
+  await win.loadFile(resolve('dist/renderer/index.html'));
+  await click('繼續旅程');
+  await waitFor(`Boolean(document.querySelector('.player-hud'))`);
+  assert.equal(await run(`localStorage.getItem('greeting-adventurer.save.v1')`), purchased);
+  assert(await run(`document.documentElement.scrollWidth <= window.innerWidth`), 'desktop horizontal overflow');
+  await click('冒險者關卡');
+  await click('舊漕渠與沉倉');
+  await waitFor(`Boolean(document.querySelector('[data-current-room]'))`);
+  await click('行囊選單');
+  await waitFor(`Boolean(document.querySelector('.window-surface')) && !document.querySelector('[data-current-room]')`);
+  await click('返回探索');
+  await waitFor(`Boolean(document.querySelector('[data-current-room]'))`);
+  const visited = new Set(); const stack = [];
+  for (let step = 0; step < 80; step++) {
+    if (await run(`Boolean(document.querySelector('[data-encounter=true]'))`)) break;
+    const room = await run(`document.querySelector('[data-current-room]').dataset.currentRoom`);
+    visited.add(room);
+    const moves = await run(`Array.from(document.querySelectorAll('[data-move-room]')).map(b=>({room:b.dataset.moveRoom,open:b.dataset.doorOpen==='true'}))`);
+    let move = moves.find(m => !visited.has(m.room));
+    if (move) stack.push(room); else move = moves.find(m => m.room === stack.pop());
+    assert(move, 'No route to combat');
+    const selector = `[data-move-room=${JSON.stringify(move.room)}]`;
+    if (!move.open) { await run(`document.querySelector(${JSON.stringify(selector)}).click()`); await waitFor(`document.querySelector(${JSON.stringify(selector)}).dataset.doorOpen === 'true'`); }
+    await run(`document.querySelector(${JSON.stringify(selector)}).click()`);
+    await waitFor(`document.querySelector('[data-current-room]').dataset.currentRoom === ${JSON.stringify(move.room)}`);
+  }
+  await capture('dungeon-smoke.png');
+  await run(`document.querySelector('[data-encounter=true]').click()`);
+  await waitFor(`Boolean(document.querySelector('[data-combat-side=enemy]'))`);
+  await capture('combat-smoke.png');
+  for(let turn=0; turn<100 && await run(`Boolean(document.querySelector('[data-combat-side=enemy]'))`); turn++) {
+    const beforeAction = await run(`localStorage.getItem('greeting-adventurer.save.v1')`);
+    await click('引環斬');
+    await waitFor(`Boolean(document.querySelector('[data-combat-side=enemy][data-alive=true][data-target-ready=true]'))`);
+    await run(`document.querySelector('[data-combat-side=enemy][data-alive=true][data-target-ready=true]').click()`);
+    await waitFor(`localStorage.getItem('greeting-adventurer.save.v1') !== ${JSON.stringify(beforeAction)}`);
+  }
+  assert(!await run(`Boolean(document.querySelector('[data-combat-side=enemy]'))`), 'UI combat did not finish');
+  assert(await run(`Boolean(document.querySelector('[data-current-room]'))`), 'UI combat must return to exploration');
+  win.setSize(800, 720);
+  await new Promise(resolve => setTimeout(resolve, 150));
+  assert(await run(`document.documentElement.scrollWidth <= window.innerWidth`), 'compact horizontal overflow');
+  await checkStage();
+  await capture('compact-smoke.png');
+  assert.equal(errors.length, 0, errors.join('\n'));
+  console.log('ELECTRON PASSED: 3D landmarks, canvas hit-testing, keyboard/tab hover,  onboarding, navigation, purchase/equip/skills, save/reload, dungeon movement and combat victory, responsive layout');
+  clearTimeout(timeout); app.exit(0);
+}).catch(error => { console.error(error); app.exit(1); });

@@ -17,5 +17,5 @@ export default defineConfig({
     outDir: resolve(import.meta.dirname, 'dist/renderer'),
     emptyOutDir: true,
   },
-  server: { port: 5473 },
+  server: { port: 5473, strictPort: true },
 });

@@ -226,9 +226,10 @@
     "enabled": true,
     "id": "combat-damage-rule.core.physical",
     "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.general-damage-reduction",
     "packId": "pack:core",
     "powerResolverId": "resolver:combat.damage-power.physical",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "core/combat-rules.json#combat-damage-rule.core.physical"
   },
   {
@@ -237,9 +238,10 @@
     "enabled": true,
     "id": "combat-damage-rule.core.magic",
     "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.magic-damage-reduction",
     "packId": "pack:core",
     "powerResolverId": "resolver:combat.damage-power.magic",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "core/combat-rules.json#combat-damage-rule.core.magic"
   },
   {
@@ -248,9 +250,10 @@
     "enabled": true,
     "id": "combat-damage-rule.core.instrument",
     "kind": "combat-damage-rule",
+    "mitigationSecondaryId": "secondary-attribute.core.instrument-damage-reduction",
     "packId": "pack:core",
     "powerResolverId": "resolver:combat.damage-power.instrument",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "core/combat-rules.json#combat-damage-rule.core.instrument"
   },
   {
@@ -575,7 +578,7 @@
     "masteryExperienceMode": "damage",
     "packId": "pack:core",
     "resourceCosts": [],
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "core/combat-rules.json#combat-skill.core.monster-slam",
     "targeting": {
       "targetResolverId": "resolver:combat.target-single-hostile"

@@ -1,0 +1,18 @@
+{
+  "camera": "Locked town camera",
+  "facilities": [
+    "adventurerGuild",
+    "inn",
+    "tavern",
+    "bookstore",
+    "equipmentShop",
+    "itemShop",
+    "home",
+    "trainingGround",
+    "cityGate",
+    "adventureCheckpoint"
+  ],
+  "sceneryBuildings": 36,
+  "meshObjects": 54,
+  "people": 0
+}

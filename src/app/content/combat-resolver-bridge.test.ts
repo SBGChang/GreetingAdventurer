@@ -43,7 +43,13 @@ export function runTests(): void {
     ['weighted-product-params'],
   );
 
+  let weaponDamage = 0;
   const bridge = createCombatResolverPort({
+    statistics: { getSnapshot: id => ({
+      effectivePrimaryAttributes: attributesById(id),
+      secondaryAttributes: { 'secondary-attribute.core.physical-damage': weaponDamage, 'secondary-attribute.core.general-damage-reduction': 0.5 },
+      maxHealth: 200, maxMana: 120, carryingCapacity: 30, sourceRevisionKey: 'test',
+    }) },
     registry,
     combatDefs,
     progressionDefs,
@@ -80,5 +86,10 @@ export function runTests(): void {
   });
 
   // 真實內容 params：bias 5 + actor.muscle×1.5 − target.muscle×1 = 5 + 30 − 10 = 25。
+  weaponDamage = 60;
+  const equippedDamage = bridge.resolvePower({ resolverId: 'resolver:combat.damage-power.physical' as ResolverId,
+    encounter, actorId: 'p1' as CombatantId, targetId: 'p2' as CombatantId,
+    mitigationSecondaryId: 'secondary-attribute.core.general-damage-reduction' as import('../../contracts/core').SecondaryAttributeId });
+  assert(equippedDamage === 42.5, `武器與 50% 減傷應為 42.5，實得 ${equippedDamage}`);
   assert(damage === 25, `真實內容物理傷害應為 25，實得 ${String(damage)}`);
 }

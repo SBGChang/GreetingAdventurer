@@ -1,7 +1,8 @@
 {
   "loadOrder": [
     "pack:core",
-    "pack:yunhua"
+    "pack:yunhua",
+    "pack:world-cities"
   ],
   "localizationBundles": [
     {
@@ -23,6 +24,16 @@
       "bundleId": "bundle.yunhua.en",
       "contentRoot": "locale/en",
       "locale": "en"
+    },
+    {
+      "bundleId": "bundle.world-cities.zh-Hant",
+      "contentRoot": "locale/zh-Hant",
+      "locale": "zh-Hant"
+    },
+    {
+      "bundleId": "bundle.world-cities.en",
+      "contentRoot": "locale/en",
+      "locale": "en"
     }
   ],
   "manifestVersion": "1.0.0",
@@ -41,6 +52,22 @@
       "requiredPacks": [
         {
           "packId": "pack:core",
+          "version": "1.0.0"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "contentRoot": "world",
+      "optional": false,
+      "packId": "pack:world-cities",
+      "requiredPacks": [
+        {
+          "packId": "pack:core",
+          "version": "1.0.0"
+        },
+        {
+          "packId": "pack:yunhua",
           "version": "1.0.0"
         }
       ],

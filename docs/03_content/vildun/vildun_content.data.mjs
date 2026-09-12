@@ -7,7 +7,7 @@ export const cultureMeta = {
   name: '維爾冬',
   direction: '北方',
   pillars: ['氏族與誓盟', '寒地狩獵', '木鐵與海岸器作', '刻石與長歌'],
-  cities: ['霜灣', '杉脊堡'],
+  cities: ['霜灣', '杉脊堡', '冰鑿城', '燼鐵城'],
   scope: 'Tier I～II 第一版可玩內容；Tier III～V 鎖定命名、裝備路線與內容語法。',
   version: '2026-08-14',
 };

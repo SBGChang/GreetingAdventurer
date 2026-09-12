@@ -705,9 +705,12 @@ function placementCells(shape: GroupShape, size: MonsterBodySize): readonly (rea
 // 決定的。理由：§7.2「Map Spawn Rule 只決定怪群槽位、威脅與體型合法性，不選擇地圖專屬怪種」——
 // 地圖挑的是「Tier × 威脅 × 體型」符合的編組，所以池裡每個合法怪種都必須有一個可被挑中的編組，
 // 否則那隻怪永遠不會出現。混種編組（例如頭目帶隨扈）在設計來源裡沒有任何一筆，不予發明。
+// 第一版方案（待討論）：有正式素材定義的怪物掉落一份素材，其餘尚無對應素材不虛構掉落。
+const DROP_MATERIALS: Readonly<Record<string,string>> = { 'tide-shell-crab': 'tide-shell', 'bamboo-back-badger': 'bamboo-back-hide', 'privateer-crossbow': 'green-iron-ingot' };
 function encounterGroup(row: MonsterRow): Authored<EncounterGroupDefinition> {
-  const cells = placementCells(row.groupShape, row.size);
-  const count = row.groupShape === 'swarm' ? SWARM_SIZE : 1;
+  // 第一版方案（待討論）：Tier I 小型怪群為三隻，讓單人旅者有可完成的初期委託；Tier II 保留大型群體。
+  const count = row.groupShape === 'swarm' ? (row.tier === 1 ? 3 : SWARM_SIZE) : 1;
+  const cells = placementCells(row.groupShape, row.size).slice(0, count);
   const id = monsterId(row.local);
   // memberDefinitionIds 逐**個體**列出（同一隻怪重複 8 次），不是去重的種類清單。
   // 這是 §5 那條規約的資料形狀，也是引擎的讀法：`encounterBudgets()`（src/modules/combat/system.ts
@@ -728,6 +731,7 @@ function encounterGroup(row: MonsterRow): Authored<EncounterGroupDefinition> {
     initialPlacements,
     experienceBudgetId: EXPERIENCE_BUDGET_ID,
     rewardResolverId: rewardResolverId(row.threat),
+    itemRewards: DROP_MATERIALS[row.local] ? [{ itemDefinitionId: yunhua.id<import('../../src/contracts/core').ItemDefinitionId>('material', DROP_MATERIALS[row.local]!), quantity: 1 }] : [],
   };
 }
 

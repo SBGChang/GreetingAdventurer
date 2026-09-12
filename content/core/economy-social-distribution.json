@@ -105,65 +105,93 @@
   },
   {
     "enabled": true,
+    "fixedAmount": {
+      "amount": 200,
+      "currencyId": "currency.core.standard"
+    },
     "id": "reward-rule.core.quest-purchase",
     "kind": "reward-rule",
     "packId": "pack:core",
     "resolverId": "resolver:economy.reward.quest-purchase",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "core/economy-social-distribution.json#reward-rule.core.quest-purchase"
   },
   {
     "enabled": true,
+    "fixedAmount": {
+      "amount": 400,
+      "currencyId": "currency.core.standard"
+    },
     "id": "reward-rule.core.quest-delivery",
     "kind": "reward-rule",
     "packId": "pack:core",
     "resolverId": "resolver:economy.reward.quest-delivery",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "core/economy-social-distribution.json#reward-rule.core.quest-delivery"
   },
   {
     "enabled": true,
+    "fixedAmount": {
+      "amount": 600,
+      "currencyId": "currency.core.standard"
+    },
     "id": "reward-rule.core.quest-escort",
     "kind": "reward-rule",
     "packId": "pack:core",
     "resolverId": "resolver:economy.reward.quest-escort",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "core/economy-social-distribution.json#reward-rule.core.quest-escort"
   },
   {
     "enabled": true,
+    "fixedAmount": {
+      "amount": 800,
+      "currencyId": "currency.core.standard"
+    },
     "id": "reward-rule.core.quest-rescue",
     "kind": "reward-rule",
     "packId": "pack:core",
     "resolverId": "resolver:economy.reward.quest-rescue",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "core/economy-social-distribution.json#reward-rule.core.quest-rescue"
   },
   {
     "enabled": true,
+    "fixedAmount": {
+      "amount": 600,
+      "currencyId": "currency.core.standard"
+    },
     "id": "reward-rule.core.quest-exploration",
     "kind": "reward-rule",
     "packId": "pack:core",
     "resolverId": "resolver:economy.reward.quest-exploration",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "core/economy-social-distribution.json#reward-rule.core.quest-exploration"
   },
   {
     "enabled": true,
+    "fixedAmount": {
+      "amount": 1000,
+      "currencyId": "currency.core.standard"
+    },
     "id": "reward-rule.core.quest-suppression",
     "kind": "reward-rule",
     "packId": "pack:core",
     "resolverId": "resolver:economy.reward.quest-suppression",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "core/economy-social-distribution.json#reward-rule.core.quest-suppression"
   },
   {
     "enabled": true,
+    "fixedAmount": {
+      "amount": 1500,
+      "currencyId": "currency.core.standard"
+    },
     "id": "reward-rule.core.quest-hunt",
     "kind": "reward-rule",
     "packId": "pack:core",
     "resolverId": "resolver:economy.reward.quest-hunt",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "core/economy-social-distribution.json#reward-rule.core.quest-hunt"
   },
   {
@@ -172,16 +200,17 @@
     "kind": "reward-rule",
     "packId": "pack:core",
     "resolverId": "resolver:economy.reward.dungeon-gold",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "core/economy-social-distribution.json#reward-rule.core.dungeon-gold"
   },
   {
     "enabled": true,
     "id": "reward-rule.core.loot-direct-sale",
+    "itemValueMultiplier": 0.8,
     "kind": "reward-rule",
     "packId": "pack:core",
     "resolverId": "resolver:economy.reward.loot-direct-sale",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourcePath": "core/economy-social-distribution.json#reward-rule.core.loot-direct-sale"
   },
   {
@@ -229,7 +258,9 @@
   },
   {
     "auction": {
+      "companionBidPolicy": "affordableIntrinsic",
       "companionBidResolverId": "resolver:distribution.companion-bid",
+      "directSaleRewardRuleId": "reward-rule.core.loot-direct-sale",
       "minimumBid": "intrinsicValue",
       "tieBreakPolicy": "deterministicFromDistributionId",
       "unclaimedSaleMultiplier": 0.8
@@ -242,7 +273,7 @@
     "kind": "asset-distribution-rule",
     "packId": "pack:core",
     "remainderPolicy": "deterministicRotation",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourceKind": "dungeonLoot",
     "sourcePath": "core/economy-social-distribution.json#asset-distribution-rule.core.player-dungeon-loot"
   },
@@ -256,13 +287,15 @@
     "npcItemRecipientResolverId": "resolver:distribution.npc-item-recipient",
     "packId": "pack:core",
     "remainderPolicy": "deterministicRotation",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourceKind": "dungeonLoot",
     "sourcePath": "core/economy-social-distribution.json#asset-distribution-rule.core.npc-dungeon-loot"
   },
   {
     "auction": {
+      "companionBidPolicy": "affordableIntrinsic",
       "companionBidResolverId": "resolver:distribution.companion-bid",
+      "directSaleRewardRuleId": "reward-rule.core.loot-direct-sale",
       "minimumBid": "intrinsicValue",
       "tieBreakPolicy": "deterministicFromDistributionId",
       "unclaimedSaleMultiplier": 0.8
@@ -275,7 +308,7 @@
     "kind": "asset-distribution-rule",
     "packId": "pack:core",
     "remainderPolicy": "deterministicRotation",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourceKind": "expiredQuestCargo",
     "sourcePath": "core/economy-social-distribution.json#asset-distribution-rule.core.player-expired-quest-cargo"
   },
@@ -289,7 +322,7 @@
     "npcItemRecipientResolverId": "resolver:distribution.npc-item-recipient",
     "packId": "pack:core",
     "remainderPolicy": "deterministicRotation",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourceKind": "expiredQuestCargo",
     "sourcePath": "core/economy-social-distribution.json#asset-distribution-rule.core.npc-expired-quest-cargo"
   },
@@ -302,7 +335,7 @@
     "kind": "asset-distribution-rule",
     "packId": "pack:core",
     "remainderPolicy": "deterministicRotation",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "sourceKind": "questReward",
     "sourcePath": "core/economy-social-distribution.json#asset-distribution-rule.core.quest-reward-currency"
   }

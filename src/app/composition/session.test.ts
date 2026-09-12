@@ -13,7 +13,10 @@
 import { requireInstance } from '../../modules/map/public';
 import { FIXTURE, createFixtureState } from '../../modules/dungeon/fixtures';
 
-import { runGameCommand } from './session';
+import { runGameCommand, settleWorld, settlePlayerDecision, scheduleBootstrapJobs } from './session';
+import { UnavailableCapabilityError } from './capability';
+import { makeEncounter } from '../../modules/combat/fixtures';
+import type { CombatantId } from '../../contracts/core';
 import { baseState, makeAssembler, openRedDoor } from '../../testing/composition/session-fixture';
 import type { GameState } from './state';
 
@@ -26,6 +29,42 @@ const assembler = makeAssembler();
 export type SessionTestResult = Readonly<{ name: string; pass: boolean; error?: string }>;
 
 const CASES: readonly Readonly<{ name: string; run: () => void }>[] = [
+  {
+    name: '未接線 port 回傳 typed rejection 且不提交狀態／ID',
+    run: () => {
+      const state = baseState();
+      const result = runGameCommand(state, openRedDoor, () => { throw new UnavailableCapabilityError('test.port'); });
+      assert(!result.accepted && result.rejection.code === 'engine/capability-unavailable', '應明確拒絕');
+      assert(result.state === state, '失敗不可提交任何狀態');
+    },
+  },
+  {
+    name: '敵方回合阻塞必須傳回 UI 使用的結算結果，不能繼續世界時間',
+    run: () => {
+      const base = baseState();
+      const enemy = 'enemy' as CombatantId;
+      const encounter = { ...makeEncounter([{ combatantId: enemy, side: 'enemy' }]),
+        playerTeamId: base.team.playerTeamId, currentActorId: enemy };
+      const state: GameState = { ...base, combat: { ...base.combat,
+        encounters: { [encounter.encounterId]: encounter } } };
+      const result = settlePlayerDecision(state, base.team.playerTeamId, () => { throw new UnavailableCapabilityError('enemy.ai'); });
+      assert(result.blocked === 'engine/capability-unavailable', '敵方錯誤不得被丟掉');
+      assert(result.state === state && result.steps.length === 0, '阻塞後不得結算世界');
+    },
+  },
+  {
+    name: '已到期工作不得把世界時鐘撥回過去',
+    run: () => {
+      const base = baseState();
+      const state = scheduleBootstrapJobs({ ...base, core: { ...base.core, worldDay: 200 } }, [{
+        type: 'mapRefreshCheck', ownerModule: 'map' as never, targetId: 'missing-map',
+        dueDay: 100 as never, payload: { reason: 'regular' },
+      }]);
+      const result = settleWorld(state, state.team.playerTeamId, assembler);
+      assert(result.state.core.worldDay === 200, '日期不得倒退');
+      assert(Object.keys(result.state.core.scheduler.jobsById).length === 0, '到期失效工作應消耗');
+    },
+  },
   {
     name: '玩家 openDungeonDoor 的 OpenMapDoor 跨模組落到真實 map Slice，門被打開',
     run: () => {

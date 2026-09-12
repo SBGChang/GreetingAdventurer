@@ -173,6 +173,6 @@ export interface CharacterStatisticsCalculator {
   calculate(input: Readonly<CharacterStatisticsInput>): CharacterStatisticsSnapshot;
   calculateAction(input: Readonly<ActionStatisticsInput>): ActionStatisticsSnapshot;
   previewEquipment(input: Readonly<EquipmentPreviewInput>): EquipmentPreviewResult;
-  // world/derived-statistics 供給 inventory encumbrance 的入口（HANDOFF 記載的缺口）。
+  // world/derived-statistics 供給 inventory encumbrance 的入口（docs/CURRENT_STATUS.md 記載的缺口）。
   calculateCarryCapacity(input: Readonly<CarryCapacityInput>): number;
 }

@@ -444,7 +444,7 @@ const cases: readonly Case[] = [
       assert(r1.nextSlice.instances[MAP_ID]!.currentVersion === 1, '有人時不應刷新');
       const reg = findEvent(eventsOf(r1.outgoingMessages), 'MapRefreshPendingRegistered');
       assert(reg !== undefined && reg.checkDay === 101, '應登記次日（101）Pending 檢查');
-      assert(r1.scheduledJobs.length === 1, '應排一個 pending 檢查 Job');
+      assert(r1.scheduledJobs.length === 2, '保留次日 pending 檢查與下一輪固定日曆');
       assert(r1.nextSlice.instances[MAP_ID]!.refresh.pendingSinceDay === 100, 'pendingSinceDay 應為 100');
 
       // 次日仍有人 → 保留 Pending，仍不刷新，並把檢查順延到 102（同時排出 102 的新 Job）。
@@ -639,7 +639,7 @@ const cases: readonly Case[] = [
       const r = handleMapRefreshCheck(regularJob(100), locked, makeContext({ worldDay: 100 as WorldDay }));
       assert(r.nextSlice.instances[MAP_ID]!.currentVersion === 1, '鎖定中不應刷新');
       assert(!hasEvent(eventsOf(r.outgoingMessages), 'MapRefreshed'), '鎖定中不應 emit MapRefreshed');
-      assert(r.scheduledJobs.length === 0, '鎖定中固定日曆不位移，不排 Job');
+      assert(r.scheduledJobs.length === 1 && r.scheduledJobs[0]!.dueDay === 101, '鎖定不改變固定日曆；下一輪仍排在 offset + cadence 的日子');
 
       const query = createMapQuery(locked, stubDefinitionReader());
       assert(query.isRefreshLocked(MAP_ID, 100 as WorldDay), 'day 100 應為鎖定中');

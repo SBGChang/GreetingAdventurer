@@ -1,5 +1,5 @@
 // app/content/cross-module-ports.ts
-// 真實跨模組 Query Port adapter（HANDOFF「跨模組 Query ← 各模組 createXxxQuery」）。
+// 真實跨模組 Query Port adapter（docs/CURRENT_STATUS.md「跨模組 Query ← 各模組 createXxxQuery」）。
 //
 // 各模組 Handler 吃的是**窄化的消費者 Port**（DungeonTeamPort、CombatLoadoutQuery…），不是別的模組
 // 的完整 Query。這層把「擁有模組的公開 Query（讀真實 sibling Slice）」轉接成消費者要的窄形狀——
@@ -196,7 +196,7 @@ export type CharacterStatsQueryDeps = Readonly<{
   worldDay: WorldDay;
 }>;
 
-export function createCharacterStatsQuery(deps: CharacterStatsQueryDeps): CharacterStatsQuery {
+export function createCharacterStatsQuery(deps: CharacterStatsQueryDeps): CharacterStatsQuery & { getSnapshot(id: CharacterId, weaponSetId?: import('../../contracts/core').WeaponSetId): import('../../contracts/statistics').CharacterStatisticsSnapshot } {
   const characterQuery = createCharacterQuery(deps.characterState);
   const progressionQuery = makeProgressionQuery(deps.progressionState, deps.progressionReader);
   const inventoryQuery = createInventoryQuery(deps.inventoryState, deps.itemReader);
@@ -207,7 +207,7 @@ export function createCharacterStatsQuery(deps: CharacterStatsQueryDeps): Charac
 
   // 兩個入口共用同一條算式；差別只有「角色從哪裡來」——已在 Slice 裡的用 id 查，
   // 還沒進 Slice 的（生成／出生）直接把草稿傳進來。
-  const statsOf = (character: Character) => {
+  const statsOf = (character: Character, selectedWeaponSetId?: import('../../contracts/core').WeaponSetId) => {
       const id = character.characterId;
       const loadout = inventoryQuery.getEquipmentLoadout(id);
       const equipmentDefinitionViews = collectEquippedEquipmentViews(
@@ -234,14 +234,15 @@ export function createCharacterStatsQuery(deps: CharacterStatsQueryDeps): Charac
         conditionModifierRefs: [],
         equipmentLoadout: loadout,
         equipmentDefinitionViews,
-        selectedWeaponSetId: firstWeaponSetId(loadout),
+        selectedWeaponSetId: selectedWeaponSetId ?? firstWeaponSetId(loadout),
         statisticsRuleId: deps.statisticsRuleId,
       };
       const snapshot = calculator.calculate(input);
-      return { maxHealth: snapshot.maxHealth, maxMana: snapshot.maxMana };
+      return snapshot;
   };
 
   return {
+    getSnapshot: (id, weaponSetId) => statsOf(characterQuery.getCharacter(id), weaponSetId),
     getStats: (id: CharacterId) => statsOf(characterQuery.getCharacter(id)),
     getStatsForCharacter: (character: Character) => statsOf(character),
   };
