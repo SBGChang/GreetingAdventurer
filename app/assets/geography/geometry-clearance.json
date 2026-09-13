@@ -2,144 +2,250 @@
   "assets": [
     {
       "path": "app/assets/town3d/yunhua-town.glb",
-      "sha256": "b17dca7fa85b84d14f1341e64afa20a68009ba884a9e539ac663608f58025ab3"
+      "sha256": "040c1ceec86b6e0c27949307397d9846bb40508a1d5d76d369e79d653e479fb2"
     },
     {
       "path": "app/assets/town3d/yunhua-town.blend",
-      "sha256": "18ee0ba963726beba428fb22e5b99ac32247425b3d1052a228542451c0995506"
+      "sha256": "33298b07f119469bc615bbddbb802db3de8158768d9fb2a37f6545cb1d5b249f"
     },
     {
       "path": "app/assets/geography/qingcen.glb",
-      "sha256": "64baa13892c13146c14264a9c5c8ce81916a6b9de1a13d50262ab9bca88a0cf5"
+      "sha256": "b048cd92f82c0cf8a740dee6d7be12c37310cabe842e5b60b961ae8d9607a368"
     },
     {
       "path": "app/assets/geography/qingcen.blend",
-      "sha256": "011ae8bb27ed1033a4d497fbaf6de6963f2677c975a99e5f615c9555384b7b6d"
+      "sha256": "34d5513f9215f80629fc3261fee32fcc67c429cb6efd4a80b6a7b65bbefd86d1"
     },
     {
       "path": "app/assets/geography/chengpu.glb",
-      "sha256": "4aff2020491275ea310dc23fd94789a4d216d8c14e9e33a94f874ce98babf4c3"
+      "sha256": "9b1b176ccb3157f8d71b7a7ef4cff5a61e6534aa5269db0d7da8ad71fb8b502e"
     },
     {
       "path": "app/assets/geography/chengpu.blend",
-      "sha256": "48b9745d3447a0c0e413ee4a9ceb3d7a98896921725fe2b79868438f248b95fc"
+      "sha256": "ed696163b15b23f4a80465d1e9eb2d0dfe7bb1d2d9abaa4540cc78a89380322d"
     },
     {
       "path": "app/assets/geography/chiling.glb",
-      "sha256": "e8cde4c65c4e7df3aab1508950417e1f79d477a11b87a78b636831a90409f6ac"
+      "sha256": "28f838fb26c8cd86196cde3e1d9b5b52bf8788b8925ad133fe39bbc683be9750"
     },
     {
       "path": "app/assets/geography/chiling.blend",
-      "sha256": "2b506b16fc4211279f399aaa7d9d4a20427c30d85b40a68e775ec4a531007237"
+      "sha256": "7f0ccdb841e67127fb7a514ba08a19527b1cbc895fcd46112ee6efb80c3b41a0"
     },
     {
       "path": "app/assets/geography/frostbay.glb",
-      "sha256": "5d47a0416f0d145b89631f9e9ca558d91bd568acc836e6ec5aa87b33e69c3743"
+      "sha256": "c1b34a9463efc80946d2e01c0be0832c9e806eb034454e2f693c04beaacb3833"
     },
     {
       "path": "app/assets/geography/frostbay.blend",
-      "sha256": "01449d72f25b79d42e7deff053259b73233086ae09f26b532395d03798cd5b58"
+      "sha256": "5c80232cb9b195a04575ed8a0b97031afa6ff3eade36b24f89d863573cf4092e"
     },
     {
       "path": "app/assets/geography/cedarkeep.glb",
-      "sha256": "83298175056097803a5125f9d5043b82ea295d3d01ff25fd626f8a24c79e3a6f"
+      "sha256": "a551a3c9b860d8f9c3ea485557c09967cce558b9ce2cf4aebd42a9aa84d57487"
     },
     {
       "path": "app/assets/geography/cedarkeep.blend",
-      "sha256": "e33a3a47d98bd3083fb144500baa97ebe4031c8916fbeedcdfe78df2e14ac896"
+      "sha256": "1cd288ced0573c3ed93c02c8e0ef5bea89a9b0fca43b84ef1c7bf893b87ec40a"
     },
     {
       "path": "app/assets/geography/dawncrown.glb",
-      "sha256": "bb5941d7934c271d3e1fa8b29aa74c388d99f776260cdb5b18cee3a0f86c99ec"
+      "sha256": "6648095c5f88e1030f639420102bf8ef8824b2f119cd244ba6566eeb4cf5416b"
     },
     {
       "path": "app/assets/geography/dawncrown.blend",
-      "sha256": "00108a1ebb5a44d5383780ae75eb739165e12e7517c5d0183aa19645cf7d60ca"
+      "sha256": "e67f4ca6504b7e2aba4da21010cba6f4def11bbc4ad46a94b34264ce47f9c75f"
     },
     {
       "path": "app/assets/geography/greyshield.glb",
-      "sha256": "367601fdebd7d88cd28f2ec3c4c458d3534fe57ff8683e98c39ecf29c405d9ed"
+      "sha256": "2189cd754a7c11dc0892457f9ac892107958eb55d61778ad2ba8ccf1c9583c2a"
     },
     {
       "path": "app/assets/geography/greyshield.blend",
-      "sha256": "6dcb0e3ca37f70afe3756f5ca8e5271b76331575998d221bfaf195deaee776ce"
+      "sha256": "13405a5aa48f041faa4dbd6067cd9df6314cf2028808dd94aa7263ce0b1d4164"
     },
     {
       "path": "app/assets/geography/starwell.glb",
-      "sha256": "fe9f0233258900c2459182b4373921b0f8f86e1488ae6391857ffb8c1b2ff919"
+      "sha256": "cbfc37c4aed1a7a2cf23406ffe98c3941d3cba8e646d08146e99042bf53b0702"
     },
     {
       "path": "app/assets/geography/starwell.blend",
-      "sha256": "7160d7b80ec4bc117078e7de24b9d06cde9f10b98fddca279f4bffb4b856a777"
+      "sha256": "0eb1e1a617070590bd6650464791b7cffc31399e63e399dd77ff83f8735fab80"
     },
     {
       "path": "app/assets/geography/redsail.glb",
-      "sha256": "bbbe341934eb854f85de0e955be3c53fbca024640c2ddf956466f3ce92a4626f"
+      "sha256": "91c1e24dfb00f4fe8f98852ca08e92b26a480cd3d8521302c08ff4a81c67bea1"
     },
     {
       "path": "app/assets/geography/redsail.blend",
-      "sha256": "6f4962cd7cea6c48848ea1b49e37900e0ce676044221ec60be87c9981ec99f58"
+      "sha256": "3091b29865d4c27ef3a3f08e63772c58600c4fcdd36cabdeae8d61b017115bd1"
     },
     {
       "path": "app/assets/geography/icechisel.glb",
-      "sha256": "c87000d429328a213b4e07a7f50b3bc2f42344c08bc939d074eeefa878d54219"
+      "sha256": "663efc3dfec412d498668ec853041ae4a8a5b741f4c750ef8ef9d9fb7ad9e642"
     },
     {
       "path": "app/assets/geography/icechisel.blend",
-      "sha256": "9c4e0e0b22dafef8ffd6d38db6d88dbdc546b032675527ff50a49d9dbed86856"
+      "sha256": "c6633342f5a93bbd789c61cf671f4cd20227c435d0ac9e0bf600d8e916bc3479"
     },
     {
       "path": "app/assets/geography/emberforge.glb",
-      "sha256": "4b9ed07bb1a17323198b65b5a2dfc2ef14dd9c3bc3853effed472055475c9065"
+      "sha256": "f40ae3700523e9e7997a2ae270a4bed875fd514a2fccacba78e0606b03aca367"
     },
     {
       "path": "app/assets/geography/emberforge.blend",
-      "sha256": "dc3ded6d455cd8068709660e6cac3ffedfd36b62ae78fdbc03b662f1d1d9da6f"
+      "sha256": "bb7c2b567a6cbcb4ba88b78d08eccf3908fbbdbc9c2447f6a28f9ab5055909b8"
     },
     {
       "path": "app/assets/geography/windharvest.glb",
-      "sha256": "559077322aeb3967fe16695755ca016ce1ffce7b5b7cc0d3294e6732bc53bc1d"
+      "sha256": "bffd256a2b1c95c0ffa1b7666fa1238ed7613897c646f921f4b133155fef03ec"
     },
     {
       "path": "app/assets/geography/windharvest.blend",
-      "sha256": "1b934cdae040cd191f23c1e51fafd144ebd1e37a1d617992f40a558cb78e820c"
+      "sha256": "c6b37b104dd973afdff5f269934ad0c3731ea019cc624c1b1ef4030d6a90067e"
     },
     {
       "path": "app/assets/geography/whitecliff.glb",
-      "sha256": "b645398fe5caec127a3721a96c793819a5ec0c4d4f22912736d00ed42249bf7d"
+      "sha256": "07dadb94c1941b744bdce8b3aff39a6b8d77f5158e704add52db4dbb12d54950"
     },
     {
       "path": "app/assets/geography/whitecliff.blend",
-      "sha256": "a28b90a376408c8004c7279818adca0aea7629e95653d12433551208d433f38c"
+      "sha256": "8dacd7202bd9a91aa75df59bfac3d3780e3e262894371201ae8091b8e061778c"
     },
     {
       "path": "app/assets/geography/saltmirror.glb",
-      "sha256": "4bbd9a0ec098150e6960291e71d45240f619899ae2bc215f413c3e8826e0a1d6"
+      "sha256": "2bd412ed5503cb2e4b86ced8de6236a6596234c29657accd8dc8ee28634794d7"
     },
     {
       "path": "app/assets/geography/saltmirror.blend",
-      "sha256": "399edbb1cb7eb199b730c8866ef8165ba21eddf18919ba4a698796efe45153cc"
+      "sha256": "bc88a629d25874dc122643bbba19adfb02095efa2a21c598f63b5649402a5bac"
     },
     {
       "path": "app/assets/geography/ochrestep.glb",
-      "sha256": "e9fd6f59247a7412fe16611c99539aefb6e66903b3f6323b6fffa43f3f43ac0e"
+      "sha256": "af6953eaf10c51be4edd4277af8e575bc13214c8100fbb1ea07410820aa38a7d"
     },
     {
       "path": "app/assets/geography/ochrestep.blend",
-      "sha256": "b26356ce6e375d8f608b122bc9b70c35e31c3eaf06a99538fd569b5c7aabbe36"
+      "sha256": "c5495d35c91028aacd8196c0e2329d621320c4e62831b56d46ce5cf26b1ff6f4"
     },
     {
       "path": "app/assets/geography/world.glb",
-      "sha256": "edb0dbf586fcaedc844b797297f9788ff8a283a346be1c6f953a87b21570ff89"
+      "sha256": "99751e114a5936fb8b7f45d75cf684c0e3f6cb0c4958b7483a19544f39b824d0"
     },
     {
       "path": "app/assets/geography/world.blend",
-      "sha256": "cf83c521967725145a72d8ae848553166fe570851b66aed5266dc1f619e4ceeb"
+      "sha256": "291e0f5b82b1c29134653db9f4ac5d17d077e1f6390a2eb7e6eb5da56b1026e1"
     }
   ],
   "issues": [],
   "topology": {
     "landComponents": 1,
     "shoreLoops": 2
-  }
+  },
+  "infrastructure": {
+    "bridges": 3,
+    "gates": 32,
+    "harborBuildings": 16,
+    "canyonApproaches": 1
+  },
+  "streets": [
+    {
+      "city": "qingcen",
+      "pavementSamples": 1387,
+      "frontages": 30,
+      "maximumDoorDistance": 2.099,
+      "blockedSamples": 0
+    },
+    {
+      "city": "chengpu",
+      "pavementSamples": 1295,
+      "frontages": 40,
+      "maximumDoorDistance": 1.817,
+      "blockedSamples": 0
+    },
+    {
+      "city": "chiling",
+      "pavementSamples": 1244,
+      "frontages": 33,
+      "maximumDoorDistance": 1.817,
+      "blockedSamples": 0
+    },
+    {
+      "city": "frostbay",
+      "pavementSamples": 1345,
+      "frontages": 36,
+      "maximumDoorDistance": 1.817,
+      "blockedSamples": 0
+    },
+    {
+      "city": "cedarkeep",
+      "pavementSamples": 1333,
+      "frontages": 34,
+      "maximumDoorDistance": 1.817,
+      "blockedSamples": 0
+    },
+    {
+      "city": "dawncrown",
+      "pavementSamples": 1541,
+      "frontages": 44,
+      "maximumDoorDistance": 1.817,
+      "blockedSamples": 0
+    },
+    {
+      "city": "greyshield",
+      "pavementSamples": 1453,
+      "frontages": 43,
+      "maximumDoorDistance": 1.817,
+      "blockedSamples": 0
+    },
+    {
+      "city": "starwell",
+      "pavementSamples": 1322,
+      "frontages": 35,
+      "maximumDoorDistance": 1.817,
+      "blockedSamples": 0
+    },
+    {
+      "city": "icechisel",
+      "pavementSamples": 1203,
+      "frontages": 32,
+      "maximumDoorDistance": 1.817,
+      "blockedSamples": 0
+    },
+    {
+      "city": "emberforge",
+      "pavementSamples": 1471,
+      "frontages": 34,
+      "maximumDoorDistance": 1.817,
+      "blockedSamples": 0
+    },
+    {
+      "city": "windharvest",
+      "pavementSamples": 1327,
+      "frontages": 32,
+      "maximumDoorDistance": 1.817,
+      "blockedSamples": 0
+    },
+    {
+      "city": "whitecliff",
+      "pavementSamples": 1261,
+      "frontages": 30,
+      "maximumDoorDistance": 1.817,
+      "blockedSamples": 0
+    },
+    {
+      "city": "saltmirror",
+      "pavementSamples": 1284,
+      "frontages": 29,
+      "maximumDoorDistance": 1.817,
+      "blockedSamples": 0
+    },
+    {
+      "city": "ochrestep",
+      "pavementSamples": 1196,
+      "frontages": 30,
+      "maximumDoorDistance": 1.817,
+      "blockedSamples": 0
+    }
+  ]
 }

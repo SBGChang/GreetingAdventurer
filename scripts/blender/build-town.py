@@ -78,6 +78,29 @@ def group(name, facility=None):
     roots.append(obj)
     return obj
 
+def discard_unused_geometry():
+    # Joining objects and rebuilding cities leaves unused mesh datablocks behind.
+    # Keep cached materials for the next city, but never save dead geometry.
+    for blocks in [bpy.data.meshes,bpy.data.curves]:
+        for block in list(blocks):
+            if block.users==0:blocks.remove(block)
+
+def prune_unused_uvs():
+    # Procedural cylinders contribute a default UVMap even when every material
+    # uses Craft UV. Keep actual material bindings; omit unused per-vertex data.
+    for obj in scene.objects:
+        if obj.type!='MESH':continue
+        active=obj.data.uv_layers.active.name if obj.data.uv_layers.active else None
+        required=set()
+        for material in obj.data.materials:
+            if not material or not material.use_nodes:continue
+            for node in material.node_tree.nodes:
+                if node.type=='UVMAP':required.add(node.uv_map or active)
+                if node.type=='TEX_IMAGE' and not node.inputs['Vector'].is_linked:required.add(active)
+                if node.type=='TEX_COORD' and node.outputs['UV'].is_linked:required.add(active)
+        for layer in list(obj.data.uv_layers):
+            if layer.name not in required:obj.data.uv_layers.remove(layer)
+
 def finish(obj, name, material):
     obj.name = name
     obj.parent = parent
@@ -216,6 +239,12 @@ def building(name,facility,x,y,w,d,h,storeys=1):
     return root
 
 group('Town foundations')
+craft_source=Path(__file__).with_name('town-craft.py')
+exec(compile(craft_source.read_text(encoding='utf-8'),str(craft_source),'exec'),globals())
+district_source=Path(__file__).with_name('town-neighbourhoods.py')
+exec(compile(district_source.read_text(encoding='utf-8'),str(district_source),'exec'),globals())
+infra_source=Path(__file__).with_name('town-infrastructure.py')
+exec(compile(infra_source.read_text(encoding='utf-8'),str(infra_source),'exec'),globals())
 box('Diorama bed',(0,0,-1.30),(68,60,1.9),darkstone,.35)
 # The river crosses the town and turns toward the foreground.
 box('North bank',(0,12.5,-.13),(64,30,.40),stone[2])
@@ -223,7 +252,9 @@ box('Southwest bank',(-16.6,-16.45,-.13),(30.8,22.1,.40),stone[1])
 box('Southeast bank',(18.1,-16.45,-.13),(27.8,22.1,.40),stone[2])
 box('Canal',(0,0,-.32),(64.7,57.5,.10),water,.02)
 for y in [-5.4,-2.5]:
-    for x in range(-32,32): box('Quay ashlar',(x+.5,y,-.08),(.97,.35,.56),random.choice(stone),.04)
+    for x in range(-32,32):
+        if y==-5.4 and -1.7<x+.5<4.7:continue
+        box('Quay ashlar',(x+.5,y,-.08),(.97,.35,.56),random.choice(stone),.04)
 for x in [-1.2,4.2]:
     for y in range(-27,-5): box('Quay ashlar',(x,y+.5,-.08),(.35,.97,.56),random.choice(stone),.04)
 for j in range(8):
@@ -271,19 +302,9 @@ for x in [9,12,15]:
         bpy.ops.mesh.primitive_cylinder_add(vertices=32,radius=radius,depth=.055,location=(x,-8-.1-(.65-radius)*.12,1.8),rotation=(math.pi/2,0,0))
         finish(bpy.context.object,'Archery target',material)
 
-group('Arched canal bridge')
-def bridgez(t): return .28+1.15*math.sin(math.pi*t)
-for j in range(23):
-    t=j/22; y=-6.8+t*5.8; z=bridgez(t)
-    box('Bridge stone tread',(0,y,z),(3.2,.28,.25),stone[j%5],.025)
-for side in [-1,1]:
-    x=side*1.64
-    line('Arch ring',[(x,-6.8+t*5.8,bridgez(t)-.1) for t in [j/30 for j in range(31)]],.22,stone[2])
-    for j in range(8):
-        t=j/7; y=-6.8+t*5.8; z=bridgez(t)
-        box('Bridge baluster',(x,y,z+.45),(.20,.20,.95),stone[4])
-        ball('Bridge post cap',(x,y,z+.97),(.16,.16,.17),stone[3],1)
-    line('Bridge handrail',[(x,-6.8+j/30*5.8,bridgez(j/30)+.83) for j in range(31)],.095,stone[4])
+stone_crossing('Civic canal bridge',-4.5,-3.95,6.3,3.2)
+timber_crossing('West ward footbridge',-23,-3.95,5.9,1.8)
+timber_crossing('South branch footbridge',1.5,-12,7.8,1.8,axis='x')
 
 group('City perimeter and water gates')
 # The front wall is a low cutaway so the fixed camera can see into the city.
@@ -292,10 +313,12 @@ for x in range(-32,33):
     if 5<x<12: continue
     box('Northern crenellation',(x,28,3.65),(.56,1.5,.80),stone[x%5])
 for x in [-32,32]:
-    for y,depth in [(12.7,30.6),(-17,22)]:
+    segments=[(-1.9,1.4),(14.7,26.6),(-17,22)] if x==32 else [(12.7,30.6),(-17,22)]
+    for y,depth in segments:
         box('Side rampart',(x,y,1.4),(1.4,depth,3),stone[0],.10)
     for y in range(-27,29):
         if -6<y<-2:continue
+        if x==32 and abs(y)<=1:continue
         box('Side crenellation',(x,y,3.15),(1.5,.56,.70),stone[y%5])
     box('Canal watergate lintel',(x,-4,2.9),(1.5,4.5,.7),stone[2])
 for x,w in [(-17,29),(18,27)]:
@@ -352,6 +375,7 @@ for i in range(8): box('Boat deck',(-8.8+i*.37,-4.15,.1),(.32,.85,.06),wood)
 for x in [-8.4,-7.8,-7.2]:
     line('Canopy rib',[(x,-4.65,.2),(x,-4.6,.7),(x,-4.15,1),(x,-3.7,.7),(x,-3.65,.2)],.025,timber)
 mesh('Woven boat awning',[(-8.5,-4.65,.3),(-8.5,-4.15,1.03),(-8.5,-3.65,.3),(-7.1,-4.65,.3),(-7.1,-4.15,1.03),(-7.1,-3.65,.3)],[(0,3,4,1),(1,4,5,2)],rope)
+parent.location.x=-3
 
 # Permanent architectural landmarks remain readable without hover or interface labels.
 facilities={r['facility']:r for r in roots if 'facility' in r}
@@ -458,12 +482,13 @@ lots=[
     (7,-18,3,3.5,2.2),(12,-23,3.5,3.0,2.5),(30,-26,2.6,2.8,2.1),
 ]
 for index,(x,y,w,d,h) in enumerate(lots):
-    root=building(f'Residential lane house {index+1:02}',None,x,y,w,d,h,2 if h>3 else 1)
+    root=urban_house('yunhua','Canal household '+str(index+1),None,x,y,w,d,h,index)
     root['scenery']=True
+    root['district']='scholarly courts' if y>12 else 'canal merchants' if y>0 else 'west artisans' if x<0 else 'east waterside families'
 # Narrow row houses fill the merchant streets without competing with the civic landmarks.
 for index,(x,y) in enumerate([(-26,-.5),(-20,-.5),(-14,-.5),(12,.3),(18,.3),(24,.3)]):
-    root=building(f'Quay warehouse {index+1:02}',None,x,y,3.4,2.4,1.9)
-    root['scenery']=True
+    root=urban_house('yunhua','Promenade shopfront '+str(index+1),None,x,y,3.4,2.4,2.2,index+3)
+    root['scenery']=True;root['district']='canal merchants'
 
 group('Street paving and market stalls')
 for x in [-16,0,16]:
@@ -473,23 +498,14 @@ for x in [-16,0,16]:
         box('Street flagstone',(x,y,.10),(2.5,.92,.045),stone[(y+2)%5],.015)
 for x in range(-28,29):
     box('Riverside promenade',(x,-1.8,.105),(.94,1.0,.055),stone[x%5],.015)
-for x,y in [(-6,8),(-3,8),(5,9),(8,11),(-20,-15),(-25,-15),(19,2),(24,2)]:
+for index,(x,y) in enumerate([(-6,8),(-3,8),(5,9),(8,11),(-20,-15),(-25,-15),(19,2),(24,2)]):
     before=set(parent.children)
-    for dx in [-.8,.8]:
-        for dy in [-.55,.55]:box('Market stall upright',(x+dx,y+dy,1),(.075,.075,2),wood,.015)
-    box('Market stall counter',(x,y,.85),(1.8,1.25,.13),timber)
-    mesh('Canvas awning',[(x-1,y-.8,1.9),(x+1,y-.8,1.9),(x-1,y+.8,2.25),(x+1,y+.8,2.25)],[(0,1,3,2)],red if x%2 else rope)
-    for dx in [-.5,0,.5]:ball('Market produce',(x+dx,y,1.1),(.2,.2,.17),leafm[2],1)
+    craft_stall(x,y,craft_trades['canal'][index%4],index,.68)
     decoration_batch(before)
 
-# Two additional crossings connect the outer wards to the central canal.
-for x in [-23,21]:
-    before=set(parent.children)
-    for j in range(22):box('Timber bridge plank',(x,-6.8+j*.28,.4),(1.6,.25,.18),timber,.02)
-    for side in [-1,1]:
-        for y in [-6.8,-5,-3.2,-1.2]:box('Timber bridge post',(x+side*.75,y,.9),(.14,.14,1.2),wood,.02)
-        box('Timber bridge rail',(x+side*.75,-4,1.5),(.11,5.8,.11),timber,.02)
-    decoration_batch(before)
+# Dry-bank approaches join the fixed bridge landings to the promenade and wards.
+for x,y,w,d in [(-4.5,-.35,3.2,1.1),(-2.3,.1,4.4,1.4),(-4.5,-7.7,3.2,1.2),(-23,-.5,1.8,1.1),(-23,-7.4,1.8,1.0),(-3,-12,1.2,1.8),(6,-12,1.2,1.8)]:
+    box('Bridge approach paving',(x,y,.105),(w,d,.055),stone[2],.015)
 
 group('Neighbourhood gardens')
 for x,y in [(-29,16),(-17,19),(-9,19),(13,23),(29,21),(-25,-15),(-18,-24),(-7,-7),(5,-24),(18,-16),(28,-16),(3,8)]:
@@ -521,6 +537,12 @@ for kind,(x,y,footprint,height) in landmark_sizes.items():
     root.location.x+=x*(1-footprint)
     root.location.y+=y*(1-footprint)
 
+checkpoint=facilities['adventureCheckpoint']
+checkpoint.rotation_euler.z=math.pi/2
+checkpoint.location.x=29.05;checkpoint.location.y=-29.05*checkpoint.scale.x
+checkpoint['passageAxis']='x';checkpoint['passageCenter']=[29.05,0]
+facilities['cityGate']['passageAxis']='y';facilities['cityGate']['passageCenter']=[8.5,28]
+
 
 # Resolve scenery against final relocated/scaled buildings before merging meshes.
 from mathutils.bvhtree import BVHTree
@@ -533,7 +555,7 @@ def clearance_tree(objects):
         faces.extend(tuple(i+off for i in p.vertices) for p in data.polygons);evaluated.to_mesh_clear()
     return BVHTree.FromPolygons(vertices,faces) if faces else None
 bpy.context.view_layer.update()
-blockers=[clearance_tree(r.children) for r in roots if r.get('facility') or r.get('scenery')]
+blockers=[clearance_tree(r.children) for r in roots if r.get('facility') or r.get('scenery') or r.get('crossing')]
 for name in ['Gardens and quay furniture','Neighbourhood gardens','Street paving and market stalls']:
     root=next(r for r in roots if r.name==name);batches={}
     for obj in root.children:batches.setdefault(obj.get('decorationBatch',obj.name),[]).append(obj)
@@ -543,22 +565,23 @@ for name in ['Gardens and quay furniture','Neighbourhood gardens','Street paving
             for obj in objects:bpy.data.objects.remove(obj,do_unlink=True)
         elif geometry:blockers.append(geometry)
 
+craft_finish({'key':'yunjing','culture':'yunhua','theme':'canal'})
+urban_ground_finish({'key':'yunjing','culture':'yunhua','theme':'canal'})
+
 # Merge authored objects by building, preserving editable material slots and facility roots.
 # This also keeps the GLB to tens of draw groups rather than thousands of objects.
 for root in roots:
     print('MERGING',root.name,flush=True)
     children=[o for o in list(root.children) if o.type in {'MESH','CURVE'}]
-    if not children: continue
+    if not children:continue
     bpy.ops.object.select_all(action='DESELECT')
-    for o in children: o.select_set(True)
+    for o in children:o.select_set(True)
     bpy.context.view_layer.objects.active=children[0]
-    bpy.ops.object.convert(target='MESH')
-    bpy.ops.object.join()
-    merged=bpy.context.object
-    merged.name=root.name+' geometry'
-    merged.parent=root
+    bpy.ops.object.convert(target='MESH');bpy.ops.object.join()
+    bpy.context.object.name=root.name+' geometry';bpy.context.object.parent=root
 
 
+urban_limit_households({'key':'yunjing','culture':'yunhua'})
 parent=None
 bpy.ops.object.camera_add(location=(49,-74,60))
 camera=bpy.context.object
@@ -582,7 +605,9 @@ for screen in bpy.data.screens:
             area.spaces.active.region_3d.view_perspective='CAMERA'
             area.spaces.active.shading.type='MATERIAL'
 scene.render.filepath=str(OUT/'yunhua-town-render.png')
-bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'yunhua-town.blend'))
+prune_unused_uvs()
+discard_unused_geometry()
+bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'yunhua-town.blend'),compress=True)
 bpy.ops.export_scene.gltf(filepath=str(OUT/'yunhua-town.glb'),export_format='GLB',export_cameras=True,export_lights=False,export_extras=True)
 (OUT/'scene-info.json').write_text(json.dumps({'camera':'Locked town camera','facilities':[r['facility'] for r in roots if 'facility' in r],'sceneryBuildings':len([r for r in roots if r.get('scenery')]),'meshObjects':len([o for o in scene.objects if o.type=='MESH']),'people':0},indent=2),encoding='utf-8')
 print('TOWN MODEL SAVED',flush=True)

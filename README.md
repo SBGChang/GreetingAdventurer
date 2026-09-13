@@ -6,6 +6,8 @@ React／TypeScript／Electron 單機 RPG。遊戲引擎在 renderer 執行，內
 
 需要 Node.js 24 與 npm。Windows 可雙擊 `Start.bat`；首次會安裝相依套件，之後建置並開啟 Electron。
 
+3D 模型（`.blend`／`.glb`）使用 Git LFS。複製專案前先安裝 Git LFS 並執行 `git lfs install`；既有 checkout 更新後執行 `git lfs pull`，確保取得實際模型檔。
+
 ```sh
 npm ci
 npm run app

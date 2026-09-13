@@ -74,6 +74,36 @@ def ribbon(name,points,width,material,raise_z=.055,dashed=False,surface_kind=Non
             faces.append((n,n+1,n+2,n+3))
     obj=mesh(name,vertices,faces,material);uv_project(obj,12);return obj
 
+def compact_world_surfaces():
+    # Dissolve redundant coplanar street-grid faces. This preserves positions,
+    # silhouettes and material/UV boundaries instead of coarsening the buildings.
+    import bmesh
+    for root in roots:
+        if not root.get('cityKey'):continue
+        for obj in root.children:
+            if obj.type!='MESH':continue
+            bpy.ops.object.select_all(action='DESELECT');obj.select_set(True);bpy.context.view_layer.objects.active=obj
+            weld=obj.modifiers.new('Join identical surface vertices','WELD');weld.merge_threshold=.00001
+            bpy.ops.object.modifier_apply(modifier=weld.name)
+            # Isolated knobs, pots and individual lattice bars cannot collapse
+            # below a closed tetrahedron. Remove subpixel components explicitly;
+            # the town view retains them and the atlas retains facade textures.
+            bm=bmesh.new();bm.from_mesh(obj.data);seen=set();discard=[]
+            for vertex in bm.verts:
+                if vertex in seen:continue
+                seen.add(vertex);pending=[vertex];component=[]
+                while pending:
+                    current=pending.pop();component.append(current)
+                    for edge in current.link_edges:
+                        other=edge.other_vert(current)
+                        if other not in seen:seen.add(other);pending.append(other)
+                extent=max(max(v.co[k] for v in component)-min(v.co[k] for v in component) for k in range(3))
+                if extent<.20:discard.extend(component)
+            if discard:bmesh.ops.delete(bm,geom=discard,context='VERTS')
+            bm.to_mesh(obj.data);bm.free()
+            dissolve=obj.modifiers.new('Remove coplanar surface subdivisions','DECIMATE');dissolve.decimate_type='DISSOLVE';dissolve.angle_limit=.00001;dissolve.delimit={'MATERIAL','UV'}
+            bpy.ops.object.modifier_apply(modifier=dissolve.name)
+
 def miniature(city,root):
     # Retain the whole authored settlement plan: walls, districts, canals and civic
     # landmarks share one transform, instead of rearranging eight sample buildings.
@@ -90,7 +120,7 @@ def miniature(city,root):
     hi=Vector(tuple(max(v[i] for v in bounds) for i in range(3)))
     scale=(26 if city['rank']=='capital' else 20)/max(hi.x-lo.x,hi.y-lo.y)
     center=Vector(((lo.x+hi.x)/2,(lo.y+hi.y)/2,lo.z))
-    ratio=min(1,18000/sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in selected))
+    ratio=min(1,10000/sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in selected))
     x,y=city['position'];z=elevation(x,y)+.2
     transform=Matrix.Translation(Vector((x,y,z))) @ Matrix.Scale(scale,4) @ Matrix.Translation(-center)
     for source in selected:
@@ -98,11 +128,19 @@ def miniature(city,root):
         obj.data.transform(transform @ source.matrix_world);obj.parent=root
         bpy.ops.object.select_all(action='DESELECT');obj.select_set(True);bpy.context.view_layer.objects.active=obj
         structural=source.parent and source.parent.name in ['Town foundations','Terrain foundation','Streets and courtyards','Defensive perimeter']
-        if len(obj.data.polygons)>300 and not structural:
+        perimeter=source.parent and source.parent.name=='Defensive perimeter'
+        if len(obj.data.polygons)>300 and (not structural or perimeter):
+            limits=[(min(v.co[k] for v in obj.data.vertices),max(v.co[k] for v in obj.data.vertices)) for k in range(3)]
             weld=obj.modifiers.new('Merge subpixel seams','WELD');weld.merge_threshold=.035
             bpy.ops.object.modifier_apply(modifier=weld.name)
-            decimate=obj.modifiers.new('Atlas building LOD','DECIMATE');decimate.ratio=ratio
+            # Close-view wall caps and tower mosaics now dominate the perimeter.
+            # Give it a gentler reduction than houses, preserving the curtain outline.
+            decimate=obj.modifiers.new('Atlas building LOD','DECIMATE');decimate.ratio=.35 if perimeter else ratio
             bpy.ops.object.modifier_apply(modifier=decimate.name)
+            # Quadric collapse on tiny curved vessels can extrapolate below a
+            # town's footing. A miniature must remain inside its authored volume.
+            for vertex in obj.data.vertices:
+                for k,(low,high) in enumerate(limits):vertex.co[k]=max(low,min(high,vertex.co[k]))
     for obj in imported:bpy.data.objects.remove(obj,do_unlink=True)
 
 def biome_materials():
@@ -274,5 +312,14 @@ def build_world():
         miniature(c,root)
     for image in bpy.data.images:
         if image.source=='FILE' and image.has_data and not image.packed_file:image.pack()
+    # Imported cities share atlases. Embed identical image bytes once in the world GLB.
+    import hashlib
+    packed_images={}
+    for image in list(bpy.data.images):
+        if not image.packed_file:continue
+        key=(hashlib.sha256(image.packed_file.data).digest(),image.colorspace_settings.name)
+        if key in packed_images:
+            image.user_remap(packed_images[key]);bpy.data.images.remove(image)
+        else:packed_images[key]=image
     (OUT/'world-mesh-info.json').write_text(json.dumps({'terrainVertices':land_count,'regions':4,'landmasses':1,'inlandLakes':1,'maxRelief':maxheight,'cityModels':len(atlas['cities']),'uvTextures':[key+'-'+kind+'.png' for key in ['meadow','snow','sand','rock'] for kind in ['albedo','normal']]},indent=2),encoding='utf-8')
     save_scene('world',True)

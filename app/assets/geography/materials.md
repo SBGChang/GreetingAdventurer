@@ -29,13 +29,27 @@ Production seamless tileable square game terrain ALBEDO texture, flat orthograph
 
 Use case: stylized-concept. A single seamless tileable game material texture, square, flat orthographic material scan of weathered alpine granite cliff rock. Fine layered slate-grey and warm grey strata, fractured mineral seams, sediment bands, tiny quartz flecks, deep narrow cracks, subtle ochre lichen deposits in crevices. Rich intricately hand-painted PBR albedo quality suited to a premium fantasy strategy map viewed close up. Dense small and medium-scale varied detail over entire surface. Neutral even diffuse lighting, no directional shadow, no perspective, no terrain silhouette, no peaks, no snow, no borders, no text, no grid, no interface, no objects. A continuous natural rock surface filling the canvas edge to edge, tileable edges.
 
+## 十六城近景工藝材質
+
+[town-craft-atlas.png](town-craft-atlas.png) 由內建 `image_gen.imagegen` 生成，實際尺寸 1254 × 1254，四象限為雪松木板、石灰岩砌石、青綠釉瓦、藍灰板岩。[town-craft-normal.png](town-craft-normal.png) 是 Blender 烘焙的 2048 × 2048 切線法線。各材質以 `Craft UV` 明確綁定象限並留內縮邊界，避免不同材質滲色；城牆小石塊取樣單一石面，地坪與階台使用每 5 個美術單位重複的世界座標投影，垂直面依面向投影，避免拉伸。微細節來自貼圖，屋簷、窗框、雕刻屋脊、棚架、門板、器皿與欄杆使用實際幾何。
+
+多翼住宅合併後，薩菲爾每棟保留最多約 10,000 個三角面，雲京每棟約 18,000 個，減去圓頂、瓦作與小型雕拱過密的細分，保留 UV 與材質；公共建築不套用這個住宅上限。赤帆整城維持原有 420,000 三角面預算。
+
+世界縮景合併共面路面、移除小於 0.2 個世界美術單位的孤立零件，並清除材質未使用的 UV 層；城內模型保留生活細節。單一 GLB 輸出限制在 100 MiB 內，整張世界地圖維持 450,000 三角面上限，均以實際輸出驗證。
+
+生成提示詞（內建工具；圖集由預設生成位置複製到本目錄）：
+
+> Production game architecture material BASE COLOR texture atlas, square high resolution 3072x3072, for finely crafted fixed-camera fantasy town models. Four exactly equal square quadrants, no gutters or margins, strictly orthographic flat surface, no lighting shadows, no perspective, no text or labels. TOP LEFT: warm weathered cedar boards running vertically, fine restrained wood grain, many thin boards (about 12 across), subtle aged joinery, no protruding hardware. TOP RIGHT: refined pale warm limestone ashlar wall in staggered courses, finely chiseled faces and narrow recessed mortar, small surface pores, about 10 stones across. BOTTOM LEFT: elegant muted jade green glazed Chinese curved roof tiles in close regular rows, fine ceramic patina and subtle streaks, 12 tiles across, no entire roofs or buildings. BOTTOM RIGHT: blue charcoal slate roofing shingles in staggered rows, restrained mineral grain and softly worn edges, 12 tiles across. Hand-painted realistic fantasy RPG material quality, sophisticated restrained colors, microdetails for close viewing, evenly lit diffuse albedo, each quadrant is a coherent tiling material patch without objects.
+
 ## 赤帆驛建築材質
 
-城市採固定街區配置：中央水池廣場保留環行空間與座椅，西側四頂紅帆組成市集，商店與酒館接在市集北側；公會、書店與旅館位於北區，工坊與訓練設施位於西南。東南住宅區以四條巷道串連十六棟住宅，主路連接北城門、廣場及南側，橫街連接商業區與住宅區。住宅使用明確地塊，不再以空位散置；建模與匯出後的交叉檢查涵蓋獨立市集根節點。此配置僅套用赤帆驛，世界縮景從同一份模型重建。
+城市採固定街區配置：中央水池廣場保留環行空間與座椅，西側布匹、陶器、蔬果與商旅貨運四種攤位組成市集，商店與酒館接在市集北側；公會、書店與旅館位於北區，工坊與訓練設施位於西南。東南住宅區以四條巷道串連十六棟住宅，主路連接北城門、廣場及南側，橫街連接商業區與住宅區。住宅使用明確地塊，不再以空位散置；建模與匯出後的交叉檢查逐一涵蓋四個攤位根節點。此配置僅套用赤帆驛，世界縮景從同一份模型重建。
 
-赤帆驛使用獨立的 [redsail-detail.py](../../../scripts/blender/redsail-detail.py) 建模細節，先以 Blender 執行 `build-geography.py -- redsail`，再以另一個 Blender 背景程序執行 `build-geography.py -- world` 重建世界縮景。其他十五座城不套用這份建築樣式。圓頂採 64 個徑向分段、24 層弧面與獨立金屬肋線；拱門窗、陽台欄杆、簷口、階梯、露台、城垛及棕櫚分葉由實際幾何呈現，市集帆布採 16 × 12 分段垂墜曲面。
+赤帆驛使用獨立的 [redsail-detail.py](../../../scripts/blender/redsail-detail.py) 建模細節，先以 Blender 執行 `build-geography.py -- redsail`，再以另一個 Blender 背景程序執行 `build-geography.py -- world` 重建世界縮景。薩菲爾四城共用雕拱、釉面、退台住宅與生活物件語彙；赤帆驛的固定街區與大型攤位另有獨立配置。修改共用薩菲爾細節時需重建 `starwell redsail saltmirror ochrestep`，再重建世界縮景。圓頂採 64 個徑向分段、24 層弧面與獨立金屬肋線；拱門窗、陽台欄杆、簷口、階梯、露台、城垛及棕櫚分葉由實際幾何呈現，市集帆布採 16 × 12 分段垂墜曲面。
 
-[redsail-material-atlas.png](redsail-material-atlas.png) 由內建 `image_gen.imagegen` 生成，實際尺寸 1254 × 1254。四象限依序為左上砂岩、右上藍釉星紋磚、左下刺繡红帆布、右下石灰抹面。`Craft UV` 明確綁定材質，保留象限內縮邊界；布面連續展開，砌體按面投影。圖集封裝在 `.blend` 與 `.glb` 中。四種材質使用各自的粗糙度，圖集搭配 Blender 烘焙的 [2048px 法線圖](redsail-craft-normal.png)。城牆由錯縫砌石、牆帽與分層垛口構成，角樓使用弧形砌石與釉磚飾帶；單塊石材的 UV 取樣單一石面，避免將整片磚牆縮在一塊石頭上。側牆補上立體拱窗與簷下托座。完整城鎮三角面上限為 360,000，世界縮景仍使用既有減面流程。
+[redsail-material-atlas.png](redsail-material-atlas.png) 由內建 `image_gen.imagegen` 生成，實際尺寸 1254 × 1254。四象限依序為左上砂岩、右上藍釉星紋磚、左下刺繡红帆布、右下石灰抹面。`Craft UV` 明確綁定材質，保留象限內縮邊界；布面連續展開，砌體按面投影。圖集封裝在 `.blend` 與 `.glb` 中。四種材質使用各自的粗糙度，圖集搭配 Blender 烘焙的 [2048px 法線圖](redsail-craft-normal.png)。城牆由錯縫砌石、牆帽與分層垛口構成，角樓使用弧形砌石與釉磚飾帶；單塊石材的 UV 取樣單一石面，避免將整片磚牆縮在一塊石頭上。側牆補上立體拱窗與簷下托座。包含商業陳列、住宅與公共生活細節的完整城鎮三角面上限為 420,000，世界縮景仍使用既有減面流程。
+
+[redsail-life.py](../../../scripts/blender/redsail-life.py) 定義近景用途與生活細節：布商使用高脊紅棚和垂掛地毯，陶器攤使用靛藍拱棚與分層陶器架，蔬果攤使用亞麻斜棚與波浪垂邊，貨運攤使用半覆木架、板車與貨箱。赤帆十六棟住家混用風塔、織戶、退台與陶工屋，以及 [town-neighbourhoods.py](../../../scripts/blender/town-neighbourhoods.py) 的開放院落、騎樓、附翼與工作院結構；分為四組錯落的家庭街坊。晾衣、屏風窗、露台階梯、盆栽、小窯、排水管及修補補充近景。公共建築各自具有屋頂客房、茶座、藏書閣、材料架或訓練平台。生活物件是靜態場景美術，不代表新增商品、製作或 NPC 行為。布面沿用圖集象限與連續 UV，陶器採帶中空口緣的旋轉剖面，木箱、車輪、棚架及井架使用實際幾何。
 
 生成提示詞：
 

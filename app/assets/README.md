@@ -2,7 +2,7 @@
 
 城鎮使用 Blender 腳本建模與渲染；地下漕渠由內建 imagegen 生成。沒有複製參考專案的圖檔。程式原生 SVG 繪製戰鬥棋子與地圖。
 
-- [十城與四國輿圖](geography/README.md)：十座獨立城市場景、3D 地貌／城市／道路大地圖，以及可編輯 Blender 原始檔。
+- [十六城與四國輿圖](geography/README.md)：十六座獨立城市場景、3D 地貌／城市／道路大地圖，以及可編輯 Blender 原始檔。
 - [雲京 GLB](town3d/yunhua-town.glb)：雲京的固定視角模型，包含功能建築與不可互動街坊。
 - [Blender 場景](town3d/yunhua-town.blend)：可編輯原始場景；由 [建模腳本](../../scripts/blender/build-town.py) 產生 GLB 與渲染圖。
 - [城鎮渲染圖](town3d/yunhua-town-render.png)：標題及設施視窗背景。
@@ -10,6 +10,8 @@
 - [玩家介面美術](ui/README.md)：圖示圖集、木框紙本面板及生成提示詞。
 
 ## 重建城鎮
+
+雲京的三座橋由 [town-infrastructure.py](../../scripts/blender/town-infrastructure.py) 建立：中央石拱橋連接北岸與西南岸、西側木橋連接外坊，南支流水道的木橋連接東西岸。橋具有獨立 `crossing` 根節點、連續承重結構、兩岸支承與引道，不參與裝飾刪除流程；水道交會口不放橫向岸石。修改橋梁後必須驗證兩端落在乾地、橋面連續，以及船隻與建築淨空。
 
 使用 Blender 背景模式執行 `scripts/blender/build-town.py`，會重建可編輯場景、GLB、渲染 PNG 與 `scene-info.json`。模型根節點的 `facility` 對應正式設施種類；`scenery` 為不可互動街坊。幾何、配色、鏡頭與尺寸是美術作者資料，不提供玩法規則。正式互動由 `app/TownModel.tsx` 讀取 GLB，僅開放 GameView 提供的設施。
 

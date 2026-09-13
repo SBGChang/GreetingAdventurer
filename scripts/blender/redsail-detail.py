@@ -95,7 +95,7 @@ def rs_arch(x,y,z,w,h,material=rs_stone):
     for zz in [z+.35,z+.7,z+1.05]:
         if zz<spring:line('Lattice cross rail',[(x-r+.08,y-.05,zz),(x+r-.08,y-.05,zz)],.022,gold)
 
-def redsail_hall(name,facility,x,y,w,d,h):
+def redsail_hall(name,facility,x,y,w,d,h,roof_kind='terrace'):
     root=group(name,facility)
     box('Stepped sandstone footing',(x,y,.16),(w+.55,d+.55,.32),rs_stone,.08)
     box('Limewashed residence',(x,y,.4+h/2),(w,d,h),rs_plaster,.08)
@@ -116,14 +116,14 @@ def redsail_hall(name,facility,x,y,w,d,h):
         box('Carved cornice corbel',(xx,y-d/2-.12,h-.04),(.18,.30,.32),rs_stone,.025)
     rs_arch(x,y-d/2-.12,.34,1.25 if facility else .85,2.35 if facility else 1.65)
     for i in range(3):box('Entry stair',(x,y-d/2-.22-i*.22,.28-i*.07),(1.65,.3,.14),rs_stone,.02)
-    # Smaller residences have roof terraces; public buildings keep prominent ceramic crowns.
-    if facility or int(name.split()[-1])%3==0:
+    # Roof silhouettes express the building's use rather than repeating a cupola.
+    if facility=='adventurerGuild' or (not facility and roof_kind=='dome'):
         cone('Cupola drum',x,y,h+.51,min(w,d)*.43,.35,rs_stone,40,top=min(w,d)*.43)
         rs_dome(x,y,h+.8,w*.43,d*.43,w*.36)
     else:
         for xx in [x-w/2,x+w/2]:box('Terrace parapet',(xx,y,h+.8),(.18,d,.6),rs_stone,.03)
         box('Terrace parapet',(x,y+d/2,h+.8),(w,.18,.6),rs_stone,.03)
-        box('Roof carpet',(x,y,h+.54),(w*.6,d*.6,.025),rs_cloth,0)
+        if facility:rs_public_roof(facility,x,y,w,d,h+.54)
     if facility:
         for xx in [x-w*.43,x+w*.43]:
             for zz in [h*.3,h*.6,h*.9]:box('Pilaster carved collar',(xx,y-d/2-.15,zz),(.38,.28,.14),rs_stone,.02)
@@ -135,7 +135,7 @@ def redsail_hall(name,facility,x,y,w,d,h):
 
 def redsail_finish():
     global parent
-    redsail_masonry()
+    if detail_city=='redsail':redsail_masonry()
     for o in list(scene.objects):
         if o.type=='MESH' and (o.name.startswith('Town ground') or any(m==roadmat for m in o.data.materials)):
             o.data.materials.clear();o.data.materials.append(rs_floor)
@@ -150,29 +150,6 @@ def redsail_finish():
             parent=o.parent;loc=o.location.copy();radius=max(v.co.x for v in o.data.vertices);bottom=min(v.co.z for v in o.data.vertices);top=max(v.co.z for v in o.data.vertices)
             bpy.data.objects.remove(o,do_unlink=True)
             rs_dome(loc.x,loc.y,loc.z+bottom,radius,radius,top-bottom)
-        elif o.name.startswith('Red sail canopy'):
-            parent=o.parent;vs=[v.co for v in o.data.vertices];x=sum(v.x for v in vs)/5;y=sum(v.y for v in vs)/5
-            bpy.data.objects.remove(o,do_unlink=True)
-            verts=[];faces=[];nx=16;ny=12
-            for j in range(ny+1):
-                v=j/ny
-                for i in range(nx+1):
-                    u=i/nx;z=2.65+1.7*(1-abs(2*u-1))-.4*math.sin(v*math.pi)+.1*math.sin(u*math.pi*8)*abs(2*v-1)
-                    verts.append((x-4+u*8,y-3+v*6,z))
-            for j in range(ny):
-                for i in range(nx):
-                    k=j*(nx+1)+i;faces.append((k,k+1,k+nx+2,k+nx+1))
-            cloth=mesh('Curved embroidered market sail',verts,faces,rs_cloth)
-            uv=cloth.data.uv_layers.new(name='Craft UV')
-            for p in cloth.data.polygons:
-                p.use_smooth=True
-                for li in p.loop_indices:
-                    k=cloth.data.loops[li].vertex_index;uv.data[li].uv=(.012+k%(nx+1)/nx*.476,.012+k//(nx+1)/ny*.476)
-            for j in [0,ny]:line('Sail edge binding',[verts[j*(nx+1)+i] for i in range(nx+1)],.045,gold)
-            for dx in [-4,4]:
-                for dy in [-3,3]:line('Market corner pole',[(x+dx,y+dy,.02),(x+dx,y+dy,2.8)],.075,timber)
-            box('Merchant counter',(x,y+1,.7),(5,1,.25),timber,.04)
-            for i in range(5):cone('Market ceramic vessel',x-2+i,y+1,.85,.25,.55,rs_tile,16,top=.17)
         else:
             for slot in o.material_slots:
                 if slot.material==sand and not o.name.startswith('Town ground'):slot.material=rs_stone
@@ -266,7 +243,10 @@ def redsail_masonry():
 
 # Authored districts replace the old generic vacant-lot scatter for this city.
 redsail_plan=[(-8,23),(23,16),(-13,14),(10,17),(-24,-17),(-23,14),(-6,-21),(-14,-17),(0,29),(-29,0)]
-redsail_house_lots=[(x,y) for y in [0,-8,-16,-24] for x in [13,18,23,28]]
+redsail_house_lots=[(13,0),(18.2,1),(24,0),(28,-4.5),
+                   (12.6,-8),(18.1,-8),(24,-8),(28,-12.5),
+                   (13,-16),(18.3,-16.8),(23.5,-16.3),(28,-20),
+                   (12.3,-24),(18,-24),(23.4,-24),(28,-26)]
 
 def redsail_streets():
     # Continuous gate spine, bazaar cross street, and narrower residential lanes.
@@ -310,17 +290,34 @@ def redsail_square():
     for x in [-5,6]:redsail_palm(x,6,s=.8)
     cone('Neighbourhood water well',9,-13,0,.72,.60,rs_stone,16,top=.72)
     cone('Neighbourhood well water',9,-13,.61,.54,.02,water,32,top=.54)
+    # Fixed street furniture outside the central circulation route.
+    for xx in [8.18,9.82]:box('Well windlass upright',(xx,-13,1.0),(.12,.14,1.8),timber,.025)
+    line('Well windlass axle',[(8.1,-13,1.8),(9.9,-13,1.8)],.08,wood)
+    line('Well bucket rope',[(9,-13,1.8),(9,-13,.78)],.018,rope)
+    rs_vessel(9,-13,.76,.20,.30,timber)
+    for x,y in [(4.8,6),(-5.0,-5.6)]:
+        box('Square lantern foot',(x,y,.12),(.42,.42,.24),rs_stone,.04)
+        line('Street lantern bracket',[(x,y,.15),(x,y,2.7),(x+.42,y,2.7)],.055,gold)
+        box('Amber street lantern',(x+.40,y,2.35),(.28,.28,.43),window,.03)
+        for dx in [-.15,.15]:
+            for dy in [-.15,.15]:line('Lantern metal rib',[(x+.4+dx,y+dy,2.1),(x+.4+dx,y+dy,2.59)],.018,gold)
+    box('Public notice board',(5.9,1.5,1.30),(.95,.13,1.10),timber,.035)
+    for xx in [5.55,6.25]:box('Notice board post',(xx,1.5,.68),(.10,.11,1.35),wood,.015)
+    for xx,zz in [(5.7,1.5),(6.1,1.1)]:box('Pinned parchment',(xx,1.415,zz),(.32,.015,.43),rs_linen,.004)
 
 def redsail_homes():
     global parent
-    blockers=[geometry_tree(r.children) for r in roots if r.get('facility') or r.name in ['Town identity landmarks','Local craft and landscape','Market stalls']]
+    blockers=[geometry_tree(r.children) for r in roots if r.get('facility') or r.get('marketStall') or r.name in ['Town identity landmarks','Local craft and landscape']]
     for index,(x,y) in enumerate(redsail_house_lots):
-        root=redsail_hall('Residential ward '+str(index),None,x,y,3.6,3.1,2.4)
-        root['scenery']=True;root['district']='residential';root['streetRow']=index//4
+        if index in [1,3,5,7,9,11,13,15]:
+            root=urban_house('safir','Caravan courtyard household '+str(index),None,x,y,3.7,3.1,2.6,index%9)
+        else:root=rs_lived_home(index,x,y)
+        root['scenery']=True;root['district']=['caravan families','weavers close','potters lane','south garden households'][index//4];root['urbanVersion']=2
         bpy.context.view_layer.update();shape=geometry_tree(root.children)
         if any(t and shape.overlap(t) for t in blockers):raise RuntimeError('Authored Redsail residential lot intersects: '+str((x,y)))
         blockers.append(shape)
     for kind in ['itemShop','tavern']:bpy.data.objects.get(kind)['district']='bazaar'
     for kind in ['equipmentShop','trainingGround']:bpy.data.objects.get(kind)['district']='workshops'
     for kind in ['adventurerGuild','bookstore','inn']:bpy.data.objects.get(kind)['district']='civic-quarter'
-    bpy.data.objects.get('Market stalls')['district']='bazaar'
+
+exec(compile(Path(__file__).with_name('redsail-life.py').read_text(encoding='utf-8'),str(Path(__file__).with_name('redsail-life.py')),'exec'),globals())

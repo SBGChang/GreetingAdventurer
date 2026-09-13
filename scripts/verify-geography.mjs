@@ -5,8 +5,15 @@ import { createHash } from 'node:crypto';
 const folder=resolve('app/assets/geography');
 const atlas=JSON.parse(readFileSync(resolve(folder,'atlas.json'),'utf8').replace(/^\uFEFF/,''));
 const clearance=JSON.parse(readFileSync(resolve(folder,'geometry-clearance.json'),'utf8'));
-assert.deepEqual(clearance.issues,[],'independent scene geometry must not intersect');
+assert.deepEqual(clearance.issues,[],'authored scene geometry and passages must be valid');
 assert.deepEqual(clearance.topology,{landComponents:1,shoreLoops:2},'one continent enclosing one inland lake');
+assert.deepEqual(clearance.infrastructure,{bridges:3,gates:32,harborBuildings:16,canyonApproaches:1},'audit dry bridge landings, continuous decks, open gates, harbor footings and canyon stairs');
+assert.equal(clearance.streets.length,14,'audit the actual regenerated street surfaces');
+for(const audit of clearance.streets){
+ assert(audit.pavementSamples>500,audit.city+' actual street mesh samples');
+ assert.equal(audit.blockedSamples,0,audit.city+' building must not obstruct street pavement');
+ assert(audit.maximumDoorDistance<=2.3,audit.city+' door must reach the visible street');
+}
 const expectedAssets=[...atlas.cities.map(c=>resolve(folder,c.model)),resolve(folder,'world.glb')].flatMap(p=>[p,p.replace(/\.glb$/,'.blend')]);
 assert.deepEqual(clearance.assets.map(a=>resolve(a.path)).sort(),expectedAssets.sort(),'clearance audit must cover every town and world');
 for(const asset of clearance.assets)assert.equal(createHash('sha256').update(readFileSync(asset.path)).digest('hex'),asset.sha256,asset.path+': rebuild geometry clearance after exporting');
@@ -23,17 +30,40 @@ for(const road of atlas.roads){
  const cities=road.ends.map(k=>atlas.cities.find(c=>c.key===k));assert(cities.every(Boolean));
  assert(['land','ferry'].includes(road.kind));assert.equal(road.playable,true);
 }
-function glb(path){const data=readFileSync(path);assert.equal(data.readUInt32LE(0),0x46546c67);assert.equal(data.readUInt32LE(4),2);return {doc:JSON.parse(data.subarray(20,20+data.readUInt32LE(12)).toString()),hash:createHash('sha256').update(data).digest('hex')};}
+function glb(path){const data=readFileSync(path);assert(data.length<100*1024*1024,path+': keep each GLB below the asset size budget');assert.equal(data.readUInt32LE(0),0x46546c67);assert.equal(data.readUInt32LE(4),2);return {doc:JSON.parse(data.subarray(20,20+data.readUInt32LE(12)).toString()),hash:createHash('sha256').update(data).digest('hex')};}
 const hashes=new Set();
+// Blender adds numeric datablock suffixes when several cities are authored in one process.
+// Validate every matching material instance and its actual UV bindings below.
+const materialName=m=>m.name.replace(/\.\d+$/,'');
 const kinds=['inn','tavern','adventurerGuild','itemShop','equipmentShop','trainingGround','bookstore','adventureCheckpoint','cityGate','home'].sort();
 for(const city of atlas.cities){
  const {doc,hash}=glb(resolve(folder,city.model));assert(!hashes.has(hash),'cities must have distinct geometry files');hashes.add(hash);
  assert.deepEqual(doc.nodes.filter(n=>n.extras?.facility).map(n=>n.extras.facility).sort(),kinds,city.key);
  assert(doc.nodes.filter(n=>n.extras?.scenery).length>=9,city.key+' needs residential wards');
  assert.equal(doc.cameras[0].type,'orthographic');
+ const householdTypes=new Set(doc.nodes.filter(n=>n.extras?.scenery&&n.extras?.archetype).map(n=>n.extras.archetype));
+ assert(householdTypes.size>=5,city.key+' must retain varied household silhouettes after export');
+ const households=doc.nodes.filter(n=>n.extras?.scenery);
+ assert(households.every(n=>n.extras?.urbanVersion===2),city.key+' must use the current authored neighbourhood geometry');
+ assert(new Set(households.map(n=>n.extras.district)).size>=3,city.key+' needs distinct inhabited districts');
+ if(!['yunjing','redsail'].includes(city.key)){
+  assert(households.length>=14,city.key+' needs occupied residential streets around its civic and trade quarters');
+  const street=doc.nodes.find(n=>n.name==='Streets and courtyards');
+  assert.equal(street.extras.connectedFrontages,households.length+14,city.key+' roads must connect every household, facility and market front');
+  assert(doc.nodes.filter(n=>n.extras?.facility||n.extras?.scenery||n.extras?.marketStall).every(n=>n.extras.streetConnected===true),city.key+' exported frontage connectivity');
+  assert(doc.nodes.some(n=>n.extras?.publicSpace),city.key+' must preserve its public square');
+ }
+ if(city.key!=='yunjing')assert.equal(doc.nodes.filter(n=>n.extras?.marketStall).length,4,city.key+' must retain four independently authored market trades');
+ if(city.key!=='redsail'){
+  const textured=doc.materials.map((m,index)=>({m,index})).filter(({m})=>m.name.startsWith('Town craft ')&&m.pbrMetallicRoughness?.baseColorTexture&&m.normalTexture);
+  assert(textured.length>=2,city.key+' needs packed near-view albedo and normals');
+  for(const {m,index} of textured)for(const p of doc.meshes.flatMap(mesh=>mesh.primitives).filter(p=>p.material===index)){
+   for(const t of [m.pbrMetallicRoughness.baseColorTexture,m.normalTexture])assert(p.attributes['TEXCOORD_'+(t.texCoord??0)]!==undefined,city.key+' material UV channel must survive merging');
+  }
+ }
  if(city.key==='redsail'){
   for(const name of ['dressed sandstone','star glazed ceramic','embroidered sail','lime plaster']){
-   const materials=doc.materials.map((m,index)=>({m,index})).filter(({m})=>m.name==='Redsail '+name);
+   const materials=doc.materials.map((m,index)=>({m,index})).filter(({m})=>materialName(m)==='Redsail '+name);
    assert(materials.length>0,'Redsail crafted material: '+name);
    for(const {m,index} of materials){
     const texture=m.pbrMetallicRoughness.baseColorTexture;assert(texture,'Redsail material must embed its atlas');
@@ -43,9 +73,9 @@ for(const city of atlas.cities){
    }
   }
   const triangles=doc.meshes.flatMap(m=>m.primitives).reduce((n,p)=>n+doc.accessors[p.indices].count/3,0);
-  assert(triangles<360000,'Redsail street-view architecture and masonry triangle budget');
+  assert(triangles<420000,'Redsail street-view architecture, masonry and household detail triangle budget');
   for(const name of ['Redsail fine limestone paving','Redsail fine dome mosaic']){
-   const entries=doc.materials.map((m,index)=>({m,index})).filter(({m})=>m.name===name);assert(entries.length>0,name);
+   const entries=doc.materials.map((m,index)=>({m,index})).filter(({m})=>materialName(m)===name);assert(entries.length>0,name);
    for(const {m,index} of entries){
     assert(m.normalTexture && m.pbrMetallicRoughness.baseColorTexture,'near-view materials need embedded albedo and tangent normals');
     for(const p of doc.meshes.flatMap(m=>m.primitives).filter(p=>p.material===index)){
