@@ -1,3 +1,5 @@
+import { onCityStockItemAvailable } from '../../modules/quest/public';
+import { supplementMissingContentKinds } from '../../modules/map/public';
 // app/composition/session.ts
 // 引擎 Session：把「一筆玩家命令 / 一個到期 Job」跑成一筆交易，並落實 §7.2 的 Runtime ID 規程。
 //
@@ -96,6 +98,7 @@ import {
   type ModuleContexts,
 } from './router';
 import type { GameCommand } from './messages';
+import type { CombatActionResolvedPayload } from '../../contracts/combat';
 import type { GameScheduledJob, GameState } from './state';
 import type { AnyScheduledJob, ScheduledJobDraft } from '../../contracts/core';
 
@@ -258,7 +261,7 @@ export type ContextAssembler = (runtime: EngineRuntime, state: GameState) => Mod
 // ──────────────────────────────────────────────────────────────────────────
 
 export type GameStepResult =
-  | Readonly<{ accepted: true; state: GameState; kernelRequests?: readonly KernelRequest[] }>
+  | Readonly<{ accepted: true; state: GameState; combatActions: readonly CombatActionResolvedPayload[]; kernelRequests?: readonly KernelRequest[] }>
   | Readonly<{ accepted: false; state: GameState; rejection: CommandRejection }>;
 
 // 排程落地：cancelled 先移除、scheduled 各鑄一個 JobId（走同一交易 cursor），寫入 core.scheduler。
@@ -338,9 +341,16 @@ function runRoot(
     contextFactory,
     applyScheduling: makeApplyScheduling(worldSeed, holder),
   });
+  // Observe already-authored domain facts; discard them with the transaction on rejection.
+  const combatActions: CombatActionResolvedPayload[] = [];
+  const observedConfig = {...config, routeEventSubscribers: (draft: Parameters<typeof config.routeEventSubscribers>[0]) => {
+    const event = draft.event;
+    if (isCombatActionResolved(event)) combatActions.push(event);
+    return config.routeEventSubscribers(draft);
+  }};
   let outcome;
   try {
-    outcome = runTransaction(config, state, transactionId, makeRoot(contextFactory), null);
+    outcome = runTransaction(observedConfig, state, transactionId, makeRoot(contextFactory), null);
   } catch (error) {
     if (!(error instanceof UnavailableCapabilityError)) throw error;
     return {
@@ -356,8 +366,12 @@ function runRoot(
   // §7.2 提交：core.nextRuntimeSequence = 交易私有 cursor 的終值。
   const committed = commitCursor(outcome.state, holder.cursor);
   return outcome.kernelRequests
-    ? { accepted: true, state: committed, kernelRequests: outcome.kernelRequests }
-    : { accepted: true, state: committed };
+    ? { accepted: true, state: committed, combatActions, kernelRequests: outcome.kernelRequests }
+    : { accepted: true, state: committed, combatActions };
+}
+
+function isCombatActionResolved(event: unknown): event is CombatActionResolvedPayload {
+  return typeof event === 'object' && event !== null && 'type' in event && event.type === 'CombatActionResolved';
 }
 
 // 跑一筆玩家命令。envelope 的 CommandId → TransactionId → CorrelationId 依 §7.2 由交易 cursor 起頭
@@ -584,10 +598,10 @@ export type CombatSettleResult = Readonly<{
   blockedBy?: string;
 }>;
 
-export function settlePlayerDecision(state: GameState, teamId: TeamId, assembler: ContextAssembler): SettleResult {
+export function settlePlayerDecision(state: GameState, teamId: TeamId, assembler: ContextAssembler, onCombatStep?: (state:GameState,actorId:CombatantId,actions:readonly CombatActionResolvedPayload[])=>void): SettleResult {
   const encounter = Object.values(state.combat.encounters).find(e => e.playerTeamId === teamId && e.state !== 'resolved');
   if (encounter !== undefined) {
-    const combat = settleCombat(state, encounter.encounterId, assembler);
+    const combat = settleCombat(state, encounter.encounterId, assembler,onCombatStep);
     if (combat.blockedBy !== undefined) return { state: combat.state, steps: [], blocked: combat.blockedBy };
     state = combat.state;
   }
@@ -611,6 +625,7 @@ export function settleCombat(
   initial: GameState,
   encounterId: EncounterId,
   assembler: ContextAssembler,
+  onCombatStep?: (state:GameState,actorId:CombatantId,actions:readonly CombatActionResolvedPayload[])=>void,
 ): CombatSettleResult {
   let state = initial;
   const steps: CombatStep[] = [];
@@ -637,8 +652,37 @@ export function settleCombat(
     }
     state = result.state;
     const after = state.combat.encounters[encounterId];
+    onCombatStep?.(state,actorId,result.combatActions);
     steps.push({ actorId, ...(after !== undefined ? { encounterState: after.state } : {}) });
   }
 
   return { state, steps, ...(blocked !== undefined ? { blockedBy: blocked } : {}) };
+}
+
+/** Explicit save upgrade. Each repair uses the normal transaction bus, owner handler and quest subscribers. No day is advanced. */
+export function upgradeWorldContent(state: GameState, assembler: ContextAssembler): GameState {
+  let current = state;
+  const run = (tag: string, root: (cf: ModuleContextFactory) => ReturnType<typeof routeGameCommand>) => {
+    const seed = current.core.worldSeed as Seed;
+    const holder: CursorHolder = { cursor: current.core.nextRuntimeSequence };
+    const transactionId = mintId<TransactionId>(seed, holder, 'transaction');
+    const result = runRoot(current, seed, holder, transactionId, `content-upgrade:${tag}`, root, assembler);
+    if (!result.accepted) throw new Error(`save/content-upgrade-failed:${result.rejection.code}`);
+    current = result.state;
+  };
+  for (const instance of Object.values(state.map.instances)) {
+    run(`map:${instance.mapId}`, cf => ctx => {
+      const result = supplementMissingContentKinds(instance, ctx.workingState.map, cf(ctx.workingState).map);
+      return { accepted: true, mutation: { sliceName: 'map', nextSlice: result.nextSlice }, outgoing: result.outgoingMessages };
+    });
+  }
+  for (const offer of Object.values(current.city.shopOffers)) {
+    if (offer.state !== 'available' || offer.sourceQuestId) continue;
+    run(`stock:${offer.offerId}`, cf => ctx => {
+      const contexts = cf(ctx.workingState);
+      const result = onCityStockItemAvailable({ type: 'CityStockItemAvailable', cityId: offer.cityId, offerId: offer.offerId, itemId: offer.itemId, itemKind: contexts.city.inventory.getItemKind(offer.itemId) }, ctx.workingState.quest, contexts.questGeneration);
+      return { accepted: true, mutation: { sliceName: 'quest', nextSlice: result.nextSlice, scheduledJobs: result.scheduledJobs }, outgoing: result.outgoingMessages };
+    });
+  }
+  return current;
 }

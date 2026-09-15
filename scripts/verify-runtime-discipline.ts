@@ -56,10 +56,9 @@ function testOnlyReason(file: string): string | undefined {
 // 正式路徑的根
 // ──────────────────────────────────────────────────────────────────────────
 //
-// 目前還沒有 React／Electron 主程式，所以「正式路徑」以**未來的產品進入點會用到什麼**來定義：
-// 引擎 Session、啟動驗證、路由、各模組對外面、內容 adapter、Workflow、kernel、data-runtime。
-// 這份清單就是規範 §2 適用範圍的具體化；產品進入點建立後應改由它單一為根。
+// 正式 renderer 與引擎入口都走傳遞依賴；獨立測試頁不屬於產品入口。
 const PRODUCTION_ROOTS: readonly string[] = [
+  'app/App.tsx',
   'src/app/composition/session.ts',
   'src/app/composition/registry.ts',
   'src/app/composition/router.ts',
@@ -152,7 +151,7 @@ function importsOf(file: string): string[] {
 
 function resolveImport(fromFile: string, spec: string): string | undefined {
   const base = resolve(dirname(fromFile), spec);
-  for (const candidate of [`${base}.ts`, join(base, 'index.ts')]) {
+  for (const candidate of [`${base}.ts`, `${base}.tsx`, join(base, 'index.ts'), join(base, 'index.tsx')]) {
     try {
       if (statSync(candidate).isFile()) return candidate;
     } catch {

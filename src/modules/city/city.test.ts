@@ -253,7 +253,7 @@ const cases: readonly Readonly<{ name: string; run: () => void }>[] = [
         handleBuyShopOffer(
           { type: 'buyShopOffer', offerId: OFFER_AVAILABLE, payerCharacterId: PLAYER_CHARACTER_ID },
           state,
-          makeContext(),
+          { ...makeContext(), canBuyQuestOffer: (questId) => questId === QUEST_A },
         ),
         'Quest 指定品購買應被接受',
       );

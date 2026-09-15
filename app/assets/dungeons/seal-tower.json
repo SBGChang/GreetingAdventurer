@@ -1,0 +1,889 @@
+{
+  "templateId": "map-template.yunhua.seal-tower",
+  "key": "seal-tower",
+  "name": "天衡印塔",
+  "cellSize": 6,
+  "floors": [
+    {
+      "floor": 1,
+      "label": "入塔正印庭",
+      "model": "seal-tower-1.glb",
+      "roomIds": [
+        "f1.入塔入口",
+        "f1.入塔前室",
+        "f1.下行封門梯",
+        "f1.正印前庭",
+        "f1.上行校印廳",
+        "f1.上行校印梯",
+        "f1.側庫",
+        "f1.符紙火陷",
+        "f1.北側環廊"
+      ],
+      "rooms": [
+        {
+          "cells": [
+            {
+              "col": 1,
+              "floor": 1,
+              "row": 6
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.入塔入口"
+        },
+        {
+          "cells": [
+            {
+              "col": 1,
+              "floor": 1,
+              "row": 5
+            },
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 5
+            },
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 6
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.入塔前室"
+        },
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 4
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.下行封門梯"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 5
+            },
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 5
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.正印前庭"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 2
+            },
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 3
+            },
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 3
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.上行校印廳"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 2
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.上行校印梯"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 2
+            },
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 3
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.側庫"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 1
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.符紙火陷"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 1
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.北側環廊"
+        }
+      ],
+      "rows": 6,
+      "cols": 6
+    },
+    {
+      "floor": 2,
+      "label": "校印層",
+      "model": "seal-tower-2.glb",
+      "roomIds": [
+        "f2.下行校印廳",
+        "f2.下行校印梯",
+        "f2.中段校印室",
+        "f2.上行校印梯",
+        "f2.東側書庫",
+        "f2.下層迴廊",
+        "f2.碎印陷阱",
+        "f2.東向短廊"
+      ],
+      "rooms": [
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 2,
+              "row": 1
+            },
+            {
+              "col": 4,
+              "floor": 2,
+              "row": 1
+            },
+            {
+              "col": 3,
+              "floor": 2,
+              "row": 2
+            }
+          ],
+          "floor": 2,
+          "roomId": "f2.下行校印廳"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 2,
+              "row": 2
+            }
+          ],
+          "floor": 2,
+          "roomId": "f2.下行校印梯"
+        },
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": 2,
+              "row": 3
+            },
+            {
+              "col": 2,
+              "floor": 2,
+              "row": 4
+            },
+            {
+              "col": 3,
+              "floor": 2,
+              "row": 4
+            }
+          ],
+          "floor": 2,
+          "roomId": "f2.中段校印室"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 2,
+              "row": 3
+            }
+          ],
+          "floor": 2,
+          "roomId": "f2.上行校印梯"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": 2,
+              "row": 3
+            },
+            {
+              "col": 6,
+              "floor": 2,
+              "row": 3
+            },
+            {
+              "col": 5,
+              "floor": 2,
+              "row": 4
+            },
+            {
+              "col": 6,
+              "floor": 2,
+              "row": 4
+            }
+          ],
+          "floor": 2,
+          "roomId": "f2.東側書庫"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 2,
+              "row": 5
+            },
+            {
+              "col": 4,
+              "floor": 2,
+              "row": 5
+            },
+            {
+              "col": 3,
+              "floor": 2,
+              "row": 6
+            },
+            {
+              "col": 4,
+              "floor": 2,
+              "row": 6
+            }
+          ],
+          "floor": 2,
+          "roomId": "f2.下層迴廊"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": 2,
+              "row": 6
+            }
+          ],
+          "floor": 2,
+          "roomId": "f2.碎印陷阱"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 2,
+              "row": 3
+            }
+          ],
+          "floor": 2,
+          "roomId": "f2.東向短廊"
+        }
+      ],
+      "rows": 6,
+      "cols": 6
+    },
+    {
+      "floor": 3,
+      "label": "藏卷層",
+      "model": "seal-tower-3.glb",
+      "roomIds": [
+        "f3.下行藏卷室",
+        "f3.下行藏卷梯",
+        "f3.上行藏卷室",
+        "f3.上行藏卷梯",
+        "f3.東側典藏庫",
+        "f3.南側卷軸庫",
+        "f3.折角短廊",
+        "f3.落卷陷阱"
+      ],
+      "rooms": [
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": 3,
+              "row": 3
+            },
+            {
+              "col": 2,
+              "floor": 3,
+              "row": 4
+            },
+            {
+              "col": 3,
+              "floor": 3,
+              "row": 4
+            }
+          ],
+          "floor": 3,
+          "roomId": "f3.下行藏卷室"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 3,
+              "row": 3
+            }
+          ],
+          "floor": 3,
+          "roomId": "f3.下行藏卷梯"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 3,
+              "row": 1
+            },
+            {
+              "col": 4,
+              "floor": 3,
+              "row": 1
+            },
+            {
+              "col": 3,
+              "floor": 3,
+              "row": 2
+            }
+          ],
+          "floor": 3,
+          "roomId": "f3.上行藏卷室"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 3,
+              "row": 2
+            }
+          ],
+          "floor": 3,
+          "roomId": "f3.上行藏卷梯"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": 3,
+              "row": 3
+            },
+            {
+              "col": 6,
+              "floor": 3,
+              "row": 3
+            },
+            {
+              "col": 5,
+              "floor": 3,
+              "row": 4
+            },
+            {
+              "col": 6,
+              "floor": 3,
+              "row": 4
+            }
+          ],
+          "floor": 3,
+          "roomId": "f3.東側典藏庫"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 3,
+              "row": 5
+            },
+            {
+              "col": 4,
+              "floor": 3,
+              "row": 6
+            }
+          ],
+          "floor": 3,
+          "roomId": "f3.南側卷軸庫"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 3,
+              "row": 3
+            },
+            {
+              "col": 4,
+              "floor": 3,
+              "row": 4
+            }
+          ],
+          "floor": 3,
+          "roomId": "f3.折角短廊"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": 3,
+              "row": 5
+            }
+          ],
+          "floor": 3,
+          "roomId": "f3.落卷陷阱"
+        }
+      ],
+      "rows": 6,
+      "cols": 6
+    },
+    {
+      "floor": 4,
+      "label": "觀印台",
+      "model": "seal-tower-4.glb",
+      "roomIds": [
+        "f4.塔外出口",
+        "f4.觀印前室",
+        "f4.下行觀印梯",
+        "f4.北側符銘室",
+        "f4.觀印台",
+        "f4.東側儀器庫"
+      ],
+      "rooms": [
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 4,
+              "row": 1
+            }
+          ],
+          "floor": 4,
+          "roomId": "f4.塔外出口"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 4,
+              "row": 1
+            }
+          ],
+          "floor": 4,
+          "roomId": "f4.觀印前室"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 4,
+              "row": 2
+            }
+          ],
+          "floor": 4,
+          "roomId": "f4.下行觀印梯"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": 4,
+              "row": 1
+            },
+            {
+              "col": 6,
+              "floor": 4,
+              "row": 1
+            },
+            {
+              "col": 5,
+              "floor": 4,
+              "row": 2
+            }
+          ],
+          "floor": 4,
+          "roomId": "f4.北側符銘室"
+        },
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": 4,
+              "row": 3
+            },
+            {
+              "col": 3,
+              "floor": 4,
+              "row": 3
+            },
+            {
+              "col": 4,
+              "floor": 4,
+              "row": 3
+            },
+            {
+              "col": 5,
+              "floor": 4,
+              "row": 3
+            },
+            {
+              "col": 2,
+              "floor": 4,
+              "row": 4
+            },
+            {
+              "col": 3,
+              "floor": 4,
+              "row": 4
+            },
+            {
+              "col": 4,
+              "floor": 4,
+              "row": 4
+            },
+            {
+              "col": 5,
+              "floor": 4,
+              "row": 4
+            }
+          ],
+          "floor": 4,
+          "roomId": "f4.觀印台"
+        },
+        {
+          "cells": [
+            {
+              "col": 6,
+              "floor": 4,
+              "row": 3
+            },
+            {
+              "col": 6,
+              "floor": 4,
+              "row": 4
+            }
+          ],
+          "floor": 4,
+          "roomId": "f4.東側儀器庫"
+        }
+      ],
+      "rows": 6,
+      "cols": 6
+    },
+    {
+      "floor": -1,
+      "label": "封門地廳",
+      "model": "seal-tower--1.glb",
+      "roomIds": [
+        "b1.上行封門梯",
+        "b1.封門前廳",
+        "b1.中段封印室",
+        "b1.下行地脈梯",
+        "b1.地脈前廳",
+        "b1.封存架",
+        "b1.地脈短廊"
+      ],
+      "rooms": [
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": -1,
+              "row": 4
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.上行封門梯"
+        },
+        {
+          "cells": [
+            {
+              "col": 1,
+              "floor": -1,
+              "row": 4
+            },
+            {
+              "col": 1,
+              "floor": -1,
+              "row": 5
+            },
+            {
+              "col": 2,
+              "floor": -1,
+              "row": 5
+            },
+            {
+              "col": 3,
+              "floor": -1,
+              "row": 5
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.封門前廳"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": -1,
+              "row": 3
+            },
+            {
+              "col": 4,
+              "floor": -1,
+              "row": 3
+            },
+            {
+              "col": 3,
+              "floor": -1,
+              "row": 4
+            },
+            {
+              "col": 4,
+              "floor": -1,
+              "row": 4
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.中段封印室"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": -1,
+              "row": 2
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.下行地脈梯"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": -1,
+              "row": 1
+            },
+            {
+              "col": 6,
+              "floor": -1,
+              "row": 1
+            },
+            {
+              "col": 6,
+              "floor": -1,
+              "row": 2
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.地脈前廳"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": -1,
+              "row": 5
+            },
+            {
+              "col": 5,
+              "floor": -1,
+              "row": 5
+            },
+            {
+              "col": 4,
+              "floor": -1,
+              "row": 6
+            },
+            {
+              "col": 5,
+              "floor": -1,
+              "row": 6
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.封存架"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": -1,
+              "row": 3
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.地脈短廊"
+        }
+      ],
+      "rows": 6,
+      "cols": 6
+    },
+    {
+      "floor": -2,
+      "label": "地脈主室",
+      "model": "seal-tower--2.glb",
+      "roomIds": [
+        "b2.上行地脈梯",
+        "b2.地脈前廳",
+        "b2.地脈主室",
+        "b2.地脈側庫"
+      ],
+      "rooms": [
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": -2,
+              "row": 2
+            }
+          ],
+          "floor": -2,
+          "roomId": "b2.上行地脈梯"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": -2,
+              "row": 1
+            },
+            {
+              "col": 6,
+              "floor": -2,
+              "row": 1
+            },
+            {
+              "col": 6,
+              "floor": -2,
+              "row": 2
+            }
+          ],
+          "floor": -2,
+          "roomId": "b2.地脈前廳"
+        },
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": -2,
+              "row": 3
+            },
+            {
+              "col": 3,
+              "floor": -2,
+              "row": 3
+            },
+            {
+              "col": 4,
+              "floor": -2,
+              "row": 3
+            },
+            {
+              "col": 5,
+              "floor": -2,
+              "row": 3
+            },
+            {
+              "col": 2,
+              "floor": -2,
+              "row": 4
+            },
+            {
+              "col": 3,
+              "floor": -2,
+              "row": 4
+            },
+            {
+              "col": 4,
+              "floor": -2,
+              "row": 4
+            },
+            {
+              "col": 5,
+              "floor": -2,
+              "row": 4
+            },
+            {
+              "col": 2,
+              "floor": -2,
+              "row": 5
+            },
+            {
+              "col": 3,
+              "floor": -2,
+              "row": 5
+            },
+            {
+              "col": 4,
+              "floor": -2,
+              "row": 5
+            },
+            {
+              "col": 5,
+              "floor": -2,
+              "row": 5
+            }
+          ],
+          "floor": -2,
+          "roomId": "b2.地脈主室"
+        },
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": -2,
+              "row": 6
+            },
+            {
+              "col": 3,
+              "floor": -2,
+              "row": 6
+            }
+          ],
+          "floor": -2,
+          "roomId": "b2.地脈側庫"
+        }
+      ],
+      "rows": 6,
+      "cols": 6
+    }
+  ],
+  "topologyHash": "a21db83736552ebdc938d26309cd84061391cad2e77120cb7c47d7f82f09d5cc"
+}

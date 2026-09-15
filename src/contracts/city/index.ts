@@ -554,6 +554,7 @@ export type CommerceInteractionCompleted = Readonly<{
 // 掃一次 city 的 Slice 去猜是哪一筆——那是把 city 的事實在別的模組重算一次。
 export type CityStockItemAvailable = Readonly<{
   type: 'CityStockItemAvailable';
+  itemKind?: ItemKind;
   cityId: CityId;
   itemId: ItemInstanceId;
   offerId: ShopOfferId;

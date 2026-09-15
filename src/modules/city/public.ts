@@ -104,7 +104,7 @@ export type {
 export const cityModuleContract: ModuleContract = {
   id: 'city' as ModuleId<'city'>,
   owns: 'city' as StateSliceName,
-  reads: [
+  reads: ['reader:quest-query' as ReaderPortId,
     'reader:city-definition' as ReaderPortId,
     'reader:team-query' as ReaderPortId,
     'reader:inventory-query' as ReaderPortId,

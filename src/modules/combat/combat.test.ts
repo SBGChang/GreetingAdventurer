@@ -47,7 +47,8 @@ import {
   WEAPON_SWITCH_DELAY,
   stubResolverPort,
 } from './fixtures';
-import { makeCombatQuery } from './queries';
+import { makeCombatQuery, previewCombatSkill } from './queries';
+import {filterByReach} from './target-shapes';
 import { localCell } from './state';
 import type { Revision, SkillDefinitionId } from '../../contracts/core';
 import type { ApplyCombatCondition } from '../../contracts/character';
@@ -100,6 +101,61 @@ function aliveEnemies(encounter: CombatEncounter): CombatantState[] {
 type Case = Readonly<{ name: string; run: () => void }>;
 
 const cases: readonly Case[] = [
+  {
+    name:'選單目標預覽遵守距離、敵我、自身架勢、資源與失效武器，不變更戰鬥',
+    run:()=>{
+      const actorId='preview-player' as CombatantId;
+      const encounter={...makeEncounter([{combatantId:actorId,side:'player',row:1},{combatantId:'ally',side:'player',row:2},{combatantId:'near',side:'enemy',row:1},{combatantId:'far',side:'enemy',row:3}]),currentActorId:actorId};
+      const ctx=makeCombatContext();
+      const deps={...ctx,loadout:{...ctx.loadout,getActiveWeaponReachCells:()=>1},resolveTargets:(input:Parameters<typeof ctx.resolvers.resolveSkillTargets>[0])=>filterByReach(input.encounter,input.actorId,input.actorReachCells,ctx.resolvers.resolveSkillTargets(input))};
+      const before=JSON.stringify(encounter);
+      const strike=previewCombatSkill(encounter,actorId,SKILL_STRIKE,WEAPON_SET_A,deps);
+      assert(strike.available&&strike.validTargetIds.join(',')==='near','攻擊只亮射程內敵人');
+      const guard=previewCombatSkill(encounter,actorId,SKILL_COUNTER,WEAPON_SET_A,deps);
+      assert(guard.available&&guard.validTargetIds.join(',')===actorId,'自身架勢不得將任意點擊當自身');
+      const heal=previewCombatSkill(encounter,actorId,SKILL_HEAL,WEAPON_SET_A,deps);
+      assert(heal.available&&heal.validTargetIds.every(id=>encounter.combatants[id]!.side==='player'),'治療只亮友軍');
+      assert(JSON.stringify(encounter)===before,'預覽不消耗資源或變更位置／CTB');
+      const exhausted={...encounter,combatants:{...encounter.combatants,[actorId]:{...encounter.combatants[actorId]!,mana:0}}};
+      assert(previewCombatSkill(exhausted,actorId,SKILL_HEAL,WEAPON_SET_A,deps).unavailableReason==='resources','資源不足停用');
+      assert(previewCombatSkill(encounter,actorId,SKILL_STRIKE,WEAPON_SET_B,{...deps,loadout:{...deps.loadout,getActiveWeaponReachCells:()=>undefined}}).unavailableReason==='weapon','空武器組不捏造射程');
+    },
+  },
+  {
+    name: 'CTB 演出事實包含行動成本，區分排程倒扣、失能與已就緒同批行動',
+    run: () => {
+      const ctx=makeCombatContext(),actorId='ctb-player' as CombatantId,enemyId='ctb-enemy' as CombatantId,blockedId='ctb-blocked' as CombatantId;
+      for(const enemyDelay of [25,0]){
+        const base=makeEncounter([{combatantId:actorId,side:'player',characterId:HERO_ID,currentCtb:0},{combatantId:enemyId,side:'enemy',currentCtb:enemyDelay},{combatantId:blockedId,side:'enemy',col:2,currentCtb:5}]);
+        const encounter:CombatEncounter={...base,currentActorId:actorId,readyQueue:enemyDelay===0?[actorId,enemyId]:[actorId],combatants:{...base.combatants,[blockedId]:{...base.combatants[blockedId]!,state:'incapacitated'}}};
+        const state=upsertEncounter(createInitialCombatState(),encounter),original=JSON.stringify(state);
+        const result=ok(handleCombatRest(state,{type:'combatRest',encounterId:encounter.encounterId,actorId},ctx));
+        const event=eventsOf(result.outgoingMessages).find(e=>e.type==='CombatActionResolved');
+        if(!event||event.type!=='CombatActionResolved')throw new Error('Missing timing event');
+        const after=result.nextSlice.encounters[encounter.encounterId]!;
+        assert(event.ctbAfterAction.find(u=>u.combatantId===actorId)!.ctb===70,'行動後端點必須包含 fixture 休止成本 100 − reaction 30');
+        for(const start of event.ctbAfterAction){
+          const end=after.combatants[start.combatantId]!;
+          assert(start.ctb-end.currentCtb===(start.combatantId===blockedId?0:enemyDelay),'失能不扣，ready 同步倒扣；已就緒同批不消耗時間');
+        }
+        assert(after.currentActorId===enemyId&&after.combatants[enemyId]!.currentCtb===0,'倒扣終點必須吻合實際下一位行動者');
+        assert(JSON.stringify(state)===original,'事件取樣不能修改原始狀態');
+      }
+    },
+  },
+  {
+    name: 'CTB query preserves committed ready queue without consuming RNG',
+    run: () => {
+      const base = makeEncounter([{combatantId:'ctb-a',side:'player',currentCtb:0,col:1},{combatantId:'ctb-z',side:'player',currentCtb:0,col:2},{combatantId:'ctb-e',side:'enemy',currentCtb:125,col:1}]);
+      const encounter = {...base, currentActorId:'ctb-z' as CombatantId, readyQueue:['ctb-z','ctb-a'] as CombatantId[]};
+      const state = upsertEncounter(createInitialCombatState(), encounter), ctx = makeCombatContext();
+      const query = makeCombatQuery(state, ctx);
+      const before = JSON.stringify(state);
+      assert(query.getCtbOrder(encounter.encounterId).join(',') === 'ctb-z,ctb-a,ctb-e', 'ready queue wins over lexical ID order');
+      assert(query.getCtbOrder(encounter.encounterId).join(',') === 'ctb-z,ctb-a,ctb-e', 'repeated projection is stable');
+      assert(JSON.stringify(state) === before, 'projection changes neither CTB nor RNG');
+    },
+  },
   {
     // R14 #1：武器組可能存著失效的技能引用（舊存檔、被移除的內容、未載入的內容包）。
     // getAvailableActions 直接 getSkillView 會讓**整個戰鬥選單 Query 拋錯**。
@@ -1245,6 +1301,9 @@ const cases: readonly Case[] = [
       if (adjust === undefined || adjust.kind !== 'adjustCtb') return;
       // 原始 14、菁英抗性 ×0.75 → floor 10。袋子時代這個欄位叫 `amount`，看不出是哪一個。
       assert(adjust.appliedCtbDelta === 10, `應回報折算後的 10（實得 ${adjust.appliedCtbDelta}）`);
+      const event=eventsOf(res.outgoingMessages).find(e=>e.type==='CombatActionResolved');
+      if(!event||event.type!=='CombatActionResolved')throw new Error('Missing timing event');
+      assert(event.ctbAfterAction.find(u=>u.combatantId===enemyId)!.ctb===enc.combatants[enemyId]!.currentCtb+adjust.appliedCtbDelta,'CTB 倒扣起點已包含控制抗性後的技能延遲，不能从前後快照猜測');
     },
   },
   {

@@ -56,9 +56,7 @@ import { MAP_DEFINITION_KINDS } from './map-reader';
 const ACCEPTED_THREATS: Readonly<Record<MapContentKind, readonly MonsterThreatRank[]>> = {
   monsterGroup: ['normal', 'elite'],
   boss: ['boss'],
-  // 以下三種不是怪物內容，沒有威脅等級可篩；本版也沒有任何地圖為它們編列槽位
-  // （九張圖的 spawnBudgets 都沒有 chest／mapEvent／kidnap／control），所以取不到候選就是
-  // 明確失敗，不會靜默生出空內容。
+  // 非戰鬥內容不走威脅篩選；kidnap 由正式救援定義建立守衛與被擄者。
   chest: [],
   mapEvent: [],
   kidnap: [],
@@ -107,6 +105,16 @@ export function createMapContentResolver(deps: MapContentResolverDeps): MapConte
 
   return {
     resolveSpawnPayload: (input): SpawnDraft => {
+      if (input.kind === 'kidnap') {
+        const definitions = contentDefs.filter(d => d.contentKind === 'kidnap' && d.rescue);
+        if (definitions.length !== 1) throw new Error('map/rescue-definition-not-unique');
+        const definition = definitions[0]!;
+        const rescue = definition.rescue!;
+        if (!Number.isSafeInteger(rescue.guardCount) || rescue.guardCount <= 0) throw new Error('map/invalid-rescue-guard-count');
+        const guards = input.generatedContents.filter(c => c.kind === 'monsterGroup' || c.kind === 'boss').slice(-rescue.guardCount);
+        if (guards.length !== rescue.guardCount) throw new Error('map/rescue-guards-unavailable');
+        return { definitionId: definition.id, payload: { kind: 'kidnap', captiveArchetypeId: rescue.captiveArchetypeId, controllerContentIds: guards.map(c => c.contentId) } };
+      }
       const candidates = candidatesFor(input.spawnRule, input.kind);
       if (candidates.length === 0) {
         // 候選池是空的＝這一槽在目前內容下生不出東西。明確失敗，不得回一個空內容讓地圖
@@ -156,6 +164,7 @@ export type MapContextDeps = Readonly<{
   definitions: MapDefinitionReader;
   world: MapHandlerContext['world'];
   presence: TeamPresenceQuery;
+  quests?: MapHandlerContext['quests'];
   ids: MapIdAllocator;
   rng: DeterministicRng;
   rngContext: RngContext;
@@ -168,6 +177,7 @@ export function createMapContext(deps: MapContextDeps): MapHandlerContext {
     definitions: deps.definitions,
     world: deps.world,
     presence: deps.presence,
+    quests: deps.quests,
     ids: deps.ids,
     rng: deps.rng,
     rngContext: deps.rngContext,

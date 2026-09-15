@@ -90,6 +90,18 @@
   "resolverBindings": [
     {
       "ownerModule": "character",
+      "paramsDefId": "weighted-draw-params.core.world-adventurer-innate-trait",
+      "resolverId": "resolver:character.temporary-innate-trait",
+      "shape": "character:weighted-draw"
+    },
+    {
+      "ownerModule": "character",
+      "paramsDefId": "weighted-choice-params.core.world-adventurer-sex",
+      "resolverId": "resolver:character.temporary-sex-weight",
+      "shape": "character:weighted-choice"
+    },
+    {
+      "ownerModule": "character",
       "paramsDefId": "weighted-choice-params.core.world-adventurer-archetype",
       "resolverId": "resolver:character.world-adventurer-archetype-weight",
       "shape": "character:weighted-choice"

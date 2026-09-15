@@ -1,0 +1,369 @@
+{
+  "templateId": "map-template.yunhua.tidal-reed-isle",
+  "key": "tidal-reed-isle",
+  "name": "潮生蘆洲",
+  "cellSize": 6,
+  "floors": [
+    {
+      "floor": 1,
+      "label": "蘆洲與潮汐水岸",
+      "model": "tidal-reed-isle-1.glb",
+      "roomIds": [
+        "f1.entry",
+        "f1.northRidge",
+        "f1.northSpring",
+        "f1.westSlope",
+        "f1.westQuarry",
+        "f1.eastCliff",
+        "f1.beastRange",
+        "f1.centralField",
+        "f1.iceCrack",
+        "f1.westVale",
+        "f1.riteClearing",
+        "f1.eastTrail",
+        "f1.cache",
+        "f1.southTrailWest",
+        "f1.southTrailEast",
+        "f1.exitPass",
+        "f1.exit"
+      ],
+      "rooms": [
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 1
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.entry"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 1
+            },
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 1
+            },
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 2
+            },
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 2
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.northRidge"
+        },
+        {
+          "cells": [
+            {
+              "col": 6,
+              "floor": 1,
+              "row": 2
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.northSpring"
+        },
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 2
+            },
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 2
+            },
+            {
+              "col": 1,
+              "floor": 1,
+              "row": 3
+            },
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 3
+            },
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 3
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.westSlope"
+        },
+        {
+          "cells": [
+            {
+              "col": 1,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 4
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.westQuarry"
+        },
+        {
+          "cells": [
+            {
+              "col": 6,
+              "floor": 1,
+              "row": 3
+            },
+            {
+              "col": 7,
+              "floor": 1,
+              "row": 3
+            },
+            {
+              "col": 8,
+              "floor": 1,
+              "row": 3
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.eastCliff"
+        },
+        {
+          "cells": [
+            {
+              "col": 7,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 8,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 8,
+              "floor": 1,
+              "row": 5
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.beastRange"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 6,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 5
+            },
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 5
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.centralField"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 5
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.iceCrack"
+        },
+        {
+          "cells": [
+            {
+              "col": 1,
+              "floor": 1,
+              "row": 5
+            },
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 5
+            },
+            {
+              "col": 1,
+              "floor": 1,
+              "row": 6
+            },
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 6
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.westVale"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 6
+            },
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 6
+            },
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 6
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.riteClearing"
+        },
+        {
+          "cells": [
+            {
+              "col": 6,
+              "floor": 1,
+              "row": 6
+            },
+            {
+              "col": 7,
+              "floor": 1,
+              "row": 6
+            },
+            {
+              "col": 7,
+              "floor": 1,
+              "row": 7
+            },
+            {
+              "col": 8,
+              "floor": 1,
+              "row": 7
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.eastTrail"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 7
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.cache"
+        },
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 7
+            },
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 7
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.southTrailWest"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 7
+            },
+            {
+              "col": 6,
+              "floor": 1,
+              "row": 7
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.southTrailEast"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 8
+            },
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 8
+            },
+            {
+              "col": 6,
+              "floor": 1,
+              "row": 8
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.exitPass"
+        },
+        {
+          "cells": [
+            {
+              "col": 7,
+              "floor": 1,
+              "row": 8
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.exit"
+        }
+      ],
+      "rows": 8,
+      "cols": 8
+    }
+  ],
+  "topologyHash": "4d439c4051c7efb17d688f7f519975a92dab99e1a26e5de30b152118e1495946"
+}

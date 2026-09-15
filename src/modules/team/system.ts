@@ -1504,3 +1504,18 @@ export function openPlayerSuccession(
   const next = setPendingSuccession(state, pending);
   return accept(next, []);
 }
+
+export function handleAttachQuestTemporaryMember(state: TeamState, cmd: import('../../contracts/team').AttachQuestTemporaryMemberPayload): TeamHandlerResult {
+  const team = requireTeam(state, cmd.teamId);
+  if (team.memberIds.includes(cmd.characterId)) return reject('team/temporary-member-already-formal');
+  if (team.temporaryMemberIds.includes(cmd.characterId)) return accept(state);
+  return accept(upsertTeam(state, { ...team, temporaryMemberIds: [...team.temporaryMemberIds, cmd.characterId], revision: bump(team.revision) }));
+}
+export function onTemporaryCharacterRecovered(event: import('../../contracts/character').TemporaryCharacterRecoveredEvent, state: TeamState): ModuleResult<TeamState> {
+  let next = state;
+  for (const team of Object.values(state.teams)) {
+    if (!team.temporaryMemberIds.includes(event.characterId)) continue;
+    next = upsertTeam(next, { ...team, temporaryMemberIds: team.temporaryMemberIds.filter(id => id !== event.characterId), revision: bump(team.revision) });
+  }
+  return { nextSlice: next, outgoingMessages: [], scheduledJobs: [] };
+}

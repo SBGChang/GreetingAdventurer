@@ -1,0 +1,317 @@
+{
+  "templateId": "map-template.yunhua.hanging-spring-grotto",
+  "key": "hanging-spring-grotto",
+  "name": "懸泉石窟",
+  "cellSize": 6,
+  "floors": [
+    {
+      "floor": 1,
+      "label": "懸泉上窟",
+      "model": "hanging-spring-grotto-1.glb",
+      "roomIds": [
+        "f1.entry",
+        "f1.foreHall",
+        "f1.westHold",
+        "f1.surfaceVein",
+        "f1.collapsedDeck",
+        "f1.stairDown",
+        "f1.eastGangway",
+        "f1.holdChamber",
+        "f1.westStep",
+        "f1.southWalk",
+        "f1.exit"
+      ],
+      "rooms": [
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 1
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.entry"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 1
+            },
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 2
+            },
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 2
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.foreHall"
+        },
+        {
+          "cells": [
+            {
+              "col": 1,
+              "floor": 1,
+              "row": 2
+            },
+            {
+              "col": 1,
+              "floor": 1,
+              "row": 3
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.westHold"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 2
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.surfaceVein"
+        },
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 3
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.collapsedDeck"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 3
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.stairDown"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 3
+            },
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 3
+            },
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 4
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.eastGangway"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 4
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.holdChamber"
+        },
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 4
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.westStep"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 5
+            },
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 5
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.southWalk"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 5
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.exit"
+        }
+      ],
+      "rows": 5,
+      "cols": 5
+    },
+    {
+      "floor": -1,
+      "label": "深層泉脈",
+      "model": "hanging-spring-grotto--1.glb",
+      "roomIds": [
+        "b1.upperCave",
+        "b1.westDrift",
+        "b1.deepVein",
+        "b1.stairUp",
+        "b1.eastDrift",
+        "b1.beastDen",
+        "b1.sunkenCargo"
+      ],
+      "rooms": [
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": -1,
+              "row": 1
+            },
+            {
+              "col": 2,
+              "floor": -1,
+              "row": 2
+            },
+            {
+              "col": 3,
+              "floor": -1,
+              "row": 2
+            },
+            {
+              "col": 4,
+              "floor": -1,
+              "row": 2
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.upperCave"
+        },
+        {
+          "cells": [
+            {
+              "col": 1,
+              "floor": -1,
+              "row": 3
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.westDrift"
+        },
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": -1,
+              "row": 3
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.deepVein"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": -1,
+              "row": 3
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.stairUp"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": -1,
+              "row": 3
+            },
+            {
+              "col": 5,
+              "floor": -1,
+              "row": 3
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.eastDrift"
+        },
+        {
+          "cells": [
+            {
+              "col": 1,
+              "floor": -1,
+              "row": 4
+            },
+            {
+              "col": 2,
+              "floor": -1,
+              "row": 4
+            },
+            {
+              "col": 2,
+              "floor": -1,
+              "row": 5
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.beastDen"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": -1,
+              "row": 4
+            },
+            {
+              "col": 4,
+              "floor": -1,
+              "row": 4
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.sunkenCargo"
+        }
+      ],
+      "rows": 5,
+      "cols": 5
+    }
+  ],
+  "topologyHash": "cd7e8fec30ccd82e0bc04db38c772f93cde4dc47a0f6d315e9848b31eadb6cea"
+}

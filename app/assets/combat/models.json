@@ -1,0 +1,128 @@
+{
+  "party.adventurer": {
+    "body": "human",
+    "color": "#315f60",
+    "accent": "#c9a65c",
+    "scale": 1
+  },
+  "monster.yunhua.mistwing-moth": {
+    "body": "moth",
+    "color": "#749b9a",
+    "accent": "#a4d9d0",
+    "scale": 1
+  },
+  "monster.yunhua.bamboo-back-badger": {
+    "body": "badger",
+    "color": "#726b48",
+    "accent": "#a2b367",
+    "scale": 1
+  },
+  "monster.yunhua.tide-shell-crab": {
+    "body": "crab",
+    "color": "#427d83",
+    "accent": "#d4b177",
+    "scale": 1
+  },
+  "monster.yunhua.scrap-sigil-doll": {
+    "body": "golem",
+    "color": "#7e6d58",
+    "accent": "#f3c279",
+    "scale": 0.85
+  },
+  "monster.yunhua.miasma-pouch-badger": {
+    "body": "badger",
+    "color": "#746281",
+    "accent": "#c49cbc",
+    "scale": 1.15
+  },
+  "monster.yunhua.gatewater-salamander": {
+    "body": "lizard",
+    "color": "#537e78",
+    "accent": "#82b8a0",
+    "scale": 1.15
+  },
+  "monster.yunhua.armored-pottery-guard": {
+    "body": "golem",
+    "color": "#9d6043",
+    "accent": "#e2b27b",
+    "scale": 1.15
+  },
+  "monster.yunhua.mist-bamboo-king": {
+    "body": "badger",
+    "color": "#486459",
+    "accent": "#b7a568",
+    "scale": 1.55
+  },
+  "monster.yunhua.sunken-weir-beast": {
+    "body": "lizard",
+    "color": "#436975",
+    "accent": "#c4b073",
+    "scale": 1.6
+  },
+  "monster.yunhua.frayed-seal-wisp": {
+    "body": "wisp",
+    "color": "#59999d",
+    "accent": "#e8daa2",
+    "scale": 1
+  },
+  "monster.yunhua.bell-mandible-beetle": {
+    "body": "beetle",
+    "color": "#a18349",
+    "accent": "#e2c06c",
+    "scale": 1
+  },
+  "monster.yunhua.tower-stone-lizard": {
+    "body": "lizard",
+    "color": "#777e83",
+    "accent": "#b9c6ba",
+    "scale": 1.2
+  },
+  "monster.yunhua.seal-halberd-warden": {
+    "body": "golem",
+    "color": "#547974",
+    "accent": "#ddc18b",
+    "scale": 1.2
+  },
+  "monster.yunhua.broken-edict-scribe": {
+    "body": "human",
+    "color": "#644f80",
+    "accent": "#d5b18b",
+    "scale": 1
+  },
+  "monster.yunhua.balance-seal-colossus": {
+    "body": "golem",
+    "color": "#786e57",
+    "accent": "#c3d894",
+    "scale": 1.55
+  },
+  "monster.yunhua.river-cutthroat": {
+    "body": "human",
+    "color": "#704b3d",
+    "accent": "#b59b6c",
+    "scale": 1
+  },
+  "monster.yunhua.privateer-crossbow": {
+    "body": "human",
+    "color": "#475c79",
+    "accent": "#a2b2bd",
+    "scale": 1
+  },
+  "monster.yunhua.salt-route-leader": {
+    "body": "human",
+    "color": "#8f623c",
+    "accent": "#e8c989",
+    "scale": 1.15
+  },
+  "monster.yunhua.seal-tower-deserter": {
+    "body": "human",
+    "color": "#61736e",
+    "accent": "#c6b993",
+    "scale": 1
+  },
+  "monster.yunhua.false-seal-officer": {
+    "body": "human",
+    "color": "#80414c",
+    "accent": "#d7bc65",
+    "scale": 1.15
+  }
+}

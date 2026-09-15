@@ -199,6 +199,16 @@ const cases: readonly Case[] = [
     },
   },
   {
+    name: 'acceptQuest：已解決或不存在的目標不可接取',
+    run: () => {
+      const state = questStateWith([makeQuest({ questId: 'gone', objective: OBJECTIVE_RESCUE })]);
+      for (const contents of [[], [kidnapContent()]]) expectReject(
+        handleAcceptQuest(state, { type: 'acceptQuest', questId: 'gone' as never }, TEAM_ID, makeContext({ mapContents: stubMapContentPort(contents) })),
+        'quest/target-unavailable', 'invalid target',
+      );
+    },
+  },
+  {
     name: 'acceptQuest（rescue）：送出 ProtectMapContent(protect)，且未接取前不建立救援角色',
     run: () => {
       const state = questStateWith([makeQuest({ questId: 'q1', objective: OBJECTIVE_RESCUE })]);
@@ -301,19 +311,18 @@ const cases: readonly Case[] = [
     },
   },
   {
-    name: 'acceptQuest 拒絕：清理流程缺 Handler 的 kind 一律指名缺口（purchase / delivery / escort）',
+    name: 'acceptQuest 拒絕：採買送貨必須有可用貨物；護衛仍需候選流程',
     run: () => {
       const ctx = makeContext();
       for (const [questId, objective, missing] of [
-        ['qp', OBJECTIVE_PURCHASE, 'city.ReserveShopOfferForQuest'],
-        ['qd', OBJECTIVE_DELIVERY, 'inventory.ReleaseExpiredQuestCargo'],
+        ['qp', OBJECTIVE_PURCHASE, 'quest/cargo-unavailable'],
+        ['qd', OBJECTIVE_DELIVERY, 'quest/cargo-unavailable'],
         ['qe', OBJECTIVE_ESCORT, 'city.EscortCandidateQuery'],
       ] as const) {
         const state = questStateWith([makeQuest({ questId, objective })]);
         const r = handleAcceptQuest(state, { type: 'acceptQuest', questId: questId as never }, TEAM_ID, ctx);
-        expectReject(r, 'quest/lifecycle-dependency-unavailable', questId);
-        if (r.ok) return;
-        assert(r.rejection.details?.missing === missing, `${questId}: rejection 應指名缺口 ${missing}`);
+        expectReject(r, objective.kind === 'escort' ? 'quest/lifecycle-dependency-unavailable' : 'quest/cargo-unavailable', questId);
+        if (!r.ok && objective.kind === 'escort') assert(r.rejection.details?.missing === missing, '護衛仍需候選');
       }
     },
   },
@@ -629,26 +638,21 @@ const cases: readonly Case[] = [
     },
   },
   {
-    name: 'questDeadline 拒絕：目標 Quest 不在 Slice / 清理流程缺 Handler',
+    name: 'questDeadline：不存在目標拒絕；未接貨到期釋放貨架',
     run: () => {
       expectReject(
         handleQuestDeadline(questStateWith([]), deadlineJob('nope', 'accept', 104), makeContext()),
         'quest/deadline-target-missing',
         'missing target',
       );
-      // 未接取的送貨到期需要 inventory 的 ApplyQuestItemLifecycle(remove)；缺就整筆拒絕，
-      // 不可只改狀態把 Item 永久留在保留位置。
-      const r = handleQuestDeadline(
+      const r = expectOk(handleQuestDeadline(
         questStateWith([makeQuest({ questId: 'qd', objective: OBJECTIVE_DELIVERY })]),
         deadlineJob('qd', 'accept', 104),
-        makeContext({ worldDay: 104 as WorldDay }),
-      );
-      expectReject(r, 'quest/lifecycle-dependency-unavailable', 'delivery cleanup');
-      if (r.ok) return;
-      assert(
-        r.rejection.details?.missing === 'inventory.ApplyQuestItemLifecycle',
-        'rejection 應指名未接取到期所缺的 Handler',
-      );
+        { ...makeContext({ worldDay: 104 as WorldDay }), cargo: { getItem: () => undefined, findOffer: () => ({ offerId: 'offer' as never, state: 'available', sourceQuestId: 'qd' as never }), nextDistributionId: () => { throw new Error('未領貨不得分配'); }, distributionRuleId: () => { throw new Error('未領貨不得分配'); } } },
+      ), '貨架委託到期');
+      assert(statusOf(r.nextSlice, 'qd') === 'expired', '未接取送貨正常到期');
+      assert(commandsOf(r.outgoingMessages).some(c => c.command.type === 'ReleaseQuestShopOffer' && c.command.disposition === 'release'), '未出售商品回到一般貨架');
+
     },
   },
   {

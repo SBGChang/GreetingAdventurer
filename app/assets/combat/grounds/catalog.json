@@ -1,0 +1,164 @@
+{
+  "profiles": {
+    "canal": {
+      "image": "canal.png",
+      "tint": "#d3e4df",
+      "edge": "#354c48",
+      "glow": "#a6cabc"
+    },
+    "court": {
+      "image": "ruins.png",
+      "tint": "#dadac8",
+      "edge": "#555449",
+      "glow": "#c5c8a7"
+    },
+    "seal": {
+      "image": "city.png",
+      "tint": "#cbd7da",
+      "edge": "#444d57",
+      "glow": "#acc9d4"
+    },
+    "bamboo": {
+      "image": "forest.png",
+      "tint": "#d7e3c3",
+      "edge": "#404c30",
+      "glow": "#bfd18e"
+    },
+    "grotto": {
+      "image": "ruins.png",
+      "tint": "#b7d4d3",
+      "edge": "#3c5253",
+      "glow": "#9bcaca"
+    },
+    "reed": {
+      "image": "forest.png",
+      "tint": "#cad7b2",
+      "edge": "#424d38",
+      "glow": "#bacda3"
+    },
+    "salt": {
+      "image": "canal.png",
+      "tint": "#e6dfcf",
+      "edge": "#5d5e52",
+      "glow": "#d3d4b6"
+    },
+    "cinnabar": {
+      "image": "ruins.png",
+      "tint": "#e1ae92",
+      "edge": "#734d3e",
+      "glow": "#d6b396"
+    },
+    "kiln": {
+      "image": "ruins.png",
+      "tint": "#c39d7d",
+      "edge": "#4d3d32",
+      "glow": "#c4936a"
+    },
+    "city-yunhua": {
+      "image": "city.png",
+      "tint": "#eee4cf",
+      "edge": "#62594a",
+      "glow": "#d6c4a1"
+    },
+    "city-vildun": {
+      "image": "city.png",
+      "tint": "#cbd9e4",
+      "edge": "#4b545f",
+      "glow": "#b6d5e1"
+    },
+    "city-aurelien": {
+      "image": "city.png",
+      "tint": "#efebd7",
+      "edge": "#696450",
+      "glow": "#e0d6b0"
+    },
+    "city-safir": {
+      "image": "sand.png",
+      "tint": "#fff0cf",
+      "edge": "#97754b",
+      "glow": "#ebd3a1"
+    },
+    "woodland-road": {
+      "image": "forest.png",
+      "tint": "#ede2cb",
+      "edge": "#574b35",
+      "glow": "#c6b88a"
+    },
+    "mountain-road": {
+      "image": "ruins.png",
+      "tint": "#cdd9df",
+      "edge": "#4a5660",
+      "glow": "#b6cbd5"
+    },
+    "desert-road": {
+      "image": "sand.png",
+      "tint": "#f6dbb4",
+      "edge": "#8c693e",
+      "glow": "#d9c190"
+    },
+    "lakeshore": {
+      "image": "canal.png",
+      "tint": "#c3d9d5",
+      "edge": "#344c4c",
+      "glow": "#95c4c3"
+    }
+  },
+  "bindings": {
+    "map": {
+      "map-template.yunhua.old-canal-sunken-store": "canal",
+      "map-template.yunhua.calendar-court-ruin": "court",
+      "map-template.yunhua.seal-tower": "seal",
+      "map-template.yunhua.mist-bamboo-valley": "bamboo",
+      "map-template.yunhua.hanging-spring-grotto": "grotto",
+      "map-template.yunhua.tidal-reed-isle": "reed",
+      "map-template.yunhua.salt-well-cellar": "salt",
+      "map-template.yunhua.cinnabar-ridge": "cinnabar",
+      "map-template.yunhua.old-kiln-flue": "kiln"
+    },
+    "city": {
+      "city-node.yunhua.yunjing": "city-yunhua",
+      "city-node.yunhua.qingcen": "city-yunhua",
+      "city-node.yunhua.chengpu": "city-yunhua",
+      "city-node.yunhua.chiling": "city-yunhua",
+      "city-node.vildun.frostbay": "city-vildun",
+      "city-node.vildun.cedarkeep": "city-vildun",
+      "city-node.aurelien.dawncrown": "city-aurelien",
+      "city-node.aurelien.greyshield": "city-aurelien",
+      "city-node.safir.starwell": "city-safir",
+      "city-node.safir.redsail": "city-safir",
+      "city-node.vildun.icechisel": "city-vildun",
+      "city-node.vildun.emberforge": "city-vildun",
+      "city-node.aurelien.windharvest": "city-aurelien",
+      "city-node.aurelien.whitecliff": "city-aurelien",
+      "city-node.safir.saltmirror": "city-safir",
+      "city-node.safir.ochrestep": "city-safir"
+    },
+    "world": {
+      "route.yunhua.yunjing-qingcen": "woodland-road",
+      "route.yunhua.yunjing-chengpu": "woodland-road",
+      "route.yunhua.yunjing-chiling": "woodland-road",
+      "route.yunhua.qingcen-chengpu": "woodland-road",
+      "route.yunhua.qingcen-chiling": "woodland-road",
+      "route.yunhua.chengpu-chiling": "woodland-road",
+      "route.core.frostbay-cedarkeep": "mountain-road",
+      "route.core.frostbay-icechisel": "mountain-road",
+      "route.core.frostbay-emberforge": "mountain-road",
+      "route.core.icechisel-emberforge": "mountain-road",
+      "route.core.dawncrown-greyshield": "woodland-road",
+      "route.core.dawncrown-windharvest": "woodland-road",
+      "route.core.dawncrown-whitecliff": "woodland-road",
+      "route.core.greyshield-windharvest": "woodland-road",
+      "route.core.windharvest-whitecliff": "woodland-road",
+      "route.core.starwell-redsail": "desert-road",
+      "route.core.starwell-saltmirror": "desert-road",
+      "route.core.starwell-ochrestep": "desert-road",
+      "route.core.redsail-saltmirror": "desert-road",
+      "route.core.saltmirror-ochrestep": "desert-road",
+      "route.core.qingcen-emberforge": "woodland-road",
+      "route.core.chengpu-redsail": "woodland-road",
+      "route.core.saltmirror-windharvest": "desert-road",
+      "route.core.whitecliff-frostbay": "woodland-road",
+      "route.core.yunjing-starwell": "lakeshore"
+    }
+  }
+}

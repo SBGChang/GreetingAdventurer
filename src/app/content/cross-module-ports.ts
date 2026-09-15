@@ -397,11 +397,27 @@ export function createQuestGenerationContext(
       if (instance === undefined) return undefined;
       return deps.world.getAdventureSite(instance.adventureSiteId).accessCityId;
     },
+    listDeliveryCityIds: (origin: CityId, maxGaps: number): readonly CityId[] => {
+      if (!Number.isSafeInteger(maxGaps) || maxGaps < 1) throw new Error('quest/invalid-city-gap-limit');
+      const visited = new Map<CityId, number>([[origin, 0]]);
+      const queue: CityId[] = [origin];
+      for (const cityId of queue) {
+        const distance = visited.get(cityId)!;
+        if (distance >= maxGaps) continue;
+        for (const route of deps.world.listRoutesFrom(cityId)) {
+          const next = route.fromCityId === cityId ? route.toCityId : route.fromCityId;
+          if (!visited.has(next)) { visited.set(next, distance + 1); queue.push(next); }
+        }
+      }
+      const cityDefs = createCityDefinitionReader(deps.registry);
+      return queue.filter(id => id !== origin && findFacilityIdByKind(cityDefs, id, 'adventurerGuild') !== undefined).sort((a,b) => String(a).localeCompare(String(b)));
+    },
     // 依 id 排序：「隨機挑一座城」必須是決定性的，而 registry 的列舉順序不是契約。
     listCityIds: (): readonly CityId[] =>
       deps.registry
         .list({ kinds: ['city-node'] })
         .map((d) => d.id as CityId)
+        .filter(id => findFacilityIdByKind(createCityDefinitionReader(deps.registry), id, 'adventurerGuild') !== undefined)
         .slice()
         .sort((a, b) => String(a).localeCompare(String(b))),
   };
@@ -432,7 +448,7 @@ export function createQuestGenerationContext(
       resolveGuildCity: (input) => step<CityId>(input.resolverId, { mapId: input.mapId }, input.rngContext),
       resolveActualEndDays: (input) => step<number>(input.resolverId, {}, input.rngContext),
       resolveDeliveryDestination: (input) =>
-        step<CityId>(input.resolverId, { excludeCityId: input.excludeCityId }, input.rngContext),
+        step<CityId>(input.resolverId, { excludeCityId: input.excludeCityId, maxCityGapCount: input.maxCityGapCount }, input.rngContext),
     },
     // 目的城的冒險者公會設施。由 city 定義投影（設施清單的擁有者是 city，不是 quest）。
     cities: {

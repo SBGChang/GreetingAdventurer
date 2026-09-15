@@ -1,0 +1,21 @@
+{
+  "actorDiameter": 1.0,
+  "files": {
+    "salt-well-cellar-1.glb": "13edc880b8e1dc416c24ceaea36808f30a878a6bafa6443c49819d9f97f88caf",
+    "salt-well-cellar--1.glb": "6f33f53c55a63ea4eddb3d82baeb615192a9905246d83055279dbbb4de3b102a",
+    "salt-well-cellar.blend": "205419ede20d04de58a1b48bfc717cbffd1fe8a9024b1cd792f8fb909555d2f9",
+    "salt-well-cellar-navigation.json": "697a472a8e7083465b3305f9e93db7c76baeb0c21ee2392d3bcd4ae7340a9bbd"
+  },
+  "floors": [
+    {
+      "floor": 1,
+      "footprintChecks": 450,
+      "openDrySampleRatio": 0.971
+    },
+    {
+      "floor": -1,
+      "footprintChecks": 432,
+      "openDrySampleRatio": 0.973
+    }
+  ]
+}

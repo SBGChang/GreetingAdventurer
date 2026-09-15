@@ -1,12 +1,13 @@
 # 場景美術
 
-城鎮使用 Blender 腳本建模與渲染；地下漕渠由內建 imagegen 生成。沒有複製參考專案的圖檔。程式原生 SVG 繪製戰鬥棋子與地圖。
+城鎮與九張冒險地圖使用 Blender 腳本建模與渲染；地牢材質與戰鬥背景由內建 imagegen 生成。沒有複製參考專案的圖檔。程式原生 SVG 繪製戰鬥棋子與地圖。
 
 - [十六城與四國輿圖](geography/README.md)：十六座獨立城市場景、3D 地貌／城市／道路大地圖，以及可編輯 Blender 原始檔。
 - [雲京 GLB](town3d/yunhua-town.glb)：雲京的固定視角模型，包含功能建築與不可互動街坊。
 - [Blender 場景](town3d/yunhua-town.blend)：可編輯原始場景；由 [建模腳本](../../scripts/blender/build-town.py) 產生 GLB 與渲染圖。
 - [城鎮渲染圖](town3d/yunhua-town-render.png)：標題及設施視窗背景。
-- [地下漕渠](yunhua-canal.png)：探索及戰鬥背景。
+- [地牢 3D 場景](dungeons/README.md)：九張雲華地圖的十八層模型、房間對照、材質與正式行走／隔離測試入口。
+- [地下漕渠背景](yunhua-canal.png)：戰鬥及尚無 3D 模型的探索背景。
 - [玩家介面美術](ui/README.md)：圖示圖集、木框紙本面板及生成提示詞。
 
 ## 重建城鎮

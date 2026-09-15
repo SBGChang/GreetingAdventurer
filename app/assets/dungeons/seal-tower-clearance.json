@@ -1,0 +1,45 @@
+{
+  "actorDiameter": 1.0,
+  "files": {
+    "seal-tower-1.glb": "3486567b1ecb635ee137cbadf2af0e3e1cfb5d33a7edc26aafb2df71bb26f004",
+    "seal-tower-2.glb": "58f630e07f896a8012339d82fc91fa9b1546f4a1caa58240a03bdb58c5961587",
+    "seal-tower-3.glb": "05c893fc5bebbc11d17f5553467f7f2a2812258eb7fb3d3122e02831b98d4db5",
+    "seal-tower-4.glb": "1b2c302a75040689e18df45ef6da43badd87a46f9f6f19ae3c38a3c56aa87f33",
+    "seal-tower--1.glb": "1381704996f75b96df85ebede8c57803335ac7d13e2c9299c0b8af2d36f347e2",
+    "seal-tower--2.glb": "172cf5ca108ea7439efdbfad826abbb67cd908988e96de61854b0f49d0c786c2",
+    "seal-tower.blend": "781463d0b38e58b2dda833d90b42c83797cba82ee78d635d58c3f328e56f7c61",
+    "seal-tower-navigation.json": "b55f7aabb791a6ff78419cb1cacca7e674435397971e8ebad0d13917fbd89917"
+  },
+  "floors": [
+    {
+      "floor": 1,
+      "footprintChecks": 487,
+      "openDrySampleRatio": 0.952
+    },
+    {
+      "floor": 2,
+      "footprintChecks": 577,
+      "openDrySampleRatio": 0.95
+    },
+    {
+      "floor": 3,
+      "footprintChecks": 488,
+      "openDrySampleRatio": 0.952
+    },
+    {
+      "floor": 4,
+      "footprintChecks": 551,
+      "openDrySampleRatio": 0.958
+    },
+    {
+      "floor": -1,
+      "footprintChecks": 614,
+      "openDrySampleRatio": 0.95
+    },
+    {
+      "floor": -2,
+      "footprintChecks": 721,
+      "openDrySampleRatio": 0.967
+    }
+  ]
+}

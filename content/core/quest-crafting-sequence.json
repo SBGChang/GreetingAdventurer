@@ -164,7 +164,7 @@
     "sourcePath": "core/quest-crafting-sequence.json#quest-reward-rule.core.hunt"
   },
   {
-    "creationChance": 1,
+    "creationChance": 0.35,
     "deadlineRuleId": "quest-deadline-rule.core.suppression-hunt",
     "enabled": true,
     "guildResolverId": "resolver:quest.guild.local-city",
@@ -197,7 +197,7 @@
     "creationChance": 1,
     "deadlineRuleId": "quest-deadline-rule.core.rescue-exploration",
     "enabled": true,
-    "guildResolverId": "resolver:quest.guild.random-legal-city",
+    "guildResolverId": "resolver:quest.guild.local-city",
     "id": "quest-reaction-rule.core.kidnap-rescue",
     "kind": "quest-reaction-rule",
     "objectiveRuleId": "quest-objective-rule.core.rescue",
@@ -235,6 +235,12 @@
     "questKind": "purchase",
     "rewardRuleId": "quest-reward-rule.core.purchase",
     "schemaVersion": 1,
+    "sourceItemKinds": [
+      "material",
+      "combatConsumable",
+      "nonCombatConsumable",
+      "generalItem"
+    ],
     "sourceKind": "cityStockItem",
     "sourcePath": "core/quest-crafting-sequence.json#quest-reaction-rule.core.city-stock-purchase"
   },
@@ -251,6 +257,12 @@
     "questKind": "delivery",
     "rewardRuleId": "quest-reward-rule.core.delivery",
     "schemaVersion": 1,
+    "sourceItemKinds": [
+      "material",
+      "combatConsumable",
+      "nonCombatConsumable",
+      "generalItem"
+    ],
     "sourceKind": "cityStockItem",
     "sourcePath": "core/quest-crafting-sequence.json#quest-reaction-rule.core.city-stock-delivery"
   },

@@ -1,3 +1,4 @@
+import { handleReserveShopOfferForQuest } from '../../modules/city/public';
 // app/composition/new-game-bootstrap.ts
 // NewGameBootstrapper（12_engine_runtime.md §1.1）：從**真實 Content Pack** 開一個新遊戲。
 //
@@ -668,7 +669,7 @@ export function createNewGame(
         cursor: 0 as RngCursor,
       },
     }),
-    enabledKinds: ['suppression', 'hunt'],
+    enabledKinds: ['suppression', 'hunt', 'purchase', 'delivery', 'rescue'],
   });
 
   let seededQuestState = emptyQuestState;
@@ -690,6 +691,12 @@ export function createNewGame(
     );
     seededQuestState = result.nextSlice;
     initialJobs.push(...result.scheduledJobs);
+    for (const quest of Object.values(result.nextSlice.quests)) {
+      if (quest.sourceId !== event.itemId) continue;
+      const reserved = handleReserveShopOfferForQuest({ type: 'ReserveShopOfferForQuest', offerId: event.offerId, sourceQuestId: quest.questId }, seededCityState);
+      if (!reserved.ok) throw new Error(reserved.rejection.code);
+      seededCityState = reserved.result.nextSlice;
+    }
   }
 
   // 隊長的 HP/MP 也由同一支引擎補滿。放在這裡而不是建 leader 的當下：`createCharacterStatsQuery`

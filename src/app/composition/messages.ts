@@ -191,6 +191,7 @@ export const INTERNAL_COMMAND_OWNER: Readonly<Record<GameInternalCommandType, Mo
   StartCombatEncounter: 'combat' as ModuleId,
 
   // team
+  AttachQuestTemporaryMember: 'team' as ModuleId,
   StartReturnFromDungeon: 'team' as ModuleId,
   StartNpcTeamPlan: 'team' as ModuleId,
   CompletePlayerTravelSegmentWithoutEvent: 'team' as ModuleId,
@@ -286,6 +287,7 @@ export const GAME_COMMAND_ENTRY: Readonly<Record<GameCommandType, GameCommandEnt
 
   // quest
   acceptQuest: 'quest' as ModuleId,
+  handInQuestCargo: 'quest' as ModuleId,
   settleQuest: 'quest' as ModuleId,
 
   // social

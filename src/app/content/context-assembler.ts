@@ -1,3 +1,4 @@
+import { createQuestQuery } from '../../modules/quest/public';
 import { UnavailableCapabilityError } from '../composition/capability';
 // app/content/context-assembler.ts
 // 正式 ContextAssembler（session.ts 的 ContextAssembler 型別的正式實作）。
@@ -257,14 +258,19 @@ export function createProductionContextAssembler(
     });
 
     // quest context：acceptQuest 只讀前置與快照，三個 Port 皆唯讀轉接真實 sibling Slice。
-    const questContext = createQuestContext({
+    const questContext = { ...createQuestContext({
       questDefinitions,
       teamState: state.team,
       mapState: state.map,
       mapDefinitions,
       characterState: state.character,
       worldDay: runtime.worldDay,
-    });
+    }), cargo: {
+      getItem: (id: import('../../contracts/core').ItemInstanceId) => state.inventory.items[id],
+      findOffer: (id: import('../../contracts/core').ItemInstanceId, questId: import('../../contracts/core').QuestId) => Object.values(state.city.shopOffers).find(offer => offer.itemId === id && offer.sourceQuestId === questId),
+      nextDistributionId: runtime.ids.dungeon.nextDistributionId,
+      distributionRuleId: (teamId: import('../../contracts/core').TeamId) => requireCargoDistributionRule(registry, teamId === state.team.playerTeamId),
+    } };
 
     const questGenerationContext = createQuestGenerationContext({
       questDefinitions,
@@ -313,6 +319,7 @@ export function createProductionContextAssembler(
     // map context：地圖刷新（`mapRefreshCheck` Job）與開門／陷阱／採集／內容結算的內部命令。
     // world Port 在 map 模組裡從未被讀取（逐行確認過）；接上前以 pending 明確標記。
     const mapContext = createMapContext({
+      quests: createQuestQuery(state.quest),
       registry,
       definitions: mapDefinitions,
       world: pending('map.world'),
@@ -408,19 +415,17 @@ export function createProductionContextAssembler(
         resolveCurrencyReward: (id) => createEconomyDefinitionReader(registry).getRewardRule(id).fixedAmount,
       },
       // ── 已接：quest 生成（地圖刷新出內容 → 依 QuestReactionRule 貼委託）──
-      questGeneration: { ...questGenerationContext, enabledKinds: ['suppression', 'hunt'] },
+      questGeneration: { ...questGenerationContext, enabledKinds: ['suppression', 'hunt', 'purchase', 'delivery', 'rescue'] },
 
       // ── 已接：character（裝備變動夾住 HP/MP 上限、世界冒險者生成）──────────────
       //
-      // `resolvers` 只接了世界冒險者生成那一支；退休／自然死亡／生育／任務暫時角色四支仍是
-      // 「一被呼叫就拋並指名是誰」（見 character-context.ts）。那是能力最小化，不是缺口掩蓋：
-      // 走到那四條路的 Job 與 Command 目前都沒有註冊。
+      // 世界冒險者及救援角色生成已接線；其他生命週期仍依能力界線保持停用。
       character: {
         worldDay: runtime.worldDay,
         definitions: createCharacterDefinitionReader(registry),
         stats,
         ids: runtime.ids.character,
-        resolvers: createCharacterResolverPort({ registry, resolvers, rng: runtime.rng }),
+        resolvers: createCharacterResolverPort({ registry, resolvers, rng: runtime.rng, rngContext: runtime.rngContextFor('character-temporary') }),
       },
 
       // ── 已接：map（刷新生成、開門、陷阱、採集、內容結算）───────────────────────
@@ -430,7 +435,10 @@ export function createProductionContextAssembler(
       dungeon: dungeonContext,
       progression: { definitions: progressionReader, teachingRuleId },
       // ── 已接：city（商店買賣、家園、設施可用性、商店刷新）───────────────────
-      city: cityContext,
+      city: { ...cityContext, canBuyQuestOffer: (questId, teamId) => {
+        const q = state.quest.quests[questId];
+        return q?.kind === 'purchase' && q.status === 'incomplete' && q.acceptedByTeamId === teamId && runtime.worldDay < q.actualEndDeadline;
+      } },
       social: pending('social'),
       // ── 已接：economy（轉帳／帳戶；買賣的金錢移轉走這裡）──────────────────────
       economy: {
@@ -464,5 +472,11 @@ function requireQuestDistributionRule(registry: DefinitionRegistry): import('../
   const rules = narrowedDomainReader<import('../../contracts/distribution').AssetDistributionRuleDefinition>(registry, 'reader:quest.distribution-rule', ['asset-distribution-rule']).list()
     .filter(r => r.sourceKind === 'questReward' && r.controllerPolicy === 'equalCurrencyOnly');
   if (rules.length !== 1) throw new Error('quest/distribution-rule-not-unique');
+  return rules[0]!.id;
+}
+
+function requireCargoDistributionRule(registry: DefinitionRegistry, player: boolean): import('../../contracts/distribution').AssetDistributionRuleId {
+  const rules = narrowedDomainReader<import('../../contracts/distribution').AssetDistributionRuleDefinition>(registry, 'reader:quest.cargo-distribution-rule', ['asset-distribution-rule']).list().filter(r => r.sourceKind === 'expiredQuestCargo' && r.controllerPolicy === (player ? 'playerAuction' : 'npcRng'));
+  if (rules.length !== 1) throw new Error('quest/cargo-distribution-rule-not-unique');
   return rules[0]!.id;
 }

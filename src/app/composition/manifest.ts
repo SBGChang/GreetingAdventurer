@@ -207,7 +207,7 @@ function workflowSub(eventType: GameDomainEventType, workflowId: WorkflowId): Ev
 //
 // 刻意不登記的（模組 ModuleContract 宣告了 subscriptionHandlerIds，但 Wave B 沒有實作對應
 // Handler，登記了會在啟動驗證時失敗）：
-//   - character: FacilityRestCompleted / HomeYearRestCompleted / QuestStateChanged —— 模組宣告了
+//   - character: FacilityRestCompleted / HomeYearRestCompleted —— 模組宣告了
 //               subscriptionHandlerIds，但 character 沒有寫對應函式（不是缺別的模組，是缺 handler）
 //   - combat: 全部 5 筆（CombatItemUseCommitted / EquipmentChanged / KnowledgeLearned /
 //             CharacterDied / CharacterAvailabilityChanged）尚無 subscriber 實作
@@ -251,6 +251,8 @@ export const EVENT_SUBSCRIPTIONS_BY_TYPE: Readonly<
   CombatAttackMasteryEarned: [sub('CombatAttackMasteryEarned', 'progression')],
   // 28 日城鎮訓練完成 → progression 依傳授差額公式發 MXP（Team 只追蹤時間）。
   FreeActionCompleted: [sub('FreeActionCompleted', 'progression')],
+  QuestStateChanged: [sub('QuestStateChanged', 'character')],
+  TemporaryCharacterRecovered: [sub('TemporaryCharacterRecovered', 'team')],
   QuestSettled: [sub('QuestSettled', 'progression')],
   // 地圖刷新生成內容 → quest 依 QuestReactionRule 決定要不要貼一筆委託（doc §2.1）。
   MapContentGenerated: [sub('MapContentGenerated', 'quest')],

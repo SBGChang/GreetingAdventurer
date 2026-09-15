@@ -1,0 +1,15 @@
+{
+  "actorDiameter": 1.0,
+  "files": {
+    "mist-bamboo-valley-1.glb": "538e69de486cbaca93e0cbbe85232c656145693e827560a2f358c18d9bf9e6cd",
+    "mist-bamboo-valley.blend": "ebb70a12a816cc68241f9193f148565d5e20eed3a655f0b7e50e2df5761bd663",
+    "mist-bamboo-valley-navigation.json": "6ac372bccd2a218980413beba5c00442ab3c617ba4ffc2ff5b879bef1488c87d"
+  },
+  "floors": [
+    {
+      "floor": 1,
+      "footprintChecks": 1211,
+      "openDrySampleRatio": 0.963
+    }
+  ]
+}

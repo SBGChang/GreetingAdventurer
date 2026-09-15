@@ -441,7 +441,7 @@ interface DetailedCombatResolver {
 | Event | 最少 payload | 訂閱者 |
 |---|---|---|
 | `CombatEncounterStarted` | `encounterId`、`teamId`、`source` | dungeon、player-travel-event workflow、ui/app。 |
-| `CombatActionResolved` | `encounterId`、`actorId`、`skillId?`、`results` | ui/app。 |
+| `CombatActionResolved` | `encounterId`、`actorId`、`skillId?`、`results`、`ctbAfterAction: { combatantId, ctb }[]` | ui/app；CTB 為效果、反擊及自身行動延遲套用後、排程倒扣前的實值，用於已提交回合的時間流逝演出。 |
 | `CombatEncounterResolved` | `encounterId`、`teamId`、`participantCharacterIds`、`source`、`outcome: victory \| defeat`、`contentResolution?` | dungeon、team、map、quest、player-travel-event workflow、ui/app。 |
 | `CombatTeamOutcome` | `teamId`、`canContinue`、`reason` | team、dungeon。 |
 | `CombatAttackMasteryEarned` | `source: { kind: encounter, encounterId }`、`characterAwards` | progression。 |

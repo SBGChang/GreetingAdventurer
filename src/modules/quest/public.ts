@@ -57,6 +57,7 @@ export {
   // Game Command handler
   handleAcceptQuest,
   handleSettleQuest,
+  handleHandInQuestCargo,
   // Internal Command handlers
   handleAcceptQuestForNpcTeam,
   handleClaimQuestForNpcTeam,
@@ -90,13 +91,13 @@ export type {
 export const questModuleContract: ModuleContract = {
   id: 'quest' as ModuleId<'quest'>,
   owns: 'quest' as StateSliceName,
-  reads: [
+  reads: ['reader:inventory-query' as ReaderPortId, 'reader:city-query' as ReaderPortId,
     'reader:quest-definition' as ReaderPortId,
     'reader:team-query' as ReaderPortId,
     'reader:map-content-query' as ReaderPortId,
     'reader:character-temporary-origin' as ReaderPortId,
   ],
-  handlesGameCommands: ['acceptQuest', 'settleQuest'],
+  handlesGameCommands: ['acceptQuest', 'settleQuest', 'handInQuestCargo'],
   handlesInternalCommands: [
     'AcceptQuestForNpcTeam',
     'ClaimQuestForNpcTeam',
@@ -104,7 +105,7 @@ export const questModuleContract: ModuleContract = {
   ],
   handlesJobs: ['questDeadline'],
   // 只宣告**有 Owner** 的送出（registry 的「送出端 → Owner」交叉驗證）。
-  sendsInternalCommands: ['ProtectMapContent', 'CreateQuestTemporaryCharacter', 'StartAssetDistribution', 'AppendAssetDistributionResult', 'FinalizeAssetDistributionCollection'],
+  sendsInternalCommands: ['AttachQuestTemporaryMember', 'ReserveShopOfferForQuest', 'ReleaseQuestShopOffer', 'MoveItemToTeamQuestCargo', 'TransferItem', 'RemoveItemInstance', 'ProtectMapContent', 'CreateQuestTemporaryCharacter', 'StartAssetDistribution', 'AppendAssetDistributionResult', 'FinalizeAssetDistributionCollection'],
   subscriptionHandlerIds: [
     'subscription.MapContentGenerated.quest' as EventSubscriptionId,
     'subscription.CityStockItemAvailable.quest' as EventSubscriptionId,

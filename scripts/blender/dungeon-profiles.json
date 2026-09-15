@@ -1,0 +1,114 @@
+[
+  {
+    "key": "calendar-court-ruin",
+    "name": "司曆殘院",
+    "theme": "court",
+    "tint": [
+      0.75,
+      0.83,
+      0.71
+    ],
+    "floors": [
+      "殘院與觀星庭"
+    ]
+  },
+  {
+    "key": "seal-tower",
+    "name": "天衡印塔",
+    "theme": "tower",
+    "tint": [
+      0.65,
+      0.73,
+      0.7
+    ],
+    "floors": [
+      "入塔正印庭",
+      "校印層",
+      "藏卷層",
+      "觀印台",
+      "封門地廳",
+      "地脈主室"
+    ]
+  },
+  {
+    "key": "mist-bamboo-valley",
+    "name": "霧篁藥谷",
+    "theme": "bamboo",
+    "tint": [
+      0.64,
+      0.78,
+      0.52
+    ],
+    "floors": [
+      "藥谷與竹徑"
+    ]
+  },
+  {
+    "key": "hanging-spring-grotto",
+    "name": "懸泉石窟",
+    "theme": "grotto",
+    "tint": [
+      0.62,
+      0.78,
+      0.8
+    ],
+    "floors": [
+      "懸泉上窟",
+      "深層泉脈"
+    ]
+  },
+  {
+    "key": "tidal-reed-isle",
+    "name": "潮生蘆洲",
+    "theme": "reed",
+    "tint": [
+      0.9,
+      0.84,
+      0.59
+    ],
+    "floors": [
+      "蘆洲與潮汐水岸"
+    ]
+  },
+  {
+    "key": "salt-well-cellar",
+    "name": "鹽井封窖",
+    "theme": "salt",
+    "tint": [
+      0.96,
+      0.93,
+      0.82
+    ],
+    "floors": [
+      "鹽井作坊",
+      "結晶封窖"
+    ]
+  },
+  {
+    "key": "cinnabar-ridge",
+    "name": "朱砂斷嶺",
+    "theme": "ridge",
+    "tint": [
+      0.94,
+      0.44,
+      0.27
+    ],
+    "floors": [
+      "赤岩採場與斷嶺"
+    ]
+  },
+  {
+    "key": "old-kiln-flue",
+    "name": "古窯火道",
+    "theme": "kiln",
+    "tint": [
+      0.75,
+      0.39,
+      0.25
+    ],
+    "floors": [
+      "古窯工坊",
+      "地下煙道"
+    ]
+  }
+]

@@ -1,0 +1,250 @@
+{
+  "templateId": "map-template.yunhua.mist-bamboo-valley",
+  "key": "mist-bamboo-valley",
+  "name": "霧篁藥谷",
+  "cellSize": 6,
+  "floors": [
+    {
+      "floor": 1,
+      "label": "藥谷與竹徑",
+      "model": "mist-bamboo-valley-1.glb",
+      "roomIds": [
+        "f1.入口竹徑",
+        "f1.南側山徑",
+        "f1.瘴氣裂縫",
+        "f1.西側竹叢",
+        "f1.採藥台地",
+        "f1.中央空地",
+        "f1.東側棧道",
+        "f1.崩裂棧板",
+        "f1.北側藥棚",
+        "f1.北口"
+      ],
+      "rooms": [
+        {
+          "cells": [
+            {
+              "col": 1,
+              "floor": 1,
+              "row": 8
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.入口竹徑"
+        },
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 8
+            },
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 8
+            },
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 7
+            },
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 7
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.南側山徑"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 7
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.瘴氣裂縫"
+        },
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 6
+            },
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 6
+            },
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 5
+            },
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 5
+            },
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 5
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.西側竹叢"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 3
+            },
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 3
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.採藥台地"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 6,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 5
+            },
+            {
+              "col": 6,
+              "floor": 1,
+              "row": 5
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.中央空地"
+        },
+        {
+          "cells": [
+            {
+              "col": 7,
+              "floor": 1,
+              "row": 5
+            },
+            {
+              "col": 7,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 7,
+              "floor": 1,
+              "row": 3
+            },
+            {
+              "col": 8,
+              "floor": 1,
+              "row": 3
+            },
+            {
+              "col": 8,
+              "floor": 1,
+              "row": 2
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.東側棧道"
+        },
+        {
+          "cells": [
+            {
+              "col": 7,
+              "floor": 1,
+              "row": 2
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.崩裂棧板"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 3
+            },
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 2
+            },
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 2
+            },
+            {
+              "col": 6,
+              "floor": 1,
+              "row": 2
+            },
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 1
+            },
+            {
+              "col": 6,
+              "floor": 1,
+              "row": 1
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.北側藥棚"
+        },
+        {
+          "cells": [
+            {
+              "col": 7,
+              "floor": 1,
+              "row": 1
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.北口"
+        }
+      ],
+      "rows": 8,
+      "cols": 8
+    }
+  ],
+  "topologyHash": "5a2c8f4f395162898f14fa434d462e98856c980d7a6a310aba5d858a80793be0"
+}

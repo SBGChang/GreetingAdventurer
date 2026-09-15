@@ -1,0 +1,17 @@
+{
+  "tool": "Built-in image_gen",
+  "assets": [
+    {
+      "id": "weapon-medallion",
+      "prompt": "Use case: game UI asset. Single ornate circular equipment medallion frame, perfectly front facing, centered, fills 90 percent of square image. Hand-painted premium Chinese fantasy RPG UI, aged gold and bronze relief cloud scrolls, subtle emerald jade inlays, intricate crisp metal engraving. Large empty dark jade stone inset for a weapon icon, no weapon included, ring silhouette clean and readable. Actual transparent background outside medallion, no cast shadow outside, no text, no letters, no people, no mockup, no checkerboard. Match lush hand-painted fantasy inventory portrait frame art."
+    },
+    {
+      "id": "skill-frame",
+      "prompt": "Use case: game UI asset. One square skill button frame, front facing, centered occupying 90 percent of square canvas. Hand-painted premium Chinese fantasy RPG interface, gilded bronze corner ornaments with delicate cloud relief, jade green enamel edge, finely engraved metal. Large empty deep teal stone center with subtle parchment grain, 75 percent usable center for a skill icon and short caption. Actual transparent background outside frame. No icon inside, no text, no letters, no people, no mockup, no checkerboard. Elegant and highly legible at small size."
+    },
+    {
+      "id": "utility-icons",
+      "prompt": "Use case: game UI icon atlas. A horizontal sheet containing EXACTLY three distinct square icons in a single row, evenly spaced on an actual transparent background, no overlapping. LEFT a bronze round shield with jade boss, CENTER a peaceful ceramic tea cup and small resting travel cushion, RIGHT a leather potion pouch with a luminous red potion bottle and blue potion bottle. Each icon complete, centered in one equal third of image, same visual size, generous clear margins, no frames. Exquisite hand painted Chinese fantasy RPG inventory art, rich warm gold and jade tones, clear silhouette, fine highlights. No text, letters, numbers, people, checkerboard, or surrounding scene."
+    }
+  ]
+}

@@ -1044,9 +1044,9 @@ function finishTurn(
 // 打到我方）。任一 dealDamage → 攻擊性（目標須敵方）；否則任一 heal → 支援性（目標須己方）；
 // 其餘（adjustCtb / interruptCasting / applyStatus…）的側別**由 targeting resolver 決定**——那是內容，
 // 不是結構：同一個「延遲目標行動」既可以是打敵人的控場，也可以是幫隊友讓位的支援。
-function requiredSideOf(
+export function requiredSideOf(
   skillView: CombatSkillDefinitionView,
-  ctx: CombatHandlerContext,
+  ctx: Pick<CombatHandlerContext,'definitions'>,
 ): 'enemy' | 'ally' | undefined {
   // 守勢／反擊（§8.4）：effectIds 描述的是**日後反擊時打在攻擊者身上**的效果，不是本次行動的效果。
   // 本次行動只在行動者自己身上立起架勢（見 handleUseCombatSkill 的 counterStance 分支，legalTargets
@@ -1077,7 +1077,7 @@ type TargetSetViolation = Readonly<{
   details: Readonly<Record<string, string | number | boolean>>;
 }>;
 
-function targetSetViolation(
+export function targetSetViolation(
   encounter: CombatEncounter,
   actorSide: 'player' | 'enemy',
   requiredSide: 'enemy' | 'ally' | undefined,
@@ -1313,6 +1313,7 @@ export function handleUseCombatSkill(
     actorId: cmd.actorId,
     skillId: cmd.skillId,
     results: work.results,
+    ctbAfterAction: Object.values(work.combatants).map(c => ({ combatantId: c.combatantId, ctb: c.currentCtb })),
   });
 
   return acceptOf(finishTurn(state, work, cmd.actorId, ctx, [actionEvent]));
@@ -1441,6 +1442,7 @@ export function handleCombatRest(
     encounterId: cmd.encounterId,
     actorId: cmd.actorId,
     results: work.results,
+    ctbAfterAction: Object.values(work.combatants).map(c => ({ combatantId: c.combatantId, ctb: c.currentCtb })),
   });
   return acceptOf(finishTurn(state, work, cmd.actorId, ctx, [actionEvent]));
 }

@@ -30,7 +30,6 @@ import type {
   CombatLoadoutQuery,
   CombatPowerInput,
   CombatResolverPort,
-  CombatSkillTargetInput,
   EnemyActionChoice,
 } from '../../modules/combat/system';
 import { filterByReach } from '../../modules/combat/target-shapes';
@@ -61,6 +60,12 @@ export type CombatResolverBridgeDeps = Readonly<{
   rng: DeterministicRng;
   rngContextFor: (tag: string) => RngContext; // AI 抽選用
 }>;
+
+/** Pure targeting shared by command resolution and the player's target preview. */
+export function createCombatTargetResolver(registry: ResolverRegistry): CombatResolverPort['resolveSkillTargets'] {
+ return input=>filterByReach(input.encounter,input.actorId,input.actorReachCells,
+  runResolver<readonly CombatantId[]>(registry,input.resolverId,input,resolverContext({})).value);
+}
 
 export function createCombatResolverPort(deps: CombatResolverBridgeDeps): CombatResolverPort {
   // P1：AI／反擊 shape 的能力受限 Context。
@@ -125,15 +130,7 @@ export function createCombatResolverPort(deps: CombatResolverBridgeDeps): Combat
 
     // 合法目標集合：純格陣 shape 產候選，再以 Handler 算好的有效射程（input.actorReachCells）做排距過濾
     //（敵方超射程剔除；同側不受限）。shape 無 params、無 RNG。
-    resolveSkillTargets: (input: CombatSkillTargetInput): readonly CombatantId[] => {
-      const candidates = runResolver<readonly CombatantId[]>(
-        deps.registry,
-        input.resolverId,
-        input,
-        resolverContext({}),
-      ).value;
-      return filterByReach(input.encounter, input.actorId, input.actorReachCells, candidates);
-    },
+    resolveSkillTargets: createCombatTargetResolver(deps.registry),
 
     // 攻擊 MXP 路由：讀該技能的 attack-mastery-award-rule，取占比最高的 Mastery。
     // 第一版單一路由（完整比例分配走結算，見帳本待討論）；缺規則＝內容錯，明確拋。

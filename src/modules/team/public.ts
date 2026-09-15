@@ -66,6 +66,8 @@ export {
   openPlayerSuccession,
   validatePlacements,
   // Internal Command
+  handleAttachQuestTemporaryMember,
+  onTemporaryCharacterRecovered,
   handleStartReturnFromDungeon,
   handleStartNpcTeamPlan,
   handleCompletePlayerTravelSegmentWithoutEvent,
@@ -113,7 +115,7 @@ export const teamModuleContract: ModuleContract = {
     'recruitTavernAdventurer',
     'configureCombatFormation',
   ],
-  handlesInternalCommands: [
+  handlesInternalCommands: ['AttachQuestTemporaryMember',
     'StartReturnFromDungeon',
     'StartNpcTeamPlan',
     'CompletePlayerTravelSegmentWithoutEvent',
@@ -125,7 +127,7 @@ export const teamModuleContract: ModuleContract = {
   sendsInternalCommands: [],
   // Wave B 未實作任何 subscriber 函式（CharacterAvailabilityChanged / CharacterRetired /
   // QuestSettled / CombatEncounterResolved / ItemConsumed / RouteAccessChanged 皆待補）。
-  subscriptionHandlerIds: [] as readonly EventSubscriptionId[],
+  subscriptionHandlerIds: ['subscription.TemporaryCharacterRecovered.team' as EventSubscriptionId,] as readonly EventSubscriptionId[],
   emits: [
     'TeamPlanChanged',
     'TeamPlanCompleted',

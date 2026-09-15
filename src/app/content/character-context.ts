@@ -1,15 +1,5 @@
 import { UnavailableCapabilityError } from '../composition/capability';
-// app/content/character-context.ts
-// `CharacterResolverPort` 的正式組裝——目前只接**世界冒險者生成**那一條路。
-//
-// 為什麼只接一條：`CharacterResolverPort` 有五個方法（退休、自然死亡、生育、世界冒險者、
-// 任務暫時角色），五者各自需要自己的 Resolver shape 與 params。世界冒險者這一條是酒館招募的
-// 前提（沒有冒險者就沒有名單），其餘四條在接上之前保持 pending：一被存取就拋並指名是誰，
-// 不給一個編造的結果。
-//
-// 生成的四項決定全部由內容的 `WorldAdventurerGenerationRuleDefinition` 指名 Resolver：
-//   archetypeWeightResolverId / sexWeightResolverId / startingAgeResolverId / innateTraitResolverId
-// 本檔一個權重、一個年齡、一個機率都不寫。
+// 世界冒險者與任務暫時角色均依正式生成規則與 Resolver params 抽取。
 
 import type {
   CharacterArchetypeId,
@@ -45,6 +35,7 @@ export type CharacterResolverPortDeps = Readonly<{
   registry: DefinitionRegistry;
   resolvers: ResolverRegistry;
   rng: DeterministicRng;
+  rngContext?: RngContext;
 }>;
 
 export function createCharacterResolverPort(deps: CharacterResolverPortDeps): CharacterResolverPort {
@@ -93,7 +84,17 @@ export function createCharacterResolverPort(deps: CharacterResolverPortDeps): Ch
     resolveNaturalDeath: () => pendingMethod('character.resolveNaturalDeath'),
     resolveRetirement: () => pendingMethod('character.resolveRetirement'),
     resolveBirth: () => pendingMethod('character.resolveBirth'),
-    resolveQuestTemporaryCharacter: () => pendingMethod('character.resolveQuestTemporaryCharacter'),
+    resolveQuestTemporaryCharacter: ({ command }) => {
+      if (!deps.rngContext) throw new Error('character/temporary-rng-unavailable');
+      const rules = narrowedDomainReader<import('../../contracts/character').TemporaryCharacterRuleDefinition>(deps.registry, 'reader:character.temporary-rule', ['temporary-character-rule']).list().filter(r => r.temporaryKind === command.kind);
+      if (rules.length !== 1) throw new Error('character/temporary-rule-not-unique');
+      const rule = rules[0]!;
+      const rngContext = { ...deps.rngContext, streamId: `${deps.rngContext.streamId}:${command.sourceQuestId}` as RngStreamId };
+      const sex = draw<string>(rule.sexWeightResolverId, {}, rngContext);
+      if (sex.value !== 'male' && sex.value !== 'female') throw new Error('character/invalid-temporary-sex');
+      const traits = draw<readonly CharacterTraitDefinitionId[]>(rule.innateTraitResolverId, {}, { ...rngContext, cursor: sex.nextCursor });
+      return { sex: sex.value, innateTraitIds: traits.value };
+    },
     resolveReputationDelta: () => pendingMethod('character.resolveReputationDelta'),
 
     resolveWorldAdventurer: ({ index, command, onDay }): WorldAdventurerDraft => {

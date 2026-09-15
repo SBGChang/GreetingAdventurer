@@ -220,9 +220,7 @@ export type FinalizeAssetDistributionCollectionCommand = Readonly<{
   distributionId: AssetDistributionId;
 }>;
 
-// §7.4 Expired Quest Cargo 的 `ReleaseExpiredQuestCargo` 由 **inventory** 處理（quest workflow 送出，
-// 將仍鎖定的任務物移入指定 assetDistributionEscrow；見 00_shared_contracts §5.4 表、10_quest §301、
-// 05_inventory §370）。distribution 不是此命令的 handler，故不在此宣告/接收。
+// 到期貨物由 Quest 協調 Inventory.TransferItem 移入 escrow，再追加與結束收集。
 export type AssetDistributionInboundInternalCommand =
   | StartAssetDistributionCommand
   | AppendAssetDistributionResultCommand

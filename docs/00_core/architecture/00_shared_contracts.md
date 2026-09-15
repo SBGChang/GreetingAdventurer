@@ -715,9 +715,7 @@ type DomainEventEnvelope<TEvent> = DomainEventBase & {
 | `AttachQuestTemporaryMember` | quest workflow | team | 將已救出的救援任務暫時角色加入接取隊伍；護衛角色永遠不加入隊伍。 |
 | `ReserveQuestItem` | quest | inventory | 將指定實體保留給委託。 |
 | `ReserveCraftingInputs` | crafting | inventory | 以 Crafting Attempt 原子保留完整輸入素材；任一素材不合法時整批拒絕。 |
-| `ApplyQuestItemLifecycle` | quest | inventory | 回收、釋放或保留指定任務物品。 |
 | `MoveItemToTeamQuestCargo` | quest、city、map workflow | inventory | 將購買／送貨／探索指定品鎖進該 Quest 的任務物資空間。 |
-| `ReleaseExpiredQuestCargo` | quest workflow | inventory | 將 expired Quest 仍鎖定的物品移入指定 Asset Distribution Escrow。 |
 | `ConsumeBookForLearning` | progression | inventory | 驗證並依書籍政策消耗／保留書籍。 |
 | `TransformCraftingItems` | crafting | inventory | 驗證已預留材料、消耗輸入並建立成品。 |
 | `ConsumeCuisineIngredients` | crafting | inventory | 驗證自製料理所需食材的持有、數量與未保留狀態後原子消耗；料理不建立 Inventory 產物。 |

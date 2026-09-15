@@ -1,0 +1,19 @@
+{
+  "turnDurationMs": 850,
+  "camera": {
+    "x": 5,
+    "y": 17,
+    "z": 26,
+    "halfHeight": 7
+  },
+  "formation": {
+    "frontX": 1.6,
+    "rowSpacing": 1.75,
+    "colSpacing": 1.65
+  },
+  "platform": {
+    "width": 14,
+    "depth": 6.2,
+    "thickness": 0.22
+  }
+}

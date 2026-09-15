@@ -291,12 +291,12 @@ City Screen Projection 同時讀 World、City、Team、Character、Social、Inve
 ### 8.2 地牢
 
 - ViewModel 顯示房間節點、實際形狀、通道／紅門、樓梯、固定採集點與偏好標記。
-- 小地圖以 Dungeon 的 `PlayerMapKnowledge` 決定可見範圍：未揭露房間的所有小格畫成黑格；揭露多格房間時一次顯示整個房間形狀。
+- 小地圖以 Dungeon 的 `PlayerMapKnowledge` 決定可見範圍：未揭露房間不建立任何圖形、外框、名稱或出口／內容標記；連線僅在兩端均已揭露時顯示；已知房間邊界的門可先標記開關狀態，本層已知的樓梯依目標樓層標上／下樓，不揭露門後或另一層的房間。入口符號錨定實際門口／平台，同處多方向並排顯示。揭露多格房間時一次顯示整個房間形狀。正式行走小地圖以已載入模型垂直俯視呈現地形，北方固定朝上；我方位置與朝向取自房內行走座標的相機投影，不固定在房間中心。
 - 已揭露範圍永久保留；Map 刷新後，Projection 以相同知識組合 Map 當前版本狀態，讓已知紅門顯示為重新關閉、已知陷阱顯示為重新啟用。
 - 採集點所在房間揭露後永久顯示其固定位置；圖示的 available／harvested 狀態來自 Map 當前版本，刷新後可重新顯示 available。
 - 永久小地圖不等於永久看見動態內容；刷新後的新怪物、寶箱與事件只依目前 Session 視野顯示。
 - 完整 `DungeonMinimapView` 由 `app/read-models/` 組合 Dungeon Knowledge 與 Map Template／Spatial Runtime；Dungeon 與 Map 都不單獨宣稱擁有完整小地圖 ViewModel。
-- 玩家只選擇相鄰可達房間或互動。
+- 玩家透過行走跨越開放的相鄰門口。門與樓梯提示錨定正式連線格及模型平台；僅目前房間且角色在互動距離內才可點選或按 E 操作。重複按鍵不重送命令；同一處多個樓梯方向提供分開選項。
 - 移動分鐘、跨日、內容合法性由 Dungeon／Map Query 提供。
 - 採集按鈕只送 `gatherDungeonNode`；可否採集、實際分鐘、最高採集者、產物 RNG 與 MXP 都不得在 View 預算或寫死。
 - 不在 Canvas／DOM 自行判斷可通行。
@@ -319,6 +319,8 @@ City Screen Projection 同時讀 World、City、Team、Character、Social、Inve
 - Combat ViewModel 提供 footprint、合法目標、可用技能、`currentCtb` 與核心已決定的 CTB 順序。
 - 行動條顯示 `min(currentCtb / 100, 1)`；Tooltip 可顯示實際 CTB。
 - UI 不把超過 100 的 State 截斷。
+- 正式 3D 呈現讀取門面 `combatFrames` 的逐動作 committed 快照；敵方連續行動逐段播放，生命變化數字是每段前後 HP 差值，並非額外傷害計算。動畫不得改變 State、RNG、CTB 或世界時間，也不寫入存檔。
+- 動作先提交與存檔，再演出；演出期間不能重送命令，結算後的勝敗確認只控制返回畫面。怪物模型 ID 取自正式怪物 Definition 身分；模型對應缺失明確報錯，不能猜模型或生成戰鬥數值。
 - 沒有普通攻擊按鈕。
 - 沒有換格、前進、後退或位移技能入口；自動補位只播放 committed Combat State 的視覺變化，動畫不控制補位時機。
 - 同值時 UI 必須呈現核心保存的 readyQueue，不能自行用角色 ID 或 React render 順序重排。
@@ -376,6 +378,16 @@ type UiNotice = {
 - 長時間快轉可顯示非玩法性的計算進度，但只有安全切點能替換 Snapshot。
 - Web Worker 可作為未來 GameEngine Adapter；訊息仍使用相同 JSON 契約。
 - UI 動畫完成與否不得控制世界交易提交。
+
+---
+
+## 11.1 冒險行走入口契約
+
+正式入口與獨立測試入口共用冒險 View 及行走控制器。入口必須提供探索身分／地圖版本、模板／樓層占地、當前房間、正式進入格、連線與門狀態、可操作狀態、隊伍身分，以及目前房間內容。模型與碰撞資料只決定呈現和可站立區域，不授予遊戲權限；占地不符或缺少資產必須明確失敗。
+
+房內座標由 View 保存，不產生世界時間；小地圖的我方箭頭共用此座標，不另建 GameState 位置或探索事實。越過門口時提交房間移動命令，拒絕不變更房間／亮房，接受後仍以 committed Snapshot 確認；門、跨層、內容互動及離場由各自正式命令結算。存檔恢復使用 Session 的房間及 entryCell。場景生命週期由探索身分、地圖版本與樓層決定；同層更新與暫時遮蔽不得重新出生，換層或離場釋放資源。
+
+測試入口只能注入隔離的 fixture 與記憶體命令 Adapter，不得讀写正式存檔；正式 View／控制器不得 import 測試入口或 fixture。兩個入口不得各自維護一份行走、碰撞、亮房或互動 UI。
 
 ---
 

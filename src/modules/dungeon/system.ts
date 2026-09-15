@@ -796,7 +796,11 @@ export function interactDungeonContent(
         nextGuardContentId: String(nextGuardContentId),
       });
     }
-    // 守衛全數解決 → 與寶箱相同，交給內容自己的解析 Resolver（往下走）。
+    if (controllerContentIds.length === 0) return reject('dungeon.interactDungeonContent.controllerContentsMissing');
+    return accept(state, [internal(MAP_MODULE_ID, {
+      type: 'ResolvePlayerMapContent', teamId, mapId: session.mapId, contentId: cmd.contentId,
+      distributionId: session.distributionId, resolution: { kind: 'guardsCleared', outcome: 'success' },
+    })]);
   }
 
   // chest，以及守衛已清空的 control / kidnap：直接要求 Map 處理內容

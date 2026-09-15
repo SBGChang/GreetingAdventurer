@@ -371,9 +371,9 @@ type NpcSequenceEntryView =
 
 | Internal Command | Map 的反應 |
 |---|---|
-| `SetMapRefreshLock` | 為鎮壓／討伐建立或解除 41 日刷新鎖。**設鎖時一併清除既有 Pending 登記**（`pendingSinceDay` / `pendingCheckScheduledFor`）。**解鎖只有下鎖的那張委託能做**：`sourceQuestId` 須與現存鎖相符，無鎖或不符一律拒絕（`map/no-refresh-lock`、`map/refresh-lock-not-owned`）——否則任一委託都能提前解掉鎮壓／討伐目標地圖的鎖（複審 R11 #4）。 |
+| `SetMapRefreshLock` | 建立或解除特殊內容指名期限的刷新鎖。**設鎖時一併清除既有 Pending 登記**（`pendingSinceDay` / `pendingCheckScheduledFor`）。**解鎖只有下鎖的那張委託能做**：`sourceQuestId` 須與現存鎖相符，無鎖或不符一律拒絕（`map/no-refresh-lock`、`map/refresh-lock-not-owned`）——否則任一委託都能提前解掉鎮壓／討伐目標地圖的鎖（複審 R11 #4）。 |
 
-> **刷新鎖與 Pending（依 GDD §183 更正）**:GDD 明定「討伐與鎮壓在生成時就使對應地圖進入三期減一天(41 日)的刷新鎖;不論委託是否被接取,期間皆跳過刷新日**且不建立 Pending**。鎖定在下一個應刷新日前一天解除,因此隔天可自然刷新;不補算、不累積。」
+> **一般委託保護與 Pending**：已接取且尚未結案／到期的鎮壓、討伐、救援透過 Quest Query 保護地圖。無人時不累積補刷；未接取的委託不阻止世界刷新。
 >
 > 本文件原先在 §5.1 寫「鎖定時保留 Pending 並逐日重排」,與 GDD 相反,且實作會留下一個永遠不會被重排的 Pending marker。**以 GDD 為準**:設鎖時清除 Pending;鎖定期間的 `mapRefreshCheck` 一律略過(不刷新、不登記 Pending、不重排);解鎖後等下一個固定刷新日自然刷新。(複審 R10 #6)
 | `ProtectMapContent` | 依 `mode: protect / release` 更新指定 Quest 的內容保護。 |
@@ -502,3 +502,5 @@ Map 模組最低必須提供：
 - [ ] 內容生成、採集點保留／刷新／消耗、正式處理與 NPC 結算驗證。
 - [ ] Map Internal Command Handler 與跨模組事件註冊。
 - [ ] Fixture、資料驗證與快轉一致性測試。
+
+綁架內容的 `MapContentDefinition.rescue` 明確指定 `captiveArchetypeId` 與正整數 `guardCount`。生成時引用同張圖先生成的真實怪群；守衛不足或原型缺失是資料錯誤。玩家以 `guardsCleared` 結果解除綁架，Map 再驗證每位守衛同圖、同版本且已 resolved，並在事件中保留實際處理的 TeamId。存檔內容升級只補未曾配置的種類，不重置既有房間、門或已解決內容。

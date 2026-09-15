@@ -51,7 +51,6 @@
 .game-shell .inventory-list>div{align-items:center;background:#f1e2c7;border:1px solid #bca372;border-radius:4px;font-size:13px;gap:8px;min-height:66px!important;padding:8px!important}
 .game-shell .inventory-list>div>.ui-art{width:42px;height:42px;margin:0;float:none;flex:0 0 42px}
 .game-shell .shop-sales{background:#ddc89d40;border:1px solid #b59a67;border-radius:5px}
-.game-shell .battle-actions button .ui-art{width:40px;height:40px;float:left;margin-right:10px}
 @media(prefers-reduced-motion:reduce){.city-scene .building-sidebar button,.city-scene .building-sidebar button .ui-art,.city-scene .building-sidebar .building-caption,.game-shell .window-surface button{transition:none!important}}
 
 .game-shell .window-surface .window-back{position:absolute;right:60px;top:48px;float:none;z-index:2}

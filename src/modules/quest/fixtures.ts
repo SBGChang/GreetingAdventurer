@@ -196,7 +196,13 @@ export function kidnapContent(contentId: ContentInstanceId = CONTENT_KIDNAP): Ma
 }
 
 export function stubMapContentPort(
-  contents: readonly MapContentView[] = [kidnapContent()],
+  contents: readonly MapContentView[] = [
+    { ...kidnapContent(), state: 'available' },
+    ...[CONTENT_MOB_A, CONTENT_MOB_B, CONTENT_BOSS].map((contentId): MapContentView => ({
+      ...kidnapContent(contentId), state: 'available', kind: contentId === CONTENT_BOSS ? 'boss' : 'monsterGroup',
+      payload: { kind: contentId === CONTENT_BOSS ? 'boss' : 'monsterGroup', encounterGroupId: 'fixture:encounter' as import('../../contracts/core').EncounterGroupDefinitionId },
+    })),
+  ],
 ): QuestMapContentPort {
   const byId = new Map<string, MapContentView>(contents.map((c) => [String(c.contentId), c]));
   return { getContent: (contentId) => byId.get(String(contentId)) };

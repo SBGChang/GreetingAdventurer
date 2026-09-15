@@ -4,8 +4,7 @@
 // 設計原則：
 //   * 全部為決定性純函式：不做 I/O、不呼叫 Math.random / Date.now；世界日由注入的 ctx 取。
 //   * Quest 只寫自己的 Slice；別的模組的狀態一律以 Internal Command 請求（doc §6）。
-//   * 目標完成的判定**只來自 Domain Event**（doc §5.3）：Quest 不掃描別的模組 State，
-//     而是把事件累計進自己的 QuestObjectiveProgress。
+//   * 戰鬥／救援依 Domain Event 累積進度；交貨命令以唯讀 Port 驗證貨物並在同一交易移除。
 //   * Quest Handler 不算錢、不算 MXP、不發物品（doc §2.5）：報酬只保存 Reward Rule 引用。
 //   * 期限天數、獎勵量、聲望效果全是 Definition 資料；本檔沒有任何玩法數值常數。
 //
@@ -116,6 +115,12 @@ export type QuestHandlerContext = Readonly<{
   teams: QuestTeamPort;
   mapContents: QuestMapContentPort;
   characters: QuestTemporaryCharacterPort;
+  cargo?: Readonly<{
+    getItem(itemId: import('../../contracts/core').ItemInstanceId): import('../../contracts/inventory').ItemInstanceView | undefined;
+    findOffer(itemId: import('../../contracts/core').ItemInstanceId, questId: QuestId): Readonly<{ offerId: import('../../contracts/core').ShopOfferId; state: string; sourceQuestId?: QuestId }> | undefined;
+    nextDistributionId(): import('../../contracts/core').AssetDistributionId;
+    distributionRuleId(teamId: TeamId): import('../../contracts/distribution').AssetDistributionRuleId;
+  }>;
 }>;
 
 // 委託生成需要三件既有 Context 沒有的東西：鑄 QuestId、擲骰、以及兩個生成 Resolver。
@@ -142,7 +147,7 @@ export interface QuestGenerationResolverPort {
   ): RngStep<number>;
   // 送貨目的地：一座**不是出發地**的城。
   resolveDeliveryDestination(
-    input: Readonly<{ resolverId: ResolverId; excludeCityId: CityId; rngContext: RngContext }>,
+    input: Readonly<{ resolverId: ResolverId; excludeCityId: CityId; maxCityGapCount?: number; rngContext: RngContext }>,
   ): RngStep<CityId>;
 }
 
@@ -272,40 +277,13 @@ function claimChanged(
   });
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// 能力邊界：哪些 QuestKind 的整條生命週期已閉合
-//
-// 一筆 Quest 從接取走到「完成結案」或「到期清理」會需要別的模組的 Internal Command Handler。
-// 註冊表裡缺少的那幾筆，讓下列 kind 的**清理流程跑不完**——接了就會留下永久鎖在
-// teamQuestCargo 的任務物或永久保留的商店 Offer。規範的五個合法出口裡沒有「先接了再說」，
-// 所以這裡走出口四：回一個指名缺口的 typed rejection。
-//
-// 兩張表刻意分開：能不能接取、與到期時能不能清乾淨，是兩個不同的問題。
-// 表變短的條件是那些 Handler 真的落地，不是改這裡的措辭。
-
-// 接取端：接下去就會需要、但現在拿不到的東西。
+// 尚未具備完整依賴的種類不開放接取。
 const MISSING_ACCEPT_DEPENDENCY: Readonly<Partial<Record<QuestKind, string>>> = {
-  // 指定 Offer 要在期限內保留／標示（doc §6、§9.1）。
-  purchase: 'city.ReserveShopOfferForQuest',
-  // 接取即把指定 Item 移入 teamQuestCargo，而到期時必須能把它交給團隊分配（不變量 13）。
-  delivery: 'inventory.ReleaseExpiredQuestCargo',
-  exploration: 'inventory.ReleaseExpiredQuestCargo',
-  // 護衛候選的身分原型只有 city 的 EscortCandidate 知道；取不到就無法建立護衛角色（doc §6）。
-  escort: 'city.EscortCandidateQuery',
+  exploration: 'quest.exploration-item-lifecycle', escort: 'city.EscortCandidateQuery',
 };
-
-// 期限端：到期時綁定的實體必須被處置，否則會永久卡住。
-// 未接取的購買／送貨：Item 仍在保留位置／指定店面，需 ApplyQuestItemLifecycle(remove)（doc §9.1）。
-const MISSING_UNACCEPTED_EXPIRY_CLEANUP: Readonly<Partial<Record<QuestKind, string>>> = {
-  purchase: 'inventory.ApplyQuestItemLifecycle',
-  delivery: 'inventory.ApplyQuestItemLifecycle',
-};
-
-// 已接取且仍鎖在 teamQuestCargo：需 ReleaseExpiredQuestCargo + Asset Distribution（不變量 13）。
+const MISSING_UNACCEPTED_EXPIRY_CLEANUP: Readonly<Partial<Record<QuestKind, string>>> = {};
 const MISSING_ACCEPTED_EXPIRY_CLEANUP: Readonly<Partial<Record<QuestKind, string>>> = {
-  purchase: 'inventory.ReleaseExpiredQuestCargo',
-  delivery: 'inventory.ReleaseExpiredQuestCargo',
-  exploration: 'inventory.ReleaseExpiredQuestCargo',
+  exploration: 'quest.exploration-item-lifecycle',
 };
 
 function missingAcceptDependency(kind: QuestKind): string | undefined {
@@ -325,7 +303,15 @@ function missingExpiryCleanup(quest: QuestInstance): string | undefined {
 // ──────────────────────────────────────────────────────────────────────────
 
 // 接取時要對別的模組發出的保護／建立請求（doc §5.1、§9.2）。
-function acceptSideEffects(quest: QuestInstance): readonly Outgoing[] {
+function acceptSideEffects(quest: QuestInstance, ctx: QuestHandlerContext): readonly Outgoing[] {
+  if (quest.objective.kind === 'delivery') {
+    const offer = ctx.cargo?.findOffer(quest.objective.itemId, quest.questId);
+    if (!offer || !quest.acceptedByTeamId || !quest.participantCharacterIds[0]) throw new Error('quest/cargo-context-incomplete');
+    return [
+      internal('inventory' as ModuleId, { type: 'MoveItemToTeamQuestCargo', itemId: quest.objective.itemId, questId: quest.questId, teamId: quest.acceptedByTeamId, carrierCharacterId: quest.participantCharacterIds[0] }),
+      internal('city' as ModuleId, { type: 'ReleaseQuestShopOffer', offerId: offer.offerId, sourceQuestId: quest.questId, disposition: 'expire' }),
+    ];
+  }
   if (quest.objective.kind === 'rescue') {
     return [
       internal(MAP_MODULE_ID, {
@@ -358,6 +344,7 @@ function expireQuest(
   state: QuestState,
   quest: QuestInstance,
   reason: QuestStateChangeReason,
+  ctx: QuestHandlerContext,
 ): Readonly<{ state: QuestState; messages: readonly Outgoing[] }> {
   const expired: QuestInstance = {
     ...quest,
@@ -369,6 +356,7 @@ function expireQuest(
   const messages: Outgoing[] = [
     stateChanged(quest.questId, quest.status, 'expired', reason),
     ...releaseProtection(quest),
+    ...releaseCargo(quest, ctx),
   ];
   if (claim !== undefined) {
     messages.push(claimChanged(quest.questId, 'released', claim.teamId, claim.chainId));
@@ -452,6 +440,15 @@ function applyAccept(
     });
   }
 
+  const mapTargets = quest.objective.kind === 'rescue' ? [quest.objective.contentId] : objectiveCompletionContentIds(quest.objective);
+  if (mapTargets.some(id => ctx.mapContents.getContent(id)?.state !== 'available')) return reject('quest/target-unavailable');
+
+  if (quest.objective.kind === 'purchase' || quest.objective.kind === 'delivery') {
+    const item = ctx.cargo?.getItem(quest.objective.itemId);
+    const offer = ctx.cargo?.findOffer(quest.objective.itemId, quest.questId);
+    if (!item || item.state !== 'active' || !offer || offer.state !== 'available' || offer.sourceQuestId !== questId) return reject('quest/cargo-unavailable');
+  }
+
   const accepted: QuestInstance = {
     ...quest,
     status: 'incomplete',
@@ -466,7 +463,7 @@ function applyAccept(
   const nextState = clearClaim(updateQuest(state, accepted), questId);
   const messages: Outgoing[] = [
     emit({ type: 'QuestAccepted', questId, teamId, acceptedOnDay: ctx.worldDay }),
-    ...acceptSideEffects(accepted),
+    ...acceptSideEffects(accepted, ctx),
   ];
   if (claim !== undefined) {
     messages.push(claimChanged(questId, 'released', claim.teamId, claim.chainId));
@@ -624,7 +621,7 @@ export function handleQuestDeadline(
         missing,
       });
     }
-    const expired = expireQuest(state, quest, 'acceptDeadline');
+    const expired = expireQuest(state, quest, 'acceptDeadline', ctx);
     return accept(expired.state, expired.messages);
   }
 
@@ -641,7 +638,7 @@ export function handleQuestDeadline(
       missing,
     });
   }
-  const expired = expireQuest(state, quest, 'actualEndDeadline');
+  const expired = expireQuest(state, quest, 'actualEndDeadline', ctx);
   return accept(expired.state, expired.messages);
 }
 
@@ -678,9 +675,18 @@ export function onMapContentGenerated(
   const messages: Outgoing[] = [];
   let cursor = ctx.rngContext.cursor;
 
+  for (const quest of listQuestsOrdered(state)) {
+    if (quest.status !== 'unaccepted' || (quest.objective.kind !== 'rescue' && quest.objective.kind !== 'hunt' && quest.objective.kind !== 'suppression') || quest.objective.mapId !== event.mapId) continue;
+    const targets = quest.objective.kind === 'rescue' ? [quest.objective.contentId] : objectiveCompletionContentIds(quest.objective);
+    if (targets.some(id => ctx.mapContents.getContent(id)?.state !== 'available')) {
+      const expired = expireQuest(working, quest, 'contentUnavailable', ctx);
+      working = expired.state; messages.push(...expired.messages);
+    }
+  }
   for (const contentId of event.contentIds) {
     const content = ctx.mapContents.getContent(contentId);
-    if (content === undefined) continue;
+    if (content === undefined || content.state !== 'available') continue;
+    if (listQuestsOrdered(working).some(q => q.status !== 'expired' && (q.objective.kind === 'rescue' ? q.objective.contentId === contentId : objectiveCompletionContentIds(q.objective).includes(contentId)))) continue;
     const sourceKind = questSourceKindOf(content);
     if (sourceKind === undefined) continue; // 這種內容不是任何委託的來源（例如寶箱）
 
@@ -809,9 +815,7 @@ function objectiveFor(kind: QuestKind, content: MapContentView): QuestObjective 
 // doc §2.3「地圖或城市庫存物品：依資料機率形成探索、購買或送貨委託」。與地圖內容那條路
 // 對稱：城市把一件東西擺上貨架 → 對 `sourceKind: 'cityStockItem'` 的每一條規則各擲一次骰。
 //
-// 為什麼是「每一條各擲一次」而不是「挑一條」：採買（0.3）與送貨（0.2）是**兩種不同的委託**，
-// 同一件貨可以同時有人要買、有人要運。地圖內容那邊是一對一（一群怪不會同時是肅清又是狩獵），
-// 所以那裡多於一條就拋錯；這裡不是。
+// 依規則依序抽取；第一筆成功即保留貨物，一件商品不得同時成為兩張委託目標。
 export function onCityStockItemAvailable(
   event: CityStockItemAvailable,
   state: QuestState,
@@ -821,8 +825,11 @@ export function onCityStockItemAvailable(
   const messages: Outgoing[] = [];
   let cursor = ctx.rngContext.cursor;
 
+  if (listQuestsOrdered(state).some(q => (q.objective.kind === 'purchase' || q.objective.kind === 'delivery') && q.objective.itemId === event.itemId && q.status !== 'expired')) return makeResult(state, []);
+  if (!ctx.cities.getGuildFacilityId(event.cityId)) return makeResult(state, []);
   for (const rule of ctx.definitions.listQuestReactionRules()) {
     if (rule.sourceKind !== 'cityStockItem') continue;
+    if (rule.sourceItemKinds && (!event.itemKind || !rule.sourceItemKinds.includes(event.itemKind))) continue;
     if (ctx.enabledKinds && !ctx.enabledKinds.includes(rule.questKind)) continue;
 
     const chanceRoll = ctx.rng.nextFloat({ ...ctx.rngContext, cursor });
@@ -855,6 +862,7 @@ export function onCityStockItemAvailable(
       const destination = ctx.resolvers.resolveDeliveryDestination({
         resolverId,
         excludeCityId: postingCityId,
+        maxCityGapCount: deadlineRule.maxCityGapCount,
         rngContext: { ...ctx.rngContext, cursor },
       });
       cursor = destination.nextCursor;
@@ -911,6 +919,9 @@ export function onCityStockItemAvailable(
         },
       }),
     );
+    messages.push(internal('city' as ModuleId, { type: 'ReserveShopOfferForQuest', offerId: event.offerId, sourceQuestId: quest.questId }));
+    break; // 一件實體貨物只保留給一張委託。
+
   }
 
   return makeResult(working, messages);
@@ -928,10 +939,19 @@ export function onMapContentResolved(
   const messages: Outgoing[] = [];
 
   for (const quest of listQuestsOrdered(state)) {
+    if (quest.status === 'unaccepted') {
+      const targets = quest.objective.kind === 'rescue' ? [quest.objective.contentId] : objectiveCompletionContentIds(quest.objective);
+      if (targets.includes(event.contentId)) {
+        const expired = expireQuest(working, quest, 'contentUnavailable', ctx);
+        working = expired.state; messages.push(...expired.messages);
+      }
+      continue;
+    }
     if (quest.status !== 'incomplete') continue;
     const current = tryGetQuest(working, quest.questId);
     if (current === undefined) continue;
 
+    if (event.teamId !== undefined && current.acceptedByTeamId !== event.teamId) continue;
     if (current.objective.kind === 'suppression' || current.objective.kind === 'hunt') {
       if (current.objective.mapId !== event.mapId) continue;
       if (!objectiveCompletionContentIds(current.objective).includes(event.contentId)) continue;
@@ -954,7 +974,7 @@ export function onMapContentResolved(
       const content = ctx.mapContents.getContent(event.contentId);
       if (content === undefined || content.payload.kind !== 'kidnap') {
         // 綁定的內容不見了或不是綁架內容 → 目標永遠無法達成，依 doc §7 轉 expired。
-        const gone = expireQuest(working, current, 'contentUnavailable');
+        const gone = expireQuest(working, current, 'contentUnavailable', ctx);
         working = gone.state;
         messages.push(...gone.messages);
         continue;
@@ -1036,7 +1056,7 @@ export function onCombatEncounterResolved(
     if (quest.acceptedByTeamId !== event.teamId) continue;
     const current = tryGetQuest(working, quest.questId);
     if (current === undefined) continue;
-    const gone = expireQuest(working, current, 'combatDefeat');
+    const gone = expireQuest(working, current, 'combatDefeat', ctx);
     working = gone.state;
     messages.push(...gone.messages);
   }
@@ -1057,7 +1077,7 @@ export function onCharacterDied(
     if (objectiveCharacterId(quest.objective) !== event.characterId) continue;
     const current = tryGetQuest(working, quest.questId);
     if (current === undefined) continue;
-    const gone = expireQuest(working, current, 'targetDied');
+    const gone = expireQuest(working, current, 'targetDied', ctx);
     working = gone.state;
     messages.push(...gone.messages);
   }
@@ -1088,5 +1108,42 @@ export function onCharacterCreated(
     objective,
     revision: bumpRevision(quest.revision),
   };
-  return makeResult(updateQuest(state, bound));
+  return makeResult(updateQuest(state, bound), quest.acceptedByTeamId && origin.kind === 'rescue' ? [internal('team' as ModuleId, { type: 'AttachQuestTemporaryMember', teamId: quest.acceptedByTeamId, characterId: event.characterId, questId: quest.questId })] : []);
+}
+
+/** Return unsold stock to commerce; distribute already collected cargo through the ordinary loot pipeline. */
+function releaseCargo(quest: QuestInstance, ctx: QuestHandlerContext): readonly Outgoing[] {
+  if (quest.objective.kind !== 'purchase' && quest.objective.kind !== 'delivery') return [];
+  if (!ctx.cargo) throw new Error('quest/cargo-context-unavailable');
+  const messages: Outgoing[] = [];
+  const offer = ctx.cargo.findOffer(quest.objective.itemId, quest.questId);
+  if (offer?.sourceQuestId === quest.questId) messages.push(internal('city' as ModuleId, { type: 'ReleaseQuestShopOffer', offerId: offer.offerId, sourceQuestId: quest.questId, disposition: 'release' }));
+  const item = ctx.cargo.getItem(quest.objective.itemId);
+  if (item?.state !== 'active' || item.location.kind !== 'teamQuestCargo' || item.location.questId !== quest.questId) return messages;
+  const distributionId = ctx.cargo.nextDistributionId();
+  const teamId = item.location.teamId;
+  const target = 'distribution' as ModuleId;
+  messages.push(
+    internal(target, { type: 'StartAssetDistribution', distributionId, source: { kind: 'expiredQuestCargo', questId: quest.questId }, teamId, participantCharacterIds: quest.participantCharacterIds, ruleId: ctx.cargo.distributionRuleId(teamId) }),
+    internal('inventory' as ModuleId, { type: 'TransferItem', itemId: quest.objective.itemId, to: { kind: 'assetDistributionEscrow', distributionId }, reason: 'expiredQuestCargo' }),
+    internal(target, { type: 'AppendAssetDistributionResult', distributionId, itemIds: [quest.objective.itemId], currencyInputs: [] }),
+    internal(target, { type: 'FinalizeAssetDistributionCollection', distributionId }),
+  );
+  return messages;
+}
+
+export function handleHandInQuestCargo(state: QuestState, command: import('../../contracts/quest').HandInQuestCargoCommand, teamId: TeamId, ctx: QuestHandlerContext): QuestHandlerResult {
+  const quest = tryGetQuest(state, command.questId);
+  if (!quest || quest.acceptedByTeamId !== teamId) return reject('quest/not-accepted-by-team');
+  if (quest.status !== 'incomplete') return reject('quest/not-incomplete');
+  if (ctx.worldDay >= quest.actualEndDeadline) return reject('quest/settlement-deadline-passed');
+  const objective = quest.objective;
+  if (objective.kind !== 'purchase' && objective.kind !== 'delivery') return reject('quest/not-cargo-quest');
+  const destination = objective.kind === 'delivery' ? objective.destinationCityId : quest.postingGuildCityId;
+  const location = ctx.teams.getLocation(teamId);
+  if (location.kind !== 'city' || location.cityId !== destination) return reject('quest/not-at-delivery-city');
+  const item = ctx.cargo?.getItem(objective.itemId);
+  if (!item || item.state !== 'active' || item.location.kind !== 'teamQuestCargo' || item.location.questId !== quest.questId || item.location.teamId !== teamId) return reject('quest/cargo-not-carried');
+  const completed = completeQuest(state, quest, ctx.worldDay, [internal('inventory' as ModuleId, { type: 'RemoveItemInstance', itemId: objective.itemId, reason: 'questCleanup' })]);
+  return accept(completed.state, completed.messages);
 }

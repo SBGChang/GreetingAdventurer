@@ -11,6 +11,8 @@ import { t, type UiLocale } from './i18n';
 type Props = {
   modelUrl: string;
   overview?: boolean;
+  visible?: boolean;
+  paused?: boolean;
   locale: UiLocale;
   active?: string;
   facilities: readonly { kind: string; name: string }[];
@@ -32,7 +34,7 @@ export function TownModel(props: Props) {
     if (!container) return;
     setStatus('loading');
     container.dataset.ready = 'false';
-    let disposed = false;
+    let disposed = false, frozenDrawn = false;
     let renderer: THREE.WebGLRenderer | undefined;
     let composer: EffectComposer | undefined;
     let outline: OutlinePass | undefined;
@@ -82,6 +84,7 @@ export function TownModel(props: Props) {
       setStatus('error');
     };
     const resize = () => {
+      frozenDrawn = false;
       const w = container.clientWidth, h = container.clientHeight;
       if (!w || !h || !renderer) return;
       renderer.setSize(w, h);
@@ -104,6 +107,7 @@ export function TownModel(props: Props) {
       return typeof kind === 'string' && latest.current.facilities.some(f => f.kind === kind) ? kind : undefined;
     };
     const move = (event: PointerEvent) => {
+        if(latest.current.paused)return;
       if (drag && camera && renderer) {
         const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
         if (Math.hypot(dx, dy) > 6) drag.moved = true;
@@ -125,6 +129,7 @@ export function TownModel(props: Props) {
       latest.current.onHover(undefined);
     };
     const down = (event: PointerEvent) => {
+        if(latest.current.paused)return;
       if (props.overview || (event.button !== 0 && event.button !== 2) || !renderer) return;
       panTarget.copy(pan); focusAt = 0; suppressClick = false;
       container.dataset.cameraFocus = '';
@@ -137,7 +142,8 @@ export function TownModel(props: Props) {
       if (renderer?.domElement.hasPointerCapture(event.pointerId)) renderer.domElement.releasePointerCapture(event.pointerId);
     };
     const contextMenu = (event: Event) => event.preventDefault();
-    const click = (event: MouseEvent) => { if (suppressClick) { suppressClick = false; return; } const kind = hit(event); if (kind) latest.current.onVisit(kind); };
+    const click = (event: MouseEvent) => {
+        if(latest.current.paused)return; if (suppressClick) { suppressClick = false; return; } const kind = hit(event); if (kind) latest.current.onVisit(kind); };
     const lost = (event: Event) => { event.preventDefault(); fail(new Error('WebGL context lost')); };
     const observer = new ResizeObserver(resize);
     setStatus('loading');
@@ -200,9 +206,10 @@ export function TownModel(props: Props) {
           for (const f of latest.current.facilities) if (!buildings.has(f.kind)) throw new Error(`Missing town landmark: ${f.kind}`);
           scene.add(model);
           if (!renderer) return;
-          composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(container.clientWidth, container.clientHeight, { type: THREE.HalfFloatType, samples: 4 }));
+          const renderSize = renderer.getSize(new THREE.Vector2());
+          composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(renderSize.x, renderSize.y, { type: THREE.HalfFloatType, samples: 4 }));
           composer.addPass(new RenderPass(scene, camera));
-          outline = new OutlinePass(new THREE.Vector2(container.clientWidth, container.clientHeight), scene, camera);
+          outline = new OutlinePass(renderSize, scene, camera);
           outline.edgeStrength = 2; outline.edgeGlow = 1.1; outline.edgeThickness = 2;
           outline.visibleEdgeColor.set('#ffdda0'); outline.hiddenEdgeColor.set('#443c21');
           composer.addPass(outline); composer.addPass(new OutputPass());
@@ -211,7 +218,14 @@ export function TownModel(props: Props) {
           container.dataset.ready = 'true'; setStatus('ready');
           let lastTime = performance.now();
           renderer.setAnimationLoop(time => {
-            if (!renderer || !camera || !composer || !outline || document.hidden) return;
+            if (!renderer || !camera || !composer || !outline) return;
+            // Facility windows retain this scene and camera, but do not draw it in the background.
+            const visible = latest.current.visible !== false && !document.hidden;
+            container.dataset.rendering = String(visible);
+            if (!visible) { lastTime = time; return; }
+            container.dataset.frozen=String(!!latest.current.paused);
+            if(latest.current.paused){if(!frozenDrawn){composer.render();frozenDrawn=true;}lastTime=time;return;}
+            frozenDrawn=false;
             const dt = Math.min((time - lastTime) / 1000, .05); lastTime = time;
             const active = latest.current.active;
             const root = active ? buildings.get(active) : undefined;

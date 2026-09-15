@@ -213,7 +213,7 @@ remainder = 總池 - baseShare × 人數
 Quest 只使用既有 `expired` 狀態，不新增 failed。若 Purchase／Delivery／Exploration 到期時仍有 Item 位於 `teamQuestCargo`：
 
 1. 以 Quest 保存的正式參與者建立 `expiredQuestCargo` Distribution。
-2. Quest 送 `ReleaseExpiredQuestCargo(distributionId)`，將 Item 移入該筆 `assetDistributionEscrow`。
+2. Quest 送 `TransferItem(to: assetDistributionEscrow)`，將 Item 移入該筆 `assetDistributionEscrow`。
 3. 玩家 Team 使用內部競拍；NPC Team 使用逐 Item RNG。
 4. 分配完成後 Cargo 必須為空。
 

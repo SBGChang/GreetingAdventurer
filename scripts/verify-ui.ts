@@ -24,7 +24,7 @@ try {
   const openingWorld = inspectWorld(initial);
   assert(openingWorld.shopOffers > 0, 'bootstrap must stock shops before the first player action');
   assert(openingWorld.mapContents.monsterGroup > 0, 'bootstrap must populate maps before the first player action');
-  assert.deepEqual(openingWorld.questKinds, ['hunt','suppression'], 'only complete quest workflows may be published');
+  assert.deepEqual(openingWorld.questKinds, ['delivery','hunt','purchase','rescue','suppression'], 'only complete quest workflows may be published');
 
   assert.deepEqual(createGame(config, initial).view, game.view, 'new-game save must round-trip');
   let result;

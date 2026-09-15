@@ -58,6 +58,7 @@ export type QuestReactionRuleDefinition = DefinitionHeader<QuestReactionRuleId> 
   sourceKind: QuestReactionSourceKind;
   questKind: QuestKind;
   creationChance: number;
+  sourceItemKinds?: readonly import('../inventory').ItemKind[];
   guildResolverId: ResolverId;
   // 送貨的**目的地**由誰決定。只有 `questKind: 'delivery'` 需要——貼在哪裡（guildResolverId）
   // 與送到哪裡是兩件事，把它們合成一個欄位就說不出「在雲京接、送去青岑」。
@@ -190,7 +191,8 @@ export type AcceptQuestCommand = Readonly<{ type: 'acceptQuest'; questId: QuestI
 export type SettleQuestCommand = Readonly<{ type: 'settleQuest'; questId: QuestId }>;
 
 // 只列**已註冊**的入口（同 contracts/dungeon、contracts/inventory 的作法）。
-export type QuestGameCommand = AcceptQuestCommand | SettleQuestCommand;
+export type HandInQuestCargoCommand = Readonly<{ type: 'handInQuestCargo'; questId: QuestId }>;
+export type QuestGameCommand = AcceptQuestCommand | SettleQuestCommand | HandInQuestCargoCommand;
 
 // ── 輸入契約：NPC Internal Command（§5.1.1）──────────────────────────────
 export type AcceptQuestForNpcTeamCommand = Readonly<{
@@ -226,8 +228,10 @@ export type QuestInternalCommand =
 // Quest **送出**的 Internal Command：一律引用接收模組契約的真實型別，不自行複寫欄位。
 // 只列已註冊 Handler 送得出去的那幾筆——送一個沒有 Owner 的命令等於保證那條流程跑不完
 // （registry 的「送出端 → Owner」交叉驗證會擋）。
-export type QuestOutboundInternalCommand = ProtectMapContent | CreateQuestTemporaryCharacter
-  | import('../distribution').AssetDistributionInboundInternalCommand;
+export type QuestOutboundInternalCommand = import('../team').AttachQuestTemporaryMemberPayload | ProtectMapContent | CreateQuestTemporaryCharacter
+  | import('../distribution').AssetDistributionInboundInternalCommand
+  | import('../city').ReserveShopOfferForQuestCommand | import('../city').ReleaseQuestShopOfferCommand
+  | import('../inventory').MoveItemToTeamQuestCargo | import('../inventory').TransferItem | import('../inventory').RemoveItemInstance;
 
 // ── ScheduledJob（§5.2）───────────────────────────────────────────────
 export type QuestDeadlineJobKind = 'accept' | 'actualEnd';

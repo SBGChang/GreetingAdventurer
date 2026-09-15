@@ -6344,6 +6344,11 @@
         "contentKind": "monsterGroup",
         "maxCount": 3,
         "minCount": 3
+      },
+      {
+        "contentKind": "kidnap",
+        "maxCount": 1,
+        "minCount": 1
       }
     ]
   },
@@ -6360,7 +6365,13 @@
     "packId": "pack:yunhua",
     "schemaVersion": 1,
     "sourcePath": "yunhua/maps.json#map-spawn-rule.yunhua.calendar-court-ruin",
-    "spawnBudgets": []
+    "spawnBudgets": [
+      {
+        "contentKind": "monsterGroup",
+        "maxCount": 4,
+        "minCount": 4
+      }
+    ]
   },
   {
     "chestPoolId": "chest-pool.yunhua.seal-tower",
@@ -6411,6 +6422,11 @@
         "contentKind": "boss",
         "maxCount": 1,
         "minCount": 1
+      },
+      {
+        "contentKind": "kidnap",
+        "maxCount": 1,
+        "minCount": 1
       }
     ]
   },
@@ -6427,7 +6443,13 @@
     "packId": "pack:yunhua",
     "schemaVersion": 1,
     "sourcePath": "yunhua/maps.json#map-spawn-rule.yunhua.hanging-spring-grotto",
-    "spawnBudgets": []
+    "spawnBudgets": [
+      {
+        "contentKind": "monsterGroup",
+        "maxCount": 4,
+        "minCount": 4
+      }
+    ]
   },
   {
     "chestPoolId": "chest-pool.yunhua.tidal-reed-isle",
@@ -6442,7 +6464,13 @@
     "packId": "pack:yunhua",
     "schemaVersion": 1,
     "sourcePath": "yunhua/maps.json#map-spawn-rule.yunhua.tidal-reed-isle",
-    "spawnBudgets": []
+    "spawnBudgets": [
+      {
+        "contentKind": "monsterGroup",
+        "maxCount": 3,
+        "minCount": 3
+      }
+    ]
   },
   {
     "chestPoolId": "chest-pool.yunhua.salt-well-cellar",
@@ -6457,7 +6485,18 @@
     "packId": "pack:yunhua",
     "schemaVersion": 1,
     "sourcePath": "yunhua/maps.json#map-spawn-rule.yunhua.salt-well-cellar",
-    "spawnBudgets": []
+    "spawnBudgets": [
+      {
+        "contentKind": "monsterGroup",
+        "maxCount": 4,
+        "minCount": 4
+      },
+      {
+        "contentKind": "kidnap",
+        "maxCount": 1,
+        "minCount": 1
+      }
+    ]
   },
   {
     "chestPoolId": "chest-pool.yunhua.cinnabar-ridge",
@@ -6472,7 +6511,13 @@
     "packId": "pack:yunhua",
     "schemaVersion": 1,
     "sourcePath": "yunhua/maps.json#map-spawn-rule.yunhua.cinnabar-ridge",
-    "spawnBudgets": []
+    "spawnBudgets": [
+      {
+        "contentKind": "monsterGroup",
+        "maxCount": 3,
+        "minCount": 3
+      }
+    ]
   },
   {
     "chestPoolId": "chest-pool.yunhua.old-kiln-flue",
@@ -6487,7 +6532,18 @@
     "packId": "pack:yunhua",
     "schemaVersion": 1,
     "sourcePath": "yunhua/maps.json#map-spawn-rule.yunhua.old-kiln-flue",
-    "spawnBudgets": []
+    "spawnBudgets": [
+      {
+        "contentKind": "monsterGroup",
+        "maxCount": 4,
+        "minCount": 4
+      },
+      {
+        "contentKind": "kidnap",
+        "maxCount": 1,
+        "minCount": 1
+      }
+    ]
   },
   {
     "contentKind": "monsterGroup",
@@ -6561,6 +6617,22 @@
     "packId": "pack:yunhua",
     "schemaVersion": 1,
     "sourcePath": "yunhua/maps.json#map-content.yunhua.map-event"
+  },
+  {
+    "contentKind": "kidnap",
+    "enabled": true,
+    "id": "map-content.yunhua.guarded-captive",
+    "kind": "map-content",
+    "npcPolicy": {
+      "eligible": false
+    },
+    "packId": "pack:yunhua",
+    "rescue": {
+      "captiveArchetypeId": "character-archetype.core.rescue-captive",
+      "guardCount": 1
+    },
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/maps.json#map-content.yunhua.guarded-captive"
   },
   {
     "candidates": [

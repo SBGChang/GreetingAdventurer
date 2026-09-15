@@ -12,6 +12,23 @@ import type {
 import type { CombatState, CombatEncounter, CombatantState } from './state';
 import { requireEncounter, tryGetEncounter } from './state';
 import type { CombatHandlerContext } from './system';
+import {requiredSideOf,targetSetViolation} from './system';
+
+/** Read-only preview uses the same targeting resolver and structural checks as commands. */
+export function previewCombatSkill(encounter:CombatEncounter,actorId:CombatantId,skillId:SkillDefinitionId,weaponSetId:WeaponSetId,deps:QueryDeps&{resolveTargets:CombatHandlerContext['resolvers']['resolveSkillTargets']}){
+ const actor=encounter.combatants[actorId];
+ if(!actor||actor.source.kind!=='character')throw new Error('Combat preview requires a character actor');
+ const skill=deps.definitions.getSkillView(skillId),reach=deps.loadout.getActiveWeaponReachCells(actor.source.characterId,weaponSetId);
+ const cost=skill.resourceCosts.reduce((sum,c)=>({...sum,[c.resource]:sum[c.resource]+c.amount}),{health:0,mana:0});
+ const reason=actor.health<cost.health||actor.mana<cost.mana?'resources':reach===undefined?'weapon':undefined;
+ const validTargetIds:CombatantId[]=[];
+ if(reach!==undefined)for(const candidate of Object.values(encounter.combatants)){
+  if(candidate.state==='dead')continue;
+  const targets=deps.resolveTargets({resolverId:skill.targeting.targetResolverId,encounter,actorId,requestedTargetIds:[candidate.combatantId],actorReachCells:reach+(skill.targeting.extraReachCells===undefined?0:skill.targeting.extraReachCells)});
+  if(targets.includes(candidate.combatantId)&&!targetSetViolation(encounter,actor.side,requiredSideOf(skill,deps),skill.targeting.targetResolverId,targets))validTargetIds.push(candidate.combatantId);
+ }
+ return {validTargetIds,unavailableReason:reason??(validTargetIds.length===0?'targets':undefined),available:encounter.currentActorId===actorId&&actor.state!=='dead'&&!reason&&validTargetIds.length>0};
+}
 
 function toCombatantView(c: CombatantState): CombatantView {
   return {
@@ -69,7 +86,8 @@ export function makeCombatQuery(state: CombatState, deps: QueryDeps): CombatQuer
       throw new Error(`missing combatant ${String(id)}`);
     },
 
-    // 不消費 RNG：以 (currentCtb 升冪, 玩家側優先, combatantId) 決定性排序（不變量 12）。
+    // 不消費 RNG；已排定的 0 CTB 同值者沿用 scheduler 的 readyQueue。
+    // 尚未排定的同值者僅以穩定順序列示，不能預先決定下一輪 RNG 結果。
     getCtbOrder(encounterId: EncounterId): CombatantId[] {
       const encounter = tryGetEncounter(state, encounterId);
       if (encounter === undefined) return [];
@@ -78,6 +96,10 @@ export function makeCombatQuery(state: CombatState, deps: QueryDeps): CombatQuer
         .filter((c): c is CombatantState => c !== undefined && c.state !== 'dead')
         .sort((a, b) => {
           if (a.currentCtb !== b.currentCtb) return a.currentCtb - b.currentCtb;
+          const aReady = encounter.readyQueue.indexOf(a.combatantId), bReady = encounter.readyQueue.indexOf(b.combatantId);
+          if (aReady >= 0 && bReady >= 0) return aReady - bReady;
+          if (aReady >= 0) return -1;
+          if (bReady >= 0) return 1;
           if (a.side !== b.side) return a.side === 'player' ? -1 : 1;
           return a.combatantId < b.combatantId ? -1 : a.combatantId > b.combatantId ? 1 : 0;
         })

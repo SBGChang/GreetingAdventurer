@@ -1,0 +1,15 @@
+{
+  "actorDiameter": 1.0,
+  "files": {
+    "cinnabar-ridge-1.glb": "dcffb4776a1d9caac1789eabb0752e6994b5594b84b6827350023e459d092d92",
+    "cinnabar-ridge.blend": "679db431cadbef8e1fb04e34ad43cdae4cbb8e124f6cfed0d9dd097c28d10547",
+    "cinnabar-ridge-navigation.json": "88c783308583d25e9ad5cacc781dbce799c501371c7c86260c7a9da3cb0c6d04"
+  },
+  "floors": [
+    {
+      "floor": 1,
+      "footprintChecks": 1611,
+      "openDrySampleRatio": 0.965
+    }
+  ]
+}

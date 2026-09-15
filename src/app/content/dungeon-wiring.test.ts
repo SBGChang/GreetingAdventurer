@@ -192,6 +192,11 @@ const cases: readonly Case[] = [
         );
 
         for (const content of contents) {
+          if (content.payload.kind === 'kidnap') {
+            assert(content.payload.controllerContentIds.length > 0, '救援必須有實際守衛');
+            assert(content.payload.controllerContentIds.every(id => contents.some(c => c.contentId === id && (c.kind === 'monsterGroup' || c.kind === 'boss'))), '守衛必須在同張地圖');
+            continue;
+          }
           const payload = content.payload as { kind: string; encounterGroupId?: string };
           const groupId = String(payload.encounterGroupId);
           // 候選必須來自文化池——不得憑空生出一個 encounter group。

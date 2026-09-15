@@ -250,6 +250,7 @@ export interface CityResolverPort {
 }
 
 export type CityHandlerContext = Readonly<{
+  canBuyQuestOffer?: (questId: import('../../contracts/core').QuestId, teamId: TeamId) => boolean;
   worldDay: WorldDay;
   definitions: CityDefinitionReader;
   team: CityTeamPort;
@@ -460,6 +461,8 @@ export function handleBuyShopOffer(
     });
   }
 
+  if (offer.sourceQuestId && !ctx.canBuyQuestOffer?.(offer.sourceQuestId, buyerTeamId)) return reject('city/quest-offer-not-accepted');
+
   const gate = commerceGate(ctx, state, offer.cityId, command.payerCharacterId);
   if (gate.limitReached) {
     return reject('city/daily-commerce-limit-reached', {
@@ -655,6 +658,7 @@ export function handleSellItemToShop(
     }),
     emit({
       type: 'CityStockItemAvailable',
+      itemKind: ctx.inventory.getItemKind(item.itemId),
       cityId: command.cityId,
       itemId: command.itemId,
       offerId: offer.offerId,
@@ -923,7 +927,7 @@ export function handleReleaseHomeTeacher(
 export function handleReserveShopOfferForQuest(
   command: ReserveShopOfferForQuestCommand,
   state: CityState,
-  ctx: CityHandlerContext,
+  ctx?: CityHandlerContext,
 ): CityHandlerResult {
   void ctx;
   const offer = tryGetOffer(state, command.offerId);
@@ -1295,7 +1299,7 @@ export function handleShopRefresh(
         itemId: offer.itemId,
         source: offer.source,
       }),
-      emit({ type: 'CityStockItemAvailable', cityId, itemId: offer.itemId, offerId: offer.offerId }),
+      emit({ type: 'CityStockItemAvailable', itemKind: ctx.inventory.getItemKind(offer.itemId), cityId, itemId: offer.itemId, offerId: offer.offerId }),
     );
   }
 

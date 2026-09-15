@@ -1,0 +1,9 @@
+{
+  "weaponFamilies": [{
+    "id": "one-hand-dao",
+    "equipmentIds": ["equipment.yunhua.ring-saber.i", "equipment.yunhua.ring-saber.ii", "equipment.yunhua.ring-saber.iii"],
+    "skillIds": ["combat-skill.yunhua.ring-saber-l0"]
+  }],
+  "characters": [{"archetypeId": "character-archetype.core.player-lineage", "sex": "male", "weaponFamilyId": "one-hand-dao", "skinId": "yunhua-male-martial"}],
+  "monsters": {"monster.yunhua.tide-shell-crab": "tide-shell-crab"}
+}

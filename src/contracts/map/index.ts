@@ -259,6 +259,7 @@ export type MapContentDefinition = DefinitionHeader &
   Readonly<{
     contentKind: MapContentKind;
     npcPolicy: MapContentNpcPolicy;
+    rescue?: Readonly<{ captiveArchetypeId: import('../core').CharacterArchetypeId; guardCount: number }>;
     // 怪物類內容的威脅等級。**只有怪物類才有**——寶箱與事件沒有威脅等級，缺席即代表「不適用」，
     // 不是「忘了填」（同 `FacilityDefinition.teacherMasteryLevel` 的慣例）。
     //
@@ -425,6 +426,7 @@ export type MapContentResolution = Readonly<{
     | Readonly<{ kind: 'contentResolver'; resolverId: ResolverId }>
     | Readonly<{ kind: 'npcTargetResolver'; resolverId: NpcDungeonTargetResolverId }>
     | Readonly<{ kind: 'combatEncounter'; encounterId: EncounterId }>
+    | Readonly<{ kind: 'guardsCleared' }>
   );
 
 // 固定陷阱處理結果（01_map_module.md §5.2 `ResolveMapTrap`／§6 `MapTrapResolved`）。
@@ -597,6 +599,7 @@ export type MapContentGenerated = Readonly<{
 // combatEncounter 那一支根本沒有 resolver 可複製。訂閱者請直接判別 `resolution.kind`。
 export type MapContentResolved = Readonly<{
   type: 'MapContentResolved';
+  teamId?: TeamId;
   mapId: MapInstanceId;
   contentId: ContentInstanceId;
   distributionId?: AssetDistributionId;

@@ -1,3 +1,5 @@
+import {createWalkController} from '../app/walk-controller';
+import {dungeonWalkSpace} from '../app/dungeon-walk-data';
 import { PLAYER_SCENARIO } from '../content-source/player-scenario';
 import assert from 'node:assert/strict';
 import { createServer } from 'vite';
@@ -20,7 +22,7 @@ try {
  const set=v.sheet.weaponSets[0];
  run({type:'equipItem',characterId:v.leader.id,itemId:item.itemId,slotId:item.slotIds[0],weaponSetId:set.weaponSetId});
  run({type:'configureWeaponSet',characterId:v.leader.id,weaponSetId:set.weaponSetId,mainHandItemId:item.itemId,selectedSkillIds:['combat-skill.yunhua.ring-saber-l0',undefined,undefined]});
- const armor=offers.find((o:any)=>o.itemDefinitionId==='equipment.yunhua.medium-armor.iii');
+ const armor=offers.find((o:any)=>o.equipmentKind==='armor' && o.affordable);
  run({type:'buyShopOffer',offerId:armor.offerId,payerCharacterId:v.leader.id,quantity:1});
  const armorItem=v.sheet.equipable.find((i:any)=>i.equipmentKind==='armor');
  run({type:'equipItem',characterId:v.leader.id,itemId:armorItem.itemId,slotId:armorItem.slotIds[0]});
@@ -36,6 +38,43 @@ try {
  for(const q of quests)run({type:'acceptQuest',questId:q.questId});
  run({type:'enterAdventureMap',adventureSiteId:site.siteId});run({type:'startPlayerExploration'});
 
+ // Exercise the production walking boundary with actual commands, saves, traps and combat.
+ let walking:ReturnType<typeof createWalkController>|undefined,walkingKey='';
+ const getWalker=()=>{
+  const d=v.dungeon;assert(d);
+  const key=`${d.explorationId}:${d.mapVersion}:${d.floor.floor}`;
+  if(key!==walkingKey){
+   const space=dungeonWalkSpace(d.templateId,d.floor.floor,d.floor.cells.map((c:any)=>({...c,floor:d.floor.floor})));
+   walking=createWalkController(space,d,roomId=>{run({type:'moveDungeonRoom',targetRoomId:roomId});return true;});walkingKey=key;
+  }else walking!.sync(d);
+  return walking!;
+ };
+ const walkTo=(targetRoomId:string)=>{
+  const d=v.dungeon,c=getWalker(),link=d.links.find((l:any)=>l.fromRoomId===d.currentRoomId && l.toRoomId===targetRoomId || l.toRoomId===d.currentRoomId && l.fromRoomId===targetRoomId);assert(link?.open);
+  const to=link.fromRoomId===d.currentRoomId?link.toCell:link.fromCell;
+  if(to.floor!==d.floor.floor){run({type:'moveDungeonRoom',targetRoomId});getWalker();return;}
+  const space=dungeonWalkSpace(d.templateId,d.floor.floor,d.floor.cells.map((cell:any)=>({...cell,floor:d.floor.floor}))),nav=space.navigation,size=nav.size;
+  const encode=(x:number,z:number)=>Math.round((z-nav.origin)/nav.step)*size+Math.round((x-nav.origin)/nav.step);
+  const start=encode(c.position.x,c.position.z),end=encode((to.col-3)*6,(to.row-3)*6),q=[start],prev=new Map([[start,-1]]);
+  const allowed=new Set(space.cells.filter(cell=>cell.roomId===d.currentRoomId||cell.roomId===targetRoomId).map(cell=>`${cell.row},${cell.col}`));
+  for(let i=0;i<q.length&&!prev.has(end);i++){
+   const at=q[i]!,row=Math.floor(at/size),col=at%size;
+   for(const [r,k] of [[row-1,col],[row+1,col],[row,col-1],[row,col+1]]){
+    const x=nav.origin+k!*nav.step,z=nav.origin+r!*nav.step,n=r!*size+k!;
+    if(r!<0||k!<0||r!>=size||k!>=size||nav.rows[r!]?.[k!]!=='1'||!allowed.has(`${Math.floor((z+15)/6)+1},${Math.floor((x+15)/6)+1}`)||prev.has(n))continue;
+    prev.set(n,at);q.push(n);
+   }
+  }
+  assert(prev.has(end),'actual walking mask must connect the formal route');
+  const path:number[]=[];for(let n=end;n!==-1;n=prev.get(n)!)path.unshift(n);
+  for(const n of path){
+   const pos=c.position;c.move(nav.origin+(n%size)*nav.step-pos.x,nav.origin+Math.floor(n/size)*nav.step-pos.z);c.sync(v.dungeon);
+   if(!v.dungeon.canMove)break;
+  }
+  assert.equal(v.dungeon.currentRoomId,targetRoomId);assert.equal(c.position.roomId,targetRoomId);
+  const resumed=createGame({},game.serialize()).view.dungeon;
+  assert.deepEqual(resumed.entryCell,v.dungeon.entryCell,'walking commits the authoritative entry cell to saves');
+ };
  const visited=new Set<string>();const stack:string[]=[];let fights=0; let lootRounds=0; let resumedCombat=false;
  for(let turn=0;turn<400;turn++){
   if(v.combat){
@@ -71,11 +110,14 @@ try {
   const d=v.dungeon;assert(d,'dungeon disappeared');
   if(fights>0&&d.isExitRoom){run({type:'useDungeonExit',exitRoomId:d.currentRoomId});continue;}
   const content=d.roomContents.find((c:any)=>(c.kind==='monsterGroup'||c.kind==='boss')&&c.available);
-  if(content && fights===0){run({type:'interactDungeonContent',contentId:content.contentId});continue;}
+  if(content && fights===0){
+   const c=getWalker(),before=c.position;run({type:'interactDungeonContent',contentId:content.contentId});
+   assert.equal(v.dungeon.canMove,false);c.sync(v.dungeon);c.move(5,5);assert.deepEqual(c.position,before,'real combat freezes walking');continue;
+  }
   visited.add(d.currentRoomId);
   const next=d.moves.find((m:any)=>!visited.has(m.roomId));
-  if(next){stack.push(d.currentRoomId); if(!next.open)run({type:'openDungeonDoor',linkId:next.linkId});run({type:'moveDungeonRoom',targetRoomId:next.roomId});}
-  else {const previous=stack.pop();assert(previous,'No exploration route');const move=d.moves.find((m:any)=>m.roomId===previous);if(!move.open)run({type:'openDungeonDoor',linkId:move.linkId});run({type:'moveDungeonRoom',targetRoomId:previous});}
+  if(next){stack.push(d.currentRoomId); if(!next.open)run({type:'openDungeonDoor',linkId:next.linkId});walkTo(next.roomId);}
+  else {const previous=stack.pop();assert(previous,'No exploration route');const move=d.moves.find((m:any)=>m.roomId===previous);if(!move.open)run({type:'openDungeonDoor',linkId:move.linkId});walkTo(previous);}
  }
  assert(lootRounds > 0, 'No real monster loot reached the player');
  assert(fights>0); assert.equal(v.location.kind,'city');

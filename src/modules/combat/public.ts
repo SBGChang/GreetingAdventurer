@@ -60,7 +60,7 @@ export type {
 } from './system';
 
 // Query port。
-export { makeCombatQuery, createCombatStatusQuery } from './queries';
+export { makeCombatQuery, createCombatStatusQuery, previewCombatSkill } from './queries';
 
 // ── ModuleContract 宣告（事件綁定順序由 Composition Manifest 決定；此處只登記能力）──
 export const combatModuleContract: ModuleContract = {

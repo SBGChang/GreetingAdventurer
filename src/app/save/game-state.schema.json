@@ -1101,9 +1101,9 @@
       ]
     },
     "MapRefreshCheckJob": {
-      "$ref": "#/definitions/ScheduledJobBase%3C%22mapRefreshCheck%22%2CModuleId%3C%22map%22%3E%2CMapInstanceId%2Calias-731470504-73899-74004-731470504-0-218439%3Cstructure-2032377033-18330-18363-2032377033-18317-18364-2032377033-18239-18367-2032377033-18022-18368-2032377033-0-22875%3E%3E"
+      "$ref": "#/definitions/ScheduledJobBase%3C%22mapRefreshCheck%22%2CModuleId%3C%22map%22%3E%2CMapInstanceId%2Calias-731470504-73899-74004-731470504-0-218439%3Cstructure-2032377033-18483-18516-2032377033-18470-18517-2032377033-18392-18520-2032377033-18175-18521-2032377033-0-23048%3E%3E"
     },
-    "ScheduledJobBase<\"mapRefreshCheck\",ModuleId<\"map\">,MapInstanceId,alias-731470504-73899-74004-731470504-0-218439<structure-2032377033-18330-18363-2032377033-18317-18364-2032377033-18239-18367-2032377033-18022-18368-2032377033-0-22875>>": {
+    "ScheduledJobBase<\"mapRefreshCheck\",ModuleId<\"map\">,MapInstanceId,alias-731470504-73899-74004-731470504-0-218439<structure-2032377033-18483-18516-2032377033-18470-18517-2032377033-18392-18520-2032377033-18175-18521-2032377033-0-23048>>": {
       "type": "object",
       "properties": {
         "jobId": {
@@ -1428,9 +1428,9 @@
       ]
     },
     "ShopRefreshJob": {
-      "$ref": "#/definitions/ScheduledJobBase%3C%22shopRefresh%22%2CModuleId%2CShopRuleId%2Calias-1603054090-14561-14791-1603054090-0-20818%3E"
+      "$ref": "#/definitions/ScheduledJobBase%3C%22shopRefresh%22%2CModuleId%2CShopRuleId%2Calias-1603054090-14999-15234-1603054090-0-21493%3E"
     },
-    "ScheduledJobBase<\"shopRefresh\",ModuleId,ShopRuleId,alias-1603054090-14561-14791-1603054090-0-20818>": {
+    "ScheduledJobBase<\"shopRefresh\",ModuleId,ShopRuleId,alias-1603054090-14999-15234-1603054090-0-21493>": {
       "type": "object",
       "properties": {
         "jobId": {
@@ -1482,9 +1482,9 @@
       "type": "string"
     },
     "EscortGenerationJob": {
-      "$ref": "#/definitions/ScheduledJobBase%3C%22escortGeneration%22%2CModuleId%2CCityId%2Calias-1603054090-14561-14791-1603054090-0-20818%3E"
+      "$ref": "#/definitions/ScheduledJobBase%3C%22escortGeneration%22%2CModuleId%2CCityId%2Calias-1603054090-14999-15234-1603054090-0-21493%3E"
     },
-    "ScheduledJobBase<\"escortGeneration\",ModuleId,CityId,alias-1603054090-14561-14791-1603054090-0-20818>": {
+    "ScheduledJobBase<\"escortGeneration\",ModuleId,CityId,alias-1603054090-14999-15234-1603054090-0-21493>": {
       "type": "object",
       "properties": {
         "jobId": {
@@ -1527,9 +1527,9 @@
       "additionalProperties": false
     },
     "CityPopulationReviewJob": {
-      "$ref": "#/definitions/ScheduledJobBase%3C%22cityPopulationReview%22%2CModuleId%2CCityId%2Calias-1603054090-14561-14791-1603054090-0-20818%3E"
+      "$ref": "#/definitions/ScheduledJobBase%3C%22cityPopulationReview%22%2CModuleId%2CCityId%2Calias-1603054090-14999-15234-1603054090-0-21493%3E"
     },
-    "ScheduledJobBase<\"cityPopulationReview\",ModuleId,CityId,alias-1603054090-14561-14791-1603054090-0-20818>": {
+    "ScheduledJobBase<\"cityPopulationReview\",ModuleId,CityId,alias-1603054090-14999-15234-1603054090-0-21493>": {
       "type": "object",
       "properties": {
         "jobId": {

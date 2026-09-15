@@ -1,0 +1,11 @@
+import canal from './assets/dungeons/navigation.json';
+import court from './assets/dungeons/calendar-court-ruin-navigation.json';
+import tower from './assets/dungeons/seal-tower-navigation.json';
+import bamboo from './assets/dungeons/mist-bamboo-valley-navigation.json';
+import grotto from './assets/dungeons/hanging-spring-grotto-navigation.json';
+import reed from './assets/dungeons/tidal-reed-isle-navigation.json';
+import salt from './assets/dungeons/salt-well-cellar-navigation.json';
+import ridge from './assets/dungeons/cinnabar-ridge-navigation.json';
+import kiln from './assets/dungeons/old-kiln-flue-navigation.json';
+type Navigation={step:number;origin:number;size:number;actorRadius:number;floors:{floor:number;rows:string[]}[]};
+export const dungeonNavigation:Record<string,Navigation>={canal,'calendar-court-ruin':court,'seal-tower':tower,'mist-bamboo-valley':bamboo,'hanging-spring-grotto':grotto,'tidal-reed-isle':reed,'salt-well-cellar':salt,'cinnabar-ridge':ridge,'old-kiln-flue':kiln};

@@ -1,0 +1,15 @@
+{
+  "actorDiameter": 1.0,
+  "files": {
+    "calendar-court-ruin-1.glb": "de07b25ebd5b095091347dfbd4508076d84fb8d1b35749509cb8a6d11d7473d3",
+    "calendar-court-ruin.blend": "cbb2380088a112c41f021f8dedb90122df09b5a7e2802aa53ecae31b7fd13f40",
+    "calendar-court-ruin-navigation.json": "ea4fbbeac4cc54913c21f2cbd65d4657908195b14faa5d9e38384e594ba9a9c4"
+  },
+  "floors": [
+    {
+      "floor": 1,
+      "footprintChecks": 1611,
+      "openDrySampleRatio": 0.966
+    }
+  ]
+}

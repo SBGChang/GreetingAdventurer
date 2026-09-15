@@ -667,7 +667,7 @@ export function handleCreateQuestTemporaryCharacter(
       : { kind: 'rescue', sourceQuestId: command.sourceQuestId, recoveryPolicy: 'rescueQuestLifecycle' };
 
   const draft = ctx.resolvers.resolveQuestTemporaryCharacter({ command, onDay: ctx.worldDay });
-  const character = newCharacter({
+  const created = newCharacter({
     characterId,
     archetypeId: command.archetypeId,
     origin: 'questTemporary',
@@ -675,10 +675,11 @@ export function handleCreateQuestTemporaryCharacter(
     birthDay: ctx.worldDay,
     availability: 'temporary',
     innateTraitIds: draft.innateTraitIds,
-    condition: fullCondition(ctx, characterId),
+    condition: { health: 0, mana: 0, statuses: [] },
     temporaryOrigin,
   });
 
+  const character = { ...created, condition: { ...created.condition, ...fullConditionOf(ctx, created) } };
   return makeResult(upsertCharacter(state, character), [
     emit({
       type: 'CharacterCreated',

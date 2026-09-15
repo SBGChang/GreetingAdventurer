@@ -10,10 +10,10 @@ import type { LocalizedTextRef } from '../src/contracts/core';
 import { t, type UiLocale } from './i18n';
 import './world-atlas.css';
 
-function AtlasCanvas({ locale, selected, current, select }: { locale: UiLocale; selected: string; current: string; select: (key: string) => void }) {
+function AtlasCanvas({ locale, selected, current, select, paused }: { paused: boolean; locale: UiLocale; selected: string; current: string; select: (key: string) => void }) {
   const host = useRef<HTMLDivElement>(null);
   const markers = useRef(new Map<string, HTMLButtonElement>());
-  const latest = useRef({ selected, select }); latest.current = { selected, select };
+  const latest = useRef({ selected, select, paused }); latest.current = { selected, select, paused };
   const resetCamera = useRef<() => void>(() => {});
   const overviewCamera = useRef<() => void>(() => {});
   const focusCity = useRef<(key: string) => void>(() => {});
@@ -24,7 +24,7 @@ function AtlasCanvas({ locale, selected, current, select }: { locale: UiLocale; 
     const container = host.current;
     if (!container) return;
     setStatus('loading');container.dataset.ready='false';
-    let disposed = false;
+    let disposed = false, frozenDrawn = false;
     let renderer: THREE.WebGLRenderer | undefined;
     let controls: OrbitControls | undefined;
     let model: THREE.Group | undefined;
@@ -42,6 +42,7 @@ function AtlasCanvas({ locale, selected, current, select }: { locale: UiLocale; 
     };
     const fail = (error: unknown) => { if(disposed)return;console.error('Atlas unavailable',error);container.dataset.ready='false';setStatus('error');renderer?.setAnimationLoop(null); };
     const resize = () => {
+      frozenDrawn = false;
       if(!renderer || !camera)return;
       const w=container.clientWidth,h=container.clientHeight;
       if(!w||!h)return;
@@ -50,9 +51,9 @@ function AtlasCanvas({ locale, selected, current, select }: { locale: UiLocale; 
     };
     const observer = new ResizeObserver(resize);
     let press: {x:number;y:number}|undefined;
-    const down=(event:PointerEvent)=>{press={x:event.clientX,y:event.clientY};};
+    const down=(event:PointerEvent)=>{if(latest.current.paused)return;press={x:event.clientX,y:event.clientY};};
     const click=(event:MouseEvent)=>{
-      if(!camera||!model||!press||Math.hypot(event.clientX-press.x,event.clientY-press.y)>5)return;
+      if(latest.current.paused||!camera||!model||!press||Math.hypot(event.clientX-press.x,event.clientY-press.y)>5)return;
       const r=renderer!.domElement.getBoundingClientRect();pointer.set((event.clientX-r.left)/r.width*2-1,1-(event.clientY-r.top)/r.height*2);
       ray.setFromCamera(pointer,camera);let object=ray.intersectObject(model,true)[0]?.object;
       while(object){if(typeof object.userData.cityKey==='string'){latest.current.select(object.userData.cityKey);break;}object=object.parent??undefined;}
@@ -89,7 +90,9 @@ function AtlasCanvas({ locale, selected, current, select }: { locale: UiLocale; 
           observer.observe(container);resize();setStatus('ready');container.dataset.ready='true';
           renderer!.setAnimationLoop(()=>{
             if(!renderer||!camera||!controls||document.hidden)return;
-            controls.update();camera.updateMatrixWorld();
+            controls.enabled=!latest.current.paused;container.dataset.frozen=String(latest.current.paused);
+            if(latest.current.paused){if(!frozenDrawn){renderer.render(scene,camera);frozenDrawn=true;}return;}
+            frozenDrawn=false;controls.update();camera.updateMatrixWorld();
             const points: Record<string,{x:number;y:number}> = {};
             for(const [key,root] of cities){
               const marker=markers.current.get(key);if(!marker)continue;
@@ -121,8 +124,8 @@ function AtlasCanvas({ locale, selected, current, select }: { locale: UiLocale; 
   </div>;
 }
 
-export function WorldMap({ locale,city,currentCityId,text,onTravel }: {
-  locale: UiLocale; city: NonNullable<GameView['city']>; currentCityId: string;
+export function WorldMap({ locale,city,currentCityId,text,onTravel,paused=false }: {
+  paused?: boolean; locale: UiLocale; city: NonNullable<GameView['city']>; currentCityId: string;
   text: (ref: LocalizedTextRef) => string;
   onTravel:(routeId:string,toCityId:string,modeId:string,placeRef:LocalizedTextRef)=>void;
 }) {
@@ -132,9 +135,9 @@ export function WorldMap({ locale,city,currentCityId,text,onTravel }: {
   const target=atlasCities.find(c=>c.key===selected)!;
   const route=city.neighbours.find(n=>n.toCityId===target.cityId);
   const choose=(key:string)=>{setSelected(key);setPreview(false);};
-  return <section className="world-atlas" aria-label={t(locale,'ui.screen.worldMap')}>
-    {preview?<div className="atlas-town-preview" data-preview-city={target.key}><TownModel overview key={target.key} modelUrl={cityModel(target)} locale={locale} facilities={[]} onHover={()=>{}} onVisit={()=>{}} /></div>
-      :<AtlasCanvas locale={locale} selected={selected} current={atlasCities.find(c=>c.cityId===currentCityId)!.key} select={choose}/>}
+  return <section className="world-atlas" data-backdrop={paused} ref={e=>e?.toggleAttribute("inert",paused)} aria-label={t(locale,'ui.screen.worldMap')}>
+    {preview?<div className="atlas-town-preview" data-preview-city={target.key}><TownModel overview paused={paused} key={target.key} modelUrl={cityModel(target)} locale={locale} facilities={[]} onHover={()=>{}} onVisit={()=>{}} /></div>
+      :<AtlasCanvas paused={paused} locale={locale} selected={selected} current={atlasCities.find(c=>c.cityId===currentCityId)!.key} select={choose}/>}
     <aside className="atlas-detail">
       <small>{t(locale,'ui.atlas.title')} · {t(locale,target.rank==='capital'?'ui.atlas.capital':'ui.atlas.town')}</small><h2>{locale==='en'?target.en:target.name}</h2>
       <p>{locale==='en'?target.enDescription:target.description}</p>

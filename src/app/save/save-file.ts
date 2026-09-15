@@ -1,3 +1,4 @@
+import { PREVIOUS_CONTENT, PREVIOUS_SCHEMA_HASH, TARGET_CONTENT } from './content-upgrade';
 import Ajv from 'ajv';
 import schema from './game-state.schema.json';
 import type { GameState } from '../composition/state';
@@ -26,7 +27,7 @@ function object(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-export function decodeSave(text: string, registry: DefinitionRegistry): GameState {
+export function decodeSave(text: string, registry: DefinitionRegistry, upgrade?: (state: GameState) => GameState): GameState {
   const envelope: unknown = JSON.parse(text);
   if (!object(envelope) || typeof envelope.payload !== 'string' ||
       envelope.checksum !== toHex16(fnv1a64(envelope.payload))) {
@@ -36,10 +37,11 @@ export function decodeSave(text: string, registry: DefinitionRegistry): GameStat
   if (!object(payload) || payload.saveSchemaVersion !== saveSchemaVersion) {
     throw new Error('save/schema-version-incompatible');
   }
-  if (payload.schemaHash !== toHex16(fnv1a64(JSON.stringify(schema)))) {
+  const needsUpgrade = JSON.stringify(registry.getManifestIdentity()) === JSON.stringify(TARGET_CONTENT) && JSON.stringify(payload.content) === JSON.stringify(PREVIOUS_CONTENT) && payload.schemaHash === PREVIOUS_SCHEMA_HASH;
+  if (!needsUpgrade && payload.schemaHash !== toHex16(fnv1a64(JSON.stringify(schema)))) {
     throw new Error('save/schema-version-incompatible');
   }
-  if (JSON.stringify(payload.content) !== JSON.stringify(registry.getManifestIdentity())) {
+  if (!needsUpgrade && JSON.stringify(payload.content) !== JSON.stringify(registry.getManifestIdentity())) {
     throw new Error('save/content-incompatible');
   }
   if (!validateState(payload.state)) {
@@ -59,6 +61,10 @@ export function decodeSave(text: string, registry: DefinitionRegistry): GameStat
     if (job.jobId !== id || !jobTypes.has(job.type) || !Number.isSafeInteger(job.dueDay) || job.dueDay < 0) {
       throw new Error('save/invalid-scheduler');
     }
+  }
+  if (needsUpgrade) {
+    if (!upgrade) throw new Error('save/content-upgrade-required');
+    return upgrade(state);
   }
   return state;
 }

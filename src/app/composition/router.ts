@@ -394,6 +394,7 @@ const INTERNAL_COMMAND_HANDLERS: Readonly<Partial<Record<GameInternalCommandType
     ),
 
   // ── team：(state, payload, ctx) → ModuleOutcome ──────────────────────────
+  AttachQuestTemporaryMember: (c, s) => fromOutcome('team', team.handleAttachQuestTemporaryMember(s.team, c as never)),
   StartReturnFromDungeon: (c, s, x) =>
     fromOutcome('team', team.handleStartReturnFromDungeon(s.team, c as never, x.team)),
   StartNpcTeamPlan: (c, s, x) =>
@@ -487,6 +488,7 @@ const GAME_COMMAND_HANDLERS: Readonly<Partial<Record<GameCommandType, RootDispat
     fromOutcome('city', city.handleReleaseHomeTeacher(c as never, s.city, x.city)),
 
   // ── quest：(state, cmd, actorTeamId, ctx)。接取委託的隊伍身分來自 envelope，不在 payload。──
+  handInQuestCargo: (c, t, s, x) => fromOutcome('quest', quest.handleHandInQuestCargo(s.quest, c as never, t, x.quest)),
   settleQuest: (c, t, s, x) => fromOutcome('quest', quest.handleSettleQuest(s.quest, c as never, t, x.questSettlement)),
   acceptQuest: (c, t, s, x) =>
     fromOutcome('quest', quest.handleAcceptQuest(s.quest, c as never, t, x.quest)),
@@ -929,6 +931,8 @@ const EVENT_SUBSCRIBERS: Readonly<Record<string, SubscriberDispatch>> = {
   // ── quest：目標完成一律由事件累計，quest 不查別的模組 State ──
   'CityStockItemAvailable::quest': (e, s, x) =>
     subscriberResult('quest', quest.onCityStockItemAvailable(e as never, s.quest, x.questGeneration)),
+  'QuestStateChanged::character': (e, s, x) => subscriberResult('character', character.onQuestStateChanged(e as never, s.character, x.character)),
+  'TemporaryCharacterRecovered::team': (e, s) => subscriberResult('team', team.onTemporaryCharacterRecovered(e as never, s.team)),
   'MapContentGenerated::quest': (e, s, x) =>
     subscriberResult('quest', quest.onMapContentGenerated(e as never, s.quest, x.questGeneration)),
   'MapContentResolved::quest': (e, s, x) =>

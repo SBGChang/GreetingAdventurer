@@ -116,6 +116,7 @@ export interface MapContentResolver {
       spawnRule: MapSpawnRuleDefinition;
       kind: MapContentKind;
       index: number;
+      generatedContents: readonly MapContentInstance[];
       rng: RngContext;
     }>,
   ): SpawnDraft;
@@ -126,6 +127,7 @@ export type MapHandlerContext = Readonly<{
   definitions: MapDefinitionReader;
   world: WorldQuery; // 刷新生成時取得地點文化／控制國（doc §2.3）；本版主路由 Resolver 供給 payload。
   presence: TeamPresenceQuery;
+  quests?: Pick<import('../../contracts/quest').QuestQuery, 'isMapReservedForAcceptedQuest'>;
   ids: MapIdAllocator;
   rng: DeterministicRng;
   rngContext: RngContext;
@@ -246,6 +248,7 @@ function generateMapContent(
   template: MapTemplateDefinition,
   spawnRule: MapSpawnRuleDefinition,
   ctx: MapHandlerContext,
+  existingContents: readonly MapContentInstance[] = [],
 ): GeneratedContent {
   const rooms = eligibleContentRoomIds(template);
   const contents: MapContentInstance[] = [];
@@ -274,6 +277,7 @@ function generateMapContent(
         spawnRule,
         kind: budget.contentKind,
         index: contents.length,
+        generatedContents: [...existingContents, ...contents],
         rng: {
           worldSeed: ctx.rngContext.worldSeed,
           streamId: ctx.rngContext.streamId,
@@ -557,6 +561,8 @@ function applyMapRefreshCheck(
     return makeResult(state);
   }
 
+  if (ctx.quests?.isMapReservedForAcceptedQuest(instance.mapId)) return makeResult(state);
+
   // 鎖定中：跳過，固定日曆不位移（doc §7.1 / §5.1）。
   const lock = instance.refresh.refreshLock;
   if (lock !== undefined && lock.releaseOnDay > ctx.worldDay) {
@@ -788,6 +794,13 @@ export function handleResolvePlayerMapContent(
   if (content.state !== 'available') {
     return reject('map/content-not-available', { state: content.state }); // 不變量 6
   }
+  if (command.resolution.kind === 'guardsCleared') {
+    if (content.payload.kind !== 'kidnap' && content.payload.kind !== 'control') return reject('map/not-guarded-content');
+    if (content.payload.controllerContentIds.length === 0 || content.payload.controllerContentIds.some(id => {
+      const guard = state.contents[id];
+      return !guard || guard.mapId !== content.mapId || guard.mapVersion !== content.mapVersion || guard.state !== 'resolved';
+    })) return reject('map/guards-unresolved');
+  }
   const next: MapContentInstance = {
     ...content,
     state: 'resolved',
@@ -797,6 +810,7 @@ export function handleResolvePlayerMapContent(
   return accept(upsertContent(state, next), [
     emit({
       type: 'MapContentResolved',
+      teamId: command.teamId,
       mapId: command.mapId,
       contentId: command.contentId,
       distributionId: command.distributionId,
@@ -980,4 +994,24 @@ export function handleSetMapRefreshLock(
   return accept(upsertInstance(state, nextInstance), [
     emit({ type: 'MapRefreshLockChanged', mapId: command.mapId }),
   ]);
+}
+
+/** Content-version upgrade: add missing kinds without resetting doors, resolved encounters, versions or quest targets. */
+export function supplementMissingContentKinds(instance: MapInstance, state: MapState, ctx: MapHandlerContext): ModuleResult<MapState> {
+  const template = ctx.definitions.getMapTemplate(instance.templateId);
+  const rule = ctx.definitions.getMapSpawnRule(template.spawnRuleId);
+  const existing = listContentsForMap(state, instance.mapId).filter(c => c.mapVersion === instance.currentVersion && c.state !== 'removedByRefresh');
+  const missing = rule.spawnBudgets.filter(b => !existing.some(c => c.kind === b.contentKind));
+  if (missing.length === 0) return makeResult(state);
+  const occupied = new Set(existing.map(c => c.position.roomId));
+  const generated = generateMapContent(instance.mapId, instance.currentVersion, { ...template, rooms: template.rooms.filter(r => !occupied.has(r.roomId)) }, { ...rule, spawnBudgets: missing }, ctx, existing);
+  const sequence = assignNpcSequence(ctx.definitions.getNpcSequenceRule(rule.npcSequenceRuleId), generated.candidates);
+  const orders = [...existing.map(c => c.npcOrder), ...Object.values(instance.spatialRuntime.gatheringNodeStates).map(n => n.npcOrder)].filter((order): order is number => order !== undefined);
+  const offset = Math.max(0, ...orders);
+  let next = state;
+  for (const content of generated.contents) {
+    const assigned = sequence.find(s => s.candidate.target.kind === 'mapContent' && s.candidate.target.contentId === content.contentId);
+    next = upsertContent(next, assigned ? { ...content, npcOrder: offset + assigned.npcOrder, npcPointCost: assigned.candidate.pointCost, npcResolverId: assigned.candidate.resolverId } : content);
+  }
+  return makeResult(next, [{ event: { type: 'MapContentGenerated', mapId: instance.mapId, mapVersion: instance.currentVersion, contentIds: generated.contents.map(c => c.contentId) } }]);
 }

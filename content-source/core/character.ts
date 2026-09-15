@@ -403,6 +403,8 @@ const worldAdventurerInnateTraits: Authored<DefinitionHeader & WeightedDrawParam
 
 export function characterGenerationBindings(): readonly ResolverBinding[] {
   return [
+    { resolverId: TEMPORARY_SEX_WEIGHT_RESOLVER, ownerModule: CHARACTER_MODULE, shape: 'character:weighted-choice', paramsDefId: worldAdventurerSexWeights.id },
+    { resolverId: TEMPORARY_INNATE_TRAIT_RESOLVER, ownerModule: CHARACTER_MODULE, shape: 'character:weighted-draw', paramsDefId: worldAdventurerInnateTraits.id },
     {
       resolverId: WORLD_ADVENTURER_ARCHETYPE_WEIGHT_RESOLVER,
       ownerModule: CHARACTER_MODULE,

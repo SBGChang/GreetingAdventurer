@@ -44,6 +44,7 @@ export {
   handleMapRefreshCheck,
   nextMapRefreshJob,
   refreshMapInstance,
+  supplementMissingContentKinds,
   // Event subscriber
   onTeamLocationChanged,
   // Internal Command handlers
@@ -70,7 +71,7 @@ export type {
 export const mapModuleContract: ModuleContract = {
   id: 'map' as ModuleId<'map'>,
   owns: 'map' as StateSliceName,
-  reads: [
+  reads: ['reader:quest-query' as ReaderPortId,
     'reader:map-definition' as ReaderPortId,
     'reader:world-query' as ReaderPortId,
     'reader:team-presence' as ReaderPortId,

@@ -79,6 +79,8 @@ type QuestReactionRuleDefinition = DefinitionHeader & {
     | 'escortCandidate';
   questKind: QuestKind;
   creationChance: number;
+  sourceItemKinds?: readonly ItemKind[];
+  destinationResolverId?: ResolverId;
   guildResolverId: ResolverId;
   deadlineRuleId: QuestDeadlineRuleId;
   objectiveRuleId: QuestObjectiveRuleId;
@@ -88,10 +90,11 @@ type QuestReactionRuleDefinition = DefinitionHeader & {
 
 既定基準：
 
-- 怪物／控制類內容：當地居民 100% 在當地公會形成處理委託。
+- 怪物群：35% 在當地公會形成指定怪群的鎮壓委託；控制內容待其生成流程完成後另行定義反應。
 - Boss：形成討伐委託。
-- 綁架：隨機一座合法城市 100% 形成救援委託。
+- 綁架：100% 在據點所屬城市的公會形成救援委託。
 - 地圖或城市庫存物品：依資料機率形成探索、購買或送貨委託；未形成時可只留下情報。
+- 城市庫存限材料、戰鬥／非戰鬥消耗品及一般貨物；不鎖定一般裝備與書籍。按規則順序以採買 30%、送貨 20% 擲骰，首筆成功後停止，一件 Item 最多一張有效委託。
 - EscortCandidate：形成護衛委託，但候選本身不是 Character。
 
 ### 2.4 期限規則
@@ -108,12 +111,12 @@ type QuestDeadlineRuleDefinition = DefinitionHeader & {
 
 | 類型 | 接受期限 | 實際結束期限 |
 |---|---:|---|
-| 購買／送貨 | 生成日 + 14 | 生成日 + 14 + 每個城市距離格各自 RNG 9～15 日；最多相隔 2 城。 |
-| 救援／探索 | 生成日 + 7 | 生成日 + 7 + 每個城市距離格各自 RNG 9～15 日。 |
-| 鎮壓／討伐 | 生成時固定 | 生成日 + 41 日（三個 14 日刷新期減 1 日）。 |
+| 購買／送貨 | 生成日 + 14 | 接受期限 + RNG 14～28 日；送貨最多相隔 2 條正式城際路段，目的地須有公會。 |
+| 救援／探索 | 生成日 + 7 | 接受期限 + RNG 7～14 日。 |
+| 鎮壓／討伐 | 生成日 + 14 | 接受期限 + RNG 21～28 日。 |
 | 護衛 | 尚未定案 | Deadline Resolver 未啟用前不得生成。 |
 
-所有距離 RNG 在 Quest 建立時一次確定並寫入 State；接取不重抽、不延長。
+所有期限 RNG 在 Quest 建立時一次確定並寫入 State；接取不重抽、不延長。
 
 期限採半開區間：`currentDay < deadline` 才合法。Scheduler 在 `currentDay === deadline` 的 `closeDeadline` phase 關閉任務；同日較早的 `completeAction` phase 可以先完成已花完時間的行動，但玩家不能在期限日結算完成後再接取或回報。
 
@@ -248,9 +251,10 @@ UI 不自行重算完成、期限或結案資格。
 | Command | 前置條件 | Quest 的責任 |
 |---|---|---|
 | `acceptQuest` | Quest 未接取、接受期限未到、隊伍在發布公會。 | 綁定 Team、保存正式成員快照，啟動目標物／角色／地圖保護 Workflow。 |
+| `handInQuestCargo` | 已接取且未到期、隊伍攜帶該任務實體；採買在原公會、送貨在目的公會。 | 同一交易驗證物品歸屬、移除貨物並轉 completed；不發報酬。 |
 | `settleQuest` | Quest 已完成、實際期限未到、隊伍在原發布公會。 | 啟動同步的任務報酬 Distribution；均分、任務物回收與效果全部成功後才建立 settlement 並發出 `QuestSettled`。 |
 
-接取與結案都是城內零時間 Command。
+接取、交貨與結案都是城內零時間 Command。
 
 ### 5.1.1 NPC Internal Command
 
@@ -270,7 +274,7 @@ NPC 接取與結案也都是零時間；差別僅在命令由已存檔的 Action
 | `questDeadline(kind: accept)` | 尚未接取者轉 expired、撤下並處理來源實體。 |
 | `questDeadline(kind: actualEnd)` | 尚未合法結案者一律轉 expired；完成但未回報亦同。 |
 
-期限 Job 使用 Quest Revision；接取不修改兩個 deadline。
+期限 Job 以目前任務狀態判定，不用接取時會改變的 Revision 作失效條件；接取不修改兩個 deadline。
 
 ### 5.3 訂閱 DomainEvent
 
@@ -279,7 +283,7 @@ NPC 接取與結案也都是零時間；差別僅在命令由已存檔的 Action
 | `MapContentGenerated` | 依 Reaction Rule 建立委託；來源內容仍先於 Quest。 |
 | `CityStockItemAvailable` | 依機率建立購買／送貨需求。 |
 | `EscortCandidatesGenerated` | 將合法候選轉為護衛委託。 |
-| `InventoryTransferred`／`ItemInstanceCreated` | 判定購買／探索指定物是否已進入正確 `teamQuestCargo`，以及送貨交付條件。 |
+| `InventoryTransferred`／`ItemInstanceCreated` | 探索指定物取得的目標訂閱；採買／送貨由 `handInQuestCargo` 明確交付。 |
 | `TeamLocationChanged` | 判定護衛抵達、救援離圖與公會位置。 |
 | `CombatEncounterResolved` | 若 `outcome=defeat`，將 `acceptedByTeamId` 相同且仍為 `incomplete` 的所有護衛 Quest 立即轉為 `expired(reason=combatDefeat)`。已送達而為 `completed` 的護衛不受影響。 |
 | `CombatSequenceChallengeResolved` | 若 `outcome=failure`，對該 `teamId` 套用與 detailed 戰敗完全相同的所有進行中護衛 Quest 到期規則；同一 Sequence 後續事件不得重複處理。 |
@@ -295,13 +299,13 @@ NPC 接取與結案也都是零時間；差別僅在命令由已存檔的 Action
 
 | Internal Command | 唯一處理者 | 用途 |
 |---|---|---|
-| `SetMapRefreshLock` | map | 鎮壓／討伐生成時建立 41 日鎖。 |
+| `SetMapRefreshLock` | map | 特殊內容可建立指定期限刷新鎖；一般委託以接取狀態的唯讀查詢保護地圖。 |
 | `ProtectMapContent` | map | 救援／探索接取後保護目標，結束後解除。 |
 | `ReserveQuestItem` | inventory | 綁定指定實體。 |
-| `ApplyQuestItemLifecycle` | inventory | 移除、回收、釋放或保留任務 Item。 |
+| `RemoveItemInstance` | inventory | 公會交貨成功時移除指定實體，reason 為 questCleanup。 |
 | `MoveItemToTeamQuestCargo` | inventory | 將 purchase／delivery／exploration 的指定實體移入不可自由使用的隊伍任務物資空間。 |
-| `ReleaseExpiredQuestCargo` | inventory | Quest expired 時將仍未交付的任務物移入指定 Asset Distribution Escrow。 |
-| `ReserveShopOfferForQuest` | city | purchase 目標在期限內保留／標示。 |
+| `TransferItem` | inventory | Quest expired 時將仍未交付的任務物移入指定 Asset Distribution Escrow。 |
+| `ReserveShopOfferForQuest` | city | purchase／delivery 目標在期限內保留；未接取不可購買。 |
 | `ReleaseQuestShopOffer` | city | 到期、完成或解除時清理。 |
 | `CreateQuestTemporaryCharacter` | character | 接取護衛或救出人物時建立暫時角色。 |
 | `AttachQuestTemporaryMember` | team | 僅將已救出的救援角色加入接取隊伍；護衛角色禁止使用此命令。 |
@@ -334,8 +338,8 @@ NPC 接取與結案也都是零時間；差別僅在命令由已存檔的 Action
 | 類型 | 轉 completed 的唯一條件 |
 |---|---|
 | 護衛 | Quest 綁定的護衛角色仍存活，且所屬隊伍進入目的城市；同交易發出可投影為感謝對話的完成事件。護衛對象不需要也不得成為隊員。 |
-| 送貨 | 指定 ItemInstance 從 `teamQuestCargo` 在目的城市指定設施自動交付。 |
-| 購買 | 指定 ItemInstance 已進入該 Quest 的 `teamQuestCargo`。 |
+| 送貨 | 在目的公會使用 `handInQuestCargo` 交付指定實體並移除貨物。 |
+| 購買 | 買下指定實體後，在原公會使用 `handInQuestCargo` 交付並移除貨物。 |
 | 探索 | 指定 ItemInstance 已進入該 Quest 的 `teamQuestCargo`。 |
 | 鎮壓 | `targetContentIds` 對應的全部怪群已 resolved。 |
 | 討伐 | 指定全部 Boss 內容已 resolved；單 Boss 任務即一隻。 |
@@ -351,28 +355,16 @@ NPC 接取與結案也都是零時間；差別僅在命令由已存檔的 Action
 
 | 狀況 | Item 處理 |
 |---|---|
-| 未在接受期限前接取，且 Item 仍在任務保留位置／指定店面 | `ApplyQuestItemLifecycle(remove)`。 |
-| 未接取前 Item 已被任何角色買走或合法移出指定店面 | Quest expired；`releaseAndKeep`，不得從現持有者身上回收。 |
-| Delivery 接取 | 指定 Item 直接進入 `teamQuestCargo(teamId, questId)`。 |
-| Purchase 買下／Exploration 取得 | 指定 Item 直接進入 `teamQuestCargo`、清除個人 Owner，Quest 轉 completed。 |
-| Delivery 到目的設施 | 從 `teamQuestCargo` 自動交付並 `reclaim`，Quest 轉 completed。 |
-| Purchase／Exploration 回原公會結案 | 從 `teamQuestCargo` 正式交付並 `reclaim`。 |
-| 已接取 Quest expired，且 Item 仍在 `teamQuestCargo` | `ReleaseExpiredQuestCargo`，交由玩家內部競拍或 NPC RNG 分配，不回永久庫存。 |
+| 未接取到期，或採買已接取但尚未購買即到期 | `ReleaseQuestShopOffer(release)`；貨物保留在正常貨架，不刪除正常商品。 |
+| Delivery 接取 | 真實 Item 進入 `teamQuestCargo`，原 Offer 關閉；不向接取者收取貨款。 |
+| Purchase 買下 | 由正式成員付款，真實 Item 進入 `teamQuestCargo`，不成為付款者私產。 |
+| 採買回原公會／送貨到目的公會 | `handInQuestCargo` 明確交付，驗證任務及隊伍歸屬後移除實體、轉 completed。 |
+| 已接取 Quest expired，且 Item 仍在 `teamQuestCargo` | 建立 expiredQuestCargo 分配，`TransferItem` 移入 escrow，Append 後 Finalize；玩家可競拍或直售。 |
+| 已交貨但未領獎即到期 | 不重建已交付物品、不發報酬或 MXP。 |
 
-送貨 Item 在 Quest 接取時才從保留位置移入任務物資空間。Purchase 目標在指定商店形成真實 Offer；接取後由某位正式成員的個人帳戶付款，但 Item 不成為付款者私產，而是直接進入該 Quest 的 `teamQuestCargo`。若 Purchase 在任務接取前已被其他人合法買走，仍追蹤同一 ItemInstance、不生成替代品，任務未接取到期時也不沒收買家物品。
+一件商品只保留給一張有效委託。商店刷新跳過保留品，其他隊伍及未接任務的玩家不得購買。所有移動與交付在正式交易中完成，失敗回滾；貨物不能被個人使用或出售。到期分配可獨立存檔，沿用接取時的正式成員快照，不會讓任務復活。
 
-```text
-已接取的 Purchase／Delivery／Exploration 到期
-  → Quest 先轉 expired 並建立 Asset Distribution
-  → ReleaseExpiredQuestCargo(distributionId)
-  → Inventory 將仍在該 Quest Cargo 的物品全部移入 distribution escrow
-  → AppendAssetDistributionResult(itemIds)
-  → FinalizeAssetDistributionCollection
-  → 玩家隊：逐件競拍；NPC 隊：逐件 RNG
-  → 分配完成後每件物品都有個人 Owner，Cargo 為空
-```
-
-Quest 到期不等待玩家競拍完成才成為 `expired`；分配流程是到期後獨立且可存檔的 Pending Interaction。它只負責處理已解除任務鎖定的財產，不會令 Quest 復活或發放任務報酬。
+探索類的來源、取得與回收仍須完成獨立流程後才能開放。
 
 ### 9.2 救援／探索
 
@@ -380,11 +372,12 @@ Quest 到期不等待玩家競拍完成才成為 `expired`；分配流程是到�
 - 已接取且未到實際期限：人物、控制者與必要場景跨一般刷新保留。
 - 已到期：解除保護；後續刷新才可移除。
 
-### 9.3 鎮壓／討伐
+### 9.3 地圖目標保護
 
-- Quest 生成時立刻建立 41 日刷新鎖，不論是否接取。
-- 鎖定期間跳過固定刷新，不設 Pending、不累積補刷。
-- 到期解除後等待地圖自己的下一個固定刷新日。
+- 鎮壓、討伐與救援接取後，以 Quest Query 阻止整張地圖的一般刷新；期限不因保護而延長。
+- 未接取的目標若被刷新替換，其委託轉 expired，新的世界內容依規則重新形成委託。
+- 已接取任務結案或到期後，等待地圖自己的下一個固定刷新日，不累積補刷。
+
 
 ---
 
@@ -397,12 +390,12 @@ Quest 到期不等待玩家競拍完成才成為 `expired`；分配流程是到�
 5. Quest settlement 最多一次，且發布城市必須相同。
 6. 目標 Item、Content、Character 皆綁定 Runtime ID。
 7. 未接取 Quest 不建立護衛 Character。
-8. 鎮壓／討伐鎖不因接取與否改變期限。
+8. 地圖目標保護不改變任務期限；救援守衛與被擄者一起保留。
 9. 任務到期不使用「失敗」狀態或 Event。
 10. 物品、報酬、MXP、Quest 歸檔在同一結案交易，任一步驟失敗全部回滾。
 11. `participantCharacterIds` 只在接取時保存正式成員，不含護衛／救援暫時角色；貨幣報酬以此清單平均發放。
 12. Purchase、Delivery、Exploration 的任務指定品進入 `teamQuestCargo` 後，不得被任何個人使用、出售或據為己有。
-13. Purchase／Exploration 只有原公會結案才回收任務物；expired 時仍在 Cargo 的物品必須全部進入團隊分配 Settlement。
+13. Purchase 在原公會交貨時回收任務物；expired 時仍在 Cargo 的物品必須全部進入團隊分配 Settlement。
 14. Delivery 在目的設施完成交付後已無 Cargo 物可分；完成但未回公會而 expired 不得重新生成同一物品。
 15. expired Cargo 分配沿用接取時的 `participantCharacterIds`；之後招募、解雇或任務暫時角色都不能改變分配名單。
 16. `equalCurrencyOnly` 完成前不可寫入 `QuestSettlement` 或發出 `QuestSettled`。

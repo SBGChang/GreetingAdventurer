@@ -1,0 +1,21 @@
+{
+  "actorDiameter": 1.0,
+  "files": {
+    "hanging-spring-grotto-1.glb": "accc6255a3ba9ee9a85899bd5a738b5e3e10a06d73a94d16be303458cff75a71",
+    "hanging-spring-grotto--1.glb": "3585837636bb399b179f91299fb5beb118e00a4eb9624950a5acec46375691c8",
+    "hanging-spring-grotto.blend": "c384cbe65f564f5dceb6fa23c8b55f7f0db5877262188a45ea29cb60cca7e235",
+    "hanging-spring-grotto-navigation.json": "758e1c0bbbb1d08580ace8170b2b60c0909eb3178387d5302f2673a3edaa6d5f"
+  },
+  "floors": [
+    {
+      "floor": 1,
+      "footprintChecks": 450,
+      "openDrySampleRatio": 0.943
+    },
+    {
+      "floor": -1,
+      "footprintChecks": 432,
+      "openDrySampleRatio": 0.952
+    }
+  ]
+}

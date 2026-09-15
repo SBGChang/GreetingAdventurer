@@ -1,0 +1,291 @@
+{
+  "templateId": "map-template.yunhua.old-canal-sunken-store",
+  "cellSize": 6,
+  "floors": [
+    {
+      "floor": 1,
+      "model": "canal-upper.glb",
+      "roomIds": [
+        "f1.水道入口",
+        "f1.西側倉房",
+        "f1.引水走廊",
+        "f1.西側下行梯",
+        "f1.東側沉倉",
+        "f1.東側下行梯"
+      ],
+      "rooms": [
+        {
+          "cells": [
+            {
+              "col": 1,
+              "floor": 1,
+              "row": 1
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.水道入口"
+        },
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 1
+            },
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 1
+            },
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 2
+            },
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 2
+            },
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 2
+            },
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 3
+            },
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 3
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.西側倉房"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 3
+            },
+            {
+              "col": 2,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 4
+            },
+            {
+              "col": 3,
+              "floor": 1,
+              "row": 5
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.引水走廊"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 4
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.西側下行梯"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": 1,
+              "row": 1
+            },
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 1
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.東側沉倉"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": 1,
+              "row": 2
+            }
+          ],
+          "floor": 1,
+          "roomId": "f1.東側下行梯"
+        }
+      ]
+    },
+    {
+      "floor": -1,
+      "model": "canal-lower.glb",
+      "roomIds": [
+        "b1.東側上行梯",
+        "b1.東側導渠",
+        "b1.蓄水池",
+        "b1.西側上行梯",
+        "b1.中段水閘",
+        "b1.西側沉貨區",
+        "b1.水門出口",
+        "b1.沉木陷阱"
+      ],
+      "rooms": [
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": -1,
+              "row": 2
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.東側上行梯"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": -1,
+              "row": 3
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.東側導渠"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": -1,
+              "row": 3
+            },
+            {
+              "col": 4,
+              "floor": -1,
+              "row": 3
+            },
+            {
+              "col": 3,
+              "floor": -1,
+              "row": 4
+            },
+            {
+              "col": 4,
+              "floor": -1,
+              "row": 4
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.蓄水池"
+        },
+        {
+          "cells": [
+            {
+              "col": 5,
+              "floor": -1,
+              "row": 4
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.西側上行梯"
+        },
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": -1,
+              "row": 1
+            },
+            {
+              "col": 3,
+              "floor": -1,
+              "row": 1
+            },
+            {
+              "col": 2,
+              "floor": -1,
+              "row": 2
+            },
+            {
+              "col": 3,
+              "floor": -1,
+              "row": 2
+            },
+            {
+              "col": 4,
+              "floor": -1,
+              "row": 2
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.中段水閘"
+        },
+        {
+          "cells": [
+            {
+              "col": 2,
+              "floor": -1,
+              "row": 3
+            },
+            {
+              "col": 2,
+              "floor": -1,
+              "row": 4
+            },
+            {
+              "col": 2,
+              "floor": -1,
+              "row": 5
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.西側沉貨區"
+        },
+        {
+          "cells": [
+            {
+              "col": 3,
+              "floor": -1,
+              "row": 5
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.水門出口"
+        },
+        {
+          "cells": [
+            {
+              "col": 4,
+              "floor": -1,
+              "row": 5
+            }
+          ],
+          "floor": -1,
+          "roomId": "b1.沉木陷阱"
+        }
+      ]
+    }
+  ],
+  "topologyHash": "44d11a09320435d6d32f2e1e688013c22d4b94534f3183b3f1384315966bdba8"
+}

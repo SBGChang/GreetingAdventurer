@@ -1,0 +1,21 @@
+{
+  "actorDiameter": 1.0,
+  "files": {
+    "old-kiln-flue-1.glb": "6aff2d27be7a9135dc61b6de8517386a44eed0f4504f2c6e7d1c95b67eec8e38",
+    "old-kiln-flue--1.glb": "ecaebe21df5e4f48e9b115f5112b5f0ce7dc8afe9f658198c098a9f4c6a3dc37",
+    "old-kiln-flue.blend": "3a7f0de85db1fe52cd39cf544322102695fb88d83c46a2863959231d84dea610",
+    "old-kiln-flue-navigation.json": "42b71adfbffd4bbd7ba0b5fea6f81d8e1a08976ef539c0f4020c76eee0b820c5"
+  },
+  "floors": [
+    {
+      "floor": 1,
+      "footprintChecks": 450,
+      "openDrySampleRatio": 0.944
+    },
+    {
+      "floor": -1,
+      "footprintChecks": 432,
+      "openDrySampleRatio": 0.949
+    }
+  ]
+}

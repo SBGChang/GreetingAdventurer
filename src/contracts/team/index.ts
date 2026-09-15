@@ -584,8 +584,9 @@ export type AttachQuestTemporaryMemberPayload = Readonly<{
 // 只列**已實作**的接收能力。尚未註冊：StartTimedCityAction、StartChildStudyPlan、CreateNpcTeam、
 // OpenPlayerTravelInteraction、MarkPlayerTravelInteractionAwaitingCombat、
 // CompletePlayerTravelInteraction、AssignNpcMemberFreeAction、RecordTeamWorkSettlementValue、
-// AttachQuestTemporaryMember。
+// 救援臨時成員由已註冊的 AttachQuestTemporaryMember 加入。
 export type TeamInboundInternalCommand =
+  | AttachQuestTemporaryMemberPayload
   | StartReturnFromDungeonPayload
   | StartNpcTeamPlanPayload
   | CompletePlayerTravelSegmentWithoutEventPayload;

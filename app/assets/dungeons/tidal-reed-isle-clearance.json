@@ -1,0 +1,15 @@
+{
+  "actorDiameter": 1.0,
+  "files": {
+    "tidal-reed-isle-1.glb": "fd57a4c0c6ff3c48590b0dc1aaf49cbf8ddf334fb8b21bb67a32ff0d9fb2007e",
+    "tidal-reed-isle.blend": "2c2d297c954fe97be108edd767b9ff164131d153d8ee5758fd9eeede526f15ce",
+    "tidal-reed-isle-navigation.json": "668d490d60b4b81ab1395e33085dca5c79f457cf3d26c8589e4acc9c68958a78"
+  },
+  "floors": [
+    {
+      "floor": 1,
+      "footprintChecks": 1611,
+      "openDrySampleRatio": 0.882
+    }
+  ]
+}

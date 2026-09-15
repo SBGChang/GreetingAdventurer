@@ -1,3 +1,6 @@
+import {createCombatTargetResolver} from '../../src/app/content/combat-resolver-bridge';
+import { upgradeWorldContent } from '../../src/app/composition/session';
+import type {CombatActionResolvedPayload, CombatActionResult} from '../../src/contracts/combat';
 import { createAssetDistributionQuery } from '../../src/modules/distribution/public';
 import { createEconomyDefinitionReader } from '../../src/app/content/economy-reader';
 import { createQuestDefinitionReader } from '../../src/app/content/quest-reader';
@@ -22,7 +25,7 @@ import { createProductionContextAssembler } from '../../src/app/content/context-
 import { createProductionResolverRegistry } from '../../src/app/content/resolver-registrations';
 import { createNewGame, type NewGameConfig } from '../../src/app/composition/new-game-bootstrap';
 import { createTeamQuery } from '../../src/modules/team/public';
-import { makeCombatQuery } from '../../src/modules/combat/public';
+import { makeCombatQuery, previewCombatSkill } from '../../src/modules/combat/public';
 import { createCombatDefinitionReader } from '../../src/app/content/combat-reader';
 import { createStatisticsDefinitionReader } from '../../src/app/content/statistics-reader';
 import { createStatisticsResolverPort } from '../../src/app/content/statistics-resolver-bridge';
@@ -164,8 +167,8 @@ export type SiteView = Readonly<{
 }>;
 
 // 地牢畫面。房間名直接用 template-local 的 roomId：它們是**模板內的區域識別碼**
-// （`RoomDefinition.roomId`），不是 Definition，所以沒有 nameRef 可掛。雲華的作者把它們
-// 寫成中文（`f1.水道入口`），所以讀得懂；但切到英文時不會翻譯——這是已知的本地化缺口，
+// （`RoomDefinition.roomId`），目前没有 nameRef。九張圖混用中文區域名與英文識別碼，
+// 尚未依語系翻譯——這是已知的本地化缺口，
 // 補它要在 RoomDefinition 上加 display 並為九張圖的每個房間授權名稱。
 export type RoomExitView = Readonly<{
   roomId: string;
@@ -178,6 +181,8 @@ export type RoomExitView = Readonly<{
 // 房間裡的一筆動態內容（怪群／Boss／寶箱／事件）。名稱走 encounter group 的 id：它是
 // 房間內容顯示：可用的本地化名稱、種類與互動狀態。
 export type RoomContentView = Readonly<{
+  modelId?: string;
+  guardsRemaining?: number;
   contentId: string;
   kind: string;
   // 怪群／Boss 的名字＝編組第一名成員的怪物名。寶箱與事件沒有對應的怪物，所以是 undefined，
@@ -267,6 +272,10 @@ export type TavernView = Readonly<{
 // 公會委託板。「可接」＝尚未被接取、且還在接取期限內（`QuestStatus` 沒有 'open' 這個值，
 // 開放與否是這兩個條件合起來說的）。
 export type QuestOfferView = Readonly<{
+  canHandIn: boolean;
+  canSettle: boolean;
+  postingNameRef: LocalizedTextRef;
+  cargoCarried: boolean;
   status: string;
   settled: boolean;
   reward: number;
@@ -298,8 +307,7 @@ export type GuildView = Readonly<{
 // 一層樓的平面圖。房間佔的格子來自 Template（`RoomDefinition.cells`），玩家看得見哪些房間
 // 來自 dungeon 的 `PlayerMapKnowledge`。兩個真相各自回答自己的部分，這一層只組合。
 //
-// 「未探索」不畫成空白：畫成一格灰底，讓玩家看得出「那邊還有地方」，但不透露裡面有什麼——
-// 這與 `revealedRoomIds` 的語意一致（知道有路，不知道內容）。
+// 未探索的房間不繪製；已知房間的門口可以標記，但不洩漏另一側的房間。
 export type MapCellView = Readonly<{
   row: number;
   col: number;
@@ -331,6 +339,8 @@ export type MoveOptionView = Readonly<{
 // ── 戰鬥 ─────────────────────────────────────────────────────────────────────
 
 export type CombatantView2 = Readonly<{
+  artIdentity?: Readonly<{archetypeId: string; sex: string; weapons: readonly Readonly<{mainHand: string | undefined; offHand: string | undefined; skillIds: readonly string[]}>[]}>;
+  modelId: string;
   combatantId: string;
   side: 'player' | 'enemy';
   nameRef: LocalizedTextRef | undefined;
@@ -355,17 +365,24 @@ export type CombatActionView = Readonly<{
   available: boolean;
 }>;
 
+export type CombatMenuAction = CombatActionView & Readonly<{weaponSetId:string;validTargetIds:readonly string[];unavailableReason:string|undefined}>;
+export type CombatWeaponSet = Readonly<{weaponSetId:string;index:number;isActive:boolean;mainHand:LocalizedTextRef|undefined;offHand:LocalizedTextRef|undefined;skills:readonly (CombatMenuAction|undefined)[]}>;
+
 export type CombatView = Readonly<{
+  mapTemplateId: string | undefined;
   encounterId: string;
   state: string;
   // 目前輪到誰。`undefined` ＝ 這場已經結束。
   currentActorId: string | undefined;
   // 目前行動者是玩家側時才有可選行動；敵方回合由引擎自己推進（settleCombat）。
-  actions: readonly CombatActionView[];
+  actions: readonly CombatMenuAction[];
+  weaponSets:readonly CombatWeaponSet[];
   combatants: readonly CombatantView2[];
   // 出手順序（CTB 升冪）。玩家看得到「下一個是誰」。
   order: readonly string[];
 }>;
+export type CombatResolvedActionView = Readonly<{actorId:string;skillId:string|undefined;nameRef:LocalizedTextRef|undefined;results:readonly CombatActionResult[]}>;
+export type CombatFrame = Readonly<{actorId:string;before:CombatView;after:CombatView;actions:readonly CombatResolvedActionView[];ctbAfterAction:CombatActionResolvedPayload['ctbAfterAction']}>;
 
 // ── 人物 ─────────────────────────────────────────────────────────────────────
 
@@ -423,6 +440,13 @@ export type CharacterSheetView = Readonly<{
 }>;
 
 export type DungeonView = Readonly<{
+  explorationId: string;
+  mapVersion: number;
+  entryCell: import('../../src/contracts/map').GridCell;
+  canMove: boolean;
+  links: readonly import('../walk-types').WalkLink[];
+  templateId: string;
+  remainingEncounters: number;
   mapId: string;
   siteNameRef: LocalizedTextRef;
   currentRoomId: string;
@@ -574,6 +598,7 @@ function projectGuild(
   state: GameState,
   registry: DefinitionRegistry,
   cityId: string,
+  includeVisitingDeliveries = false,
 ): GuildView | undefined {
   const cityDef = registry
     .list({ kinds: ['city'] })
@@ -588,6 +613,8 @@ function projectGuild(
   if (facilityId === undefined) return undefined;
 
   const teamId = state.team.playerTeamId;
+  const playerLocation = state.team.teams[teamId]?.location;
+  const atGuild = playerLocation?.kind === 'city' && String(playerLocation.cityId) === cityId;
   const toView = (quest: (typeof state.quest.quests)[keyof typeof state.quest.quests]): QuestOfferView => {
     // 目標所在的據點名：委託的 objective 綁的是地圖實例，實例綁的是據點。
     const mapId =
@@ -639,6 +666,10 @@ function projectGuild(
         : undefined;
 
     return {
+      canSettle: atGuild && quest.status === 'completed' && !quest.settlement && String(quest.postingGuildCityId) === cityId && state.core.worldDay < quest.actualEndDeadline,
+      postingNameRef: requireData<CityNodeDefinition>(registry, String(quest.postingGuildCityId), '公會城市').display.nameRef,
+      cargoCarried: item?.state === 'active' && item.location.kind === 'teamQuestCargo' && item.location.questId === quest.questId,
+      canHandIn: atGuild && quest.status === 'incomplete' && quest.acceptedByTeamId === teamId && state.core.worldDay < quest.actualEndDeadline && item?.state === 'active' && item.location.kind === 'teamQuestCargo' && item.location.questId === quest.questId && item.location.teamId === teamId && String(quest.objective.kind === 'delivery' ? quest.objective.destinationCityId : quest.postingGuildCityId) === cityId,
       status: quest.status, settled: quest.settlement !== undefined,
       reward: (() => {
         const rule = createQuestDefinitionReader(registry).getQuestRewardRule(quest.rewardRuleId);
@@ -668,9 +699,9 @@ function projectGuild(
     facilityId: String(facilityId),
     nameRef: requireData<FacilityDefinition>(registry, String(facilityId), '設施').display.nameRef,
     offers: here
-      .filter((q) => q.status === 'unaccepted' && (q.kind === 'suppression' || q.kind === 'hunt') && Number(q.acceptDeadline) >= state.core.worldDay)
+      .filter((q) => q.status === 'unaccepted' && ['suppression', 'hunt', 'purchase', 'delivery', 'rescue'].includes(q.kind) && Number(q.acceptDeadline) > state.core.worldDay)
       .map(toView),
-    accepted: here.filter((q) => q.acceptedByTeamId === teamId).map(toView),
+    accepted: Object.values(state.quest.quests).filter((q) => q.acceptedByTeamId === teamId && q.status !== 'expired' && (String(q.postingGuildCityId) === cityId || (includeVisitingDeliveries && q.objective.kind === 'delivery' && String(q.objective.destinationCityId) === cityId))).map(toView),
   };
 }
 
@@ -850,7 +881,7 @@ function projectHome(
 }
 
 // 一筆地圖內容的「怪物名」。內容的 payload 指向 EncounterGroup，編組的第一名成員就是這一群的
-// 代表怪（swarm 是同一隻重複 8 次，boss 只有一隻）。編組本身沒有 display——它是「幾隻、站哪裡」
+// 代表怪（怪群的數量仍由正式編組提供）。編組本身沒有 display——它是「幾隻、站哪裡」
 // 的編排，名字屬於怪物，所以這裡投影怪物的 nameRef，不另外替編組發明一個名字。
 function monsterNameRefOf(
   registry: DefinitionRegistry,
@@ -944,37 +975,47 @@ function projectCombat(
   registry: DefinitionRegistry,
   resolvers: ResolverRegistry,
   teamId: GameState['team']['playerTeamId'],
+  includeEncounterId?:string,
 ): CombatView | undefined {
   // 這支隊伍進行中的遭遇。結算完成（resolved）的不再顯示——那時該回到地牢畫面。
   const encounter = Object.values(state.combat.encounters).find(
-    (e) => String(e.playerTeamId) === String(teamId) && e.state !== 'resolved',
+    (e) => String(e.playerTeamId) === String(teamId) && (includeEncounterId ? String(e.encounterId)===includeEncounterId : e.state !== 'resolved'),
   );
   if (encounter === undefined) return undefined;
 
   const itemReader = createItemDefinitionReader(registry);
   const combatDefinitions = createCombatDefinitionReader(registry);
-  const query = makeCombatQuery(state.combat, {
-    definitions: combatDefinitions,
-    loadout: createCombatLoadoutQuery(state.inventory, itemReader),
-    progression: makeProgressionQuery(state.progression, createProgressionDefinitionReader(registry)),
-  });
+  const previewDeps={definitions:combatDefinitions,loadout:createCombatLoadoutQuery(state.inventory,itemReader),progression:makeProgressionQuery(state.progression,createProgressionDefinitionReader(registry)),resolveTargets:createCombatTargetResolver(resolvers)};
+  const query=makeCombatQuery(state.combat,previewDeps);
 
   const currentActorId = encounter.currentActorId;
   const actorIsPlayer =
     currentActorId !== undefined && encounter.combatants[currentActorId]?.side === 'player';
 
-  const actions: CombatActionView[] =
-    currentActorId === undefined || !actorIsPlayer
-      ? []
-      : query.getAvailableActions(encounter.encounterId, currentActorId).map((o) => ({
-          skillId: String(o.skillId),
-          nameRef: skillNameRefOf(registry, String(o.skillId)),
-          costs: combatDefinitions.getSkillView(o.skillId).resourceCosts,
-          actionKind: o.actionKind,
-          available: o.available,
-        }));
+  const actor=currentActorId===undefined?undefined:encounter.combatants[currentActorId];
+  const options=actorIsPlayer&&currentActorId?query.getAvailableActions(encounter.encounterId,currentActorId):[];
+  const actions:CombatMenuAction[]=options.map(o=>{
+   const weaponSetId=o.requiresWeaponSetId??actor!.activeWeaponSetId;
+   if(!weaponSetId)throw new Error('Combat action has no weapon set');
+   return {skillId:String(o.skillId),nameRef:skillNameRefOf(registry,String(o.skillId)),costs:combatDefinitions.getSkillView(o.skillId).resourceCosts,actionKind:o.actionKind,weaponSetId:String(weaponSetId),...previewCombatSkill(encounter,currentActorId!,o.skillId,weaponSetId,previewDeps)};
+  });
+  const weaponSets:CombatWeaponSet[]=actor?.source.kind==='character'?previewDeps.loadout.getEquipmentLoadout(actor.source.characterId).weaponSets.map((set,index)=>{
+   const name=(id:typeof set.mainHandItemId)=>id===undefined?undefined:itemReader.getItem(state.inventory.items[id]!.definitionId).display.nameRef;
+   return {weaponSetId:String(set.weaponSetId),index,isActive:set.weaponSetId===actor.activeWeaponSetId,mainHand:name(set.mainHandItemId),offHand:name(set.offHandItemId),skills:set.selectedSkillIds.map(id=>id===undefined?undefined:actions.find(a=>a.weaponSetId===String(set.weaponSetId)&&a.skillId===String(id)))};
+  }):[];
 
   const combatants: CombatantView2[] = Object.values(encounter.combatants).map((c) => ({
+    artIdentity: c.source.kind === 'character' ? (() => {
+      const character = state.character.characters[c.source.characterId]!;
+      const loadout = state.inventory.equipmentLoadouts[c.source.characterId];
+      return {archetypeId: String(character.archetypeId), sex: character.sex,
+        weapons: (loadout?.weaponSets ?? []).filter(w => w.selectedSkillIds.some(Boolean)).map(w => ({
+          mainHand: w.mainHandItemId === undefined ? undefined : String(state.inventory.items[w.mainHandItemId]!.definitionId),
+          offHand: w.offHandItemId === undefined ? undefined : String(state.inventory.items[w.offHandItemId]!.definitionId),
+          skillIds: w.selectedSkillIds.filter((s): s is NonNullable<typeof s> => s !== undefined).map(String),
+        }))};
+    })() : undefined,
+    modelId:c.source.kind==='monster'?String(c.source.monsterDefinitionId):'party.adventurer',
     combatantId: String(c.combatantId),
     side: c.side,
     nameRef:
@@ -996,10 +1037,12 @@ function projectCombat(
   }));
 
   return {
+    mapTemplateId: encounter.source.kind === 'mapContent' ? String(state.map.instances[encounter.source.mapId]!.templateId) : undefined,
     encounterId: String(encounter.encounterId),
     state: encounter.state,
     currentActorId: currentActorId === undefined ? undefined : String(currentActorId),
     actions,
+    weaponSets,
     combatants,
     order: query.getCtbOrder(encounter.encounterId).map(String),
   };
@@ -1219,6 +1262,8 @@ function projectDungeon(
     .map((c) => {
       return {
         contentId: String(c.contentId),
+        modelId:c.payload.kind==='monsterGroup'||c.payload.kind==='boss'?String(requireData<EncounterGroupDefinition>(registry,String(c.payload.encounterGroupId),'怪物編組').memberDefinitionIds[0]):undefined,
+        guardsRemaining: c.payload.kind === 'kidnap' ? c.payload.controllerContentIds.filter(id => state.map.contents[id]?.state !== 'resolved').length : undefined,
         kind: c.kind,
         nameRef: monsterNameRefOf(registry, c),
         available: c.state === 'available',
@@ -1232,8 +1277,9 @@ function projectDungeon(
     contentCountByRoom.set(rid, (contentCountByRoom.get(rid) ?? 0) + 1);
   }
 
-  const currentFloor =
-    template.rooms.find((r) => String(r.roomId) === current)?.floor ?? template.rooms[0]?.floor ?? 1;
+  const currentRoom = template.rooms.find(r => String(r.roomId) === current);
+  if (!currentRoom) throw new Error(`Dungeon session references missing room: ${current}`);
+  const currentFloor = currentRoom.floor;
   const floor = projectFloor(
     template,
     currentFloor,
@@ -1250,7 +1296,7 @@ function projectDungeon(
     const there = roomAnchor(template, exit.roomId);
     if (here === undefined || there === undefined) continue;
     const otherFloor = template.rooms.find(r => String(r.roomId) === exit.roomId)!.floor;
-    const direction = otherFloor !== currentFloor ? (otherFloor > currentFloor ? 'down' : 'up') : directionOf(here, there);
+    const direction = otherFloor !== currentFloor ? (otherFloor > currentFloor ? 'up' : 'down') : directionOf(here, there);
     if (direction === undefined) continue;
     moves.push({
       direction,
@@ -1263,6 +1309,13 @@ function projectDungeon(
   }
 
   return {
+    explorationId: String(session.distributionId),
+    mapVersion: session.mapVersion,
+    entryCell: session.entryCell,
+    canMove: session.status === 'exploring' && session.pendingInteraction === undefined && session.mapVersion === instance.currentVersion,
+    links: template.links.map(link => ({ ...link, open: link.kind === 'passage' || instance.spatialRuntime.doorStates[link.linkId]?.state === 'open' })),
+    remainingEncounters: liveContents.filter(c => c.kind === 'monsterGroup' || c.kind === 'boss').length,
+    templateId: String(template.id),
     mapId,
     siteNameRef: site.display.nameRef,
     currentRoomId: current,
@@ -1303,6 +1356,10 @@ function projectShops(
   const byFacility = new Map<string, ShopOfferView[]>();
   for (const offer of Object.values(state.city.shopOffers)) {
     if (String(offer.cityId) !== cityId || offer.state !== 'available') continue;
+    if (offer.sourceQuestId) {
+      const quest = state.quest.quests[offer.sourceQuestId];
+      if (quest?.kind !== 'purchase' || quest.status !== 'incomplete' || quest.acceptedByTeamId !== state.team.playerTeamId) continue;
+    }
     const item = state.inventory.items[offer.itemId];
     if (item === undefined) continue;
     const definition = itemReader.getItem(item.definitionId);
@@ -1391,7 +1448,7 @@ export function projectView(
       projectHome(state, registry, cityId, economyQuery),
       projectTrainings(state, registry, cityId),
       projectTavern(state, registry, cityId),
-      projectGuild(state, registry, cityId),
+      projectGuild(state, registry, cityId, true),
     );
   } else if (team.location.kind === 'travelling') {
     const progress = team.location.progress;
@@ -1464,7 +1521,7 @@ export function projectView(
 export type { SettleStep };
 
 export type CommandOutcome =
-  | Readonly<{ accepted: true; view: GameView; settled: readonly SettleStep[]; blocked?: string }>
+  | Readonly<{ accepted: true; view: GameView; combatFrames:readonly CombatFrame[]; settled: readonly SettleStep[]; blocked?: string }>
   | Readonly<{ accepted: false; rejectionCode: string; view: GameView }>;
 
 export type GameHandle = Readonly<{
@@ -1503,7 +1560,7 @@ export function createGame(config: NewGameConfig, saved?: string): GameHandle {
 
   const started = saved === undefined
     ? createNewGame(config, registry, resolvers)
-    : { success: true as const, state: decodeSave(saved, registry) };
+    : { success: true as const, state: decodeSave(saved, registry, state => upgradeWorldContent(state, assembler)) };
   if (!started.success) {
     throw new Error(`開新遊戲失敗：${started.diagnostics.map((d) => d.code).join(', ')}`);
   }
@@ -1514,6 +1571,8 @@ export function createGame(config: NewGameConfig, saved?: string): GameHandle {
   // 時間是動作的後果，不是玩家的一個指令——規則與理由見
   // `src/app/composition/session.ts` 的 `settleWorld`。這一層只負責把結果轉成 ViewModel。
   const runCommand = (command: GameCommand): CommandOutcome => {
+    const previousCombat=projectCombat(state,registry,resolvers,playerTeamId);
+    const combatFrames:CombatFrame[]=[];
     const request: GameCommandRequest<GameCommand> = { actorTeamId: playerTeamId, command };
     const result = runGameCommand(state, request, assembler);
     if (!result.accepted) {
@@ -1522,12 +1581,26 @@ export function createGame(config: NewGameConfig, saved?: string): GameHandle {
     // 指令接受後，先把**戰鬥**推進到輪回玩家（CTB 決定誰先動，常常是怪先），
     // 再讓世界結算到下一個決策點。順序不能反：戰鬥中的隊伍沒有 activePlan，
     // settleWorld 什麼都不會做，而怪的回合會停在那裡沒有人推。
-    const settled = settlePlayerDecision(result.state, playerTeamId, assembler);
+    let previous=previousCombat;
+    const recordCombat=(next:GameState,actorId:string,actions:readonly CombatActionResolvedPayload[])=>{
+      const after=projectCombat(next,registry,resolvers,playerTeamId,previous?.encounterId);
+      if(previous&&after&&actions.length>0){
+        const committed=actions.filter(a=>String(a.encounterId)===after.encounterId);
+        const action=committed.find(a=>String(a.actorId)===actorId);
+        if(!action)throw new Error('Committed combat step is missing its action timing facts');
+        combatFrames.push({actorId,before:previous,after,ctbAfterAction:action.ctbAfterAction,actions:committed.map(a=>({actorId:String(a.actorId),skillId:a.skillId===undefined?undefined:String(a.skillId),nameRef:a.skillId===undefined?undefined:skillNameRefOf(registry,String(a.skillId)),results:a.results}))});
+      }
+      previous=after;
+    };
+    if(previousCombat?.currentActorId)recordCombat(result.state,previousCombat.currentActorId,result.combatActions);
+    else previous=projectCombat(result.state,registry,resolvers,playerTeamId);
+    const settled = settlePlayerDecision(result.state, playerTeamId, assembler,(next,actorId,actions)=>recordCombat(next,String(actorId),actions));
     const view = projectView(settled.state, registry, resolvers);
     state = settled.state;
     return {
       accepted: true,
       view,
+      combatFrames,
       settled: settled.steps,
       blocked: settled.blocked,
     };

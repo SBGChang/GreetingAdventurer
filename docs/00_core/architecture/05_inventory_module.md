@@ -387,9 +387,7 @@ type CarryCapacitySnapshot = {
 | `TransferItem` | 驗證來源、目的地、Owner 變更、保留與數量後移轉指定實體。 |
 | `ReserveQuestItem` | 以 Quest ID 保留指定實體。 |
 | `ReserveCraftingInputs` | 輸入為 `{ craftingAttemptId, recipeId, inputs: { itemId, quantity, slotId }[] }`。驗證完整素材集合的 Owner、位置、數量、Definition 與未保留狀態後，以同一 Crafting Attempt ID 原子保留；任一筆不合法時全部拒絕。**重複 itemId 一律拒絕**（否則同一實體被 bump 兩次 revision、發兩次事件）；`quantity` 須為正整數且不超過該實體持有量，保留量即為請求量而非整疊。配方／Mastery／設施／材料 Tag 的合法性由 `startCrafting` Workflow 驗證（見 20 §191），Inventory 的 Reader 讀不到配方定義，只忠實記錄已驗證的 `recipeId` + `slotId` 供消耗端比對。 |
-| `ApplyQuestItemLifecycle` | 依未接取、完成、到期等明確指令回收、釋放或保留實體。 |
 | `MoveItemToTeamQuestCargo` | 驗證 Quest、Team、指定 Item、任務類型與正式攜帶者後，清除個人 Owner 並移入該 Quest 的任務物資空間；驗證攜帶者重量上限。 |
-| `ReleaseExpiredQuestCargo` | Quest expired 時清除任務保留，將仍存在的任務物資移入指定 Asset Distribution Escrow，並回傳實際移動的 Item ID 清單。 |
 | `ConsumeBookForLearning` | 驗證持有權並依 Book Policy 保留或消耗書籍。 |
 | `TransformCraftingItems` | 驗證／消耗材料並建立產物實體。 |
 | `ConsumeCuisineIngredients` | 驗證自製料理食材的 Owner、位置、數量與未保留狀態後原子消耗；不建立 Inventory 產物。 |
@@ -470,20 +468,11 @@ Gathering Workflow 已解析合法 GatheringResolution
 ### 7.3 委託指定實體物品
 
 ```text
-Quest 建立需求
-  → 指定一個 ItemInstanceId（必要時拆堆）
-  → ReserveQuestItem
-
-未接取到接受期限
-  → 若仍在任務保留位置／指定店面：ApplyQuestItemLifecycle(remove)
-  → 若已被合法買走：ApplyQuestItemLifecycle(releaseAndKeep)
-
-已接取且完成
-  → ApplyQuestItemLifecycle(reclaim)
-
-已接取但實際結束期限到達前未完成
-  → ApplyQuestItemLifecycle(releaseAndKeep)
-  → 該實體若後來賣進店裡，City 下次月刷新可要求清除
+Quest 生成：City 保留指定真實 Offer（一件商品只對應一張有效委託）
+接取送貨／購買採買目標：MoveItemToTeamQuestCargo
+公會交貨：RemoveItemInstance(reason=questCleanup)，Quest 在同一交易轉 completed
+未領貨到期：City 解除 Offer 保留，正常商品留在貨架
+已領貨到期：TransferItem → distribution escrow → Append → Finalize → 競拍或直售
 ```
 
 Inventory 只執行已明確的生命周期指令；「為何委託到期」與「何時視為完成」永遠是 Quest 的責任。

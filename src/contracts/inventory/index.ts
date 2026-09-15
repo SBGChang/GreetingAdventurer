@@ -452,25 +452,12 @@ export type ReserveCraftingInputs = Readonly<{
   inputs: readonly CraftingInputReservation[];
 }>;
 
-export type ApplyQuestItemLifecycle = Readonly<{
-  type: 'ApplyQuestItemLifecycle';
-  itemId: ItemInstanceId;
-  questId: QuestId;
-  action: 'remove' | 'releaseAndKeep' | 'reclaim';
-}>;
-
 export type MoveItemToTeamQuestCargo = Readonly<{
   type: 'MoveItemToTeamQuestCargo';
   itemId: ItemInstanceId;
   questId: QuestId;
   teamId: TeamId;
   carrierCharacterId: CharacterId;
-}>;
-
-export type ReleaseExpiredQuestCargo = Readonly<{
-  type: 'ReleaseExpiredQuestCargo';
-  questId: QuestId;
-  distributionId: AssetDistributionId;
 }>;
 
 export type ConsumeBookForLearning = Readonly<{
@@ -517,7 +504,7 @@ export type EvaluateTeamEncumbrance = Readonly<{
 }>;
 
 // 只列**已實作**的接收能力。宣告接收卻沒有 Handler，會讓啟動驗證與 Router 都認為它可用。
-// 尚未註冊：ApplyQuestItemLifecycle、ReleaseExpiredQuestCargo、ConsumeBookForLearning、
+// 尚未註冊：ConsumeBookForLearning、
 // TransformCraftingItems、ConsumeCuisineIngredients。
 //
 // `ConsumeCombatSequenceRetrySupply` 已於 Wave D 整合時實作：combat-sequence 會送出它，而

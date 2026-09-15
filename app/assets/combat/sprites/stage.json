@@ -1,0 +1,33 @@
+{
+  "width": 1600,
+  "height": 900,
+  "turnDurationMs": 1400,
+  "impactProgress": 0.42,
+  "approachStart": 0.08,
+  "approachEnd": 0.32,
+  "returnStart": 0.65,
+  "returnEnd": 0.94,
+  "contactDistance": 100,
+  "formation": {
+    "playerX": 555,
+    "enemyX": 825,
+    "y": 450,
+    "rowSpacing": 110,
+    "colSpacing": 78,
+    "playerDepthX": -42,
+    "enemyDepthX": -42
+  },
+  "skinWidths": {
+    "yunhua-male-martial": 255.0,
+    "tide-shell-crab": 202.5
+  },
+  "sampleFps": 30,
+  "platform": {
+    "x": 200,
+    "y": 300,
+    "width": 1110,
+    "depth": 280,
+    "skew": -180,
+    "thickness": 18
+  }
+}

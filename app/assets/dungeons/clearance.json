@@ -1,0 +1,21 @@
+{
+  "actorDiameter": 1.0,
+  "files": {
+    "canal-upper.glb": "7993c196ec4d165ecb336ef108b32600b5ad276b425c8d4d83fd84d2b8310f8e",
+    "canal-lower.glb": "159a5f49b0a9a6b883a61c76dfac93a92d023a534d537a6b1ed9b878e911b1bb",
+    "old-canal.blend": "d4694c5c8e394e422d6aa5e56e117de9128fafc187e3cfe1e7f0a4ead1d2215b",
+    "navigation.json": "577dab69e717302f0e21ba958fef1bcc0314da6308566fe81bcd547f8fa84e9a"
+  },
+  "floors": [
+    {
+      "floor": 1,
+      "footprintChecks": 563,
+      "openDrySampleRatio": 0.946
+    },
+    {
+      "floor": -1,
+      "footprintChecks": 559,
+      "openDrySampleRatio": 0.919
+    }
+  ]
+}

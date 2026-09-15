@@ -1,0 +1,65 @@
+{
+  "width": 1600,
+  "height": 900,
+  "transitionMs": 650,
+  "recoveryMs": 180,
+  "countdownMs": 450,
+  "portraits": {
+    "yunhua-male-martial": [
+      188,
+      18,
+      143,
+      143
+    ],
+    "tide-shell-crab": [
+      100,
+      158,
+      230,
+      190
+    ]
+  },
+  "gauge": {
+    "frame": [
+      40,
+      115,
+      1456,
+      230
+    ],
+    "health": [
+      134,
+      410,
+      1270,
+      88
+    ],
+    "mana": [
+      134,
+      592,
+      1270,
+      84
+    ],
+    "ctb": [
+      134,
+      775,
+      1270,
+      86
+    ]
+  },
+  "atlasWidth": 1536,
+  "atlasHeight": 1024,
+  "delay": {
+    "x": 1340,
+    "y": 20,
+    "width": 240,
+    "height": 860,
+    "maxStep": 72
+  },
+  "squads": {
+    "playerX": 20,
+    "enemyX": 675,
+    "y": 604,
+    "width": 635,
+    "height": 282,
+    "portrait": 76,
+    "gaugeHeight": 29
+  }
+}

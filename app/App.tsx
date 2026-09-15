@@ -1,16 +1,19 @@
+import {CombatScreen} from './CombatScreen';
+import {combatEnvironment} from './combat-ground';
 import { WorldMap } from './WorldMap';
+import { DungeonAdventure } from './DungeonAdventure';
 import { MenuTabs, FormationBoard, type MenuTab } from './PlayerMenu';
 import { UiArt, SCREEN_ART, FACILITY_ART } from './UiArt';
 import { PLAYER_SCENARIO } from '../content-source/player-scenario';
-import { PlayerShell, Welcome, CityScene, CombatFigure } from './PlayerShell';
-import { useState } from 'react';
-import { readSave, writeSave, restoreSave } from './engine/save-storage';
+import { PlayerShell, Welcome, CityScene } from './PlayerShell';
+import { useState, useRef } from 'react';
+import { readSave, writeSave, restoreSave, clearSave } from './engine/save-storage';
 import {
   createGame,
   CAPABILITIES,
   type GameHandle,
   type FacilityAction,
-  type CombatActionView,
+  type CommandOutcome,
   type MoveOptionView,
   type GameView,
   type FacilityView,
@@ -27,6 +30,7 @@ type Screen = 'city' | 'worldMap' | 'adventure' | 'shop' | 'home' | 'training' |
 // 日誌條目存**引用**，不存已翻譯字串（15_ui_application.md §10 的同一條理由：把翻譯結果存進
 // state，切語系時就換不掉了）。內容名稱以 LocalizedTextRef 帶著，render 當下才解析。
 type LogEntry =
+  | { kind: 'questCargoHandedIn' }
   | { kind: 'formationSaved' }
   | { kind: 'combatWon' }
   | { kind: 'sold'; item: string; price: number }
@@ -175,6 +179,7 @@ export function App(): JSX.Element {
   const [locale, setLocale] = useState<UiLocale>('zh-Hant');
   const [storageError, setStorageError] = useState<string>();
   const [saveNotice, setSaveNotice] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
   const saveCurrent = (game: GameHandle): void => {
     try {
       writeSave(localStorage, game.serialize());
@@ -201,10 +206,10 @@ export function App(): JSX.Element {
   const [trainFacilityId, setTrainFacilityId] = useState<string | undefined>(undefined);
   // 戰鬥是兩段式選擇：先點招、再點目標。存在這裡而不是塞進 GameView——它是**畫面的**狀態，
   // 不是世界的狀態（重新載入後不該記得你剛剛點了哪一招）。
-  const [pickedSkill, setPickedSkill] = useState<CombatActionView | undefined>(undefined);
   // 裝備武器要指定裝到哪一組。玩家在人物頁點卡片切換；未選時用第一組（下面 view 就緒後才決定）。
   const [pickedSetRaw, setPickedSet] = useState<string | undefined>(undefined);
   const [view, setView] = useState<GameView | undefined>(init.handle?.view);
+  const retainedCity = useRef<{ cityId: string; city: NonNullable<GameView['city']>; nameRef: LocalizedTextRef }>();
   const [log, setLog] = useState<readonly LogLine[]>([]);
   const nextId = useState({ n: 1 })[0];
   // 同一次點擊可能連送兩個指令（例如「去冒險」＝入圖＋開始探索）。React 的 `view` 在那之間
@@ -254,6 +259,7 @@ export function App(): JSX.Element {
     // （設施名、物品名），有些是畫面本身（人物頁、戰鬥）——後者的字在 UI 文字表裡，
     // 用 `text()` 去解會得到「缺文字」。由呼叫端先解好再傳進來。
     subject: string,
+    onResult?: (result:CommandOutcome)=>void,
   ): boolean => {
     const before = progress.day;
     const wasCity = progress.cityId;
@@ -261,9 +267,10 @@ export function App(): JSX.Element {
     try { r = handle.runCommand(command); }
     catch (e) {
       append({ kind: 'actionRejected', action: subject, code: e instanceof Error ? e.message : String(e) }, 'warn');
+      onResult?.({accepted:false,rejectionCode:e instanceof Error?e.message:String(e),view});
       return false;
     }
-    setView(r.view);
+    if(onResult)onResult(r);else setView(r.view);
     if (!r.accepted) {
       append({ kind: 'actionRejected', action: subject, code: r.rejectionCode }, 'warn');
       return false;
@@ -408,12 +415,16 @@ export function App(): JSX.Element {
           slots: entry.slots,
           price: entry.price,
         });
+      case 'questCargoHandedIn': return t(locale, 'ui.quest.handedIn');
       case 'bought':
         return t(locale, 'ui.log.bought', { item: entry.item, price: entry.price });
     }
   };
 
   const city = view.city;
+  if (view.location.kind === 'city' && city) retainedCity.current = { cityId: view.location.cityId, city, nameRef: view.location.nameRef };
+  else if (!view.combat && (view.location.kind === 'travelling' || view.location.kind === 'adventureMap')) retainedCity.current = undefined;
+  const townScene = retainedCity.current;
   // 先把「在冒險地」這個分支窄化出來：在 callback 裡再讀 view.location 會失去判別。
   const atMap = view.location.kind === 'adventureMap' ? view.location : undefined;
   const locationLabel =
@@ -473,6 +484,11 @@ export function App(): JSX.Element {
           }} />
         </label>
         <button style={S.btnGhost} onClick={() => recover(false)}>{t(locale, 'ui.save.new')}</button>
+        <button style={S.btnGhost} onClick={() => {
+          if (!confirmClear) { setConfirmClear(true); return; }
+          try { clearSave(localStorage); window.location.reload(); }
+          catch (error) { setStorageError(String(error)); }
+        }}>{t(locale, confirmClear ? 'ui.save.confirmClear' : 'ui.save.clear')}</button>
         {saveNotice && !storageError && <span role="status">{t(locale, 'ui.save.saved')}</span>}
       </div>
       </details>
@@ -509,14 +525,15 @@ export function App(): JSX.Element {
         </div>
       ) : null}
 
-      {view.combat === undefined && !view.loot && screen === 'city' && city !== undefined && <CityScene cityId={view.location.kind === 'city' ? view.location.cityId : ''} facilities={city.facilities} place={locationLabel} locale={locale} text={text} visit={onFacility} />}
+      {townScene !== undefined && <CityScene key={townScene.cityId} cityId={townScene.cityId} visible={screen === 'city' && !view.loot} backdrop={!!view.combat} facilities={townScene.city.facilities} place={text(townScene.nameRef)} locale={locale} text={text} visit={onFacility} />}
 
       {/* ── 世界地圖 ──────────────────────────────────────────── */}
-      {view.combat === undefined && screen === 'worldMap' && city !== undefined ? (
+      {screen === 'worldMap' && townScene !== undefined ? (
         <WorldMap
           locale={locale}
-          city={city}
-          currentCityId={view.location.kind === 'city' ? view.location.cityId : ''}
+          city={townScene.city}
+          paused={!!view.combat}
+          currentCityId={townScene.cityId}
           text={text}
           onTravel={(routeId, toCityId, modeId, placeRef) => {
             const ok = dispatch(
@@ -658,8 +675,8 @@ export function App(): JSX.Element {
           const questTile = (q: (typeof guild.offers)[number], acceptable: boolean) => (
             <button
               key={q.questId}
-              style={acceptable || (q.status === 'completed' && !q.settled) ? S.tile : S.card}
-              disabled={q.settled || (!acceptable && q.status !== 'completed')}
+              style={acceptable || q.canSettle || q.canHandIn ? S.tile : S.card}
+              disabled={q.settled || (!acceptable && !q.canSettle && !q.canHandIn)}
               onClick={
                 acceptable
                   ? () =>
@@ -668,16 +685,18 @@ export function App(): JSX.Element {
                         { kind: 'questAccepted', quest: questKindText(q.kind) },
                         text(guild.nameRef),
                       )
-                  : () => dispatch({ type: 'settleQuest', questId: q.questId } as unknown as GameCommand, { kind: 'questSettled' }, questKindText(q.kind))
+                  : () => dispatch({ type: q.canHandIn ? 'handInQuestCargo' : 'settleQuest', questId: q.questId } as unknown as GameCommand, { kind: q.canHandIn ? 'questCargoHandedIn' : 'questSettled' }, questKindText(q.kind))
               }
             >
               <UiArt kind="quest" /><span style={S.tileName}>
                 {questKindText(q.kind)} · {q.settled ? t(locale, 'ui.quest.settled') : q.status === 'completed' ? t(locale, 'ui.quest.settle') : `${q.completedTargets} / ${q.targetCount}`}
+                {q.canHandIn ? ` · ${t(locale, 'ui.quest.handIn')}` : q.kind === 'purchase' && q.status === 'incomplete' && !q.cargoCarried ? ` · ${t(locale, 'ui.quest.buyCargo')}` : q.kind === 'delivery' && q.cargoCarried ? ` · ${t(locale, 'ui.quest.deliverCargo')}` : ''}
                 {q.targetNameRef !== undefined ? ` · ${text(q.targetNameRef)}` : ''}
               </span>
               <span style={{ ...S.tileNote, color: acceptable ? C.accent : C.dim }}>
                 {[
                   `${t(locale, 'ui.quest.reward')} ${q.reward}`,
+                  `${t(locale, 'ui.quest.postingGuild')} ${text(q.postingNameRef)}`,
                     q.siteNameRef === undefined ? undefined : text(q.siteNameRef),
                   q.roomId,
                   q.targetCount > 1 ? t(locale, 'ui.guild.targets', { n: q.targetCount }) : undefined,
@@ -707,7 +726,10 @@ export function App(): JSX.Element {
               {guild.offers.length === 0 ? (
                 <p style={S.sub}>{t(locale, 'ui.guild.empty')}</p>
               ) : (
-                <div style={S.grid}>{guild.offers.map((q) => questTile(q, true))}</div>
+                (['delivery', 'purchase', 'rescue', 'hunt', 'suppression'] as const).map(kind => {
+                  const offers = guild.offers.filter(q => q.kind === kind);
+                  return offers.length > 0 ? <section key={kind}><h3 style={S.label}>{questKindText(kind)}</h3><div style={S.grid}>{offers.map(q => questTile(q, true))}</div></section> : null;
+                })
               )}
             </>
           );
@@ -1125,161 +1147,21 @@ export function App(): JSX.Element {
         })()
       ) : null}
 
-      {/* ── 戰鬥 ─────────────────────────────────────────────────
-          有進行中的遭遇時，戰鬥畫面**取代**其他畫面：戰鬥中不能買東西、不能走路。
-          這不是 UI 偷懶，是引擎的實際狀態——其他指令在戰鬥中都會被拒。 */}
-      {view.combat !== undefined ? (
-        (() => {
-          const c = view.combat;
-          const side = (s: 'player' | 'enemy') => c.combatants.filter((x) => x.side === s);
-          const label = (x: (typeof c.combatants)[number]): string =>
-            x.nameRef !== undefined ? text(x.nameRef) : t(locale, 'ui.combat.member', { n: side('player').indexOf(x) + 1 });
-          const bar = (cur: number, max: number, color: string) => (
-            <span style={S.barTrack}>
-              <span
-                style={{
-                  ...S.barFill,
-                  width: `${max <= 0 ? 0 : Math.max(0, Math.min(100, (cur / max) * 100))}%`,
-                  background: color,
-                }}
-              />
-            </span>
-          );
-          const unit = (x: (typeof c.combatants)[number]) => (
-            <div
-              key={x.combatantId}
-              className="battle-unit"
-              data-current-actor={x.isCurrentActor} data-combat-side={x.side} data-alive={x.state !== 'dead'} data-target-ready={pickedSkill !== undefined}
-              role="button" tabIndex={pickedSkill && x.state !== 'dead' ? 0 : -1}
-              onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.currentTarget.click(); } }}
-              style={{
-                ...S.card,
-                padding: '8px 10px',
-                marginBottom: 6,
-                opacity: x.state === 'dead' ? 0.4 : 1,
-                borderColor: x.isCurrentActor ? C.accent : C.line,
-                borderWidth: x.isCurrentActor ? 2 : 1,
-                cursor: pickedSkill !== undefined && x.state !== 'dead' ? 'pointer' : 'default',
-              }}
-              onClick={
-                pickedSkill !== undefined && x.state !== 'dead'
-                  ? () => {
-                      const skill = pickedSkill;
-                      setPickedSkill(undefined);
-                      dispatch(
-                        {
-                          type: 'useCombatSkill',
-                          encounterId: c.encounterId,
-                          actorId: c.currentActorId,
-                          skillId: skill.skillId,
-                          targetCombatantIds: [x.combatantId],
-                        } as unknown as GameCommand,
-                        {
-                          kind: 'usedSkill',
-                          skill: skill.nameRef !== undefined ? text(skill.nameRef) : skillLocal(skill.skillId),
-                        },
-                        t(locale, 'ui.screen.combat'),
-                      );
-                    }
-                  : undefined
-              }
-            >
-              <CombatFigure enemy={x.side === 'enemy'} crab={x.nameRef?.key.includes('tide-shell-crab') ?? false} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                <span style={{ fontWeight: x.isCurrentActor ? 700 : 500 }}>
-                  {x.isCurrentActor ? '▶ ' : ''}
-                  {label(x)}
-                </span>
-                <span style={S.sub}>
-                  {t(locale, 'ui.combat.row', { n: x.row })} · {t(locale, 'ui.combat.ctb', { n: Math.round(x.ctb) })}
-                </span>
-              </div>
-              {x.state === 'dead' ? (
-                <div style={S.sub}>{t(locale, 'ui.combat.dead')}</div>
-              ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                  {bar(x.health, x.maxHealth, '#c0392b')}
-                  <span style={{ ...S.sub, minWidth: 62 }}>
-                    {x.health}/{x.maxHealth}
-                  </span>
-                </div>
-              )}
-            </div>
-          );
-          return (
-            <>
-              <h2 style={{ fontSize: 15, margin: '0 0 10px' }}>{t(locale, 'ui.screen.combat')}</h2>
-              <div className="battle-formations">
-                <div className="battle-side">
-                  <p style={{ ...S.label, margin: '0 0 6px' }}>{t(locale, 'ui.combat.foe')}</p>
-                  {side('enemy').map(unit)}
-                </div>
-                <div className="battle-side">
-                  <p style={{ ...S.label, margin: '0 0 6px' }}>{t(locale, 'ui.combat.ally')}</p>
-                  {side('player').map(unit)}
-                </div>
-              </div>
-
-              {c.currentActorId === undefined ? (
-                <p style={S.sub}>{t(locale, 'ui.combat.won')}</p>
-              ) : (
-                <div className="battle-actions">
-                  <p style={{ ...S.label, margin: '0 0 6px' }}>
-                    {pickedSkill === undefined
-                      ? t(locale, 'ui.combat.pickAction')
-                      : t(locale, 'ui.combat.pickTarget')}
-                  </p>
-                  {c.actions.length === 0 ? (
-                    <p style={{ ...S.sub, marginBottom: 8 }}>{t(locale, 'ui.combat.noAction')}</p>
-                  ) : (
-                    <div style={S.grid}>
-                      {c.actions.map((a) => (
-                        <button
-                          key={a.skillId}
-                          style={
-                            pickedSkill?.skillId === a.skillId
-                              ? { ...S.tile, borderColor: C.accent, borderWidth: 2 }
-                              : a.available
-                                ? S.tile
-                                : S.tileOff
-                          }
-                          disabled={!a.available}
-                          onClick={() => setPickedSkill(a)}
-                        >
-                          <span style={S.tileName}>
-                            {a.nameRef !== undefined ? text(a.nameRef) : skillLocal(a.skillId)}
-                          </span>
-                          <span style={S.tileNote}>{a.costs?.map(cost => `${cost.resource === 'health' ? 'HP' : 'MP'} ${cost.amount}`).join(' · ') || t(locale, 'ui.combat.noCost')}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  <button
-                    style={{ ...S.btnGhost, marginTop: 10 }}
-                    onClick={() => {
-                      setPickedSkill(undefined);
-                      dispatch(
-                        {
-                          type: 'combatRest',
-                          encounterId: c.encounterId,
-                          actorId: c.currentActorId,
-                        } as unknown as GameCommand,
-                        { kind: 'combatRested' },
-                        t(locale, 'ui.screen.combat'),
-                      );
-                    }}
-                  >
-                    {t(locale, 'ui.combat.rest')}
-                  </button>
-                </div>
-              )}
-            </>
-          );
-        })()
-      ) : null}
+      {view.combat && <CombatScreen environment={combatEnvironment(view)} key={view.combat.encounterId} combat={view.combat} locale={locale} text={text}
+        act={(choice,receive)=>{
+          const combat=view.combat!;
+          const command:GameCommand=choice.kind==='rest'?{
+            type:'combatRest',encounterId:combat.encounterId as Extract<GameCommand,{type:'combatRest'}>['encounterId'],actorId:combat.currentActorId as Extract<GameCommand,{type:'combatRest'}>['actorId'],
+          }:{type:'useCombatSkill',encounterId:combat.encounterId as Extract<GameCommand,{type:'useCombatSkill'}>['encounterId'],actorId:combat.currentActorId as Extract<GameCommand,{type:'useCombatSkill'}>['actorId'],weaponSetId:choice.weaponSetId as import('../src/contracts/core').WeaponSetId,skillId:choice.skillId as Extract<GameCommand,{type:'useCombatSkill'}>['skillId'],targetCombatantIds:[choice.targetId as Extract<GameCommand,{type:'useCombatSkill'}>['targetCombatantIds'][number]]};
+          const skill=choice.kind==='skill'?combat.actions.find(a=>a.skillId===choice.skillId):undefined;
+          dispatch(command,choice.kind==='rest'?{kind:'combatRested'}:{kind:'usedSkill',skill:skill?.nameRef?text(skill.nameRef):skillLocal(choice.skillId)},t(locale,'ui.screen.combat'),result=>{
+            if(!result.accepted){receive({accepted:false,code:result.rejectionCode});return;}
+            receive({accepted:true,frames:result.combatFrames,complete:()=>setView(result.view)});
+          });
+        }}/>}
 
       {/* ── 地城 ─────────────────────────────────────────────── */}
-      {view.combat === undefined && atMap !== undefined && screen !== 'sheet' ? (
+      {atMap !== undefined ? (
         view.dungeon === undefined ? (
           <>
             <h2 style={{ fontSize: 15, margin: '0 0 10px' }}>{t(locale, 'ui.dungeon.title')}</h2>
@@ -1300,20 +1182,23 @@ export function App(): JSX.Element {
             </div>
           </>
         ) : (
-          <Dungeon
+          <DungeonAdventure
+            active={view.combat === undefined && screen !== 'sheet' && !view.loot}
+            backdrop={!!view.combat}
+            party={{leaderId:view.formation.actorCharacterId, memberIds:view.formation.members}}
             locale={locale}
             dungeon={view.dungeon}
             text={text}
             onOpenDoor={(linkId) =>
               dispatch(
-                { type: 'openDungeonDoor', linkId } as unknown as GameCommand,
+                { type: 'openDungeonDoor', linkId: linkId as Extract<GameCommand, {type:'openDungeonDoor'}>['linkId'] },
                 { kind: 'doorOpened' },
                 text(view.dungeon!.siteNameRef),
               )
             }
             onMove={(roomId) =>
               dispatch(
-                { type: 'moveDungeonRoom', targetRoomId: roomId } as unknown as GameCommand,
+                { type: 'moveDungeonRoom', targetRoomId: roomId as Extract<GameCommand, {type:'moveDungeonRoom'}>['targetRoomId'] },
                 { kind: 'movedPlain', room: roomId },
                 text(view.dungeon!.siteNameRef),
               )
@@ -1322,15 +1207,15 @@ export function App(): JSX.Element {
               dispatch(
                 {
                   type: 'useDungeonExit',
-                  exitRoomId: view.dungeon!.currentRoomId,
-                } as unknown as GameCommand,
+                  exitRoomId: view.dungeon!.currentRoomId as Extract<GameCommand, {type:'useDungeonExit'}>['exitRoomId'],
+                },
                 { kind: 'leftDungeon' },
                 text(view.dungeon!.siteNameRef),
               )
             }
             onFight={(contentId, who) =>
               dispatch(
-                { type: 'interactDungeonContent', contentId } as unknown as GameCommand,
+                { type: 'interactDungeonContent', contentId: contentId as Extract<GameCommand, {type:'interactDungeonContent'}>['contentId'] },
                 { kind: 'combatStarted', who },
                 text(view.dungeon!.siteNameRef),
               )
@@ -1349,87 +1234,4 @@ export function App(): JSX.Element {
       </div></details>
     </PlayerShell>
   );
-}
-
-// ── 地城畫面 ──────────────────────────────────────────────────────────────
-//
-// 房間拓樸來自 Template、門的開關來自 map Slice、已揭露來自 dungeon Slice——三者都由 facade
-// 投影好，這裡只負責畫與送指令。紅門關著時先顯示「開門」，開了才顯示「前往」：那個順序是
-// 內容決定的（紅門要花 redDoorOpenMinutes），不是 UI 的裝飾。
-function Dungeon(props: {
-  locale: UiLocale;
-  dungeon: NonNullable<GameView['dungeon']>;
-  text: (ref: LocalizedTextRef) => string;
-  onOpenDoor: (linkId: string) => void;
-  onMove: (roomId: string) => void;
-  onLeave: () => void;
-  onFight: (contentId: string, label: string) => void;
-}): JSX.Element {
-  const { locale, dungeon, text, onOpenDoor, onMove, onLeave, onFight } = props;
-
-  // 小地圖：以房間的格座標畫平面圖。同一個房間可能佔多格（L 形／大廳），所以逐格畫。
-  // 沒有房間的格子留白——那是牆，不是「未探索」。
-
-  // 一個房間可能佔好幾格（倉房、大廳）。整個房間都塗色，但「你在這裡」的記號只畫在**錨點格**
-  // （row 最小、其次 col 最小）——七個 ◉ 看起來像七個玩家。內容數同理，一間房只標一次。
-  const anchorOf = new Map<string, string>();
-  for (const cell of dungeon.floor.cells) {
-    const prev = anchorOf.get(cell.roomId);
-    const key = `${String(cell.row).padStart(3, '0')},${String(cell.col).padStart(3, '0')}`;
-    if (prev === undefined || key < prev) anchorOf.set(cell.roomId, key);
-  }
-  const isAnchor = (cell: (typeof dungeon.floor.cells)[number]): boolean =>
-    anchorOf.get(cell.roomId) ===
-    `${String(cell.row).padStart(3, '0')},${String(cell.col).padStart(3, '0')}`;
-
-  const directionText = { up:'ui.direction.up', down:'ui.direction.down', north:'ui.dir.north',south:'ui.dir.south',east:'ui.dir.east',west:'ui.dir.west' } as const;
-  const cells = dungeon.floor.cells;
-  const byCell = new Map(cells.map(cell => [`${cell.row},${cell.col}`, cell]));
-  const width = dungeon.floor.cols * 150 + 70;
-  const height = dungeon.floor.rows * 110 + 70;
-  return <>
-    <div className="dungeon-caption"><span>{text(dungeon.siteNameRef)} · {t(locale,'ui.dungeon.floor',{n:dungeon.floor.floor})}</span>
-      <h2 data-current-room={dungeon.currentRoomId}>{dungeon.currentRoomId.replace(/^f\d+\./,'')}</h2>
-      <p>{t(locale,'ui.dungeon.rooms',{a:dungeon.revealedRoomCount,b:dungeon.totalRoomCount})} · {t(locale,'ui.dungeon.minutes',{n:dungeon.elapsedMinutes})}</p>
-    </div>
-    <section className="dungeon-atlas" aria-label={t(locale,'ui.dungeon.map')}>
-      <svg viewBox={`0 0 ${width} ${height}`} role="group">
-        {cells.map(cell => { const move = dungeon.moves.find(m=>m.roomId===cell.roomId); const x=(cell.col-1)*150+40, y=(cell.row-1)*110+35;
-          return <g key={`${cell.row},${cell.col}`} transform={`translate(${x},${y})`} className="atlas-node" role={move?'button':undefined} tabIndex={move?0:undefined}
-            aria-label={cell.revealed?cell.roomId:t(locale,'ui.dungeon.unexplored')}
-            onClick={()=>{if(move)move.open?onMove(move.roomId):onOpenDoor(move.linkId)}}
-            onKeyDown={event=>{if(move && (event.key==='Enter'||event.key===' ')){event.preventDefault();move.open?onMove(move.roomId):onOpenDoor(move.linkId)}}}>
-            <rect width="150" height="110" fill={cell.isCurrent?'#806f48':cell.revealed?'#4b6250':'#293a31'} />
-            <path d={[
-              byCell.get(`${cell.row-1},${cell.col}`)?.roomId!==cell.roomId ? 'M0 0H150' : '',
-              byCell.get(`${cell.row+1},${cell.col}`)?.roomId!==cell.roomId ? 'M0 110H150' : '',
-              byCell.get(`${cell.row},${cell.col-1}`)?.roomId!==cell.roomId ? 'M0 0V110' : '',
-              byCell.get(`${cell.row},${cell.col+1}`)?.roomId!==cell.roomId ? 'M150 0V110' : '',
-            ].join(' ')} fill="none" stroke={cell.isCurrent?'#e2c484':move?'#b59f68':'#66745c'} strokeWidth="3" strokeDasharray={cell.revealed?undefined:'5 6'} />
-            <text x="75" y="41" textAnchor="middle" fill={cell.isCurrent?'#242d21':'#e6ddbe'} fontSize="14">{isAnchor(cell) ? (cell.revealed?cell.roomId.replace(/^f\d+\./,''):'?') : ''}</text>
-            <text x="75" y="74" textAnchor="middle" fill={cell.isCurrent?'#fff1c9':'#adbea1'} fontSize="13">{isAnchor(cell) ? (cell.isCurrent?'◆':cell.isExit?'↗':cell.revealed&&cell.contentCount>0?`◇ ${cell.contentCount}`:'') : ''}</text>
-          </g>;
-        })}
-        {dungeon.moves.map(move => {
-          const pairs = cells.filter(c=>c.isCurrent).flatMap(a=>cells.filter(c=>c.roomId===move.roomId).map(b=>({a,b,d:Math.abs(a.row-b.row)+Math.abs(a.col-b.col)})));
-          const pair = pairs.sort((a,b)=>a.d-b.d)[0];
-          if (!pair) return null; // Stairs to another floor use the route dock.
-          const x=(pair.a.col+pair.b.col-2)*75+115, y=(pair.a.row+pair.b.row-2)*55+90;
-          return <g key={move.linkId} pointerEvents="none"><rect x={x-12} y={y-12} width="24" height="24" rx="3" fill={move.open?'#e3cc8f':'#a8533e'} stroke="#f3ddab"/><text x={x} y={y+5} textAnchor="middle" fontSize="17" fill="#233327">{move.open?'↔':'×'}</text></g>;
-        })}
-      </svg>
-    </section>
-    <aside className="dungeon-room-panel"><h3>{t(locale,'ui.dungeon.roomContents')}</h3>
-      {dungeon.isExitRoom && <button className="primary" onClick={onLeave}>{t(locale,'ui.dungeon.leave')} ↗</button>}
-      {dungeon.roomContents.length===0 && <p>{t(locale,'ui.dungeon.roomEmpty')}</p>}
-      {dungeon.roomContents.map(content=><button key={content.contentId} data-encounter={content.kind==='monsterGroup'||content.kind==='boss'} style={S.tile} onClick={()=>onFight(content.contentId,content.nameRef?text(content.nameRef):'')}>
-        <span style={S.tileName}>{content.nameRef?text(content.nameRef):t(locale,'ui.dungeon.kind.other')}</span>
-        <span style={S.tileNote}>{t(locale,content.kind==='monsterGroup'||content.kind==='boss'?'ui.dungeon.fight':'ui.dungeon.open')} →</span>
-      </button>)}
-    </aside>
-    <div className="dungeon-route-dock">{dungeon.moves.map(move=><button key={move.linkId} data-move-room={move.roomId} data-door-open={move.open} style={S.tile} onClick={()=>move.open?onMove(move.roomId):onOpenDoor(move.linkId)}>
-      <span style={S.tileName}>{t(locale,directionText[move.direction])} · {move.roomId.replace(/^f\d+\./,'')}</span>
-      {!move.open&&<span style={S.tileNote}>{t(locale,'ui.dungeon.openDoor')}</span>}
-    </button>)}</div>
-  </>;
 }

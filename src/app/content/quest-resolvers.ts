@@ -27,6 +27,7 @@ const NUMBER_RESULT_SCHEMA = 'schema:number-result' as SchemaId;
 export type QuestGuildQueries = Readonly<{
   getCityOfMap(mapId: MapInstanceId): CityId | undefined;
   listCityIds(): readonly CityId[];
+  listDeliveryCityIds?(origin: CityId, maxGaps: number): readonly CityId[];
 }>;
 
 export type QuestRangeDefinitions = Readonly<{
@@ -36,7 +37,7 @@ export type QuestRangeDefinitions = Readonly<{
 export type GuildResolverInput = Readonly<{ mapId: MapInstanceId }>;
 
 // 送貨目的地：世界上任何一座**不是出發地**的城。送到自己所在的城不是送貨。
-export type DestinationResolverInput = Readonly<{ excludeCityId: CityId }>;
+export type DestinationResolverInput = Readonly<{ excludeCityId: CityId; maxCityGapCount?: number }>;
 
 function requireRng(ctx: ResolverContext): Readonly<{
   rng: NonNullable<ResolverContext['rng']>;
@@ -107,7 +108,8 @@ function otherCityRegistration(
     resultSchemaId: CITY_RESULT_SCHEMA,
     resolve: (input, ctx) => {
       const queries = ctx.queries as QuestGuildQueries;
-      const candidates = queries.listCityIds().filter((id) => String(id) !== String(input.excludeCityId));
+      if (input.maxCityGapCount !== undefined && !queries.listDeliveryCityIds) throw new Error('quest/delivery-distance-query-unavailable');
+      const candidates = input.maxCityGapCount === undefined ? queries.listCityIds().filter(id => id !== input.excludeCityId) : queries.listDeliveryCityIds!(input.excludeCityId, input.maxCityGapCount);
       if (candidates.length === 0) {
         throw new Error(
           `quest-resolvers：除了 "${String(input.excludeCityId)}" 之外沒有別的城市——送貨委託送不出去。`,

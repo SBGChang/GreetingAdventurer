@@ -611,6 +611,8 @@ export type CombatActionResolvedPayload = Readonly<{
   actorId: CombatantId;
   skillId?: SkillDefinitionId;
   results: readonly CombatActionResult[];
+  // 效果、反擊與自身行動延遲全部套用後，排程倒扣前的實值；只隨已提交事件公開。
+  ctbAfterAction: readonly Readonly<{ combatantId: CombatantId; ctb: number }>[];
 }>;
 export type CombatEncounterResolvedPayload = Readonly<{
   type: 'CombatEncounterResolved';
