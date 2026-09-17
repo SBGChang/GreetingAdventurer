@@ -1,0 +1,2857 @@
+{
+  "version": 1,
+  "expressions": [
+    "normal",
+    "happy",
+    "angry",
+    "sad"
+  ],
+  "facilities": [
+    {
+      "id": "yunhua-inn",
+      "cultureId": "culture.yunhua",
+      "kind": "inn",
+      "name": {
+        "zh-Hant": "聽雨客棧",
+        "en": "Rainfall Inn"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "蘇晚晴",
+          "en": "蘇晚晴"
+        },
+        "description": "adult woman innkeeper, round face, black hair in loose bun, cream and plum hanfu, cloth room-key pouch",
+        "portrait": "yunhua-inn.png"
+      },
+      "theme": {
+        "atlas": "yunhua-panels.png",
+        "cell": 0,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.001,
+          0.498,
+          0.178
+        ],
+        "returnCell": 0,
+        "light": false,
+        "detail": {
+          "atlas": "yunhua-details.png",
+          "rect": [
+            0.0,
+            0,
+            0.2,
+            0.496
+          ],
+          "inset": [
+            18,
+            16,
+            18,
+            18
+          ]
+        },
+        "dialogue": {
+          "image": "yunhua-dialogue.png",
+          "fill": "#efe2c7",
+          "ink": "#3f3828",
+          "edge": "#95743d",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "旅途辛苦了。先看看房間與休息安排吧。",
+          "en": "Welcome, traveler. Let us arrange your rest."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "yunhua-tavern",
+      "cultureId": "culture.yunhua",
+      "kind": "tavern",
+      "name": {
+        "zh-Hant": "流霞酒肆",
+        "en": "Rosy Cloud Tavern"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "杜長川",
+          "en": "杜長川"
+        },
+        "description": "stocky middle-aged man tavern host, small moustache, short tied black hair, burgundy vest, ceramic wine jug",
+        "portrait": "yunhua-tavern.png"
+      },
+      "theme": {
+        "atlas": "yunhua-panels.png",
+        "cell": 1,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.001,
+          0.498,
+          0.178
+        ],
+        "returnCell": 0,
+        "light": false,
+        "detail": {
+          "atlas": "yunhua-details.png",
+          "rect": [
+            0.2,
+            0,
+            0.2,
+            0.496
+          ],
+          "inset": [
+            16,
+            12,
+            25,
+            13
+          ]
+        },
+        "dialogue": {
+          "image": "yunhua-dialogue.png",
+          "fill": "#efe2c7",
+          "ink": "#3f3828",
+          "edge": "#95743d",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "坐一會吧，今日到訪的旅人都在這裡。",
+          "en": "Take a seat. These travelers are visiting today."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "yunhua-adventurerGuild",
+      "cultureId": "culture.yunhua",
+      "kind": "adventurerGuild",
+      "name": {
+        "zh-Hant": "雲行會館",
+        "en": "Cloudfarer Hall"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "沈知微",
+          "en": "沈知微"
+        },
+        "description": "adult woman guild registrar, sharp brows, long braided black hair, jade robe, bronze insignia and document folio",
+        "portrait": "yunhua-adventurerGuild.png"
+      },
+      "theme": {
+        "atlas": "yunhua-panels.png",
+        "cell": 2,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.181,
+          0.498,
+          0.182
+        ],
+        "returnCell": 0,
+        "light": false,
+        "detail": {
+          "atlas": "yunhua-details.png",
+          "rect": [
+            0.4,
+            0,
+            0.2,
+            0.496
+          ],
+          "inset": [
+            13,
+            19,
+            26,
+            10
+          ]
+        },
+        "dialogue": {
+          "image": "yunhua-dialogue.png",
+          "fill": "#efe2c7",
+          "ink": "#3f3828",
+          "edge": "#95743d",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "委託都已整理好了。想承接哪一類差事？",
+          "en": "The commissions are ready. What work interests you?"
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "yunhua-itemShop",
+      "cultureId": "culture.yunhua",
+      "kind": "itemShop",
+      "name": {
+        "zh-Hant": "百草行",
+        "en": "Hundred Herbs"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "陶青禾",
+          "en": "陶青禾"
+        },
+        "description": "young adult man herbalist, freckled face, tousled dark hair, sage apron, herb satchel",
+        "portrait": "yunhua-itemShop.png"
+      },
+      "theme": {
+        "atlas": "yunhua-panels.png",
+        "cell": 3,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.181,
+          0.498,
+          0.182
+        ],
+        "returnCell": 0,
+        "light": false,
+        "detail": {
+          "atlas": "yunhua-details.png",
+          "rect": [
+            0.6,
+            0,
+            0.2,
+            0.496
+          ],
+          "inset": [
+            16,
+            13,
+            25,
+            18
+          ]
+        },
+        "dialogue": {
+          "image": "yunhua-dialogue.png",
+          "fill": "#efe2c7",
+          "ink": "#3f3828",
+          "edge": "#95743d",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "藥品與補給都在架上，請慢慢挑選。",
+          "en": "Remedies and provisions are ready for inspection."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "yunhua-equipmentShop",
+      "cultureId": "culture.yunhua",
+      "kind": "equipmentShop",
+      "name": {
+        "zh-Hant": "青鐵坊",
+        "en": "Azure Iron Forge"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "魏鳴鐵",
+          "en": "魏鳴鐵"
+        },
+        "description": "broad older man smith, gray beard, weathered face, tied hair, soot-stained leather apron and iron hammer",
+        "portrait": "yunhua-equipmentShop.png"
+      },
+      "theme": {
+        "atlas": "yunhua-panels.png",
+        "cell": 4,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.365,
+          0.498,
+          0.18000000000000005
+        ],
+        "returnCell": 0,
+        "light": false,
+        "detail": {
+          "atlas": "yunhua-details.png",
+          "rect": [
+            0.8,
+            0,
+            0.2,
+            0.496
+          ],
+          "inset": [
+            18,
+            18,
+            22,
+            18
+          ]
+        },
+        "dialogue": {
+          "image": "yunhua-dialogue.png",
+          "fill": "#efe2c7",
+          "ink": "#3f3828",
+          "edge": "#95743d",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "兵刃與護具都仔細檢過，先看看哪件合手。",
+          "en": "Every blade and armor has been inspected. Find your fit."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "yunhua-trainingGround",
+      "cultureId": "culture.yunhua",
+      "kind": "trainingGround",
+      "name": {
+        "zh-Hant": "定鋒武館",
+        "en": "Steady Blade Hall"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "霍清嵐",
+          "en": "霍清嵐"
+        },
+        "description": "athletic adult woman martial instructor, high ponytail, navy training robe, red wrist wraps, wooden practice saber",
+        "portrait": "yunhua-trainingGround.png"
+      },
+      "theme": {
+        "atlas": "yunhua-panels.png",
+        "cell": 5,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.365,
+          0.498,
+          0.18000000000000005
+        ],
+        "returnCell": 0,
+        "light": false,
+        "detail": {
+          "atlas": "yunhua-details.png",
+          "rect": [
+            0.0,
+            0.496,
+            0.2,
+            0.504
+          ],
+          "inset": [
+            18,
+            17,
+            24,
+            17
+          ]
+        },
+        "dialogue": {
+          "image": "yunhua-dialogue.png",
+          "fill": "#efe2c7",
+          "ink": "#3f3828",
+          "edge": "#95743d",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "修習貴在專注，請選擇要精進的技藝。",
+          "en": "Choose the discipline you wish to practice."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "yunhua-bookstore",
+      "cultureId": "culture.yunhua",
+      "kind": "bookstore",
+      "name": {
+        "zh-Hant": "竹簡書齋",
+        "en": "Bamboo Library"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "顧墨生",
+          "en": "顧墨生"
+        },
+        "description": "elderly man bookseller, fine white beard, black scholar cap, indigo robe, bamboo book",
+        "portrait": "yunhua-bookstore.png"
+      },
+      "theme": {
+        "atlas": "yunhua-panels.png",
+        "cell": 6,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.547,
+          0.498,
+          0.18699999999999994
+        ],
+        "returnCell": 0,
+        "light": true,
+        "detail": {
+          "atlas": "yunhua-details.png",
+          "rect": [
+            0.2,
+            0.496,
+            0.2,
+            0.504
+          ],
+          "inset": [
+            17,
+            15,
+            26,
+            16
+          ]
+        },
+        "dialogue": {
+          "image": "yunhua-dialogue.png",
+          "fill": "#efe2c7",
+          "ink": "#3f3828",
+          "edge": "#95743d",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "書頁承載前人的心血，看看哪卷適合你。",
+          "en": "Each volume preserves experience. Find one that suits you."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "yunhua-adventureCheckpoint",
+      "cultureId": "culture.yunhua",
+      "kind": "adventureCheckpoint",
+      "name": {
+        "zh-Hant": "山行驛",
+        "en": "Trailhead Lodge"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "陸拾山",
+          "en": "陸拾山"
+        },
+        "description": "adult woman pathfinder, short wavy black hair, olive travel cloak, compass and rolled map",
+        "portrait": "yunhua-adventureCheckpoint.png"
+      },
+      "theme": {
+        "atlas": "yunhua-panels.png",
+        "cell": 7,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.547,
+          0.498,
+          0.18699999999999994
+        ],
+        "returnCell": 0,
+        "light": false,
+        "detail": {
+          "atlas": "yunhua-details.png",
+          "rect": [
+            0.4,
+            0.496,
+            0.2,
+            0.504
+          ],
+          "inset": [
+            19,
+            18,
+            27,
+            15
+          ]
+        },
+        "dialogue": {
+          "image": "yunhua-dialogue.png",
+          "fill": "#efe2c7",
+          "ink": "#3f3828",
+          "edge": "#95743d",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "出發前先認清路線，再決定今日去處。",
+          "en": "Review the route before choosing your destination."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "yunhua-cityGate",
+      "cultureId": "culture.yunhua",
+      "kind": "cityGate",
+      "name": {
+        "zh-Hant": "雲關署",
+        "en": "Cloud Gate Office"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "秦鎮川",
+          "en": "秦鎮川"
+        },
+        "description": "stern adult man gate officer, square jaw, topknot, dark lamellar armor, crimson shoulder sash",
+        "portrait": "yunhua-cityGate.png"
+      },
+      "theme": {
+        "atlas": "yunhua-panels.png",
+        "cell": 8,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.736,
+          0.498,
+          0.263
+        ],
+        "returnCell": 0,
+        "light": false,
+        "detail": {
+          "atlas": "yunhua-details.png",
+          "rect": [
+            0.6,
+            0.496,
+            0.2,
+            0.504
+          ],
+          "inset": [
+            16,
+            18,
+            30,
+            18
+          ]
+        },
+        "dialogue": {
+          "image": "yunhua-dialogue.png",
+          "fill": "#efe2c7",
+          "ink": "#3f3828",
+          "edge": "#95743d",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "城外路線已核對妥當，請選擇目的地。",
+          "en": "The routes are checked. Choose your destination."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "yunhua-home",
+      "cultureId": "culture.yunhua",
+      "kind": "home",
+      "name": {
+        "zh-Hant": "安居牙行",
+        "en": "Courtyard Registry"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "許安寧",
+          "en": "許安寧"
+        },
+        "description": "middle-aged woman property steward, pinned chestnut hair, pearl hairpin, ochre silk jacket, lacquer key box",
+        "portrait": "yunhua-home.png"
+      },
+      "theme": {
+        "atlas": "yunhua-panels.png",
+        "cell": 9,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.736,
+          0.498,
+          0.263
+        ],
+        "returnCell": 0,
+        "light": true,
+        "detail": {
+          "atlas": "yunhua-details.png",
+          "rect": [
+            0.8,
+            0.496,
+            0.2,
+            0.504
+          ],
+          "inset": [
+            20,
+            14,
+            31,
+            14
+          ]
+        },
+        "frame": {
+          "image": "yunhua-home-frame.png",
+          "slicePercent": 20,
+          "width": 72,
+          "fill": "#decdad"
+        },
+        "dialogue": {
+          "image": "yunhua-dialogue.png",
+          "fill": "#efe2c7",
+          "ink": "#3f3828",
+          "edge": "#95743d",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "安頓下來也很好，先看看合適的居所。",
+          "en": "A place to settle matters. Look over the available homes."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "vildun-inn",
+      "cultureId": "culture.vildun",
+      "kind": "inn",
+      "name": {
+        "zh-Hant": "爐火長屋",
+        "en": "Hearth Longhouse"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "艾妲",
+          "en": "艾妲"
+        },
+        "description": "stout adult woman innkeeper, auburn braids, kind freckled face, ochre wool dress, fur shoulder wrap, wooden room keys",
+        "portrait": "vildun-inn.png"
+      },
+      "theme": {
+        "atlas": "vildun-panels.png",
+        "cell": 0,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.001,
+          0.498,
+          0.182
+        ],
+        "returnCell": 1,
+        "light": true,
+        "detail": {
+          "atlas": "vildun-details.png",
+          "rect": [
+            0.0,
+            0,
+            0.2,
+            0.501
+          ],
+          "inset": [
+            20,
+            12,
+            36,
+            14
+          ]
+        },
+        "dialogue": {
+          "image": "vildun-dialogue.png",
+          "fill": "#e4dfcf",
+          "ink": "#343c3b",
+          "edge": "#696e6a",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "旅途辛苦了。先看看房間與休息安排吧。",
+          "en": "Welcome, traveler. Let us arrange your rest."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "vildun-tavern",
+      "cultureId": "culture.vildun",
+      "kind": "tavern",
+      "name": {
+        "zh-Hant": "鹿角蜜酒堂",
+        "en": "Antler Mead Hall"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "托爾姆",
+          "en": "托爾姆"
+        },
+        "description": "large middle-aged man mead keeper, curled red beard, shaved sides, forest green tunic, carved drinking horn",
+        "portrait": "vildun-tavern.png"
+      },
+      "theme": {
+        "atlas": "vildun-panels.png",
+        "cell": 1,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.001,
+          0.498,
+          0.182
+        ],
+        "returnCell": 1,
+        "light": false,
+        "detail": {
+          "atlas": "vildun-details.png",
+          "rect": [
+            0.2,
+            0,
+            0.2,
+            0.501
+          ],
+          "inset": [
+            29,
+            13,
+            31,
+            13
+          ]
+        },
+        "dialogue": {
+          "image": "vildun-dialogue.png",
+          "fill": "#e4dfcf",
+          "ink": "#343c3b",
+          "edge": "#696e6a",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "坐一會吧，今日到訪的旅人都在這裡。",
+          "en": "Take a seat. These travelers are visiting today."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "vildun-adventurerGuild",
+      "cultureId": "culture.vildun",
+      "kind": "adventurerGuild",
+      "name": {
+        "zh-Hant": "誓獵集會",
+        "en": "Oathhunt Assembly"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "芙蕾雅",
+          "en": "芙蕾雅"
+        },
+        "description": "adult woman hunt registrar, silver-blonde single braid, strong cheekbones, slate wool cloak, bronze oath rings, leather ledger",
+        "portrait": "vildun-adventurerGuild.png"
+      },
+      "theme": {
+        "atlas": "vildun-panels.png",
+        "cell": 2,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.185,
+          0.498,
+          0.186
+        ],
+        "returnCell": 1,
+        "light": false,
+        "detail": {
+          "atlas": "vildun-details.png",
+          "rect": [
+            0.4,
+            0,
+            0.2,
+            0.501
+          ],
+          "inset": [
+            23,
+            13,
+            36,
+            13
+          ]
+        },
+        "dialogue": {
+          "image": "vildun-dialogue.png",
+          "fill": "#e4dfcf",
+          "ink": "#343c3b",
+          "edge": "#696e6a",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "委託都已整理好了。想承接哪一類差事？",
+          "en": "The commissions are ready. What work interests you?"
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "vildun-itemShop",
+      "cultureId": "culture.vildun",
+      "kind": "itemShop",
+      "name": {
+        "zh-Hant": "霜苔藥舍",
+        "en": "Frostmoss Remedies"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "艾文",
+          "en": "艾文"
+        },
+        "description": "slim adult man herbalist, wavy brown hair, soft face, cream wool, moss-green shawl and medicine pouches",
+        "portrait": "vildun-itemShop.png"
+      },
+      "theme": {
+        "atlas": "vildun-panels.png",
+        "cell": 3,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.185,
+          0.498,
+          0.186
+        ],
+        "returnCell": 1,
+        "light": false,
+        "detail": {
+          "atlas": "vildun-details.png",
+          "rect": [
+            0.6,
+            0,
+            0.2,
+            0.501
+          ],
+          "inset": [
+            23,
+            20,
+            32,
+            17
+          ]
+        },
+        "dialogue": {
+          "image": "vildun-dialogue.png",
+          "fill": "#e4dfcf",
+          "ink": "#343c3b",
+          "edge": "#696e6a",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "藥品與補給都在架上，請慢慢挑選。",
+          "en": "Remedies and provisions are ready for inspection."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "vildun-equipmentShop",
+      "cultureId": "culture.vildun",
+      "kind": "equipmentShop",
+      "name": {
+        "zh-Hant": "沼鐵鍛屋",
+        "en": "Bog Iron Smithy"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "布倫",
+          "en": "布倫"
+        },
+        "description": "powerful older woman smith, gray braided hair, weathered tan face, sleeveless wool tunic, iron-studded apron, hammer",
+        "portrait": "vildun-equipmentShop.png"
+      },
+      "theme": {
+        "atlas": "vildun-panels.png",
+        "cell": 4,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.373,
+          0.498,
+          0.19399999999999995
+        ],
+        "returnCell": 1,
+        "light": false,
+        "detail": {
+          "atlas": "vildun-details.png",
+          "rect": [
+            0.8,
+            0,
+            0.2,
+            0.501
+          ],
+          "inset": [
+            20,
+            16,
+            27,
+            16
+          ]
+        },
+        "dialogue": {
+          "image": "vildun-dialogue.png",
+          "fill": "#e4dfcf",
+          "ink": "#343c3b",
+          "edge": "#696e6a",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "兵刃與護具都仔細檢過，先看看哪件合手。",
+          "en": "Every blade and armor has been inspected. Find your fit."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "vildun-trainingGround",
+      "cultureId": "culture.vildun",
+      "kind": "trainingGround",
+      "name": {
+        "zh-Hant": "盾環試場",
+        "en": "Shieldring Yard"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "西格妮",
+          "en": "西格妮"
+        },
+        "description": "athletic adult man shield trainer, blond beard, scar on eyebrow, navy tunic, round shield strap",
+        "portrait": "vildun-trainingGround.png"
+      },
+      "theme": {
+        "atlas": "vildun-panels.png",
+        "cell": 5,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.373,
+          0.498,
+          0.19399999999999995
+        ],
+        "returnCell": 1,
+        "light": false,
+        "detail": {
+          "atlas": "vildun-details.png",
+          "rect": [
+            0.0,
+            0.501,
+            0.2,
+            0.499
+          ],
+          "inset": [
+            24,
+            15,
+            30,
+            15
+          ]
+        },
+        "dialogue": {
+          "image": "vildun-dialogue.png",
+          "fill": "#e4dfcf",
+          "ink": "#343c3b",
+          "edge": "#696e6a",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "修習貴在專注，請選擇要精進的技藝。",
+          "en": "Choose the discipline you wish to practice."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "vildun-bookstore",
+      "cultureId": "culture.vildun",
+      "kind": "bookstore",
+      "name": {
+        "zh-Hant": "樺皮卷屋",
+        "en": "Birch Scroll House"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "烏爾文",
+          "en": "烏爾文"
+        },
+        "description": "elderly woman lore keeper, long silver hair, amber beads, dark teal wool, birch scrolls",
+        "portrait": "vildun-bookstore.png"
+      },
+      "theme": {
+        "atlas": "vildun-panels.png",
+        "cell": 6,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.569,
+          0.498,
+          0.18100000000000005
+        ],
+        "returnCell": 1,
+        "light": true,
+        "detail": {
+          "atlas": "vildun-details.png",
+          "rect": [
+            0.2,
+            0.501,
+            0.2,
+            0.499
+          ],
+          "inset": [
+            20,
+            17,
+            31,
+            18
+          ]
+        },
+        "dialogue": {
+          "image": "vildun-dialogue.png",
+          "fill": "#e4dfcf",
+          "ink": "#343c3b",
+          "edge": "#696e6a",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "書頁承載前人的心血，看看哪卷適合你。",
+          "en": "Each volume preserves experience. Find one that suits you."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "vildun-adventureCheckpoint",
+      "cultureId": "culture.vildun",
+      "kind": "adventureCheckpoint",
+      "name": {
+        "zh-Hant": "獵徑哨所",
+        "en": "Hunter Trail Post"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "莉芙",
+          "en": "莉芙"
+        },
+        "description": "young adult woman trail scout, copper short hair, freckles, brown leather hunting gear, white fur collar",
+        "portrait": "vildun-adventureCheckpoint.png"
+      },
+      "theme": {
+        "atlas": "vildun-panels.png",
+        "cell": 7,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.569,
+          0.498,
+          0.18100000000000005
+        ],
+        "returnCell": 1,
+        "light": false,
+        "detail": {
+          "atlas": "vildun-details.png",
+          "rect": [
+            0.4,
+            0.501,
+            0.2,
+            0.499
+          ],
+          "inset": [
+            24,
+            19,
+            34,
+            20
+          ]
+        },
+        "dialogue": {
+          "image": "vildun-dialogue.png",
+          "fill": "#e4dfcf",
+          "ink": "#343c3b",
+          "edge": "#696e6a",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "出發前先認清路線，再決定今日去處。",
+          "en": "Review the route before choosing your destination."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "vildun-cityGate",
+      "cultureId": "culture.vildun",
+      "kind": "cityGate",
+      "name": {
+        "zh-Hant": "霜門守所",
+        "en": "Frostgate Watch"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "哈肯",
+          "en": "哈肯"
+        },
+        "description": "older adult man gate watchman, thick dark beard, gray hair at temples, iron mail and bear-brown cloak",
+        "portrait": "vildun-cityGate.png"
+      },
+      "theme": {
+        "atlas": "vildun-panels.png",
+        "cell": 8,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.752,
+          0.498,
+          0.247
+        ],
+        "returnCell": 1,
+        "light": false,
+        "detail": {
+          "atlas": "vildun-details.png",
+          "rect": [
+            0.6,
+            0.501,
+            0.2,
+            0.499
+          ],
+          "inset": [
+            29,
+            16,
+            29,
+            16
+          ]
+        },
+        "dialogue": {
+          "image": "vildun-dialogue.png",
+          "fill": "#e4dfcf",
+          "ink": "#343c3b",
+          "edge": "#696e6a",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "城外路線已核對妥當，請選擇目的地。",
+          "en": "The routes are checked. Choose your destination."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "vildun-home",
+      "cultureId": "culture.vildun",
+      "kind": "home",
+      "name": {
+        "zh-Hant": "長屋置產所",
+        "en": "Longhouse Registry"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "茉伊菈",
+          "en": "茉伊菈"
+        },
+        "description": "adult man home steward, clean shaven, shoulder-length sandy hair, rust wool coat, bone key ring",
+        "portrait": "vildun-home.png"
+      },
+      "theme": {
+        "atlas": "vildun-panels.png",
+        "cell": 9,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.752,
+          0.498,
+          0.247
+        ],
+        "returnCell": 1,
+        "light": true,
+        "detail": {
+          "atlas": "vildun-details.png",
+          "rect": [
+            0.8,
+            0.501,
+            0.2,
+            0.499
+          ],
+          "inset": [
+            23,
+            14,
+            38,
+            15
+          ]
+        },
+        "dialogue": {
+          "image": "vildun-dialogue.png",
+          "fill": "#e4dfcf",
+          "ink": "#343c3b",
+          "edge": "#696e6a",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "安頓下來也很好，先看看合適的居所。",
+          "en": "A place to settle matters. Look over the available homes."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "aurelien-inn",
+      "cultureId": "culture.aurelien",
+      "kind": "inn",
+      "name": {
+        "zh-Hant": "白鐘旅舍",
+        "en": "White Bell Inn"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "艾莉絲",
+          "en": "艾莉絲"
+        },
+        "description": "adult woman innkeeper, chestnut bob, warm brown eyes, cream blouse and blue embroidered bodice, brass key chain",
+        "portrait": "aurelien-inn.png"
+      },
+      "theme": {
+        "atlas": "aurelien-panels.png",
+        "cell": 0,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.001,
+          0.498,
+          0.176
+        ],
+        "returnCell": 2,
+        "light": false,
+        "detail": {
+          "atlas": "aurelien-details.png",
+          "rect": [
+            0.0,
+            0,
+            0.2,
+            0.499
+          ],
+          "inset": [
+            17,
+            13,
+            31,
+            13
+          ]
+        },
+        "dialogue": {
+          "image": "aurelien-dialogue.png",
+          "fill": "#f0e3cb",
+          "ink": "#46382e",
+          "edge": "#a18452",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "旅途辛苦了。先看看房間與休息安排吧。",
+          "en": "Welcome, traveler. Let us arrange your rest."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "aurelien-tavern",
+      "cultureId": "culture.aurelien",
+      "kind": "tavern",
+      "name": {
+        "zh-Hant": "金杯酒館",
+        "en": "Golden Chalice Tavern"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "加斯頓",
+          "en": "加斯頓"
+        },
+        "description": "portly adult man tavern host, dark curled moustache, burgundy doublet, cream sleeves, pewter goblet",
+        "portrait": "aurelien-tavern.png"
+      },
+      "theme": {
+        "atlas": "aurelien-panels.png",
+        "cell": 1,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.001,
+          0.498,
+          0.176
+        ],
+        "returnCell": 2,
+        "light": false,
+        "detail": {
+          "atlas": "aurelien-details.png",
+          "rect": [
+            0.2,
+            0,
+            0.2,
+            0.499
+          ],
+          "inset": [
+            22,
+            16,
+            32,
+            16
+          ]
+        },
+        "dialogue": {
+          "image": "aurelien-dialogue.png",
+          "fill": "#f0e3cb",
+          "ink": "#46382e",
+          "edge": "#a18452",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "坐一會吧，今日到訪的旅人都在這裡。",
+          "en": "Take a seat. These travelers are visiting today."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "aurelien-adventurerGuild",
+      "cultureId": "culture.aurelien",
+      "kind": "adventurerGuild",
+      "name": {
+        "zh-Hant": "巡誓公所",
+        "en": "Oathward Office"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "瑟蕾娜",
+          "en": "瑟蕾娜"
+        },
+        "description": "adult woman oath registrar, dark brown skin, tightly curled black hair, ivory and royal blue mantle, gold seal and book",
+        "portrait": "aurelien-adventurerGuild.png"
+      },
+      "theme": {
+        "atlas": "aurelien-panels.png",
+        "cell": 2,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.179,
+          0.498,
+          0.181
+        ],
+        "returnCell": 2,
+        "light": false,
+        "detail": {
+          "atlas": "aurelien-details.png",
+          "rect": [
+            0.4,
+            0,
+            0.2,
+            0.499
+          ],
+          "inset": [
+            25,
+            22,
+            28,
+            22
+          ]
+        },
+        "dialogue": {
+          "image": "aurelien-dialogue.png",
+          "fill": "#f0e3cb",
+          "ink": "#46382e",
+          "edge": "#a18452",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "委託都已整理好了。想承接哪一類差事？",
+          "en": "The commissions are ready. What work interests you?"
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "aurelien-itemShop",
+      "cultureId": "culture.aurelien",
+      "kind": "itemShop",
+      "name": {
+        "zh-Hant": "聖露藥房",
+        "en": "Hallowed Dew Apothecary"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "盧西安",
+          "en": "盧西安"
+        },
+        "description": "adult man apothecary, olive skin, long black hair tied low, sage velvet coat, glass vial",
+        "portrait": "aurelien-itemShop.png"
+      },
+      "theme": {
+        "atlas": "aurelien-panels.png",
+        "cell": 3,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.179,
+          0.498,
+          0.181
+        ],
+        "returnCell": 2,
+        "light": false,
+        "detail": {
+          "atlas": "aurelien-details.png",
+          "rect": [
+            0.6,
+            0,
+            0.2,
+            0.499
+          ],
+          "inset": [
+            23,
+            14,
+            33,
+            16
+          ]
+        },
+        "dialogue": {
+          "image": "aurelien-dialogue.png",
+          "fill": "#f0e3cb",
+          "ink": "#46382e",
+          "edge": "#a18452",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "藥品與補給都在架上，請慢慢挑選。",
+          "en": "Remedies and provisions are ready for inspection."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "aurelien-equipmentShop",
+      "cultureId": "culture.aurelien",
+      "kind": "equipmentShop",
+      "name": {
+        "zh-Hant": "獅徽軍械坊",
+        "en": "Lioncrest Armory"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "瑪爾塔",
+          "en": "瑪爾塔"
+        },
+        "description": "muscular middle-aged woman armorer, copper hair in crown braid, dark leather apron, burgundy shirt, steel tongs",
+        "portrait": "aurelien-equipmentShop.png"
+      },
+      "theme": {
+        "atlas": "aurelien-panels.png",
+        "cell": 4,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.362,
+          0.498,
+          0.19500000000000006
+        ],
+        "returnCell": 2,
+        "light": false,
+        "detail": {
+          "atlas": "aurelien-details.png",
+          "rect": [
+            0.8,
+            0,
+            0.2,
+            0.499
+          ],
+          "inset": [
+            19,
+            16,
+            33,
+            17
+          ]
+        },
+        "dialogue": {
+          "image": "aurelien-dialogue.png",
+          "fill": "#f0e3cb",
+          "ink": "#46382e",
+          "edge": "#a18452",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "兵刃與護具都仔細檢過，先看看哪件合手。",
+          "en": "Every blade and armor has been inspected. Find your fit."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "aurelien-trainingGround",
+      "cultureId": "culture.aurelien",
+      "kind": "trainingGround",
+      "name": {
+        "zh-Hant": "銀槍教場",
+        "en": "Silver Lance Yard"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "羅蘭",
+          "en": "羅蘭"
+        },
+        "description": "adult man knight instructor, short silver-blond hair, clean jaw, blue gambeson with modest polished armor, training sword",
+        "portrait": "aurelien-trainingGround.png"
+      },
+      "theme": {
+        "atlas": "aurelien-panels.png",
+        "cell": 5,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.362,
+          0.498,
+          0.19500000000000006
+        ],
+        "returnCell": 2,
+        "light": false,
+        "detail": {
+          "atlas": "aurelien-details.png",
+          "rect": [
+            0.0,
+            0.499,
+            0.2,
+            0.501
+          ],
+          "inset": [
+            28,
+            22,
+            29,
+            20
+          ]
+        },
+        "dialogue": {
+          "image": "aurelien-dialogue.png",
+          "fill": "#f0e3cb",
+          "ink": "#46382e",
+          "edge": "#a18452",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "修習貴在專注，請選擇要精進的技藝。",
+          "en": "Choose the discipline you wish to practice."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "aurelien-bookstore",
+      "cultureId": "culture.aurelien",
+      "kind": "bookstore",
+      "name": {
+        "zh-Hant": "晨光書庫",
+        "en": "Dawn Archive"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "貝雅特麗絲",
+          "en": "貝雅特麗絲"
+        },
+        "description": "elderly woman archivist, silver curls, gold spectacles, navy velvet robe, illuminated manuscript",
+        "portrait": "aurelien-bookstore.png"
+      },
+      "theme": {
+        "atlas": "aurelien-panels.png",
+        "cell": 6,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.559,
+          0.498,
+          0.18899999999999995
+        ],
+        "returnCell": 2,
+        "light": true,
+        "detail": {
+          "atlas": "aurelien-details.png",
+          "rect": [
+            0.2,
+            0.499,
+            0.2,
+            0.501
+          ],
+          "inset": [
+            21,
+            19,
+            34,
+            18
+          ]
+        },
+        "dialogue": {
+          "image": "aurelien-dialogue.png",
+          "fill": "#f0e3cb",
+          "ink": "#46382e",
+          "edge": "#a18452",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "書頁承載前人的心血，看看哪卷適合你。",
+          "en": "Each volume preserves experience. Find one that suits you."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "aurelien-adventureCheckpoint",
+      "cultureId": "culture.aurelien",
+      "kind": "adventureCheckpoint",
+      "name": {
+        "zh-Hant": "巡境驛站",
+        "en": "Marchwarden Post"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "賽德里克",
+          "en": "賽德里克"
+        },
+        "description": "young adult man courier scout, curly dark hair, tan face, ochre hooded cloak, leather map tube",
+        "portrait": "aurelien-adventureCheckpoint.png"
+      },
+      "theme": {
+        "atlas": "aurelien-panels.png",
+        "cell": 7,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.559,
+          0.498,
+          0.18899999999999995
+        ],
+        "returnCell": 2,
+        "light": false,
+        "detail": {
+          "atlas": "aurelien-details.png",
+          "rect": [
+            0.4,
+            0.499,
+            0.2,
+            0.501
+          ],
+          "inset": [
+            24,
+            13,
+            36,
+            13
+          ]
+        },
+        "dialogue": {
+          "image": "aurelien-dialogue.png",
+          "fill": "#f0e3cb",
+          "ink": "#46382e",
+          "edge": "#a18452",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "出發前先認清路線，再決定今日去處。",
+          "en": "Review the route before choosing your destination."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "aurelien-cityGate",
+      "cultureId": "culture.aurelien",
+      "kind": "cityGate",
+      "name": {
+        "zh-Hant": "獅門衛署",
+        "en": "Liongate Guard"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "伊蓮娜",
+          "en": "伊蓮娜"
+        },
+        "description": "adult woman gate captain, black hair swept back, stern oval face, polished steel plate with blue sash",
+        "portrait": "aurelien-cityGate.png"
+      },
+      "theme": {
+        "atlas": "aurelien-panels.png",
+        "cell": 8,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.75,
+          0.498,
+          0.249
+        ],
+        "returnCell": 2,
+        "light": false,
+        "detail": {
+          "atlas": "aurelien-details.png",
+          "rect": [
+            0.6,
+            0.499,
+            0.2,
+            0.501
+          ],
+          "inset": [
+            26,
+            23,
+            30,
+            23
+          ]
+        },
+        "dialogue": {
+          "image": "aurelien-dialogue.png",
+          "fill": "#f0e3cb",
+          "ink": "#46382e",
+          "edge": "#a18452",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "城外路線已核對妥當，請選擇目的地。",
+          "en": "The routes are checked. Choose your destination."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "aurelien-home",
+      "cultureId": "culture.aurelien",
+      "kind": "home",
+      "name": {
+        "zh-Hant": "白石地契所",
+        "en": "White Stone Deeds"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "奧斯溫",
+          "en": "奧斯溫"
+        },
+        "description": "middle-aged man deed keeper, short salt-and-pepper beard, brown velvet cap, cream and wine coat, rolled deed",
+        "portrait": "aurelien-home.png"
+      },
+      "theme": {
+        "atlas": "aurelien-panels.png",
+        "cell": 9,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.75,
+          0.498,
+          0.249
+        ],
+        "returnCell": 2,
+        "light": true,
+        "detail": {
+          "atlas": "aurelien-details.png",
+          "rect": [
+            0.8,
+            0.499,
+            0.2,
+            0.501
+          ],
+          "inset": [
+            19,
+            15,
+            36,
+            15
+          ]
+        },
+        "dialogue": {
+          "image": "aurelien-dialogue.png",
+          "fill": "#f0e3cb",
+          "ink": "#46382e",
+          "edge": "#a18452",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "安頓下來也很好，先看看合適的居所。",
+          "en": "A place to settle matters. Look over the available homes."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "safir-inn",
+      "cultureId": "culture.safir",
+      "kind": "inn",
+      "name": {
+        "zh-Hant": "月泉客舍",
+        "en": "Moonwell Lodge"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "蕾拉",
+          "en": "蕾拉"
+        },
+        "description": "adult woman innkeeper, warm brown skin, dark wavy hair under loose ivory scarf, turquoise dress, brass keys",
+        "portrait": "safir-inn.png"
+      },
+      "theme": {
+        "atlas": "safir-panels.png",
+        "cell": 0,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.001,
+          0.498,
+          0.186
+        ],
+        "returnCell": 3,
+        "light": false,
+        "detail": {
+          "atlas": "safir-details.png",
+          "rect": [
+            0.0,
+            0,
+            0.2,
+            0.467
+          ],
+          "inset": [
+            24,
+            17,
+            34,
+            17
+          ]
+        },
+        "dialogue": {
+          "image": "safir-dialogue.png",
+          "fill": "#eee1c6",
+          "ink": "#403b2d",
+          "edge": "#a38049",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "旅途辛苦了。先看看房間與休息安排吧。",
+          "en": "Welcome, traveler. Let us arrange your rest."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "safir-tavern",
+      "cultureId": "culture.safir",
+      "kind": "tavern",
+      "name": {
+        "zh-Hant": "琥珀茶坊",
+        "en": "Amber Teahouse"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "法里德",
+          "en": "法里德"
+        },
+        "description": "middle-aged man tea host, deep brown skin, neat black beard, amber turban, indigo vest, small brass teapot",
+        "portrait": "safir-tavern.png"
+      },
+      "theme": {
+        "atlas": "safir-panels.png",
+        "cell": 1,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.001,
+          0.498,
+          0.186
+        ],
+        "returnCell": 3,
+        "light": false,
+        "detail": {
+          "atlas": "safir-details.png",
+          "rect": [
+            0.2,
+            0,
+            0.2,
+            0.467
+          ],
+          "inset": [
+            27,
+            14,
+            33,
+            14
+          ]
+        },
+        "dialogue": {
+          "image": "safir-dialogue.png",
+          "fill": "#eee1c6",
+          "ink": "#403b2d",
+          "edge": "#a38049",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "坐一會吧，今日到訪的旅人都在這裡。",
+          "en": "Take a seat. These travelers are visiting today."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "safir-adventurerGuild",
+      "cultureId": "culture.safir",
+      "kind": "adventurerGuild",
+      "name": {
+        "zh-Hant": "星路商盟",
+        "en": "Starroad Compact"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "娜迪雅",
+          "en": "娜迪雅"
+        },
+        "description": "adult woman trade registrar, olive skin, long dark braid, cobalt silk mantle, gold geometric clasp, star-stamped ledger",
+        "portrait": "safir-adventurerGuild.png"
+      },
+      "theme": {
+        "atlas": "safir-panels.png",
+        "cell": 2,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.189,
+          0.498,
+          0.182
+        ],
+        "returnCell": 3,
+        "light": false,
+        "detail": {
+          "atlas": "safir-details.png",
+          "rect": [
+            0.4,
+            0,
+            0.2,
+            0.467
+          ],
+          "inset": [
+            25,
+            15,
+            31,
+            15
+          ]
+        },
+        "dialogue": {
+          "image": "safir-dialogue.png",
+          "fill": "#eee1c6",
+          "ink": "#403b2d",
+          "edge": "#a38049",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "委託都已整理好了。想承接哪一類差事？",
+          "en": "The commissions are ready. What work interests you?"
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "safir-itemShop",
+      "cultureId": "culture.safir",
+      "kind": "itemShop",
+      "name": {
+        "zh-Hant": "綠洲香藥鋪",
+        "en": "Oasis Remedies"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "薩米爾",
+          "en": "薩米爾"
+        },
+        "description": "young adult man perfumer, tan skin, dark curly hair, white tunic, green embroidered vest and glass perfume vial",
+        "portrait": "safir-itemShop.png"
+      },
+      "theme": {
+        "atlas": "safir-panels.png",
+        "cell": 3,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.189,
+          0.498,
+          0.182
+        ],
+        "returnCell": 3,
+        "light": false,
+        "detail": {
+          "atlas": "safir-details.png",
+          "rect": [
+            0.6,
+            0,
+            0.2,
+            0.467
+          ],
+          "inset": [
+            25,
+            16,
+            35,
+            16
+          ]
+        },
+        "dialogue": {
+          "image": "safir-dialogue.png",
+          "fill": "#eee1c6",
+          "ink": "#403b2d",
+          "edge": "#a38049",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "藥品與補給都在架上，請慢慢挑選。",
+          "en": "Remedies and provisions are ready for inspection."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "safir-equipmentShop",
+      "cultureId": "culture.safir",
+      "kind": "equipmentShop",
+      "name": {
+        "zh-Hant": "赤銅兵作",
+        "en": "Red Copper Armory"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "札赫拉",
+          "en": "札赫拉"
+        },
+        "description": "strong adult woman weaponsmith, brown skin, black hair wrapped in rust scarf, sand shirt and worn leather apron, copper tongs",
+        "portrait": "safir-equipmentShop.png"
+      },
+      "theme": {
+        "atlas": "safir-panels.png",
+        "cell": 4,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.373,
+          0.498,
+          0.18400000000000005
+        ],
+        "returnCell": 3,
+        "light": false,
+        "detail": {
+          "atlas": "safir-details.png",
+          "rect": [
+            0.8,
+            0,
+            0.2,
+            0.467
+          ],
+          "inset": [
+            19,
+            14,
+            33,
+            15
+          ]
+        },
+        "dialogue": {
+          "image": "safir-dialogue.png",
+          "fill": "#eee1c6",
+          "ink": "#403b2d",
+          "edge": "#a38049",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "兵刃與護具都仔細檢過，先看看哪件合手。",
+          "en": "Every blade and armor has been inspected. Find your fit."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "safir-trainingGround",
+      "cultureId": "culture.safir",
+      "kind": "trainingGround",
+      "name": {
+        "zh-Hant": "沙環演武庭",
+        "en": "Sandring Court"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "卡里姆",
+          "en": "卡里姆"
+        },
+        "description": "adult man martial tutor, lean muscular frame, long dark moustache, cream wrapped headcloth, red sash, curved training blade",
+        "portrait": "safir-trainingGround.png"
+      },
+      "theme": {
+        "atlas": "safir-panels.png",
+        "cell": 5,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.373,
+          0.498,
+          0.18400000000000005
+        ],
+        "returnCell": 3,
+        "light": false,
+        "detail": {
+          "atlas": "safir-details.png",
+          "rect": [
+            0.0,
+            0.467,
+            0.2,
+            0.533
+          ],
+          "inset": [
+            29,
+            19,
+            39,
+            19
+          ]
+        },
+        "dialogue": {
+          "image": "safir-dialogue.png",
+          "fill": "#eee1c6",
+          "ink": "#403b2d",
+          "edge": "#a38049",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "修習貴在專注，請選擇要精進的技藝。",
+          "en": "Choose the discipline you wish to practice."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "safir-bookstore",
+      "cultureId": "culture.safir",
+      "kind": "bookstore",
+      "name": {
+        "zh-Hant": "星井抄書院",
+        "en": "Starwell Scriptorium"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "雅斯敏",
+          "en": "雅斯敏"
+        },
+        "description": "older adult woman scribe, deep brown skin, silver hair under indigo veil, turquoise beads, ivory robe, bound manuscript",
+        "portrait": "safir-bookstore.png"
+      },
+      "theme": {
+        "atlas": "safir-panels.png",
+        "cell": 6,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.559,
+          0.498,
+          0.18999999999999995
+        ],
+        "returnCell": 3,
+        "light": true,
+        "detail": {
+          "atlas": "safir-details.png",
+          "rect": [
+            0.2,
+            0.467,
+            0.2,
+            0.533
+          ],
+          "inset": [
+            20,
+            21,
+            37,
+            18
+          ]
+        },
+        "dialogue": {
+          "image": "safir-dialogue.png",
+          "fill": "#eee1c6",
+          "ink": "#403b2d",
+          "edge": "#a38049",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "書頁承載前人的心血，看看哪卷適合你。",
+          "en": "Each volume preserves experience. Find one that suits you."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "safir-adventureCheckpoint",
+      "cultureId": "culture.safir",
+      "kind": "adventureCheckpoint",
+      "name": {
+        "zh-Hant": "駝鈴行驛",
+        "en": "Caravan Waystation"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "塔里克",
+          "en": "塔里克"
+        },
+        "description": "adult man caravan scout, sun-weathered tan skin, black stubble, teal headwrap, sand cloak and map",
+        "portrait": "safir-adventureCheckpoint.png"
+      },
+      "theme": {
+        "atlas": "safir-panels.png",
+        "cell": 7,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.559,
+          0.498,
+          0.18999999999999995
+        ],
+        "returnCell": 3,
+        "light": false,
+        "detail": {
+          "atlas": "safir-details.png",
+          "rect": [
+            0.4,
+            0.467,
+            0.2,
+            0.533
+          ],
+          "inset": [
+            24,
+            14,
+            37,
+            14
+          ]
+        },
+        "dialogue": {
+          "image": "safir-dialogue.png",
+          "fill": "#eee1c6",
+          "ink": "#403b2d",
+          "edge": "#a38049",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "出發前先認清路線，再決定今日去處。",
+          "en": "Review the route before choosing your destination."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "safir-cityGate",
+      "cultureId": "culture.safir",
+      "kind": "cityGate",
+      "name": {
+        "zh-Hant": "日輪門署",
+        "en": "Sunwheel Gate"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "瑪莉卡",
+          "en": "瑪莉卡"
+        },
+        "description": "adult woman gate officer, short curly black hair, bronze scale armor, deep red scarf, sun medallion",
+        "portrait": "safir-cityGate.png"
+      },
+      "theme": {
+        "atlas": "safir-panels.png",
+        "cell": 8,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.001,
+          0.751,
+          0.498,
+          0.248
+        ],
+        "returnCell": 3,
+        "light": false,
+        "detail": {
+          "atlas": "safir-details.png",
+          "rect": [
+            0.6,
+            0.467,
+            0.2,
+            0.533
+          ],
+          "inset": [
+            33,
+            26,
+            33,
+            26
+          ]
+        },
+        "dialogue": {
+          "image": "safir-dialogue.png",
+          "fill": "#eee1c6",
+          "ink": "#403b2d",
+          "edge": "#a38049",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "城外路線已核對妥當，請選擇目的地。",
+          "en": "The routes are checked. Choose your destination."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    },
+    {
+      "id": "safir-home",
+      "cultureId": "culture.safir",
+      "kind": "home",
+      "name": {
+        "zh-Hant": "綠庭契坊",
+        "en": "Garden Deed House"
+      },
+      "host": {
+        "name": {
+          "zh-Hant": "伊德里斯",
+          "en": "伊德里斯"
+        },
+        "description": "older adult man property keeper, gray beard, cream turban, ornate blue waistcoat, brass key ring",
+        "portrait": "safir-home.png"
+      },
+      "theme": {
+        "atlas": "safir-panels.png",
+        "cell": 9,
+        "columns": 2,
+        "rows": 5,
+        "rect": [
+          0.501,
+          0.751,
+          0.498,
+          0.248
+        ],
+        "returnCell": 3,
+        "light": true,
+        "detail": {
+          "atlas": "safir-details.png",
+          "rect": [
+            0.8,
+            0.467,
+            0.2,
+            0.533
+          ],
+          "inset": [
+            27,
+            17,
+            35,
+            17
+          ]
+        },
+        "dialogue": {
+          "image": "safir-dialogue.png",
+          "fill": "#eee1c6",
+          "ink": "#403b2d",
+          "edge": "#a38049",
+          "slicePercent": 20
+        }
+      },
+      "dialogue": {
+        "normal": {
+          "zh-Hant": "安頓下來也很好，先看看合適的居所。",
+          "en": "A place to settle matters. Look over the available homes."
+        },
+        "happy": {
+          "zh-Hant": "已經辦妥了，願這份準備能助你一路順利。",
+          "en": "All arranged. May it serve you well on your travels."
+        },
+        "angry": {
+          "zh-Hant": "這樣可不合規矩。請先核對條件，再來辦理。",
+          "en": "That is against the rules. Review the requirements first."
+        },
+        "sad": {
+          "zh-Hant": "可惜，眼下還辦不到。先看看其他選擇吧。",
+          "en": "Unfortunately, this cannot be arranged just now. Consider another option."
+        }
+      }
+    }
+  ]
+}

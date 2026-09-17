@@ -21,6 +21,17 @@ export type UiText = Readonly<Record<UiLocale, string>>;
 // `satisfies` 而非型別標註：保留每個 key 的字面型別（讓 `UiTextKey` 是精確聯集），
 // 同時仍然強制每筆都寫滿所有語系。
 export const UI_TEXT = {
+  'ui.quest.accept': {'zh-Hant':'接取委託','en':'Accept commission'},
+  'ui.facility.restHint': {'zh-Hant':'確認休息後會推進世界時間。','en':'Resting advances world time.'},
+  'ui.facility.choices': {'zh-Hant':'設施服務','en':'Facility services'},
+  'ui.facility.categories': {'zh-Hant':'服務分類','en':'Service categories'},
+  'ui.facility.empty': {'zh-Hant':'目前沒有符合的項目','en':'No matching entries'},
+  'ui.facility.details': {'zh-Hant':'服務詳情','en':'Service details'},
+  'ui.facility.select': {'zh-Hant':'先從左側挑選，再查看詳情與確認操作','en':'Choose an entry to review its details and confirm'},
+  'ui.facility.confirm': {'zh-Hant':'確認','en':'Confirm'},
+  'ui.facility.train': {'zh-Hant':'開始訓練','en':'Begin training'},
+  'ui.facility.rest': {'zh-Hant':'住宿休息','en':'Rest at the inn'},
+
   'ui.combat.delayTitle': {'zh-Hant':'行動延遲',en:'Action delay'},
   'ui.combat.delayHint': {'zh-Hant':'越低越先行動 · 100 滿條，數值可超過',en:'Lower acts sooner · Bar caps at 100, CTB does not'},
   'ui.combat.allyNumber': {'zh-Hant':'我 {n}',en:'A {n}'},

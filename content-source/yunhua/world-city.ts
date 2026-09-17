@@ -1,3 +1,4 @@
+import {facilityName} from '../facility-names';
 // content-source/yunhua/world-city.ts
 // 雲華的**世界節點與城市**：文化、國度、地區、四座城市節點、城際路線、九座冒險點，
 // 以及每座城市的十種設施、商店刷新、情報、護衛生成、人口補充、房屋與城市耗時行動。
@@ -918,16 +919,16 @@ type FacilityRow = Readonly<{
 
 const FACILITY_ROWS: readonly FacilityRow[] = [
   // 旅館：「住宿至少 1 日，恢復生命、魔力與可由休息解除的暫時狀態。」
-  { facilityKind: 'inn', local: 'inn', name: { 'zh-Hant': '旅館', en: "Inn" }, actionRuleIds: [INN_REST_RULE_ID] },
+  { facilityKind: 'inn', local: 'inn', name: facilityName('culture.yunhua', 'inn'), actionRuleIds: [INN_REST_RULE_ID] },
   // 酒館：「探聽情報、遇見與互動冒險者。」聊天與探聽不消耗時間。
-  { facilityKind: 'tavern', local: 'tavern', name: { 'zh-Hant': '酒館', en: "Tavern" }, actionRuleIds: [] },
+  { facilityKind: 'tavern', local: 'tavern', name: facilityName('culture.yunhua', 'tavern'), actionRuleIds: [] },
   // 冒險者公會：「接取與交付委託。」不消耗時間。
-  { facilityKind: 'adventurerGuild', local: 'adventurer-guild', name: { 'zh-Hant': '冒險者公會', en: "Adventurer's Guild" }, actionRuleIds: [] },
+  { facilityKind: 'adventurerGuild', local: 'adventurer-guild', name: facilityName('culture.yunhua', 'adventurerGuild'), actionRuleIds: [] },
   // 道具店：「買賣道具、提供相關製作環境與生活熟練度訓練。」
   {
     facilityKind: 'itemShop',
     local: 'item-shop',
-    name: { 'zh-Hant': '道具店', en: "Item Shop" },
+    name: facilityName('culture.yunhua', 'itemShop'),
     actionRuleIds: [trainingRuleId('training-life-craft')],
     teacherMasteryLevel: 5,
   },
@@ -935,7 +936,7 @@ const FACILITY_ROWS: readonly FacilityRow[] = [
   {
     facilityKind: 'equipmentShop',
     local: 'equipment-shop',
-    name: { 'zh-Hant': '裝備店', en: "Equipment Shop" },
+    name: facilityName('culture.yunhua', 'equipmentShop'),
     actionRuleIds: [trainingRuleId('training-smith-tailor')],
     teacherMasteryLevel: 5,
   },
@@ -943,21 +944,21 @@ const FACILITY_ROWS: readonly FacilityRow[] = [
   {
     facilityKind: 'trainingGround',
     local: 'training-ground',
-    name: { 'zh-Hant': '訓練所', en: "Training Ground" },
+    name: facilityName('culture.yunhua', 'trainingGround'),
     actionRuleIds: [trainingRuleId('training-combat-magic')],
     teacherMasteryLevel: 5,
   },
   // 書店：「販售技能與鍛造／製作內容的基礎書籍。」不提供傳授 → 無教師、無耗時行動。
-  { facilityKind: 'bookstore', local: 'bookstore', name: { 'zh-Hant': '書店', en: "Bookstore" }, actionRuleIds: [] },
+  { facilityKind: 'bookstore', local: 'bookstore', name: facilityName('culture.yunhua', 'bookstore'), actionRuleIds: [] },
   // 冒險者關卡：「前往或返回本城對應的冒險地圖。」1 日／1 日歸 team-plan-rule。
-  { facilityKind: 'adventureCheckpoint', local: 'adventure-checkpoint', name: { 'zh-Hant': '冒險者關卡', en: "Adventure Checkpoint" }, actionRuleIds: [] },
+  { facilityKind: 'adventureCheckpoint', local: 'adventure-checkpoint', name: facilityName('culture.yunhua', 'adventureCheckpoint'), actionRuleIds: [] },
   // 城門口：「選擇趕路、正常或慢行前往其他城市。」3／6／9 日歸 player-travel-mode。
-  { facilityKind: 'cityGate', local: 'city-gate', name: { 'zh-Hant': '城門口', en: "City Gate" }, actionRuleIds: [] },
+  { facilityKind: 'cityGate', local: 'city-gate', name: facilityName('culture.yunhua', 'cityGate'), actionRuleIds: [] },
   // 家：「家族、子女教育、熟練度傳授、休息與休息一年。」
   // 熟練度傳授是**個人自由行動**（`free-action-rule.core.teach`，requiresCityFacilityKind: 'home'）
   // 與隊伍教學崗位（`team-plan-rule.core.home-teaching-post`），不是 city-action-rule；
   // 子女教育是 `child-study` TeamPlan。所以家在 city 側只承載 365 日的年度休息。
-  { facilityKind: 'home', local: 'home', name: { 'zh-Hant': '家', en: "Home" }, actionRuleIds: [HOME_YEAR_REST_RULE_ID] },
+  { facilityKind: 'home', local: 'home', name: facilityName('culture.yunhua', 'home'), actionRuleIds: [HOME_YEAR_REST_RULE_ID] },
 ];
 
 // 設施名稱的 key 以 facilityKind 為單位（見 facility() 的說明）。
@@ -1166,3 +1167,4 @@ export const yunhuaWorldCityDomain: AuthoredDomain = {
     commercePracticeRule,
   ],
 };
+

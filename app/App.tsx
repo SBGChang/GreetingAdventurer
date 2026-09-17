@@ -1,4 +1,9 @@
+import {FacilityChoices} from './FacilityChoices';
+import {ReceptionProvider,ReceptionAside,ReceptionActions,ReceptionOptions,receptionStyle} from './FacilityReception';
+import {facilityPresentation,type ReceptionEvent} from './facility-presentation';
 import {CombatScreen} from './CombatScreen';
+import {AppearancePicker} from './AppearancePicker';
+import {readAppearanceSelections,selectAppearance,appearanceStorageKey,type AppearanceSelections} from './combat-appearances';
 import {combatEnvironment} from './combat-ground';
 import { WorldMap } from './WorldMap';
 import { DungeonAdventure } from './DungeonAdventure';
@@ -6,7 +11,7 @@ import { MenuTabs, FormationBoard, type MenuTab } from './PlayerMenu';
 import { UiArt, SCREEN_ART, FACILITY_ART } from './UiArt';
 import { PLAYER_SCENARIO } from '../content-source/player-scenario';
 import { PlayerShell, Welcome, CityScene } from './PlayerShell';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { readSave, writeSave, restoreSave, clearSave } from './engine/save-storage';
 import {
   createGame,
@@ -22,10 +27,12 @@ import { t, UI_LOCALES, UI_TEXT, type UiLocale, type UiTextKey } from './i18n';
 import type { CityId, LocalizedTextRef } from '../src/contracts/core';
 import type { NewGameConfig } from '../src/app/composition/new-game-bootstrap';
 import type { GameCommand } from '../src/app/composition/messages';
+import './facilities.css';
+
 
 const DEFAULT_CONFIG = PLAYER_SCENARIO;
 
-type Screen = 'city' | 'worldMap' | 'adventure' | 'shop' | 'home' | 'training' | 'tavern' | 'guild' | 'sheet';
+type Screen = 'rest' | 'city' | 'worldMap' | 'adventure' | 'shop' | 'home' | 'training' | 'tavern' | 'guild' | 'sheet';
 
 // 日誌條目存**引用**，不存已翻譯字串（15_ui_application.md §10 的同一條理由：把翻譯結果存進
 // state，切語系時就換不掉了）。內容名稱以 LocalizedTextRef 帶著，render 當下才解析。
@@ -178,8 +185,12 @@ export function App(): JSX.Element {
   const [lootBid, setLootBid] = useState('');
   const [locale, setLocale] = useState<UiLocale>('zh-Hant');
   const [storageError, setStorageError] = useState<string>();
+  const [appearanceChoices,setAppearanceChoices]=useState<AppearanceSelections>({});
+  useEffect(()=>{try{setAppearanceChoices(readAppearanceSelections(localStorage))}catch(e){setStorageError(e instanceof Error?e.message:String(e))}},[]);
   const [saveNotice, setSaveNotice] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [restFacility,setRestFacility]=useState<FacilityView>();
+  const [receptionResult,setReceptionResult]=useState<{id:number;event:ReceptionEvent;entry:LogEntry}|undefined>();
   const saveCurrent = (game: GameHandle): void => {
     try {
       writeSave(localStorage, game.serialize());
@@ -196,7 +207,7 @@ export function App(): JSX.Element {
       if (backup && saved === undefined) throw new Error('save/backup-missing');
       const game = createGame(DEFAULT_CONFIG, saved);
       if (backup) restoreSave(localStorage, game.serialize());
-      else writeSave(localStorage, game.serialize());
+      else {writeSave(localStorage, game.serialize());localStorage.removeItem(appearanceStorageKey);}
       window.location.reload();
     } catch (e) { setStorageError(e instanceof Error ? e.message : String(e)); }
   };
@@ -267,15 +278,19 @@ export function App(): JSX.Element {
     try { r = handle.runCommand(command); }
     catch (e) {
       append({ kind: 'actionRejected', action: subject, code: e instanceof Error ? e.message : String(e) }, 'warn');
+      setReceptionResult(prev=>({id:(prev?.id??0)+1,event:'failed',entry:{kind:'actionRejected',action:subject,code:e instanceof Error?e.message:String(e)}}));
       onResult?.({accepted:false,rejectionCode:e instanceof Error?e.message:String(e),view});
       return false;
     }
     if(onResult)onResult(r);else setView(r.view);
     if (!r.accepted) {
       append({ kind: 'actionRejected', action: subject, code: r.rejectionCode }, 'warn');
+      setReceptionResult(prev=>({id:(prev?.id??0)+1,event:'rejected',entry:{kind:'actionRejected',action:subject,code:r.rejectionCode}}));
       return false;
     }
-    append(typeof onAccepted === 'function' ? onAccepted(r.view) : onAccepted, 'ok');
+    const acceptedEntry=typeof onAccepted === 'function' ? onAccepted(r.view) : onAccepted;
+    append(acceptedEntry, 'ok');
+    setReceptionResult(prev=>({id:(prev?.id??0)+1,event:acceptedEntry.kind==='recruitFailed'?'failed':'accepted',entry:acceptedEntry}));
     const elapsed = r.view.worldDay - before;
     if (elapsed > 0) {
       append({ kind: 'daysPassed', days: elapsed, day: r.view.worldDay }, 'info');
@@ -328,12 +343,7 @@ export function App(): JSX.Element {
   // 設施 → 按下去發生什麼。非 Partial 的 Record：facade 新增一種 FacilityAction 而這裡沒接，
   // 就是編譯錯誤，而不是「按了沒反應」——後者正是這份表原本是 if/else 串時發生過的事。
   const FACILITY_HANDLER: Readonly<Record<FacilityAction, (f: FacilityView) => void>> = {
-    rest: (f) =>
-      void dispatch(
-        { type: 'rest', planKind: 'cityFacilityAction' } as GameCommand,
-        { kind: 'rested', place: f.nameRef },
-        text(f.nameRef),
-      ),
+    rest: (f) => {setRestFacility(f);setScreen('rest');},
     leaveCity: () => setScreen('worldMap'),
     goAdventure: () => setScreen('adventure'),
     shop: (f) => {
@@ -351,7 +361,7 @@ export function App(): JSX.Element {
     none: () => undefined,
   };
 
-  const onFacility = (f: FacilityView): void => FACILITY_HANDLER[f.action](f);
+  const onFacility = (f: FacilityView): void => {setReceptionResult(undefined);FACILITY_HANDLER[f.action](f)};
 
   // 日誌條目 → 當下語系的字。這是唯一把 LogEntry 變成文字的地方。
   const renderLog = (entry: LogEntry): string => {
@@ -422,6 +432,9 @@ export function App(): JSX.Element {
   };
 
   const city = view.city;
+  const receptionKinds:Partial<Record<Screen,FacilityView['kind']>>={rest:'inn',tavern:'tavern',guild:'adventurerGuild',home:'home',adventure:'adventureCheckpoint',worldMap:'cityGate'};
+  const receptionKind=screen==='shop'?city?.facilities.find(f=>f.facilityId===shopFacilityId)?.kind:screen==='training'?city?.facilities.find(f=>f.facilityId===trainFacilityId)?.kind:receptionKinds[screen];
+  const receptionProfile=city&&view.cultureId&&receptionKind&&!view.combat&&!view.dungeon&&!view.loot?facilityPresentation(view.cultureId,receptionKind):undefined;
   if (view.location.kind === 'city' && city) retainedCity.current = { cityId: view.location.cityId, city, nameRef: view.location.nameRef };
   else if (!view.combat && (view.location.kind === 'travelling' || view.location.kind === 'adventureMap')) retainedCity.current = undefined;
   const townScene = retainedCity.current;
@@ -446,6 +459,7 @@ export function App(): JSX.Element {
       if (init.hasSave && !window.confirm(t(locale, 'ui.save.confirmNew'))) return;
       try {
         const game = createGame({ ...DEFAULT_CONFIG, worldSeed: seed, leaderSex: sex });
+        localStorage.removeItem(appearanceStorageKey); setAppearanceChoices({});
         setInit({ hasSave: true, handle: game, error: undefined }); setView(game.view); setScreen('city');
         progress.day = game.view.worldDay; progress.cityId = game.view.location.kind === 'city' ? game.view.location.cityId : undefined;
         setLog([]); saveCurrent(game); setStarted(true);
@@ -453,6 +467,7 @@ export function App(): JSX.Element {
     }} />;
 
   return (
+    <ReceptionProvider profile={receptionProfile} locale={locale} result={receptionResult?{id:receptionResult.id,event:receptionResult.event,detail:renderLog(receptionResult.entry)}:undefined}>
     <PlayerShell locale={locale} view={view} place={locationLabel} screen={screen} navigate={setScreen}>
       <details className="save-tools"><summary>{t(locale, 'ui.play.saveMenu')}</summary>
       <div data-toolbar><label style={S.sub}>{t(locale, 'ui.locale.label')}{' '}
@@ -514,17 +529,18 @@ export function App(): JSX.Element {
           }}>{t(locale, 'ui.loot.pass')}</button>
         </div>
       </section>}
-      <div className={view.combat ? 'play-surface battle-surface' : view.dungeon && screen !== 'sheet' ? 'play-surface dungeon-surface' : screen === 'worldMap' ? 'play-surface atlas-surface' : screen === 'city' ? 'play-surface scene-surface' : 'play-surface window-surface'}>
-      <section className="surface-content">
+      <div data-reception={receptionProfile?.id} data-reception-culture={receptionProfile?.cultureId} style={receptionProfile?receptionStyle(receptionProfile):undefined} className={receptionProfile?'play-surface window-surface reception-window':view.combat ? 'play-surface battle-surface' : view.dungeon && screen !== 'sheet' ? 'play-surface dungeon-surface' : screen === 'worldMap' ? 'play-surface atlas-surface' : screen === 'city' ? 'play-surface scene-surface' : 'play-surface window-surface'}>
+      {receptionProfile&&<><ReceptionAside/><h2 className="reception-title">{receptionProfile.name[locale]}</h2></>}
       {SCREEN_ART[screen] && !view.combat && (!view.dungeon || screen === 'sheet') && <UiArt className="window-emblem" kind={screen === 'shop' ? FACILITY_ART[city?.facilities.find(f => f.facilityId === shopFacilityId)?.kind ?? 'equipmentShop'] : SCREEN_ART[screen]} />}
       {screen !== 'city' && !view.combat && (!view.dungeon || screen === 'sheet') ? (
         <div className="window-back" style={S.btnRow}>
-          <button style={S.btnGhost} onClick={() => setScreen('city')}>
-            {t(locale, view.dungeon ? 'ui.scene.backToMap' : 'ui.action.back')}
+          <button className={receptionProfile ? 'reception-return' : undefined} style={S.btnGhost} aria-label={t(locale, view.dungeon ? 'ui.scene.backToMap' : 'ui.action.back')} title={t(locale, view.dungeon ? 'ui.scene.backToMap' : 'ui.action.back')} onClick={() => setScreen('city')}>
+            {!receptionProfile && t(locale, view.dungeon ? 'ui.scene.backToMap' : 'ui.action.back')}
           </button>
         </div>
       ) : null}
 
+      <section className="surface-content">
       {townScene !== undefined && <CityScene key={townScene.cityId} cityId={townScene.cityId} visible={screen === 'city' && !view.loot} backdrop={!!view.combat} facilities={townScene.city.facilities} place={text(townScene.nameRef)} locale={locale} text={text} visit={onFacility} />}
 
       {/* ── 世界地圖 ──────────────────────────────────────────── */}
@@ -553,8 +569,7 @@ export function App(): JSX.Element {
           {city.sites.length === 0 ? (
             <p style={S.sub}>{t(locale, 'ui.adventure.none')}</p>
           ) : (
-            <div style={S.grid}>
-              {city.sites.map((site) => (
+            <FacilityChoices locale={locale} action={t(locale,'ui.action.descend')} groups={[{id:"main",label:t(locale,'ui.screen.adventure'),items:city.sites.map((site) => (
                 <button
                   key={site.siteId}
                   style={S.tile}
@@ -582,11 +597,19 @@ export function App(): JSX.Element {
                     {t(locale, 'ui.action.descend')} →
                   </span>
                 </button>
-              ))}
-            </div>
+              ))}]}/>
           )}
         </>
       ) : null}
+
+      {screen==='rest'&&!view.combat&&restFacility&&<>
+        <h2>{text(restFacility.nameRef)}</h2><section className="rest-summary">
+          <p>{t(locale,'ui.status.health')} · {view.sheet?.health} / {view.sheet?.maxHealth}</p>
+          <p>MP · {view.sheet?.mana} / {view.sheet?.maxMana}</p>
+          <p>{t(locale,'ui.shop.balance')} · {view.balance}</p>
+          <p>{t(locale,'ui.facility.restHint')}</p>
+          <ReceptionActions><button data-reception-rest onClick={()=>dispatch({type:'rest',planKind:'cityFacilityAction'},{kind:'rested',place:restFacility.nameRef},text(restFacility.nameRef))}>{t(locale,'ui.facility.rest')}</button></ReceptionActions>
+        </section></>}
 
       {/* ── 商店 ─────────────────────────────────────────────── */}
       {view.combat === undefined && screen === 'shop' && city !== undefined ? (
@@ -603,16 +626,11 @@ export function App(): JSX.Element {
           return (
             <>
               <h2 style={{ fontSize: 15, margin: '0 0 10px' }}>
-                {t(locale, 'ui.screen.shop')} · {text(shop.nameRef)}
+                {text(shop.nameRef)}
               </h2>
-              <div style={{ ...S.card, marginBottom: 12 }}>
-                <div style={{ ...S.row, borderBottom: 'none' }}>
-                  <span style={S.label}>{t(locale, 'ui.shop.balance')}</span>
-                  <span style={{ fontWeight: 600 }}>{shop.balance}</span>
-                </div>
-              </div>
+              <div className="facility-summary"><span>{t(locale,'ui.shop.balance')} <strong>{shop.balance}</strong></span>
               {city.trainings.some((tr) => tr.facilityId === shop.facilityId) ? (
-                <button
+                <ReceptionOptions><button
                   style={{ ...S.btnGhost, marginBottom: 12 }}
                   onClick={() => {
                     setTrainFacilityId(shop.facilityId);
@@ -620,18 +638,11 @@ export function App(): JSX.Element {
                   }}
                 >
                   {t(locale, 'ui.training.here')} →
-                </button>
+                </button></ReceptionOptions>
               ) : null}
-              {shop.sellable.length > 0 && <details className="shop-sales"><summary>{t(locale, 'ui.shop.sell')}</summary><div style={S.grid}>
-                {shop.sellable.map(item => <button key={item.itemId} style={S.tile} onClick={() => dispatch({
-                  type: 'sellItemToShop', itemId: item.itemId, sellerCharacterId: view.leader?.id,
-                  cityId: view.location.kind === 'city' ? view.location.cityId : undefined, facilityId: shop.facilityId,
-                } as unknown as GameCommand, { kind: 'sold', item: text(item.nameRef), price: item.price }, t(locale, 'ui.shop.sell'))}>
-                  <UiArt kind="supplies" /><span style={S.tileName}>{text(item.nameRef)} × {item.quantity}</span><span style={S.tileNote}>+ {item.price}</span>
-                </button>)}
-              </div></details>}
-              <div style={S.grid}>
-                {shop.offers.map((o) => (
+              </div>
+              <FacilityChoices key={shop.facilityId} locale={locale} action={t(locale,'ui.shop.buy')} groups={[
+                {id:'buy',label:t(locale,'ui.shop.buy'),items:shop.offers.map((o) => (
                   <button
                     key={o.offerId}
                     style={o.affordable ? S.tile : S.tileOff}
@@ -657,8 +668,15 @@ export function App(): JSX.Element {
                       {o.affordable ? t(locale, 'ui.shop.buy') : t(locale, 'ui.shop.tooExpensive')}
                     </span>
                   </button>
-                ))}
-              </div>
+                ))},
+                {id:'sell',label:t(locale,'ui.shop.sell'),items:shop.sellable.map(item => <button key={item.itemId} data-action-label={t(locale,'ui.shop.sell')} style={S.tile} onClick={() => dispatch({
+                  type: 'sellItemToShop', itemId: item.itemId, sellerCharacterId: view.leader?.id,
+                  cityId: view.location.kind === 'city' ? view.location.cityId : undefined, facilityId: shop.facilityId,
+                } as unknown as GameCommand, { kind: 'sold', item: text(item.nameRef), price: item.price }, t(locale, 'ui.shop.sell'))}>
+                  <UiArt kind="supplies" /><span style={S.tileName}>{text(item.nameRef)} × {item.quantity}</span><span style={S.tileNote}>+ {item.price}</span>
+                </button>)}
+              ]}/>
+
             </>
           );
         })()
@@ -675,6 +693,7 @@ export function App(): JSX.Element {
           const questTile = (q: (typeof guild.offers)[number], acceptable: boolean) => (
             <button
               key={q.questId}
+              data-action-label={acceptable?t(locale,'ui.quest.accept'):t(locale,q.canHandIn?'ui.quest.handIn':'ui.quest.settle')}
               style={acceptable || q.canSettle || q.canHandIn ? S.tile : S.card}
               disabled={q.settled || (!acceptable && !q.canSettle && !q.canHandIn)}
               onClick={
@@ -698,39 +717,25 @@ export function App(): JSX.Element {
                   `${t(locale, 'ui.quest.reward')} ${q.reward}`,
                   `${t(locale, 'ui.quest.postingGuild')} ${text(q.postingNameRef)}`,
                     q.siteNameRef === undefined ? undefined : text(q.siteNameRef),
-                  q.roomId,
                   q.targetCount > 1 ? t(locale, 'ui.guild.targets', { n: q.targetCount }) : undefined,
                   acceptable
                     ? t(locale, 'ui.guild.deadline', { day: q.acceptDeadline })
                     : t(locale, 'ui.guild.endBy', { day: q.actualEndDeadline }),
                 ]
                   .filter((x): x is string => x !== undefined)
-                  .join(' · ')}
+                  .map((value,index)=><span className="facility-fact" key={index}>{value}</span>)}
               </span>
             </button>
           );
           return (
             <>
               <h2 style={{ fontSize: 15, margin: '0 0 10px' }}>
-                {t(locale, 'ui.screen.guild')} · {text(guild.nameRef)}
+                {text(guild.nameRef)}
               </h2>
-              {guild.accepted.length > 0 ? (
-                <>
-                  <p style={{ ...S.label, margin: '0 0 6px' }}>{t(locale, 'ui.guild.accepted')}</p>
-                  <div style={{ ...S.grid, marginBottom: 14 }}>
-                    {guild.accepted.map((q) => questTile(q, false))}
-                  </div>
-                </>
-              ) : null}
-              <p style={{ ...S.label, margin: '0 0 6px' }}>{t(locale, 'ui.guild.board')}</p>
-              {guild.offers.length === 0 ? (
-                <p style={S.sub}>{t(locale, 'ui.guild.empty')}</p>
-              ) : (
-                (['delivery', 'purchase', 'rescue', 'hunt', 'suppression'] as const).map(kind => {
-                  const offers = guild.offers.filter(q => q.kind === kind);
-                  return offers.length > 0 ? <section key={kind}><h3 style={S.label}>{questKindText(kind)}</h3><div style={S.grid}>{offers.map(q => questTile(q, true))}</div></section> : null;
-                })
-              )}
+              <FacilityChoices theme="guild" locale={locale} action={t(locale,'ui.facility.confirm')} groups={[
+                {id:'accepted',label:t(locale,'ui.guild.accepted'),items:guild.accepted.map(q=>questTile(q,false))},
+                ...(['delivery','purchase','rescue','hunt','suppression'] as const).map(kind=>({id:kind,label:questKindText(kind),items:guild.offers.filter(q=>q.kind===kind).map(q=>questTile(q,true))}))
+              ]}/>
             </>
           );
         })()
@@ -743,14 +748,13 @@ export function App(): JSX.Element {
           return (
             <>
               <h2 style={{ fontSize: 15, margin: '0 0 10px' }}>
-                {t(locale, 'ui.screen.tavern')} · {text(tavern.nameRef)}
+                {text(tavern.nameRef)}
               </h2>
               <p style={{ ...S.sub, margin: '0 0 10px' }}>{t(locale, 'ui.tavern.intro')}</p>
               {tavern.visitors.length === 0 ? (
                 <p style={S.sub}>{t(locale, 'ui.tavern.empty')}</p>
               ) : (
-                <div style={S.grid}>
-                  {tavern.visitors.map((v) => (
+                <FacilityChoices locale={locale} action={t(locale,'ui.tavern.recruit')} groups={[{id:"main",label:t(locale,'ui.screen.tavern'),items:tavern.visitors.map((v) => (
                     <button
                       key={v.characterId}
                       style={tavern.teamIsFull ? S.tileOff : S.tile}
@@ -782,8 +786,7 @@ export function App(): JSX.Element {
                           : t(locale, 'ui.tavern.recruit')}
                       </span>
                     </button>
-                  ))}
-                </div>
+                  ))}]}/>
               )}
             </>
           );
@@ -816,18 +819,17 @@ export function App(): JSX.Element {
               { kind: 'trainingStarted', mastery: text(o.nameRef), days: training.requiredDays },
               text(training.nameRef),
             );
-            setScreen('city');
+
           };
           return (
             <>
               <h2 style={{ fontSize: 15, margin: '0 0 10px' }}>
-                {t(locale, 'ui.screen.training')} · {text(training.nameRef)}
+                {text(training.nameRef)}
               </h2>
               <p style={{ ...S.sub, margin: '0 0 10px' }}>
                 {t(locale, 'ui.training.intro', { days: training.requiredDays })}
               </p>
-              <div style={S.grid}>
-                {training.options.map((o) => (
+              <FacilityChoices locale={locale} action={t(locale,'ui.facility.train')} groups={[{id:"main",label:t(locale,'ui.screen.training'),items:training.options.map((o) => (
                   <button key={o.masteryId} style={S.tile} onClick={() => startTraining(o)}>
                     <UiArt kind="training" /><span style={S.tileName}>{text(o.nameRef)}</span>
                     <span style={{ ...S.tileNote, color: C.accent }}>
@@ -835,8 +837,7 @@ export function App(): JSX.Element {
                       {t(locale, 'ui.training.exp', { n: o.experience })}
                     </span>
                   </button>
-                ))}
-              </div>
+                ))}]}/>
             </>
           );
         })()
@@ -849,7 +850,7 @@ export function App(): JSX.Element {
           return (
             <>
               <h2 style={{ fontSize: 15, margin: '0 0 10px' }}>
-                {t(locale, 'ui.screen.home')} · {text(home.nameRef)}
+                {text(home.nameRef)}
               </h2>
               <div style={{ ...S.card, marginBottom: 12 }}>
                 <div style={{ ...S.row, borderBottom: 'none' }}>
@@ -880,8 +881,7 @@ export function App(): JSX.Element {
               ) : (
                 <>
                   <p style={{ ...S.sub, margin: '0 0 10px' }}>{t(locale, 'ui.home.notOwned')}</p>
-                  <div style={S.grid}>
-                    {home.options.map((o) => (
+                  <FacilityChoices locale={locale} action={t(locale,'ui.home.buy')} groups={[{id:"main",label:t(locale,'ui.screen.home'),items:home.options.map((o) => (
                       <button
                         key={o.slotCount}
                         style={o.affordable ? S.tile : S.tileOff}
@@ -914,8 +914,7 @@ export function App(): JSX.Element {
                             : t(locale, 'ui.shop.tooExpensive')}
                         </span>
                       </button>
-                    ))}
-                  </div>
+                    ))}]}/>
                 </>
               )}
             </>
@@ -955,6 +954,9 @@ export function App(): JSX.Element {
                 <div className="inventory-list">{sh.bag.map(item => <div key={item.itemId}><UiArt kind="supplies" /><span>{text(item.nameRef)}</span><b>× {item.quantity}</b><small>{item.weight.toFixed(1)}</small></div>)}</div>
               </section>}
               <section hidden={menuTab !== 'equipment'}>
+              <AppearancePicker sex={sh.sex} selected={appearanceChoices[sh.characterId]} locale={locale} choose={id=>{
+                try{const next=selectAppearance(appearanceChoices,sh.characterId,sh.sex,id);localStorage.setItem(appearanceStorageKey,JSON.stringify(next));setAppearanceChoices(next);setStorageError(undefined)}catch(e){setStorageError(e instanceof Error?e.message:String(e))}
+              }}/>
 
 
               <div style={S.card}>
@@ -1147,7 +1149,7 @@ export function App(): JSX.Element {
         })()
       ) : null}
 
-      {view.combat && <CombatScreen environment={combatEnvironment(view)} key={view.combat.encounterId} combat={view.combat} locale={locale} text={text}
+      {view.combat && <CombatScreen environment={combatEnvironment(view)} key={view.combat.encounterId} combat={view.combat} locale={locale} text={text} appearanceSelections={appearanceChoices}
         act={(choice,receive)=>{
           const combat=view.combat!;
           const command:GameCommand=choice.kind==='rest'?{
@@ -1232,6 +1234,8 @@ export function App(): JSX.Element {
           </div>
         ))}
       </div></details>
-    </PlayerShell>
+    </PlayerShell></ReceptionProvider>
   );
 }
+
+

@@ -1,0 +1,4414 @@
+{
+  "sandglass-beetle": {
+    "label": "砂漏甲蟲",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.safir.sandglass-beetle"
+  },
+  "saltback-lizard": {
+    "label": "鹽背蜥",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.safir.saltback-lizard"
+  },
+  "mirage-moth": {
+    "label": "蜃粉夜蛾",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "stationary",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.safir.mirage-moth"
+  },
+  "date-jackal": {
+    "label": "棗林胡狼",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.safir.date-jackal"
+  },
+  "dune-scorpion": {
+    "label": "丘殼蠍",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.safir.dune-scorpion"
+  },
+  "glasswing-serpent": {
+    "label": "玻翼砂蛇",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.safir.glasswing-serpent"
+  },
+  "star-sand-idol": {
+    "label": "星砂偶",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "stationary",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.safir.star-sand-idol"
+  },
+  "red-dune-hornbeast": {
+    "label": "赤丘角獸",
+    "facing": "left",
+    "width": 450,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.safir.red-dune-hornbeast"
+  },
+  "buried-caravan-devourer": {
+    "label": "埋商吞獸",
+    "facing": "left",
+    "width": 450,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.safir.buried-caravan-devourer"
+  },
+  "moon-dust-moth": {
+    "label": "月塵蛾",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "stationary",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.safir.moon-dust-moth"
+  },
+  "compass-scarab": {
+    "label": "銅針聖甲",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.safir.compass-scarab"
+  },
+  "tower-gecko": {
+    "label": "星臺脊蜥",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.safir.tower-gecko"
+  },
+  "oath-stone-sentinel": {
+    "label": "路誓石衛",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.safir.oath-stone-sentinel"
+  },
+  "lost-star-echo": {
+    "label": "失星回聲",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "stationary",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.safir.lost-star-echo"
+  },
+  "moonring-astral-beast": {
+    "label": "月環星獸",
+    "facing": "left",
+    "width": 450,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.safir.moonring-astral-beast"
+  },
+  "iron-mane-rat": {
+    "label": "鐵鬃穴鼠",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.aurelien.iron-mane-rat"
+  },
+  "thornhide-hound": {
+    "label": "荊甲獵犬",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.aurelien.thornhide-hound"
+  },
+  "candlewing-moth": {
+    "label": "燭翅夜蛾",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "stationary",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.aurelien.candlewing-moth"
+  },
+  "clay-gargoyle": {
+    "label": "灰泥翼像",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.aurelien.clay-gargoyle"
+  },
+  "bell-shell-beetle": {
+    "label": "鐘殼甲蟲",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.aurelien.bell-shell-beetle"
+  },
+  "ruined-armor-lion": {
+    "label": "廢鎧獅獸",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.aurelien.ruined-armor-lion"
+  },
+  "wax-seal-sprite": {
+    "label": "火漆書靈",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "stationary",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.aurelien.wax-seal-sprite"
+  },
+  "thorn-crown-boar": {
+    "label": "荊冠巨豬",
+    "facing": "left",
+    "width": 450,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.aurelien.thorn-crown-boar"
+  },
+  "sunken-bell-wingbeast": {
+    "label": "沉鐘翼獸",
+    "facing": "left",
+    "width": 450,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.aurelien.sunken-bell-wingbeast"
+  },
+  "star-dust-bookmoth": {
+    "label": "星粉書蛾",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "stationary",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.aurelien.star-dust-bookmoth"
+  },
+  "bronze-wing-gargoyle": {
+    "label": "銅翼小像",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.aurelien.bronze-wing-gargoyle"
+  },
+  "tower-ridge-stonehound": {
+    "label": "塔脊石犬",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.aurelien.tower-ridge-stonehound"
+  },
+  "oath-academy-ironward": {
+    "label": "誓院鐵衛",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.aurelien.oath-academy-ironward"
+  },
+  "disordered-ritual": {
+    "label": "失序法儀",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "stationary",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.aurelien.disordered-ritual"
+  },
+  "seven-tower-stonelion": {
+    "label": "七塔石獅",
+    "facing": "left",
+    "width": 450,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.aurelien.seven-tower-stonelion"
+  },
+  "snow-tuft-hare": {
+    "label": "雪簇穴兔",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.vildun.snow-tuft-hare"
+  },
+  "resin-antler-young": {
+    "label": "脂角幼鹿",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.vildun.resin-antler-young"
+  },
+  "tide-claw-crawler": {
+    "label": "潮爪伏獸",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.vildun.tide-claw-crawler"
+  },
+  "rime-mote": {
+    "label": "霜屑浮靈",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "stationary",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.vildun.rime-mote"
+  },
+  "white-mane-packwolf": {
+    "label": "白鬃獵狼",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.vildun.white-mane-packwolf"
+  },
+  "ice-shell-bear": {
+    "label": "冰殼穴熊",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.vildun.ice-shell-bear"
+  },
+  "carved-stone-sentry": {
+    "label": "刻痕石衛",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "contact",
+    "portrait": [
+      70,
+      0,
+      110,
+      110
+    ],
+    "modelId": "monster.vildun.carved-stone-sentry"
+  },
+  "split-antler-elk": {
+    "label": "裂角巨麋",
+    "facing": "left",
+    "width": 450,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.vildun.split-antler-elk"
+  },
+  "deep-tide-whale-lizard": {
+    "label": "深潮鯨蜥",
+    "facing": "left",
+    "width": 450,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.vildun.deep-tide-whale-lizard"
+  },
+  "grave-lamp-moth": {
+    "label": "塚燈寒蛾",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "stationary",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.vildun.grave-lamp-moth"
+  },
+  "iron-beak-cave-raven": {
+    "label": "鐵喙穴鴉",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.vildun.iron-beak-cave-raven"
+  },
+  "broken-stele-beast": {
+    "label": "碎碑石獸",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "contact",
+    "portrait": [
+      10,
+      40,
+      130,
+      130
+    ],
+    "modelId": "monster.vildun.broken-stele-beast"
+  },
+  "oath-barrow-warden": {
+    "label": "誓塚持盾者",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "contact",
+    "portrait": [
+      70,
+      0,
+      110,
+      110
+    ],
+    "modelId": "monster.vildun.oath-barrow-warden"
+  },
+  "longsong-echo": {
+    "label": "長歌殘響",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "stationary",
+    "portrait": [
+      70,
+      0,
+      110,
+      110
+    ],
+    "modelId": "monster.vildun.longsong-echo"
+  },
+  "winter-crown-colossus": {
+    "label": "冬冠石王",
+    "facing": "left",
+    "width": 450,
+    "attackMotion": "contact",
+    "portrait": [
+      70,
+      0,
+      110,
+      110
+    ],
+    "modelId": "monster.vildun.winter-crown-colossus"
+  },
+  "mistwing-moth": {
+    "label": "瘴翅蛾",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "stationary",
+    "portrait": [
+      12,
+      52,
+      125,
+      125
+    ],
+    "modelId": "monster.yunhua.mistwing-moth"
+  },
+  "bamboo-back-badger": {
+    "label": "竹背獾",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "contact",
+    "portrait": [
+      12,
+      52,
+      125,
+      125
+    ],
+    "modelId": "monster.yunhua.bamboo-back-badger"
+  },
+  "scrap-sigil-doll": {
+    "label": "殘頁符偶",
+    "facing": "left",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      76,
+      8,
+      110,
+      110
+    ],
+    "modelId": "monster.yunhua.scrap-sigil-doll"
+  },
+  "miasma-pouch-badger": {
+    "label": "瘴囊獾母",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "stationary",
+    "portrait": [
+      12,
+      52,
+      125,
+      125
+    ],
+    "modelId": "monster.yunhua.miasma-pouch-badger"
+  },
+  "gatewater-salamander": {
+    "label": "閘水母螈",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "contact",
+    "portrait": [
+      12,
+      52,
+      125,
+      125
+    ],
+    "modelId": "monster.yunhua.gatewater-salamander"
+  },
+  "armored-pottery-guard": {
+    "label": "披甲陶衛",
+    "facing": "left",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      76,
+      8,
+      110,
+      110
+    ],
+    "modelId": "monster.yunhua.armored-pottery-guard"
+  },
+  "mist-bamboo-king": {
+    "label": "霧篁獾王",
+    "facing": "left",
+    "width": 450,
+    "attackMotion": "contact",
+    "portrait": [
+      12,
+      52,
+      125,
+      125
+    ],
+    "modelId": "monster.yunhua.mist-bamboo-king"
+  },
+  "sunken-weir-beast": {
+    "label": "沉閘巨螈",
+    "facing": "left",
+    "width": 450,
+    "attackMotion": "contact",
+    "portrait": [
+      12,
+      52,
+      125,
+      125
+    ],
+    "modelId": "monster.yunhua.sunken-weir-beast"
+  },
+  "frayed-seal-wisp": {
+    "label": "斷符游靈",
+    "facing": "left",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      76,
+      8,
+      110,
+      110
+    ],
+    "modelId": "monster.yunhua.frayed-seal-wisp"
+  },
+  "bell-mandible-beetle": {
+    "label": "銅鈴顎蟲",
+    "facing": "left",
+    "width": 220,
+    "attackMotion": "contact",
+    "portrait": [
+      12,
+      52,
+      125,
+      125
+    ],
+    "modelId": "monster.yunhua.bell-mandible-beetle"
+  },
+  "tower-stone-lizard": {
+    "label": "塔脊石蜥",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "contact",
+    "portrait": [
+      12,
+      52,
+      125,
+      125
+    ],
+    "modelId": "monster.yunhua.tower-stone-lizard"
+  },
+  "seal-halberd-warden": {
+    "label": "鎖印陶將",
+    "facing": "left",
+    "width": 330,
+    "attackMotion": "contact",
+    "portrait": [
+      76,
+      8,
+      110,
+      110
+    ],
+    "modelId": "monster.yunhua.seal-halberd-warden"
+  },
+  "broken-edict-scribe": {
+    "label": "殘詔書吏",
+    "facing": "left",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      76,
+      8,
+      110,
+      110
+    ],
+    "modelId": "monster.yunhua.broken-edict-scribe"
+  },
+  "balance-seal-colossus": {
+    "label": "天衡印俑",
+    "facing": "left",
+    "width": 450,
+    "attackMotion": "contact",
+    "portrait": [
+      76,
+      8,
+      110,
+      110
+    ],
+    "modelId": "monster.yunhua.balance-seal-colossus"
+  },
+  "yunhua-female-martial--blade": {
+    "label": "雲華女性偏武 · 單手武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-martial",
+    "motionFamilyId": "blade"
+  },
+  "yunhua-male-scholarly--polearm": {
+    "label": "雲華男性偏文 · 長柄武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-scholarly",
+    "motionFamilyId": "polearm"
+  },
+  "yunhua-male-martial--polearm": {
+    "label": "雲華男性偏武 · 長柄武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-martial",
+    "motionFamilyId": "polearm"
+  },
+  "yunhua-female-scholarly--blade": {
+    "label": "雲華女性偏文 · 單手武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-scholarly",
+    "motionFamilyId": "blade"
+  },
+  "yunhua-female-scholarly--polearm": {
+    "label": "雲華女性偏文 · 長柄武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-scholarly",
+    "motionFamilyId": "polearm"
+  },
+  "yunhua-female-martial--polearm": {
+    "label": "雲華女性偏武 · 長柄武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-martial",
+    "motionFamilyId": "polearm"
+  },
+  "vildun-male-scholarly--blade": {
+    "label": "維爾冬男性偏文 · 單手武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-scholarly",
+    "motionFamilyId": "blade"
+  },
+  "vildun-male-scholarly--polearm": {
+    "label": "維爾冬男性偏文 · 長柄武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-scholarly",
+    "motionFamilyId": "polearm"
+  },
+  "vildun-male-martial--blade": {
+    "label": "維爾冬男性偏武 · 單手武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-martial",
+    "motionFamilyId": "blade"
+  },
+  "vildun-male-martial--polearm": {
+    "label": "維爾冬男性偏武 · 長柄武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-martial",
+    "motionFamilyId": "polearm"
+  },
+  "vildun-female-scholarly--blade": {
+    "label": "維爾冬女性偏文 · 單手武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-scholarly",
+    "motionFamilyId": "blade"
+  },
+  "vildun-female-scholarly--polearm": {
+    "label": "維爾冬女性偏文 · 長柄武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-scholarly",
+    "motionFamilyId": "polearm"
+  },
+  "vildun-female-martial--blade": {
+    "label": "維爾冬女性偏武 · 單手武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-martial",
+    "motionFamilyId": "blade"
+  },
+  "vildun-female-martial--polearm": {
+    "label": "維爾冬女性偏武 · 長柄武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-martial",
+    "motionFamilyId": "polearm"
+  },
+  "aurelien-male-scholarly--blade": {
+    "label": "奧瑞恩男性偏文 · 單手武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-scholarly",
+    "motionFamilyId": "blade"
+  },
+  "aurelien-male-martial--blade": {
+    "label": "奧瑞恩男性偏武 · 單手武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-martial",
+    "motionFamilyId": "blade"
+  },
+  "aurelien-female-scholarly--blade": {
+    "label": "奧瑞恩女性偏文 · 單手武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-scholarly",
+    "motionFamilyId": "blade"
+  },
+  "aurelien-female-martial--blade": {
+    "label": "奧瑞恩女性偏武 · 單手武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-martial",
+    "motionFamilyId": "blade"
+  },
+  "safir-male-scholarly--blade": {
+    "label": "薩菲爾男性偏文 · 單手武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-scholarly",
+    "motionFamilyId": "blade"
+  },
+  "safir-male-martial--blade": {
+    "label": "薩菲爾男性偏武 · 單手武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-martial",
+    "motionFamilyId": "blade"
+  },
+  "safir-female-scholarly--blade": {
+    "label": "薩菲爾女性偏文 · 單手武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-scholarly",
+    "motionFamilyId": "blade"
+  },
+  "yunhua-male-scholarly--blade": {
+    "label": "雲華男性偏文 · 單手武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-scholarly",
+    "motionFamilyId": "blade"
+  },
+  "yunhua-male-scholarly--heavyblade": {
+    "label": "雲華男性偏文 · 雙手重刃",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-scholarly",
+    "motionFamilyId": "heavyblade"
+  },
+  "aurelien-male-scholarly--polearm": {
+    "label": "奧瑞恩男性偏文 · 長柄武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-scholarly",
+    "motionFamilyId": "polearm"
+  },
+  "aurelien-male-martial--polearm": {
+    "label": "奧瑞恩男性偏武 · 長柄武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-martial",
+    "motionFamilyId": "polearm"
+  },
+  "aurelien-female-scholarly--polearm": {
+    "label": "奧瑞恩女性偏文 · 長柄武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-scholarly",
+    "motionFamilyId": "polearm"
+  },
+  "aurelien-female-martial--polearm": {
+    "label": "奧瑞恩女性偏武 · 長柄武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-martial",
+    "motionFamilyId": "polearm"
+  },
+  "safir-male-scholarly--polearm": {
+    "label": "薩菲爾男性偏文 · 長柄武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-scholarly",
+    "motionFamilyId": "polearm"
+  },
+  "safir-male-martial--polearm": {
+    "label": "薩菲爾男性偏武 · 長柄武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-martial",
+    "motionFamilyId": "polearm"
+  },
+  "safir-female-scholarly--polearm": {
+    "label": "薩菲爾女性偏文 · 長柄武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-scholarly",
+    "motionFamilyId": "polearm"
+  },
+  "safir-female-martial--blade": {
+    "label": "薩菲爾女性偏武 · 單手武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-martial",
+    "motionFamilyId": "blade"
+  },
+  "safir-female-martial--polearm": {
+    "label": "薩菲爾女性偏武 · 長柄武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-martial",
+    "motionFamilyId": "polearm"
+  },
+  "yunhua-male-martial--heavyblade": {
+    "label": "雲華男性偏武 · 雙手重刃",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-martial",
+    "motionFamilyId": "heavyblade"
+  },
+  "yunhua-female-scholarly--heavyblade": {
+    "label": "雲華女性偏文 · 雙手重刃",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-scholarly",
+    "motionFamilyId": "heavyblade"
+  },
+  "yunhua-female-martial--heavyblade": {
+    "label": "雲華女性偏武 · 雙手重刃",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-martial",
+    "motionFamilyId": "heavyblade",
+    "contactFrame": 4
+  },
+  "vildun-male-scholarly--heavyblade": {
+    "label": "維爾冬男性偏文 · 雙手重刃",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-scholarly",
+    "motionFamilyId": "heavyblade",
+    "contactFrame": 4
+  },
+  "vildun-male-martial--heavyblade": {
+    "label": "維爾冬男性偏武 · 雙手重刃",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-martial",
+    "motionFamilyId": "heavyblade"
+  },
+  "yunhua-male-scholarly--throwing": {
+    "label": "雲華男性偏文 · 投擲武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-scholarly",
+    "motionFamilyId": "throwing"
+  },
+  "yunhua-male-martial--throwing": {
+    "label": "雲華男性偏武 · 投擲武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-martial",
+    "motionFamilyId": "throwing"
+  },
+  "yunhua-female-scholarly--throwing": {
+    "label": "雲華女性偏文 · 投擲武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-scholarly",
+    "motionFamilyId": "throwing"
+  },
+  "yunhua-female-martial--throwing": {
+    "label": "雲華女性偏武 · 投擲武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-martial",
+    "motionFamilyId": "throwing"
+  },
+  "vildun-male-scholarly--throwing": {
+    "label": "維爾冬男性偏文 · 投擲武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-scholarly",
+    "motionFamilyId": "throwing"
+  },
+  "vildun-male-martial--throwing": {
+    "label": "維爾冬男性偏武 · 投擲武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-martial",
+    "motionFamilyId": "throwing"
+  },
+  "vildun-female-scholarly--heavyblade": {
+    "label": "維爾冬女性偏文 · 雙手重刃",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-scholarly",
+    "motionFamilyId": "heavyblade",
+    "contactFrame": 4
+  },
+  "vildun-female-scholarly--throwing": {
+    "label": "維爾冬女性偏文 · 投擲武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-scholarly",
+    "motionFamilyId": "throwing"
+  },
+  "vildun-female-martial--heavyblade": {
+    "label": "維爾冬女性偏武 · 雙手重刃",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-martial",
+    "motionFamilyId": "heavyblade",
+    "contactFrame": 4
+  },
+  "vildun-female-martial--throwing": {
+    "label": "維爾冬女性偏武 · 投擲武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-martial",
+    "motionFamilyId": "throwing"
+  },
+  "aurelien-male-scholarly--heavyblade": {
+    "label": "奧瑞恩男性偏文 · 雙手重刃",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-scholarly",
+    "motionFamilyId": "heavyblade",
+    "contactFrame": 4
+  },
+  "aurelien-male-scholarly--throwing": {
+    "label": "奧瑞恩男性偏文 · 投擲武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-scholarly",
+    "motionFamilyId": "throwing"
+  },
+  "aurelien-male-martial--heavyblade": {
+    "label": "奧瑞恩男性偏武 · 雙手重刃",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-martial",
+    "motionFamilyId": "heavyblade"
+  },
+  "aurelien-male-martial--throwing": {
+    "label": "奧瑞恩男性偏武 · 投擲武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-martial",
+    "motionFamilyId": "throwing"
+  },
+  "aurelien-female-scholarly--heavyblade": {
+    "label": "奧瑞恩女性偏文 · 雙手重刃",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-scholarly",
+    "motionFamilyId": "heavyblade"
+  },
+  "aurelien-female-scholarly--throwing": {
+    "label": "奧瑞恩女性偏文 · 投擲武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-scholarly",
+    "motionFamilyId": "throwing"
+  },
+  "aurelien-female-martial--heavyblade": {
+    "label": "奧瑞恩女性偏武 · 雙手重刃",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-martial",
+    "motionFamilyId": "heavyblade"
+  },
+  "aurelien-female-martial--throwing": {
+    "label": "奧瑞恩女性偏武 · 投擲武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-martial",
+    "motionFamilyId": "throwing"
+  },
+  "safir-male-scholarly--heavyblade": {
+    "label": "薩菲爾男性偏文 · 雙手重刃",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-scholarly",
+    "motionFamilyId": "heavyblade",
+    "contactFrame": 4
+  },
+  "safir-male-scholarly--throwing": {
+    "label": "薩菲爾男性偏文 · 投擲武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-scholarly",
+    "motionFamilyId": "throwing"
+  },
+  "safir-male-martial--heavyblade": {
+    "label": "薩菲爾男性偏武 · 雙手重刃",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-martial",
+    "motionFamilyId": "heavyblade",
+    "contactFrame": 4
+  },
+  "safir-male-martial--throwing": {
+    "label": "薩菲爾男性偏武 · 投擲武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-martial",
+    "motionFamilyId": "throwing"
+  },
+  "safir-female-scholarly--heavyblade": {
+    "label": "薩菲爾女性偏文 · 雙手重刃",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      67.36842105263158,
+      0,
+      128.61244019138755,
+      85.74162679425838
+    ],
+    "appearanceId": "safir-female-scholarly",
+    "motionFamilyId": "heavyblade"
+  },
+  "safir-female-scholarly--throwing": {
+    "label": "薩菲爾女性偏文 · 投擲武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-scholarly",
+    "motionFamilyId": "throwing"
+  },
+  "safir-female-martial--heavyblade": {
+    "label": "薩菲爾女性偏武 · 雙手重刃",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-martial",
+    "motionFamilyId": "heavyblade",
+    "contactFrame": 4
+  },
+  "safir-female-martial--throwing": {
+    "label": "薩菲爾女性偏武 · 投擲武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-martial",
+    "motionFamilyId": "throwing"
+  },
+  "yunhua-male-scholarly--bow": {
+    "label": "雲華男性偏文 · 弓",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-scholarly",
+    "motionFamilyId": "bow"
+  },
+  "yunhua-male-martial--bow": {
+    "label": "雲華男性偏武 · 弓",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-martial",
+    "motionFamilyId": "bow"
+  },
+  "yunhua-female-scholarly--bow": {
+    "label": "雲華女性偏文 · 弓",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-scholarly",
+    "motionFamilyId": "bow"
+  },
+  "yunhua-female-martial--bow": {
+    "label": "雲華女性偏武 · 弓",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-martial",
+    "motionFamilyId": "bow"
+  },
+  "vildun-male-scholarly--bow": {
+    "label": "維爾冬男性偏文 · 弓",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-scholarly",
+    "motionFamilyId": "bow"
+  },
+  "vildun-male-martial--bow": {
+    "label": "維爾冬男性偏武 · 弓",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-martial",
+    "motionFamilyId": "bow"
+  },
+  "vildun-female-scholarly--bow": {
+    "label": "維爾冬女性偏文 · 弓",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-scholarly",
+    "motionFamilyId": "bow"
+  },
+  "vildun-female-martial--bow": {
+    "label": "維爾冬女性偏武 · 弓",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-martial",
+    "motionFamilyId": "bow"
+  },
+  "yunhua-male-scholarly--crossbow": {
+    "label": "雲華男性偏文 · 弩",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-scholarly",
+    "motionFamilyId": "crossbow"
+  },
+  "yunhua-male-martial--crossbow": {
+    "label": "雲華男性偏武 · 弩",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-martial",
+    "motionFamilyId": "crossbow"
+  },
+  "yunhua-female-scholarly--crossbow": {
+    "label": "雲華女性偏文 · 弩",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-scholarly",
+    "motionFamilyId": "crossbow"
+  },
+  "yunhua-female-martial--crossbow": {
+    "label": "雲華女性偏武 · 弩",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-martial",
+    "motionFamilyId": "crossbow"
+  },
+  "vildun-male-scholarly--crossbow": {
+    "label": "維爾冬男性偏文 · 弩",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-scholarly",
+    "motionFamilyId": "crossbow"
+  },
+  "vildun-male-martial--crossbow": {
+    "label": "維爾冬男性偏武 · 弩",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-martial",
+    "motionFamilyId": "crossbow"
+  },
+  "vildun-female-scholarly--crossbow": {
+    "label": "維爾冬女性偏文 · 弩",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-scholarly",
+    "motionFamilyId": "crossbow"
+  },
+  "aurelien-male-scholarly--bow": {
+    "label": "奧瑞恩男性偏文 · 弓",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-scholarly",
+    "motionFamilyId": "bow"
+  },
+  "aurelien-male-martial--bow": {
+    "label": "奧瑞恩男性偏武 · 弓",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-martial",
+    "motionFamilyId": "bow"
+  },
+  "aurelien-female-scholarly--bow": {
+    "label": "奧瑞恩女性偏文 · 弓",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-scholarly",
+    "motionFamilyId": "bow"
+  },
+  "aurelien-female-martial--bow": {
+    "label": "奧瑞恩女性偏武 · 弓",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-martial",
+    "motionFamilyId": "bow"
+  },
+  "safir-male-scholarly--bow": {
+    "label": "薩菲爾男性偏文 · 弓",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-scholarly",
+    "motionFamilyId": "bow"
+  },
+  "safir-male-martial--bow": {
+    "label": "薩菲爾男性偏武 · 弓",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-martial",
+    "motionFamilyId": "bow"
+  },
+  "safir-female-scholarly--bow": {
+    "label": "薩菲爾女性偏文 · 弓",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-scholarly",
+    "motionFamilyId": "bow"
+  },
+  "safir-female-martial--bow": {
+    "label": "薩菲爾女性偏武 · 弓",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-martial",
+    "motionFamilyId": "bow"
+  },
+  "river-cutthroat": {
+    "label": "漕幫刀客",
+    "facing": "left",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "modelId": "monster.yunhua.river-cutthroat",
+    "contactFrame": 4
+  },
+  "privateer-crossbow": {
+    "label": "私運弩手",
+    "facing": "left",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "modelId": "monster.yunhua.privateer-crossbow"
+  },
+  "salt-route-leader": {
+    "label": "鹽路頭目",
+    "facing": "left",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "modelId": "monster.yunhua.salt-route-leader"
+  },
+  "seal-tower-deserter": {
+    "label": "守印逃卒",
+    "facing": "left",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "modelId": "monster.yunhua.seal-tower-deserter"
+  },
+  "false-seal-officer": {
+    "label": "偽印校尉",
+    "facing": "left",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "modelId": "monster.yunhua.false-seal-officer"
+  },
+  "yunhua-male-scholarly--unarmed": {
+    "label": "雲華男性偏文 · 空手",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-scholarly",
+    "motionFamilyId": "unarmed"
+  },
+  "yunhua-male-scholarly--shield": {
+    "label": "雲華男性偏文 · 單手盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-scholarly",
+    "motionFamilyId": "shield"
+  },
+  "yunhua-male-scholarly--wand": {
+    "label": "雲華男性偏文 · 單手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-scholarly",
+    "motionFamilyId": "wand"
+  },
+  "yunhua-male-scholarly--staff": {
+    "label": "雲華男性偏文 · 雙手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-scholarly",
+    "motionFamilyId": "staff"
+  },
+  "yunhua-male-martial--unarmed": {
+    "label": "雲華男性偏武 · 空手",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-martial",
+    "motionFamilyId": "unarmed"
+  },
+  "yunhua-male-martial--shield": {
+    "label": "雲華男性偏武 · 單手盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-martial",
+    "motionFamilyId": "shield"
+  },
+  "yunhua-male-martial--wand": {
+    "label": "雲華男性偏武 · 單手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-martial",
+    "motionFamilyId": "wand"
+  },
+  "yunhua-male-martial--staff": {
+    "label": "雲華男性偏武 · 雙手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-martial",
+    "motionFamilyId": "staff"
+  },
+  "yunhua-female-scholarly--unarmed": {
+    "label": "雲華女性偏文 · 空手",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-scholarly",
+    "motionFamilyId": "unarmed"
+  },
+  "yunhua-female-scholarly--shield": {
+    "label": "雲華女性偏文 · 單手盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-scholarly",
+    "motionFamilyId": "shield"
+  },
+  "yunhua-female-scholarly--wand": {
+    "label": "雲華女性偏文 · 單手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-scholarly",
+    "motionFamilyId": "wand"
+  },
+  "yunhua-female-scholarly--staff": {
+    "label": "雲華女性偏文 · 雙手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-scholarly",
+    "motionFamilyId": "staff"
+  },
+  "yunhua-female-martial--unarmed": {
+    "label": "雲華女性偏武 · 空手",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-martial",
+    "motionFamilyId": "unarmed"
+  },
+  "yunhua-female-martial--shield": {
+    "label": "雲華女性偏武 · 單手盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-martial",
+    "motionFamilyId": "shield"
+  },
+  "yunhua-female-martial--wand": {
+    "label": "雲華女性偏武 · 單手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-martial",
+    "motionFamilyId": "wand"
+  },
+  "yunhua-female-martial--staff": {
+    "label": "雲華女性偏武 · 雙手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-martial",
+    "motionFamilyId": "staff"
+  },
+  "vildun-male-scholarly--unarmed": {
+    "label": "維爾冬男性偏文 · 空手",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-scholarly",
+    "motionFamilyId": "unarmed"
+  },
+  "vildun-male-scholarly--shield": {
+    "label": "維爾冬男性偏文 · 單手盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      53.59649122807018,
+      0,
+      102.32057416267942,
+      107.76315789473684
+    ],
+    "appearanceId": "vildun-male-scholarly",
+    "motionFamilyId": "shield"
+  },
+  "vildun-male-scholarly--wand": {
+    "label": "維爾冬男性偏文 · 單手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-scholarly",
+    "motionFamilyId": "wand"
+  },
+  "vildun-male-scholarly--staff": {
+    "label": "維爾冬男性偏文 · 雙手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-scholarly",
+    "motionFamilyId": "staff"
+  },
+  "vildun-male-martial--unarmed": {
+    "label": "維爾冬男性偏武 · 空手",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-martial",
+    "motionFamilyId": "unarmed"
+  },
+  "vildun-male-martial--shield": {
+    "label": "維爾冬男性偏武 · 單手盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-martial",
+    "motionFamilyId": "shield"
+  },
+  "vildun-male-martial--wand": {
+    "label": "維爾冬男性偏武 · 單手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-martial",
+    "motionFamilyId": "wand"
+  },
+  "vildun-male-martial--staff": {
+    "label": "維爾冬男性偏武 · 雙手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-martial",
+    "motionFamilyId": "staff"
+  },
+  "vildun-female-scholarly--unarmed": {
+    "label": "維爾冬女性偏文 · 空手",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-scholarly",
+    "motionFamilyId": "unarmed"
+  },
+  "vildun-female-scholarly--shield": {
+    "label": "維爾冬女性偏文 · 單手盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-scholarly",
+    "motionFamilyId": "shield"
+  },
+  "vildun-female-scholarly--wand": {
+    "label": "維爾冬女性偏文 · 單手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-scholarly",
+    "motionFamilyId": "wand"
+  },
+  "vildun-female-scholarly--staff": {
+    "label": "維爾冬女性偏文 · 雙手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-scholarly",
+    "motionFamilyId": "staff"
+  },
+  "vildun-female-martial--unarmed": {
+    "label": "維爾冬女性偏武 · 空手",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-martial",
+    "motionFamilyId": "unarmed"
+  },
+  "vildun-female-martial--shield": {
+    "label": "維爾冬女性偏武 · 單手盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-martial",
+    "motionFamilyId": "shield"
+  },
+  "vildun-female-martial--crossbow": {
+    "label": "維爾冬女性偏武 · 弩",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-martial",
+    "motionFamilyId": "crossbow"
+  },
+  "vildun-female-martial--wand": {
+    "label": "維爾冬女性偏武 · 單手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-martial",
+    "motionFamilyId": "wand"
+  },
+  "vildun-female-martial--staff": {
+    "label": "維爾冬女性偏武 · 雙手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-martial",
+    "motionFamilyId": "staff"
+  },
+  "aurelien-male-scholarly--unarmed": {
+    "label": "奧瑞恩男性偏文 · 空手",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-scholarly",
+    "motionFamilyId": "unarmed"
+  },
+  "aurelien-male-scholarly--shield": {
+    "label": "奧瑞恩男性偏文 · 單手盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-scholarly",
+    "motionFamilyId": "shield"
+  },
+  "aurelien-male-scholarly--crossbow": {
+    "label": "奧瑞恩男性偏文 · 弩",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-scholarly",
+    "motionFamilyId": "crossbow"
+  },
+  "aurelien-male-scholarly--wand": {
+    "label": "奧瑞恩男性偏文 · 單手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-scholarly",
+    "motionFamilyId": "wand"
+  },
+  "aurelien-male-scholarly--staff": {
+    "label": "奧瑞恩男性偏文 · 雙手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-scholarly",
+    "motionFamilyId": "staff"
+  },
+  "aurelien-male-martial--unarmed": {
+    "label": "奧瑞恩男性偏武 · 空手",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-martial",
+    "motionFamilyId": "unarmed"
+  },
+  "aurelien-male-martial--shield": {
+    "label": "奧瑞恩男性偏武 · 單手盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-martial",
+    "motionFamilyId": "shield"
+  },
+  "aurelien-male-martial--crossbow": {
+    "label": "奧瑞恩男性偏武 · 弩",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-martial",
+    "motionFamilyId": "crossbow"
+  },
+  "aurelien-male-martial--wand": {
+    "label": "奧瑞恩男性偏武 · 單手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-martial",
+    "motionFamilyId": "wand"
+  },
+  "aurelien-male-martial--staff": {
+    "label": "奧瑞恩男性偏武 · 雙手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-martial",
+    "motionFamilyId": "staff"
+  },
+  "aurelien-female-scholarly--unarmed": {
+    "label": "奧瑞恩女性偏文 · 空手",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-scholarly",
+    "motionFamilyId": "unarmed"
+  },
+  "aurelien-female-scholarly--shield": {
+    "label": "奧瑞恩女性偏文 · 單手盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-scholarly",
+    "motionFamilyId": "shield"
+  },
+  "aurelien-female-scholarly--crossbow": {
+    "label": "奧瑞恩女性偏文 · 弩",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-scholarly",
+    "motionFamilyId": "crossbow"
+  },
+  "aurelien-female-scholarly--wand": {
+    "label": "奧瑞恩女性偏文 · 單手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-scholarly",
+    "motionFamilyId": "wand"
+  },
+  "aurelien-female-martial--unarmed": {
+    "label": "奧瑞恩女性偏武 · 空手",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-martial",
+    "motionFamilyId": "unarmed"
+  },
+  "aurelien-female-martial--shield": {
+    "label": "奧瑞恩女性偏武 · 單手盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-martial",
+    "motionFamilyId": "shield"
+  },
+  "aurelien-female-martial--crossbow": {
+    "label": "奧瑞恩女性偏武 · 弩",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-martial",
+    "motionFamilyId": "crossbow"
+  },
+  "aurelien-female-martial--wand": {
+    "label": "奧瑞恩女性偏武 · 單手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-martial",
+    "motionFamilyId": "wand"
+  },
+  "aurelien-female-martial--staff": {
+    "label": "奧瑞恩女性偏武 · 雙手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-martial",
+    "motionFamilyId": "staff"
+  },
+  "safir-male-scholarly--unarmed": {
+    "label": "薩菲爾男性偏文 · 空手",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-scholarly",
+    "motionFamilyId": "unarmed"
+  },
+  "safir-male-scholarly--shield": {
+    "label": "薩菲爾男性偏文 · 單手盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-scholarly",
+    "motionFamilyId": "shield"
+  },
+  "safir-male-scholarly--crossbow": {
+    "label": "薩菲爾男性偏文 · 弩",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-scholarly",
+    "motionFamilyId": "crossbow"
+  },
+  "safir-male-scholarly--wand": {
+    "label": "薩菲爾男性偏文 · 單手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-scholarly",
+    "motionFamilyId": "wand"
+  },
+  "safir-male-martial--unarmed": {
+    "label": "薩菲爾男性偏武 · 空手",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-martial",
+    "motionFamilyId": "unarmed"
+  },
+  "safir-male-martial--crossbow": {
+    "label": "薩菲爾男性偏武 · 弩",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-martial",
+    "motionFamilyId": "crossbow"
+  },
+  "safir-male-martial--wand": {
+    "label": "薩菲爾男性偏武 · 單手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-martial",
+    "motionFamilyId": "wand"
+  },
+  "safir-female-scholarly--unarmed": {
+    "label": "薩菲爾女性偏文 · 空手",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-scholarly",
+    "motionFamilyId": "unarmed"
+  },
+  "safir-female-scholarly--crossbow": {
+    "label": "薩菲爾女性偏文 · 弩",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-scholarly",
+    "motionFamilyId": "crossbow"
+  },
+  "safir-female-scholarly--wand": {
+    "label": "薩菲爾女性偏文 · 單手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-scholarly",
+    "motionFamilyId": "wand"
+  },
+  "safir-female-martial--unarmed": {
+    "label": "薩菲爾女性偏武 · 空手",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-martial",
+    "motionFamilyId": "unarmed"
+  },
+  "safir-female-martial--crossbow": {
+    "label": "薩菲爾女性偏武 · 弩",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-martial",
+    "motionFamilyId": "crossbow"
+  },
+  "safir-female-martial--wand": {
+    "label": "薩菲爾女性偏武 · 單手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-martial",
+    "motionFamilyId": "wand"
+  },
+  "yunhua-male-scholarly--wind": {
+    "label": "雲華男性偏文 · 管樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-scholarly",
+    "motionFamilyId": "wind"
+  },
+  "yunhua-male-martial--wind": {
+    "label": "雲華男性偏武 · 管樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-martial",
+    "motionFamilyId": "wind"
+  },
+  "yunhua-female-scholarly--wind": {
+    "label": "雲華女性偏文 · 管樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-scholarly",
+    "motionFamilyId": "wind"
+  },
+  "aurelien-female-scholarly--staff": {
+    "label": "奧瑞恩女性偏文 · 雙手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-scholarly",
+    "motionFamilyId": "staff"
+  },
+  "safir-male-scholarly--staff": {
+    "label": "薩菲爾男性偏文 · 雙手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-scholarly",
+    "motionFamilyId": "staff"
+  },
+  "safir-male-martial--shield": {
+    "label": "薩菲爾男性偏武 · 單手盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-martial",
+    "motionFamilyId": "shield"
+  },
+  "safir-male-martial--staff": {
+    "label": "薩菲爾男性偏武 · 雙手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-martial",
+    "motionFamilyId": "staff"
+  },
+  "safir-female-scholarly--shield": {
+    "label": "薩菲爾女性偏文 · 單手盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-scholarly",
+    "motionFamilyId": "shield"
+  },
+  "safir-female-scholarly--staff": {
+    "label": "薩菲爾女性偏文 · 雙手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-scholarly",
+    "motionFamilyId": "staff"
+  },
+  "safir-female-martial--shield": {
+    "label": "薩菲爾女性偏武 · 單手盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-martial",
+    "motionFamilyId": "shield"
+  },
+  "safir-female-martial--staff": {
+    "label": "薩菲爾女性偏武 · 雙手法杖",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-martial",
+    "motionFamilyId": "staff"
+  },
+  "yunhua-male-scholarly--strings": {
+    "label": "雲華男性偏文 · 弦樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-scholarly",
+    "motionFamilyId": "strings"
+  },
+  "yunhua-male-martial--strings": {
+    "label": "雲華男性偏武 · 弦樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-martial",
+    "motionFamilyId": "strings"
+  },
+  "yunhua-female-scholarly--strings": {
+    "label": "雲華女性偏文 · 弦樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-scholarly",
+    "motionFamilyId": "strings"
+  },
+  "yunhua-female-martial--wind": {
+    "label": "雲華女性偏武 · 管樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-martial",
+    "motionFamilyId": "wind"
+  },
+  "yunhua-female-martial--strings": {
+    "label": "雲華女性偏武 · 弦樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-martial",
+    "motionFamilyId": "strings"
+  },
+  "vildun-male-scholarly--wind": {
+    "label": "維爾冬男性偏文 · 管樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-scholarly",
+    "motionFamilyId": "wind"
+  },
+  "vildun-male-scholarly--strings": {
+    "label": "維爾冬男性偏文 · 弦樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-scholarly",
+    "motionFamilyId": "strings"
+  },
+  "vildun-male-martial--wind": {
+    "label": "維爾冬男性偏武 · 管樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-martial",
+    "motionFamilyId": "wind"
+  },
+  "vildun-male-martial--strings": {
+    "label": "維爾冬男性偏武 · 弦樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-martial",
+    "motionFamilyId": "strings"
+  },
+  "vildun-female-scholarly--wind": {
+    "label": "維爾冬女性偏文 · 管樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-scholarly",
+    "motionFamilyId": "wind"
+  },
+  "vildun-female-scholarly--strings": {
+    "label": "維爾冬女性偏文 · 弦樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-scholarly",
+    "motionFamilyId": "strings"
+  },
+  "vildun-female-martial--wind": {
+    "label": "維爾冬女性偏武 · 管樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-martial",
+    "motionFamilyId": "wind"
+  },
+  "vildun-female-martial--strings": {
+    "label": "維爾冬女性偏武 · 弦樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-martial",
+    "motionFamilyId": "strings"
+  },
+  "aurelien-male-scholarly--wind": {
+    "label": "奧瑞恩男性偏文 · 管樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-scholarly",
+    "motionFamilyId": "wind"
+  },
+  "aurelien-male-scholarly--strings": {
+    "label": "奧瑞恩男性偏文 · 弦樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-scholarly",
+    "motionFamilyId": "strings"
+  },
+  "aurelien-male-martial--wind": {
+    "label": "奧瑞恩男性偏武 · 管樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-martial",
+    "motionFamilyId": "wind"
+  },
+  "aurelien-female-scholarly--wind": {
+    "label": "奧瑞恩女性偏文 · 管樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-scholarly",
+    "motionFamilyId": "wind"
+  },
+  "aurelien-female-martial--wind": {
+    "label": "奧瑞恩女性偏武 · 管樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-martial",
+    "motionFamilyId": "wind"
+  },
+  "safir-male-scholarly--wind": {
+    "label": "薩菲爾男性偏文 · 管樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-scholarly",
+    "motionFamilyId": "wind"
+  },
+  "safir-male-martial--wind": {
+    "label": "薩菲爾男性偏武 · 管樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-martial",
+    "motionFamilyId": "wind"
+  },
+  "safir-female-scholarly--wind": {
+    "label": "薩菲爾女性偏文 · 管樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-scholarly",
+    "motionFamilyId": "wind"
+  },
+  "safir-female-martial--wind": {
+    "label": "薩菲爾女性偏武 · 管樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-martial",
+    "motionFamilyId": "wind"
+  },
+  "yunhua-male-scholarly--percussion": {
+    "label": "雲華男性偏文 · 打擊樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-scholarly",
+    "motionFamilyId": "percussion"
+  },
+  "yunhua-male-martial--percussion": {
+    "label": "雲華男性偏武 · 打擊樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-martial",
+    "motionFamilyId": "percussion"
+  },
+  "yunhua-female-scholarly--percussion": {
+    "label": "雲華女性偏文 · 打擊樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-scholarly",
+    "motionFamilyId": "percussion"
+  },
+  "yunhua-female-martial--percussion": {
+    "label": "雲華女性偏武 · 打擊樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-martial",
+    "motionFamilyId": "percussion"
+  },
+  "vildun-male-scholarly--percussion": {
+    "label": "維爾冬男性偏文 · 打擊樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-scholarly",
+    "motionFamilyId": "percussion"
+  },
+  "vildun-male-martial--percussion": {
+    "label": "維爾冬男性偏武 · 打擊樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-martial",
+    "motionFamilyId": "percussion"
+  },
+  "vildun-female-scholarly--percussion": {
+    "label": "維爾冬女性偏文 · 打擊樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-scholarly",
+    "motionFamilyId": "percussion"
+  },
+  "vildun-female-martial--percussion": {
+    "label": "維爾冬女性偏武 · 打擊樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-martial",
+    "motionFamilyId": "percussion"
+  },
+  "aurelien-male-scholarly--percussion": {
+    "label": "奧瑞恩男性偏文 · 打擊樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-scholarly",
+    "motionFamilyId": "percussion"
+  },
+  "aurelien-male-martial--strings": {
+    "label": "奧瑞恩男性偏武 · 弦樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-martial",
+    "motionFamilyId": "strings"
+  },
+  "aurelien-male-martial--percussion": {
+    "label": "奧瑞恩男性偏武 · 打擊樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-martial",
+    "motionFamilyId": "percussion"
+  },
+  "aurelien-female-scholarly--strings": {
+    "label": "奧瑞恩女性偏文 · 弦樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-scholarly",
+    "motionFamilyId": "strings"
+  },
+  "aurelien-female-scholarly--percussion": {
+    "label": "奧瑞恩女性偏文 · 打擊樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-scholarly",
+    "motionFamilyId": "percussion"
+  },
+  "aurelien-female-martial--strings": {
+    "label": "奧瑞恩女性偏武 · 弦樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-martial",
+    "motionFamilyId": "strings"
+  },
+  "safir-male-scholarly--strings": {
+    "label": "薩菲爾男性偏文 · 弦樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-scholarly",
+    "motionFamilyId": "strings"
+  },
+  "safir-male-martial--strings": {
+    "label": "薩菲爾男性偏武 · 弦樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-martial",
+    "motionFamilyId": "strings"
+  },
+  "safir-female-scholarly--strings": {
+    "label": "薩菲爾女性偏文 · 弦樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-scholarly",
+    "motionFamilyId": "strings"
+  },
+  "safir-female-martial--strings": {
+    "label": "薩菲爾女性偏武 · 弦樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-martial",
+    "motionFamilyId": "strings"
+  },
+  "yunhua-male-scholarly--sword-shield": {
+    "label": "雲華男性偏文 · 單手武器與盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-scholarly",
+    "motionFamilyId": "sword-shield"
+  },
+  "yunhua-male-martial--sword-shield": {
+    "label": "雲華男性偏武 · 單手武器與盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-martial",
+    "motionFamilyId": "sword-shield"
+  },
+  "yunhua-female-scholarly--sword-shield": {
+    "label": "雲華女性偏文 · 單手武器與盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-scholarly",
+    "motionFamilyId": "sword-shield"
+  },
+  "yunhua-female-martial--sword-shield": {
+    "label": "雲華女性偏武 · 單手武器與盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-martial",
+    "motionFamilyId": "sword-shield",
+    "contactFrame": 4
+  },
+  "vildun-male-scholarly--sword-shield": {
+    "label": "維爾冬男性偏文 · 單手武器與盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-scholarly",
+    "motionFamilyId": "sword-shield"
+  },
+  "vildun-male-martial--sword-shield": {
+    "label": "維爾冬男性偏武 · 單手武器與盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-martial",
+    "motionFamilyId": "sword-shield"
+  },
+  "vildun-female-scholarly--sword-shield": {
+    "label": "維爾冬女性偏文 · 單手武器與盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-scholarly",
+    "motionFamilyId": "sword-shield"
+  },
+  "vildun-female-martial--sword-shield": {
+    "label": "維爾冬女性偏武 · 單手武器與盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-martial",
+    "motionFamilyId": "sword-shield"
+  },
+  "aurelien-male-scholarly--sword-shield": {
+    "label": "奧瑞恩男性偏文 · 單手武器與盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-scholarly",
+    "motionFamilyId": "sword-shield"
+  },
+  "aurelien-male-martial--sword-shield": {
+    "label": "奧瑞恩男性偏武 · 單手武器與盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-martial",
+    "motionFamilyId": "sword-shield"
+  },
+  "aurelien-female-scholarly--sword-shield": {
+    "label": "奧瑞恩女性偏文 · 單手武器與盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-scholarly",
+    "motionFamilyId": "sword-shield"
+  },
+  "aurelien-female-martial--percussion": {
+    "label": "奧瑞恩女性偏武 · 打擊樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-martial",
+    "motionFamilyId": "percussion"
+  },
+  "aurelien-female-martial--sword-shield": {
+    "label": "奧瑞恩女性偏武 · 單手武器與盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-martial",
+    "motionFamilyId": "sword-shield"
+  },
+  "safir-male-scholarly--percussion": {
+    "label": "薩菲爾男性偏文 · 打擊樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-scholarly",
+    "motionFamilyId": "percussion"
+  },
+  "safir-male-scholarly--sword-shield": {
+    "label": "薩菲爾男性偏文 · 單手武器與盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-scholarly",
+    "motionFamilyId": "sword-shield"
+  },
+  "safir-male-martial--percussion": {
+    "label": "薩菲爾男性偏武 · 打擊樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-martial",
+    "motionFamilyId": "percussion"
+  },
+  "safir-male-martial--sword-shield": {
+    "label": "薩菲爾男性偏武 · 單手武器與盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-martial",
+    "motionFamilyId": "sword-shield"
+  },
+  "safir-female-scholarly--percussion": {
+    "label": "薩菲爾女性偏文 · 打擊樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-scholarly",
+    "motionFamilyId": "percussion"
+  },
+  "safir-female-martial--percussion": {
+    "label": "薩菲爾女性偏武 · 打擊樂器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-martial",
+    "motionFamilyId": "percussion"
+  },
+  "safir-female-martial--sword-shield": {
+    "label": "薩菲爾女性偏武 · 單手武器與盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-martial",
+    "motionFamilyId": "sword-shield"
+  },
+  "yunhua-male-scholarly--tower-shield": {
+    "label": "雲華男性偏文 · 雙手大盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-scholarly",
+    "motionFamilyId": "tower-shield"
+  },
+  "yunhua-male-scholarly--dual": {
+    "label": "雲華男性偏文 · 雙持武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-scholarly",
+    "motionFamilyId": "dual"
+  },
+  "yunhua-male-martial--tower-shield": {
+    "label": "雲華男性偏武 · 雙手大盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-martial",
+    "motionFamilyId": "tower-shield"
+  },
+  "yunhua-male-martial--dual": {
+    "label": "雲華男性偏武 · 雙持武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-male-martial",
+    "motionFamilyId": "dual"
+  },
+  "yunhua-female-scholarly--tower-shield": {
+    "label": "雲華女性偏文 · 雙手大盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-scholarly",
+    "motionFamilyId": "tower-shield"
+  },
+  "yunhua-female-scholarly--dual": {
+    "label": "雲華女性偏文 · 雙持武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-scholarly",
+    "motionFamilyId": "dual"
+  },
+  "yunhua-female-martial--tower-shield": {
+    "label": "雲華女性偏武 · 雙手大盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-martial",
+    "motionFamilyId": "tower-shield"
+  },
+  "yunhua-female-martial--dual": {
+    "label": "雲華女性偏武 · 雙持武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "yunhua-female-martial",
+    "motionFamilyId": "dual"
+  },
+  "vildun-male-scholarly--tower-shield": {
+    "label": "維爾冬男性偏文 · 雙手大盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-scholarly",
+    "motionFamilyId": "tower-shield"
+  },
+  "vildun-male-scholarly--dual": {
+    "label": "維爾冬男性偏文 · 雙持武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-scholarly",
+    "motionFamilyId": "dual"
+  },
+  "vildun-male-martial--tower-shield": {
+    "label": "維爾冬男性偏武 · 雙手大盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-martial",
+    "motionFamilyId": "tower-shield"
+  },
+  "vildun-male-martial--dual": {
+    "label": "維爾冬男性偏武 · 雙持武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-male-martial",
+    "motionFamilyId": "dual"
+  },
+  "vildun-female-scholarly--tower-shield": {
+    "label": "維爾冬女性偏文 · 雙手大盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-scholarly",
+    "motionFamilyId": "tower-shield"
+  },
+  "vildun-female-scholarly--dual": {
+    "label": "維爾冬女性偏文 · 雙持武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-scholarly",
+    "motionFamilyId": "dual"
+  },
+  "vildun-female-martial--tower-shield": {
+    "label": "維爾冬女性偏武 · 雙手大盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-martial",
+    "motionFamilyId": "tower-shield"
+  },
+  "vildun-female-martial--dual": {
+    "label": "維爾冬女性偏武 · 雙持武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "vildun-female-martial",
+    "motionFamilyId": "dual"
+  },
+  "aurelien-male-scholarly--tower-shield": {
+    "label": "奧瑞恩男性偏文 · 雙手大盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-scholarly",
+    "motionFamilyId": "tower-shield"
+  },
+  "aurelien-male-scholarly--dual": {
+    "label": "奧瑞恩男性偏文 · 雙持武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-scholarly",
+    "motionFamilyId": "dual"
+  },
+  "aurelien-male-martial--tower-shield": {
+    "label": "奧瑞恩男性偏武 · 雙手大盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-martial",
+    "motionFamilyId": "tower-shield"
+  },
+  "aurelien-male-martial--dual": {
+    "label": "奧瑞恩男性偏武 · 雙持武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-male-martial",
+    "motionFamilyId": "dual"
+  },
+  "aurelien-female-scholarly--tower-shield": {
+    "label": "奧瑞恩女性偏文 · 雙手大盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-scholarly",
+    "motionFamilyId": "tower-shield"
+  },
+  "aurelien-female-scholarly--dual": {
+    "label": "奧瑞恩女性偏文 · 雙持武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-scholarly",
+    "motionFamilyId": "dual"
+  },
+  "aurelien-female-martial--tower-shield": {
+    "label": "奧瑞恩女性偏武 · 雙手大盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-martial",
+    "motionFamilyId": "tower-shield"
+  },
+  "aurelien-female-martial--dual": {
+    "label": "奧瑞恩女性偏武 · 雙持武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "aurelien-female-martial",
+    "motionFamilyId": "dual"
+  },
+  "safir-male-scholarly--tower-shield": {
+    "label": "薩菲爾男性偏文 · 雙手大盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-scholarly",
+    "motionFamilyId": "tower-shield"
+  },
+  "safir-male-scholarly--dual": {
+    "label": "薩菲爾男性偏文 · 雙持武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-scholarly",
+    "motionFamilyId": "dual"
+  },
+  "safir-male-martial--tower-shield": {
+    "label": "薩菲爾男性偏武 · 雙手大盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-martial",
+    "motionFamilyId": "tower-shield"
+  },
+  "safir-male-martial--dual": {
+    "label": "薩菲爾男性偏武 · 雙持武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-male-martial",
+    "motionFamilyId": "dual"
+  },
+  "safir-female-scholarly--sword-shield": {
+    "label": "薩菲爾女性偏文 · 單手武器與盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-scholarly",
+    "motionFamilyId": "sword-shield"
+  },
+  "safir-female-scholarly--tower-shield": {
+    "label": "薩菲爾女性偏文 · 雙手大盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-scholarly",
+    "motionFamilyId": "tower-shield"
+  },
+  "safir-female-scholarly--dual": {
+    "label": "薩菲爾女性偏文 · 雙持武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-scholarly",
+    "motionFamilyId": "dual"
+  },
+  "safir-female-martial--tower-shield": {
+    "label": "薩菲爾女性偏武 · 雙手大盾",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-martial",
+    "motionFamilyId": "tower-shield"
+  },
+  "safir-female-martial--dual": {
+    "label": "薩菲爾女性偏武 · 雙持武器",
+    "facing": "right",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "appearanceId": "safir-female-martial",
+    "motionFamilyId": "dual"
+  }
+}

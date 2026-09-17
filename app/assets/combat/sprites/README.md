@@ -17,9 +17,13 @@
 
 基本動作為待機、攻擊、受擊、格擋與閃避；戰鬥角色另需倒地。武器、裝備、技能、外觀與動作對應須由美術資料表提供。外觀缺失或動作不相容時不能假裝完成，也不能在正式入口把所有角色顯示為本樣本。
 
+動作族以代表兵器繪製：單手類用刀、重刃用大劍、投擲用短刃、管樂用笛、弦樂用魯特琴。這是種類級動作，尚不隨個別裝備替換圖中的武器造型。雙持圖集對應兩把單手武器，刀盾圖集對應單手武器加盾；其他異種混搭必須另有相容圖集才能登記，不可直接冒用。打擊樂器、空手、單手盾及雙手大盾亦有獨立動作族。
+
 ## 圖集與播放
 
-`yunhua-male-martial/sample.json` 描述單一美術樣本的身分、五個圖集、來源尺寸、逐格裁切區、多邊形遮罩、腳底定位、比例及停留毫秒。來源是洋紅單色底 RGB PNG，並非原生透明 PNG；`sprite-compositor.ts` 在載入時以 WebGL 色鍵合成透明畫面、快取至離屏 Canvas，隨即釋放 WebGL 資源。正式素材檔不被重新繪製或覆寫。來源與合成方式必須一起使用，不能將 RGB 圖集直接當透明圖。裁切及遮罩僅在 Canvas 繪製時取樣原始圖集，避免揮刀超出等分格時切斷刀刃或混入鄰格。圖集不得依賴 Codex 工作目錄以外的路徑。
+每個新圖集資料夾保存 `sequence.png` 原圖、`source.json` 來源提示詞、`crops.json` 取樣輪廓、`sampling-source.json` 原圖雜湊及編譯後 `profile.json`。原有人物與潮殼蟹的分段圖集仍使用 `sample.json`。来源是洋紅單色底 RGB PNG；`sprite-compositor.ts` 載入時以 WebGL 色鍵合成透明畫面，快取至離屏 Canvas 並釋放 WebGL 資源。不得改寫原圖像素修補透明度；來源有錯時重新繪製並更新雜湊與取樣資料。Canvas 依逐格輪廓取樣，避免混入鄰格；圖集不得依賴工作目錄以外的路徑。
+
+`catalog.json` 僅存輕量身分索引，完整裁切資料與 PNG 依參戰者及其武器組延後載入；HUD、外觀選擇及戰場共用載入 Promise 與圖集快取。圖片尺寸與資料不符時明確報錯。比例按原圖格高統一換算，不能按每格角色姿势單獨縮放。`contactFrame` 可指定攻擊命中格，未指定時取序列中點；它只對齊已提交傷害的演出時機。
 
 `SpriteSequence.tsx` 是逐格光柵播放器，不使用骨架、肢體旋轉或生成中間姿勢。每格使用固定來源矩形和作者指定的腳底定位；不可按每格包圍盒獨立拉成一樣高，否則蹲姿會膨脹。戰場可平移整個角色接近目標及歸隊，身體動作仍必須切換實際序列格，不能只移動一張立繪冒充攻擊。攻擊蓄力、接觸、收勢可有不同停留時間，不能用統一慢速掩蓋錯誤姿勢。循環接縫仍需目視驗收。
 
@@ -31,7 +35,9 @@
 
 [stage.json](stage.json) 提供單一共用地面尺寸、緊湊的左右隊形投影、移動與接觸時機及素材尺寸；背景使用入口保留的實際 3D 模型並壓暗／模糊，不另外載入場景插畫。`yunhua-male-martial/defeat.json` 補人物倒地；`tide-shell-crab/sample.json` 提供怪物待機、攻擊、受擊及倒地，各六格。未知模型明確報錯並停用指令，不套用潮殼蟹或玩家樣本作為預設。
 
-`CombatScreen` 是正式、實戰測試及容量測試共用的入口，接收 `CombatView`、文字查詢、命令提交及結束回呼，不依網址或測試旗標改變戰鬥規則。`combat-sprite-catalog.ts` 依投影的角色 archetype／性別、所有配招武器組及怪物身分選取素材。`bindings.json` 將個別裝備對應武器動作族，再將角色條件與動作族對應到圖集；不得從武器名称猜組別。只有完整相容的遭遇使用 2D，其他組合保留既有 3D；缺少已登記的素材檔則明確報錯，不把壞素材當成未覆蓋。現有角色尚無外觀選擇欄位，作者對 male player-lineage 指定男性偏武預設造型，不能當成十六種外觀選擇已完成。
+`CombatScreen` 是正式、實戰測試及容量測試共用的入口，接收 `CombatView`、外觀選擇、文字查詢、命令提交及結束回呼，不依網址或測試旗標改變戰鬥規則。`combat-sprite-catalog.ts` 依投影的角色身分／性別、武器組及怪物身分選取素材。`bindings.json` 明確對應裝備 ID 與動作族；不得從名稱猜組別。雙手槽是否指向同一件物品由門面投影 `twoHanded`，不能將雙手武器誤認為雙持。空手有獨立動作，武器切換取已提交的 activeWeaponSetId。只有完整相容的遭遇使用 2D，未登記的搭配保留既有 3D；已登記素材損壞則報錯。
+
+`content-source/combat-appearances.json` 定義十六種外觀，`combat-motion-families.json` 定義動作族，`combat-sprite-bindings.json` 定義裝備、怪物與預設外觀的對應。行囊人物頁可選擇與角色性別相符的八種外觀；選擇以 characterId 存於獨立美術偏好，不改變 Character.sex、能力或 RNG，清除存檔／新遊戲時清空。未知造型與性別不相容必須拒絕。怪物序列綁定具體 modelId，不使用通用蟹圖替代其他種族。
 
 `CombatSpriteArena.tsx` 只接收共用 `CombatView`／`CombatFrame` 與解析後的平台布局及逐參戰者圖集對應，不引用固定水道或 fixture。雙方各 3×3 的投影位置、角色尺寸與 30 FPS 目標取樣率均來自場景資料；角色長寬各為原樣本的一半。30 FPS 指播放時間取樣，六格來源仍為六格，不生成中間姿勢，也不影響引擎 CTB。Session 只在交易成功後公開本次 `CombatActionResolved`，門面將動作事實放入 `CombatFrame.actions`，排程前 CTB 端點放入 `CombatFrame.ctbAfterAction`，供共用 HUD 在動作完成後快速倒扣；拒絕與回滾不產生可播放結果。資料不進入存檔，也不改動戰鬥判定或 RNG。
 
@@ -41,6 +47,10 @@
 
 ## 素材製作與驗收
 
-素材由內建 `image_gen` 製作；人物五段動作與單色底編輯的完整提示詞保存於 [prompts.json](prompts.json)，怪物與人物倒地提示詞保存於 [battle-prompts.json](battle-prompts.json)；共用 HUD 頭框與條圖集提示詞保存於 [hud/prompts.json](../hud/prompts.json)。這是資產來源契約，不是另一份實作待辦。原始探索稿留在工具輸出目錄，不作為專案素材引用。
+素材由內建 `image_gen` 製作；新圖集完整提示詞在各自 `source.json`，原有人物五段在 [prompts.json](prompts.json)，潮殼蟹與人物倒地在 [battle-prompts.json](battle-prompts.json)，HUD 在 [hud/prompts.json](../hud/prompts.json)。原始探索稿留在工具輸出目錄，不作為專案素材引用。
+
+作者流程：`register-combat-sprite-sources.mjs` 登記確實存在的原圖 → `analyze-sprite-crops.py` 唯讀分析原圖並輸出取樣 JSON → `compile-combat-sprites.mjs` 驗證原圖雜湊後編譯 profile、索引與綁定。分析工具需 Pillow、numpy、OpenCV；只寫 JSON，不修圖。動作列可重複以組成較長序列，不能把攻擊的後半列誤標成受擊。新增來源及重繪後都必須重新驗證。`verify-combat-sprite-assets.mjs --complete` 檢查完整外觀×動作族及全部已定義怪物；`verify-sprite-routing.ts` 檢查角色性別、武器持握、空手、怪物綁定與美術偏好保存；`electron-sprite-catalog-smoke.cjs` 逐格實際繪製，檢查透明合成與不同姿勢，但不取代目視確認。
+
+取樣分析依六欄固定格定位主體與分離特效；前伸的音波、刀光仍屬原格，不能按最近身體距離分給鄰格。`sampling-source.json` 同時記錄分析版本，版本或原圖變更後必須重建輪廓。美術偏好獨立存於目前網站的本機儲存，不包含在遊戲 JSON 存檔匯出內。
 
 驗收需實際檢查圖集透明度、來源裁切有無碰到鄰格、腳底／身高一致性、出刀與格擋的手腕關係，以及逐格與正常速度播放。`scripts/electron-sprite-smoke.cjs` 驗證五段人物預覽；`scripts/electron-battle2d-smoke.cjs` 以隔離 Electron 操作本體選取、無效目標拒絕、攻擊、休息、傷害、三隻怪物倒地及勝利確認；`scripts/electron-walk-smoke.cjs` 驗證遭遇後回到保留的探索模型。`scripts/electron-combat-formation-smoke.cjs` 驗證十八個本體均可分別選取、兩側九宮格、HP／MP 美術條、右側直立 CTB 及存檔隔離。使用 `npm run verify` 檢查工作樹。

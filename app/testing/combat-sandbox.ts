@@ -3,8 +3,8 @@ import {PLAYER_SCENARIO} from '../../content-source/player-scenario';
 import type {GameCommand} from '../../src/app/composition/messages';
 
 /** Isolated test entrance: real combat engine, deterministic invented world, no Storage access. */
-export function createCombatSandbox(configureAlternateSet=false){
- const handle=createGame({...PLAYER_SCENARIO,leaderSex:'male',worldSeed:'ui-regression'});let view=handle.view;
+export function createCombatSandbox(configureAlternateSet=false, sex:'male'|'female'='male'){
+ const handle=createGame({...PLAYER_SCENARIO,leaderSex:sex,worldSeed:'ui-regression'});let view=handle.view;
  const run=(command:GameCommand)=>{const result=handle.runCommand(command);if(!result.accepted)throw new Error(`Combat test entrance: ${result.rejectionCode}`);if(result.blocked)throw new Error(result.blocked);view=result.view;return result;};
  const offer=view.city?.shops.flatMap(s=>s.offers).find(o=>o.itemDefinitionId==='equipment.yunhua.ring-saber.i');
  if(!offer||!view.leader)throw new Error('Missing combat test equipment');

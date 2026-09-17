@@ -9,6 +9,7 @@ import type { GameView } from './engine/game-facade';
 import type { LocalizedTextRef } from '../src/contracts/core';
 import { t, type UiLocale } from './i18n';
 import './world-atlas.css';
+import {ReceptionActions,useReception} from './FacilityReception';
 
 function AtlasCanvas({ locale, selected, current, select, paused }: { paused: boolean; locale: UiLocale; selected: string; current: string; select: (key: string) => void }) {
   const host = useRef<HTMLDivElement>(null);
@@ -134,7 +135,8 @@ export function WorldMap({ locale,city,currentCityId,text,onTravel,paused=false 
   const [modeId,setModeId]=useState(city.travelModes[1]?.modeId??city.travelModes[0]?.modeId??'');
   const target=atlasCities.find(c=>c.key===selected)!;
   const route=city.neighbours.find(n=>n.toCityId===target.cityId);
-  const choose=(key:string)=>{setSelected(key);setPreview(false);};
+  const reception=useReception();
+  const choose=(key:string)=>{setSelected(key);setPreview(false);const place=atlasCities.find(c=>c.key===key);if(place)reception?.inspect(place.cityId===currentCityId||city.neighbours.some(n=>n.toCityId===place.cityId)?'selected':'unavailable',locale==='en'?place.en:place.name)};
   return <section className="world-atlas" data-backdrop={paused} ref={e=>e?.toggleAttribute("inert",paused)} aria-label={t(locale,'ui.screen.worldMap')}>
     {preview?<div className="atlas-town-preview" data-preview-city={target.key}><TownModel overview paused={paused} key={target.key} modelUrl={cityModel(target)} locale={locale} facilities={[]} onHover={()=>{}} onVisit={()=>{}} /></div>
       :<AtlasCanvas paused={paused} locale={locale} selected={selected} current={atlasCities.find(c=>c.cityId===currentCityId)!.key} select={choose}/>}
@@ -144,8 +146,8 @@ export function WorldMap({ locale,city,currentCityId,text,onTravel,paused=false 
       <button data-city-preview onClick={()=>setPreview(!preview)}>{t(locale,preview?'ui.atlas.back':'ui.atlas.inspect')}</button>
       {target.cityId===currentCityId?<p className="atlas-current">◆ {t(locale,'ui.worldMap.current')}</p>:route?<>
         {atlasRoutes.find(r=>r.routeId===route.routeId)?.kind==='ferry'&&<p data-ferry-route>{t(locale,'ui.atlas.ferry')}</p>}
-        <div className="atlas-travel-modes">{city.travelModes.map(mode=><button key={mode.modeId} aria-pressed={modeId===mode.modeId} onClick={()=>setModeId(mode.modeId)}>{text(mode.nameRef)} · {t(locale,'ui.worldMap.days',{days:mode.durationDays})}</button>)}</div>
-        <button data-atlas-travel disabled={!modeId} onClick={()=>onTravel(route.routeId,route.toCityId,modeId,route.nameRef)}>{t(locale,'ui.action.travelHere')} →</button>
+        <ReceptionActions><div className="atlas-travel-modes">{city.travelModes.map(mode=><button key={mode.modeId} aria-pressed={modeId===mode.modeId} onClick={()=>setModeId(mode.modeId)}>{text(mode.nameRef)} · {t(locale,'ui.worldMap.days',{days:mode.durationDays})}</button>)}</div>
+        <button data-atlas-travel disabled={!modeId} onClick={()=>onTravel(route.routeId,route.toCityId,modeId,route.nameRef)}>{t(locale,'ui.action.travelHere')} →</button></ReceptionActions>
       </>:<p>{t(locale,'ui.atlas.unavailable')}</p>}
       <small>{t(locale,'ui.atlas.direct')}</small>
       <div className="atlas-city-index atlas-direct">{city.neighbours.map(n=>{const c=atlasCities.find(c=>c.cityId===n.toCityId);return c&&<button key={n.routeId} data-direct-city={c.key} onClick={()=>choose(c.key)}>{text(n.nameRef)} →</button>;})}</div>

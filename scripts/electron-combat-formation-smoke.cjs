@@ -8,7 +8,7 @@ app.whenReady().then(async()=>{
  const errors=[],run=code=>win.webContents.executeJavaScript(code,true),pause=ms=>new Promise(r=>setTimeout(r,ms));
  win.webContents.on('console-message',d=>{if(d.level==='error')errors.push(d.message)});
  const wait=async code=>{for(let i=0;i<600;i++){if(await run(code))return;await pause(30)}throw Error('Timeout '+code)};
- await win.loadFile(path.resolve('dist/renderer/combat-2d.html'),{query:{formation:'full'}});
+ await win.loadFile(path.resolve('dist/renderer/combat-2d.html'),{query:{formation:'full',...(process.env.BATTLE_APPEARANCE?{appearance:process.env.BATTLE_APPEARANCE}:{})}});
  await wait(`document.querySelector('.combat-sprite-arena')?.dataset.ready==='true'&&document.querySelector('[data-hud-ready]')?.dataset.hudReady==='true'&&document.querySelector('.combat-screen')?.dataset.groundReady==='true'`);
  await wait(`document.querySelector('.combat-background-test .walk-scene')?.dataset.frozen==='true'`);
  assert.equal(await run(`document.querySelectorAll('[data-battle-platform]').length`),1);

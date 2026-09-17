@@ -1,0 +1,158 @@
+[
+  {
+    "skin": "river-cutthroat",
+    "label": "漕幫刀客",
+    "modelId": "monster.yunhua.river-cutthroat",
+    "actions": [
+      "idle",
+      "attack",
+      "hit",
+      "guard",
+      "dodge",
+      "defeat"
+    ],
+    "scale": 1.73,
+    "baselines": [
+      0.97,
+      1,
+      0.98,
+      1,
+      1,
+      0.98
+    ],
+    "facing": "left",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ],
+    "contactFrame": 4
+  },
+  {
+    "skin": "privateer-crossbow",
+    "label": "私運弩手",
+    "modelId": "monster.yunhua.privateer-crossbow",
+    "actions": [
+      "idle",
+      "attack",
+      "hit",
+      "guard",
+      "dodge",
+      "defeat"
+    ],
+    "scale": 1.73,
+    "baselines": [
+      0.97,
+      1,
+      0.98,
+      1,
+      1,
+      0.98
+    ],
+    "facing": "left",
+    "width": 255,
+    "attackMotion": "stationary",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ]
+  },
+  {
+    "skin": "salt-route-leader",
+    "label": "鹽路頭目",
+    "modelId": "monster.yunhua.salt-route-leader",
+    "actions": [
+      "idle",
+      "attack",
+      "attack",
+      "hit",
+      "guard",
+      "defeat"
+    ],
+    "scale": 1.73,
+    "baselines": [
+      0.97,
+      1,
+      0.98,
+      1,
+      1,
+      0.98
+    ],
+    "facing": "left",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ]
+  },
+  {
+    "skin": "seal-tower-deserter",
+    "label": "守印逃卒",
+    "modelId": "monster.yunhua.seal-tower-deserter",
+    "actions": [
+      "idle",
+      "attack",
+      "hit",
+      "guard",
+      "dodge",
+      "defeat"
+    ],
+    "scale": 1.73,
+    "baselines": [
+      0.97,
+      1,
+      0.98,
+      1,
+      1,
+      0.98
+    ],
+    "facing": "left",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ]
+  },
+  {
+    "skin": "false-seal-officer",
+    "label": "偽印校尉",
+    "modelId": "monster.yunhua.false-seal-officer",
+    "actions": [
+      "idle",
+      "attack",
+      "attack",
+      "hit",
+      "guard",
+      "defeat"
+    ],
+    "scale": 1.73,
+    "baselines": [
+      0.97,
+      1,
+      0.98,
+      1,
+      1,
+      0.98
+    ],
+    "facing": "left",
+    "width": 255,
+    "attackMotion": "contact",
+    "portrait": [
+      55,
+      0,
+      105,
+      105
+    ]
+  }
+]

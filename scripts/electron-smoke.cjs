@@ -34,9 +34,10 @@ app.whenReady().then(async () => {
     })()`), 'landscape stage must fit entirely inside the viewport');
   };
   const click = async label => {
-    const expression = `Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim().includes(${JSON.stringify(label)}) && !b.disabled)`;
+    const expression = `Array.from(document.querySelectorAll('button')).find(b => (b.getAttribute('aria-label')??b.textContent).trim().includes(${JSON.stringify(label)}) && !b.disabled)`;
     await waitFor(`Boolean(${expression})`);
-    await run(`(${expression}).click()`);
+    const inspecting=await run(`(()=>{const button=${expression};button.click();return button.hasAttribute('data-facility-choice')})()`);
+    if(inspecting){await waitFor(`Boolean(document.querySelector('[data-facility-confirm]:enabled'))`);await run(`document.querySelector('[data-facility-confirm]').click()`);}
   };
   mkdirSync(resolve('dist'), { recursive: true });
   await waitFor(`Boolean(document.querySelector('.welcome form'))`);
@@ -58,7 +59,7 @@ app.whenReady().then(async () => {
   const tabHeight = await run(`document.querySelector('[data-building-tab=equipmentShop]').getBoundingClientRect().height`);
   await hoverAt('[data-building-tab=equipmentShop]');
   await waitFor(`document.querySelector('.town-model').dataset.hovered === 'equipmentShop'`);
-  assert(await run(`!document.querySelector('.building-label').hidden && document.querySelector('.building-label').textContent.includes('裝備店')`), 'tab hover must label the 3D building');
+  assert(await run(`!document.querySelector('.building-label').hidden && document.querySelector('.building-label').textContent.includes('青鐵坊')`), 'tab hover must label the 3D building');
   await capture('town-hover-smoke.png');
   assert(await run(`!document.querySelector('.game-brand') && !document.querySelector('.town-heading')`), 'town chrome must omit game title and sidebar headings');
   assert(await run(`(() => {const nav=document.querySelector('.building-sidebar nav');return nav.scrollHeight<=nav.clientHeight+1 && getComputedStyle(nav).scrollbarWidth==='none';})()`), 'all facility labels must fit without scrollbar');
@@ -96,19 +97,21 @@ app.whenReady().then(async () => {
   await waitFor(`document.querySelector('.town-model')?.dataset.ready === 'true'`);
   await waitFor(`document.querySelector('.town-model')?.dataset.rendering === 'true'`);
   assert(await run(`document.querySelector('.city-scene canvas') === window.retainedTownCanvas`), 'returning from a facility must not recreate the city');
-  assert.equal(await run(`document.querySelector('.town-model').dataset.camera`), retainedCamera, 'returning from a facility must preserve the camera');
+  const returnedCamera=JSON.parse(await run(`document.querySelector('.town-model').dataset.camera`)),expectedCamera=JSON.parse(retainedCamera);
+  for(const key of ['x','y','height'])assert(Math.abs(returnedCamera[key]-expectedCamera[key])<1e-8,'returning from a facility must preserve camera '+key);
+  assert(returnedCamera.rotation.every((value,index)=>Math.abs(value-expectedCamera.rotation[index])<1e-8),'returning from a facility must preserve camera rotation');
   // Hidden offscreen windows lack OS focus; explicitly deliver the DOM focus events.
   await run(`(() => { const tab=document.querySelector('[data-building-tab=adventurerGuild]'); tab.focus(); tab.dispatchEvent(new FocusEvent('focusin',{bubbles:true})); })()`);
   await waitFor(`document.querySelector('.town-model').dataset.hovered === 'adventurerGuild'`);
   await run(`document.activeElement.dispatchEvent(new FocusEvent('focusout',{bubbles:true})); document.activeElement.blur()`);
-  await click('冒險者公會');
+  await click('雲行會館');
   await waitFor(`Boolean(document.querySelector('[data-screen=guild]'))`);
   await new Promise(resolve => setTimeout(resolve, 200));
   assert(await run(`['運送','採買','救援'].every(label => document.querySelector('[data-screen=guild]').textContent.includes(label))`), 'guild must visibly offer cargo and rescue quests');
   assert(await run(`document.querySelector('.city-scene canvas') === window.retainedTownCanvas`), 'guild must retain the city model');
   await capture('guild-smoke.png');
   await click('回主城');
-  await click('裝備店');
+  await click('青鐵坊');
   await waitFor(`Boolean(document.querySelector('[data-screen=shop]'))`);
   await capture('shop-smoke.png');
   await click('環首短刀');
@@ -129,6 +132,12 @@ app.whenReady().then(async () => {
   await run(`document.querySelector('[data-menu-tab=quests]').click()`);
   assert(await run(`!!document.querySelector('.quest-status-list')`), 'quests tab must render accepted quests');
   await run(`document.querySelector('[data-menu-tab=equipment]').click()`);
+  await run(`document.querySelector('.appearance-toggle').click()`);
+  await waitFor(`document.querySelectorAll('.appearance-options button:not(:disabled)').length===8`);
+  await run(`document.querySelectorAll('.appearance-options button')[6].click()`);
+  const selectedAppearance=await run(`localStorage.getItem('greeting-adventurer.appearances.v1')`);
+  assert(selectedAppearance?.includes('safir-female-scholarly'),'equipment UI must save the selected female appearance');
+  await run(`document.querySelector('.appearance-toggle').click()`);
   await click('環首短刀');
   await click('雲紗術袍');
   await click('引環斬');
@@ -146,8 +155,9 @@ app.whenReady().then(async () => {
   await click('繼續旅程');
   await waitFor(`Boolean(document.querySelector('.player-hud'))`);
   assert.equal(await run(`localStorage.getItem('greeting-adventurer.save.v1')`), purchased);
+  assert.equal(await run(`localStorage.getItem('greeting-adventurer.appearances.v1')`),selectedAppearance,'appearance survives reload');
   assert(await run(`document.documentElement.scrollWidth <= window.innerWidth`), 'desktop horizontal overflow');
-  await click('冒險者關卡');
+  await click('山行驛');
   await click('舊漕渠與沉倉');
   await waitFor(`Boolean(document.querySelector('[data-current-room]'))`);
   assert(await run(`!document.querySelector('.city-scene')`), 'entering an adventure must release the city scene');
@@ -158,7 +168,7 @@ app.whenReady().then(async () => {
   const template=JSON.parse(readFileSync('content/yunhua/maps.json','utf8')).find(t=>t.id==='map-template.yunhua.old-canal-sunken-store');
   const nav=JSON.parse(readFileSync('app/assets/dungeons/navigation.json','utf8'));
   const walk=require('./lib/dungeon-keyboard.cjs').createDungeonKeyboard(run,template,nav);
-  await waitFor(`document.querySelector('.walk-scene')?.dataset.ready==='true'`);
+  await waitFor(`document.querySelector('.walk-scene')?.dataset.ready==='true'&&Boolean(document.querySelector('.walk-scene').dataset.actor)`);
   const door=`document.querySelector('[data-move-room="f1.西側倉房"]')`;
   const target=await run(`({x:Number((${door}).dataset.worldX),z:Number((${door}).dataset.worldZ)})`);
   await walk(['f1.水道入口'],target,1,1.35);await waitFor(`!(${door}).disabled`);await run(`(${door}).click()`);await waitFor(`!(${door})`);
@@ -168,7 +178,8 @@ app.whenReady().then(async () => {
   await capture('dungeon-smoke.png');
   await run(`document.querySelector('[data-encounter=true]').click()`);
   await waitFor(`document.querySelector('.combat-arena')?.dataset.ready==='true'&&document.querySelector('[data-hud-ready]')?.dataset.hudReady==='true'&&document.querySelector('.combat-screen')?.dataset.groundReady==='true'`);
-  assert.equal(await run(`document.querySelector('.combat-screen').dataset.presentation`),'model','unpainted formal party keeps its actual 3D appearance');
+  assert.equal(await run(`document.querySelector('.combat-screen').dataset.presentation`),'sprite','formal female party uses its own 2D sequence art');
+  assert.equal(await run(`document.querySelector('[data-sprite-unit][data-side=player]').dataset.skin`),'safir-female-scholarly--blade','formal battle honors the saved appearance');
   assert.equal(await run(`document.querySelectorAll('.combat-labels .battle-unit').length`),0,'formal actors have no body resource labels');
   assert.equal(await run(`document.querySelectorAll('[data-squad]').length`),2);
   assert(await run(`Array.from(document.querySelectorAll('.game-bottom,.action-feedback,.journal,.save-tools')).every(e=>getComputedStyle(e).display==='none')`),'exploration HUD cannot cover combat squad boards');
@@ -201,3 +212,4 @@ app.whenReady().then(async () => {
   console.log('ELECTRON PASSED: 3D landmarks, canvas hit-testing, keyboard/tab hover,  onboarding, navigation, purchase/equip/skills, save/reload, dungeon movement and combat victory, responsive layout');
   clearTimeout(timeout); app.exit(0);
 }).catch(error => { console.error(error); app.exit(1); });
+

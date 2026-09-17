@@ -53,7 +53,10 @@ try{
  assert(resolve({...initial,mapTemplateId:'another-location'}),'compatible character art is independent of the retained scene');
  assert(resolve({...initial,mapTemplateId:undefined}),'city or road encounters can use the same platform when art is compatible');
  const player=initial.combatants.find(u=>u.side==='player')!;
- for(const identity of [{...player.artIdentity!,sex:'female'},{...player.artIdentity!,weapons:[{mainHand:'unsupported-weapon',offHand:undefined,skillIds:[]}]}]){
+ const female=create(false,'female');
+ assert(resolve(female.view.combat!), 'formal female projection resolves her own authored sprite');
+ assert.equal(resolve(female.view.combat!)!.skins[female.view.combat!.currentActorId!],'yunhua-female-martial--blade');
+ for(const identity of [{...player.artIdentity!,sex:'unknown'},{...player.artIdentity!,weapons:[{weaponSetId:player.artIdentity!.activeWeaponSetId!,mainHand:'unsupported-weapon',offHand:undefined,twoHanded:false,skillIds:[]}]}]){
   assert.equal(resolve({...initial,combatants:initial.combatants.map(u=>u===player?{...u,artIdentity:identity}:u)}),undefined,'incompatible appearances and weapon families do not reuse dao art');
  }
  while(game.view.combat&&turns++<80){

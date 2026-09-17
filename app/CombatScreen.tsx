@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState,useMemo} from 'react';
 import {CombatSpriteArena} from './CombatSpriteArena';
 import {resolveSpriteBattle} from './combat-sprite-catalog';
+import type {AppearanceSelections} from './combat-appearances';
 import {CombatArena} from './CombatArena';
 import {CombatCommandMenu} from './CombatCommandMenu';
 import {CombatHud} from './CombatHud';
@@ -14,11 +15,11 @@ import {resolveCombatGround,type CombatEnvironment} from './combat-ground';
 
 export type CombatChoice={kind:'skill';skillId:string;weaponSetId:string;targetId:string}|{kind:'rest'};
 export type CombatResponse={accepted:true;frames:readonly CombatFrame[];complete:()=>void}|{accepted:false;code:string};
-export function CombatScreen({environment,combat,locale,text,act}:{environment:CombatEnvironment;combat:CombatView;locale:UiLocale;text:(ref:LocalizedTextRef)=>string;act:(choice:CombatChoice,receive:(result:CombatResponse)=>void)=>void}){
+export function CombatScreen({environment,combat,locale,text,act,appearanceSelections}:{environment:CombatEnvironment;combat:CombatView;locale:UiLocale;text:(ref:LocalizedTextRef)=>string;act:(choice:CombatChoice,receive:(result:CombatResponse)=>void)=>void;appearanceSelections?:AppearanceSelections}){
  const ground=useMemo(()=>resolveCombatGround(environment),[environment.kind,environment.id]);
  const [groundReady,setGroundReady]=useState(false),[groundError,setGroundError]=useState<string>();
  useEffect(()=>{let disposed=false;setGroundReady(false);setGroundError(undefined);const image=new Image();image.onload=()=>{if(!disposed)setGroundReady(true)};image.onerror=()=>{if(!disposed)setGroundError(`無法載入戰場地塊：${ground.id}`)};image.src=ground.image;return()=>{disposed=true}},[ground]);
- const sprite=useMemo(()=>resolveSpriteBattle(combat),[combat]);
+ const sprite=useMemo(()=>resolveSpriteBattle(combat,appearanceSelections),[combat,appearanceSelections]);
  const Arena=sprite?CombatSpriteArena:CombatArena;
  const durationMs=sprite?.scene.turnDurationMs??presentation.turnDurationMs;
  const impactProgress=sprite?.scene.impactProgress??.42;

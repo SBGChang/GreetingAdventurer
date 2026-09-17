@@ -426,3 +426,11 @@ type UiNotice = {
 - [ ] 玩家旅行事件、Effect 摘要、戰鬥續接與 NPC 無旅行事件的 Projection／UI 測試。
 - [ ] Notification／Audio／Localization Projector。
 - [ ] Feature import boundary 與 UI 契約測試。
+
+### 文化設施接待呈現
+
+設施接待的作者資料由 `content/presentation/facilities.json` 擁有，以 `cultureId + kind` 唯一定位。`name`、招待員身份描述、四表情圖片、台詞、面板矩形與返回圖示均為呈現資料；正式內容編譯器由同一份名稱產生 LocalizedTextRef 對應語言文字。未知文化／設施配對或缺圖須明確失敗，不能借用另一文化角色。
+
+視窗左側放人物與對話、服務選項及確認，右側放服務查詢內容。選取與確認分離；React portal 只改變控制項的呈現位置，命令與 disabled 仍來自正式來源。角色情緒以實際命令結果或候選狀態切換，不自行結算玩法，不寫入存檔，不把接待立繪當作世界 NPC。四個表情為 normal、happy、angry、sad；對應與圖片取樣契約見 `app/assets/facilities/README.md`。
+
+美術目錄的覆蓋範圍不等於 Capability 的開放範圍。未開放設施只在隔離的美術假資料入口檢視；正式城市仍依內容包提供的 FacilityView 顯示服務。

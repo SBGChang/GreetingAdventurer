@@ -1,0 +1,60 @@
+/* Fixed window chrome, bounded reading panes, and deliberate command confirmation. */
+.game-shell .window-surface{isolation:isolate;z-index:20}
+.game-shell .window-surface .window-back{right:54px;top:44px;z-index:4;margin:0}
+.game-shell .window-surface>.window-emblem{left:54px;top:44px;width:52px;height:52px}
+.game-shell .window-surface>.surface-content{inset:44px 54px 40px;padding:0 3px 3px;overflow-x:hidden;scrollbar-width:none}
+.game-shell:has(.window-surface)>.player-hud{visibility:hidden}
+.game-shell:has(.window-surface) :is(.journal,.save-tools){display:none}
+.game-shell .window-surface .surface-content>h2:first-of-type{margin:0 155px 18px 70px!important;min-height:54px;font-size:24px!important;letter-spacing:1px;padding:0;flex-shrink:0;overflow-wrap:anywhere}
+.game-shell .window-surface .surface-content:has(>.facility-browser){display:flex;flex-direction:column;overflow:hidden}
+.game-shell .window-surface .surface-content:has(>.facility-browser)>:not(.facility-browser){flex-shrink:0}
+.game-shell .window-surface .surface-content:has(>.facility-browser)>div{padding:6px 12px!important;margin-bottom:8px!important}
+.game-shell .window-surface .surface-content:has(>.facility-browser)>button{align-self:flex-end;margin-bottom:8px!important}
+.game-shell .window-surface .surface-content:has(>.facility-browser)>p{margin-bottom:12px!important}
+.game-shell .window-surface .facility-browser{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0;gap:14px}
+.facility-categories{display:flex;flex:1;gap:6px;min-width:0;flex-wrap:wrap}
+.game-shell .window-surface .facility-categories button{min-height:42px;padding:8px 12px;font-size:16px;color:#5c4529;background-color:#e4d1a8;border:1px solid #b09864}
+.facility-categories small{margin-left:7px;font:12px sans-serif;opacity:.7}
+.game-shell .window-surface .facility-categories button[aria-pressed=true]{background-color:#355044;color:#fff0c9;box-shadow:inset 0 -3px #d7b76f}
+.facility-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:22px;flex:1;min-height:0}
+.facility-list-pane{display:flex;flex-direction:column;min-height:0;min-width:0}
+.facility-choices{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;padding:3px}
+.game-shell .window-surface button.facility-choice{display:grid;grid-template-columns:48px minmax(0,1fr) 15px;align-items:center;gap:12px;height:72px;min-height:72px;padding:7px 12px!important;margin:0;background-color:#ecdfc4;text-align:left;flex-shrink:0;box-shadow:none;transform:none!important}
+.game-shell .window-surface .facility-choice>.ui-art{float:none;width:44px;height:44px;margin:0;border-width:1px}
+.facility-choice strong{font-size:17px;line-height:1.4;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.game-shell .window-surface button.facility-choice[aria-pressed=true]{background-color:#c8cfb2;border-color:#607651!important;box-shadow:inset 4px 0 #486847}
+.facility-choice>span:last-child{font-size:25px;color:#76633e}
+.facility-detail{min-width:0;min-height:0;display:flex;flex-direction:column;border:1px solid #a9915c;background:linear-gradient(135deg,#f9efd8df,#e3d0a9d9);box-shadow:inset 0 0 0 4px #fff3cc55;border-radius:4px}
+.facility-detail-body{min-height:0;overflow:auto;overflow-x:hidden;scrollbar-width:none;flex:1;padding:25px 28px;overflow-wrap:anywhere}
+.game-shell .window-surface .facility-detail-body>.ui-art{float:none;display:block;width:64px;height:64px;margin:0 0 14px;border:2px ridge #ac8e50}
+.game-shell .window-surface .facility-detail-body>span:not(.ui-art){font-size:18px!important;line-height:1.9;display:block!important;white-space:normal;overflow-wrap:anywhere}
+.game-shell .window-surface .facility-detail-body>span:nth-child(2){font-size:22px!important;line-height:1.5;font-weight:800;margin-bottom:10px}
+.facility-action-footer{flex-shrink:0;display:flex;justify-content:flex-end;padding:16px 24px;border-top:1px solid #bca271;background:#d5c39c55}
+.game-shell .window-surface button[data-facility-confirm]{min-height:48px;min-width:190px;max-width:100%;padding:10px 24px;background-color:#355044;color:#fff0c9;font-size:20px;font-weight:800;border:1px solid #b29354}
+.facility-empty-detail{display:grid;align-content:center;justify-items:center;text-align:center;flex:1;color:#8a795b;padding:25px;font-size:18px;line-height:1.8}
+.facility-empty-detail>span{font-size:70px;color:#b6a176}.facility-empty{padding:20px;text-align:center;color:#76674e}
+.game-shell .window-surface .surface-content>section:not(.facility-browser){min-width:0}
+.game-shell .window-surface input,.game-shell .window-surface select{max-width:100%;min-width:0}
+.game-shell .window-surface .surface-content [style*="grid"]{min-width:0}
+.game-shell .window-surface .surface-content [style*="grid"]>*{min-width:0;overflow-wrap:anywhere}
+.game-shell .window-surface .surface-content button:not(.facility-choice):not([data-facility-confirm]){white-space:normal;overflow-wrap:anywhere}
+.game-shell .window-surface .inventory-list>div,.game-shell .window-surface .quest-status-list article{min-width:0;overflow-wrap:anywhere}
+.game-shell .window-surface .inventory-list span,.game-shell .window-surface .quest-status-list article>div{min-width:0}
+.game-shell .window-surface .player-menu-tabs{position:sticky;top:0;background:#ead9b7;padding:8px 0;z-index:3}
+.game-shell .window-surface .player-menu-tabs .ui-art{flex-shrink:0}
+.game-shell:has(.window-surface) .action-feedback{bottom:15px;max-height:56px;left:90px;right:250px}
+.game-shell .rest-summary{display:grid;gap:18px;padding:32px;border:1px solid #bba16e;background:#f0e3c8;max-width:650px;margin:30px auto;font-size:20px}
+.rest-summary p{margin:0}.rest-summary button{min-height:55px;background:#355044;color:#fff0c9;border:1px solid #b29354;font-size:22px}
+.facility-summary{display:flex;align-items:center;justify-content:space-between;gap:20px;font-size:17px;min-height:44px}
+.facility-summary strong{margin-left:18px;color:#4c694a;font-size:22px}
+.facility-summary button{margin:0!important}
+.facility-fact{display:block;padding:6px 0;border-bottom:1px solid #bba77c66;font-size:17px;line-height:1.45}
+.game-shell .window-surface .surface-content [style*="grid"]>button:has(>.ui-art){display:grid;grid-template-columns:52px minmax(0,1fr);gap:5px 12px;align-items:center;min-height:90px;padding:12px!important}
+.game-shell .window-surface .surface-content [style*="grid"]>button>.ui-art{width:48px;height:48px;margin:0;grid-row:1 / span 3;float:none}
+.game-shell .window-surface .surface-content [style*="grid"]>button>span:not(.ui-art){grid-column:2;min-width:0}
+
+.facility-choices{touch-action:none;overscroll-behavior:contain;user-select:none;cursor:grab}
+.facility-choices::-webkit-scrollbar{display:none}
+.facility-choices button{cursor:inherit!important}
+.facility-choices[data-dragging=true]{cursor:grabbing}
+.facility-choices:focus-visible{outline:1px solid #d8bc7c;outline-offset:2px}

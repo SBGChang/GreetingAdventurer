@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "appearances": [
+    {
+      "id": "yunhua-male-scholarly",
+      "culture": "yunhua",
+      "sex": "male",
+      "style": "scholarly",
+      "label": "雲華男性偏文",
+      "description": "slender adult Chinese man with long black hair tied by an ivory scholar ribbon, pale jade long scholar coat, deep indigo waistcoat, fine bronze trim, narrow white sleeves, charcoal trousers and cloth boots"
+    },
+    {
+      "id": "yunhua-male-martial",
+      "culture": "yunhua",
+      "sex": "male",
+      "style": "martial",
+      "label": "雲華男性偏武",
+      "description": "athletic adult Chinese man with black topknot and long hair, teal tunic, white sleeves, black and gold lamellar armor, burgundy sash and dark boots"
+    },
+    {
+      "id": "yunhua-female-scholarly",
+      "culture": "yunhua",
+      "sex": "female",
+      "style": "scholarly",
+      "label": "雲華女性偏文",
+      "description": "slender adult Chinese woman with an oval face and black half-up hair with ivory hairpin, long ivory and pale sage scholar robes, jade belt, muted plum underskirt and soft dark boots"
+    },
+    {
+      "id": "yunhua-female-martial",
+      "culture": "yunhua",
+      "sex": "female",
+      "style": "martial",
+      "label": "雲華女性偏武",
+      "description": "athletic adult Chinese woman, black high ponytail with jade tie, fitted teal tunic, ivory sleeves, bronze shoulder guards, burgundy sash and dark boots"
+    },
+    {
+      "id": "vildun-male-scholarly",
+      "culture": "vildun",
+      "sex": "male",
+      "style": "scholarly",
+      "label": "維爾冬男性偏文",
+      "description": "slender adult northern man with swept ash-blond hair, neat braid and no beard, deep blue long wool coat, ivory fur collar, bronze knotwork clasps, rune-carved belt and fitted brown boots"
+    },
+    {
+      "id": "vildun-male-martial",
+      "culture": "vildun",
+      "sex": "male",
+      "style": "martial",
+      "label": "維爾冬男性偏武",
+      "description": "broad athletic adult northern man, braided auburn hair and short beard, slate blue wool tunic, dark iron mail, grey wolf fur shoulder mantle, leather straps and heavy snow boots"
+    },
+    {
+      "id": "vildun-female-scholarly",
+      "culture": "vildun",
+      "sex": "female",
+      "style": "scholarly",
+      "label": "維爾冬女性偏文",
+      "description": "slender adult northern woman with long braided platinum hair, pale blue wool coat over dark navy dress, white fur trim, amber knotwork pendant and warm brown boots"
+    },
+    {
+      "id": "vildun-female-martial",
+      "culture": "vildun",
+      "sex": "female",
+      "style": "martial",
+      "label": "維爾冬女性偏武",
+      "description": "athletic adult northern woman with red braided hair and strong feminine face, steel lamellar cuirass over dark green wool, white fur mantle, burgundy belt and leather winter boots"
+    },
+    {
+      "id": "aurelien-male-scholarly",
+      "culture": "aurelien",
+      "sex": "male",
+      "style": "scholarly",
+      "label": "奧瑞恩男性偏文",
+      "description": "slender adult European-looking man with wavy dark auburn hair, ivory long academy coat with royal blue panels and gold piping, burgundy scarf, leather book belt and tall black boots"
+    },
+    {
+      "id": "aurelien-male-martial",
+      "culture": "aurelien",
+      "sex": "male",
+      "style": "martial",
+      "label": "奧瑞恩男性偏武",
+      "description": "athletic adult European-looking man with short chestnut hair, polished blue-grey plate shoulders and cuirass, cream and royal blue surcoat with gold sun trim, brown gauntlets and armoured boots"
+    },
+    {
+      "id": "aurelien-female-scholarly",
+      "culture": "aurelien",
+      "sex": "female",
+      "style": "scholarly",
+      "label": "奧瑞恩女性偏文",
+      "description": "slender adult European-looking woman with dark chestnut braided bun, ivory and navy scholar dress with fitted sleeves, gold celestial embroidery, burgundy waist ribbon and black boots"
+    },
+    {
+      "id": "aurelien-female-martial",
+      "culture": "aurelien",
+      "sex": "female",
+      "style": "martial",
+      "label": "奧瑞恩女性偏武",
+      "description": "athletic adult European-looking woman with short auburn hair swept back, fitted steel plate cuirass and pauldrons over blue and cream tabard, gold embroidered hem and brown armoured boots"
+    },
+    {
+      "id": "safir-male-scholarly",
+      "culture": "safir",
+      "sex": "male",
+      "style": "scholarly",
+      "label": "薩菲爾男性偏文",
+      "description": "slender adult brown-skinned desert man with black wavy hair, teal wrapped turban, flowing indigo astronomer coat with gold star trim over ivory tunic, brass astrolabe pendant and soft leather boots"
+    },
+    {
+      "id": "safir-male-martial",
+      "culture": "safir",
+      "sex": "male",
+      "style": "martial",
+      "label": "薩菲爾男性偏武",
+      "description": "athletic adult brown-skinned desert man with black curls and short neat beard, ivory headwrap, cobalt short coat over brass scale vest, crimson sash, loose sand-coloured trousers and dark riding boots"
+    },
+    {
+      "id": "safir-female-scholarly",
+      "culture": "safir",
+      "sex": "female",
+      "style": "scholarly",
+      "label": "薩菲爾女性偏文",
+      "description": "slender adult brown-skinned desert woman with dark wavy half-up hair and turquoise veil draped behind shoulders, deep blue and ivory scholar robes with gold star embroidery, amber belt and soft boots"
+    },
+    {
+      "id": "safir-female-martial",
+      "culture": "safir",
+      "sex": "female",
+      "style": "martial",
+      "label": "薩菲爾女性偏武",
+      "description": "athletic adult brown-skinned desert woman with long dark braid, narrow ivory headband, turquoise jacket and brass lamellar shoulder armor, crimson sash, loose ivory trousers and leather riding boots"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  "generator": "built-in image_gen.imagegen",
+  "prompt": "Production game UI icon atlas, exactly 2 columns x 2 rows equal square cells on a square canvas, four culturally different RETURN ARROW buttons. Each square button fills its cell exactly, no gutters. The same very legible large embossed left-pointing hooked return arrow centered in every cell; no text. TOP LEFT ancient Chinese, bronze cloud carvings and dark celadon jade, warm gold arrow. TOP RIGHT northern forest, carved pine and forged iron knotwork, ivory bone arrow. BOTTOM LEFT western knight kingdom, ivory stone and blue enamel fleur ornament, gold arrow. BOTTOM RIGHT desert star traders, turquoise glazed tile, engraved brass geometric arabesque, gold arrow. Beautiful detailed painted fantasy RPG art, designed to remain readable at 48 pixels. One clearly separate square icon per cell, flat front view, opaque, no modern graphic UI, no lettering, no text or labels."
+}

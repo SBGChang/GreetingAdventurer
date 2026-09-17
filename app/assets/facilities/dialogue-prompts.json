@@ -1,0 +1,41 @@
+{
+  "mode": "built-in image_gen.imagegen",
+  "assets": [
+    {
+      "id": "yunhua",
+      "style": "Chinese jade-green enamel, fine aged brass cloud curls, elegant rosewood accents and tiny plum flowers",
+      "fill": "#efe2c7",
+      "ink": "#3f3828",
+      "edge": "#95743d",
+      "prompt": "Use case: ui-mockup. Make one square compact 1024 x1024 opaque RGB texture for a SMALL NPC DIALOGUE FRAME in a richly illustrated fantasy RPG. Culture: Chinese jade-green enamel, fine aged brass cloud curls, elegant rosewood accents and tiny plum flowers. This is a reusable nine-slice frame, not a screenshot. Fully front-facing orthographic square closed border flush with canvas edges, no outside space. Delicate handcrafted border, inviting conversational feel, slightly softened corners, fine relief and restrained ornament. Preserve maximal text readability. Four decorative corner pieces contained entirely in the outer 20% square corner regions. Frame rail thickness only 6% of canvas side. Between the corners, straight rails with simple repeatable narrow bead/filigree units, so they can be tiled lengthwise at fixed scale. Center from 20% to80% of image in both axes is perfectly SOLID #efe2c7, no grain, gradients, patterns, scenes or texture. No ornaments intruding into the reading area. At runtime this square is sliced and made into a wide 295 x132 dialogue box; corner details must remain legible when rendered about24px, not busy miniature scenes. Do not paint words, text, labels, buttons, portraits, quote marks, a bubble tail, a title or a central badge. No drop shadows on the central area. Refined polished fantasy game art, not plain web UI. The center will be discarded and filled with a solid color; only the border survives.",
+      "source": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-d737bffa-b5e1-4ad2-a8b4-c107a68e4d4d.png"
+    },
+    {
+      "id": "vildun",
+      "style": "Nordic embossed leather, blue-grey iron, subtle interlaced knot corners and small silver rivets",
+      "fill": "#e4dfcf",
+      "ink": "#343c3b",
+      "edge": "#696e6a",
+      "prompt": "Use case: ui-mockup. Make one square compact 1024 x1024 opaque RGB texture for a SMALL NPC DIALOGUE FRAME in a richly illustrated fantasy RPG. Culture: Nordic embossed leather, blue-grey iron, subtle interlaced knot corners and small silver rivets. This is a reusable nine-slice frame, not a screenshot. Fully front-facing orthographic square closed border flush with canvas edges, no outside space. Delicate handcrafted border, inviting conversational feel, slightly softened corners, fine relief and restrained ornament. Preserve maximal text readability. Four decorative corner pieces contained entirely in the outer 20% square corner regions. Frame rail thickness only 6% of canvas side. Between the corners, straight rails with simple repeatable narrow bead/filigree units, so they can be tiled lengthwise at fixed scale. Center from 20% to80% of image in both axes is perfectly SOLID #e4dfcf, no grain, gradients, patterns, scenes or texture. No ornaments intruding into the reading area. At runtime this square is sliced and made into a wide 295 x132 dialogue box; corner details must remain legible when rendered about24px, not busy miniature scenes. Do not paint words, text, labels, buttons, portraits, quote marks, a bubble tail, a title or a central badge. No drop shadows on the central area. Refined polished fantasy game art, not plain web UI. The center will be discarded and filled with a solid color; only the border survives.",
+      "source": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-9ffa219d-4812-4b88-822c-3b54cf52311c.png"
+    },
+    {
+      "id": "aurelien",
+      "style": "courtly burgundy enamel, engraved antique brass, small fleur-de-lis corner clasps",
+      "fill": "#f0e3cb",
+      "ink": "#46382e",
+      "edge": "#a18452",
+      "prompt": "Use case: ui-mockup. Make one square compact 1024 x1024 opaque RGB texture for a SMALL NPC DIALOGUE FRAME in a richly illustrated fantasy RPG. Culture: courtly burgundy enamel, engraved antique brass, small fleur-de-lis corner clasps. This is a reusable nine-slice frame, not a screenshot. Fully front-facing orthographic square closed border flush with canvas edges, no outside space. Delicate handcrafted border, inviting conversational feel, slightly softened corners, fine relief and restrained ornament. Preserve maximal text readability. Four decorative corner pieces contained entirely in the outer 20% square corner regions. Frame rail thickness only 6% of canvas side. Between the corners, straight rails with simple repeatable narrow bead/filigree units, so they can be tiled lengthwise at fixed scale. Center from 20% to80% of image in both axes is perfectly SOLID #f0e3cb, no grain, gradients, patterns, scenes or texture. No ornaments intruding into the reading area. At runtime this square is sliced and made into a wide 295 x132 dialogue box; corner details must remain legible when rendered about24px, not busy miniature scenes. Do not paint words, text, labels, buttons, portraits, quote marks, a bubble tail, a title or a central badge. No drop shadows on the central area. Refined polished fantasy game art, not plain web UI. The center will be discarded and filled with a solid color; only the border survives.",
+      "source": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-552d5dd4-f5e3-4419-b3d4-87ef463c1256.png"
+    },
+    {
+      "id": "safir",
+      "style": "turquoise enamel, chased copper, tiny geometric star arabesques and indigo accents",
+      "fill": "#eee1c6",
+      "ink": "#403b2d",
+      "edge": "#a38049",
+      "prompt": "Use case: ui-mockup. Make one square compact 1024 x1024 opaque RGB texture for a SMALL NPC DIALOGUE FRAME in a richly illustrated fantasy RPG. Culture: turquoise enamel, chased copper, tiny geometric star arabesques and indigo accents. This is a reusable nine-slice frame, not a screenshot. Fully front-facing orthographic square closed border flush with canvas edges, no outside space. Delicate handcrafted border, inviting conversational feel, slightly softened corners, fine relief and restrained ornament. Preserve maximal text readability. Four decorative corner pieces contained entirely in the outer 20% square corner regions. Frame rail thickness only 6% of canvas side. Between the corners, straight rails with simple repeatable narrow bead/filigree units, so they can be tiled lengthwise at fixed scale. Center from 20% to80% of image in both axes is perfectly SOLID #eee1c6, no grain, gradients, patterns, scenes or texture. No ornaments intruding into the reading area. At runtime this square is sliced and made into a wide 295 x132 dialogue box; corner details must remain legible when rendered about24px, not busy miniature scenes. Do not paint words, text, labels, buttons, portraits, quote marks, a bubble tail, a title or a central badge. No drop shadows on the central area. Refined polished fantasy game art, not plain web UI. The center will be discarded and filled with a solid color; only the border survives.",
+      "source": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-5ddecccf-ed73-4bfa-8c6c-6aa46bd2275a.png"
+    }
+  ]
+}

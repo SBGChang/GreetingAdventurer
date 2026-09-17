@@ -1,0 +1,70 @@
+/* Cultural facility art is selected by the presentation catalog, never by gameplay rules. */
+.game-shell .game-main .window-surface.reception-window{background-image:var(--reception-panel)!important;background-size:var(--reception-size-x) var(--reception-size-y)!important;background-position:var(--reception-panel-x) var(--reception-panel-y)!important;background-color:#28382e;border-radius:5px;overflow:visible}
+.game-shell .game-main .reception-window>.window-emblem{display:none}
+.game-shell .game-main .reception-window>.surface-content{inset:55px 65px 54px 385px;padding:0;overflow-x:hidden}
+.game-shell .game-main .reception-window .surface-content>h2:first-of-type{display:none!important}
+.game-shell .game-main .reception-window>.reception-title{position:absolute;z-index:5;left:50%;top:-56px;right:auto;transform:translateX(-50%);width:380px;height:112px;min-height:0;margin:0!important;padding:0 30px!important;display:flex;align-items:center;justify-content:center;text-align:center;background:url("./assets/facilities/facility-plaque.png") center/100% 100% no-repeat;font-size:26px!important;font-weight:900!important;color:#ffebc3;text-shadow:0 2px 3px #201b10,-1px -1px #4c3718;white-space:normal;filter:drop-shadow(0 5px 4px #0008)}
+.game-shell .game-main .reception-window .window-back{right:38px;top:-24px}
+.game-shell .game-main .reception-window .window-back button.reception-return{width:48px;height:48px;min-height:48px;padding:0!important;background-image:var(--reception-return)!important;background-size:200% 200%!important;background-position:var(--reception-return-x) var(--reception-return-y)!important;background-repeat:no-repeat!important;border:0!important;border-radius:9px!important}
+.game-shell .game-main .reception-window .facility-reception{position:absolute;top:48px;left:61px;bottom:54px;width:295px;display:flex;flex-direction:column;gap:8px;min-height:0;color:#f4e6c5}
+.reception-portrait{position:relative;flex:0 0 216px;width:216px;align-self:center;background-size:200% 200%;background-repeat:no-repeat;border:3px ridge #b19261;box-shadow:0 4px 14px #0008;overflow:hidden;border-radius:3px}
+.reception-portrait strong{position:absolute;bottom:0;left:0;right:0;padding:7px;text-align:center;background:#152c28d9;color:#fff0c9;letter-spacing:2px;font-size:20px;text-shadow:0 1px 3px #000}
+.reception-options{flex-shrink:0}.reception-confirmation{flex-shrink:0;min-height:0}
+.game-shell .game-main .reception-window .facility-categories{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin:0}
+.game-shell .game-main .reception-window :is(.facility-categories button,.reception-confirmation button,.facility-choice,.reception-options>button){background-image:url("./assets/facilities/service-button.png")!important;background-size:100% 100%!important;background-position:center!important;background-color:transparent;color:#fff0d1!important;border:0!important;border-radius:4px!important;text-shadow:0 1px 2px #000!important;box-shadow:0 2px 4px #0006;font-weight:800;transition:filter .12s,box-shadow .12s}
+.game-shell .game-main .reception-window .facility-categories button{display:flex;align-items:center;justify-content:center;gap:5px;min-height:34px;padding:5px 7px;font-size:15px;white-space:normal;min-width:0}
+.game-shell .game-main .reception-window .facility-categories small{font-size:12px;margin-left:3px}
+.game-shell .game-main .reception-window .facility-categories .ui-art{float:none;width:22px;height:22px;margin:0;border-width:1px}
+.game-shell .game-main .reception-window button[aria-pressed=true]{outline:1px solid #f0ca77;outline-offset:-3px;filter:brightness(1.28);box-shadow:inset 3px 0 #e3bd73,0 0 5px #e2b05f55}
+.game-shell .game-main .reception-window .facility-action-footer{padding:0;border:0;background:none;min-height:0;display:block}
+.game-shell .game-main .reception-window .reception-confirmation button{width:100%;min-width:0;min-height:47px;font-size:18px;padding:9px 12px;letter-spacing:1px}
+.game-shell .game-main .reception-window .facility-browser{gap:9px}
+.game-shell .game-main .reception-window .facility-columns{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.game-shell .game-main .reception-window .facility-choices{gap:7px;padding:3px}
+.game-shell .game-main .reception-window button.facility-choice{height:67px;min-height:67px;padding:8px 12px!important;grid-template-columns:38px minmax(0,1fr) 10px;gap:9px;box-shadow:0 2px 6px #0006}
+.game-shell .game-main .reception-window .facility-choice>.ui-art{width:36px;height:36px;margin:0}
+.game-shell .game-main .reception-window .facility-choice strong{font-size:16px;line-height:1.4}
+.game-shell .game-main .reception-window .facility-choice>span:last-child{font-size:20px;color:#e9d2a4}
+.game-shell .game-main .reception-window .facility-detail{background-image:var(--reception-detail)!important;background-size:var(--reception-detail-size)!important;background-position:var(--reception-detail-position)!important;background-repeat:no-repeat!important;background-color:transparent;position:relative;padding:0;border:0;border-radius:2px;color:#443921;box-shadow:0 3px 10px #0006}
+.game-shell .game-main .reception-window .facility-detail-body{padding:8px;min-width:0}
+.game-shell .game-main .reception-window .facility-detail-body>.ui-art{float:none;display:block;width:47px;height:47px;margin:0 0 12px}
+.game-shell .game-main .reception-window .facility-detail-body>span:nth-child(2){display:block!important;font-size:19px!important;min-height:0;line-height:1.4;color:#49351d;margin-bottom:12px}
+.game-shell .game-main .reception-window .facility-detail-body>span:nth-child(3){font-size:16px!important;line-height:1.6;color:#4e513c!important}
+.game-shell .game-main .reception-window .facility-fact{font-size:15px;padding:7px 0}
+.game-shell .game-main .reception-window .facility-empty-detail{font-size:16px;padding:14px;color:#796545}
+.game-shell .game-main .reception-window .facility-empty-detail>.ui-art{width:75px;height:75px;float:none;margin:0}
+.game-shell .game-main .reception-window .facility-summary,.game-shell .game-main .reception-window .surface-content>p{color:#fff0d1!important;text-shadow:0 1px 3px #000}
+.game-shell .game-main .reception-window .rest-summary{max-width:none;margin:0;min-height:300px;padding:32px;background:linear-gradient(#f4ead5ee,#f4ead5ee),var(--reception-panel);background-size:var(--reception-size-x) var(--reception-size-y);background-position:var(--reception-panel-x) var(--reception-panel-y);font-size:22px}
+.game-shell:has(.reception-window) .action-feedback{display:none}
+.game-shell .game-main .reception-window button:focus-visible{outline:2px solid #ffdfa0;outline-offset:2px}
+.game-shell .game-main .reception-window button:not(:disabled):hover{filter:brightness(1.18)}
+.game-shell .game-main .reception-window button:disabled{opacity:.55;filter:saturate(.4)}
+.game-shell .game-main .reception-window .world-atlas{position:absolute;inset:0;background:#172820;border:1px solid #b19865}
+.game-shell .game-main .reception-window .atlas-detail{width:230px;right:0;top:0;bottom:0;padding:14px;font-size:14px}
+.game-shell .game-main .reception-window .atlas-detail h2{font-size:20px!important;margin:0 0 12px!important;min-height:0}
+.game-shell .game-main .reception-window .atlas-canvas{right:230px}
+.game-shell .game-main .reception-window .atlas-city-index{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+
+.game-shell .game-main .reception-window .reception-options>button{width:100%;min-height:32px;margin:0 0 5px!important;padding:5px 9px!important;font-size:15px}
+.game-shell .game-main .reception-window .reception-confirmation .atlas-travel-modes{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 6px}
+.game-shell .game-main .reception-window .reception-confirmation .atlas-travel-modes button{flex:1;min-height:36px;padding:5px;font-size:14px}
+
+.game-shell .game-main .reception-window button:not(:disabled):active{filter:brightness(.86);box-shadow:inset 0 3px 5px #0009}
+
+.game-shell .game-main .reception-window .facility-detail>:is(.facility-detail-body,.facility-empty-detail){position:absolute;inset:var(--reception-detail-inset);padding:0;overflow:auto;scrollbar-width:none}
+
+/* Nine-slice prototype: corners retain their size; ornate edges repeat, and the center is a flat color. */
+.game-shell .game-main .window-surface.reception-window:has(>.reception-frame){background-image:none!important;background-color:transparent}
+.reception-frame{position:absolute;inset:0;z-index:-1;pointer-events:none;border-style:solid;border-color:transparent;box-sizing:border-box;border-image-repeat:round}
+.game-shell .game-main .reception-window:has(>.reception-frame) .surface-content>:is(p,.facility-summary){color:#443921!important;text-shadow:none!important}
+
+.reception-dialogue{position:relative;flex:1;min-height:88px;max-height:146px;margin-top:6px;padding:18px 19px;box-sizing:border-box;overflow:visible;color:var(--dialogue-ink);font-size:17px;line-height:1.65;filter:drop-shadow(0 3px 3px #0003)}
+.reception-dialogue::before{content:"";position:absolute;inset:0;pointer-events:none;background:var(--dialogue-fill);border:24px solid transparent;border-image-source:var(--dialogue-art);border-image-slice:var(--dialogue-slice);border-image-width:24px;border-image-repeat:round;box-sizing:border-box}
+.reception-dialogue::after{content:"";position:absolute;top:-5px;left:calc(50% - 6px);width:12px;height:12px;transform:rotate(45deg);background:var(--dialogue-fill);border-top:1px solid var(--dialogue-edge);border-left:1px solid var(--dialogue-edge);pointer-events:none}
+.reception-dialogue-body{position:relative;z-index:1;height:100%;min-height:0;overflow:auto;overflow-wrap:anywhere;scrollbar-width:none;touch-action:none;overscroll-behavior:contain;user-select:none;cursor:grab}
+.reception-dialogue-body::-webkit-scrollbar{display:none}
+.reception-dialogue-body[data-dragging=true]{cursor:grabbing}
+.reception-dialogue-body:focus-visible{outline:1px solid var(--dialogue-edge);outline-offset:2px}
+.reception-dialogue-body p{margin:0;font-weight:500}
+.reception-dialogue-body small{display:block;margin-top:9px;padding-top:7px;border-top:1px solid var(--dialogue-edge);font-size:14px;line-height:1.5;opacity:.85}

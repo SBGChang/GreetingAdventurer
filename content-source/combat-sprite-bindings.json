@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "equipmentLines": {
+    "yunhua": {
+      "ring-saber": "blade",
+      "iron-fan": "blade",
+      "spear": "polearm",
+      "glaive": "heavyblade",
+      "needle": "throwing",
+      "chain-weight": "throwing",
+      "bamboo-bow": "bow",
+      "repeating-crossbow": "crossbow",
+      "one-hand-staff": "wand",
+      "two-hand-staff": "staff",
+      "bamboo-flute": "wind",
+      "seven-string": "strings",
+      "one-hand-shield": "shield",
+      "two-hand-shield": "tower-shield"
+    },
+    "vildun": {
+      "hand-axe": "blade",
+      "hunting-knife": "blade",
+      "hunting-spear": "polearm",
+      "great-axe": "heavyblade",
+      "javelin": "throwing",
+      "throwing-axe": "throwing",
+      "hunting-bow": "bow",
+      "longbow": "bow",
+      "one-hand-staff": "wand",
+      "two-hand-staff": "staff",
+      "war-horn": "wind",
+      "bowed-lyre": "strings",
+      "one-hand-shield": "shield",
+      "two-hand-shield": "tower-shield"
+    },
+    "aurelien": {
+      "longsword": "blade",
+      "mace": "blade",
+      "lance": "polearm",
+      "greatsword": "heavyblade",
+      "throwing-flask": "throwing",
+      "hunting-bow": "bow",
+      "hand-crossbow": "crossbow",
+      "heavy-crossbow": "crossbow",
+      "one-hand-staff": "wand",
+      "two-hand-staff": "staff",
+      "war-trumpet": "wind",
+      "choir-harp": "strings",
+      "one-hand-shield": "shield",
+      "two-hand-shield": "tower-shield"
+    },
+    "safir": {
+      "curved-blade": "blade",
+      "hook-dagger": "blade",
+      "moon-spear": "polearm",
+      "double-glaive": "heavyblade",
+      "sling": "throwing",
+      "throwing-wheel": "throwing",
+      "composite-bow": "bow",
+      "great-bow": "bow",
+      "one-hand-staff": "wand",
+      "two-hand-staff": "staff",
+      "reed-flute": "wind",
+      "frame-drum": "percussion",
+      "one-hand-shield": "shield",
+      "two-hand-shield": "tower-shield"
+    }
+  },
+  "defaultAppearances": [
+    {
+      "archetypeId": "character-archetype.core.player-lineage",
+      "sex": "male",
+      "appearanceId": "yunhua-male-martial"
+    },
+    {
+      "archetypeId": "character-archetype.core.player-lineage",
+      "sex": "female",
+      "appearanceId": "yunhua-female-martial"
+    },
+    {
+      "archetypeId": "character-archetype.core.world-adventurer",
+      "sex": "male",
+      "appearanceId": "yunhua-male-martial"
+    },
+    {
+      "archetypeId": "character-archetype.core.world-adventurer",
+      "sex": "female",
+      "appearanceId": "yunhua-female-martial"
+    }
+  ],
+  "combinations": [
+    {
+      "main": "blade",
+      "off": "blade",
+      "motion": "dual"
+    },
+    {
+      "main": "blade",
+      "off": "shield",
+      "motion": "sword-shield"
+    }
+  ]
+}

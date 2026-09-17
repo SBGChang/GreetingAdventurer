@@ -1,0 +1,9923 @@
+{
+  "schemaVersion": 1,
+  "sheets": [
+    {
+      "skin": "sandglass-beetle",
+      "modelId": "monster.safir.sandglass-beetle",
+      "label": "砂漏甲蟲",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "saltback-lizard",
+      "modelId": "monster.safir.saltback-lizard",
+      "label": "鹽背蜥",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "mirage-moth",
+      "modelId": "monster.safir.mirage-moth",
+      "label": "蜃粉夜蛾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "stationary",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "date-jackal",
+      "modelId": "monster.safir.date-jackal",
+      "label": "棗林胡狼",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "dune-scorpion",
+      "modelId": "monster.safir.dune-scorpion",
+      "label": "丘殼蠍",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "glasswing-serpent",
+      "modelId": "monster.safir.glasswing-serpent",
+      "label": "玻翼砂蛇",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "star-sand-idol",
+      "modelId": "monster.safir.star-sand-idol",
+      "label": "星砂偶",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "stationary",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "red-dune-hornbeast",
+      "modelId": "monster.safir.red-dune-hornbeast",
+      "label": "赤丘角獸",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 450,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "buried-caravan-devourer",
+      "modelId": "monster.safir.buried-caravan-devourer",
+      "label": "埋商吞獸",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 450,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "moon-dust-moth",
+      "modelId": "monster.safir.moon-dust-moth",
+      "label": "月塵蛾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "stationary",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "compass-scarab",
+      "modelId": "monster.safir.compass-scarab",
+      "label": "銅針聖甲",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "tower-gecko",
+      "modelId": "monster.safir.tower-gecko",
+      "label": "星臺脊蜥",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "oath-stone-sentinel",
+      "modelId": "monster.safir.oath-stone-sentinel",
+      "label": "路誓石衛",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "lost-star-echo",
+      "modelId": "monster.safir.lost-star-echo",
+      "label": "失星回聲",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "stationary",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "moonring-astral-beast",
+      "modelId": "monster.safir.moonring-astral-beast",
+      "label": "月環星獸",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 450,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "iron-mane-rat",
+      "modelId": "monster.aurelien.iron-mane-rat",
+      "label": "鐵鬃穴鼠",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "thornhide-hound",
+      "modelId": "monster.aurelien.thornhide-hound",
+      "label": "荊甲獵犬",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "candlewing-moth",
+      "modelId": "monster.aurelien.candlewing-moth",
+      "label": "燭翅夜蛾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "stationary",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "clay-gargoyle",
+      "modelId": "monster.aurelien.clay-gargoyle",
+      "label": "灰泥翼像",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "bell-shell-beetle",
+      "modelId": "monster.aurelien.bell-shell-beetle",
+      "label": "鐘殼甲蟲",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "ruined-armor-lion",
+      "modelId": "monster.aurelien.ruined-armor-lion",
+      "label": "廢鎧獅獸",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "wax-seal-sprite",
+      "modelId": "monster.aurelien.wax-seal-sprite",
+      "label": "火漆書靈",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "stationary",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "thorn-crown-boar",
+      "modelId": "monster.aurelien.thorn-crown-boar",
+      "label": "荊冠巨豬",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 450,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "sunken-bell-wingbeast",
+      "modelId": "monster.aurelien.sunken-bell-wingbeast",
+      "label": "沉鐘翼獸",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 450,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "star-dust-bookmoth",
+      "modelId": "monster.aurelien.star-dust-bookmoth",
+      "label": "星粉書蛾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "stationary",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "bronze-wing-gargoyle",
+      "modelId": "monster.aurelien.bronze-wing-gargoyle",
+      "label": "銅翼小像",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "tower-ridge-stonehound",
+      "modelId": "monster.aurelien.tower-ridge-stonehound",
+      "label": "塔脊石犬",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "oath-academy-ironward",
+      "modelId": "monster.aurelien.oath-academy-ironward",
+      "label": "誓院鐵衛",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "disordered-ritual",
+      "modelId": "monster.aurelien.disordered-ritual",
+      "label": "失序法儀",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "stationary",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "seven-tower-stonelion",
+      "modelId": "monster.aurelien.seven-tower-stonelion",
+      "label": "七塔石獅",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 450,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "snow-tuft-hare",
+      "modelId": "monster.vildun.snow-tuft-hare",
+      "label": "雪簇穴兔",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "resin-antler-young",
+      "modelId": "monster.vildun.resin-antler-young",
+      "label": "脂角幼鹿",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "tide-claw-crawler",
+      "modelId": "monster.vildun.tide-claw-crawler",
+      "label": "潮爪伏獸",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "rime-mote",
+      "modelId": "monster.vildun.rime-mote",
+      "label": "霜屑浮靈",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "stationary",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "white-mane-packwolf",
+      "modelId": "monster.vildun.white-mane-packwolf",
+      "label": "白鬃獵狼",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "ice-shell-bear",
+      "modelId": "monster.vildun.ice-shell-bear",
+      "label": "冰殼穴熊",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "carved-stone-sentry",
+      "modelId": "monster.vildun.carved-stone-sentry",
+      "label": "刻痕石衛",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "contact",
+      "portrait": [
+        70,
+        0,
+        110,
+        110
+      ]
+    },
+    {
+      "skin": "split-antler-elk",
+      "modelId": "monster.vildun.split-antler-elk",
+      "label": "裂角巨麋",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 450,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "deep-tide-whale-lizard",
+      "modelId": "monster.vildun.deep-tide-whale-lizard",
+      "label": "深潮鯨蜥",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 450,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "grave-lamp-moth",
+      "modelId": "monster.vildun.grave-lamp-moth",
+      "label": "塚燈寒蛾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "stationary",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "iron-beak-cave-raven",
+      "modelId": "monster.vildun.iron-beak-cave-raven",
+      "label": "鐵喙穴鴉",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "broken-stele-beast",
+      "modelId": "monster.vildun.broken-stele-beast",
+      "label": "碎碑石獸",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "contact",
+      "portrait": [
+        10,
+        40,
+        130,
+        130
+      ]
+    },
+    {
+      "skin": "oath-barrow-warden",
+      "modelId": "monster.vildun.oath-barrow-warden",
+      "label": "誓塚持盾者",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "contact",
+      "portrait": [
+        70,
+        0,
+        110,
+        110
+      ]
+    },
+    {
+      "skin": "longsong-echo",
+      "modelId": "monster.vildun.longsong-echo",
+      "label": "長歌殘響",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "stationary",
+      "portrait": [
+        70,
+        0,
+        110,
+        110
+      ]
+    },
+    {
+      "skin": "winter-crown-colossus",
+      "modelId": "monster.vildun.winter-crown-colossus",
+      "label": "冬冠石王",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 450,
+      "attackMotion": "contact",
+      "portrait": [
+        70,
+        0,
+        110,
+        110
+      ]
+    },
+    {
+      "skin": "mistwing-moth",
+      "modelId": "monster.yunhua.mistwing-moth",
+      "label": "瘴翅蛾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "stationary",
+      "portrait": [
+        12,
+        52,
+        125,
+        125
+      ]
+    },
+    {
+      "skin": "bamboo-back-badger",
+      "modelId": "monster.yunhua.bamboo-back-badger",
+      "label": "竹背獾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "contact",
+      "portrait": [
+        12,
+        52,
+        125,
+        125
+      ]
+    },
+    {
+      "skin": "scrap-sigil-doll",
+      "modelId": "monster.yunhua.scrap-sigil-doll",
+      "label": "殘頁符偶",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        76,
+        8,
+        110,
+        110
+      ]
+    },
+    {
+      "skin": "miasma-pouch-badger",
+      "modelId": "monster.yunhua.miasma-pouch-badger",
+      "label": "瘴囊獾母",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "stationary",
+      "portrait": [
+        12,
+        52,
+        125,
+        125
+      ]
+    },
+    {
+      "skin": "gatewater-salamander",
+      "modelId": "monster.yunhua.gatewater-salamander",
+      "label": "閘水母螈",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "contact",
+      "portrait": [
+        12,
+        52,
+        125,
+        125
+      ]
+    },
+    {
+      "skin": "armored-pottery-guard",
+      "modelId": "monster.yunhua.armored-pottery-guard",
+      "label": "披甲陶衛",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        76,
+        8,
+        110,
+        110
+      ]
+    },
+    {
+      "skin": "mist-bamboo-king",
+      "modelId": "monster.yunhua.mist-bamboo-king",
+      "label": "霧篁獾王",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 450,
+      "attackMotion": "contact",
+      "portrait": [
+        12,
+        52,
+        125,
+        125
+      ]
+    },
+    {
+      "skin": "sunken-weir-beast",
+      "modelId": "monster.yunhua.sunken-weir-beast",
+      "label": "沉閘巨螈",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 450,
+      "attackMotion": "contact",
+      "portrait": [
+        12,
+        52,
+        125,
+        125
+      ]
+    },
+    {
+      "skin": "frayed-seal-wisp",
+      "modelId": "monster.yunhua.frayed-seal-wisp",
+      "label": "斷符游靈",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        76,
+        8,
+        110,
+        110
+      ]
+    },
+    {
+      "skin": "bell-mandible-beetle",
+      "modelId": "monster.yunhua.bell-mandible-beetle",
+      "label": "銅鈴顎蟲",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 220,
+      "attackMotion": "contact",
+      "portrait": [
+        12,
+        52,
+        125,
+        125
+      ]
+    },
+    {
+      "skin": "tower-stone-lizard",
+      "modelId": "monster.yunhua.tower-stone-lizard",
+      "label": "塔脊石蜥",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "contact",
+      "portrait": [
+        12,
+        52,
+        125,
+        125
+      ]
+    },
+    {
+      "skin": "seal-halberd-warden",
+      "modelId": "monster.yunhua.seal-halberd-warden",
+      "label": "鎖印陶將",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 330,
+      "attackMotion": "contact",
+      "portrait": [
+        76,
+        8,
+        110,
+        110
+      ]
+    },
+    {
+      "skin": "broken-edict-scribe",
+      "modelId": "monster.yunhua.broken-edict-scribe",
+      "label": "殘詔書吏",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        76,
+        8,
+        110,
+        110
+      ]
+    },
+    {
+      "skin": "balance-seal-colossus",
+      "modelId": "monster.yunhua.balance-seal-colossus",
+      "label": "天衡印俑",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "defeat"
+      ],
+      "scale": 1.45,
+      "baselines": [
+        0.94,
+        0.94,
+        0.94,
+        0.94
+      ],
+      "facing": "left",
+      "width": 450,
+      "attackMotion": "contact",
+      "portrait": [
+        76,
+        8,
+        110,
+        110
+      ]
+    },
+    {
+      "skin": "yunhua-female-martial--blade",
+      "label": "雲華女性偏武 · 單手武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ],
+      "appearanceId": "yunhua-female-martial",
+      "motionFamilyId": "blade"
+    },
+    {
+      "skin": "yunhua-male-scholarly--polearm",
+      "appearanceId": "yunhua-male-scholarly",
+      "motionFamilyId": "polearm",
+      "label": "雲華男性偏文 · 長柄武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-martial--polearm",
+      "appearanceId": "yunhua-male-martial",
+      "motionFamilyId": "polearm",
+      "label": "雲華男性偏武 · 長柄武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-scholarly--blade",
+      "appearanceId": "yunhua-female-scholarly",
+      "motionFamilyId": "blade",
+      "label": "雲華女性偏文 · 單手武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-scholarly--polearm",
+      "appearanceId": "yunhua-female-scholarly",
+      "motionFamilyId": "polearm",
+      "label": "雲華女性偏文 · 長柄武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-martial--polearm",
+      "appearanceId": "yunhua-female-martial",
+      "motionFamilyId": "polearm",
+      "label": "雲華女性偏武 · 長柄武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-scholarly--blade",
+      "appearanceId": "vildun-male-scholarly",
+      "motionFamilyId": "blade",
+      "label": "維爾冬男性偏文 · 單手武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-scholarly--polearm",
+      "appearanceId": "vildun-male-scholarly",
+      "motionFamilyId": "polearm",
+      "label": "維爾冬男性偏文 · 長柄武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-martial--blade",
+      "appearanceId": "vildun-male-martial",
+      "motionFamilyId": "blade",
+      "label": "維爾冬男性偏武 · 單手武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-martial--polearm",
+      "appearanceId": "vildun-male-martial",
+      "motionFamilyId": "polearm",
+      "label": "維爾冬男性偏武 · 長柄武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-scholarly--blade",
+      "appearanceId": "vildun-female-scholarly",
+      "motionFamilyId": "blade",
+      "label": "維爾冬女性偏文 · 單手武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-scholarly--polearm",
+      "appearanceId": "vildun-female-scholarly",
+      "motionFamilyId": "polearm",
+      "label": "維爾冬女性偏文 · 長柄武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-martial--blade",
+      "appearanceId": "vildun-female-martial",
+      "motionFamilyId": "blade",
+      "label": "維爾冬女性偏武 · 單手武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-martial--polearm",
+      "appearanceId": "vildun-female-martial",
+      "motionFamilyId": "polearm",
+      "label": "維爾冬女性偏武 · 長柄武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-scholarly--blade",
+      "appearanceId": "aurelien-male-scholarly",
+      "motionFamilyId": "blade",
+      "label": "奧瑞恩男性偏文 · 單手武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-martial--blade",
+      "appearanceId": "aurelien-male-martial",
+      "motionFamilyId": "blade",
+      "label": "奧瑞恩男性偏武 · 單手武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-scholarly--blade",
+      "appearanceId": "aurelien-female-scholarly",
+      "motionFamilyId": "blade",
+      "label": "奧瑞恩女性偏文 · 單手武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-martial--blade",
+      "appearanceId": "aurelien-female-martial",
+      "motionFamilyId": "blade",
+      "label": "奧瑞恩女性偏武 · 單手武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-scholarly--blade",
+      "appearanceId": "safir-male-scholarly",
+      "motionFamilyId": "blade",
+      "label": "薩菲爾男性偏文 · 單手武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-martial--blade",
+      "appearanceId": "safir-male-martial",
+      "motionFamilyId": "blade",
+      "label": "薩菲爾男性偏武 · 單手武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-scholarly--blade",
+      "appearanceId": "safir-female-scholarly",
+      "motionFamilyId": "blade",
+      "label": "薩菲爾女性偏文 · 單手武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-scholarly--blade",
+      "appearanceId": "yunhua-male-scholarly",
+      "motionFamilyId": "blade",
+      "label": "雲華男性偏文 · 單手武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-scholarly--heavyblade",
+      "appearanceId": "yunhua-male-scholarly",
+      "motionFamilyId": "heavyblade",
+      "label": "雲華男性偏文 · 雙手重刃",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-scholarly--polearm",
+      "appearanceId": "aurelien-male-scholarly",
+      "motionFamilyId": "polearm",
+      "label": "奧瑞恩男性偏文 · 長柄武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-martial--polearm",
+      "appearanceId": "aurelien-male-martial",
+      "motionFamilyId": "polearm",
+      "label": "奧瑞恩男性偏武 · 長柄武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-scholarly--polearm",
+      "appearanceId": "aurelien-female-scholarly",
+      "motionFamilyId": "polearm",
+      "label": "奧瑞恩女性偏文 · 長柄武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-martial--polearm",
+      "appearanceId": "aurelien-female-martial",
+      "motionFamilyId": "polearm",
+      "label": "奧瑞恩女性偏武 · 長柄武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-scholarly--polearm",
+      "appearanceId": "safir-male-scholarly",
+      "motionFamilyId": "polearm",
+      "label": "薩菲爾男性偏文 · 長柄武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-martial--polearm",
+      "appearanceId": "safir-male-martial",
+      "motionFamilyId": "polearm",
+      "label": "薩菲爾男性偏武 · 長柄武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-scholarly--polearm",
+      "appearanceId": "safir-female-scholarly",
+      "motionFamilyId": "polearm",
+      "label": "薩菲爾女性偏文 · 長柄武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-martial--blade",
+      "appearanceId": "safir-female-martial",
+      "motionFamilyId": "blade",
+      "label": "薩菲爾女性偏武 · 單手武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-martial--polearm",
+      "appearanceId": "safir-female-martial",
+      "motionFamilyId": "polearm",
+      "label": "薩菲爾女性偏武 · 長柄武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-martial--heavyblade",
+      "appearanceId": "yunhua-male-martial",
+      "motionFamilyId": "heavyblade",
+      "label": "雲華男性偏武 · 雙手重刃",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-scholarly--heavyblade",
+      "appearanceId": "yunhua-female-scholarly",
+      "motionFamilyId": "heavyblade",
+      "label": "雲華女性偏文 · 雙手重刃",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-martial--heavyblade",
+      "appearanceId": "yunhua-female-martial",
+      "motionFamilyId": "heavyblade",
+      "label": "雲華女性偏武 · 雙手重刃",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ],
+      "contactFrame": 4
+    },
+    {
+      "skin": "vildun-male-scholarly--heavyblade",
+      "appearanceId": "vildun-male-scholarly",
+      "motionFamilyId": "heavyblade",
+      "label": "維爾冬男性偏文 · 雙手重刃",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ],
+      "contactFrame": 4
+    },
+    {
+      "skin": "vildun-male-martial--heavyblade",
+      "appearanceId": "vildun-male-martial",
+      "motionFamilyId": "heavyblade",
+      "label": "維爾冬男性偏武 · 雙手重刃",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-scholarly--throwing",
+      "appearanceId": "yunhua-male-scholarly",
+      "motionFamilyId": "throwing",
+      "label": "雲華男性偏文 · 投擲武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-martial--throwing",
+      "appearanceId": "yunhua-male-martial",
+      "motionFamilyId": "throwing",
+      "label": "雲華男性偏武 · 投擲武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-scholarly--throwing",
+      "appearanceId": "yunhua-female-scholarly",
+      "motionFamilyId": "throwing",
+      "label": "雲華女性偏文 · 投擲武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-martial--throwing",
+      "appearanceId": "yunhua-female-martial",
+      "motionFamilyId": "throwing",
+      "label": "雲華女性偏武 · 投擲武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-scholarly--throwing",
+      "appearanceId": "vildun-male-scholarly",
+      "motionFamilyId": "throwing",
+      "label": "維爾冬男性偏文 · 投擲武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-martial--throwing",
+      "appearanceId": "vildun-male-martial",
+      "motionFamilyId": "throwing",
+      "label": "維爾冬男性偏武 · 投擲武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-scholarly--heavyblade",
+      "appearanceId": "vildun-female-scholarly",
+      "motionFamilyId": "heavyblade",
+      "label": "維爾冬女性偏文 · 雙手重刃",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ],
+      "contactFrame": 4
+    },
+    {
+      "skin": "vildun-female-scholarly--throwing",
+      "appearanceId": "vildun-female-scholarly",
+      "motionFamilyId": "throwing",
+      "label": "維爾冬女性偏文 · 投擲武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-martial--heavyblade",
+      "appearanceId": "vildun-female-martial",
+      "motionFamilyId": "heavyblade",
+      "label": "維爾冬女性偏武 · 雙手重刃",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ],
+      "contactFrame": 4
+    },
+    {
+      "skin": "vildun-female-martial--throwing",
+      "appearanceId": "vildun-female-martial",
+      "motionFamilyId": "throwing",
+      "label": "維爾冬女性偏武 · 投擲武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-scholarly--heavyblade",
+      "appearanceId": "aurelien-male-scholarly",
+      "motionFamilyId": "heavyblade",
+      "label": "奧瑞恩男性偏文 · 雙手重刃",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ],
+      "contactFrame": 4
+    },
+    {
+      "skin": "aurelien-male-scholarly--throwing",
+      "appearanceId": "aurelien-male-scholarly",
+      "motionFamilyId": "throwing",
+      "label": "奧瑞恩男性偏文 · 投擲武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-martial--heavyblade",
+      "appearanceId": "aurelien-male-martial",
+      "motionFamilyId": "heavyblade",
+      "label": "奧瑞恩男性偏武 · 雙手重刃",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-martial--throwing",
+      "appearanceId": "aurelien-male-martial",
+      "motionFamilyId": "throwing",
+      "label": "奧瑞恩男性偏武 · 投擲武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-scholarly--heavyblade",
+      "appearanceId": "aurelien-female-scholarly",
+      "motionFamilyId": "heavyblade",
+      "label": "奧瑞恩女性偏文 · 雙手重刃",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-scholarly--throwing",
+      "appearanceId": "aurelien-female-scholarly",
+      "motionFamilyId": "throwing",
+      "label": "奧瑞恩女性偏文 · 投擲武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-martial--heavyblade",
+      "appearanceId": "aurelien-female-martial",
+      "motionFamilyId": "heavyblade",
+      "label": "奧瑞恩女性偏武 · 雙手重刃",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-martial--throwing",
+      "appearanceId": "aurelien-female-martial",
+      "motionFamilyId": "throwing",
+      "label": "奧瑞恩女性偏武 · 投擲武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-scholarly--heavyblade",
+      "appearanceId": "safir-male-scholarly",
+      "motionFamilyId": "heavyblade",
+      "label": "薩菲爾男性偏文 · 雙手重刃",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ],
+      "contactFrame": 4
+    },
+    {
+      "skin": "safir-male-scholarly--throwing",
+      "appearanceId": "safir-male-scholarly",
+      "motionFamilyId": "throwing",
+      "label": "薩菲爾男性偏文 · 投擲武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-martial--heavyblade",
+      "appearanceId": "safir-male-martial",
+      "motionFamilyId": "heavyblade",
+      "label": "薩菲爾男性偏武 · 雙手重刃",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ],
+      "contactFrame": 4
+    },
+    {
+      "skin": "safir-male-martial--throwing",
+      "appearanceId": "safir-male-martial",
+      "motionFamilyId": "throwing",
+      "label": "薩菲爾男性偏武 · 投擲武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-scholarly--heavyblade",
+      "appearanceId": "safir-female-scholarly",
+      "motionFamilyId": "heavyblade",
+      "label": "薩菲爾女性偏文 · 雙手重刃",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 2.11857421875,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        67.36842105263158,
+        0,
+        128.61244019138755,
+        85.74162679425838
+      ]
+    },
+    {
+      "skin": "safir-female-scholarly--throwing",
+      "appearanceId": "safir-female-scholarly",
+      "motionFamilyId": "throwing",
+      "label": "薩菲爾女性偏文 · 投擲武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-martial--heavyblade",
+      "appearanceId": "safir-female-martial",
+      "motionFamilyId": "heavyblade",
+      "label": "薩菲爾女性偏武 · 雙手重刃",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ],
+      "contactFrame": 4
+    },
+    {
+      "skin": "safir-female-martial--throwing",
+      "appearanceId": "safir-female-martial",
+      "motionFamilyId": "throwing",
+      "label": "薩菲爾女性偏武 · 投擲武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-scholarly--bow",
+      "appearanceId": "yunhua-male-scholarly",
+      "motionFamilyId": "bow",
+      "label": "雲華男性偏文 · 弓",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-martial--bow",
+      "appearanceId": "yunhua-male-martial",
+      "motionFamilyId": "bow",
+      "label": "雲華男性偏武 · 弓",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-scholarly--bow",
+      "appearanceId": "yunhua-female-scholarly",
+      "motionFamilyId": "bow",
+      "label": "雲華女性偏文 · 弓",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-martial--bow",
+      "appearanceId": "yunhua-female-martial",
+      "motionFamilyId": "bow",
+      "label": "雲華女性偏武 · 弓",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-scholarly--bow",
+      "appearanceId": "vildun-male-scholarly",
+      "motionFamilyId": "bow",
+      "label": "維爾冬男性偏文 · 弓",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-martial--bow",
+      "appearanceId": "vildun-male-martial",
+      "motionFamilyId": "bow",
+      "label": "維爾冬男性偏武 · 弓",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-scholarly--bow",
+      "appearanceId": "vildun-female-scholarly",
+      "motionFamilyId": "bow",
+      "label": "維爾冬女性偏文 · 弓",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-martial--bow",
+      "appearanceId": "vildun-female-martial",
+      "motionFamilyId": "bow",
+      "label": "維爾冬女性偏武 · 弓",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-scholarly--crossbow",
+      "appearanceId": "yunhua-male-scholarly",
+      "motionFamilyId": "crossbow",
+      "label": "雲華男性偏文 · 弩",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-martial--crossbow",
+      "appearanceId": "yunhua-male-martial",
+      "motionFamilyId": "crossbow",
+      "label": "雲華男性偏武 · 弩",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-scholarly--crossbow",
+      "appearanceId": "yunhua-female-scholarly",
+      "motionFamilyId": "crossbow",
+      "label": "雲華女性偏文 · 弩",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-martial--crossbow",
+      "appearanceId": "yunhua-female-martial",
+      "motionFamilyId": "crossbow",
+      "label": "雲華女性偏武 · 弩",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-scholarly--crossbow",
+      "appearanceId": "vildun-male-scholarly",
+      "motionFamilyId": "crossbow",
+      "label": "維爾冬男性偏文 · 弩",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-martial--crossbow",
+      "appearanceId": "vildun-male-martial",
+      "motionFamilyId": "crossbow",
+      "label": "維爾冬男性偏武 · 弩",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-scholarly--crossbow",
+      "appearanceId": "vildun-female-scholarly",
+      "motionFamilyId": "crossbow",
+      "label": "維爾冬女性偏文 · 弩",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-scholarly--bow",
+      "appearanceId": "aurelien-male-scholarly",
+      "motionFamilyId": "bow",
+      "label": "奧瑞恩男性偏文 · 弓",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-martial--bow",
+      "appearanceId": "aurelien-male-martial",
+      "motionFamilyId": "bow",
+      "label": "奧瑞恩男性偏武 · 弓",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-scholarly--bow",
+      "appearanceId": "aurelien-female-scholarly",
+      "motionFamilyId": "bow",
+      "label": "奧瑞恩女性偏文 · 弓",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-martial--bow",
+      "appearanceId": "aurelien-female-martial",
+      "motionFamilyId": "bow",
+      "label": "奧瑞恩女性偏武 · 弓",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-scholarly--bow",
+      "appearanceId": "safir-male-scholarly",
+      "motionFamilyId": "bow",
+      "label": "薩菲爾男性偏文 · 弓",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-martial--bow",
+      "appearanceId": "safir-male-martial",
+      "motionFamilyId": "bow",
+      "label": "薩菲爾男性偏武 · 弓",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-scholarly--bow",
+      "appearanceId": "safir-female-scholarly",
+      "motionFamilyId": "bow",
+      "label": "薩菲爾女性偏文 · 弓",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-martial--bow",
+      "appearanceId": "safir-female-martial",
+      "motionFamilyId": "bow",
+      "label": "薩菲爾女性偏武 · 弓",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "river-cutthroat",
+      "label": "漕幫刀客",
+      "modelId": "monster.yunhua.river-cutthroat",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "left",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ],
+      "contactFrame": 4
+    },
+    {
+      "skin": "privateer-crossbow",
+      "label": "私運弩手",
+      "modelId": "monster.yunhua.privateer-crossbow",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "left",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "salt-route-leader",
+      "label": "鹽路頭目",
+      "modelId": "monster.yunhua.salt-route-leader",
+      "actions": [
+        "idle",
+        "attack",
+        "attack",
+        "hit",
+        "guard",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "left",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "seal-tower-deserter",
+      "label": "守印逃卒",
+      "modelId": "monster.yunhua.seal-tower-deserter",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "left",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "false-seal-officer",
+      "label": "偽印校尉",
+      "modelId": "monster.yunhua.false-seal-officer",
+      "actions": [
+        "idle",
+        "attack",
+        "attack",
+        "hit",
+        "guard",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "left",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-scholarly--unarmed",
+      "appearanceId": "yunhua-male-scholarly",
+      "motionFamilyId": "unarmed",
+      "label": "雲華男性偏文 · 空手",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-scholarly--shield",
+      "appearanceId": "yunhua-male-scholarly",
+      "motionFamilyId": "shield",
+      "label": "雲華男性偏文 · 單手盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-scholarly--wand",
+      "appearanceId": "yunhua-male-scholarly",
+      "motionFamilyId": "wand",
+      "label": "雲華男性偏文 · 單手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-scholarly--staff",
+      "appearanceId": "yunhua-male-scholarly",
+      "motionFamilyId": "staff",
+      "label": "雲華男性偏文 · 雙手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-martial--unarmed",
+      "appearanceId": "yunhua-male-martial",
+      "motionFamilyId": "unarmed",
+      "label": "雲華男性偏武 · 空手",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-martial--shield",
+      "appearanceId": "yunhua-male-martial",
+      "motionFamilyId": "shield",
+      "label": "雲華男性偏武 · 單手盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-martial--wand",
+      "appearanceId": "yunhua-male-martial",
+      "motionFamilyId": "wand",
+      "label": "雲華男性偏武 · 單手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-martial--staff",
+      "appearanceId": "yunhua-male-martial",
+      "motionFamilyId": "staff",
+      "label": "雲華男性偏武 · 雙手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-scholarly--unarmed",
+      "appearanceId": "yunhua-female-scholarly",
+      "motionFamilyId": "unarmed",
+      "label": "雲華女性偏文 · 空手",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-scholarly--shield",
+      "appearanceId": "yunhua-female-scholarly",
+      "motionFamilyId": "shield",
+      "label": "雲華女性偏文 · 單手盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-scholarly--wand",
+      "appearanceId": "yunhua-female-scholarly",
+      "motionFamilyId": "wand",
+      "label": "雲華女性偏文 · 單手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-scholarly--staff",
+      "appearanceId": "yunhua-female-scholarly",
+      "motionFamilyId": "staff",
+      "label": "雲華女性偏文 · 雙手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-martial--unarmed",
+      "appearanceId": "yunhua-female-martial",
+      "motionFamilyId": "unarmed",
+      "label": "雲華女性偏武 · 空手",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-martial--shield",
+      "appearanceId": "yunhua-female-martial",
+      "motionFamilyId": "shield",
+      "label": "雲華女性偏武 · 單手盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-martial--wand",
+      "appearanceId": "yunhua-female-martial",
+      "motionFamilyId": "wand",
+      "label": "雲華女性偏武 · 單手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-martial--staff",
+      "appearanceId": "yunhua-female-martial",
+      "motionFamilyId": "staff",
+      "label": "雲華女性偏武 · 雙手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-scholarly--unarmed",
+      "appearanceId": "vildun-male-scholarly",
+      "motionFamilyId": "unarmed",
+      "label": "維爾冬男性偏文 · 空手",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-scholarly--shield",
+      "appearanceId": "vildun-male-scholarly",
+      "motionFamilyId": "shield",
+      "label": "維爾冬男性偏文 · 單手盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.6856410256410257,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        53.59649122807018,
+        0,
+        102.32057416267942,
+        107.76315789473684
+      ]
+    },
+    {
+      "skin": "vildun-male-scholarly--wand",
+      "appearanceId": "vildun-male-scholarly",
+      "motionFamilyId": "wand",
+      "label": "維爾冬男性偏文 · 單手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-scholarly--staff",
+      "appearanceId": "vildun-male-scholarly",
+      "motionFamilyId": "staff",
+      "label": "維爾冬男性偏文 · 雙手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-martial--unarmed",
+      "appearanceId": "vildun-male-martial",
+      "motionFamilyId": "unarmed",
+      "label": "維爾冬男性偏武 · 空手",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-martial--shield",
+      "appearanceId": "vildun-male-martial",
+      "motionFamilyId": "shield",
+      "label": "維爾冬男性偏武 · 單手盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-martial--wand",
+      "appearanceId": "vildun-male-martial",
+      "motionFamilyId": "wand",
+      "label": "維爾冬男性偏武 · 單手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-martial--staff",
+      "appearanceId": "vildun-male-martial",
+      "motionFamilyId": "staff",
+      "label": "維爾冬男性偏武 · 雙手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-scholarly--unarmed",
+      "appearanceId": "vildun-female-scholarly",
+      "motionFamilyId": "unarmed",
+      "label": "維爾冬女性偏文 · 空手",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-scholarly--shield",
+      "appearanceId": "vildun-female-scholarly",
+      "motionFamilyId": "shield",
+      "label": "維爾冬女性偏文 · 單手盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-scholarly--wand",
+      "appearanceId": "vildun-female-scholarly",
+      "motionFamilyId": "wand",
+      "label": "維爾冬女性偏文 · 單手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-scholarly--staff",
+      "appearanceId": "vildun-female-scholarly",
+      "motionFamilyId": "staff",
+      "label": "維爾冬女性偏文 · 雙手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-martial--unarmed",
+      "appearanceId": "vildun-female-martial",
+      "motionFamilyId": "unarmed",
+      "label": "維爾冬女性偏武 · 空手",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-martial--shield",
+      "appearanceId": "vildun-female-martial",
+      "motionFamilyId": "shield",
+      "label": "維爾冬女性偏武 · 單手盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-martial--crossbow",
+      "appearanceId": "vildun-female-martial",
+      "motionFamilyId": "crossbow",
+      "label": "維爾冬女性偏武 · 弩",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-martial--wand",
+      "appearanceId": "vildun-female-martial",
+      "motionFamilyId": "wand",
+      "label": "維爾冬女性偏武 · 單手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-martial--staff",
+      "appearanceId": "vildun-female-martial",
+      "motionFamilyId": "staff",
+      "label": "維爾冬女性偏武 · 雙手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-scholarly--unarmed",
+      "appearanceId": "aurelien-male-scholarly",
+      "motionFamilyId": "unarmed",
+      "label": "奧瑞恩男性偏文 · 空手",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-scholarly--shield",
+      "appearanceId": "aurelien-male-scholarly",
+      "motionFamilyId": "shield",
+      "label": "奧瑞恩男性偏文 · 單手盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-scholarly--crossbow",
+      "appearanceId": "aurelien-male-scholarly",
+      "motionFamilyId": "crossbow",
+      "label": "奧瑞恩男性偏文 · 弩",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-scholarly--wand",
+      "appearanceId": "aurelien-male-scholarly",
+      "motionFamilyId": "wand",
+      "label": "奧瑞恩男性偏文 · 單手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-scholarly--staff",
+      "appearanceId": "aurelien-male-scholarly",
+      "motionFamilyId": "staff",
+      "label": "奧瑞恩男性偏文 · 雙手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-martial--unarmed",
+      "appearanceId": "aurelien-male-martial",
+      "motionFamilyId": "unarmed",
+      "label": "奧瑞恩男性偏武 · 空手",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-martial--shield",
+      "appearanceId": "aurelien-male-martial",
+      "motionFamilyId": "shield",
+      "label": "奧瑞恩男性偏武 · 單手盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-martial--crossbow",
+      "appearanceId": "aurelien-male-martial",
+      "motionFamilyId": "crossbow",
+      "label": "奧瑞恩男性偏武 · 弩",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-martial--wand",
+      "appearanceId": "aurelien-male-martial",
+      "motionFamilyId": "wand",
+      "label": "奧瑞恩男性偏武 · 單手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-martial--staff",
+      "appearanceId": "aurelien-male-martial",
+      "motionFamilyId": "staff",
+      "label": "奧瑞恩男性偏武 · 雙手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-scholarly--unarmed",
+      "appearanceId": "aurelien-female-scholarly",
+      "motionFamilyId": "unarmed",
+      "label": "奧瑞恩女性偏文 · 空手",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-scholarly--shield",
+      "appearanceId": "aurelien-female-scholarly",
+      "motionFamilyId": "shield",
+      "label": "奧瑞恩女性偏文 · 單手盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-scholarly--crossbow",
+      "appearanceId": "aurelien-female-scholarly",
+      "motionFamilyId": "crossbow",
+      "label": "奧瑞恩女性偏文 · 弩",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-scholarly--wand",
+      "appearanceId": "aurelien-female-scholarly",
+      "motionFamilyId": "wand",
+      "label": "奧瑞恩女性偏文 · 單手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-martial--unarmed",
+      "appearanceId": "aurelien-female-martial",
+      "motionFamilyId": "unarmed",
+      "label": "奧瑞恩女性偏武 · 空手",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-martial--shield",
+      "appearanceId": "aurelien-female-martial",
+      "motionFamilyId": "shield",
+      "label": "奧瑞恩女性偏武 · 單手盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-martial--crossbow",
+      "appearanceId": "aurelien-female-martial",
+      "motionFamilyId": "crossbow",
+      "label": "奧瑞恩女性偏武 · 弩",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-martial--wand",
+      "appearanceId": "aurelien-female-martial",
+      "motionFamilyId": "wand",
+      "label": "奧瑞恩女性偏武 · 單手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-martial--staff",
+      "appearanceId": "aurelien-female-martial",
+      "motionFamilyId": "staff",
+      "label": "奧瑞恩女性偏武 · 雙手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-scholarly--unarmed",
+      "appearanceId": "safir-male-scholarly",
+      "motionFamilyId": "unarmed",
+      "label": "薩菲爾男性偏文 · 空手",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-scholarly--shield",
+      "appearanceId": "safir-male-scholarly",
+      "motionFamilyId": "shield",
+      "label": "薩菲爾男性偏文 · 單手盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-scholarly--crossbow",
+      "appearanceId": "safir-male-scholarly",
+      "motionFamilyId": "crossbow",
+      "label": "薩菲爾男性偏文 · 弩",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-scholarly--wand",
+      "appearanceId": "safir-male-scholarly",
+      "motionFamilyId": "wand",
+      "label": "薩菲爾男性偏文 · 單手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-martial--unarmed",
+      "appearanceId": "safir-male-martial",
+      "motionFamilyId": "unarmed",
+      "label": "薩菲爾男性偏武 · 空手",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-martial--crossbow",
+      "appearanceId": "safir-male-martial",
+      "motionFamilyId": "crossbow",
+      "label": "薩菲爾男性偏武 · 弩",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-martial--wand",
+      "appearanceId": "safir-male-martial",
+      "motionFamilyId": "wand",
+      "label": "薩菲爾男性偏武 · 單手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-scholarly--unarmed",
+      "appearanceId": "safir-female-scholarly",
+      "motionFamilyId": "unarmed",
+      "label": "薩菲爾女性偏文 · 空手",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-scholarly--crossbow",
+      "appearanceId": "safir-female-scholarly",
+      "motionFamilyId": "crossbow",
+      "label": "薩菲爾女性偏文 · 弩",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-scholarly--wand",
+      "appearanceId": "safir-female-scholarly",
+      "motionFamilyId": "wand",
+      "label": "薩菲爾女性偏文 · 單手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-martial--unarmed",
+      "appearanceId": "safir-female-martial",
+      "motionFamilyId": "unarmed",
+      "label": "薩菲爾女性偏武 · 空手",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-martial--crossbow",
+      "appearanceId": "safir-female-martial",
+      "motionFamilyId": "crossbow",
+      "label": "薩菲爾女性偏武 · 弩",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-martial--wand",
+      "appearanceId": "safir-female-martial",
+      "motionFamilyId": "wand",
+      "label": "薩菲爾女性偏武 · 單手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-scholarly--wind",
+      "appearanceId": "yunhua-male-scholarly",
+      "motionFamilyId": "wind",
+      "label": "雲華男性偏文 · 管樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-martial--wind",
+      "appearanceId": "yunhua-male-martial",
+      "motionFamilyId": "wind",
+      "label": "雲華男性偏武 · 管樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-scholarly--wind",
+      "appearanceId": "yunhua-female-scholarly",
+      "motionFamilyId": "wind",
+      "label": "雲華女性偏文 · 管樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-scholarly--staff",
+      "appearanceId": "aurelien-female-scholarly",
+      "motionFamilyId": "staff",
+      "label": "奧瑞恩女性偏文 · 雙手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-scholarly--staff",
+      "appearanceId": "safir-male-scholarly",
+      "motionFamilyId": "staff",
+      "label": "薩菲爾男性偏文 · 雙手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-martial--shield",
+      "appearanceId": "safir-male-martial",
+      "motionFamilyId": "shield",
+      "label": "薩菲爾男性偏武 · 單手盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-martial--staff",
+      "appearanceId": "safir-male-martial",
+      "motionFamilyId": "staff",
+      "label": "薩菲爾男性偏武 · 雙手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-scholarly--shield",
+      "appearanceId": "safir-female-scholarly",
+      "motionFamilyId": "shield",
+      "label": "薩菲爾女性偏文 · 單手盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-scholarly--staff",
+      "appearanceId": "safir-female-scholarly",
+      "motionFamilyId": "staff",
+      "label": "薩菲爾女性偏文 · 雙手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-martial--shield",
+      "appearanceId": "safir-female-martial",
+      "motionFamilyId": "shield",
+      "label": "薩菲爾女性偏武 · 單手盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-martial--staff",
+      "appearanceId": "safir-female-martial",
+      "motionFamilyId": "staff",
+      "label": "薩菲爾女性偏武 · 雙手法杖",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-scholarly--strings",
+      "appearanceId": "yunhua-male-scholarly",
+      "motionFamilyId": "strings",
+      "label": "雲華男性偏文 · 弦樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-martial--strings",
+      "appearanceId": "yunhua-male-martial",
+      "motionFamilyId": "strings",
+      "label": "雲華男性偏武 · 弦樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-scholarly--strings",
+      "appearanceId": "yunhua-female-scholarly",
+      "motionFamilyId": "strings",
+      "label": "雲華女性偏文 · 弦樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-martial--wind",
+      "appearanceId": "yunhua-female-martial",
+      "motionFamilyId": "wind",
+      "label": "雲華女性偏武 · 管樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-martial--strings",
+      "appearanceId": "yunhua-female-martial",
+      "motionFamilyId": "strings",
+      "label": "雲華女性偏武 · 弦樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-scholarly--wind",
+      "appearanceId": "vildun-male-scholarly",
+      "motionFamilyId": "wind",
+      "label": "維爾冬男性偏文 · 管樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-scholarly--strings",
+      "appearanceId": "vildun-male-scholarly",
+      "motionFamilyId": "strings",
+      "label": "維爾冬男性偏文 · 弦樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-martial--wind",
+      "appearanceId": "vildun-male-martial",
+      "motionFamilyId": "wind",
+      "label": "維爾冬男性偏武 · 管樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-martial--strings",
+      "appearanceId": "vildun-male-martial",
+      "motionFamilyId": "strings",
+      "label": "維爾冬男性偏武 · 弦樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-scholarly--wind",
+      "appearanceId": "vildun-female-scholarly",
+      "motionFamilyId": "wind",
+      "label": "維爾冬女性偏文 · 管樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-scholarly--strings",
+      "appearanceId": "vildun-female-scholarly",
+      "motionFamilyId": "strings",
+      "label": "維爾冬女性偏文 · 弦樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-martial--wind",
+      "appearanceId": "vildun-female-martial",
+      "motionFamilyId": "wind",
+      "label": "維爾冬女性偏武 · 管樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-martial--strings",
+      "appearanceId": "vildun-female-martial",
+      "motionFamilyId": "strings",
+      "label": "維爾冬女性偏武 · 弦樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-scholarly--wind",
+      "appearanceId": "aurelien-male-scholarly",
+      "motionFamilyId": "wind",
+      "label": "奧瑞恩男性偏文 · 管樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-scholarly--strings",
+      "appearanceId": "aurelien-male-scholarly",
+      "motionFamilyId": "strings",
+      "label": "奧瑞恩男性偏文 · 弦樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-martial--wind",
+      "appearanceId": "aurelien-male-martial",
+      "motionFamilyId": "wind",
+      "label": "奧瑞恩男性偏武 · 管樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-scholarly--wind",
+      "appearanceId": "aurelien-female-scholarly",
+      "motionFamilyId": "wind",
+      "label": "奧瑞恩女性偏文 · 管樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-martial--wind",
+      "appearanceId": "aurelien-female-martial",
+      "motionFamilyId": "wind",
+      "label": "奧瑞恩女性偏武 · 管樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-scholarly--wind",
+      "appearanceId": "safir-male-scholarly",
+      "motionFamilyId": "wind",
+      "label": "薩菲爾男性偏文 · 管樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-martial--wind",
+      "appearanceId": "safir-male-martial",
+      "motionFamilyId": "wind",
+      "label": "薩菲爾男性偏武 · 管樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-scholarly--wind",
+      "appearanceId": "safir-female-scholarly",
+      "motionFamilyId": "wind",
+      "label": "薩菲爾女性偏文 · 管樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-martial--wind",
+      "appearanceId": "safir-female-martial",
+      "motionFamilyId": "wind",
+      "label": "薩菲爾女性偏武 · 管樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-scholarly--percussion",
+      "appearanceId": "yunhua-male-scholarly",
+      "motionFamilyId": "percussion",
+      "label": "雲華男性偏文 · 打擊樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-martial--percussion",
+      "appearanceId": "yunhua-male-martial",
+      "motionFamilyId": "percussion",
+      "label": "雲華男性偏武 · 打擊樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-scholarly--percussion",
+      "appearanceId": "yunhua-female-scholarly",
+      "motionFamilyId": "percussion",
+      "label": "雲華女性偏文 · 打擊樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-martial--percussion",
+      "appearanceId": "yunhua-female-martial",
+      "motionFamilyId": "percussion",
+      "label": "雲華女性偏武 · 打擊樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-scholarly--percussion",
+      "appearanceId": "vildun-male-scholarly",
+      "motionFamilyId": "percussion",
+      "label": "維爾冬男性偏文 · 打擊樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-martial--percussion",
+      "appearanceId": "vildun-male-martial",
+      "motionFamilyId": "percussion",
+      "label": "維爾冬男性偏武 · 打擊樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-scholarly--percussion",
+      "appearanceId": "vildun-female-scholarly",
+      "motionFamilyId": "percussion",
+      "label": "維爾冬女性偏文 · 打擊樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-martial--percussion",
+      "appearanceId": "vildun-female-martial",
+      "motionFamilyId": "percussion",
+      "label": "維爾冬女性偏武 · 打擊樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-scholarly--percussion",
+      "appearanceId": "aurelien-male-scholarly",
+      "motionFamilyId": "percussion",
+      "label": "奧瑞恩男性偏文 · 打擊樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-martial--strings",
+      "appearanceId": "aurelien-male-martial",
+      "motionFamilyId": "strings",
+      "label": "奧瑞恩男性偏武 · 弦樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-martial--percussion",
+      "appearanceId": "aurelien-male-martial",
+      "motionFamilyId": "percussion",
+      "label": "奧瑞恩男性偏武 · 打擊樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-scholarly--strings",
+      "appearanceId": "aurelien-female-scholarly",
+      "motionFamilyId": "strings",
+      "label": "奧瑞恩女性偏文 · 弦樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-scholarly--percussion",
+      "appearanceId": "aurelien-female-scholarly",
+      "motionFamilyId": "percussion",
+      "label": "奧瑞恩女性偏文 · 打擊樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-martial--strings",
+      "appearanceId": "aurelien-female-martial",
+      "motionFamilyId": "strings",
+      "label": "奧瑞恩女性偏武 · 弦樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-scholarly--strings",
+      "appearanceId": "safir-male-scholarly",
+      "motionFamilyId": "strings",
+      "label": "薩菲爾男性偏文 · 弦樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-martial--strings",
+      "appearanceId": "safir-male-martial",
+      "motionFamilyId": "strings",
+      "label": "薩菲爾男性偏武 · 弦樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-scholarly--strings",
+      "appearanceId": "safir-female-scholarly",
+      "motionFamilyId": "strings",
+      "label": "薩菲爾女性偏文 · 弦樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-martial--strings",
+      "appearanceId": "safir-female-martial",
+      "motionFamilyId": "strings",
+      "label": "薩菲爾女性偏武 · 弦樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-scholarly--sword-shield",
+      "appearanceId": "yunhua-male-scholarly",
+      "motionFamilyId": "sword-shield",
+      "label": "雲華男性偏文 · 單手武器與盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-martial--sword-shield",
+      "appearanceId": "yunhua-male-martial",
+      "motionFamilyId": "sword-shield",
+      "label": "雲華男性偏武 · 單手武器與盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-scholarly--sword-shield",
+      "appearanceId": "yunhua-female-scholarly",
+      "motionFamilyId": "sword-shield",
+      "label": "雲華女性偏文 · 單手武器與盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-martial--sword-shield",
+      "appearanceId": "yunhua-female-martial",
+      "motionFamilyId": "sword-shield",
+      "label": "雲華女性偏武 · 單手武器與盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ],
+      "contactFrame": 4
+    },
+    {
+      "skin": "vildun-male-scholarly--sword-shield",
+      "appearanceId": "vildun-male-scholarly",
+      "motionFamilyId": "sword-shield",
+      "label": "維爾冬男性偏文 · 單手武器與盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-martial--sword-shield",
+      "appearanceId": "vildun-male-martial",
+      "motionFamilyId": "sword-shield",
+      "label": "維爾冬男性偏武 · 單手武器與盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-scholarly--sword-shield",
+      "appearanceId": "vildun-female-scholarly",
+      "motionFamilyId": "sword-shield",
+      "label": "維爾冬女性偏文 · 單手武器與盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-martial--sword-shield",
+      "appearanceId": "vildun-female-martial",
+      "motionFamilyId": "sword-shield",
+      "label": "維爾冬女性偏武 · 單手武器與盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-scholarly--sword-shield",
+      "appearanceId": "aurelien-male-scholarly",
+      "motionFamilyId": "sword-shield",
+      "label": "奧瑞恩男性偏文 · 單手武器與盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-martial--sword-shield",
+      "appearanceId": "aurelien-male-martial",
+      "motionFamilyId": "sword-shield",
+      "label": "奧瑞恩男性偏武 · 單手武器與盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-scholarly--sword-shield",
+      "appearanceId": "aurelien-female-scholarly",
+      "motionFamilyId": "sword-shield",
+      "label": "奧瑞恩女性偏文 · 單手武器與盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-martial--percussion",
+      "appearanceId": "aurelien-female-martial",
+      "motionFamilyId": "percussion",
+      "label": "奧瑞恩女性偏武 · 打擊樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-martial--sword-shield",
+      "appearanceId": "aurelien-female-martial",
+      "motionFamilyId": "sword-shield",
+      "label": "奧瑞恩女性偏武 · 單手武器與盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-scholarly--percussion",
+      "appearanceId": "safir-male-scholarly",
+      "motionFamilyId": "percussion",
+      "label": "薩菲爾男性偏文 · 打擊樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-scholarly--sword-shield",
+      "appearanceId": "safir-male-scholarly",
+      "motionFamilyId": "sword-shield",
+      "label": "薩菲爾男性偏文 · 單手武器與盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-martial--percussion",
+      "appearanceId": "safir-male-martial",
+      "motionFamilyId": "percussion",
+      "label": "薩菲爾男性偏武 · 打擊樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-martial--sword-shield",
+      "appearanceId": "safir-male-martial",
+      "motionFamilyId": "sword-shield",
+      "label": "薩菲爾男性偏武 · 單手武器與盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-scholarly--percussion",
+      "appearanceId": "safir-female-scholarly",
+      "motionFamilyId": "percussion",
+      "label": "薩菲爾女性偏文 · 打擊樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-martial--percussion",
+      "appearanceId": "safir-female-martial",
+      "motionFamilyId": "percussion",
+      "label": "薩菲爾女性偏武 · 打擊樂器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "stationary",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-martial--sword-shield",
+      "appearanceId": "safir-female-martial",
+      "motionFamilyId": "sword-shield",
+      "label": "薩菲爾女性偏武 · 單手武器與盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-scholarly--tower-shield",
+      "appearanceId": "yunhua-male-scholarly",
+      "motionFamilyId": "tower-shield",
+      "label": "雲華男性偏文 · 雙手大盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-scholarly--dual",
+      "appearanceId": "yunhua-male-scholarly",
+      "motionFamilyId": "dual",
+      "label": "雲華男性偏文 · 雙持武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-martial--tower-shield",
+      "appearanceId": "yunhua-male-martial",
+      "motionFamilyId": "tower-shield",
+      "label": "雲華男性偏武 · 雙手大盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-male-martial--dual",
+      "appearanceId": "yunhua-male-martial",
+      "motionFamilyId": "dual",
+      "label": "雲華男性偏武 · 雙持武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-scholarly--tower-shield",
+      "appearanceId": "yunhua-female-scholarly",
+      "motionFamilyId": "tower-shield",
+      "label": "雲華女性偏文 · 雙手大盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-scholarly--dual",
+      "appearanceId": "yunhua-female-scholarly",
+      "motionFamilyId": "dual",
+      "label": "雲華女性偏文 · 雙持武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-martial--tower-shield",
+      "appearanceId": "yunhua-female-martial",
+      "motionFamilyId": "tower-shield",
+      "label": "雲華女性偏武 · 雙手大盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "yunhua-female-martial--dual",
+      "appearanceId": "yunhua-female-martial",
+      "motionFamilyId": "dual",
+      "label": "雲華女性偏武 · 雙持武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-scholarly--tower-shield",
+      "appearanceId": "vildun-male-scholarly",
+      "motionFamilyId": "tower-shield",
+      "label": "維爾冬男性偏文 · 雙手大盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-scholarly--dual",
+      "appearanceId": "vildun-male-scholarly",
+      "motionFamilyId": "dual",
+      "label": "維爾冬男性偏文 · 雙持武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-martial--tower-shield",
+      "appearanceId": "vildun-male-martial",
+      "motionFamilyId": "tower-shield",
+      "label": "維爾冬男性偏武 · 雙手大盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-male-martial--dual",
+      "appearanceId": "vildun-male-martial",
+      "motionFamilyId": "dual",
+      "label": "維爾冬男性偏武 · 雙持武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-scholarly--tower-shield",
+      "appearanceId": "vildun-female-scholarly",
+      "motionFamilyId": "tower-shield",
+      "label": "維爾冬女性偏文 · 雙手大盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-scholarly--dual",
+      "appearanceId": "vildun-female-scholarly",
+      "motionFamilyId": "dual",
+      "label": "維爾冬女性偏文 · 雙持武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-martial--tower-shield",
+      "appearanceId": "vildun-female-martial",
+      "motionFamilyId": "tower-shield",
+      "label": "維爾冬女性偏武 · 雙手大盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "vildun-female-martial--dual",
+      "appearanceId": "vildun-female-martial",
+      "motionFamilyId": "dual",
+      "label": "維爾冬女性偏武 · 雙持武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-scholarly--tower-shield",
+      "appearanceId": "aurelien-male-scholarly",
+      "motionFamilyId": "tower-shield",
+      "label": "奧瑞恩男性偏文 · 雙手大盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-scholarly--dual",
+      "appearanceId": "aurelien-male-scholarly",
+      "motionFamilyId": "dual",
+      "label": "奧瑞恩男性偏文 · 雙持武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-martial--tower-shield",
+      "appearanceId": "aurelien-male-martial",
+      "motionFamilyId": "tower-shield",
+      "label": "奧瑞恩男性偏武 · 雙手大盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-male-martial--dual",
+      "appearanceId": "aurelien-male-martial",
+      "motionFamilyId": "dual",
+      "label": "奧瑞恩男性偏武 · 雙持武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-scholarly--tower-shield",
+      "appearanceId": "aurelien-female-scholarly",
+      "motionFamilyId": "tower-shield",
+      "label": "奧瑞恩女性偏文 · 雙手大盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-scholarly--dual",
+      "appearanceId": "aurelien-female-scholarly",
+      "motionFamilyId": "dual",
+      "label": "奧瑞恩女性偏文 · 雙持武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-martial--tower-shield",
+      "appearanceId": "aurelien-female-martial",
+      "motionFamilyId": "tower-shield",
+      "label": "奧瑞恩女性偏武 · 雙手大盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "aurelien-female-martial--dual",
+      "appearanceId": "aurelien-female-martial",
+      "motionFamilyId": "dual",
+      "label": "奧瑞恩女性偏武 · 雙持武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-scholarly--tower-shield",
+      "appearanceId": "safir-male-scholarly",
+      "motionFamilyId": "tower-shield",
+      "label": "薩菲爾男性偏文 · 雙手大盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-scholarly--dual",
+      "appearanceId": "safir-male-scholarly",
+      "motionFamilyId": "dual",
+      "label": "薩菲爾男性偏文 · 雙持武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-martial--tower-shield",
+      "appearanceId": "safir-male-martial",
+      "motionFamilyId": "tower-shield",
+      "label": "薩菲爾男性偏武 · 雙手大盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-male-martial--dual",
+      "appearanceId": "safir-male-martial",
+      "motionFamilyId": "dual",
+      "label": "薩菲爾男性偏武 · 雙持武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-scholarly--sword-shield",
+      "appearanceId": "safir-female-scholarly",
+      "motionFamilyId": "sword-shield",
+      "label": "薩菲爾女性偏文 · 單手武器與盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-scholarly--tower-shield",
+      "appearanceId": "safir-female-scholarly",
+      "motionFamilyId": "tower-shield",
+      "label": "薩菲爾女性偏文 · 雙手大盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-scholarly--dual",
+      "appearanceId": "safir-female-scholarly",
+      "motionFamilyId": "dual",
+      "label": "薩菲爾女性偏文 · 雙持武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-martial--tower-shield",
+      "appearanceId": "safir-female-martial",
+      "motionFamilyId": "tower-shield",
+      "label": "薩菲爾女性偏武 · 雙手大盾",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    },
+    {
+      "skin": "safir-female-martial--dual",
+      "appearanceId": "safir-female-martial",
+      "motionFamilyId": "dual",
+      "label": "薩菲爾女性偏武 · 雙持武器",
+      "actions": [
+        "idle",
+        "attack",
+        "hit",
+        "guard",
+        "dodge",
+        "defeat"
+      ],
+      "scale": 1.73,
+      "baselines": [
+        0.97,
+        1,
+        0.98,
+        1,
+        1,
+        0.98
+      ],
+      "facing": "right",
+      "width": 255,
+      "attackMotion": "contact",
+      "portrait": [
+        55,
+        0,
+        105,
+        105
+      ]
+    }
+  ]
+}

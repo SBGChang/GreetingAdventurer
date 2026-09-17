@@ -1,0 +1,15 @@
+{
+  "mode": "built-in image_gen.imagegen",
+  "assets": [
+    {
+      "id": "service-button",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-cb8ffdfb-3cc6-4371-baf6-67a198c8c67e.png",
+      "prompt": "Create a production game UI asset: ONE single plain clickable horizontal rectangular button, front view, filling the entire 1536 x 512 canvas edge to edge. Fully opaque RGB. Refined smooth charcoal-brown enamel inset face, extremely fine brushed antique brass rim, thin bevel highlights at top edge and a subtle lower bevel for tactile raised-button depth. Very restrained elegant painterly realism, clean small-scale details. Broad EMPTY central face for code-rendered text. Straight rectangular sides with tiny chamfered corners. All edges are part of the button, no outer backdrop or margins. No illustration, no architecture, no scrollwork, no cultural emblems, no gems, no carvings, no text, no symbols, no embossed patterns. This is a simple physical game BUTTON, not an ornate decorative panel. Crisp high-resolution fine material grain, not scratched or rough."
+    },
+    {
+      "id": "facility-plaque",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-44a310b1-bdb6-4de5-89e0-37c4604fe1af.png",
+      "prompt": "Create ONE production RPG UI title plaque asset, horizontal 3:1 canvas 1536 x 512, centered front view on a genuinely TRANSPARENT background. A refined dark walnut signboard with a very thin aged brass raised frame, lightly chamfered ends and tiny understated mounting tabs. Simple elegant craftsmanship, realistic painted game illustration, crisp clean edges, warm soft edge highlights, subtle material grain. The large dark central writing surface is completely blank, no text or symbols. Plaque fills 96 percent width and 86 percent height. Preserve full opacity of the entire wood/brass object, transparent only OUTSIDE the silhouette. No fading, no architectural scenery, no cultural motifs, no curling ornament, no ropes, no chains, no watermark. This plaque will straddle the top edge of a large illustrated game window with half protruding above it, at a display size of 340 by 96 pixels."
+    }
+  ]
+}

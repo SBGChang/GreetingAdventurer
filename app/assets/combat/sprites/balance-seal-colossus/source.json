@@ -1,0 +1,7 @@
+{
+  "tool": "image_gen",
+  "name": "天衡印俑",
+  "prompt": "Production small raster animation sprites for a polished hand-painted fantasy RPG, crisp miniature art, NOT chibi, NOT 3D. OPAQUE PURE MAGENTA #FF00FF background, RGB, no alpha or transparency. EXACTLY SIX COLUMNS and FOUR ROWS, 24 full-body poses total. Each equal cell contains ONE entire creature with 15% magenta margin all sides. No overlap between cells, no grid lines, no text, no scenery, no floor shadows. Same creature identity, scale and camera every pose, enemy facing LEFT three-quarter side view. Row1 six poses of breathing/hovering IDLE LOOP. Row2 six distinct ATTACK keyframes: ready, anticipation, coil, strong contact attack, follow-through, recover. Row3 six HIT recoil/recovery frames. Row4 six DEFEAT frames from standing through collapse into motionless fallen final pose; no gore. Source format landscape, 1536x1024 preferred. Creature should be around 140px tall per cell, leave room for weapons and tail. Strong action silhouettes, no identical poses substituting attacks. SUBJECT: a gigantic ancient Chinese ritual guardian constructed of pale stone and verdigris bronze, heavy square seal crown, symmetrical scale-like shoulder plates, amber seal core in chest and massive fists. Motion: slow grounded idle then lifts massive stone fist and slams it down. Keep effects entirely inside cell margins.",
+  "source": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-fe77b29b-49f3-484e-9455-b6ab41551e52.png",
+  "review": "unreviewed"
+}

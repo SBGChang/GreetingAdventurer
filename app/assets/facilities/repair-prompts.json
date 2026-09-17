@@ -1,0 +1,280 @@
+{
+  "mode": "built-in image_gen.imagegen",
+  "useCase": "identity-preserve",
+  "prompt": "Technical repair ONLY. Input image is the EDIT TARGET. Preserve exactly these four portraits, same character identity, all facial expressions (normal top-left, happy top-right, angry bottom-left, sad bottom-right), clothing, framing, colors and 2x2 layout. The source has a BROKEN ALPHA CHANNEL, especially bottom-right portrait, where body and background fade to transparency. Make this image COMPLETELY OPAQUE, reconstructing matching clothing and indoor background only where necessary. Every pixel MUST have alpha 255; output RGB image with no transparency. Do not fade or dissolve any part, no vignette, no checkerboard, no gradients to transparent, no additional objects, no other change. A flat full square opaque illustration sheet, NOT a transparent sprite.",
+  "outputs": [
+    {
+      "id": "vildun-inn",
+      "prompt": "Technical repair ONLY. Preserve exactly these four portraits, same woman, all facial expressions, clothing, framing, colors and 2x2 layout. The source has a BROKEN ALPHA CHANNEL, especially bottom-right portrait, where body and background fade to transparency. Make this image COMPLETELY OPAQUE, reconstructing matching clothing and timber background only where necessary. Every pixel MUST have alpha 255; output RGB image with no transparency. Do not fade or dissolve any part, no vignette, no checkerboard, no gradients to transparent, no additional objects, no other change. A flat full square opaque illustration sheet, NOT a transparent sprite.",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-c07345a1-0d86-4288-bd5a-e582354eb818.png",
+      "editTarget": "app/assets/facilities/vildun-inn.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-78b96cb8-b8c7-4d14-9919-5e100ac82ffb.png"
+    },
+    {
+      "id": "yunhua-tavern",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-81322630-4555-4160-925d-4bd1cecb549d.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/yunhua-tavern.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-96a3c70c-d0e7-4b87-90c6-5bb74d7b35b3.png"
+    },
+    {
+      "id": "yunhua-adventurerGuild",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-89bd3b46-3d97-4d00-a973-bd7b2c987750.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/yunhua-adventurerGuild.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-b10810c2-6f70-4b2e-9762-f11504dd6463.png"
+    },
+    {
+      "id": "yunhua-itemShop",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-d0221959-4049-4171-8a8b-ea1b893cd41f.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/yunhua-itemShop.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-898aff76-550a-41b4-bc4c-2f70eae5c318.png"
+    },
+    {
+      "id": "yunhua-trainingGround",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-f9fc6c0b-ab73-46a3-9b7b-de5c0c6c3e33.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/yunhua-trainingGround.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-fef15553-5dda-46d8-b2bd-5d623e9f113d.png"
+    },
+    {
+      "id": "yunhua-equipmentShop",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-767cb9be-10ea-4c15-870a-103c0d5f15eb.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/yunhua-equipmentShop.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-538452b1-92b0-4971-b933-258fc487a83b.png"
+    },
+    {
+      "id": "yunhua-bookstore",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-098fb881-6f35-43f5-854f-f981e23c9480.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/yunhua-bookstore.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-772fbc39-a64f-4ddc-bd50-38a6dbfafeb6.png"
+    },
+    {
+      "id": "yunhua-cityGate",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-36edea97-369f-41b9-a33c-c3fc9d799c7c.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/yunhua-cityGate.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-117c1293-cc84-4870-bc40-4cb8924cc142.png"
+    },
+    {
+      "id": "yunhua-home",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-f6672558-57f5-41be-b416-89c2689d2303.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/yunhua-home.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-343712d3-5520-4a7f-ba81-1236cc751a54.png"
+    },
+    {
+      "id": "yunhua-adventureCheckpoint",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-851b5a9b-73e5-4683-ae22-9a9acfd64064.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/yunhua-adventureCheckpoint.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-7d1fa141-3396-4de4-9c59-1c5ccbff9111.png"
+    },
+    {
+      "id": "vildun-tavern",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-2d77cca7-732d-4d7a-b8b7-2a46b208705f.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/vildun-tavern.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-95bd2220-c607-4753-b1c7-54c03d2901a9.png"
+    },
+    {
+      "id": "vildun-adventurerGuild",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-f746937e-36ac-43e8-bf38-94462244a4ea.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/vildun-adventurerGuild.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-18d63d5c-d6e7-475f-8a9a-f7f264c6779e.png"
+    },
+    {
+      "id": "vildun-itemShop",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-1e00cb44-9720-46ca-9e55-e3449b35d869.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/vildun-itemShop.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-cc86115c-784e-4107-b9c0-72a14a31d461.png"
+    },
+    {
+      "id": "vildun-equipmentShop",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-0af7c54e-6752-4ca2-a28a-733007bb8a56.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/vildun-equipmentShop.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-a498b461-0716-4ab1-ae92-f49c4e3beab7.png"
+    },
+    {
+      "id": "vildun-trainingGround",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-c36544cd-c5a7-430a-abe9-611fbcc215a2.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/vildun-trainingGround.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-b7f2f5ff-d235-427e-a185-f8a2551109ae.png"
+    },
+    {
+      "id": "vildun-adventureCheckpoint",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-373f3e97-2d3c-4a95-8304-267f63f73017.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/vildun-adventureCheckpoint.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-6676a0f0-5b4f-4631-910c-2487104b8f7d.png"
+    },
+    {
+      "id": "vildun-bookstore",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-46c40f17-8f12-40d4-8f81-c9b4182deb0b.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/vildun-bookstore.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-481fbc0c-a662-41aa-b0d5-2ecb5bbb8bf8.png"
+    },
+    {
+      "id": "vildun-cityGate",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-bb24488f-8731-4506-a643-d78fc7eebbf1.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/vildun-cityGate.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-bad0ca1a-ca5f-4c46-b726-0d483f04b861.png"
+    },
+    {
+      "id": "vildun-home",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-6cec7371-6c96-4202-9ef6-2e0a3ecd31f0.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/vildun-home.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-7ec285ff-92cb-4ebf-9774-b6fda991e345.png"
+    },
+    {
+      "id": "aurelien-inn",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-82a29782-9428-44cc-a0d4-fd3201e3e7d5.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/aurelien-inn.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-48d78128-40aa-4893-8eda-ba0bcc3692c6.png"
+    },
+    {
+      "id": "aurelien-adventurerGuild",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-27a4be99-f73d-40e6-bc69-3ffbc5516610.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/aurelien-adventurerGuild.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-fa362c48-b775-49a2-95c9-2cc363c3518c.png"
+    },
+    {
+      "id": "aurelien-itemShop",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-95a34d78-c31a-4df4-a4f0-e9bf36effb11.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/aurelien-itemShop.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-2b2038eb-d832-4d93-81a7-8c2b4dad836d.png"
+    },
+    {
+      "id": "aurelien-tavern",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-8eca1c92-84b8-436d-be0c-875d300a77de.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/aurelien-tavern.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-81d0fd76-d1a7-469a-a9bc-f37dbf89f5fe.png"
+    },
+    {
+      "id": "aurelien-trainingGround",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-9d2d5ad7-765e-4787-b65d-dd636b157bb7.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/aurelien-trainingGround.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-df1fa448-eee3-4766-920f-bedca9f62350.png"
+    },
+    {
+      "id": "aurelien-bookstore",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-bdfb1af7-c339-4279-ba01-f40c1d12ae03.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/aurelien-bookstore.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-5c88a651-67cb-4fe6-bae4-342cbed47e12.png"
+    },
+    {
+      "id": "aurelien-equipmentShop",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-34e65635-0b63-4b09-9aaf-ea96e7b84045.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/aurelien-equipmentShop.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-7c983794-400b-4c24-8951-655f96df6ea4.png"
+    },
+    {
+      "id": "aurelien-adventureCheckpoint",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-7777c5d2-fed7-4a75-83b7-716762ade75a.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/aurelien-adventureCheckpoint.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-1f17bdad-8805-47e7-ac5d-5dd048314925.png"
+    },
+    {
+      "id": "aurelien-cityGate",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-e135dfc8-8715-462a-95f3-e398baa2fab7.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/aurelien-cityGate.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-896aa77e-4fe7-4224-9c0b-7b60971b724d.png"
+    },
+    {
+      "id": "safir-inn",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-eeee8b8f-8b83-43f8-9508-1d40759bce58.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/safir-inn.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-70bf098f-5450-44eb-b3d2-eb1edaad9bbf.png"
+    },
+    {
+      "id": "safir-tavern",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-9b7504ef-42b6-4c51-90c7-80096b5b4979.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/safir-tavern.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-1173a03d-a139-4e47-9e27-6c8406eb2a51.png"
+    },
+    {
+      "id": "aurelien-home",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-ffcb2d61-b9f3-4d8f-acea-5c8e072fbe3a.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/aurelien-home.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-18a1f906-93ea-47d9-8a95-6e4ae1f522f1.png"
+    },
+    {
+      "id": "safir-adventurerGuild",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-2d72ae8e-986e-44a1-8fdb-74c2e497f2a6.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/safir-adventurerGuild.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-5cfa8671-24c3-4fa7-9c5a-e5dca76ffa79.png"
+    },
+    {
+      "id": "safir-itemShop",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-d4104d9c-02f0-4144-bd80-f2a394466575.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/safir-itemShop.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-e35722a1-ae8e-4433-9c49-69b5210e6c27.png"
+    },
+    {
+      "id": "safir-equipmentShop",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-c38790c6-8f49-451f-b224-c20730a76720.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/safir-equipmentShop.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-a3e6097e-d196-4b42-8f51-8d0ed1e8ac39.png"
+    },
+    {
+      "id": "safir-trainingGround",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-8066d807-bd2c-430e-b223-940ad86dfd14.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/safir-trainingGround.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-74c02a44-5af5-42ee-a0ca-32e932ad2515.png"
+    },
+    {
+      "id": "safir-bookstore",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-18b4e1ed-e11c-4f3a-b15f-423be34b56b4.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/safir-bookstore.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-c37fea34-cf35-4537-aa77-baf7d82a1adb.png"
+    },
+    {
+      "id": "safir-adventureCheckpoint",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-b5647698-0624-4bc4-a810-05f8c4b170de.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/safir-adventureCheckpoint.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-82acd44a-8c0c-4b32-a291-0baafb500ed4.png"
+    },
+    {
+      "id": "safir-home",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-7216a7f1-ba97-4322-aaf3-b510776a37ba.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/safir-home.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-94d288fa-ea7e-4e71-9084-111b5f1e24aa.png"
+    },
+    {
+      "id": "safir-cityGate",
+      "path": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-d7cb62fe-c7a0-4ba4-8d88-7f854ebc0c89.png",
+      "ok": true,
+      "editTarget": "app/assets/facilities/safir-cityGate.png",
+      "original": "C:\\Users\\DerekHChang\\.codex\\generated_images\\01a08938-b866-79a1-890d-364f5e1a0ea9\\exec-4e090d32-e135-460c-94a1-97229d58a06a.png"
+    }
+  ]
+}

@@ -17,8 +17,8 @@ function loopPose(clip: SpriteClip, time: number) {
 /** Shared renderer: all encounter-specific art is supplied by the entrance contract. */
 export function CombatSpriteArena({ground,view, frame, progress, selecting, validTargetIds, onTarget, label, actionLabel, loadingLabel, onReady, spritePresentation, highlightedId}: CombatArenaProps) {
   if (!spritePresentation) throw new Error('Missing sprite battle presentation');
-  const {scene, skins} = spritePresentation;
-  const widths: Record<string, number> = scene.skinWidths;
+  const {scene, skins, weaponSetSkins} = spritePresentation;
+  const skinKey = JSON.stringify([...new Set([...Object.values(skins), ...Object.values(weaponSetSkins).flatMap(sets=>Object.values(sets))])].sort());
   const host = useRef<HTMLDivElement>(null);
   const [atlases, setAtlases] = useState<Atlases>(), [error, setError] = useState('');
   const [scale, setScale] = useState(1), [clock, setClock] = useState(0), [hovered, setHovered] = useState<string>();
@@ -27,9 +27,10 @@ export function CombatSpriteArena({ground,view, frame, progress, selecting, vali
     let cancelled = false; onReady?.(false);
     const invalid = view.combatants.find(u => !profiles[skins[u.combatantId]!]);
     if (invalid) { setError(`尚無此參戰者的 2D 美術：${invalid.modelId}`); return; }
-    loadSpriteArt().then(loaded => { if (!cancelled) { setAtlases(loaded); onReady?.(true); } }).catch((e: Error) => { if (!cancelled) setError(e.message); });
+    setError(''); setAtlases(undefined);
+    loadSpriteArt(JSON.parse(skinKey) as string[]).then(loaded => { if (!cancelled) { setAtlases(loaded); onReady?.(true); } }).catch((e: Error) => { if (!cancelled) setError(e.message); });
     return () => { cancelled = true; onReady?.(false); };
-  }, [view.encounterId, onReady]);
+  }, [view.encounterId, onReady, skinKey]);
   useEffect(() => {
     const el = host.current!;
     const resize = () => setScale(Math.min(el.clientWidth / scene.width, el.clientHeight / scene.height));
@@ -45,31 +46,34 @@ export function CombatSpriteArena({ground,view, frame, progress, selecting, vali
     return spriteFormation(stable, scene);
   };
   const units = view.combatants.map((unit, i) => {
-    const skin = skins[unit.combatantId], profile = skin && profiles[skin];
-    if (!skin || !profile) return undefined;
+    const resolvedUnit = frame?.after.combatants.find(u=>u.combatantId===unit.combatantId) ?? unit;
+    const activeSet = resolvedUnit.artIdentity?.activeWeaponSetId;
+    const skin = activeSet ? weaponSetSkins[unit.combatantId]?.[activeSet] : skins[unit.combatantId], profile = skin && profiles[skin];
+    if (!skin || !profile || !atlases) return undefined;
     const before = frame?.before.combatants.find(u => u.combatantId === unit.combatantId);
     const action = frame?.actions.find(a => a.actorId === unit.combatantId);
     const results = frame?.actions.flatMap(a => a.results) ?? [];
     const hurt = results.some(r => r.kind === 'dealDamage' && r.targetId === unit.combatantId && r.amount > 0);
     const dead = unit.state === 'dead', newDeath = dead && before?.state !== 'dead';
-    const attack = !!action?.skillId && action.results.some(r => r.kind === 'dealDamage');
-    const stance = !!action?.results.some(r => r.kind === 'counterStanceEstablished');
+    const stance = action?.actionKind === 'guard' || !!action?.results.some(r => r.kind === 'counterStanceEstablished');
+    const attack = !!action?.skillId && !stance;
     const pose = dead ? 'defeat' : hurt && progress >= scene.impactProgress ? 'hit' : attack ? 'attack' : stance ? 'guard' : 'idle';
     const clip = profile.clips.find(c => c.id === pose);
     if (!clip) throw new Error(`缺少動作：${skin}/${pose}`);
     const count = clip.frames.length;
-    const poseIndex = pose === 'idle' ? loopPose(clip, clock + i * 170) : dead && (!frame || !newDeath) ? count - 1 : pose === 'hit' || pose === 'defeat' ? Math.min(count - 1, Math.floor(clamp((progress - scene.impactProgress) / (1 - scene.impactProgress)) * count)) : Math.min(count - 1, progress < scene.impactProgress ? Math.floor(progress / scene.impactProgress * 3) : 3 + Math.floor((progress - scene.impactProgress) / (1 - scene.impactProgress) * 3));
+    const lead=pose==='attack'?(profile.contactFrame??Math.floor(count/2)):Math.floor(count/2);
+    const poseIndex = pose === 'idle' ? loopPose(clip, clock + i * 170) : dead && (!frame || !newDeath) ? count - 1 : pose === 'hit' || pose === 'defeat' ? Math.min(count - 1, Math.floor(clamp((progress - scene.impactProgress) / (1 - scene.impactProgress)) * count)) : Math.min(count - 1, progress < scene.impactProgress ? Math.floor(progress / scene.impactProgress * lead) : lead + Math.floor((progress - scene.impactProgress) / (1 - scene.impactProgress) * (count-lead)));
     const base = formation(unit), position = {...base};
     const damage = action?.results.find(r => r.kind === 'dealDamage' && r.targetId !== unit.combatantId);
     const target = damage?.kind === 'dealDamage' ? view.combatants.find(u => u.combatantId === damage.targetId) : undefined;
-    if (attack && target && !reduced) {
+    if (attack && target && !reduced && action?.actionKind === 'attack' && profile.attackMotion === 'contact') {
       const aim = formation(target);
       const reach = progress < scene.returnStart ? clamp((progress - scene.approachStart) / (scene.approachEnd - scene.approachStart)) : 1 - clamp((progress - scene.returnStart) / (scene.returnEnd - scene.returnStart));
       const ease = reach * reach * (3 - 2 * reach);
       position.x += (aim.x + (unit.side === 'player' ? -scene.contactDistance : scene.contactDistance) - base.x) * ease;
       position.y += (aim.y - base.y) * ease;
     }
-    return {unit, skin, clip, pose, poseIndex, position, base, delta: before ? unit.health - before.health : 0, moving: attack && progress > scene.approachStart && progress < scene.returnEnd};
+    return {unit, skin, profile, clip, pose, poseIndex, position, base, delta: before ? unit.health - before.health : 0, moving: attack && action?.actionKind === 'attack' && profile.attackMotion === 'contact' && progress > scene.approachStart && progress < scene.returnEnd};
   }).filter((u): u is NonNullable<typeof u> => u !== undefined);
 
   useEffect(() => {
@@ -79,7 +83,8 @@ export function CombatSpriteArena({ground,view, frame, progress, selecting, vali
       const r = el.querySelector<HTMLElement>(`[data-sprite-unit="${u.unit.combatantId}"] canvas`)!.getBoundingClientRect();
       const f = u.clip.frames[u.poseIndex]!;
       if (!f) throw new Error(`Invalid sprite frame: ${u.skin}/${u.pose} index=${u.poseIndex} progress=${progress}`);
-      return {id: u.unit.combatantId, x: (r.left - outer.left + r.width / 2 + (f.rect.width / 2 - f.pivot.x) * u.clip.scale * r.width / 600) * el.clientWidth / outer.width,
+      const direction = (u.unit.side === 'player' ? 'right' : 'left') === u.profile.facing ? 1 : -1;
+      return {id: u.unit.combatantId, x: (r.left - outer.left + r.width / 2 + direction * (f.rect.width / 2 - f.pivot.x) * u.clip.scale * r.width / 600) * el.clientWidth / outer.width,
         y: (r.top - outer.top + r.height * .84 + (f.rect.height / 2 - f.pivot.y) * u.clip.scale * r.width / 600) * el.clientHeight / outer.height};
     }));
   }, [units, atlases, scale]);
@@ -99,10 +104,10 @@ export function CombatSpriteArena({ground,view, frame, progress, selecting, vali
     <div className="sprite-battle-stage" style={{width: scene.width, height: scene.height, transform: `translate(-50%,-50%) scale(${scale})`}}
       onPointerMove={e => setHovered(pick(e.clientX, e.clientY))} onPointerLeave={() => setHovered(undefined)} onClick={e => { const id = pick(e.clientX, e.clientY); if (id) onTarget(id); }}>
       <CombatGround scene={scene} ground={ground}/>
-      {atlases && units.map(u => <div key={u.unit.combatantId} className="sprite-battle-unit" data-sprite-unit={u.unit.combatantId} data-pose={u.pose}
-        data-targetable={selecting&&validTargetIds.includes(u.unit.combatantId)} data-target-dimmed={selecting&&!validTargetIds.includes(u.unit.combatantId)} data-hovered={hovered === u.unit.combatantId || highlightedId === u.unit.combatantId} data-side={u.unit.side} style={{left: u.position.x, top: u.position.y, zIndex: Math.round(u.moving ? 2000 : u.position.y), '--sprite-width': `${widths[u.skin]}px`} as CSSProperties}>
+      {atlases && units.map(u => <div key={u.unit.combatantId} className="sprite-battle-unit" data-sprite-unit={u.unit.combatantId} data-skin={u.skin} data-pose={u.pose}
+        data-targetable={selecting&&validTargetIds.includes(u.unit.combatantId)} data-target-dimmed={selecting&&!validTargetIds.includes(u.unit.combatantId)} data-hovered={hovered === u.unit.combatantId || highlightedId === u.unit.combatantId} data-side={u.unit.side} style={{left: u.position.x, top: u.position.y, zIndex: Math.round(u.moving ? 2000 : u.position.y), '--sprite-width': `${u.profile.width}px`} as CSSProperties}>
         <i className="sprite-contact-shadow"/>
-        <div className="sprite-battle-figure"><SpriteSequence image={atlases[`${u.skin}/${u.clip.id}`]!} clip={u.clip} frame={u.poseIndex}/></div>
+        <div className="sprite-battle-figure"><SpriteSequence image={atlases[`${u.skin}/${u.clip.id}`]!} clip={u.clip} frame={u.poseIndex} flipX={(u.unit.side === 'player' ? 'right' : 'left') !== u.profile.facing}/></div>
         {u.delta !== 0 && progress >= scene.impactProgress && <strong className={`sprite-damage ${u.delta > 0 ? 'healing' : ''}`}>{u.delta > 0 ? '+' : ''}{u.delta}</strong>}
       </div>)}
       {activeAction && <div className="sprite-action-name" key={`${frame!.actorId}:${frame!.before.combatants.map(u => u.ctb).join('-')}`}>{actionLabel(activeAction)}</div>}

@@ -339,7 +339,7 @@ export type MoveOptionView = Readonly<{
 // ── 戰鬥 ─────────────────────────────────────────────────────────────────────
 
 export type CombatantView2 = Readonly<{
-  artIdentity?: Readonly<{archetypeId: string; sex: string; weapons: readonly Readonly<{mainHand: string | undefined; offHand: string | undefined; skillIds: readonly string[]}>[]}>;
+  artIdentity?: Readonly<{characterId: string; archetypeId: string; sex: string; activeWeaponSetId: string | undefined; weapons: readonly Readonly<{weaponSetId: string; mainHand: string | undefined; offHand: string | undefined; twoHanded: boolean; skillIds: readonly string[]}>[]}>;
   modelId: string;
   combatantId: string;
   side: 'player' | 'enemy';
@@ -348,6 +348,7 @@ export type CombatantView2 = Readonly<{
   fallbackLabel: string;
   row: number;
   col: number;
+  footprint: Readonly<{width: 1 | 2 | 3; height: 1 | 2 | 3}>;
   health: number;
   maxHealth: number;
   mana: number;
@@ -381,7 +382,7 @@ export type CombatView = Readonly<{
   // 出手順序（CTB 升冪）。玩家看得到「下一個是誰」。
   order: readonly string[];
 }>;
-export type CombatResolvedActionView = Readonly<{actorId:string;skillId:string|undefined;nameRef:LocalizedTextRef|undefined;results:readonly CombatActionResult[]}>;
+export type CombatResolvedActionView = Readonly<{actorId:string;skillId:string|undefined;actionKind:string|undefined;nameRef:LocalizedTextRef|undefined;results:readonly CombatActionResult[]}>;
 export type CombatFrame = Readonly<{actorId:string;before:CombatView;after:CombatView;actions:readonly CombatResolvedActionView[];ctbAfterAction:CombatActionResolvedPayload['ctbAfterAction']}>;
 
 // ── 人物 ─────────────────────────────────────────────────────────────────────
@@ -1008,10 +1009,12 @@ function projectCombat(
     artIdentity: c.source.kind === 'character' ? (() => {
       const character = state.character.characters[c.source.characterId]!;
       const loadout = state.inventory.equipmentLoadouts[c.source.characterId];
-      return {archetypeId: String(character.archetypeId), sex: character.sex,
-        weapons: (loadout?.weaponSets ?? []).filter(w => w.selectedSkillIds.some(Boolean)).map(w => ({
+      return {characterId:String(character.characterId), archetypeId: String(character.archetypeId), sex: character.sex, activeWeaponSetId: c.activeWeaponSetId === undefined ? undefined : String(c.activeWeaponSetId),
+        weapons: (loadout?.weaponSets ?? []).filter(w => w.selectedSkillIds.some(Boolean) || w.weaponSetId === c.activeWeaponSetId).map(w => ({
+          weaponSetId: String(w.weaponSetId),
           mainHand: w.mainHandItemId === undefined ? undefined : String(state.inventory.items[w.mainHandItemId]!.definitionId),
           offHand: w.offHandItemId === undefined ? undefined : String(state.inventory.items[w.offHandItemId]!.definitionId),
+          twoHanded: w.mainHandItemId !== undefined && w.mainHandItemId === w.offHandItemId,
           skillIds: w.selectedSkillIds.filter((s): s is NonNullable<typeof s> => s !== undefined).map(String),
         }))};
     })() : undefined,
@@ -1027,6 +1030,7 @@ function projectCombat(
     fallbackLabel: String(c.combatantId).split('~').slice(-1)[0] ?? String(c.combatantId),
     row: c.anchorCell.row,
     col: c.anchorCell.col,
+    footprint: c.footprint,
     health: c.health,
     maxHealth: c.maxHealth,
     mana: c.mana,
@@ -1588,7 +1592,7 @@ export function createGame(config: NewGameConfig, saved?: string): GameHandle {
         const committed=actions.filter(a=>String(a.encounterId)===after.encounterId);
         const action=committed.find(a=>String(a.actorId)===actorId);
         if(!action)throw new Error('Committed combat step is missing its action timing facts');
-        combatFrames.push({actorId,before:previous,after,ctbAfterAction:action.ctbAfterAction,actions:committed.map(a=>({actorId:String(a.actorId),skillId:a.skillId===undefined?undefined:String(a.skillId),nameRef:a.skillId===undefined?undefined:skillNameRefOf(registry,String(a.skillId)),results:a.results}))});
+        combatFrames.push({actorId,before:previous,after,ctbAfterAction:action.ctbAfterAction,actions:committed.map(a=>({actorId:String(a.actorId),skillId:a.skillId===undefined?undefined:String(a.skillId),actionKind:a.skillId===undefined?undefined:requireData<CombatSkillDefinitionView>(registry,String(a.skillId),'戰鬥技能').actionKind,nameRef:a.skillId===undefined?undefined:skillNameRefOf(registry,String(a.skillId)),results:a.results}))});
       }
       previous=after;
     };

@@ -13,10 +13,11 @@ export default defineConfig({
   base: './',
   plugins: [react()],
   build: {
-    rollupOptions: { input: { main: resolve(import.meta.dirname, 'app/index.html'), dungeon: resolve(import.meta.dirname, 'app/dungeon-3d.html'), walk: resolve(import.meta.dirname, 'app/dungeon-walk.html'), sprites: resolve(import.meta.dirname, 'app/combat-sprites.html'), battle2d: resolve(import.meta.dirname, 'app/combat-2d.html') } },
+    rollupOptions: { input: { main: resolve(import.meta.dirname, 'app/index.html'), facilityArt: resolve(import.meta.dirname, 'app/facility-art.html'), dungeon: resolve(import.meta.dirname, 'app/dungeon-3d.html'), walk: resolve(import.meta.dirname, 'app/dungeon-walk.html'), sprites: resolve(import.meta.dirname, 'app/combat-sprites.html'), battle2d: resolve(import.meta.dirname, 'app/combat-2d.html') } },
     // 產物放 repo 根的 dist/renderer（Electron 之後從這裡載）。
     outDir: resolve(import.meta.dirname, 'dist/renderer'),
     emptyOutDir: true,
   },
   server: { port: 5473, strictPort: true },
 });
+

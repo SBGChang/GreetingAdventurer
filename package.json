@@ -22,7 +22,7 @@
     "typecheck:ui": "tsc --noEmit -p app/tsconfig.json",
     "report:content": "tsx scripts/report-content-coverage.ts",
     "verify:content-scope": "node scripts/verify-content-scope.mjs",
-    "verify": "npm run typecheck && npm run typecheck:ui && npm run verify:discipline && npm run verify:modules && npm run verify:ui && npm run verify:playthrough && npm run verify:quests && npm run verify:world-travel && npm run verify:save-schema && npm run verify:content-packs && npm run verify:content-sync && npm run verify:content-scope && npm run verify:docs && npm run verify:geography && tsx scripts/verify-walk.ts && tsx scripts/verify-combat-presentation.ts && npm run verify:dungeon-art && npm run build:ui",
+    "verify": "npm run typecheck && npm run typecheck:ui && npm run verify:discipline && npm run verify:modules && npm run verify:ui && npm run verify:playthrough && npm run verify:quests && npm run verify:world-travel && npm run verify:save-schema && npm run verify:content-packs && npm run verify:content-sync && npm run verify:content-scope && npm run verify:docs && npm run verify:geography && tsx scripts/verify-walk.ts && tsx scripts/verify-combat-presentation.ts && npm run verify:dungeon-art && node scripts/verify-reception-art.mjs && npm run verify:sprite-assets && npm run verify:sprite-routing && npm run build:ui",
     "content:all": "npm run content:yunhua && npm run content:vildun && npm run content:aurelien && npm run content:safir",
     "content:yunhua": "node build_yunhua_content_html.mjs",
     "content:vildun": "node build_vildun_content_html.mjs",
@@ -41,7 +41,9 @@
     "verify:dungeon-art": "node scripts/verify-dungeon-art.mjs",
     "verify:dungeon": "npm run build:ui && electron scripts/electron-dungeon-smoke.cjs",
     "verify:walk": "tsx scripts/verify-walk.ts && npm run build:ui && electron scripts/electron-walk-smoke.cjs",
-    "verify:dungeon-catalog": "npm run build:ui && electron scripts/electron-dungeon-catalog-smoke.cjs"
+    "verify:dungeon-catalog": "npm run build:ui && electron scripts/electron-dungeon-catalog-smoke.cjs",
+    "verify:sprite-assets": "node scripts/verify-combat-sprite-assets.mjs --complete",
+    "verify:sprite-routing": "tsx scripts/verify-sprite-routing.ts"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",

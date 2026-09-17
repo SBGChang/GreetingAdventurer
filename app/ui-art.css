@@ -42,9 +42,6 @@
 .window-surface .window-emblem{position:absolute;left:59px;top:40px;width:78px;height:78px;border:3px double #ba9858;box-shadow:0 5px 15px #48351f70}
 .game-shell .window-surface h2{color:#423420;font:25px 'PMingLiU',serif!important;letter-spacing:2px;margin:8px 0 25px 98px!important;min-height:48px;display:flex;align-items:center;text-shadow:0 1px #fff8}
 .game-shell .window-surface button{border-color:#ad915b!important;border-radius:4px!important;transition:transform .16s,box-shadow .16s;background-image:linear-gradient(#fff5,#b08d3c12)!important}
-.game-shell .window-surface button:has(> .ui-art),.game-shell .window-surface div:has(> .ui-art):not(.inventory-list){position:relative;min-height:104px;padding:15px 14px!important;border:1px solid #b79a61;box-shadow:inset 0 0 0 3px #dec99750,0 4px 8px #6c51251c}
-.window-surface button>.ui-art,.window-surface div:not(.inventory-list)>.ui-art:not(.window-emblem){float:left;width:65px;height:65px;margin:0 13px 8px 0;border-radius:9px;border:2px ridge #b79a61}
-.game-shell .window-surface button:has(> .ui-art):hover:not(:disabled){transform:translateY(-4px);box-shadow:0 7px 15px #5c432b40;border-color:#8c6229!important;filter:brightness(1.03)}
 .game-shell .window-surface button:disabled{opacity:.64;filter:saturate(.5)}
 .game-shell .window-surface button>span:not(.ui-art){line-height:1.6}
 .game-shell .inventory-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}

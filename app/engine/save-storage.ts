@@ -6,9 +6,11 @@ export interface SaveStorage {
 }
 const primary = 'greeting-adventurer.save.v1';
 const backup = 'greeting-adventurer.save.v1.backup';
+export const appearanceStorageKey='greeting-adventurer.appearances.v1';
 export function clearSave(storage: { removeItem(key: string): void }): void {
   storage.removeItem(backup);
   storage.removeItem(primary);
+  storage.removeItem(appearanceStorageKey);
 }
 export function readSave(storage: SaveStorage, fromBackup = false): string | undefined {
   return storage.getItem(fromBackup ? backup : primary) ?? undefined;

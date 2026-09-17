@@ -1,0 +1,9 @@
+.appearance-picker{margin:0 0 20px;color:#302b22}
+.appearance-picker .appearance-toggle{background:#27221c url('./assets/facilities/service-button.png') center/100% 100%;border:0;color:#fff2d3;padding:12px 24px;cursor:pointer;font-weight:700}
+.appearance-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.appearance-options button{background:#28261f url('./assets/facilities/service-button.png') center/100% 100%;border:0;color:#fff0cf;min-width:0;cursor:pointer;position:relative;padding:8px}
+.appearance-options canvas{display:block;width:100%;height:auto;max-height:150px;object-fit:contain}
+.appearance-options span{font-weight:700;display:block;text-shadow:1px 1px #000}
+.appearance-options button[aria-pressed=true]{filter:brightness(1.25);outline:2px solid #e7c773;outline-offset:-4px}
+.appearance-options button:hover{filter:brightness(1.15)}
+.appearance-options button:disabled{opacity:.45;cursor:wait}

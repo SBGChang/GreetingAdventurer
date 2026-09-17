@@ -87,13 +87,13 @@ const cases: readonly Case[] = [
           );
         }
       }
-      // 抽驗兩個具體字：公會與酒館。
+      // 抽驗雲華公會的文化名稱；職務種類仍是 adventurerGuild。
       const guild = city.facilityIds
         .map((f) => dataOf<FacilityDefinition>(String(f)))
         .find((f) => f.facilityKind === 'adventurerGuild');
       if (guild === undefined) throw new Error('雲京沒有冒險者公會');
-      assert(localization.resolve('zh-Hant', guild.display.nameRef) === '冒險者公會', '公會繁中名錯');
-      assert(localization.resolve('en', guild.display.nameRef) === "Adventurer's Guild", '公會英文名錯');
+      assert(localization.resolve('zh-Hant', guild.display.nameRef) === '雲行會館', '公會繁中名錯');
+      assert(localization.resolve('en', guild.display.nameRef) === 'Cloudfarer Hall', '公會英文名錯');
     },
   },
   {

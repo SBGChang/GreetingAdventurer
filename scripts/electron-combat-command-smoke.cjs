@@ -7,8 +7,10 @@ app.whenReady().then(async()=>{
  const run=code=>win.webContents.executeJavaScript(code,true),pause=ms=>new Promise(r=>setTimeout(r,ms)),errors=[];
  win.webContents.on('console-message',d=>{if(d.level==='error')errors.push(d.message)});
  const wait=async code=>{for(let n=0;n<1000;n++){if(await run(code))return;await pause(25)}throw Error('Timeout '+code)};
- await win.loadFile(path.resolve('dist/renderer/combat-2d.html'),{query:{weapons:'alternate'}});
+ await win.loadFile(path.resolve('dist/renderer/combat-2d.html'),{query:{weapons:'alternate',appearance:'aurelien-male-scholarly'}});
  await wait(`document.querySelector('.combat-command-overlay')?.dataset.commandReady==='true'`);
+ await wait(`document.querySelector('.combat-sprite-arena')?.dataset.ready==='true'`);
+ assert.equal(await run(`document.querySelector('[data-sprite-unit][data-side=player]').dataset.skin`),'aurelien-male-scholarly--unarmed');
  assert.equal(await run(`document.querySelectorAll('.combat-skill-tile[data-skill-id]:enabled').length`),1);
  await pause(250);win.webContents.invalidate();writeFileSync(path.resolve('dist/combat-alternate-weapon.png'),(await win.webContents.capturePage()).toPNG());
  const nextSet=await run(`document.querySelector('[data-active-set=false] .combat-skill-tile[data-skill-id]').dataset.weaponSetId`);
@@ -18,6 +20,7 @@ app.whenReady().then(async()=>{
  assert.equal(await run(`document.querySelectorAll('[data-combat-side=player]:enabled').length`),0);
  await run(`document.querySelector('[data-combat-side=enemy][data-target-ready=true]').click()`);
  await wait(`document.querySelector('.combat-screen').dataset.playing==='true'`);
+ await wait(`document.querySelector('[data-sprite-unit][data-side=player]')?.dataset.skin==='aurelien-male-scholarly--blade'`);
  await wait(`document.querySelector('.combat-command-overlay')?.dataset.commandReady==='true'`);
  assert.equal(await run(`document.querySelector('[data-active-set=true]').dataset.weaponSet`),nextSet,'selected weapon set is committed by the engine and marked on the next turn');
  assert.equal(await run('localStorage.length'),0);assert.deepEqual(errors,[]);

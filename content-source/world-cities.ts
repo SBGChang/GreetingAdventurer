@@ -1,3 +1,4 @@
+import {facilityName} from './facility-names';
 // Travel and lodging for the twelve additional cities. Culture-specific commerce,
 // quests and dungeons are separate content work, never copied from Yunhua.
 import { cultureIds, textKeyFor, type Authored, type AuthoredDomain, type AuthoredText } from './authoring';
@@ -25,9 +26,9 @@ for(const [key,zh,en] of cultures){
     texts.push({key:textKeyFor(cityId),name:city.name});
     add<CityNodeDefinition>({kind:'city-node',id:cityId,regionId,adjacentRouteIds:extraRouteIdsFor(cityId),adventureSiteIds:[],isCapital:city.capital,display:{nameRef:{key:textKeyFor(cityId)}}});
     const facilityIds: FacilityDefinition['id'][]=[];
-    for(const [kind,local,zh,en] of [['inn','inn','旅館','Inn'],['cityGate','city-gate','城門口','City gate']] as const){
+    for(const [kind,local] of [['inn','inn'],['cityGate','city-gate']] as const){
       const id=ids.id<FacilityDefinition['id']>('facility',city.key+'-'+local);facilityIds.push(id);
-      texts.push({key:textKeyFor(id),name:{'zh-Hant':zh,en}});
+      texts.push({key:textKeyFor(id),name:facilityName('culture.'+key,kind)});
       add<FacilityDefinition>({kind:'facility',id,facilityKind:kind,actionRuleIds:kind==='inn'?[yunhua.id('city-action-rule','inn-rest')]:[],display:{nameRef:{key:textKeyFor(id)}}});
     }
     const populationId=ids.id<PopulationSupplyRuleDefinition['id']>('population-supply-rule',city.key);
@@ -45,3 +46,4 @@ for(const [key,zh,en] of cultures){
 }
 for(const ends of CONNECTING_ROUTES)add<RouteDefinition>({kind:'route',id:connectingRouteId(ends),fromCityId:worldCityId(ends[0]),toCityId:worldCityId(ends[1]),enabledByDefault:true,passagePolicyId:core.id<NationDefinition['passagePolicyId']>('passage-policy','domestic-open'),playerTravelEventPoolId:yunhua.id('player-travel-event-pool','domestic')});
 export const worldCitiesDomain: AuthoredDomain={domain:'world-city',definitions,texts};
+

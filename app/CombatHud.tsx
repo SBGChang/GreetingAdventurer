@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState,type CSSProperties} from 'react';
 import type {CombatView} from './engine/game-facade';
 import type {SpriteBattlePresentation} from './combat-sprite-catalog';
-import {loadSpriteArt} from './combat-sprite-art';
+import {loadSpriteArt, profiles} from './combat-sprite-art';
 import {composeSpriteAtlas} from './sprite-compositor';
 import frameUrl from './assets/combat/hud/portrait-frame.png';
 import gaugeUrl from './assets/combat/hud/gauges.png';
@@ -10,17 +10,19 @@ import {t,type UiLocale} from './i18n';
 import './combat-hud.css';
 
 type Art={gauge:string;portraits:Record<string,string>};
-let cached:Promise<Art>|undefined;
-function loadHud(){
- if(cached)return cached;
+let cached:Promise<string>|undefined;
+async function loadHud(skins:readonly string[]){
  const load=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(new Error('無法載入戰鬥介面美術'));im.src=src});
- cached=Promise.all([load(gaugeUrl),load(frameUrl),loadSpriteArt()]).then(([gauge,,atlases])=>({gauge:composeSpriteAtlas(gauge).toDataURL(),portraits:Object.fromEntries(Object.entries(atlases).filter(([key])=>key.endsWith('/idle')).map(([key,canvas])=>[key.split('/')[0]!,canvas.toDataURL()]))})).catch(e=>{cached=undefined;throw e});
- return cached;
+ cached??=Promise.all([load(gaugeUrl),load(frameUrl)]).then(([gauge])=>composeSpriteAtlas(gauge).toDataURL()).catch(e=>{cached=undefined;throw e});
+ const [gauge,atlases]=await Promise.all([cached,loadSpriteArt(skins)]);
+ return {gauge,portraits:Object.fromEntries(Object.entries(atlases).filter(([key])=>key.endsWith('/idle')).map(([key,canvas])=>[key.split('/')[0]!,canvas.toDataURL()]))};
 }
 function Slice({src,rect}:{src:string;rect:readonly number[]}){return <svg viewBox={rect.join(' ')} preserveAspectRatio="none" aria-hidden="true"><image href={src} width={layout.atlasWidth} height={layout.atlasHeight}/></svg>}
 function Portrait({skin,art,name}:{skin:string|undefined;art:Art|undefined;name:string}){
- const rect=skin?(layout.portraits as Record<string,number[]>)[skin]:undefined;
- return <span className="hud-portrait">{skin&&rect&&art?<span className="hud-face"><Slice src={art.portraits[skin]!} rect={rect}/></span>:<span className="hud-monogram">{name.slice(0,1)}</span>}<img src={frameUrl} alt=""/></span>;
+ const profile=skin?profiles[skin]:undefined;
+ const rect=skin?((layout.portraits as Record<string,number[]>)[skin]??profile?.portrait):undefined;
+ const idle=profile?.clips.find(c=>c.id==='idle');
+ return <span className="hud-portrait">{skin&&rect&&art?.portraits[skin]&&idle?<span className="hud-face"><svg viewBox={rect.join(' ')} preserveAspectRatio="xMidYMid slice" aria-hidden="true"><image href={art.portraits[skin]} width={idle.width} height={idle.height}/></svg></span>:<span className="hud-monogram">{name.slice(0,1)}</span>}<img src={frameUrl} alt=""/></span>;
 }
 function Gauge({kind,value,max,art}:{kind:'health'|'mana'|'ctb';value:number;max:number;art:Art|undefined}){
  const fraction=max>0?Math.min(1,Math.max(0,value/max)):0;
@@ -31,7 +33,8 @@ function Gauge({kind,value,max,art}:{kind:'health'|'mana'|'ctb';value:number;max
 
 export function CombatHud({view,sprite,locale,label,selecting,onTarget,onHover,onReady,canCommand,commandsOpen,onCommand,validTargetIds}:{view:CombatView;sprite:SpriteBattlePresentation|undefined;locale:UiLocale;label:(u:CombatView['combatants'][number])=>string;selecting:boolean;onTarget:(id:string)=>void;onHover:(id:string|undefined)=>void;onReady:(ready:boolean)=>void;canCommand:boolean;commandsOpen:boolean;onCommand:()=>void;validTargetIds:readonly string[]}){
  const host=useRef<HTMLDivElement>(null),[scale,setScale]=useState(1),[art,setArt]=useState<Art>(),[error,setError]=useState('');
- useEffect(()=>{let disposed=false;onReady(false);loadHud().then(a=>{if(!disposed){setArt(a);onReady(true)}}).catch(e=>{if(!disposed)setError(String(e))});return()=>{disposed=true}},[onReady]);
+ const skinKey=JSON.stringify([...new Set([...Object.values(sprite?.skins??{}),...Object.values(sprite?.weaponSetSkins??{}).flatMap(sets=>Object.values(sets))])].sort());
+ useEffect(()=>{let disposed=false;onReady(false);setError('');loadHud(JSON.parse(skinKey) as string[]).then(a=>{if(!disposed){setArt(a);onReady(true)}}).catch(e=>{if(!disposed)setError(String(e))});return()=>{disposed=true}},[onReady,skinKey]);
  useEffect(()=>{const e=host.current!;const resize=()=>setScale(Math.min(e.clientWidth/layout.width,e.clientHeight/layout.height));const observer=new ResizeObserver(resize);observer.observe(e);resize();return()=>observer.disconnect()},[]);
  const ordered=view.order.map(id=>view.combatants.find(u=>u.combatantId===id)!).filter(u=>u.state!=='dead');
  const details=(u:CombatView['combatants'][number])=>`${label(u)} · HP ${u.health}/${u.maxHealth} · MP ${u.mana}/${u.maxMana} · CTB ${Number(u.ctb.toFixed(2))}`;

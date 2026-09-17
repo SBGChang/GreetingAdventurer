@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "actions": [
+    "idle",
+    "attack",
+    "hit",
+    "guard",
+    "dodge",
+    "defeat"
+  ],
+  "families": [
+{"id":"unarmed","label":"空手","held":"empty bare hands, no weapon, no shield, no scabbard, relaxed fists","attack":"a compact forward straight punch with a clear windup, fully extended fist to RIGHT, then recovery","attackMotion":"contact"},
+{"id":"shield","label":"單手盾","held":"one small round wooden-and-bronze shield strapped to LEFT forearm, right hand empty, no sword or other weapon","attack":"brace the round shield close to torso then a forceful forward shield bash to RIGHT and recoil, right hand stays empty","attackMotion":"contact"} ,
+    {
+      "id": "blade",
+      "label": "單手武器",
+      "held": "a single curved one-handed saber in right hand, left hand free",
+      "attack": "Draw weapon back with coiled waist, step and make a forceful diagonal cut with compact bright crescent slash then follow through",
+      "attackMotion": "contact"
+    },
+    {
+      "id": "polearm",
+      "label": "長柄武器",
+      "held": "a compact long spear held in both hands diagonally, keep the whole spear visible",
+      "attack": "Pull spear back, lower stance, powerful two-handed forward thrust then recover",
+      "attackMotion": "contact"
+    },
+    {
+      "id": "heavyblade",
+      "label": "雙手重刃",
+      "held": "a broad two-handed greatsword with long grip, both hands grasping it",
+      "attack": "Both hands lift heavy sword over shoulder, strong overhead diagonal chop and weighty follow-through",
+      "attackMotion": "contact"
+    },
+    {
+      "id": "throwing",
+      "label": "投擲武器",
+      "held": "two small metal throwing daggers, one drawn in right hand and one in belt",
+      "attack": "Raise throwing arm behind shoulder, twist torso then whip arm forward releasing one tiny dagger with a short motion trace, draw replacement",
+      "attackMotion": "stationary"
+    },
+    {
+      "id": "bow",
+      "label": "弓",
+      "held": "a recurved wooden bow in left hand, arrow and small quiver on back",
+      "attack": "Nock arrow, pull string fully to cheek, aim right, release arrow with recoil and lower bow",
+      "attackMotion": "stationary"
+    },
+    {
+      "id": "crossbow",
+      "label": "弩",
+      "held": "a wood and steel compact crossbow held with both hands",
+      "attack": "Cock crossbow, raise stock to shoulder, aim right, release a single bolt with recoil, lower and reload",
+      "attackMotion": "stationary"
+    },
+    {
+      "id": "wand",
+      "label": "單手法杖",
+      "held": "a short crystal-tipped magic wand in right hand, left hand free",
+      "attack": "Gather a small turquoise spark around the wand, point right and discharge compact magic burst, settle",
+      "attackMotion": "stationary"
+    },
+    {
+      "id": "staff",
+      "label": "雙手法杖",
+      "held": "a long crystal-tipped staff grasped in both hands",
+      "attack": "Brace staff in both hands, draw energy into the tip then thrust forward releasing a compact gold magic burst, settle",
+      "attackMotion": "stationary"
+    },
+    {
+      "id": "wind",
+      "label": "管樂器",
+      "held": "a short ornate wooden flute held in both hands",
+      "attack": "Lift flute to lips and visibly play it with changing hand positions, compact golden sound rings appear near bell, lower flute",
+      "attackMotion": "stationary"
+    },
+    {
+      "id": "strings",
+      "label": "弦樂器",
+      "held": "a small wooden lute held across torso, one hand fretting and other strumming",
+      "attack": "Bring lute into playing position, fingers strum rhythmically, small compact golden musical sparks, then settle",
+      "attackMotion": "stationary"
+    },
+    {
+      "id": "percussion",
+      "label": "打擊樂器",
+      "held": "a round frame drum held in left hand and played with right palm",
+      "attack": "Raise drum, right palm hits drum face with two rhythmic beats and small golden sound rings, then settle",
+      "attackMotion": "stationary"
+    },
+    {
+      "id": "sword-shield",
+      "label": "單手武器與盾",
+      "held": "a one-handed saber in right hand and a small ROUND SHIELD strapped to left forearm",
+      "attack": "Brace shield, draw saber back and make forceful diagonal cut past shield then recover; guard MUST raise shield, not saber",
+      "attackMotion": "contact"
+    },
+    {
+      "id": "tower-shield",
+      "label": "雙手大盾",
+      "held": "one large tall tower shield held with BOTH HANDS, no blade",
+      "attack": "Brace behind shield, crouch and forcefully shove heavy shield forward for shield bash then recover; guard covers entire torso behind shield",
+      "attackMotion": "contact"
+    },
+    {
+      "id": "dual",
+      "label": "雙持武器",
+      "held": "two short curved sabers, one in each hand",
+      "attack": "Coil then make a strong crossing double cut, left then right blade, compact crossed slash streaks; guard crosses BOTH blades",
+      "attackMotion": "contact"
+    }
+  ]
+}

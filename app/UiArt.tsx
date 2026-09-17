@@ -23,6 +23,6 @@ export function UiArt({ kind, className = '' }: { kind: ArtKind; className?: str
 }
 
 export const SCREEN_ART: Record<string, ArtKind> = {
-  shop: 'forge', guild: 'guild', tavern: 'tavern', training: 'training', home: 'home',
+  rest: 'inn', shop: 'forge', guild: 'guild', tavern: 'tavern', training: 'training', home: 'home',
   sheet: 'guild', adventure: 'adventure', worldMap: 'compass',
 };
