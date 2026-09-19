@@ -1,3 +1,4 @@
+import { renderCharacterName } from '../src/contracts/character/names';
 import {useEffect,useRef,useState,useMemo} from 'react';
 import {CombatSpriteArena} from './CombatSpriteArena';
 import {resolveSpriteBattle} from './combat-sprite-catalog';
@@ -37,7 +38,7 @@ export function CombatScreen({environment,combat,locale,text,act,appearanceSelec
  const shown=frame?(progress<impactProgress?frame.before:frame.after):playback?.frames.at(-1)?.after??combat;
  const hudView=frame&&progress>=impactProgress?ctbPlaybackView(frame,countdownProgress):shown;
  const resolved=finished&&shown.state==='resolved',won=resolved&&shown.combatants.filter(u=>u.side==='enemy').every(u=>u.state==='dead');
- const label=(u:CombatView['combatants'][number])=>u.nameRef?text(u.nameRef):t(locale,'ui.combat.member',{n:shown.combatants.filter(c=>c.side==='player').indexOf(u)+1});
+ const label=(u:CombatView['combatants'][number])=>u.nameRef?text(u.nameRef):renderCharacterName(u.characterName!,text);
  const canCommand=ready&&hudReady&&groundReady&&!playback&&combat.combatants.some(u=>u.isCurrentActor&&u.side==='player'&&u.state!=='dead');
  const closeCommands=()=>{setCommandsOpen(false);setPicked(undefined);setError(undefined);};
  useEffect(()=>{

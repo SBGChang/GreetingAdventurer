@@ -1,3 +1,6 @@
+import { createCharacterNameReader, validateCharacterNames } from '../../src/app/content/character-name-reader';
+import { characterNameDisplay } from '../../src/modules/character/public';
+import type { CharacterNameDisplay } from '../../src/contracts/character/names';
 import {createCombatTargetResolver} from '../../src/app/content/combat-resolver-bridge';
 import { upgradeWorldContent } from '../../src/app/composition/session';
 import type {CombatActionResolvedPayload, CombatActionResult} from '../../src/contracts/combat';
@@ -256,7 +259,7 @@ export type TrainingView = Readonly<{
 // 自由行動（team/state.ts 的 `listTavernVisitorsInCity`）。這裡只投影，不另存可見性旗標。
 export type TavernVisitorView = Readonly<{
   characterId: string;
-  label: string;
+  name: CharacterNameDisplay;
   sex: string;
   ageYears: number;
 }>;
@@ -344,8 +347,7 @@ export type CombatantView2 = Readonly<{
   combatantId: string;
   side: 'player' | 'enemy';
   nameRef: LocalizedTextRef | undefined;
-  // 角色尚無命名欄位；UI 以隊員序號顯示。怪物側提供 nameRef。
-  fallbackLabel: string;
+  characterName: CharacterNameDisplay | undefined;
   row: number;
   col: number;
   footprint: Readonly<{width: 1 | 2 | 3; height: 1 | 2 | 3}>;
@@ -411,6 +413,7 @@ export type MasteryLevelView = Readonly<{
 }>;
 
 export type CharacterSheetView = Readonly<{
+  name: CharacterNameDisplay;
   bag: readonly { itemId: string; nameRef: LocalizedTextRef; quantity: number; weight: number }[];
   carryingCapacity: number;
   characterId: string;
@@ -493,6 +496,7 @@ export type GameView = Readonly<{
   cultureId: string | undefined;
   formation: import('../../src/contracts/team').TeamCombatFormationView & {
     actorCharacterId: import('../../src/contracts/core').CharacterId;
+    names: Readonly<Record<string, CharacterNameDisplay>>;
     members: readonly import('../../src/contracts/core').CharacterId[];
   };
   quests: readonly QuestOfferView[];
@@ -729,8 +733,7 @@ function projectTavern(
       if (character === undefined) return undefined;
       return {
         characterId: String(id),
-        // 尚無角色命名欄位，保留識別標籤。
-        label: String(id).split('~').slice(-1)[0] ?? String(id),
+        name: characterNameDisplay(createCharacterNameReader(registry), character.name),
         sex: character.sex,
         // 年齡是「世界日 − 出生日」除以一年的日數。一年 365 日是這個世界的曆法
         // （content-source/core/character.ts 的 DAYS_PER_YEAR），沒有月份與閏年。
@@ -1026,8 +1029,7 @@ function projectCombat(
         ? requireData<MonsterDefinition>(registry, String(c.source.monsterDefinitionId), '怪物')
             .display.nameRef
         : undefined,
-    // 尚無角色命名欄位，保留識別標籤。
-    fallbackLabel: String(c.combatantId).split('~').slice(-1)[0] ?? String(c.combatantId),
+    characterName: c.source.kind === 'character' ? characterNameDisplay(createCharacterNameReader(registry), state.character.characters[c.source.characterId]!.name) : undefined,
     row: c.anchorCell.row,
     col: c.anchorCell.col,
     footprint: c.footprint,
@@ -1167,6 +1169,7 @@ function projectSheet(
     bag: Object.values(state.inventory.items).filter(i => i.location.kind === 'characterBag' && i.location.characterId === characterId)
       .map(i => { const def = itemReader.getItem(i.definitionId); return { itemId: String(i.itemId), nameRef: def.display.nameRef, quantity: i.quantity, weight: i.quantity * def.unitWeight }; }),
     characterId: String(characterId),
+    name: characterNameDisplay(createCharacterNameReader(registry), character.name),
     archetypeNameRef: undefined,
     sex: character.sex,
     ageYears: Math.floor((state.core.worldDay - Number(character.birthDay)) / DAYS_PER_YEAR),
@@ -1486,7 +1489,7 @@ export function projectView(
   return {
     worldDay: state.core.worldDay,
     cultureId,
-    formation: { ...createTeamQuery(state.team).getCombatFormation(playerTeamId), actorCharacterId: team.leaderId, members: team.memberIds },
+    formation: { ...createTeamQuery(state.team).getCombatFormation(playerTeamId), actorCharacterId: team.leaderId, members: team.memberIds, names: Object.fromEntries(team.memberIds.map(id => [id, characterNameDisplay(createCharacterNameReader(registry), state.character.characters[id]!.name)])) },
     quests: registry.list({ kinds: ['city'] }).flatMap(def => {
       const cityDefinition = requireData<CityDefinition>(registry, String(def.id), '城市');
       const guild = projectGuild(state, registry, String(cityDefinition.worldCityId));
@@ -1558,6 +1561,7 @@ export function createGame(config: NewGameConfig, saved?: string): GameHandle {
   const registry: DefinitionRegistry = loaded.registry;
   const catalog = loaded.localization;
   assertLocaleParity(catalog);
+  validateCharacterNames(registry, catalog);
 
   const resolvers = createProductionResolverRegistry(loaded.resolverBindings);
   const assembler: ContextAssembler = createProductionContextAssembler(registry, resolvers);

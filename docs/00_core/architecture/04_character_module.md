@@ -133,6 +133,20 @@ type BirthRuleDefinition = DefinitionHeader & {
 
 ---
 
+### 2.5 姓名與多語呈現
+
+角色的 `name` 是必填的持久身分，由 Character 擁有。`generated` 保存文化、命名規則、姓氏及完整名字的 Definition ID；`custom` 保存文化與玩家輸入的原文。姓名不含職稱，固定招待員的職務由設施資料呈現。未使用的稱號或綽號不新增空欄位。
+
+- `character-name-part` 定義完整的姓氏或名字、本地化引用、文化與適用性別；不得逐字或逐音節拼名。
+- `character-naming-rule` 指定各性別名字池、姓氏池、保留的完整姓名，以及本地化姓名格式。每個載入文化必須恰有一份規則；雲華姓在前，其他三國名在前。繁中與英文均須有作者校訂文字；增加語系時補全姓名庫與格式，不能即時翻譯或回退成另一語系。
+- 姓名在新遊戲、世界冒險者及任務人物建立時決定。世界冒險者使用生成命令的文化；開局角色使用起始城市文化；救援人物使用委託發布城市文化。生育 Handler 使用第一位父母的命名文化，但不代表生育正式流程已啟用。
+- 抽取使用世界種子與 CharacterId 的獨立決定性串流，不改動其他玩法 RNG。優先使用世界中未用過的完整姓名，排除保留名字；有限名字庫耗盡時選重複次數最少者，不追加數字、不無限重抽。玩家自訂姓名不受隨機池排重限制。
+- 酒館、招募紀錄、人物頁、隊形與戰鬥均投影同一份姓名；切換語言、旅行、招募與讀檔不得重抽。玩家自訂文字不轉譯，開局輸入限制為 1–80 字元，留空使用文化名字庫。
+- 固定設施接待人仍屬呈現目錄，以固定設施 ID 保存繁中、英文完整姓名，不虛構世界人口。其與隨機池重疊的完整名字列入保留清單。
+- 存檔格式升為 v2。僅接受 `src/app/save/content-upgrade.ts` 明列的來源內容身分與 schema 雜湊升級；舊角色未保存命名文化，升級時依任務发布城市、住宅或隊伍所在地一次補定。冒險地採入口城市、旅行中採路線起點；無法確定來源則拒絕載入，不猜預設文化。補名不改動原有進度、RNG、角色數值或排程。既有公會內容升級仍獨立執行。
+
+---
+
 ## 3. Runtime State
 
 ### 3.1 Character
@@ -142,6 +156,7 @@ type Character = {
   characterId: CharacterId;
   archetypeId: CharacterArchetypeId;
   origin: 'playerLineage' | 'worldAdventurer' | 'worldResident' | 'questTemporary';
+  name: CharacterName;
   sex: 'male' | 'female';
 
   birthDay: WorldDay;

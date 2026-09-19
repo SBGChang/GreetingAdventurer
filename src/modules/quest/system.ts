@@ -989,6 +989,7 @@ export function onMapContentResolved(
       messages.push(
         internal(CHARACTER_MODULE_ID, {
           type: 'CreateQuestTemporaryCharacter',
+          originCityId: current.postingGuildCityId,
           kind: 'rescue',
           archetypeId: content.payload.captiveArchetypeId,
           sourceQuestId: current.questId,

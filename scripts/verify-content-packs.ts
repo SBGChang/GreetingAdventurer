@@ -1,3 +1,4 @@
+import { validateCharacterNames } from '../src/app/content/character-name-reader';
 // scripts/verify-content-packs.ts
 // 執行：`npx tsx scripts/verify-content-packs.ts`（或 `npm run verify:content-packs`）
 //
@@ -61,6 +62,8 @@ if (!loaded.success) {
   }
   process.exit(1);
 }
+
+validateCharacterNames(loaded.registry, loaded.localization);
 
 console.log(
   `CONTENT PACKS OK：${result.files.length} 個產物同步、載入 ${loaded.registry.size} 筆 Definition` +

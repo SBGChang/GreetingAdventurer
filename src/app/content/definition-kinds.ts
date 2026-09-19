@@ -1,3 +1,4 @@
+import { CHARACTER_NAME_KINDS } from './character-name-reader';
 // app/content/definition-kinds.ts
 // 全遊戲 Definition kind 的權威登記表：kind 字串 → 擁有它的模組 + 目前 schemaVersion。
 //
@@ -94,7 +95,7 @@ function kindsOf(constants: Readonly<Record<string, string | readonly string[]>>
 }
 
 export const DEFINITION_KIND_REGISTRATIONS: readonly DefinitionKindRegistration[] = [
-  ...own('character', kindsOf(CHARACTER_DEFINITION_KINDS)),
+  ...own('character', [...kindsOf(CHARACTER_DEFINITION_KINDS), ...kindsOf(CHARACTER_NAME_KINDS)]),
   ...own('combat', kindsOf(COMBAT_DEFINITION_KINDS), { 'combat-skill': 2, 'combat-damage-rule': 2, 'encounter-group': 2 }),
   ...own('dungeon', kindsOf(DUNGEON_DEFINITION_KINDS)),
   ...own('inventory', kindsOf(INVENTORY_DEFINITION_KINDS)),

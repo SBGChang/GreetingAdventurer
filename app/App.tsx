@@ -1,3 +1,4 @@
+import { renderCharacterName, type CharacterNameDisplay } from '../src/contracts/character/names';
 import {FacilityChoices} from './FacilityChoices';
 import {ReceptionProvider,ReceptionAside,ReceptionActions,ReceptionOptions,receptionStyle} from './FacilityReception';
 import {facilityPresentation,type ReceptionEvent} from './facility-presentation';
@@ -60,8 +61,8 @@ type LogEntry =
   | Readonly<{ kind: 'homeBought'; place: LocalizedTextRef; slots: number; price: number }>
   | Readonly<{ kind: 'freePeriodBegan' }>
   | Readonly<{ kind: 'trainingStarted'; mastery: string; days: number }>
-  | Readonly<{ kind: 'recruitSucceeded'; who: string }>
-  | Readonly<{ kind: 'recruitFailed'; who: string }>
+  | Readonly<{ kind: 'recruitSucceeded'; who: CharacterNameDisplay }>
+  | Readonly<{ kind: 'recruitFailed'; who: CharacterNameDisplay }>
   | Readonly<{ kind: 'questAccepted'; quest: string }>
   | Readonly<{ kind: 'usedSkill'; skill: string }>
   | Readonly<{ kind: 'combatRested' }>
@@ -412,9 +413,9 @@ export function App(): JSX.Element {
       case 'questAccepted':
         return t(locale, 'ui.log.questAccepted', { quest: entry.quest });
       case 'recruitSucceeded':
-        return t(locale, 'ui.log.recruitSucceeded', { who: entry.who });
+        return t(locale, 'ui.log.recruitSucceeded', { who: renderCharacterName(entry.who, text) });
       case 'recruitFailed':
-        return t(locale, 'ui.log.recruitFailed', { who: entry.who });
+        return t(locale, 'ui.log.recruitFailed', { who: renderCharacterName(entry.who, text) });
       case 'freePeriodBegan':
         return t(locale, 'ui.log.freePeriodBegan');
       case 'trainingStarted':
@@ -455,10 +456,10 @@ export function App(): JSX.Element {
   </main>;
 
   if (!started) return <Welcome locale={locale} hasSave={init.hasSave} error={storageError}
-    onContinue={() => setStarted(true)} onStart={(seed, sex) => {
+    onContinue={() => setStarted(true)} onStart={(seed, sex, leaderName) => {
       if (init.hasSave && !window.confirm(t(locale, 'ui.save.confirmNew'))) return;
       try {
-        const game = createGame({ ...DEFAULT_CONFIG, worldSeed: seed, leaderSex: sex });
+        const game = createGame({ ...DEFAULT_CONFIG, worldSeed: seed, leaderSex: sex, leaderName });
         localStorage.removeItem(appearanceStorageKey); setAppearanceChoices({});
         setInit({ hasSave: true, handle: game, error: undefined }); setView(game.view); setScreen('city');
         progress.day = game.view.worldDay; progress.cityId = game.view.location.kind === 'city' ? game.view.location.cityId : undefined;
@@ -768,13 +769,13 @@ export function App(): JSX.Element {
                           // 招募是擲骰：指令一定被接受，成敗看那個人有沒有真的進隊。
                           (next) =>
                             next.memberCount > view.memberCount
-                              ? { kind: 'recruitSucceeded', who: v.label }
-                              : { kind: 'recruitFailed', who: v.label },
+                              ? { kind: 'recruitSucceeded', who: v.name }
+                              : { kind: 'recruitFailed', who: v.name },
                           text(tavern.nameRef),
                         )
                       }
                     >
-                      <UiArt kind="guild" /><span style={S.tileName}>{v.label}</span>
+                      <UiArt kind="guild" /><span style={S.tileName}>{renderCharacterName(v.name, text)}</span>
                       <span style={{ ...S.tileNote, color: tavern.teamIsFull ? C.dim : C.accent }}>
                         {t(locale, 'ui.tavern.who', {
                           sex: t(locale, v.sex === 'female' ? 'ui.sex.female' : 'ui.sex.male'),
@@ -938,7 +939,7 @@ export function App(): JSX.Element {
             <>
               <h2>{t(locale, 'ui.menu.open')}</h2>
               <MenuTabs active={menuTab} select={setMenuTab} locale={locale} />
-              {menuTab === 'formation' && <FormationBoard key={`${view.formation.revision}-${view.formation.members.join()}`} formation={view.formation} locale={locale}
+              {menuTab === 'formation' && <FormationBoard key={`${view.formation.revision}-${view.formation.members.join()}`} formation={view.formation} locale={locale} text={text}
                 save={command => dispatch(command, { kind: 'formationSaved' }, t(locale, 'ui.menu.formation'))} />}
               {menuTab === 'quests' && <section className="quest-status-list">
                 {view.quests.length === 0 && <p>{t(locale, 'ui.menu.noQuests')}</p>}
@@ -954,6 +955,7 @@ export function App(): JSX.Element {
                 <div className="inventory-list">{sh.bag.map(item => <div key={item.itemId}><UiArt kind="supplies" /><span>{text(item.nameRef)}</span><b>× {item.quantity}</b><small>{item.weight.toFixed(1)}</small></div>)}</div>
               </section>}
               <section hidden={menuTab !== 'equipment'}>
+              <h3 className="character-sheet-name">{renderCharacterName(sh.name, text)}</h3>
               <AppearancePicker sex={sh.sex} selected={appearanceChoices[sh.characterId]} locale={locale} choose={id=>{
                 try{const next=selectAppearance(appearanceChoices,sh.characterId,sh.sex,id);localStorage.setItem(appearanceStorageKey,JSON.stringify(next));setAppearanceChoices(next);setStorageError(undefined)}catch(e){setStorageError(e instanceof Error?e.message:String(e))}
               }}/>

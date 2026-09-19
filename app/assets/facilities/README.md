@@ -31,20 +31,22 @@
 
 表情只影響畫面，不改價格、好感、命令條件或存檔。實際操作訊息附在台詞下方；純裝飾台詞不能代替正式錯誤。文字均提供繁中與英文。
 
+固定接待人以設施 ID 維持身分，`host.name` 提供人工校訂的繁中與英文完整姓名。英文使用固定拼寫，不沿用中文字；職稱由設施職務呈現，不與本名拼在一起。隨機姓名庫保留與固定接待人重疊的完整姓名。
+
 ## 設施與接待人
 
 | 文化 | 設施 | 招待員 | 圖片 |
 |---|---|---|---|
 | yunhua | 聽雨客棧 | 蘇晚晴 | [四表情](yunhua-inn.png) |
-| yunhua | 流霞酒肆 | 杜長川 | [四表情](yunhua-tavern.png) |
+| yunhua | 流霞酒肆 | 杜寬 | [四表情](yunhua-tavern.png) |
 | yunhua | 雲行會館 | 沈知微 | [四表情](yunhua-adventurerGuild.png) |
-| yunhua | 百草行 | 陶青禾 | [四表情](yunhua-itemShop.png) |
-| yunhua | 青鐵坊 | 魏鳴鐵 | [四表情](yunhua-equipmentShop.png) |
-| yunhua | 定鋒武館 | 霍清嵐 | [四表情](yunhua-trainingGround.png) |
-| yunhua | 竹簡書齋 | 顧墨生 | [四表情](yunhua-bookstore.png) |
-| yunhua | 山行驛 | 陸拾山 | [四表情](yunhua-adventureCheckpoint.png) |
-| yunhua | 雲關署 | 秦鎮川 | [四表情](yunhua-cityGate.png) |
-| yunhua | 安居牙行 | 許安寧 | [四表情](yunhua-home.png) |
+| yunhua | 百草行 | 陶秀蘭 | [四表情](yunhua-itemShop.png) |
+| yunhua | 青鐵坊 | 魏成 | [四表情](yunhua-equipmentShop.png) |
+| yunhua | 定鋒武館 | 霍英 | [四表情](yunhua-trainingGround.png) |
+| yunhua | 竹簡書齋 | 顧文禮 | [四表情](yunhua-bookstore.png) |
+| yunhua | 山行驛 | 陸進 | [四表情](yunhua-adventureCheckpoint.png) |
+| yunhua | 雲關署 | 秦岳 | [四表情](yunhua-cityGate.png) |
+| yunhua | 安居牙行 | 許惠如 | [四表情](yunhua-home.png) |
 | vildun | 爐火長屋 | 艾妲 | [四表情](vildun-inn.png) |
 | vildun | 鹿角蜜酒堂 | 托爾姆 | [四表情](vildun-tavern.png) |
 | vildun | 誓獵集會 | 芙蕾雅 | [四表情](vildun-adventurerGuild.png) |

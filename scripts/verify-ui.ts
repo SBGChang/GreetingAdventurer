@@ -1,3 +1,4 @@
+import { verifyNaming } from './naming-regression';
 import assert from 'node:assert/strict';
 import { createServer } from 'vite';
 import { fnv1a64, toHex16 } from '../src/kernel/hash';
@@ -12,6 +13,7 @@ try {
     startingArchetypeId: 'character-archetype.core.player-lineage',
     startCityId: 'city-node.yunhua.yunjing', leaderSex: 'female', leaderBirthDay: 5475, startingMoney: 5000,
   };
+  verifyNaming(createGame, config as never);
   const game = createGame(config);
   const initial = game.serialize();
   const inspectWorld = (save: string) => {

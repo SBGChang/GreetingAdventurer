@@ -425,7 +425,7 @@ export function createProductionContextAssembler(
         definitions: createCharacterDefinitionReader(registry),
         stats,
         ids: runtime.ids.character,
-        resolvers: createCharacterResolverPort({ registry, resolvers, rng: runtime.rng, rngContext: runtime.rngContextFor('character-temporary') }),
+        resolvers: createCharacterResolverPort({ worldSeed: state.core.worldSeed, registry, resolvers, rng: runtime.rng, rngContext: runtime.rngContextFor('character-temporary') }),
       },
 
       // ── 已接：map（刷新生成、開門、陷阱、採集、內容結算）───────────────────────

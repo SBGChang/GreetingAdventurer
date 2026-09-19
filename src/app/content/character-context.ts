@@ -1,3 +1,7 @@
+import { createCharacterNameReader } from './character-name-reader';
+import { createWorldDefinitionReader } from './world-reader';
+import { generateCharacterName } from '../../modules/character/public';
+import type { Seed } from '../../contracts/core';
 import { UnavailableCapabilityError } from '../composition/capability';
 // 世界冒險者與任務暫時角色均依正式生成規則與 Resolver params 抽取。
 
@@ -32,6 +36,7 @@ function pendingMethod(name: string): never {
 }
 
 export type CharacterResolverPortDeps = Readonly<{
+  worldSeed: Seed;
   registry: DefinitionRegistry;
   resolvers: ResolverRegistry;
   rng: DeterministicRng;
@@ -81,6 +86,11 @@ export function createCharacterResolverPort(deps: CharacterResolverPortDeps): Ch
   };
 
   return {
+    resolveName: ({ origin, ...input }) => {
+      const world = createWorldDefinitionReader(deps.registry);
+      const cultureId = origin.kind === 'culture' ? origin.cultureId : world.getRegion(world.getCityNode(origin.cityId).regionId).nativeCultureId;
+      return generateCharacterName(createCharacterNameReader(deps.registry), deps.rng, { ...input, cultureId, worldSeed: deps.worldSeed });
+    },
     resolveNaturalDeath: () => pendingMethod('character.resolveNaturalDeath'),
     resolveRetirement: () => pendingMethod('character.resolveRetirement'),
     resolveBirth: () => pendingMethod('character.resolveBirth'),

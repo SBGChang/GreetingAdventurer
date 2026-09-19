@@ -79,7 +79,7 @@ export function CityScene({ cityId, visible, backdrop = false, facilities, place
 
 export function Welcome({ locale, hasSave, onContinue, onStart, error }: {
   locale: UiLocale; hasSave: boolean; error?: string; onContinue: () => void;
-  onStart: (seed: string, sex: 'female' | 'male') => void;
+  onStart: (seed: string, sex: 'female' | 'male', name?: string) => void;
 }) {
   return <GameViewport><main className="welcome">
     <div className="title-shade" /><div className="title-emblem">✦</div>
@@ -89,8 +89,9 @@ export function Welcome({ locale, hasSave, onContinue, onStart, error }: {
       {hasSave && <button className="primary continue" onClick={onContinue}>{t(locale, 'ui.play.continue')} →</button>}
       <details open={!hasSave}><summary>{t(locale, 'ui.play.new')}</summary>
         <form onSubmit={event => {event.preventDefault(); const data = new FormData(event.currentTarget);
-          onStart(String(data.get('seed')).trim(), data.get('sex') === 'male' ? 'male' : 'female');}}>
+          onStart(String(data.get('seed')).trim(), data.get('sex') === 'male' ? 'male' : 'female', String(data.get('name') ?? '').trim() ? String(data.get('name')) : undefined);}}>
           <label>{t(locale, 'ui.play.seed')}<input name="seed" required maxLength={100} defaultValue="my-adventure" /></label>
+          <label>{t(locale, 'ui.play.name')}<input name="name" maxLength={80} placeholder={t(locale, 'ui.play.nameHint')} /></label>
           <label>{t(locale, 'ui.play.sex')}<select name="sex"><option value="female">{t(locale, 'ui.sex.female')}</option><option value="male">{t(locale, 'ui.sex.male')}</option></select></label>
           <button className="primary" type="submit">{t(locale, 'ui.play.begin')} ↗</button>
         </form>

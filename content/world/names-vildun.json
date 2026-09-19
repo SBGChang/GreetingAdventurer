@@ -1,0 +1,535 @@
+[
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.family.hervik.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.family.hervik",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.family.hervik",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.family.skarn.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.family.skarn",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.family.skarn",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.family.valden.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.family.valden",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.family.valden",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.family.brek.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.family.brek",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.family.brek",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.family.holt.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.family.holt",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.family.holt",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.family.lind.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.family.lind",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.family.lind",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.family.ask.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.family.ask",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.family.ask",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.family.sten.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.family.sten",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.family.sten",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.male.torven.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.male.torven",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.male.torven",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.male.hald.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.male.hald",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.male.hald",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.male.sigvar.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.male.sigvar",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.male.sigvar",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.male.rik.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.male.rik",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.male.rik",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.male.arne.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.male.arne",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.male.arne",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.male.erik.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.male.erik",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.male.erik",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.male.odd.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.male.odd",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.male.odd",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.male.bryn.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.male.bryn",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.male.bryn",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.male.gunnar.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.male.gunnar",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.male.gunnar",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.male.svein.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.male.svein",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.male.svein",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.male.ivar.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.male.ivar",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.male.ivar",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.male.leif.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.male.leif",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.male.leif",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.female.signa.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.female.signa",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.female.signa",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.female.inge.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.female.inge",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.female.inge",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.female.asta.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.female.asta",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.female.asta",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.female.helga.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.female.helga",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.female.helga",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.female.hilda.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.female.hilda",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.female.hilda",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.female.frida.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.female.frida",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.female.frida",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.female.solvi.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.female.solvi",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.female.solvi",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.female.gudrun.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.female.gudrun",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.female.gudrun",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.female.tyra.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.female.tyra",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.female.tyra",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.female.una.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.female.una",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.female.una",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.female.rivna.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.female.rivna",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.female.rivna",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.vildun.female.ilsa.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.vildun.female.ilsa",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-name-part.vildun.female.ilsa",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.vildun",
+    "display": {
+      "nameRef": {
+        "key": "text.character-naming-rule.vildun.standard.name"
+      }
+    },
+    "enabled": true,
+    "familyIds": [
+      "character-name-part.vildun.family.hervik",
+      "character-name-part.vildun.family.skarn",
+      "character-name-part.vildun.family.valden",
+      "character-name-part.vildun.family.brek",
+      "character-name-part.vildun.family.holt",
+      "character-name-part.vildun.family.lind",
+      "character-name-part.vildun.family.ask",
+      "character-name-part.vildun.family.sten"
+    ],
+    "femaleGivenIds": [
+      "character-name-part.vildun.female.signa",
+      "character-name-part.vildun.female.inge",
+      "character-name-part.vildun.female.asta",
+      "character-name-part.vildun.female.helga",
+      "character-name-part.vildun.female.hilda",
+      "character-name-part.vildun.female.frida",
+      "character-name-part.vildun.female.solvi",
+      "character-name-part.vildun.female.gudrun",
+      "character-name-part.vildun.female.tyra",
+      "character-name-part.vildun.female.una",
+      "character-name-part.vildun.female.rivna",
+      "character-name-part.vildun.female.ilsa"
+    ],
+    "id": "character-naming-rule.vildun.standard",
+    "kind": "character-naming-rule",
+    "maleGivenIds": [
+      "character-name-part.vildun.male.torven",
+      "character-name-part.vildun.male.hald",
+      "character-name-part.vildun.male.sigvar",
+      "character-name-part.vildun.male.rik",
+      "character-name-part.vildun.male.arne",
+      "character-name-part.vildun.male.erik",
+      "character-name-part.vildun.male.odd",
+      "character-name-part.vildun.male.bryn",
+      "character-name-part.vildun.male.gunnar",
+      "character-name-part.vildun.male.svein",
+      "character-name-part.vildun.male.ivar",
+      "character-name-part.vildun.male.leif"
+    ],
+    "packId": "pack:world-cities",
+    "reservedNames": [],
+    "schemaVersion": 1,
+    "sourcePath": "world/names-vildun.json#character-naming-rule.vildun.standard"
+  }
+]

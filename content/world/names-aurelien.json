@@ -1,0 +1,535 @@
+[
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.family.veyne.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.family.veyne",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.family.veyne",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.family.morant.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.family.morant",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.family.morant",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.family.duval.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.family.duval",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.family.duval",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.family.bell.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.family.bell",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.family.bell",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.family.maret.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.family.maret",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.family.maret",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.family.lowell.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.family.lowell",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.family.lowell",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.family.cairn.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.family.cairn",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.family.cairn",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.family.vidal.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.family.vidal",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.family.vidal",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.male.mathis.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.male.mathis",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.male.mathis",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.male.edmund.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.male.edmund",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.male.edmund",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.male.olivier.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.male.olivier",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.male.olivier",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.male.felix.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.male.felix",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.male.felix",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.male.remy.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.male.remy",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.male.remy",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.male.hugo.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.male.hugo",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.male.hugo",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.male.adrian.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.male.adrian",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.male.adrian",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.male.nicolas.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.male.nicolas",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.male.nicolas",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.male.simon.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.male.simon",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.male.simon",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.male.emile.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.male.emile",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.male.emile",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.male.leon.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.male.leon",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.male.leon",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.male.vincent.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.male.vincent",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.male.vincent",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.female.aline.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.female.aline",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.female.aline",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.female.claire.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.female.claire",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.female.claire",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.female.margot.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.female.margot",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.female.margot",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.female.cecile.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.female.cecile",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.female.cecile",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.female.rose.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.female.rose",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.female.rose",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.female.adele.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.female.adele",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.female.adele",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.female.isabelle.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.female.isabelle",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.female.isabelle",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.female.estelle.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.female.estelle",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.female.estelle",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.female.louise.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.female.louise",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.female.louise",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.female.viviane.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.female.viviane",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.female.viviane",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.female.sophie.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.female.sophie",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.female.sophie",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.aurelien.female.marianne.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.aurelien.female.marianne",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-name-part.aurelien.female.marianne",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.aurelien",
+    "display": {
+      "nameRef": {
+        "key": "text.character-naming-rule.aurelien.standard.name"
+      }
+    },
+    "enabled": true,
+    "familyIds": [
+      "character-name-part.aurelien.family.veyne",
+      "character-name-part.aurelien.family.morant",
+      "character-name-part.aurelien.family.duval",
+      "character-name-part.aurelien.family.bell",
+      "character-name-part.aurelien.family.maret",
+      "character-name-part.aurelien.family.lowell",
+      "character-name-part.aurelien.family.cairn",
+      "character-name-part.aurelien.family.vidal"
+    ],
+    "femaleGivenIds": [
+      "character-name-part.aurelien.female.aline",
+      "character-name-part.aurelien.female.claire",
+      "character-name-part.aurelien.female.margot",
+      "character-name-part.aurelien.female.cecile",
+      "character-name-part.aurelien.female.rose",
+      "character-name-part.aurelien.female.adele",
+      "character-name-part.aurelien.female.isabelle",
+      "character-name-part.aurelien.female.estelle",
+      "character-name-part.aurelien.female.louise",
+      "character-name-part.aurelien.female.viviane",
+      "character-name-part.aurelien.female.sophie",
+      "character-name-part.aurelien.female.marianne"
+    ],
+    "id": "character-naming-rule.aurelien.standard",
+    "kind": "character-naming-rule",
+    "maleGivenIds": [
+      "character-name-part.aurelien.male.mathis",
+      "character-name-part.aurelien.male.edmund",
+      "character-name-part.aurelien.male.olivier",
+      "character-name-part.aurelien.male.felix",
+      "character-name-part.aurelien.male.remy",
+      "character-name-part.aurelien.male.hugo",
+      "character-name-part.aurelien.male.adrian",
+      "character-name-part.aurelien.male.nicolas",
+      "character-name-part.aurelien.male.simon",
+      "character-name-part.aurelien.male.emile",
+      "character-name-part.aurelien.male.leon",
+      "character-name-part.aurelien.male.vincent"
+    ],
+    "packId": "pack:world-cities",
+    "reservedNames": [],
+    "schemaVersion": 1,
+    "sourcePath": "world/names-aurelien.json#character-naming-rule.aurelien.standard"
+  }
+]

@@ -1,0 +1,535 @@
+[
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.family.haddad.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.family.haddad",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.family.haddad",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.family.mansur.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.family.mansur",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.family.mansur",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.family.najjar.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.family.najjar",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.family.najjar",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.family.sabah.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.family.sabah",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.family.sabah",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.family.hakim.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.family.hakim",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.family.hakim",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.family.rashid.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.family.rashid",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.family.rashid",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.family.khalil.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.family.khalil",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.family.khalil",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.family.nasser.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.family.nasser",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.family.nasser",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.male.nadim.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.male.nadim",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.male.nadim",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.male.hasan.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.male.hasan",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.male.hasan",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.male.rafiq.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.male.rafiq",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.male.rafiq",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.male.adil.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.male.adil",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.male.adil",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.male.bashir.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.male.bashir",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.male.bashir",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.male.hamid.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.male.hamid",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.male.hamid",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.male.ilyas.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.male.ilyas",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.male.ilyas",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.male.jamil.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.male.jamil",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.male.jamil",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.male.munir.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.male.munir",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.male.munir",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.male.nabil.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.male.nabil",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.male.nabil",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.male.omar.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.male.omar",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.male.omar",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.male.salim.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.male.salim",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.male.salim",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.female.samira.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.female.samira",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.female.samira",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.female.amina.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.female.amina",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.female.amina",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.female.hana.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.female.hana",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.female.hana",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.female.iman.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.female.iman",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.female.iman",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.female.jamila.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.female.jamila",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.female.jamila",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.female.lina.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.female.lina",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.female.lina",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.female.muna.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.female.muna",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.female.muna",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.female.nura.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.female.nura",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.female.nura",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.female.rania.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.female.rania",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.female.rania",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.female.salma.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.female.salma",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.female.salma",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.female.soraya.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.female.soraya",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.female.soraya",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.safir.female.yara.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.safir.female.yara",
+    "kind": "character-name-part",
+    "packId": "pack:world-cities",
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-name-part.safir.female.yara",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.safir",
+    "display": {
+      "nameRef": {
+        "key": "text.character-naming-rule.safir.standard.name"
+      }
+    },
+    "enabled": true,
+    "familyIds": [
+      "character-name-part.safir.family.haddad",
+      "character-name-part.safir.family.mansur",
+      "character-name-part.safir.family.najjar",
+      "character-name-part.safir.family.sabah",
+      "character-name-part.safir.family.hakim",
+      "character-name-part.safir.family.rashid",
+      "character-name-part.safir.family.khalil",
+      "character-name-part.safir.family.nasser"
+    ],
+    "femaleGivenIds": [
+      "character-name-part.safir.female.samira",
+      "character-name-part.safir.female.amina",
+      "character-name-part.safir.female.hana",
+      "character-name-part.safir.female.iman",
+      "character-name-part.safir.female.jamila",
+      "character-name-part.safir.female.lina",
+      "character-name-part.safir.female.muna",
+      "character-name-part.safir.female.nura",
+      "character-name-part.safir.female.rania",
+      "character-name-part.safir.female.salma",
+      "character-name-part.safir.female.soraya",
+      "character-name-part.safir.female.yara"
+    ],
+    "id": "character-naming-rule.safir.standard",
+    "kind": "character-naming-rule",
+    "maleGivenIds": [
+      "character-name-part.safir.male.nadim",
+      "character-name-part.safir.male.hasan",
+      "character-name-part.safir.male.rafiq",
+      "character-name-part.safir.male.adil",
+      "character-name-part.safir.male.bashir",
+      "character-name-part.safir.male.hamid",
+      "character-name-part.safir.male.ilyas",
+      "character-name-part.safir.male.jamil",
+      "character-name-part.safir.male.munir",
+      "character-name-part.safir.male.nabil",
+      "character-name-part.safir.male.omar",
+      "character-name-part.safir.male.salim"
+    ],
+    "packId": "pack:world-cities",
+    "reservedNames": [],
+    "schemaVersion": 1,
+    "sourcePath": "world/names-safir.json#character-naming-rule.safir.standard"
+  }
+]

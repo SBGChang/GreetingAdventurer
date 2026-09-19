@@ -908,6 +908,7 @@ const cases: readonly Case[] = [
         const res = handleCreateQuestTemporaryCharacter(
           {
             type: 'CreateQuestTemporaryCharacter',
+            originCityId: 'city.test' as never,
             kind: 'escort',
             archetypeId: NPC_ARCHETYPE_ID,
             sourceQuestId: 'runtime:quest:escort-1' as never,
@@ -953,6 +954,7 @@ const cases: readonly Case[] = [
         handleCreateQuestTemporaryCharacter(
           {
             type: 'CreateQuestTemporaryCharacter',
+            originCityId: 'city.test' as never,
             kind: 'rescue',
             archetypeId: 'definition:character-archetype:ghost' as never,
             sourceQuestId: 'runtime:quest:rescue-1' as never,

@@ -10,6 +10,7 @@ const portraits=new Set(),identities=new Set(),detailCells=new Set(),detailAtlas
 for(const culture of cultures)for(const kind of kinds){
  const rows=catalog.facilities.filter(p=>p.cultureId===culture&&p.kind===kind);assert.equal(rows.length,1,`${culture}/${kind}`);const p=rows[0];
  for(const locale of ['zh-Hant','en']){assert(p.name[locale]);assert(p.host.name[locale]);for(const expression of ['normal','happy','angry','sad'])assert(p.dialogue[expression][locale]);}
+ assert(!/[\u3400-\u9fff]/.test(p.host.name.en),`${p.id}: English name must have an authored spelling`);
  const file=fs.readFileSync(path.join('app/assets/facilities',p.host.portrait));assert(file.subarray(1,4).toString()==='PNG');assert.equal(file.readUInt32BE(16),file.readUInt32BE(20),'expression sheet is square');assert(file.readUInt32BE(16)>=1024,'portrait source resolution');
  assert.equal(file[25],2,`${p.id}: receptionist sheets must be opaque RGB PNGs, not fading RGBA sprites`);
  portraits.add(createHash('sha256').update(file).digest('hex'));identities.add(p.host.description);

@@ -87,6 +87,7 @@ try {
      assert.equal(locked.rejectionCode,'team/formation-active-combat');
      assert.equal(game.serialize(),lockedSnapshot);
      assert.equal(c.combatants.find((unit:any)=>unit.side==='player').col,2);
+     assert.deepEqual(c.combatants.find((unit:any)=>unit.side==='player').characterName,v.sheet.name,'combat and character sheet display the same identity');
 
      const command = {type:'useCombatSkill',encounterId:c.encounterId,actorId:c.currentActorId,skillId:skill.skillId,targetCombatantIds:[target.combatantId]};
      const snapshot = game.serialize();

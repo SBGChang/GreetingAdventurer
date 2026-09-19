@@ -2101,6 +2101,9 @@
         "origin": {
           "$ref": "#/definitions/CharacterOrigin"
         },
+        "name": {
+          "$ref": "#/definitions/CharacterName"
+        },
         "sex": {
           "$ref": "#/definitions/Sex"
         },
@@ -2154,6 +2157,7 @@
         "characterId",
         "archetypeId",
         "origin",
+        "name",
         "sex",
         "birthDay",
         "lifeState",
@@ -2185,6 +2189,88 @@
         "worldResident",
         "questTemporary"
       ]
+    },
+    "CharacterName": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "generated"
+            },
+            "ruleId": {
+              "$ref": "#/definitions/NamingRuleId"
+            },
+            "familyId": {
+              "$ref": "#/definitions/NamePartId"
+            },
+            "givenId": {
+              "$ref": "#/definitions/NamePartId"
+            },
+            "cultureId": {
+              "$ref": "#/definitions/CultureId"
+            }
+          },
+          "required": [
+            "cultureId",
+            "familyId",
+            "givenId",
+            "kind",
+            "ruleId"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "custom"
+            },
+            "text": {
+              "type": "string"
+            },
+            "cultureId": {
+              "$ref": "#/definitions/CultureId"
+            }
+          },
+          "required": [
+            "cultureId",
+            "kind",
+            "text"
+          ]
+        }
+      ],
+      "description": "Persist identity, never translated display strings. Custom names retain the user's spelling."
+    },
+    "NamingRuleId": {
+      "$ref": "#/definitions/DefinitionId%3C%22character-naming-rule%22%3E"
+    },
+    "DefinitionId<\"character-naming-rule\">": {
+      "$ref": "#/definitions/Brand%3Cstring%2C%22definition%3Acharacter-naming-rule%22%3E"
+    },
+    "Brand<string,\"definition:character-naming-rule\">": {
+      "type": "string"
+    },
+    "NamePartId": {
+      "$ref": "#/definitions/DefinitionId%3C%22character-name-part%22%3E"
+    },
+    "DefinitionId<\"character-name-part\">": {
+      "$ref": "#/definitions/Brand%3Cstring%2C%22definition%3Acharacter-name-part%22%3E"
+    },
+    "Brand<string,\"definition:character-name-part\">": {
+      "type": "string"
+    },
+    "CultureId": {
+      "$ref": "#/definitions/DefinitionId%3C%22culture%22%3E"
+    },
+    "DefinitionId<\"culture\">": {
+      "$ref": "#/definitions/Brand%3Cstring%2C%22definition%3Aculture%22%3E"
+    },
+    "Brand<string,\"definition:culture\">": {
+      "type": "string"
     },
     "Sex": {
       "type": "string",
@@ -7523,15 +7609,6 @@
       "$ref": "#/definitions/Brand%3Cstring%2C%22definition%3Arestaurant-meal-variant%22%3E"
     },
     "Brand<string,\"definition:restaurant-meal-variant\">": {
-      "type": "string"
-    },
-    "CultureId": {
-      "$ref": "#/definitions/DefinitionId%3C%22culture%22%3E"
-    },
-    "DefinitionId<\"culture\">": {
-      "$ref": "#/definitions/Brand%3Cstring%2C%22definition%3Aculture%22%3E"
-    },
-    "Brand<string,\"definition:culture\">": {
       "type": "string"
     },
     "FoodAffixId": {

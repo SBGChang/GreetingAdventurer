@@ -18,7 +18,7 @@
       "host": {
         "name": {
           "zh-Hant": "蘇晚晴",
-          "en": "蘇晚晴"
+          "en": "Su Wanqing"
         },
         "description": "adult woman innkeeper, round face, black hair in loose bun, cream and plum hanfu, cloth room-key pouch",
         "portrait": "yunhua-inn.png"
@@ -88,8 +88,8 @@
       },
       "host": {
         "name": {
-          "zh-Hant": "杜長川",
-          "en": "杜長川"
+          "zh-Hant": "杜寬",
+          "en": "Du Kuan"
         },
         "description": "stocky middle-aged man tavern host, small moustache, short tied black hair, burgundy vest, ceramic wine jug",
         "portrait": "yunhua-tavern.png"
@@ -160,7 +160,7 @@
       "host": {
         "name": {
           "zh-Hant": "沈知微",
-          "en": "沈知微"
+          "en": "Shen Zhiwei"
         },
         "description": "adult woman guild registrar, sharp brows, long braided black hair, jade robe, bronze insignia and document folio",
         "portrait": "yunhua-adventurerGuild.png"
@@ -230,8 +230,8 @@
       },
       "host": {
         "name": {
-          "zh-Hant": "陶青禾",
-          "en": "陶青禾"
+          "zh-Hant": "陶秀蘭",
+          "en": "Tao Xiulan"
         },
         "description": "young adult man herbalist, freckled face, tousled dark hair, sage apron, herb satchel",
         "portrait": "yunhua-itemShop.png"
@@ -301,8 +301,8 @@
       },
       "host": {
         "name": {
-          "zh-Hant": "魏鳴鐵",
-          "en": "魏鳴鐵"
+          "zh-Hant": "魏成",
+          "en": "Wei Cheng"
         },
         "description": "broad older man smith, gray beard, weathered face, tied hair, soot-stained leather apron and iron hammer",
         "portrait": "yunhua-equipmentShop.png"
@@ -372,8 +372,8 @@
       },
       "host": {
         "name": {
-          "zh-Hant": "霍清嵐",
-          "en": "霍清嵐"
+          "zh-Hant": "霍英",
+          "en": "Huo Ying"
         },
         "description": "athletic adult woman martial instructor, high ponytail, navy training robe, red wrist wraps, wooden practice saber",
         "portrait": "yunhua-trainingGround.png"
@@ -443,8 +443,8 @@
       },
       "host": {
         "name": {
-          "zh-Hant": "顧墨生",
-          "en": "顧墨生"
+          "zh-Hant": "顧文禮",
+          "en": "Gu Wenli"
         },
         "description": "elderly man bookseller, fine white beard, black scholar cap, indigo robe, bamboo book",
         "portrait": "yunhua-bookstore.png"
@@ -514,8 +514,8 @@
       },
       "host": {
         "name": {
-          "zh-Hant": "陸拾山",
-          "en": "陸拾山"
+          "zh-Hant": "陸進",
+          "en": "Lu Jin"
         },
         "description": "adult woman pathfinder, short wavy black hair, olive travel cloak, compass and rolled map",
         "portrait": "yunhua-adventureCheckpoint.png"
@@ -585,8 +585,8 @@
       },
       "host": {
         "name": {
-          "zh-Hant": "秦鎮川",
-          "en": "秦鎮川"
+          "zh-Hant": "秦岳",
+          "en": "Qin Yue"
         },
         "description": "stern adult man gate officer, square jaw, topknot, dark lamellar armor, crimson shoulder sash",
         "portrait": "yunhua-cityGate.png"
@@ -656,8 +656,8 @@
       },
       "host": {
         "name": {
-          "zh-Hant": "許安寧",
-          "en": "許安寧"
+          "zh-Hant": "許惠如",
+          "en": "Xu Huiru"
         },
         "description": "middle-aged woman property steward, pinned chestnut hair, pearl hairpin, ochre silk jacket, lacquer key box",
         "portrait": "yunhua-home.png"
@@ -734,7 +734,7 @@
       "host": {
         "name": {
           "zh-Hant": "艾妲",
-          "en": "艾妲"
+          "en": "Ada"
         },
         "description": "stout adult woman innkeeper, auburn braids, kind freckled face, ochre wool dress, fur shoulder wrap, wooden room keys",
         "portrait": "vildun-inn.png"
@@ -805,7 +805,7 @@
       "host": {
         "name": {
           "zh-Hant": "托爾姆",
-          "en": "托爾姆"
+          "en": "Torm"
         },
         "description": "large middle-aged man mead keeper, curled red beard, shaved sides, forest green tunic, carved drinking horn",
         "portrait": "vildun-tavern.png"
@@ -876,7 +876,7 @@
       "host": {
         "name": {
           "zh-Hant": "芙蕾雅",
-          "en": "芙蕾雅"
+          "en": "Freya"
         },
         "description": "adult woman hunt registrar, silver-blonde single braid, strong cheekbones, slate wool cloak, bronze oath rings, leather ledger",
         "portrait": "vildun-adventurerGuild.png"
@@ -947,7 +947,7 @@
       "host": {
         "name": {
           "zh-Hant": "艾文",
-          "en": "艾文"
+          "en": "Eivin"
         },
         "description": "slim adult man herbalist, wavy brown hair, soft face, cream wool, moss-green shawl and medicine pouches",
         "portrait": "vildun-itemShop.png"
@@ -1018,7 +1018,7 @@
       "host": {
         "name": {
           "zh-Hant": "布倫",
-          "en": "布倫"
+          "en": "Brunn"
         },
         "description": "powerful older woman smith, gray braided hair, weathered tan face, sleeveless wool tunic, iron-studded apron, hammer",
         "portrait": "vildun-equipmentShop.png"
@@ -1089,7 +1089,7 @@
       "host": {
         "name": {
           "zh-Hant": "西格妮",
-          "en": "西格妮"
+          "en": "Signe"
         },
         "description": "athletic adult man shield trainer, blond beard, scar on eyebrow, navy tunic, round shield strap",
         "portrait": "vildun-trainingGround.png"
@@ -1160,7 +1160,7 @@
       "host": {
         "name": {
           "zh-Hant": "烏爾文",
-          "en": "烏爾文"
+          "en": "Ulven"
         },
         "description": "elderly woman lore keeper, long silver hair, amber beads, dark teal wool, birch scrolls",
         "portrait": "vildun-bookstore.png"
@@ -1231,7 +1231,7 @@
       "host": {
         "name": {
           "zh-Hant": "莉芙",
-          "en": "莉芙"
+          "en": "Liv"
         },
         "description": "young adult woman trail scout, copper short hair, freckles, brown leather hunting gear, white fur collar",
         "portrait": "vildun-adventureCheckpoint.png"
@@ -1302,7 +1302,7 @@
       "host": {
         "name": {
           "zh-Hant": "哈肯",
-          "en": "哈肯"
+          "en": "Hakon"
         },
         "description": "older adult man gate watchman, thick dark beard, gray hair at temples, iron mail and bear-brown cloak",
         "portrait": "vildun-cityGate.png"
@@ -1373,7 +1373,7 @@
       "host": {
         "name": {
           "zh-Hant": "茉伊菈",
-          "en": "茉伊菈"
+          "en": "Moira"
         },
         "description": "adult man home steward, clean shaven, shoulder-length sandy hair, rust wool coat, bone key ring",
         "portrait": "vildun-home.png"
@@ -1444,7 +1444,7 @@
       "host": {
         "name": {
           "zh-Hant": "艾莉絲",
-          "en": "艾莉絲"
+          "en": "Alice"
         },
         "description": "adult woman innkeeper, chestnut bob, warm brown eyes, cream blouse and blue embroidered bodice, brass key chain",
         "portrait": "aurelien-inn.png"
@@ -1515,7 +1515,7 @@
       "host": {
         "name": {
           "zh-Hant": "加斯頓",
-          "en": "加斯頓"
+          "en": "Gaston"
         },
         "description": "portly adult man tavern host, dark curled moustache, burgundy doublet, cream sleeves, pewter goblet",
         "portrait": "aurelien-tavern.png"
@@ -1586,7 +1586,7 @@
       "host": {
         "name": {
           "zh-Hant": "瑟蕾娜",
-          "en": "瑟蕾娜"
+          "en": "Serena"
         },
         "description": "adult woman oath registrar, dark brown skin, tightly curled black hair, ivory and royal blue mantle, gold seal and book",
         "portrait": "aurelien-adventurerGuild.png"
@@ -1657,7 +1657,7 @@
       "host": {
         "name": {
           "zh-Hant": "盧西安",
-          "en": "盧西安"
+          "en": "Lucien"
         },
         "description": "adult man apothecary, olive skin, long black hair tied low, sage velvet coat, glass vial",
         "portrait": "aurelien-itemShop.png"
@@ -1728,7 +1728,7 @@
       "host": {
         "name": {
           "zh-Hant": "瑪爾塔",
-          "en": "瑪爾塔"
+          "en": "Marta"
         },
         "description": "muscular middle-aged woman armorer, copper hair in crown braid, dark leather apron, burgundy shirt, steel tongs",
         "portrait": "aurelien-equipmentShop.png"
@@ -1799,7 +1799,7 @@
       "host": {
         "name": {
           "zh-Hant": "羅蘭",
-          "en": "羅蘭"
+          "en": "Roland"
         },
         "description": "adult man knight instructor, short silver-blond hair, clean jaw, blue gambeson with modest polished armor, training sword",
         "portrait": "aurelien-trainingGround.png"
@@ -1870,7 +1870,7 @@
       "host": {
         "name": {
           "zh-Hant": "貝雅特麗絲",
-          "en": "貝雅特麗絲"
+          "en": "Beatrice"
         },
         "description": "elderly woman archivist, silver curls, gold spectacles, navy velvet robe, illuminated manuscript",
         "portrait": "aurelien-bookstore.png"
@@ -1941,7 +1941,7 @@
       "host": {
         "name": {
           "zh-Hant": "賽德里克",
-          "en": "賽德里克"
+          "en": "Cedric"
         },
         "description": "young adult man courier scout, curly dark hair, tan face, ochre hooded cloak, leather map tube",
         "portrait": "aurelien-adventureCheckpoint.png"
@@ -2012,7 +2012,7 @@
       "host": {
         "name": {
           "zh-Hant": "伊蓮娜",
-          "en": "伊蓮娜"
+          "en": "Elena"
         },
         "description": "adult woman gate captain, black hair swept back, stern oval face, polished steel plate with blue sash",
         "portrait": "aurelien-cityGate.png"
@@ -2083,7 +2083,7 @@
       "host": {
         "name": {
           "zh-Hant": "奧斯溫",
-          "en": "奧斯溫"
+          "en": "Oswin"
         },
         "description": "middle-aged man deed keeper, short salt-and-pepper beard, brown velvet cap, cream and wine coat, rolled deed",
         "portrait": "aurelien-home.png"
@@ -2154,7 +2154,7 @@
       "host": {
         "name": {
           "zh-Hant": "蕾拉",
-          "en": "蕾拉"
+          "en": "Layla"
         },
         "description": "adult woman innkeeper, warm brown skin, dark wavy hair under loose ivory scarf, turquoise dress, brass keys",
         "portrait": "safir-inn.png"
@@ -2225,7 +2225,7 @@
       "host": {
         "name": {
           "zh-Hant": "法里德",
-          "en": "法里德"
+          "en": "Farid"
         },
         "description": "middle-aged man tea host, deep brown skin, neat black beard, amber turban, indigo vest, small brass teapot",
         "portrait": "safir-tavern.png"
@@ -2296,7 +2296,7 @@
       "host": {
         "name": {
           "zh-Hant": "娜迪雅",
-          "en": "娜迪雅"
+          "en": "Nadia"
         },
         "description": "adult woman trade registrar, olive skin, long dark braid, cobalt silk mantle, gold geometric clasp, star-stamped ledger",
         "portrait": "safir-adventurerGuild.png"
@@ -2367,7 +2367,7 @@
       "host": {
         "name": {
           "zh-Hant": "薩米爾",
-          "en": "薩米爾"
+          "en": "Samir"
         },
         "description": "young adult man perfumer, tan skin, dark curly hair, white tunic, green embroidered vest and glass perfume vial",
         "portrait": "safir-itemShop.png"
@@ -2438,7 +2438,7 @@
       "host": {
         "name": {
           "zh-Hant": "札赫拉",
-          "en": "札赫拉"
+          "en": "Zahra"
         },
         "description": "strong adult woman weaponsmith, brown skin, black hair wrapped in rust scarf, sand shirt and worn leather apron, copper tongs",
         "portrait": "safir-equipmentShop.png"
@@ -2509,7 +2509,7 @@
       "host": {
         "name": {
           "zh-Hant": "卡里姆",
-          "en": "卡里姆"
+          "en": "Karim"
         },
         "description": "adult man martial tutor, lean muscular frame, long dark moustache, cream wrapped headcloth, red sash, curved training blade",
         "portrait": "safir-trainingGround.png"
@@ -2580,7 +2580,7 @@
       "host": {
         "name": {
           "zh-Hant": "雅斯敏",
-          "en": "雅斯敏"
+          "en": "Yasmin"
         },
         "description": "older adult woman scribe, deep brown skin, silver hair under indigo veil, turquoise beads, ivory robe, bound manuscript",
         "portrait": "safir-bookstore.png"
@@ -2651,7 +2651,7 @@
       "host": {
         "name": {
           "zh-Hant": "塔里克",
-          "en": "塔里克"
+          "en": "Tariq"
         },
         "description": "adult man caravan scout, sun-weathered tan skin, black stubble, teal headwrap, sand cloak and map",
         "portrait": "safir-adventureCheckpoint.png"
@@ -2722,7 +2722,7 @@
       "host": {
         "name": {
           "zh-Hant": "瑪莉卡",
-          "en": "瑪莉卡"
+          "en": "Malika"
         },
         "description": "adult woman gate officer, short curly black hair, bronze scale armor, deep red scarf, sun medallion",
         "portrait": "safir-cityGate.png"
@@ -2793,7 +2793,7 @@
       "host": {
         "name": {
           "zh-Hant": "伊德里斯",
-          "en": "伊德里斯"
+          "en": "Idris"
         },
         "description": "older adult man property keeper, gray beard, cream turban, ornate blue waistcoat, brass key ring",
         "portrait": "safir-home.png"

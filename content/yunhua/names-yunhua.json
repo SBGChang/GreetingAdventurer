@@ -1,0 +1,732 @@
+[
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.family.chen.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.family.chen",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.family.chen",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.family.he.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.family.he",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.family.he",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.family.du.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.family.du",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.family.du",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.family.wei.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.family.wei",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.family.wei",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.family.lin.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.family.lin",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.family.lin",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.family.zhou.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.family.zhou",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.family.zhou",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.family.zhao.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.family.zhao",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.family.zhao",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.family.feng.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.family.feng",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.family.feng",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.family.liang.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.family.liang",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.family.liang",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.family.song.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.family.song",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.family.song",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.family.zheng.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.family.zheng",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.family.zheng",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.family.luo.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.family.luo",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.family.luo",
+    "usage": "family"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.male.yue.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.male.yue",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.male.yue",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.male.cheng.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.male.cheng",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.male.cheng",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.male.jing.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.male.jing",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.male.jing",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.male.ping.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.male.ping",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.male.ping",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.male.yong.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.male.yong",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.male.yong",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.male.wenxiu.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.male.wenxiu",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.male.wenxiu",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.male.shikang.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.male.shikang",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.male.shikang",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.male.boliang.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.male.boliang",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.male.boliang",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.male.zhiyuan.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.male.zhiyuan",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.male.zhiyuan",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.male.huairen.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.male.huairen",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.male.huairen",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.male.demao.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.male.demao",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.male.demao",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.male.yongnian.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.male.yongnian",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.male.yongnian",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.male.xiuming.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.male.xiuming",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.male.xiuming",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.male.zhongan.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.male.zhongan",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.male.zhongan",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.male.ziqian.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.male.ziqian",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.male.ziqian",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.male.dayou.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.male.dayou",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.male.dayou",
+    "usage": "male"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.female.xiu.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.female.xiu",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.female.xiu",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.female.min.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.female.min",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.female.min",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.female.rong.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.female.rong",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.female.rong",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.female.lan.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.female.lan",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.female.lan",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.female.zhen.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.female.zhen",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.female.zhen",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.female.yufen.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.female.yufen",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.female.yufen",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.female.huiru.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.female.huiru",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.female.huiru",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.female.chunyan.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.female.chunyan",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.female.chunyan",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.female.suqin.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.female.suqin",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.female.suqin",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.female.wanru.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.female.wanru",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.female.wanru",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.female.lijun.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.female.lijun",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.female.lijun",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.female.peiwen.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.female.peiwen",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.female.peiwen",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.female.jingyi.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.female.jingyi",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.female.jingyi",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.female.qiurong.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.female.qiurong",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.female.qiurong",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.female.xiuyun.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.female.xiuyun",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.female.xiuyun",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-name-part.yunhua.female.shuhua.name"
+      }
+    },
+    "enabled": true,
+    "id": "character-name-part.yunhua.female.shuhua",
+    "kind": "character-name-part",
+    "packId": "pack:yunhua",
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-name-part.yunhua.female.shuhua",
+    "usage": "female"
+  },
+  {
+    "cultureId": "culture.yunhua",
+    "display": {
+      "nameRef": {
+        "key": "text.character-naming-rule.yunhua.standard.name"
+      }
+    },
+    "enabled": true,
+    "familyIds": [
+      "character-name-part.yunhua.family.chen",
+      "character-name-part.yunhua.family.he",
+      "character-name-part.yunhua.family.du",
+      "character-name-part.yunhua.family.wei",
+      "character-name-part.yunhua.family.lin",
+      "character-name-part.yunhua.family.zhou",
+      "character-name-part.yunhua.family.zhao",
+      "character-name-part.yunhua.family.feng",
+      "character-name-part.yunhua.family.liang",
+      "character-name-part.yunhua.family.song",
+      "character-name-part.yunhua.family.zheng",
+      "character-name-part.yunhua.family.luo"
+    ],
+    "femaleGivenIds": [
+      "character-name-part.yunhua.female.xiu",
+      "character-name-part.yunhua.female.min",
+      "character-name-part.yunhua.female.rong",
+      "character-name-part.yunhua.female.lan",
+      "character-name-part.yunhua.female.zhen",
+      "character-name-part.yunhua.female.yufen",
+      "character-name-part.yunhua.female.huiru",
+      "character-name-part.yunhua.female.chunyan",
+      "character-name-part.yunhua.female.suqin",
+      "character-name-part.yunhua.female.wanru",
+      "character-name-part.yunhua.female.lijun",
+      "character-name-part.yunhua.female.peiwen",
+      "character-name-part.yunhua.female.jingyi",
+      "character-name-part.yunhua.female.qiurong",
+      "character-name-part.yunhua.female.xiuyun",
+      "character-name-part.yunhua.female.shuhua"
+    ],
+    "id": "character-naming-rule.yunhua.standard",
+    "kind": "character-naming-rule",
+    "maleGivenIds": [
+      "character-name-part.yunhua.male.yue",
+      "character-name-part.yunhua.male.cheng",
+      "character-name-part.yunhua.male.jing",
+      "character-name-part.yunhua.male.ping",
+      "character-name-part.yunhua.male.yong",
+      "character-name-part.yunhua.male.wenxiu",
+      "character-name-part.yunhua.male.shikang",
+      "character-name-part.yunhua.male.boliang",
+      "character-name-part.yunhua.male.zhiyuan",
+      "character-name-part.yunhua.male.huairen",
+      "character-name-part.yunhua.male.demao",
+      "character-name-part.yunhua.male.yongnian",
+      "character-name-part.yunhua.male.xiuming",
+      "character-name-part.yunhua.male.zhongan",
+      "character-name-part.yunhua.male.ziqian",
+      "character-name-part.yunhua.male.dayou"
+    ],
+    "packId": "pack:yunhua",
+    "reservedNames": [
+      {
+        "familyId": "character-name-part.yunhua.family.wei",
+        "givenId": "character-name-part.yunhua.male.cheng"
+      }
+    ],
+    "schemaVersion": 1,
+    "sourcePath": "yunhua/names-yunhua.json#character-naming-rule.yunhua.standard"
+  }
+]

@@ -1,3 +1,5 @@
+import type { CharacterName } from '../../contracts/character/names';
+import type { CultureId, CityId } from '../../contracts/core';
 // modules/character/system.ts
 // Character 模組的純函式 Handler / Subscriber。
 //
@@ -136,6 +138,10 @@ export type QuestTemporaryCharacterDraft = Readonly<{
 
 // 由資料 Resolver 決定的規則結果。Handler 不含公式，只消費結果。
 export interface CharacterResolverPort {
+  resolveName(input: Readonly<{
+    characterId: CharacterId; sex: Sex; existingNames: readonly CharacterName[];
+    origin: Readonly<{ kind: 'culture'; cultureId: CultureId }> | Readonly<{ kind: 'city'; cityId: CityId }>;
+  }>): CharacterName;
   resolveNaturalDeath(
     input: Readonly<{ character: Character; onDay: WorldDay }>,
   ): LifecycleDecision;
@@ -346,6 +352,7 @@ function newCharacter(
     characterId: CharacterId;
     archetypeId: CharacterArchetypeId;
     origin: CharacterOrigin;
+    name: CharacterName;
     sex: Sex;
     birthDay: WorldDay;
     availability: Character['availability'];
@@ -358,6 +365,7 @@ function newCharacter(
     characterId: input.characterId,
     archetypeId: input.archetypeId,
     origin: input.origin,
+    name: input.name,
     sex: input.sex,
     birthDay: input.birthDay,
     lifeState: 'alive',
@@ -671,6 +679,7 @@ export function handleCreateQuestTemporaryCharacter(
     characterId,
     archetypeId: command.archetypeId,
     origin: 'questTemporary',
+    name: ctx.resolvers.resolveName({ characterId, sex: draft.sex, existingNames: Object.values(state.characters).map(c => c.name), origin: { kind: 'city', cityId: command.originCityId } }),
     sex: draft.sex,
     birthDay: ctx.worldDay,
     availability: 'temporary',
@@ -707,6 +716,7 @@ export function handleCreateWorldAdventurerBatch(
       characterId,
       archetypeId: draft.archetypeId,
       origin: 'worldAdventurer',
+      name: ctx.resolvers.resolveName({ characterId, sex: draft.sex, existingNames: Object.values(nextState.characters).map(c => c.name), origin: { kind: 'culture', cultureId: command.cultureId } }),
       sex: draft.sex,
       birthDay: draft.birthDay,
       // 生成規則輸出已成年起始年齡 → 直接 available。
@@ -1057,6 +1067,7 @@ export function onHomeYearRestCompleted(
         characterId: childId,
         archetypeId: decision.archetypeId,
         origin: 'playerLineage',
+        name: ctx.resolvers.resolveName({ characterId: childId, sex: decision.sex, existingNames: Object.values(nextState.characters).map(c => c.name), origin: { kind: 'culture', cultureId: a.name.cultureId } }),
         sex: decision.sex,
         birthDay: ctx.worldDay,
         // 未成年不可入隊（不變量 8）：出生即 unavailable，成年 Job 後才轉 available。

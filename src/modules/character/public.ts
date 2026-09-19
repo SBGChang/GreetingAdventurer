@@ -111,3 +111,6 @@ export const characterModuleContract: ModuleContract = {
 function CHARACTER_MODULE_ID_VALUE(): ModuleId {
   return 'character' as ModuleId;
 }
+
+export { generateCharacterName, characterNameDisplay } from './names';
+export type { CharacterNameReader } from './names';

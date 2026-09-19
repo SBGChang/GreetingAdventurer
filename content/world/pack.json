@@ -1,5 +1,7 @@
 {
   "declaredKinds": [
+    "character-name-part",
+    "character-naming-rule",
     "city",
     "city-node",
     "culture",

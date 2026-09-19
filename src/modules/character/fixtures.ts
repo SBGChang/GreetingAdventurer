@@ -88,6 +88,7 @@ export function makeCharacter(
 ): Character {
   return {
     characterId: input.characterId,
+    name: { kind: 'custom', text: 'Test Adventurer', cultureId: 'culture.test' as never },
     archetypeId: input.archetypeId ?? PLAYER_ARCHETYPE_ID,
     origin: input.origin ?? 'playerLineage',
     sex: input.sex ?? 'female',
@@ -262,6 +263,7 @@ export function stubResolverPort(
   overrides: Partial<CharacterResolverPort> = {},
 ): CharacterResolverPort {
   const base: CharacterResolverPort = {
+    resolveName: ({ characterId }) => ({ kind: 'custom', text: String(characterId), cultureId: 'culture.test' as never }),
     resolveNaturalDeath: () => ({ outcome: 'reschedule', nextCheckInDays: 365 }),
     resolveRetirement: () => ({ outcome: 'reschedule', nextCheckInDays: 365 }),
     resolveBirth: () => ({ born: false }),

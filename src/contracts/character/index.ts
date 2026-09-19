@@ -1,3 +1,5 @@
+import type { CharacterName } from './names';
+export * from './names';
 // contracts/character — Character 模組公開契約。
 // 對應 docs/00_core/architecture/04_character_module.md（純型別；不含實作）。
 // 規則：共用型別一律 import 自 '../core'；不重新定義 core 型別。
@@ -177,6 +179,7 @@ export type Character = Readonly<{
   characterId: CharacterId;
   archetypeId: CharacterArchetypeId;
   origin: CharacterOrigin;
+  name: CharacterName;
   sex: Sex;
 
   birthDay: WorldDay;
@@ -305,6 +308,7 @@ export interface CharacterStatsQuery {
 
 export type CreateQuestTemporaryCharacter = Readonly<{
   type: 'CreateQuestTemporaryCharacter';
+  originCityId: CityId;
   kind: 'escort' | 'rescue';
   archetypeId: CharacterArchetypeId;
   sourceQuestId: QuestId;

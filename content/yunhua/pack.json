@@ -2,6 +2,8 @@
   "declaredKinds": [
     "adventure-site",
     "attack-mastery-award-rule",
+    "character-name-part",
+    "character-naming-rule",
     "city",
     "city-action-rule",
     "city-node",

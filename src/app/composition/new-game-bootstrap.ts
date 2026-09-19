@@ -1,3 +1,5 @@
+import { createCharacterNameReader } from '../content/character-name-reader';
+import { generateCharacterName } from '../../modules/character/public';
 import { handleReserveShopOfferForQuest } from '../../modules/city/public';
 // app/composition/new-game-bootstrap.ts
 // NewGameBootstrapper（12_engine_runtime.md §1.1）：從**真實 Content Pack** 開一個新遊戲。
@@ -104,6 +106,7 @@ export type NewGameConfig = Readonly<{
   startingArchetypeId: CharacterArchetypeId;
   startCityId: CityId;
   leaderSex: Sex;
+  leaderName?: string;
   // 隊長出生日。**必填**——隊長的起始年齡是開新遊戲的選擇，Bootstrapper 不替它發明預設
   // （原本寫 `?? 0`，被紀律門禁擋下：0 在這裡是猜的玩法值，不是結構不變量）。
   leaderBirthDay: number;
@@ -152,6 +155,7 @@ export function createNewGame(
   if (config.worldSeed.trim() === '') {
     diagnostics.push({ code: 'newGame/empty-seed', detail: 'worldSeed 不可為空' });
   }
+  if (config.leaderName !== undefined && (!config.leaderName.trim() || config.leaderName.length > 80)) diagnostics.push({ code: 'newGame/invalid-name', detail: '姓名須為 1–80 字元' });
   const birthDay = config.leaderBirthDay;
   if (!Number.isInteger(config.startDay) || config.startDay < 0) {
     diagnostics.push({ code: 'newGame/invalid-start-day', detail: `startDay 需為非負整數（實得 ${config.startDay}）` });
@@ -223,8 +227,12 @@ export function createNewGame(
   const leaderId = ids.character.nextCharacterId();
   const playerTeamId = ids.team.nextTeamId();
 
+  const cultureId = world.getRegion(world.getCityNode(config.startCityId).regionId).nativeCultureId;
   const leader: Character = {
     characterId: leaderId,
+    name: config.leaderName === undefined
+      ? generateCharacterName(createCharacterNameReader(registry), deterministicRng, { worldSeed, characterId: leaderId, cultureId, sex: config.leaderSex, existingNames: [] })
+      : { kind: 'custom', cultureId, text: config.leaderName },
     archetypeId: config.startingArchetypeId,
     origin: 'playerLineage',
     sex: config.leaderSex,
@@ -563,6 +571,7 @@ export function createNewGame(
       worldDay: config.startDay as WorldDay,
     });
   const adventurerResolvers = createCharacterResolverPort({
+    worldSeed,
     registry,
     resolvers,
     rng: deterministicRng,

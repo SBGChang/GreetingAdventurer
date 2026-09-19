@@ -1,3 +1,5 @@
+import { renderCharacterName } from '../src/contracts/character/names';
+import type { LocalizedTextRef } from '../src/contracts/core';
 import { useState } from 'react';
 import { GRID_MIN, GRID_MAX } from '../src/contracts/core';
 import type { CharacterId } from '../src/contracts/core';
@@ -18,13 +20,13 @@ export function MenuTabs({ active, select, locale }: { active: MenuTab; select: 
   </nav>;
 }
 
-export function FormationBoard({ formation, locale, save }: {
-  formation: GameView['formation']; locale: UiLocale; save: (command: ConfigureCombatFormationCommand) => void;
+export function FormationBoard({ formation, locale, save, text }: {
+  text: (ref: LocalizedTextRef) => string; formation: GameView['formation']; locale: UiLocale; save: (command: ConfigureCombatFormationCommand) => void;
 }) {
   const [selected, setSelected] = useState<CharacterId>();
   const [draft, setDraft] = useState<Record<CharacterId, GridCell>>(() => ({ ...formation.placements }));
   const active = selected && formation.members.includes(selected) ? selected : formation.members[0];
-  const memberLabel = (id: CharacterId) => t(locale, 'ui.menu.member', { n: formation.members.indexOf(id) + 1 });
+  const memberLabel = (id: CharacterId) => renderCharacterName(formation.names[id]!, text);
   const move = (row: number, col: number) => {
     if (!active) return;
     const old = draft[active];
@@ -38,16 +40,16 @@ export function FormationBoard({ formation, locale, save }: {
   const coordinates = Array.from({ length: GRID_MAX - GRID_MIN + 1 }, (_, index) => GRID_MIN + index);
   return <section className="formation-editor">
     <p>{t(locale, 'ui.menu.formationHint')}</p>
-    <div className="formation-members">{formation.members.map(id => <button key={id} aria-pressed={active === id} onClick={() => setSelected(id)}>
-      <UiArt kind="guild" />{memberLabel(id)}
+    <div className="formation-members">{formation.members.map(id => <button key={id} title={memberLabel(id)} aria-pressed={active === id} onClick={() => setSelected(id)}>
+      <UiArt kind="guild" /><span className="character-name">{memberLabel(id)}</span>
     </button>)}</div>
     <p>{t(locale, 'ui.menu.front')}</p>
     <div className="formation-board">{coordinates.flatMap(row => coordinates.map(col => {
       const occupant = formation.members.find(id => draft[id]?.row === row && draft[id]?.col === col);
-      return <button key={`${row}-${col}`} data-formation-cell={`${row}-${col}`} data-occupied={!!occupant}
+      return <button key={`${row}-${col}`} data-formation-cell={`${row}-${col}`} data-occupied={!!occupant} title={occupant ? memberLabel(occupant) : undefined}
         aria-label={`${row} / ${col} · ${occupant ? memberLabel(occupant) : t(locale, 'ui.menu.emptyCell')}`}
         onClick={() => move(row, col)}>
-        {occupant ? <><UiArt kind="guild" /><b>{memberLabel(occupant)}</b></> : <span>◇</span>}
+        {occupant ? <><UiArt kind="guild" /><b className="character-name">{memberLabel(occupant)}</b></> : <span>◇</span>}
       </button>;
     }))}</div>
     <button data-save-formation disabled={!formation.members.every(id => draft[id])}

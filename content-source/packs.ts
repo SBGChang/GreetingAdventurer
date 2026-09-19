@@ -1,3 +1,4 @@
+import { yunhuaNamesDomain, worldNamesDomains } from './character-names';
 // content-source/packs.ts
 // Content Pack 宣告：有哪些 pack、版本、相依、載入順序，以及每個 pack 由哪些 domain 檔組成。
 //
@@ -208,6 +209,7 @@ export { CORE_DEPENDENCY, CORE_PACK_ID };
 //
 // 雲華 pack 實際內容的 kind 聯集（38 筆）。與 core 同樣刻意手寫，Compiler 交叉比對。
 const YUNHUA_DECLARED_KINDS: readonly string[] = [
+  'character-name-part', 'character-naming-rule',
   'adventure-site',
   'attack-mastery-award-rule',
   'city',
@@ -265,6 +267,7 @@ const yunhuaPack: AuthoredPack = {
   runtimeCompatibility: { minRuntimeVersion: '0.1.0' },
   declaredKinds: YUNHUA_DECLARED_KINDS,
   domains: [
+    yunhuaNamesDomain,
     yunhuaEquipmentDomain,
     yunhuaSkillsDomain,
     yunhuaMonstersDomain,
@@ -281,7 +284,7 @@ const worldPack: AuthoredPack = {
   requiredPacks:[...CORE_DEPENDENCY,{packId:yunhuaPack.packId,version:yunhuaPack.version}],optional:false,
   scope:{cultureIds:['culture.vildun','culture.aurelien','culture.safir'],features:['city-travel','lodging']},
   requiredResolverIds:[],resolverBindings:[],runtimeCompatibility:{minRuntimeVersion:'0.1.0'},
-  declaredKinds:['culture','nation','region','city-node','city','facility','route','population-supply-rule','escort-generation-rule'],domains:[worldCitiesDomain],
+  declaredKinds:['character-name-part','character-naming-rule','culture','nation','region','city-node','city','facility','route','population-supply-rule','escort-generation-rule'],domains:[worldCitiesDomain,...worldNamesDomains],
 };
 export const AUTHORED_MANIFEST: AuthoredManifest = {
   manifestVersion: '1.0.0',

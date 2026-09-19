@@ -9,7 +9,7 @@ const server=await createServer({server:{middlewareMode:true},appType:'custom'})
 try{
   const {createGame}=await server.ssrLoadModule('/engine/game-facade.ts');
   const config={worldSeed:'world-travel-regression',startDay:14600,startingArchetypeId:'character-archetype.core.player-lineage',startCityId:'city-node.yunhua.yunjing',leaderSex:'female',leaderBirthDay:5475,startingMoney:5000};
-  let game=createGame(config);let view=game.view;const visited=new Set([config.startCityId]);let trips=0;
+  let game=createGame(config);let view=game.view;const visited=new Set([config.startCityId]);let trips=0;const initialName=view.sheet.name;
   function path(from:string,to:string):string[]{
     const queue=[[from]];const seen=new Set([from]);
     for(const p of queue){const last=p[p.length-1];if(last===to)return p.slice(1);
@@ -26,7 +26,7 @@ try{
       const mode=view.city.travelModes[0];const beforeDay=view.worldDay;
       const result=game.runCommand({type:'startCityTravel',routeId:link.routeId,toCityId:next,modeId:mode.modeId});
       assert(result.accepted,JSON.stringify(result));assert.equal(result.blocked,undefined);view=result.view;
-      assert.equal(view.location.kind,'city');assert.equal(view.location.cityId,next);
+      assert.deepEqual(view.sheet.name,initialName,'travel never renames a character');assert.equal(view.location.kind,'city');assert.equal(view.location.cityId,next);
       assert.equal(view.worldDay,beforeDay+mode.durationDays);
       assert(view.city.facilities.some((f:{kind:string})=>f.kind==='cityGate'));
       assert(view.city.facilities.some((f:{kind:string})=>f.kind==='inn'));

@@ -76,6 +76,7 @@ export function createBringUpFixture(input: BringUpFixtureInput): BringUpFixture
 
   const leader: Character = {
     characterId: leaderId,
+    name: { kind: 'custom', text: 'Test Adventurer', cultureId: 'culture.test' as never },
     archetypeId: input.leaderArchetypeId ?? DEFAULT_ARCHETYPE,
     origin: 'playerLineage',
     sex: input.leaderSex ?? 'female',
